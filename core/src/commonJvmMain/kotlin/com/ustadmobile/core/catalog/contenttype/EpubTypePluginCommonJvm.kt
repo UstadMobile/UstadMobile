@@ -153,18 +153,18 @@ class EpubTypePluginCommonJvm(
                             progress)
 
                         db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
+                    }
 
-                        db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
-
+                    if(contentNeedUpload) {
                         val haveConnectivityToContinueJob = db.contentJobDao
                             .isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid ?: 0)
 
                         if (!haveConnectivityToContinueJob) {
                             return@withContext ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
                         }
-                    }
 
-                    if(contentNeedUpload) {
+                        db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+
                         val progressListenerAdapter = NetworkProgressListenerAdapter(progress,
                             contentJobItem)
                         return@withContext ProcessResult(uploader.upload(

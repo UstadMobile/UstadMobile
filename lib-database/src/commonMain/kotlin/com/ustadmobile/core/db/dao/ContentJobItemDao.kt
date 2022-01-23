@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 
 @Dao
@@ -239,4 +240,12 @@ abstract class ContentJobItemDao {
          WHERE cjiJobUid = :jobId 
     """)
     abstract fun findAllByJobId(jobId: Long): List<ContentJobItem>
+
+    @Query("""
+        SELECT *
+          FROM ContentJobItem
+         WHERE cjiUid = :uid   
+    """)
+    abstract fun getJobItemByUidLive(uid: Long): DoorLiveData<ContentJobItem?>
+
 }

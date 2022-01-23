@@ -227,9 +227,6 @@ app-ktor-server/application.conf
 #data directory for running the server
 app-ktor-server/data
 
-#distribution package from running react app
+#Resources copied for production app-ktor-server
 app-ktor-server/src/main/resources/umapp
-
-#Dynamic resource generated at runtime
-app-react/src/main/resources/appconfig.json
 
