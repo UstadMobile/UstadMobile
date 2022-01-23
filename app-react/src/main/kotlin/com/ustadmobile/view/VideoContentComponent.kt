@@ -7,9 +7,13 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.videoComponentResponsiveMedia
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -48,6 +52,7 @@ class VideoContentComponent(mProps: UmProps):UstadBaseComponent<UmProps, UmState
 
     override fun onCreateView() {
         super.onCreateView()
+        fabManager?.visible = false
         db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
         containerUid = arguments[ARG_CONTAINER_UID]?.toLong() ?: 0L
         mPresenter = VideoContentPresenter(this, arguments, this, di)
@@ -55,12 +60,17 @@ class VideoContentComponent(mProps: UmProps):UstadBaseComponent<UmProps, UmState
     }
 
     override fun RBuilder.render() {
-        styledVideo {
-            css(videoComponentResponsiveMedia)
-            attrs.src = videoParams?.videoPath ?: ""
-            attrs.autoPlay = false
-            attrs.autoBuffer = true
-            attrs.controls = true
+        umGridContainer {
+            umItem(GridSize.cells12) {
+                css(StyleManager.videoPlayerWrapper)
+                styledVideo {
+                    css(videoComponentResponsiveMedia)
+                    attrs.src = videoParams?.videoPath ?: ""
+                    attrs.autoPlay = false
+                    attrs.autoBuffer = true
+                    attrs.controls = true
+                }
+            }
         }
     }
 

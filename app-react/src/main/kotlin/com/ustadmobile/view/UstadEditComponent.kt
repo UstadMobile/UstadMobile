@@ -16,16 +16,16 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
 
     override fun onCreateView() {
         super.onCreateView()
-        val textId = if(mEditPresenter?.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB) {
+        val fabLabelText = if(mEditPresenter?.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB) {
             getString(MessageID.save)
         }else {
             getString(MessageID.done)
         }
         fabManager?.icon = "check"
-        fabManager?.text = textId
-        window.setTimeout({
+        fabManager?.text = fabLabelText
+        updateUiWithStateChangeDelay {
             fabManager?.visible = true
-        }, STATE_CHANGE_DELAY)
+        }
     }
 
     override fun onFabClicked() {

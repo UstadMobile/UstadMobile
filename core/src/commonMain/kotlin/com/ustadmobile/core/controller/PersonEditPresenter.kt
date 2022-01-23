@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
@@ -265,14 +266,16 @@ class PersonEditPresenter(
                     repo.personDao.updateAsync(entity)
                 }
 
-                val personPictureVal = view.personPicture
-                if(personPictureVal != null) {
-                    personPictureVal.personPicturePersonUid = entity.personUid
+                UmPlatformUtil.runAsync {
+                    val personPictureVal = view.personPicture
+                    if(personPictureVal != null) {
+                        personPictureVal.personPicturePersonUid = entity.personUid
 
-                    if(personPictureVal.personPictureUid == 0L) {
-                        repo.personPictureDao.insertAsync(personPictureVal)
-                    }else {
-                        repo.personPictureDao.updateAsync(personPictureVal)
+                        if(personPictureVal.personPictureUid == 0L) {
+                            repo.personPictureDao.insertAsync(personPictureVal)
+                        }else {
+                            repo.personPictureDao.updateAsync(personPictureVal)
+                        }
                     }
                 }
 

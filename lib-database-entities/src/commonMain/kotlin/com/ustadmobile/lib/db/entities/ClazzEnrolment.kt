@@ -8,6 +8,7 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.TABLE_ID
 
 import kotlinx.serialization.Serializable
 
@@ -24,195 +25,38 @@ import kotlinx.serialization.Serializable
     //Index for streamlining ClazzList where the number of users is counted by role
     Index(value = ["clazzEnrolmentClazzUid", "clazzEnrolmentRole"])
 ])
-@SyncableEntity(tableId = ClazzEnrolment.TABLE_ID,
-    /* If someone is newly added to a class this might mean that existing members of the class (e.g.
-     * students and teachers) now have access to information in other tables that was not previously
-     * the case.
-     *
-     * E.g. if a new student is added to a class, the other people in the class would normally then
-     * get the select permission on that person. Hence we need to trigger an update notification for
-     * the other tables (such as person, statemententity, and others where permission can be affected
-     * by class membership) for everyone who has permission to see this clazzEnrolment.
-     *
-     * Note: There is a possibility that this could be made more efficient with a CTE, and then
-     * joining to the CTE. There could then be two
-     *
-     */
-    notifyOnUpdate = [
-        //clazzEnrolment itself
-        """
-    SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-           ${ClazzEnrolment.TABLE_ID} AS tableId 
-      FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            JOIN ScopedGrant 
-                 ON ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
-                         AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
-                      OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
-                          AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentPersonUid)
-                      OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
-                          AND ScopedGrant.sgEntityUid = ClazzEnrolment.clazzEnrolmentClazzUid)
-                      OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
-                         AND ScopedGrant.sgEntityUid = (
-                             SELECT clazzSchoolUid
-                               FROM Clazz
-                              WHERE clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid)))
-                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0                               
-            JOIN PersonGroupMember 
-                   ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-            JOIN UserSession
-                   ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """,
-        //Person
-        """
-    SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-           ${ClazzEnrolment.TABLE_ID} AS tableId 
-      FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-                  ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} 
-                  $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2     
-        """,
-        //AgentEntity
-        """
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-           ${AgentEntity.TABLE_ID} AS tableId 
-      FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-        """,
-        //ClazzLogAttendanceRecord
-        """
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-                ${ClazzLogAttendanceRecord.TABLE_ID} AS tableId 
-          FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
-            $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-                  ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} 
-                  $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-        """,
-        //GroupLearningSession
-        """
-      SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-            ${GroupLearningSession.TABLE_ID} AS tableId 
-       FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-        """,
-        //LearnerGroup
-        """
-      SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-            ${LearnerGroup.TABLE_ID} AS tableId 
-       FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2      
-        """,
-        //LearnerGroupMember
-        """
-      SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-            ${LearnerGroupMember.TABLE_ID} AS tableId 
-       FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2      
-        """,
-        //PersonGroup
-        """
-      SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-            ${PersonGroup.TABLE_ID} AS tableId 
-       FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-        """,
-        //PersonGroupMember
-        """
-      SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-            ${PersonGroupMember.TABLE_ID} AS tableId 
-       FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-        """,
-        //PersonPicture
-        """
-      SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-            ${PersonPicture.TABLE_ID} AS tableId 
-       FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-                    ${Role.PERMISSION_PERSON_PICTURE_SELECT}
-                    $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-                    
-        """,
-        //SchoolMember
-        """
-      SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-            ${SchoolMember.TABLE_ID} AS tableId 
-       FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-        """,
-        //StatementEntity
-        """
-      SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-            ${StatementEntity.TABLE_ID} AS tableId 
-       FROM ChangeLog
-            JOIN ClazzEnrolment 
-                 ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID} 
-                    AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid 
-            $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-                    ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
-                    $JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-        """
-    ],
-    syncFindAllQuery = """
-       SELECT clazzEnrolment.* 
-         FROM UserSession
-              JOIN PersonGroupMember 
-                   ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-              JOIN ScopedGrant 
-                   ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
-                      AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0 
-              JOIN ClazzEnrolment 
-                   ON $FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
-             WHERE UserSession.usClientNodeId = :clientId
-                   AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE} 
-    """)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzEnrolmentReplicate::class,
+    priority = ReplicateEntity.HIGHEST_PRIORITY + 1)
+@Triggers(arrayOf(
+     Trigger(
+         name = "clazzenrolment_remote_insert",
+         order = Trigger.Order.INSTEAD_OF,
+         on = Trigger.On.RECEIVEVIEW,
+         events = [Trigger.Event.INSERT],
+         sqlStatements = [
+             """REPLACE INTO ClazzEnrolment(clazzEnrolmentUid, clazzEnrolmentPersonUid, clazzEnrolmentClazzUid, clazzEnrolmentDateJoined, clazzEnrolmentDateLeft, clazzEnrolmentRole, clazzEnrolmentAttendancePercentage, clazzEnrolmentActive, clazzEnrolmentLeavingReasonUid, clazzEnrolmentOutcome, clazzEnrolmentLocalChangeSeqNum, clazzEnrolmentMasterChangeSeqNum, clazzEnrolmentLastChangedBy, clazzEnrolmentLct) 
+             VALUES (NEW.clazzEnrolmentUid, NEW.clazzEnrolmentPersonUid, NEW.clazzEnrolmentClazzUid, NEW.clazzEnrolmentDateJoined, NEW.clazzEnrolmentDateLeft, NEW.clazzEnrolmentRole, NEW.clazzEnrolmentAttendancePercentage, NEW.clazzEnrolmentActive, NEW.clazzEnrolmentLeavingReasonUid, NEW.clazzEnrolmentOutcome, NEW.clazzEnrolmentLocalChangeSeqNum, NEW.clazzEnrolmentMasterChangeSeqNum, NEW.clazzEnrolmentLastChangedBy, NEW.clazzEnrolmentLct) 
+             /*psql ON CONFLICT (clazzEnrolmentUid) DO UPDATE 
+             SET clazzEnrolmentPersonUid = EXCLUDED.clazzEnrolmentPersonUid, clazzEnrolmentClazzUid = EXCLUDED.clazzEnrolmentClazzUid, clazzEnrolmentDateJoined = EXCLUDED.clazzEnrolmentDateJoined, clazzEnrolmentDateLeft = EXCLUDED.clazzEnrolmentDateLeft, clazzEnrolmentRole = EXCLUDED.clazzEnrolmentRole, clazzEnrolmentAttendancePercentage = EXCLUDED.clazzEnrolmentAttendancePercentage, clazzEnrolmentActive = EXCLUDED.clazzEnrolmentActive, clazzEnrolmentLeavingReasonUid = EXCLUDED.clazzEnrolmentLeavingReasonUid, clazzEnrolmentOutcome = EXCLUDED.clazzEnrolmentOutcome, clazzEnrolmentLocalChangeSeqNum = EXCLUDED.clazzEnrolmentLocalChangeSeqNum, clazzEnrolmentMasterChangeSeqNum = EXCLUDED.clazzEnrolmentMasterChangeSeqNum, clazzEnrolmentLastChangedBy = EXCLUDED.clazzEnrolmentLastChangedBy, clazzEnrolmentLct = EXCLUDED.clazzEnrolmentLct
+             */"""
+         ]
+     )
+))
+/* If someone is newly added to a class this might mean that existing members of the class (e.g.
+ * students and teachers) now have access to information in other tables that was not previously
+ * the case.
+ *
+ * E.g. if a new student is added to a class, the other people in the class would normally then
+ * get the select permission on that person. Hence we need to trigger an update notification for
+ * the other tables (such as person, statemententity, and others where permission can be affected
+ * by class membership) for everyone who has permission to see this clazzEnrolment.
+ *
+ * Note: There is a possibility that this could be made more efficient with a CTE, and then
+ * joining to the CTE. There could then be two
+ *
+ * This is handled by RepIncomingListener
+ *
+ */
 @Serializable
 open class ClazzEnrolment()  {
 
@@ -258,6 +102,7 @@ open class ClazzEnrolment()  {
     var clazzEnrolmentLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var clazzEnrolmentLct: Long = 0
 
     constructor(clazzUid: Long, personUid: Long) : this() {

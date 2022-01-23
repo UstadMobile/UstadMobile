@@ -6,13 +6,12 @@ import androidx.databinding.BindingAdapter
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
-import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_MIRROR
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 
 @BindingAdapter("repoLoadStatus")
 fun ProgressBar.repoLoadStatus(repoLoadStatus: RepositoryLoadHelper.RepoLoadStatus?) {
     val loadStatusFlag = repoLoadStatus?.loadStatus ?: 0
-    visibility = if(loadStatusFlag == STATUS_LOADING_CLOUD || loadStatusFlag == STATUS_LOADING_MIRROR) {
+    visibility = if(loadStatusFlag == STATUS_LOADING_CLOUD) {
         View.VISIBLE
     }else {
         View.GONE

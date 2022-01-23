@@ -14,7 +14,7 @@ import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.util.OneToManyJoinEditHelperMp.Companion.SUFFIX_RETKEY_DEFAULT
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
@@ -130,8 +130,8 @@ class ClazzEditFragmentTest : TestCase() {
                                 gson.toJson(listOf(existingHolidayCal)))
                 }
 
-                val repo = dbRule.repo as DoorDatabaseSyncRepository
-                repo.clientId
+//                val repo = dbRule.repo as DoorDatabaseRepository
+//                repo.clientId
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
                 val clazzes = dbRule.db.clazzDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {

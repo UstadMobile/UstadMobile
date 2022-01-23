@@ -11,32 +11,23 @@ import com.ustadmobile.lib.db.entities.Clazz.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-    notifyOnUpdate = [
-        """
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               $TABLE_ID AS tableId 
-          FROM ChangeLog 
-                JOIN Clazz
-                     ON ChangeLog.chTableId = $TABLE_ID 
-                            AND Clazz.clazzUid = ChangeLog.chEntityPk
-                $JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
-                    ${Role.PERMISSION_CLAZZ_SELECT}
-                    $JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-        """
-    ],
-    syncFindAllQuery = """
-        SELECT Clazz.* 
-          FROM UserSession
-               JOIN PersonGroupMember 
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-               $JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
-                    ${Role.PERMISSION_CLAZZ_SELECT} 
-                    $JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
-         WHERE UserSession.usClientNodeId = :clientId 
-           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-    """
-)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ClazzReplicate::class,
+    priority = ReplicateEntity.HIGHEST_PRIORITY)
+@Triggers(arrayOf(
+ Trigger(
+     name = "clazz_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO Clazz(clazzUid, clazzName, clazzDesc, attendanceAverage, clazzHolidayUMCalendarUid, clazzScheuleUMCalendarUid, isClazzActive, clazzLocationUid, clazzStartTime, clazzEndTime, clazzFeatures, clazzSchoolUid, clazzMasterChangeSeqNum, clazzLocalChangeSeqNum, clazzLastChangedBy, clazzLct, clazzTimeZone, clazzStudentsPersonGroupUid, clazzTeachersPersonGroupUid, clazzPendingStudentsPersonGroupUid, clazzParentsPersonGroupUid, clazzCode) 
+         VALUES (NEW.clazzUid, NEW.clazzName, NEW.clazzDesc, NEW.attendanceAverage, NEW.clazzHolidayUMCalendarUid, NEW.clazzScheuleUMCalendarUid, NEW.isClazzActive, NEW.clazzLocationUid, NEW.clazzStartTime, NEW.clazzEndTime, NEW.clazzFeatures, NEW.clazzSchoolUid, NEW.clazzMasterChangeSeqNum, NEW.clazzLocalChangeSeqNum, NEW.clazzLastChangedBy, NEW.clazzLct, NEW.clazzTimeZone, NEW.clazzStudentsPersonGroupUid, NEW.clazzTeachersPersonGroupUid, NEW.clazzPendingStudentsPersonGroupUid, NEW.clazzParentsPersonGroupUid, NEW.clazzCode) 
+         /*psql ON CONFLICT (clazzUid) DO UPDATE 
+         SET clazzName = EXCLUDED.clazzName, clazzDesc = EXCLUDED.clazzDesc, attendanceAverage = EXCLUDED.attendanceAverage, clazzHolidayUMCalendarUid = EXCLUDED.clazzHolidayUMCalendarUid, clazzScheuleUMCalendarUid = EXCLUDED.clazzScheuleUMCalendarUid, isClazzActive = EXCLUDED.isClazzActive, clazzLocationUid = EXCLUDED.clazzLocationUid, clazzStartTime = EXCLUDED.clazzStartTime, clazzEndTime = EXCLUDED.clazzEndTime, clazzFeatures = EXCLUDED.clazzFeatures, clazzSchoolUid = EXCLUDED.clazzSchoolUid, clazzMasterChangeSeqNum = EXCLUDED.clazzMasterChangeSeqNum, clazzLocalChangeSeqNum = EXCLUDED.clazzLocalChangeSeqNum, clazzLastChangedBy = EXCLUDED.clazzLastChangedBy, clazzLct = EXCLUDED.clazzLct, clazzTimeZone = EXCLUDED.clazzTimeZone, clazzStudentsPersonGroupUid = EXCLUDED.clazzStudentsPersonGroupUid, clazzTeachersPersonGroupUid = EXCLUDED.clazzTeachersPersonGroupUid, clazzPendingStudentsPersonGroupUid = EXCLUDED.clazzPendingStudentsPersonGroupUid, clazzParentsPersonGroupUid = EXCLUDED.clazzParentsPersonGroupUid, clazzCode = EXCLUDED.clazzCode
+         */"""
+     ]
+ )
+))
 @Serializable
 open class Clazz() {
 
@@ -80,6 +71,7 @@ open class Clazz() {
     var clazzLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var clazzLct: Long = 0
 
     /**
@@ -112,6 +104,64 @@ open class Clazz() {
         this.clazzLocationUid = clazzLocationUid
         this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or CLAZZ_FEATURE_CLAZZ_ASSIGNMENT
         this.isClazzActive = true
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as Clazz
+
+        if (clazzUid != other.clazzUid) return false
+        if (clazzName != other.clazzName) return false
+        if (clazzDesc != other.clazzDesc) return false
+        if (attendanceAverage != other.attendanceAverage) return false
+        if (clazzHolidayUMCalendarUid != other.clazzHolidayUMCalendarUid) return false
+        if (clazzScheuleUMCalendarUid != other.clazzScheuleUMCalendarUid) return false
+        if (isClazzActive != other.isClazzActive) return false
+        if (clazzLocationUid != other.clazzLocationUid) return false
+        if (clazzStartTime != other.clazzStartTime) return false
+        if (clazzEndTime != other.clazzEndTime) return false
+        if (clazzFeatures != other.clazzFeatures) return false
+        if (clazzSchoolUid != other.clazzSchoolUid) return false
+        if (clazzMasterChangeSeqNum != other.clazzMasterChangeSeqNum) return false
+        if (clazzLocalChangeSeqNum != other.clazzLocalChangeSeqNum) return false
+        if (clazzLastChangedBy != other.clazzLastChangedBy) return false
+        if (clazzLct != other.clazzLct) return false
+        if (clazzTimeZone != other.clazzTimeZone) return false
+        if (clazzStudentsPersonGroupUid != other.clazzStudentsPersonGroupUid) return false
+        if (clazzTeachersPersonGroupUid != other.clazzTeachersPersonGroupUid) return false
+        if (clazzPendingStudentsPersonGroupUid != other.clazzPendingStudentsPersonGroupUid) return false
+        if (clazzParentsPersonGroupUid != other.clazzParentsPersonGroupUid) return false
+        if (clazzCode != other.clazzCode) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = clazzUid.hashCode()
+        result = 31 * result + (clazzName?.hashCode() ?: 0)
+        result = 31 * result + (clazzDesc?.hashCode() ?: 0)
+        result = 31 * result + attendanceAverage.hashCode()
+        result = 31 * result + clazzHolidayUMCalendarUid.hashCode()
+        result = 31 * result + clazzScheuleUMCalendarUid.hashCode()
+        result = 31 * result + isClazzActive.hashCode()
+        result = 31 * result + clazzLocationUid.hashCode()
+        result = 31 * result + clazzStartTime.hashCode()
+        result = 31 * result + clazzEndTime.hashCode()
+        result = 31 * result + clazzFeatures.hashCode()
+        result = 31 * result + clazzSchoolUid.hashCode()
+        result = 31 * result + clazzMasterChangeSeqNum.hashCode()
+        result = 31 * result + clazzLocalChangeSeqNum.hashCode()
+        result = 31 * result + clazzLastChangedBy
+        result = 31 * result + clazzLct.hashCode()
+        result = 31 * result + (clazzTimeZone?.hashCode() ?: 0)
+        result = 31 * result + clazzStudentsPersonGroupUid.hashCode()
+        result = 31 * result + clazzTeachersPersonGroupUid.hashCode()
+        result = 31 * result + clazzPendingStudentsPersonGroupUid.hashCode()
+        result = 31 * result + clazzParentsPersonGroupUid.hashCode()
+        result = 31 * result + (clazzCode?.hashCode() ?: 0)
+        return result
     }
 
     companion object {

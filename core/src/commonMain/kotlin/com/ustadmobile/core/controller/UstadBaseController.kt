@@ -31,7 +31,7 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.impl.nav.navigateToErrorScreen
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.UmPlatform
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.putResultDestInfo
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
@@ -335,7 +335,7 @@ abstract class UstadBaseController<V : UstadView>(
         val accountManager: UstadAccountManager = direct.instance()
         val impl: UstadMobileSystemImpl = direct.instance()
         val numAccountsRemaining = accountManager.activeSessionCount()
-        val canSelectServer = if(UmPlatform.isWeb) false else impl.getAppConfigBoolean(
+        val canSelectServer = if(UmPlatformUtil.isWeb) false else impl.getAppConfigBoolean(
             AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
 
         //Wherever the user is going now, we must wipe the backstack

@@ -3,6 +3,7 @@ plugins {
     id 'application'
     id 'kotlin'
     id 'maven-publish'
+
     id 'com.github.johnrengelman.shadow' version "$version_shadow"
     id 'kotlinx-serialization'
 }
@@ -124,4 +125,7 @@ shadowJar {
 sourceCompatibility = "8"
 targetCompatibility = "8"
 
-shadowJar.dependsOn(":app-react:distro")
+if(findProperty("skipreactproductionbundle") != "true") {
+    shadowJar.dependsOn(":app-react:distro")
+}
+

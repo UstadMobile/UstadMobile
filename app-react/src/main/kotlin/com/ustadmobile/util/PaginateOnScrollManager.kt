@@ -2,16 +2,26 @@ package com.ustadmobile.util
 
 /**
  * Handle pagination on view scrolling
- * @param totalItems Number of items to be paginated
+ * @param totalItemCount Number of items to be paginated
  * @param pageSize size of a page
  */
-class  PaginateOnScrollManager(private val totalItems: Int, private val pageSize: Int) {
+class  PaginateOnScrollManager(private val totalItemCount: Int, private val pageSize: Int) {
 
     private var pageNumber = 1
 
     private var scrollManager: ScrollManager? = null
 
-    private val totalPages:Double = totalItems.toDouble()/pageSize
+    private val totalPages:Double = totalItemCount.toDouble()/pageSize
+
+    val startIndex: () -> Int = {
+        if(((pageNumber - 1) * pageSize) > totalItemCount) 0
+        else (pageNumber - 1) * pageSize
+    }
+
+    val endIndex: () -> Int = {
+        if((pageNumber * pageSize) < totalItemCount) pageNumber * pageSize
+        else totalItemCount - 1
+    }
 
     //pages is used by js code
     @Suppress("UNUSED_VARIABLE")
@@ -20,13 +30,11 @@ class  PaginateOnScrollManager(private val totalItems: Int, private val pageSize
             var pages = totalPages
             pages = js("Math.ceil(pages)").toString().toDouble()
             if(pageNumber.toDouble() == pages) pageNumber else pageNumber++
-            val startIndex = if(((pageNumber - 1) * pageSize) > totalItems) 0
-            else (pageNumber - 1) * pageSize
-            val endIndex = if((pageNumber * pageSize) < totalItems) pageNumber * pageSize
-            else totalItems - 1
-            onScrollPageChanged?.invoke(pageNumber,startIndex, endIndex)
+            console.log(pageNumber, startIndex, endIndex)
+            onScrollPageChanged?.invoke(pageNumber,startIndex(), endIndex())
         }
     }
+
 
     /**
      * On page changed takes page number as first param, startIndex and endIndex respectively
@@ -34,9 +42,9 @@ class  PaginateOnScrollManager(private val totalItems: Int, private val pageSize
     var onScrollPageChanged: ((Int, Int, Int) -> Unit?)? = null
         set(value) {
             if(value != null){
-                value(pageNumber,pageNumber, pageSize)
+                value(pageNumber,startIndex(), endIndex())
             }
-            if(pageSize != totalItems && totalPages > 1){
+            if(pageSize != totalItemCount && totalPages > 1){
                 scrollManager = ScrollManager("main-content")
                 scrollManager?.scrollListener = onScroll
             }

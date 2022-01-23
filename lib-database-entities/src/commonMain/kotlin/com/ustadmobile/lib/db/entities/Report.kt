@@ -7,26 +7,23 @@ import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NONE
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = Report.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId as deviceId, 
-               ${Report.TABLE_ID} AS tableId 
-          FROM ChangeLog
-               JOIN Report 
-                    ON ChangeLog.chTableId = ${Report.TABLE_ID} AND ChangeLog.chEntityPk = Report.reportUid
-               JOIN UserSession 
-                    ON Report.reportOwnerUid = UserSession.usPersonUid
-                       AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}"""],
-    syncFindAllQuery = """
-        SELECT Report.* 
-          FROM Report
-               JOIN UserSession 
-                    ON Report.reportOwnerUid = UserSession.usPersonUid
-                       AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-         WHERE UserSession.usClientNodeId = :clientId
-    """
-)
 @Serializable
+@ReplicateEntity(tableId = Report.TABLE_ID, tracker = ReportReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "report_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO Report(reportUid, reportOwnerUid, xAxis, reportDateRangeSelection, fromDate, fromRelTo, fromRelOffSet, fromRelUnit, toDate, toRelTo, toRelOffSet, toRelUnit, reportTitle, reportDescription, reportSeries, reportInactive, isTemplate, priority, reportTitleId, reportDescId, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy, reportLct) 
+         VALUES (NEW.reportUid, NEW.reportOwnerUid, NEW.xAxis, NEW.reportDateRangeSelection, NEW.fromDate, NEW.fromRelTo, NEW.fromRelOffSet, NEW.fromRelUnit, NEW.toDate, NEW.toRelTo, NEW.toRelOffSet, NEW.toRelUnit, NEW.reportTitle, NEW.reportDescription, NEW.reportSeries, NEW.reportInactive, NEW.isTemplate, NEW.priority, NEW.reportTitleId, NEW.reportDescId, NEW.reportMasterChangeSeqNum, NEW.reportLocalChangeSeqNum, NEW.reportLastChangedBy, NEW.reportLct) 
+         /*psql ON CONFLICT (reportUid) DO UPDATE 
+         SET reportOwnerUid = EXCLUDED.reportOwnerUid, xAxis = EXCLUDED.xAxis, reportDateRangeSelection = EXCLUDED.reportDateRangeSelection, fromDate = EXCLUDED.fromDate, fromRelTo = EXCLUDED.fromRelTo, fromRelOffSet = EXCLUDED.fromRelOffSet, fromRelUnit = EXCLUDED.fromRelUnit, toDate = EXCLUDED.toDate, toRelTo = EXCLUDED.toRelTo, toRelOffSet = EXCLUDED.toRelOffSet, toRelUnit = EXCLUDED.toRelUnit, reportTitle = EXCLUDED.reportTitle, reportDescription = EXCLUDED.reportDescription, reportSeries = EXCLUDED.reportSeries, reportInactive = EXCLUDED.reportInactive, isTemplate = EXCLUDED.isTemplate, priority = EXCLUDED.priority, reportTitleId = EXCLUDED.reportTitleId, reportDescId = EXCLUDED.reportDescId, reportMasterChangeSeqNum = EXCLUDED.reportMasterChangeSeqNum, reportLocalChangeSeqNum = EXCLUDED.reportLocalChangeSeqNum, reportLastChangedBy = EXCLUDED.reportLastChangedBy, reportLct = EXCLUDED.reportLct
+         */"""
+     ]
+ )
+))
 open class Report {
 
     @PrimaryKey(autoGenerate = true)
@@ -80,6 +77,7 @@ open class Report {
     var reportLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var reportLct: Long = 0
 
     companion object {

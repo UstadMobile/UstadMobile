@@ -1,12 +1,13 @@
 package com.ustadmobile.view.ext
 
 
-import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.ChartData
+import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.lib.db.entities.*
@@ -43,7 +44,6 @@ import com.ustadmobile.view.ChartOptions
 import com.ustadmobile.view.ChartType
 import com.ustadmobile.view.ContentEntryListComponent
 import com.ustadmobile.view.umChart
-import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import mui.material.GridProps
@@ -87,11 +87,11 @@ private fun guardRoute(
     systemImpl: UstadMobileSystemImpl
 ): ReactElement?  = createElement {
     val viewName = getViewNameFromUrl()
-    val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
-    if(activeSession == null && viewName != null && viewName != Login2View.VIEW_NAME){
-        window.setTimeout({
-            window.location.href = "./"
-        }, 0)
+    val activeSession = systemImpl.getAppPref(UstadAccountManager.ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
+    val logout = activeSession == null && viewName != null
+            && viewName != Login2View.VIEW_NAME
+    if(logout){
+        //window.location.href = "./"
     }
     child(component){}
 }
@@ -472,6 +472,150 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
     }
 }
 
+fun RBuilder.createPersonWithAttemptProgress(
+    item: PersonWithAttemptsSummary,
+    systemImpl: UstadMobileSystemImpl,
+    onMainList: Boolean = false){
+    umGridContainer{
+        val padding = LinearDimension("4px")
+        css{
+            padding(top = padding, bottom = padding)
+        }
+
+        umItem(GridSize.cells3, if(onMainList) GridSize.cells1 else GridSize.cells2){
+            umProfileAvatar(item.personUid, "person")
+        }
+
+        umItem(GridSize.cells9, if(onMainList) GridSize.cells11 else GridSize.cells10){
+            umGridContainer {
+                umItem(GridSize.cells12){
+                    umTypography("${item.firstNames} ${item.lastName}",
+                        variant = TypographyVariant.h6){
+                        css (alignTextToStart)
+                    }
+                }
+
+                umItem(GridSize.cells12, flexDirection = FlexDirection.row){
+
+                    styledSpan {
+                        css{
+                            padding(right = 4.spacingUnits)
+                        }
+                        umTypography("${item.attempts} ${systemImpl.getString(MessageID.attempts, this)}",
+                            variant = TypographyVariant.body1,
+                            paragraph = true){
+                            css(alignTextToStart)
+                        }
+                    }
+
+                    if(item.duration > 60000){
+
+                        styledSpan {
+                            css{
+                                padding(right = 2.spacingUnits)
+                            }
+                            umIcon("timer", fontSize = IconFontSize.small){
+                                css{
+                                    marginTop = 1.px
+                                }
+                            }
+                        }
+
+                        styledSpan {
+                            css{
+                                padding(right = 2.spacingUnits)
+                            }
+
+                            umTypography(item.duration.formatToStringHoursMinutesSeconds(systemImpl),
+                                variant = TypographyVariant.body1,
+                                paragraph = true){
+                                css(alignTextToStart)
+                            }
+                        }
+                    }
+
+                }
+
+                if(item.startDate > 0L){
+                    umItem (GridSize.cells12){
+                        val endDate = if(item.endDate == 0L) "" else " - ${item.endDate.toDate()?.standardFormat()}"
+                        umTypography("${item.startDate.toDate()?.standardFormat()}$endDate",
+                            variant = TypographyVariant.body1){
+                            css (alignTextToStart)
+                        }
+                    }
+                }
+
+                if(item.scoreProgress?.progress ?: 0 > 0){
+                    umItem (GridSize.cells12, flexDirection = FlexDirection.row){
+                        umLinearProgress(item.scoreProgress?.progress?.toDouble(),
+                            variant = ProgressVariant.determinate){
+                            css (StyleManager.studentProgressBar)
+                        }
+
+                        styledSpan {
+                            css{
+                                padding(left = 4.spacingUnits)
+                            }
+                            umTypography(systemImpl.getString(MessageID.percentage_complete, this)
+                                .format(item.scoreProgress?.progress ?: 0),
+                                variant = TypographyVariant.body1,
+                                paragraph = true){
+                                css(alignTextToStart)
+                            }
+                        }
+                    }
+                }
+
+                if(item.scoreProgress?.resultMax ?: 0 > 0){
+                    umItem (GridSize.cells12, flexDirection = FlexDirection.row){
+                        umLinearProgress(item.scoreProgress?.resultMax?.toDouble(),
+                            variant = ProgressVariant.determinate){
+                            css (StyleManager.studentProgressBar)
+                        }
+                        styledSpan {
+                            css {
+                                padding(left = 4.spacingUnits)
+                            }
+
+                            umTypography(
+                                systemImpl.getString(MessageID.percentage_score, this)
+                                    .format(item.scoreProgress?.calculateScoreWithPenalty() ?: 0),
+                                variant = TypographyVariant.body1,
+                                paragraph = true
+                            ) {
+                                css(alignTextToStart)
+                            }
+                        }
+
+                    }
+                }
+
+                if(!item.latestPrivateComment.isNullOrEmpty()){
+                    umItem(GridSize.cells12, flexDirection = FlexDirection.row){
+                        styledSpan {
+                            css {
+                                padding(right = 4.spacingUnits)
+                            }
+                            umIcon("comment", fontSize = IconFontSize.small){
+                                css{
+                                    marginTop = 1.px
+                                }
+                            }
+                        }
+
+                        umTypography(item.latestPrivateComment,
+                            variant = TypographyVariant.body2,
+                            paragraph = true){
+                            css(alignTextToStart)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 fun RBuilder.createPersonListItemWithNameAndUserName(item: Person){
     umGridContainer(GridSpacing.spacing5) {
         val padding = LinearDimension("4px")
@@ -843,6 +987,7 @@ fun RBuilder.createContentEntryListItem(
     showStatus: Boolean = false,
     downloaded: Boolean = true,
     onClick: ((ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit)? = null,
+    mainList: Boolean = true,
     onSecondaryAction: (() -> Unit)? = null){
 
     /*
@@ -865,13 +1010,20 @@ fun RBuilder.createContentEntryListItem(
             }
         }
 
-        umItem(GridSize.cells4, GridSize.cells2){
+        umItem(GridSize.cells4, if(mainList) GridSize.cells2 else GridSize.cells1){
             umItemThumbnail( if(item.leaf) "class" else "folder", item.thumbnailUrl,width = 80,
                 iconColor = Color(StyleManager.theme.palette.action.disabled),
                 avatarBackgroundColor = Color.transparent)
+            val progress = (item.scoreProgress?.progress ?: 0).toDouble()
+            if(progress > 0){
+                umLinearProgress(progress,
+                    variant = ProgressVariant.determinate){
+                    css (StyleManager.itemContentProgress)
+                }
+            }
         }
 
-        umItem(GridSize.cells8, GridSize.cells10){
+        umItem(GridSize.cells8, if(mainList) GridSize.cells10 else GridSize.cells11){
             umGridContainer {
                 umItem(GridSize.cells12){
                     umTypography(item.title,
@@ -1033,31 +1185,35 @@ fun setContentComplete(systemImpl: UstadMobileSystemImpl,person: PersonWithSessi
 }
 
 fun setStatementQuestionAnswer(statementEntity: StatementEntity): String{
-    val fullStatementJson = statementEntity.fullStatement ?: return ""
-    val statement = JSON.parse<Statement>(fullStatementJson)
-    var statementText = statement.`object`?.definition?.description?.get("en-US")
-    val answerResponse = statement.result?.response
-    if(answerResponse?.isNotEmpty() == true || answerResponse?.contains("[,]") == true){
-        val responses = answerResponse.split("[,]")
-        val choiceMap = statement.`object`?.definition?.choices
-        val sourceMap = statement.`object`?.definition?.source
-        val targetMap = statement.`object`?.definition?.target
-        statementText += "\n"
-        responses.forEachIndexed { i, it ->
-
-            var description = choiceMap?.find { choice -> choice.id == it }?.description?.get("en-US")
-            if(it.contains("[.]")){
-                val dragResponse = it.split("[.]")
-                description = ""
-                description += sourceMap?.find { source -> source.id == dragResponse[0] }?.description?.get("en-US")
-                description += " on "
-                description += targetMap?.find { target -> target.id == dragResponse[1] }?.description?.get("en-US")
+    try{
+        val fullStatementJson = statementEntity.fullStatement ?: return ""
+        val statement = JSON.parse<Statement>(fullStatementJson)
+        var statementText = statement. asDynamic()["object"].definition.description["en-US"].toString()
+        val answerResponse = statement.result?.response
+        if(answerResponse?.isNotEmpty() == true || answerResponse?.contains("[,]") == true){
+            val responses = answerResponse.split("[,]")
+            val choiceMap = statement.`object`?.definition?.choices
+            val sourceMap = statement.`object`?.definition?.source
+            val targetMap = statement.`object`?.definition?.target
+            statementText += "\n"
+            responses.forEachIndexed { i, it ->
+                console.log(choiceMap?.find { choice -> choice.id == it }?.description)
+                var description = choiceMap?.find { choice -> choice.id == it }?.description?.get("en-US")
+                if(it.contains("[.]")){
+                    val dragResponse = it.split("[.]")
+                    description = ""
+                    description += sourceMap?.find { source -> source.id == dragResponse[0] }?.description?.get("en-US")
+                    description += " on "
+                    description += targetMap?.find { target -> target.id == dragResponse[1] }?.description?.get("en-US")
+                }
+                statementText += "${i+1}: ${if(description.isNullOrEmpty()) it else description} \n"
             }
-            statementText += "${i+1}: ${if(description.isNullOrEmpty()) it else description} \n"
-        }
 
+        }
+        return statementText ?: ""
+    }catch (e: Exception){
+        return ""
     }
-    return statementText ?: ""
 }
 
 
@@ -1094,7 +1250,6 @@ fun RBuilder.drawChart(
     if(chartData != null){
         val dataTable = mutableListOf<MutableList<Any>>()
         val chartOption: ChartOptions = ChartOptions().apply {
-            seriesType = "bars"
             colors = arrayOf("#009999", "#FF9900", "#0099FF", "#FF3333", "#663399", "#669999",
                 "#FF3366", "#990099", "#996666", "#339933", "#FFCC00", "#9966CC", "#FFCC99",
                 "#99FFCC", "#0066CC", "#66CCFF", "#FF66FF", "#4D4D4D", "#0066FF", "#FF6600", "#33FFFF",
@@ -1119,12 +1274,20 @@ fun RBuilder.drawChart(
         val options: Json = json("" to "")
 
         val dataSet: MutableMap<String, MutableList<Any>> = mutableMapOf()
-        distinctXAxisSet.forEach { dataSet[it] = mutableListOf(it) }
+        distinctXAxisSet.forEach {
+            dataSet[it] = mutableListOf(chartData.xAxisValueFormatter?.format(it) ?: "")
+        }
 
         chartData.seriesData.forEachIndexed { index, data ->
             val seriesType = if(data.series.reportSeriesVisualType == ReportSeries.BAR_CHART)
                 "bars" else "line"
-            options[index.toString()] = json("type" to seriesType)
+            if(chartData.seriesData.size == 1 && index == 0){
+                chartOption.seriesType = seriesType
+            }
+
+            if(chartData.seriesData.size > 1){
+                options[index.toString()] = json("type" to seriesType)
+            }
             val groupedByXAxis = data.dataList.filter { it.xAxis != null }.groupBy { it.xAxis }
             val distinctSubgroups = data.dataList.mapNotNull { it.subgroup }.toSet()
             distinctXAxisSet.forEach { xAxisKey ->

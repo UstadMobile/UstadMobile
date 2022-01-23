@@ -38,7 +38,7 @@ open class OneToManyJoinEditHelperMp<T : Any>(pkGetter: (T) -> Long,
         editPresenter.observeSavedStateResult(returnSavedStateKey, deserializationStrategy, entityClass) {
             val newValue = it.firstOrNull() ?: return@observeSavedStateResult
             onEditResult(newValue)
-            UmPlatform.run {
+            UmPlatformUtil.run {
                 savedStateHandle[returnSavedStateKey] = null
             }
         }

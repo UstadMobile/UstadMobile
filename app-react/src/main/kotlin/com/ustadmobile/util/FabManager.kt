@@ -32,34 +32,30 @@ class  FabManager(private val viewId: String = "um-fab", visible: Boolean = fals
     var visible: Boolean = visible
         set(value) {
             field = value
-            if(fabView!= null){
-                val style = fabView?.asDynamic().style
-                if(style != null)
-                    style.display = if(value) "flex" else "none"
-            }
+            updateIconAndFabText(value)
         }
 
     var icon: String? = null
         get() = field
         set(value){
             field = value
-            updateIconAndFabText()
+            updateIconAndFabText(visible)
         }
 
     var text: String? = null
         get() = field
         set(value) {
             field = value
-            updateIconAndFabText()
+            updateIconAndFabText(visible)
         }
 
-    private fun updateIconAndFabText(){
-        if(!text.isNullOrBlank() && !icon.isNullOrBlank()){
-            fabView?.childNodes?.item(0)?.textContent = icon
-            fabView?.childNodes?.item(1)?.textContent = text
-
-        }else{
-            visible = false
+    private fun updateIconAndFabText(visible: Boolean){
+        fabView?.childNodes?.item(0)?.textContent = icon
+        fabView?.childNodes?.item(1)?.textContent = text
+        if(fabView!= null){
+            val style = fabView?.asDynamic().style
+            if(style != null)
+                style.display = if(visible) "flex" else "none"
         }
     }
 

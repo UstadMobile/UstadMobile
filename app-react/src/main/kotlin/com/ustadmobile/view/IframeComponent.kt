@@ -1,8 +1,8 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.util.PaginateOnScrollManager
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.iframeComponentResponsiveIframe
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import kotlinx.browser.document
@@ -11,22 +11,20 @@ import kotlinx.html.js.onLoadFunction
 import react.RBuilder
 import react.RComponent
 import react.dom.attrs
-import react.setState
 import styled.css
 import styled.styledDiv
 import styled.styledIframe
 
 interface IframeProps: UmProps {
-    var sources: List<String>?
+    var sources: List<String>
     var pageSize: Int
+    var contentTypeEpub: Boolean
 }
 
 
 class  IframeComponent(mProps: IframeProps): RComponent<IframeProps, UmState>(mProps){
 
-    private var sourceToLoad: HashSet<String> = hashSetOf()
-
-    private var didUpdate = false
+    private var sourcesUrlToLoad: List<String> = listOf()
 
     private var paginateOnScrollManager: PaginateOnScrollManager? = null
 
@@ -35,19 +33,21 @@ class  IframeComponent(mProps: IframeProps): RComponent<IframeProps, UmState>(mP
     override fun RBuilder.render() {
        styledDiv{
            css(contentContainer)
-           sourceToLoad.forEach {
+           sourcesUrlToLoad.forEach {
                val iframeId = js("it.split('/').pop().split('#')[0].split('?')[0];").toString()
                styledIframe{
-                   css(iframeComponentResponsiveIframe)
+                   css(StyleManager.iframeComponentResponsiveIframe)
                    attrs {
-                       src = it
+                       src = it+if(props.contentTypeEpub) "?contentTypeEpub=${props.contentTypeEpub}" else ""
                        id = iframeId
                        onLoadFunction = { loadEvent ->
-                           val contentWindow = loadEvent.target.asDynamic().contentWindow
-                           val iframe = document.getElementById(iframeId)
-                           val iframeDoc = js("iframe.contentDocument || iframe.contentWindow.document")
-                           val scrollHeight = iframeDoc.body.scrollHeight.toString().toInt()
-                           iframe.asDynamic().style.height = "${scrollHeight + (scrollHeight * 0.1)}px"
+                           if(props.contentTypeEpub){
+                               val contentWindow = loadEvent.target.asDynamic().contentWindow
+                               val iframe = document.getElementById(iframeId)
+                               val iframeDoc = js("iframe.contentDocument || iframe.contentWindow.document")
+                               val scrollHeight = iframeDoc.body.scrollHeight.toString().toInt()
+                               iframe.asDynamic().style.height = "${scrollHeight + (scrollHeight * 0.1)}px"
+                           }
                        }
                    }
                }
@@ -56,16 +56,10 @@ class  IframeComponent(mProps: IframeProps): RComponent<IframeProps, UmState>(mP
     }
 
     override fun componentDidUpdate(prevProps: IframeProps, prevState: UmState, snapshot: Any) {
-        if(!didUpdate && prevProps.sources?.isNotEmpty() == true){
-            didUpdate = true
-            val sources = props.sources
-            paginateOnScrollManager = PaginateOnScrollManager(prevProps.sources?.size!!, prevProps.pageSize)
-            paginateOnScrollManager?.onScrollPageChanged = { _, _, endIndex ->
-                if(sources != null){
-                    val items = sources.slice(IntRange(0, endIndex)).toMutableList()
-                    setState {
-                        sourceToLoad = items.toHashSet()
-                    }
+        if(prevProps.sources.isNotEmpty() &&  !sourcesUrlToLoad.containsAll(prevProps.sources)){
+            paginateOnScrollManager = PaginateOnScrollManager(prevProps.sources.size, prevProps.pageSize)
+            paginateOnScrollManager?.onScrollPageChanged = { _, _, endIndex -> run{
+                sourcesUrlToLoad = prevProps.sources.slice(IntRange(0, endIndex))
                 }
             }
         }
@@ -78,9 +72,11 @@ class  IframeComponent(mProps: IframeProps): RComponent<IframeProps, UmState>(mP
 }
 
 fun RBuilder.renderIframe(
-    urls: List<String>?,
-    pageSize: Int = 10
+    urls: List<String>,
+    pageSize: Int = 10,
+    epubType: Boolean = false
 ) = child(IframeComponent::class) {
     attrs.pageSize = pageSize
-    attrs.sources = urls
+    attrs.sources = urls.distinct()
+    attrs.contentTypeEpub = epubType
 }

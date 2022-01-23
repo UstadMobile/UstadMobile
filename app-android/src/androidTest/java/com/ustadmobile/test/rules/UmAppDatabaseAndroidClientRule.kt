@@ -9,7 +9,6 @@ import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
-import com.ustadmobile.port.android.impl.BaseUstadApp
 import com.ustadmobile.port.android.impl.UstadApp
 import com.ustadmobile.test.port.android.util.getApplicationDi
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
@@ -18,6 +17,7 @@ import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import org.kodein.di.DIAware
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -49,7 +49,7 @@ class UmAppDatabaseAndroidClientRule(
     private lateinit var accountPerson: Person
 
     override fun starting(description: Description) {
-        val di = (getApplicationContext<BaseUstadApp>() as UstadApp).di
+        val di = (getApplicationContext() as UstadApp).di
         val httpClient: HttpClient = di.direct.instance()
 
         if(description.getAnnotation(UmAppDatabaseServerRequiredTest::class.java) != null) {
@@ -83,7 +83,7 @@ class UmAppDatabaseAndroidClientRule(
 
     override fun finished(description: Description?) {
         super.finished(description)
-        val di = (getApplicationContext<BaseUstadApp>() as UstadApp).di
+        val di = (getApplicationContext<UstadApp>() as DIAware).di
         val httpClient: HttpClient = di.direct.instance()
         appDbServer?.also { server ->
             runBlocking { httpClient.get<Unit>("$controlServerUrl/servers/close/${server.first}") }

@@ -242,6 +242,11 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
         }
     }
 
+    override fun onFabClicked() {
+        super.onFabClicked()
+        mPresenter?.handleClickEdit()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter?.onDestroy()

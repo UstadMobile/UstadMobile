@@ -3,43 +3,21 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
-import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = AgentEntity.TABLE_ID,
-    notifyOnUpdate = [
-        """
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               ${AgentEntity.TABLE_ID} AS tableId 
-         FROM ChangeLog
-              JOIN AgentEntity 
-                   ON ChangeLog.chTableId = ${AgentEntity.TABLE_ID} 
-                        AND ChangeLog.chEntityPk = AgentEntity.agentUid
-              JOIN Person 
-                   ON Person.personUid = AgentEntity.agentPersonUid
-              $JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    $JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
-        """
-    ],
-
-    syncFindAllQuery = """
-        SELECT AgentEntity.*
-          FROM UserSession
-               JOIN PersonGroupMember 
-                        ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-               ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} 
-                        ${Role.PERMISSION_PERSON_SELECT}
-                        ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
-               JOIN AgentEntity 
-                    ON AgentEntity.agentPersonUid = Person.personUid
-         WHERE UserSession.usClientNodeId= :clientId
-           AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-        """
+@ReplicateEntity(tableId = AgentEntity.TABLE_ID, tracker = AgentEntityReplicate::class)
+@Triggers(arrayOf(
+ Trigger(name = "agententity_remote_insert",
+         order = Trigger.Order.INSTEAD_OF,
+         on = Trigger.On.RECEIVEVIEW,
+         events = [Trigger.Event.INSERT],
+         sqlStatements = [
+         "REPLACE INTO AgentEntity(agentUid, agentMbox, agentMbox_sha1sum, agentOpenid, agentAccountName, agentHomePage, agentPersonUid, statementMasterChangeSeqNum, statementLocalChangeSeqNum, statementLastChangedBy, agentLct) VALUES (NEW.agentUid, NEW.agentMbox, NEW.agentMbox_sha1sum, NEW.agentOpenid, NEW.agentAccountName, NEW.agentHomePage, NEW.agentPersonUid, NEW.statementMasterChangeSeqNum, NEW.statementLocalChangeSeqNum, NEW.statementLastChangedBy, NEW.agentLct) " +
+         "/*psql ON CONFLICT (agentUid) DO UPDATE SET agentMbox = EXCLUDED.agentMbox, agentMbox_sha1sum = EXCLUDED.agentMbox_sha1sum, agentOpenid = EXCLUDED.agentOpenid, agentAccountName = EXCLUDED.agentAccountName, agentHomePage = EXCLUDED.agentHomePage, agentPersonUid = EXCLUDED.agentPersonUid, statementMasterChangeSeqNum = EXCLUDED.statementMasterChangeSeqNum, statementLocalChangeSeqNum = EXCLUDED.statementLocalChangeSeqNum, statementLastChangedBy = EXCLUDED.statementLastChangedBy, agentLct = EXCLUDED.agentLct*/"
+         ])
+ )
 )
-
 @Serializable
 class AgentEntity {
 
@@ -67,6 +45,7 @@ class AgentEntity {
     @LastChangedBy
     var statementLastChangedBy: Int = 0
 
+    @ReplicationVersionId
     @LastChangedTime
     var agentLct: Long = 0
 

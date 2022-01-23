@@ -1,15 +1,76 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.*
 import com.ustadmobile.door.DoorDataSourceFactory
+import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.SyncNode
+import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.UserSession
 
 
 @Repository
 @Dao
 abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
+
+    @Query("""
+     REPLACE INTO ScheduleReplicate(schedulePk, scheduleDestination)
+      SELECT DISTINCT Schedule.scheduleUid AS schedulePk,
+             :newNodeId AS scheduleDestination
+        FROM UserSession
+              JOIN PersonGroupMember
+                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+              ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_CLAZZ_SELECT}
+                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
+              JOIN Schedule
+                   ON Schedule.scheduleClazzUid = Clazz.clazzUid
+       WHERE UserSession.usClientNodeId = :newNodeId
+         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+         AND Schedule.scheduleLastChangedTime != COALESCE(
+             (SELECT scheduleVersionId
+                FROM ScheduleReplicate
+               WHERE schedulePk = Schedule.scheduleUid
+                 AND scheduleDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(schedulePk, scheduleDestination) DO UPDATE
+             SET schedulePending = true
+      */       
+ """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([Schedule::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+ @Query("""
+ REPLACE INTO ScheduleReplicate(schedulePk, scheduleDestination)
+  SELECT DISTINCT Schedule.scheduleUid AS scheduleUid,
+         UserSession.usClientNodeId AS scheduleDestination
+    FROM ChangeLog
+         JOIN Schedule
+              ON ChangeLog.chTableId = ${Schedule.TABLE_ID}
+                 AND Schedule.scheduleUid = ChangeLog.chEntityPk
+         JOIN Clazz
+              ON Clazz.clazzUid = Schedule.scheduleClazzUid
+         ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+              ${Role.PERMISSION_CLAZZ_SELECT}
+              ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND Schedule.scheduleLastChangedTime != COALESCE(
+         (SELECT scheduleVersionId
+            FROM ScheduleReplicate
+           WHERE schedulePk = Schedule.scheduleUid
+             AND scheduleDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(schedulePk, scheduleDestination) DO UPDATE
+     SET schedulePending = true
+  */               
+    """)
+    @ReplicationRunOnChange([Schedule::class])
+    @ReplicationCheckPendingNotificationsFor([Schedule::class])
+    abstract suspend fun replicateOnChange()
 
     @Insert
     abstract override fun insert(entity: Schedule): Long
@@ -23,7 +84,7 @@ abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
     }
 
     @Query("""UPDATE Schedule SET scheduleActive = :active,
-            scheduleLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
+            scheduleLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
             WHERE scheduleUid = :scheduleUid""")
     abstract suspend fun updateScheduleActivated(scheduleUid: Long, active: Boolean)
 

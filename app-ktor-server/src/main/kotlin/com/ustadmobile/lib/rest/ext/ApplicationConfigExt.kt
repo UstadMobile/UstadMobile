@@ -27,8 +27,10 @@ fun ApplicationConfig.toProperties(propertyNames: List<String>): Properties {
  * Given a section in the KTOR HOCON config that contains driver, url, user, and password, turn this
  * into a Properties that can be used to initialize a DataSource
  */
-fun ApplicationConfig.databasePropertiesFromSection(section: String,
-                                                    defaultUrl : String) : Properties {
+fun ApplicationConfig.databasePropertiesFromSection(
+    section: String,
+    defaultUrl : String
+) : Properties {
     return Properties().apply {
         setProperty("driver",
             propertyOrNull("$section.driver")?.getString() ?: "org.sqlite.JDBC")

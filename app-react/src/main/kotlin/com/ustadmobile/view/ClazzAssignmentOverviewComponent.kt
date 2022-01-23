@@ -199,11 +199,9 @@ class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<Cl
                                         width = LinearDimension("97%")
                                     }
                                    createContentEntryListItem(content, systemImpl, false,
-                                       onClick = {
+                                       mainList = false, onClick = {
                                        entryItemListener.onClickContentEntry(it)
-                                   }){
-
-                                   }
+                                   }){}
                                 }
                             }
                         }

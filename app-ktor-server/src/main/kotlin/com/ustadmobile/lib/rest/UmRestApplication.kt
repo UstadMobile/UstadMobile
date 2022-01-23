@@ -11,6 +11,7 @@ import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.db.UmAppDatabase_ReplicationRunOnChangeRunner
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
@@ -20,11 +21,12 @@ import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.*
 import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.io.UploadSessionManager
+import com.ustadmobile.core.util.ext.addInvalidationListener
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.rest.ext.*
@@ -54,6 +56,16 @@ import java.net.InetAddress
 import java.net.URL
 import java.nio.file.Files
 import javax.naming.InitialContext
+import com.ustadmobile.door.ext.asRepository
+import com.ustadmobile.door.replication.ReplicationNotificationDispatcher
+import com.ustadmobile.lib.rest.ext.initAdminUser
+import com.ustadmobile.lib.rest.ext.ktorInitRepo
+import com.ustadmobile.door.ext.doorDatabaseMetadata
+import kotlinx.coroutines.GlobalScope
+import com.ustadmobile.door.ext.nodeIdAuthCache
+import com.ustadmobile.door.util.NodeIdAuthCache
+import com.ustadmobile.core.db.RepIncomingListener
+import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -87,6 +99,8 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
             header(HttpHeaders.ContentType)
             header(HttpHeaders.AccessControlAllowOrigin)
             header("X-nid")
+            header("door-dbversion")
+            header("door-node")
             anyHost()
         }
     }
@@ -138,6 +152,10 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
             systemImpl.getOrGenerateNodeIdAndAuth(contextIdentifier, Any())
         }
 
+        bind<NodeIdAuthCache>() with scoped(EndpointScope.Default).singleton {
+            instance<UmAppDatabase>(tag = DoorTag.TAG_DB).nodeIdAuthCache
+        }
+
         bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
             val containerDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "container")
 
@@ -167,11 +185,15 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
                 defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
             InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbHostName)
-                .addSyncCallback(nodeIdAndAuth, true)
+            val attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
+                UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
+            val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbHostName,
+                    attachmentsDir)
+                .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())
                     .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .build()
+            db.addIncomingReplicationListener(RepIncomingListener(db))
             runBlocking {
                 db.connectivityStatusDao.insertAsync(ConnectivityStatus().apply {
                     connectivityState = ConnectivityStatus.STATE_UNMETERED
@@ -181,23 +203,20 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
             db
         }
 
-        bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
-            ServerUpdateNotificationManagerImpl()
-        }
 
         bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            EpubTypePluginCommonJvm(Any(), context, di)
+            EpubTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
         }
 
         bind<XapiTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            XapiTypePluginCommonJvm(Any(), context, di)
+            XapiTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
         }
 
         bind<H5PTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            H5PTypePluginCommonJvm(Any(), context, di)
+            H5PTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
         }
         bind<VideoTypePluginJvm>() with scoped(EndpointScope.Default).singleton{
-            VideoTypePluginJvm(Any(), context, di)
+            VideoTypePluginJvm(Any(), context, di, DummyContentPluginUploader())
         }
         bind<ApacheIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
             ApacheIndexerPlugin(Any(), context, di)
@@ -215,16 +234,13 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             val doorNode = instance<NodeIdAndAuth>()
-            val repo = db.asRepository(repositoryConfig(Any(), "http://localhost/",
+            val repo: UmAppDatabase = db.asRepository(repositoryConfig(Any(), "http://localhost/",
                 doorNode.nodeId, doorNode.auth, instance(), instance()) {
-                attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
-                    UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
-                updateNotificationManager = instance()
+                useReplicationSubscription = false
             })
-            ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
 
             //Add listener that will end sessions when authentication has been updated
-            repo.addSyncListener(PersonAuth2::class, EndSessionPersonAuth2SyncListener(repo))
+            //repo.addSyncListener(PersonAuth2::class, EndSessionPersonAuth2SyncListener(repo))
             runBlocking { repo.preload() }
             repo.ktorInitRepo()
             runBlocking {
@@ -335,9 +351,13 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
         personAuthRegisterRoute()
         ContainerMountRoute()
         ContainerUploadRoute2()
-        UmAppDatabase_KtorRoute(true)
+        route("UmAppDatabase") {
+            UmAppDatabase_KtorRoute()
+        }
         SiteRoute()
         ContentEntryLinkImporter()
+        ContentUploadRoute()
+
         /*
           This is a temporary redirect approach for users who open an app link but don't
           have the app installed. Because the uri scheme of views is #ViewName?args, this

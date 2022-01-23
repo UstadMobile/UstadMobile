@@ -1,10 +1,9 @@
 package com.ustadmobile.core.db
 
-import com.ustadmobile.door.DoorDatabaseCallback
+import com.ustadmobile.door.DoorDatabaseCallbackStatementList
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.DoorSqlDatabase
 import com.ustadmobile.door.ext.dbType
-import com.ustadmobile.door.ext.execSqlBatch
 
 /**
  * These triggers manage recursive progress tracking for ContentJobItem. Each ContentJobItem
@@ -21,22 +20,24 @@ import com.ustadmobile.door.ext.execSqlBatch
  *
  * The recursive trigger system works by posting progress up the tree when an update occurs.
  */
-class ContentJobItemTriggersCallback: DoorDatabaseCallback {
+class ContentJobItemTriggersCallback: DoorDatabaseCallbackStatementList {
 
-    override fun onCreate(db: DoorSqlDatabase) {
-        if(db.dbType() == DoorDbType.SQLITE) {
-            db.execSqlBatch(DatabaseTriggers.sqliteContentJobItemTriggers)
+    override fun onCreate(db: DoorSqlDatabase) : List<String> {
+        return if(db.dbType() == DoorDbType.SQLITE) {
+            DatabaseTriggers.sqliteContentJobItemTriggers.toList()
         }else {
-            db.execSqlBatch(DatabaseTriggers.postgresContentJobItemTriggers)
+            DatabaseTriggers.postgresContentJobItemTriggers.toList()
         }
 
     }
 
-    override fun onOpen(db: DoorSqlDatabase) {
-        if(db.dbType() == DoorDbType.SQLITE) {
-            db.execSQL("""
+    override fun onOpen(db: DoorSqlDatabase) : List<String> {
+        return if(db.dbType() == DoorDbType.SQLITE) {
+            listOf("""
                 PRAGMA recursive_triggers = ON;
             """)
+        }else {
+            listOf()
         }
     }
 

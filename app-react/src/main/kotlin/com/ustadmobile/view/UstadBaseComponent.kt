@@ -6,6 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -121,12 +122,22 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     override fun componentDidUpdate(prevProps: P, prevState: S, snapshot: Any) {
         val propsDidChange = props.asDynamic().arguments != js("undefined")
                 && !props.asDynamic().arguments.values.equals(prevProps.asDynamic().arguments.values)
+        val activeSession = systemImpl.getAppPref(UstadAccountManager.ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
+        val redirected = systemImpl.getAppPref(RedirectView.TAG_REDIRECTED, "false",this).toBoolean()
+        val refreshPage = activeSession != null && redirected
 
-        //Handles tabs behaviour when changing from one tab to another, react components
-        //are mounted once and when trying to re-mount it's componentDidUpdate is triggered.
-        //This will check and make sure the component has changed by checking if the props has changed
-        if(propsDidChange){
-            arguments = props.asDynamic().arguments as Map<String, String>
+        /**
+         * Handles tabs behaviour when changing from one tab to another, react components
+         * are mounted once and when trying to re-mount it's componentDidUpdate is triggered.
+         * This will check and make sure the component has changed by checking if the props has changed
+         */
+        if(propsDidChange || refreshPage){
+            if(propsDidChange){
+                arguments = props.asDynamic().arguments as Map<String, String>
+            }
+            if(refreshPage){
+                systemImpl.setAppPref(RedirectView.TAG_REDIRECTED, "false", this)
+            }
             onCreateView()
         }
     }
@@ -155,12 +166,27 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         lifecycleObservers.remove(observer)
     }
 
-    final fun getString(messageId: Int): String {
+    /**
+     * Get string from xml language resources
+     */
+    fun getString(messageId: Int): String {
         return if(messageId == 0) "" else systemImpl.getString(messageId, this)
     }
 
-    open fun optional(messageId: Int): String {
+    /**
+     * Get a string with optional label appended to it
+     * i.e Field is optional
+     */
+    fun getStringWithOptionalLabel(messageId: Int): String {
         return getString(messageId)+" (${getString(MessageID.optional)})"
+    }
+
+    /**
+     * Update state with a delay to make sure we are not updating
+     * state when a component is still building
+     */
+    fun updateUiWithStateChangeDelay(timeOutInMills: Int = STATE_CHANGE_DELAY, block:() -> Unit){
+        window.setTimeout(block, timeOutInMills)
     }
 
     override fun componentWillUnmount() {
@@ -179,6 +205,6 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
 
     companion object {
 
-        const val STATE_CHANGE_DELAY = 100
+        const val STATE_CHANGE_DELAY = 200
     }
 }

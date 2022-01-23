@@ -2,6 +2,7 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.AccountListView
+import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.mui.components.*
@@ -43,7 +44,6 @@ import kotlinx.coroutines.launch
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.padding
-import kotlinx.html.js.onClickFunction
 import mui.material.PaperProps
 import react.RBuilder
 import react.setState
@@ -118,11 +118,6 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
 
                 styledDiv {
                     css(mainComponentContainer)
-                    attrs.onClickFunction = {
-                       GlobalScope.launch {
-                           //appDatabase.exportDatabase()
-                       }
-                    }
 
                     umTopBar(appState,
                         currentDestination,
@@ -130,6 +125,9 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                                 "${getString(MessageID.search)} " +
                                 if(systemImpl.isRtlActive()) "" else "...",
                         activeAccount?.firstName){
+                        GlobalScope.launch {
+                            appDatabase.exportDatabase()
+                        }
                         systemImpl.go(AccountListView.VIEW_NAME, mapOf(), this)
                     }
 
@@ -175,13 +173,18 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                 val destination = value as UstadDestination
                 systemImpl.go(destination.view, mapOf(),this)
             }}
-            destinationList.filter { it.icon != null && it.view != SettingsView.VIEW_NAME }.forEach { destination ->
+            val extraMenuToShow = mutableListOf(SettingsView.VIEW_NAME)
+            if(!accountManager.activeAccount.admin){
+                extraMenuToShow+=ReportListView.VIEW_NAME
+            }
+
+            destinationList.filter { it.icon != null && extraMenuToShow.indexOf(it.view) == -1 }.forEach { destination ->
                 destination.icon?.let {
                     umBottomNavigationAction(
-                        label = getString(destination.labelId),
-                        it,
+                        label = getString(destination.labelId), it,
                         value = destination,
-                        showLabel = true)
+                        showLabel = true
+                    )
                 }
             }
         }

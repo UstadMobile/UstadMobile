@@ -8,6 +8,6 @@ import org.kodein.di.DI
 
 fun UmAppDatabase.setupAssignmentSyncListener(site: Endpoint, di: DI) : UmAppDatabase{
     val listener = ClazzAssignmentSyncListener(site, di)
-    (this as DoorDatabaseRepository).addSyncListener(ClazzAssignment::class, listener.assignmentListener)
+    //(this as DoorDatabaseRepository).addSyncListener(ClazzAssignment::class, listener.assignmentListener)
     return this
 }

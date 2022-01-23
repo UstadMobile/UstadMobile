@@ -4,13 +4,57 @@ import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
 @Dao
 @Repository
 abstract class ContentEntryDao : BaseDao<ContentEntry> {
+
+    @Query("""
+        REPLACE INTO ContentEntryReplicate(cePk, ceDestination)
+         SELECT DISTINCT contentEntryUid AS ceUid,
+                :newNodeId AS siteDestination
+           FROM ContentEntry
+          WHERE ContentEntry.contentEntryLct != COALESCE(
+                (SELECT ceVersionId
+                   FROM ContentEntryReplicate
+                  WHERE cePk = ContentEntry.contentEntryUid
+                    AND ceDestination = :newNodeId), -1) 
+         /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
+                SET cePending = true
+         */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([ContentEntry::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+        REPLACE INTO ContentEntryReplicate(cePk, ceDestination)
+         SELECT DISTINCT ContentEntry.contentEntryUid AS cePk,
+                UserSession.usClientNodeId AS siteDestination
+           FROM ChangeLog
+                JOIN ContentEntry
+                    ON ChangeLog.chTableId = ${ContentEntry.TABLE_ID}
+                       AND ChangeLog.chEntityPk = ContentEntry.contentEntryUid
+                JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+          WHERE UserSession.usClientNodeId != (
+                SELECT nodeClientId 
+                  FROM SyncNode
+                 LIMIT 1)
+            AND ContentEntry.contentEntryLct != COALESCE(
+                (SELECT ceVersionId
+                   FROM ContentEntryReplicate
+                  WHERE cePk = ContentEntry.contentEntryUid
+                    AND ceDestination = UserSession.usClientNodeId), 0)     
+        /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
+            SET cePending = true
+         */               
+    """)
+    @ReplicationRunOnChange([ContentEntry::class])
+    @ReplicationCheckPendingNotificationsFor([ContentEntry::class])
+    abstract suspend fun replicateOnChange()
 
     @JsName("insertListAsync")
     @Insert
@@ -93,6 +137,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract suspend fun findAllLanguageRelatedEntriesAsync(entryUuid: Long): List<ContentEntry>
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
+    @RepoHttpAccessible
     @Query("SELECT DISTINCT ContentCategory.contentCategoryUid, ContentCategory.name AS categoryName, " +
             "ContentCategorySchema.contentCategorySchemaUid, ContentCategorySchema.schemaName FROM ContentEntry " +
             "LEFT JOIN ContentEntryContentCategoryJoin ON ContentEntryContentCategoryJoin.ceccjContentEntryUid = ContentEntry.contentEntryUid " +
@@ -109,6 +154,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name")
     @JsName("findUniqueLanguagesInListAsync")
+    @RepoHttpAccessible
     abstract suspend fun findUniqueLanguagesInListAsync(parentUid: Long): List<Language>
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
@@ -117,6 +163,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
         LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
         WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name""")
     @JsName("findUniqueLanguageWithParentUid")
+    @RepoHttpAccessible
     abstract suspend fun findUniqueLanguageWithParentUid(parentUid: Long): List<LangUidAndName>
 
     @Update
@@ -303,6 +350,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
      * not yet have the indexes
      */
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
+    @RepoHttpAccessible
     @Query("""
         WITH RECURSIVE 
                ContentEntry_recursive(contentEntryUid, containerSize) AS (
@@ -337,17 +385,29 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query(ALL_ENTRIES_RECURSIVE_SQL)
     abstract fun getAllEntriesRecursivelyAsList(contentEntryUid: Long): List<ContentEntryWithParentChildJoinAndMostRecentContainer>
 
-    @Query("""UPDATE ContentEntry SET ceInactive = :ceInactive, 
-            contentEntryLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
+    @Query("""
+            UPDATE ContentEntry 
+               SET ceInactive = :ceInactive,
+                   contentEntryLct = :changedTime        
             WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
     @JsName("updateContentEntryInActive")
-    abstract fun updateContentEntryInActive(contentEntryUid: Long, ceInactive: Boolean)
+    abstract fun updateContentEntryInActive(
+        contentEntryUid: Long,
+        ceInactive: Boolean,
+        changedTime: Long
+    )
 
-    @Query("""UPDATE ContentEntry SET contentTypeFlag = :contentFlag,
-            contentEntryLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
-            WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
+    @Query("""
+        UPDATE ContentEntry 
+           SET contentTypeFlag = :contentFlag,
+               contentEntryLct = :changedTime 
+         WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
     @JsName("updateContentEntryContentFlag")
-    abstract fun updateContentEntryContentFlag(contentFlag: Int, contentEntryUid: Long)
+    abstract fun updateContentEntryContentFlag(
+        contentFlag: Int,
+        contentEntryUid: Long,
+        changedTime: Long
+    )
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<ContentEntry>)
@@ -371,19 +431,30 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("""
         UPDATE ContentEntry
-           SET ceInactive = :inactive
+           SET ceInactive = :inactive,
+               contentEntryLct = :changedTime
          WHERE contentEntryUid IN (SELECT cjiContentEntryUid 
                                      FROM ContentJobItem
                                     WHERE cjiJobUid = :jobId
                                       AND CAST(ContentJobItem.cjiContentDeletedOnCancellation AS INTEGER) = 1)
     """)
-    abstract fun invalidateContentEntryCreatedByJob(jobId: Long, inactive: Boolean)
+    abstract fun invalidateContentEntryCreatedByJob(
+        jobId: Long,
+        inactive: Boolean,
+        changedTime: Long
+    )
 
 
-    @Query("""UPDATE ContentEntry SET ceInactive = :toggleVisibility, 
-                contentEntryLastChangedBy =  COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
-                WHERE contentEntryUid IN (:selectedItem)""")
-    abstract suspend fun toggleVisibilityContentEntryItems(toggleVisibility: Boolean, selectedItem: List<Long>)
+    @Query("""
+        UPDATE ContentEntry 
+           SET ceInactive = :toggleVisibility, 
+               contentEntryLct = :changedTime 
+         WHERE contentEntryUid IN (:selectedItem)""")
+    abstract suspend fun toggleVisibilityContentEntryItems(
+        toggleVisibility: Boolean,
+        selectedItem: List<Long>,
+        changedTime: Long
+    )
 
     companion object {
 

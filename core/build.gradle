@@ -24,7 +24,6 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 31
-        missingDimensionStrategy 'api', 'api18'
     }
 
     packagingOptions {
@@ -104,7 +103,6 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.ustadmobile.door:door-runtime:$version_door"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation "com.ustadmobile.door:door-runtime:$version_door"
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
                 compileOnly "com.ustadmobile.door:room-annotations:$version_door"

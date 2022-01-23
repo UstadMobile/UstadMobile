@@ -79,12 +79,16 @@ class EpubContentComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
 
     override fun onCreateView() {
         super.onCreateView()
+        fabManager?.visible = false
         mPresenter = EpubContentPresenter(this,arguments,this, di)
         mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
-        renderIframe(spineUrls)
+        val urls = spineUrls
+        if(urls != null){
+            renderIframe(urls, epubType = true)
+        }
     }
 
     override fun onDestroyView() {

@@ -18,8 +18,9 @@ import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.contentEntryDetailOverviewComponentOpenBtn
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.StyleManager.detailPaddingBottom
+import com.ustadmobile.util.StyleManager.detailContentProgress
 import com.ustadmobile.util.StyleManager.displayProperty
+import com.ustadmobile.util.StyleManager.entryDetailRightSection
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util.ASSET_BOOK
 import com.ustadmobile.util.Util.ASSET_FOLDER
@@ -216,27 +217,29 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                     if(scoreProgress?.progress ?: 0 > 0){
                         umLinearProgress((scoreProgress?.progress ?: 0).toDouble(),
                             variant = ProgressVariant.determinate){
-                            css {
-                                padding(top = 1.spacingUnits, bottom = 1.spacingUnits)
-                            }
+                            css (detailContentProgress)
                         }
                     }
 
-                   if((canDownload || canOpen) && showEntryDownloadOpenBtn){
-                       umButton(getString(if(canDownload) MessageID.download else MessageID.open),
-                           size = ButtonSize.large,
-                           color = UMColor.secondary,
-                           variant = ButtonVariant.contained,
-                           onClick = {
-                               mPresenter?.handleOnClickOpenDownloadButton()
-                           }){
-                           css (contentEntryDetailOverviewComponentOpenBtn)
-                       }
-                   }
+                  /*
+                  Handle this when we have local download on web
+                  if((canDownload || canOpen) && showEntryDownloadOpenBtn){
+                       if(canDownload) MessageID.download else MessageID.open
+                   }*/
+
+                    umButton(getString(MessageID.open),
+                        size = ButtonSize.large,
+                        color = UMColor.secondary,
+                        variant = ButtonVariant.contained,
+                        onClick = {
+                            mPresenter?.handleOnClickOpenDownloadButton()
+                        }){
+                        css (contentEntryDetailOverviewComponentOpenBtn)
+                    }
                 }
 
                 umItem(GridSize.cells12, GridSize.cells8){
-                    css(detailPaddingBottom)
+                    css(entryDetailRightSection)
 
                     umGridContainer {
 

@@ -108,6 +108,7 @@ fun Route.ContainerMountRoute() {
 suspend fun Route.serve(call: ApplicationCall, isHeadRequest: Boolean){
     val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
     val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
+    val contentTypeEpub = call.parameters["contentTypeEpub"]?.toBoolean() ?: false
     val pathInContainer = call.parameters.getAll("paths")?.joinToString("/") ?: ""
 
     if(containerUid == 0L || pathInContainer.isEmpty()){
@@ -155,7 +156,9 @@ suspend fun Route.serve(call: ApplicationCall, isHeadRequest: Boolean){
             if(fileIsGzipped && acceptsGzip){
                 inputStream = GZIPInputStream(inputStream)
             }
-            inputStream = EpubContainerFilter(di()).filterResponse(inputStream, mimeType)
+            if(contentTypeEpub){
+                inputStream = EpubContainerFilter(di()).filterResponse(inputStream, mimeType)
+            }
             call.respond(object : OutgoingContent.WriteChannelContent() {
                 override val contentType = contentType
                 override val status = if(isRangeRequest)

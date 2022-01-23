@@ -328,8 +328,10 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         mPresenter = null
         currentLiveData = null
         mBinding?.availableTranslationView?.adapter = null
+        mBinding?.contentJobItemProgressList?.adapter = null
         availableTranslationAdapter = null
         availableTranslationsList = null
+        progressListAdapter = null
         entity = null
         presenterLifecycleObserver?.also {
             viewLifecycleOwner.lifecycle.removeObserver(it)

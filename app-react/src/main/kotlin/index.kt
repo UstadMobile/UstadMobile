@@ -1,5 +1,6 @@
 
 import com.ustadmobile.core.account.*
+import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.nav.UstadNavController
@@ -10,11 +11,10 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.defaultJsonSerializer
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.ContainerMounter
-import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.jsExt.DoorDatabaseRepositoryJs
-import com.ustadmobile.jsExt.container.ContainerMounterJs
+import com.ustadmobile.door.ext.asRepository
+import com.ustadmobile.util.ContainerMounterJs
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mui.components.umThemeProvider
@@ -28,6 +28,8 @@ import com.ustadmobile.util.ThemeManager.createAppTheme
 import com.ustadmobile.view.renderSplashComponent
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.engine.js.*
 import io.ktor.client.features.*
@@ -45,6 +47,7 @@ import react.redux.provider
 fun main() {
     defaultJsonSerializer()
     BrowserTabTracker.init()
+    Napier.base(DebugAntilog())
     window.onload = {
         render(document.getElementById("root")) {
             val diState = ReduxDiState(
@@ -76,7 +79,12 @@ private val diModule = DI.Module("UstadApp-React"){
     }
 
     bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(EndpointScope.Default).singleton {
-        getCurrentState().db.instance ?: throw IllegalArgumentException("Database was not built, make sure it is built before proceeding")
+        /***
+         * Database is being built from PlashPresenter due to the fact that it has to be built asynchronously
+         * After building the database, Redux takes care of updating the app's state.
+         */
+        getCurrentState().db.instance ?:
+        throw IllegalStateException("Database was not built, make sure it is built before proceeding")
     }
 
     bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
@@ -84,24 +92,19 @@ private val diModule = DI.Module("UstadApp-React"){
     }
 
     bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-        val repo: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = UmAppDatabase.TAG_DB)
-        repo
-    }
-
-    bind<DoorDatabaseRepository>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {
         val nodeIdAndAuth: NodeIdAndAuth = instance()
-        val config =  RepositoryConfig.repositoryConfig(
-            this,context.url,  nodeIdAndAuth.auth, nodeIdAndAuth.nodeId, instance())
-        val db: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = UmAppDatabase.TAG_DB)
-        DoorDatabaseRepositoryJs(db, config)
+        val db = instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB)
+        val repositoryConfig =  RepositoryConfig.repositoryConfig(
+            this,context.url+"UmAppDatabase/",  nodeIdAndAuth.auth,
+            nodeIdAndAuth.nodeId, instance(),
+            kotlinx.serialization.json.Json { encodeDefaults = true }
+        ){
+            replicationSubscriptionInitListener = RepSubscriptionInitListener()
+        }
+        db.asRepository(repositoryConfig)
     }
 
     constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with false
-
-    bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(EndpointScope.Default).singleton {
-        val nodeIdAndAuth: NodeIdAndAuth = instance()
-        ClientId(nodeIdAndAuth.nodeId)
-    }
 
     bind<ReduxThemeState>() with singleton{
         ReduxThemeState(getCurrentState().appTheme?.theme)

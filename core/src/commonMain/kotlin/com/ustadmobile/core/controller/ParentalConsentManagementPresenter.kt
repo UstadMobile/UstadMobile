@@ -26,6 +26,7 @@ import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 
 
 class ParentalConsentManagementPresenter(context: Any,
@@ -54,9 +55,30 @@ class ParentalConsentManagementPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonParentJoinWithMinorPerson? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        val personParentJoin = db.onRepoWithFallbackToDb(5000) {
+
+
+
+        var personParentJoin = db.onRepoWithFallbackToDb(5000) {
             it.personParentJoinDao.findByUidWithMinorAsync(entityUid)
         }
+
+        if(personParentJoin == null && db is DoorDatabaseRepository) {
+            //try fetching from the server
+            try {
+                personParentJoin  = db.personParentJoinDao.findByUidWithMinorAsyncFromWeb(entityUid)
+                if(personParentJoin != null)
+                    db.personParentJoinDao.insertAsync(personParentJoin)
+
+                val minorPersonFromWeb = personParentJoin?.minorPerson
+                val minorPerson = db.personDao.findByUidAsync(personParentJoin?.ppjMinorPersonUid ?: 0L)
+                if(minorPerson == null && minorPersonFromWeb != null)
+                    db.personDao.insertAsync(minorPersonFromWeb)
+
+            }catch (e: Exception) {
+                Napier.w("Could not load personparentjoin from web for $entityUid", e)
+            }
+        }
+
 
         if(personParentJoin == null && db !is DoorDatabaseRepository) {
             //Not available in the local db, just return and wait for repo load

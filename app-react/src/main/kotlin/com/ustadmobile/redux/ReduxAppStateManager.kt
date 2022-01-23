@@ -34,7 +34,6 @@ object ReduxAppStateManager {
             is ReduxNavStackState -> {
                 BrowserTabTracker.navStackState = action
                 state.copy(navStack = action)
-
             }
             is ReduxSnackBarState -> state.copy(appSnackBar = action)
             else -> state

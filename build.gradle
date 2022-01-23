@@ -38,6 +38,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        mavenLocal()
 
         maven {
             url "https://devserver3.ustadmobile.com/maven"
@@ -86,7 +87,6 @@ ext {
     ustadVersionCode = 221
 
     wrapperVersion = "pre.270-kotlin-1.6.0"
-
     version_kotlin_react = "17.0.2-$wrapperVersion"
     version_kotlin_react_router_dom = "6.0.2-$wrapperVersion"
     version_kotlin_styled = "5.3.3-$wrapperVersion"
@@ -108,7 +108,7 @@ ext {
     version_npm_html_to_image = "^1.9.0"
     version_npm_date_fns = "2.27.0"
 
-    version_door = "0.0.32t-jsv6"
+    version_door = "0.0.45"
     version_xmlpullparserkmp = '0.0.20'
 
     version_gradle_buildconfig_plugin = "1.1.7"
@@ -274,6 +274,19 @@ if(System.getenv("ACRA_BASIC_LOGIN") != null) {
 if(System.getenv("ACRA_BASIC_PASS") != null) {
     ext.buildConfigProperties["android.acra.auth"] = System.getenv("ACRA_BASIC_PASS")
 }
+
+if(System.getenv("DOORDB_POSTGRES_URL") != null) {
+    ext.buildConfigProperties["doordb_postgres_url"] = System.getenv("DOORDB_POSTGRES_URL")
+}
+
+if(System.getenv("DOORDB_POSTGRES_USER") != null) {
+    ext.buildConfigProperties["doordb_postgres_user"] = System.getenv("DOORDB_POSTGRES_USER")
+}
+
+if(System.getenv("DOORDB_POSTGRES_PASSWORD") != null) {
+    ext.buildConfigProperties["doordb_postgres_password"] = System.getenv("DOORDB_POSTGRES_PASSWORD")
+}
+
 
 /**
  * Make sure lib-database:jsJar depends on lib-database:jvmJar

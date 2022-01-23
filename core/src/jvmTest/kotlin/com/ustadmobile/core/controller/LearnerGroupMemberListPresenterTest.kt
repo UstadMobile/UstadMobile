@@ -1,13 +1,12 @@
 package com.ustadmobile.core.controller
 
 import org.mockito.kotlin.*
-import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.LearnerGroupMemberDao
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.test.waitUntilAsyncOrTimeout
 import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
@@ -144,7 +143,10 @@ class LearnerGroupMemberListPresenterTest {
         presenter.handleNewMemberToGroup(person)
 
         runBlocking {
-            verify(repoLearnerGroupMemberDaoSpy, timeout(5000)).insertAsync(any())
+            repo.waitUntilAsyncOrTimeout(5000, listOf("LearnerGroupMember")) {
+                repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(
+                    1, 1).size == 2
+            }
         }
 
         runBlocking {
