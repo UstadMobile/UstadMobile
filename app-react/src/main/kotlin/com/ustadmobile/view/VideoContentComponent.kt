@@ -52,6 +52,7 @@ class VideoContentComponent(mProps: UmProps):UstadBaseComponent<UmProps, UmState
 
     override fun onCreateView() {
         super.onCreateView()
+        fabManager?.visible = false
         db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
         containerUid = arguments[ARG_CONTAINER_UID]?.toLong() ?: 0L
         mPresenter = VideoContentPresenter(this, arguments, this, di)

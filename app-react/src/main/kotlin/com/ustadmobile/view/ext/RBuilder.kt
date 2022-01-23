@@ -44,7 +44,6 @@ import com.ustadmobile.view.ChartOptions
 import com.ustadmobile.view.ChartType
 import com.ustadmobile.view.ContentEntryListComponent
 import com.ustadmobile.view.umChart
-import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import mui.material.GridProps
@@ -92,7 +91,7 @@ private fun guardRoute(
     val logout = activeSession == null && viewName != null
             && viewName != Login2View.VIEW_NAME
     if(logout){
-        window.location.href = "./"
+        //window.location.href = "./"
     }
     child(component){}
 }

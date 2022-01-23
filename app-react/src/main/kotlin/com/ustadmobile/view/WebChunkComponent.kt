@@ -29,12 +29,15 @@ class WebChunkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(m
 
     override fun onCreateView() {
         super.onCreateView()
+        fabManager?.visible = false
         mPresenter = WebChunkPresenter(this,arguments, this, di)
         mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
-        renderIframe(listOf(url), 1)
+        if(url.isNotEmpty()){
+            renderIframe(listOf(url), 1)
+        }
     }
 
     override fun showNoAppFoundError(message: String, actionMessageId: Int, mimeType: String) {

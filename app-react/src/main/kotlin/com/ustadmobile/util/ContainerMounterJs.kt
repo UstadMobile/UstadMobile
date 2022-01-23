@@ -1,4 +1,4 @@
-package com.ustadmobile.jsExt.container
+package com.ustadmobile.util
 
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContainerMounter

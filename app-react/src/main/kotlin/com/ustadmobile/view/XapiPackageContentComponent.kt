@@ -37,7 +37,9 @@ class XapiPackageContentComponent(mProps: UmProps): UstadBaseComponent<UmProps, 
     }
 
     override fun RBuilder.render() {
-        renderIframe(listOf(url), 1)
+        if(url.isNotEmpty()){
+            renderIframe(listOf(url), 1)
+        }
     }
 
     override fun onDestroyView() {

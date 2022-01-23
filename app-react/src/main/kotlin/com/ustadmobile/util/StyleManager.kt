@@ -377,14 +377,14 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val contentContainer by css {
         marginLeft = 1.spacingUnits
         marginRight = 1.spacingUnits
-        height = LinearDimension("100vh")
+        height = 100.vh
         overflow = Overflow.scroll
         paddingLeft = 2.spacingUnits
         paddingRight = 2.spacingUnits
         paddingBottom = 16.spacingUnits
-        width = LinearDimension("95.5%")
+        width = (95.5).pct
         media(theme.breakpoints.up(tabletAndHighEnd)){
-            width = LinearDimension("96.5%")
+            width = (95.5).pct
             marginLeft = 3.spacingUnits
             marginRight = 3.spacingUnits
         }
@@ -613,8 +613,10 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         backgroundColor = Color.transparent
         border = "0px"
         minHeight = 75.pct
+        margin(top = 10.pct)
         media(theme.breakpoints.up(tabletAndHighEnd)){
             minHeight = 100.pct
+            margin(top = 5.pct)
         }
     }
 

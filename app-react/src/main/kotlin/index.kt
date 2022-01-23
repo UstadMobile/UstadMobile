@@ -14,7 +14,7 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.asRepository
-import com.ustadmobile.jsExt.container.ContainerMounterJs
+import com.ustadmobile.util.ContainerMounterJs
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mui.components.umThemeProvider
