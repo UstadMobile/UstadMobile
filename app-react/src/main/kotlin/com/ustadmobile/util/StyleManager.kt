@@ -720,7 +720,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         paddingRight = 2.spacingUnits
         marginTop = 10.px
         media(theme.breakpoints.up(tabletAndHighEnd)) {
-            width = 80.pct
+            width = 70.pct
         }
     }
 

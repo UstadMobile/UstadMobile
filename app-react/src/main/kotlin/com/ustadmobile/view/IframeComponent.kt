@@ -11,7 +11,6 @@ import kotlinx.html.js.onLoadFunction
 import react.RBuilder
 import react.RComponent
 import react.dom.attrs
-import react.setState
 import styled.css
 import styled.styledDiv
 import styled.styledIframe
@@ -59,9 +58,8 @@ class  IframeComponent(mProps: IframeProps): RComponent<IframeProps, UmState>(mP
     override fun componentDidUpdate(prevProps: IframeProps, prevState: UmState, snapshot: Any) {
         if(prevProps.sources.isNotEmpty() &&  !sourcesUrlToLoad.containsAll(prevProps.sources)){
             paginateOnScrollManager = PaginateOnScrollManager(prevProps.sources.size, prevProps.pageSize)
-            paginateOnScrollManager?.onScrollPageChanged = { _, _, endIndex ->
-                setState {
-                    sourcesUrlToLoad = prevProps.sources.slice(IntRange(0, endIndex))
+            paginateOnScrollManager?.onScrollPageChanged = { _, _, endIndex -> run{
+                sourcesUrlToLoad = prevProps.sources.slice(IntRange(0, endIndex))
                 }
             }
         }

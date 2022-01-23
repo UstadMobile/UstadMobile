@@ -491,7 +491,7 @@ fun RBuilder.createPersonWithAttemptProgress(
                 umItem(GridSize.cells12){
                     umTypography("${item.firstNames} ${item.lastName}",
                         variant = TypographyVariant.h6){
-                        css (StyleManager.alignTextToStart)
+                        css (alignTextToStart)
                     }
                 }
 
@@ -504,7 +504,7 @@ fun RBuilder.createPersonWithAttemptProgress(
                         umTypography("${item.attempts} ${systemImpl.getString(MessageID.attempts, this)}",
                             variant = TypographyVariant.body1,
                             paragraph = true){
-                            css(StyleManager.alignTextToStart)
+                            css(alignTextToStart)
                         }
                     }
 
@@ -529,7 +529,7 @@ fun RBuilder.createPersonWithAttemptProgress(
                             umTypography(item.duration.formatToStringHoursMinutesSeconds(systemImpl),
                                 variant = TypographyVariant.body1,
                                 paragraph = true){
-                                css(StyleManager.alignTextToStart)
+                                css(alignTextToStart)
                             }
                         }
                     }
@@ -541,7 +541,7 @@ fun RBuilder.createPersonWithAttemptProgress(
                         val endDate = if(item.endDate == 0L) "" else " - ${item.endDate.toDate()?.standardFormat()}"
                         umTypography("${item.startDate.toDate()?.standardFormat()}$endDate",
                             variant = TypographyVariant.body1){
-                            css (StyleManager.alignTextToStart)
+                            css (alignTextToStart)
                         }
                     }
                 }
@@ -561,7 +561,7 @@ fun RBuilder.createPersonWithAttemptProgress(
                                 .format(item.scoreProgress?.progress ?: 0),
                                 variant = TypographyVariant.body1,
                                 paragraph = true){
-                                css(StyleManager.alignTextToStart)
+                                css(alignTextToStart)
                             }
                         }
                     }
@@ -584,7 +584,7 @@ fun RBuilder.createPersonWithAttemptProgress(
                                 variant = TypographyVariant.body1,
                                 paragraph = true
                             ) {
-                                css(StyleManager.alignTextToStart)
+                                css(alignTextToStart)
                             }
                         }
 
@@ -607,7 +607,7 @@ fun RBuilder.createPersonWithAttemptProgress(
                         umTypography(item.latestPrivateComment,
                             variant = TypographyVariant.body2,
                             paragraph = true){
-                            css(StyleManager.alignTextToStart)
+                            css(alignTextToStart)
                         }
                     }
                 }
@@ -987,6 +987,7 @@ fun RBuilder.createContentEntryListItem(
     showStatus: Boolean = false,
     downloaded: Boolean = true,
     onClick: ((ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit)? = null,
+    mainList: Boolean = true,
     onSecondaryAction: (() -> Unit)? = null){
 
     /*
@@ -1009,7 +1010,7 @@ fun RBuilder.createContentEntryListItem(
             }
         }
 
-        umItem(GridSize.cells4, GridSize.cells2){
+        umItem(GridSize.cells4, if(mainList) GridSize.cells2 else GridSize.cells1){
             umItemThumbnail( if(item.leaf) "class" else "folder", item.thumbnailUrl,width = 80,
                 iconColor = Color(StyleManager.theme.palette.action.disabled),
                 avatarBackgroundColor = Color.transparent)
@@ -1022,7 +1023,7 @@ fun RBuilder.createContentEntryListItem(
             }
         }
 
-        umItem(GridSize.cells8, GridSize.cells10){
+        umItem(GridSize.cells8, if(mainList) GridSize.cells10 else GridSize.cells11){
             umGridContainer {
                 umItem(GridSize.cells12){
                     umTypography(item.title,
