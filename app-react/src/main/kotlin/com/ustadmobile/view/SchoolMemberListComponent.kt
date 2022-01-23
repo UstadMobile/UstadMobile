@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.controller.PersonListPresenter
 import com.ustadmobile.core.controller.SchoolMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -109,7 +108,7 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
 
     override fun handleClickCreateNewEntry() {
         mPresenter?.handleClickAddNewItem(arguments,
-            PersonListPresenter.RESULT_PERSON_KEY)
+            addPersonKeyName)
     }
 
     override fun RBuilder.renderFooterView() {

@@ -37,11 +37,11 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
     private var titleLabel = FieldLabel(text = getString(MessageID.title))
 
-    private var instructionLabel = FieldLabel(text = optional(MessageID.instructions_for_students))
+    private var instructionLabel = FieldLabel(text = getStringWithOptionalLabel(MessageID.instructions_for_students))
 
     private var startDateLabel = FieldLabel(text = getString(MessageID.start_date))
 
-    private var deadlineDateLabel = FieldLabel(text = optional(MessageID.deadline))
+    private var deadlineDateLabel = FieldLabel(text = getStringWithOptionalLabel(MessageID.deadline))
 
     private var startTimeLabel = FieldLabel(text = getString(MessageID.time))
 

@@ -23,6 +23,7 @@ object RouteManager {
         UstadDestination(view = Login2View.VIEW_NAME, labelId = MessageID.login, component = LoginComponent::class, showNavigation = false),
         UstadDestination(view = ContentEntryDetailView.VIEW_NAME, component = ContentEntryDetailComponent::class),
         UstadDestination(view = ContentEntryDetailOverviewView.VIEW_NAME, component = ContentEntryDetailOverviewComponent::class),
+        UstadDestination(view = ContentEntryDetailAttemptsListView.VIEW_NAME, component = ContentEntryDetailAttemptsListComponent::class, showSearch = true),
         UstadDestination(view = EpubContentView.VIEW_NAME, component = EpubContentComponent::class),
         UstadDestination(view = PersonDetailView.VIEW_NAME, component = PersonDetailComponent::class),
         UstadDestination(view = PersonAccountEditView.VIEW_NAME, component = PersonAccountEditComponent::class),

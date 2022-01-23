@@ -571,10 +571,26 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val contentEntryDetailOverviewComponentOpenBtn by css {
-        margin = "2% 1.5% 2% 1.5%"
+        margin = "3% 1.5% 3% 1.5%"
         width = LinearDimension("98%")
         media(theme.breakpoints.up(tabletAndHighEnd)){
             margin = "2% 1.5% 0% 1.5%"
+        }
+    }
+
+    val detailContentProgress by css{
+        margin(left = LinearDimension("1.5%"), right = LinearDimension("1.5%"))
+        width = LinearDimension("98%")
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            margin(left = LinearDimension("1.5%"), right = LinearDimension("1.5%"))
+        }
+    }
+
+    val itemContentProgress by css{
+        margin(top = 2.spacingUnits, left = LinearDimension("1.5%"), right = LinearDimension("1.5%"))
+        width = LinearDimension("43%")
+        media(theme.breakpoints.up(tabletAndHighEnd)){
+            margin(top = 1.spacingUnits,left = LinearDimension("1.5%"), right = LinearDimension("1.5%"))
         }
     }
 

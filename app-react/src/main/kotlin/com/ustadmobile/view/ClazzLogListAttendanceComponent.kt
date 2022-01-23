@@ -65,7 +65,9 @@ class ClazzLogListAttendanceComponent (mProps: UmProps) : UstadListComponent<Cla
         null
         set(value) {
             field = value
-            //fabManager?.visible = !value.isNullOrEmpty()
+            updateUiWithStateChangeDelay {
+                fabManager?.visible = !value.isNullOrEmpty()
+            }
         }
 
 

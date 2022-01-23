@@ -192,9 +192,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                 field = value
                 showCreateNewItem = value == ListViewAddMode.FIRST_ITEM
             }
-            window.setTimeout({
+            updateUiWithStateChangeDelay {
                 fabManager?.visible = value == ListViewAddMode.FAB
-            }, STATE_CHANGE_DELAY)
+            }
         }
 
     override var listFilterOptionChips: List<ListFilterIdOption>? = null
@@ -216,7 +216,6 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     override fun onCreateView() {
         super.onCreateView()
         fabManager?.icon = "add"
-        fabManager?.text = ""
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         window.setTimeout({
             searchManager?.searchListener = listPresenter

@@ -18,6 +18,7 @@ import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.contentEntryDetailOverviewComponentOpenBtn
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
+import com.ustadmobile.util.StyleManager.detailContentProgress
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.entryDetailRightSection
 import com.ustadmobile.util.UmProps
@@ -216,9 +217,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                     if(scoreProgress?.progress ?: 0 > 0){
                         umLinearProgress((scoreProgress?.progress ?: 0).toDouble(),
                             variant = ProgressVariant.determinate){
-                            css {
-                                padding(top = 1.spacingUnits, bottom = 1.spacingUnits)
-                            }
+                            css (detailContentProgress)
                         }
                     }
 

@@ -166,12 +166,27 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         lifecycleObservers.remove(observer)
     }
 
-    final fun getString(messageId: Int): String {
+    /**
+     * Get string from xml language resources
+     */
+    fun getString(messageId: Int): String {
         return if(messageId == 0) "" else systemImpl.getString(messageId, this)
     }
 
-    open fun optional(messageId: Int): String {
+    /**
+     * Get a string with optional label appended to it
+     * i.e Field is optional
+     */
+    fun getStringWithOptionalLabel(messageId: Int): String {
         return getString(messageId)+" (${getString(MessageID.optional)})"
+    }
+
+    /**
+     * Update state with a delay to make sure we are not updating
+     * state when a component is still building
+     */
+    fun updateUiWithStateChangeDelay(timeOutInMills: Int = STATE_CHANGE_DELAY, block:() -> Unit){
+        window.setTimeout(block, timeOutInMills)
     }
 
     override fun componentWillUnmount() {
@@ -190,6 +205,6 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
 
     companion object {
 
-        const val STATE_CHANGE_DELAY = 100
+        const val STATE_CHANGE_DELAY = 200
     }
 }
