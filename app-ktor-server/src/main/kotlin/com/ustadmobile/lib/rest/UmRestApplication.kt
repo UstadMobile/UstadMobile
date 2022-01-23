@@ -64,6 +64,7 @@ import kotlinx.coroutines.GlobalScope
 import com.ustadmobile.door.ext.nodeIdAuthCache
 import com.ustadmobile.door.util.NodeIdAuthCache
 import com.ustadmobile.core.db.RepIncomingListener
+import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -197,18 +198,18 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
 
         bind<EpubTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            EpubTypePluginCommonJvm(Any(), context, di)
+            EpubTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
         }
 
         bind<XapiTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            XapiTypePluginCommonJvm(Any(), context, di)
+            XapiTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
         }
 
         bind<H5PTypePluginCommonJvm>() with scoped(EndpointScope.Default).singleton{
-            H5PTypePluginCommonJvm(Any(), context, di)
+            H5PTypePluginCommonJvm(Any(), context, di, DummyContentPluginUploader())
         }
         bind<VideoTypePluginJvm>() with scoped(EndpointScope.Default).singleton{
-            VideoTypePluginJvm(Any(), context, di)
+            VideoTypePluginJvm(Any(), context, di, DummyContentPluginUploader())
         }
         bind<ApacheIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
             ApacheIndexerPlugin(Any(), context, di)
@@ -348,6 +349,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
         SiteRoute()
         ContentEntryLinkImporter()
+        ContentUploadRoute()
+
         /*
           This is a temporary redirect approach for users who open an app link but don't
           have the app installed. Because the uri scheme of views is #ViewName?args, this

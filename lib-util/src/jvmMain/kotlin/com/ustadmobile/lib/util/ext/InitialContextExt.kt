@@ -21,9 +21,6 @@ fun InitialContext.bindDataSourceIfNotExisting(dbName: String, dbProperties: Pro
         dbProperties.setProperty("url", dbUrl.replace("(hostname)", hostnameSanitized))
         SJDataSourceConverter().convert(dbProperties, "javax.sql.DataSource")
     }
-    createSubcontextIfNotExisting("java:/comp/env/doordb")
-    createSubcontextIfNotExisting("java:/comp/env/doordb/$dbName")
-    bindIfNotExisting("java:/comp/env/doordb/$dbName/master") { true }
 }
 
 fun InitialContext.bindIfNotExisting(path: String, bindProducer: () -> Any) {
