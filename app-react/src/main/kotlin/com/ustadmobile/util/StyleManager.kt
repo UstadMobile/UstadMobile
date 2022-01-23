@@ -414,8 +414,16 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val centerContainer by css {
         display = Display.flex
         justifyContent = JustifyContent.center
-        height = LinearDimension("70vh")
-        width = LinearDimension("100wh")
+        height = 70.vh
+        width = 100.vw
+        alignItems = Align.center
+    }
+
+    val videoPlayerWrapper by css {
+        display = Display.flex
+        justifyContent = JustifyContent.center
+        height = 80.vh
+        width = 90.vw
         alignItems = Align.center
     }
 
@@ -601,12 +609,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val iframeComponentResponsiveIframe by css{
         overflow = Overflow.hidden
-        width = LinearDimension("100%")
+        width = 100.pct
         backgroundColor = Color.transparent
         border = "0px"
-        minHeight = LinearDimension("75%")
+        minHeight = 75.pct
         media(theme.breakpoints.up(tabletAndHighEnd)){
-            minHeight = LinearDimension("100%")
+            minHeight = 100.pct
         }
     }
 
@@ -616,9 +624,9 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         alignContent = Align.center
         alignItems = Align.center
         paddingBottom = 16.px
-        padding = "16px 30px 16px 30px"
+        padding(16.px,30.px , 16.px ,30.px)
         cursor = Cursor.pointer
-        width = LinearDimension("100%")
+        width = 100.pct
         hover {
             backgroundColor = Color(theme.palette.action.selected)
         }
@@ -630,24 +638,26 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val videoComponentResponsiveMedia by css{
         overflow = Overflow.hidden
-        width = LinearDimension("100%")
-        minHeight = LinearDimension("100%")
-        height = LinearDimension("100%")
-        margin(top = LinearDimension("50%"))
+        width = 95.pct
+        minHeight = 70.pct
+        height = 70.pct
+        margin(top = 10.pct)
         backgroundColor = Color.transparent
         media(theme.breakpoints.up(tabletAndHighEnd)){
-            margin(top = 0.px)
+            height = 100.pct
+            minHeight = 100.pct
+            margin(top = 5.pct)
         }
     }
 
     val clazzItemClass by css {
         height = 200.px
-        width = LinearDimension("100%")
+        width = 100.pct
     }
 
     val clazzDetailExtraInfo by css {
-        width = LinearDimension("100%")
-        margin = "0 2% 0 2%"
+        width = 100.pct
+        margin(0.px, 2.pct,0.px, 2.pct)
         paddingBottom = 10.spacingUnits
     }
 
@@ -696,7 +706,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         position = Position.fixed
         right = 2.spacingUnits
         bottom = 2.spacingUnits
-        width = LinearDimension("100vh")
+        width = 100.vh
         media(theme.breakpoints.up(tabletAndHighEnd)) {
             bottom = 4.spacingUnits
             right = 3.spacingUnits
@@ -704,11 +714,11 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val studentProgressBar by css{
-        width = LinearDimension("50%")
+        width = 50.pct
         paddingRight = 2.spacingUnits
         marginTop = 10.px
         media(theme.breakpoints.up(tabletAndHighEnd)) {
-            width = LinearDimension("80%")
+            width = 80.pct
         }
     }
 
