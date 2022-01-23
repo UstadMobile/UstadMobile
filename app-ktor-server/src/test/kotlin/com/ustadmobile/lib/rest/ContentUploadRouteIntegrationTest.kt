@@ -45,11 +45,9 @@ import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
-import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import javax.naming.InitialContext
-import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
@@ -108,11 +106,8 @@ class ContentUploadRouteIntegrationTest {
                 }
 
                 bind<Scheduler>() with singleton {
-                    val dbProperties = environment.config.databasePropertiesFromSection("quartz",
-                        "jdbc:sqlite:data/quartz_test.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
                     InitialContext().apply {
-                        bindDataSourceIfNotExisting("quartz_test", dbProperties)
-                        initQuartzDb("java:/comp/env/jdbc/quartz_test")
+                        initQuartzDb("java:/comp/env/jdbc/quartzds")
                     }
                     StdSchedulerFactory.getDefaultScheduler().also {
                         it.context.put("di", di)
