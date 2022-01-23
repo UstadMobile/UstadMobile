@@ -39,8 +39,6 @@ import com.ustadmobile.view.ext.umTopBar
 import kotlinext.js.jsObject
 import kotlinx.browser.document
 import kotlinx.browser.window
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.padding
@@ -125,9 +123,9 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                                 "${getString(MessageID.search)} " +
                                 if(systemImpl.isRtlActive()) "" else "...",
                         activeAccount?.firstName){
-                        GlobalScope.launch {
+                        /*GlobalScope.launch {
                             appDatabase.exportDatabase()
-                        }
+                        }*/
                         systemImpl.go(AccountListView.VIEW_NAME, mapOf(), this)
                     }
 
