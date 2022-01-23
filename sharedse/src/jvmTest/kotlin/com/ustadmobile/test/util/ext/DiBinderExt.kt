@@ -18,6 +18,7 @@ import org.kodein.di.*
 import javax.naming.InitialContext
 import kotlin.random.Random
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import kotlinx.coroutines.runBlocking
 
 fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMode: Boolean = true) {
     bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
@@ -32,7 +33,7 @@ fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMod
             .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
-            .also { it.preload() })
+            .also { runBlocking { it.preload() } })
     }
 
     bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
