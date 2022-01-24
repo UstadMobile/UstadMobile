@@ -724,6 +724,24 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
+    val filedDropClass by css {
+        backgroundColor = Color("transparent !important")
+        width = LinearDimension("90% !important")
+        minHeight = LinearDimension("70vh !important")
+        border = "10px dashed ${theme.palette.action.selected} !important"
+        marginTop = LinearDimension("5% !important")
+    }
+
+    val dropZoneIconClass by css {
+        marginTop = 15.pct
+        width = LinearDimension("250px !important")
+        height = LinearDimension("250px !important")
+        color = Color("${theme.palette.action.selected} !important")
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            marginTop = 5.pct
+        }
+    }
+
     override val di: DI
         get() = ReduxAppStateManager.getCurrentState().di.instance
 

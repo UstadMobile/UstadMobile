@@ -2,7 +2,13 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.core.contentjob.SupportedContent
 
-interface SelectFileView : UstadView {
+interface SelectFileView : UstadEditView<Any> {
+
+    var acceptedMimeTypes: List<String>
+
+    var noFileSelectedError: String?
+
+    var unSupportedFileError: String?
 
     companion object {
 
