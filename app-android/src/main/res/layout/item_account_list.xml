@@ -4,11 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.UmAccount"/>
+        <import type="com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint"/>
         <import type="android.view.View"/>
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
         <variable
-            name="umaccount"
-            type="UmAccount" />
+            name="session"
+            type="UserSessionWithPersonAndEndpoint" />
 
         <variable
             name="activeAccount"
@@ -31,14 +32,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="@dimen/dimen_16dp"
-        android:id="@+id/item_account_list"
-        android:onClick="@{() -> presenter.handleClickAccount(umaccount)}"
-        app:backgroundIfAnimationEnabled="@{@drawable/bg_listitem}">
+        android:id="@+id/item_account_list">
 
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/person_profile_icon"
             android:src="@drawable/ic_account_circle_black_24dp"
+            android:tint="?colorOnIconTint"
+            app:imageForeignKey="@{session.person.personUid}"
+            app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
+            app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
+            app:imageForeignKeyEndpoint="@{session.endpoint.url}"
             android:layout_width="@dimen/dimen_48dp"
             android:layout_height="@dimen/dimen_48dp"
             android:layout_margin="@dimen/dimen_16dp"
@@ -50,6 +54,7 @@
         <com.google.android.material.button.MaterialButton
             android:visibility="@{activeAccount ? View.GONE: View.VISIBLE}"
             android:id="@+id/account_delete_icon"
+            android:onClick="@{()->presenter.handleClickDeleteSession(session)}"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginEnd="@dimen/dimen_20dp"
@@ -57,20 +62,19 @@
             app:icon="@drawable/ic_delete_black_24dp"
             app:iconTint="?colorOnIconTint"
             style="@style/UmTheme.Widget.TextButton.IconOnly"
-            android:onClick="@{()->presenter.handleClickDeleteAccount(umaccount)}"
             app:layout_constraintStart_toEndOf="@id/person_full_name"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/person_full_name"
-            android:text="@{umaccount.firstName +` `+umaccount.lastName}"
+            android:text="@{session.person.firstNames + ` ` + session.person.lastName}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/person_profile_icon"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginStart="@dimen/dimen_64dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginBottom="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_60dp"
@@ -99,7 +103,7 @@
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             android:id="@+id/person_username"
             android:layout_width="0dp"
-            android:text="@{umaccount.username}"
+            android:text="@{session.person.username}"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@+id/account_user_icon"
             app:layout_constraintTop_toBottomOf="@+id/person_full_name"
@@ -123,7 +127,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimen_8dp"
             android:lines="1"
-            android:text="@{umaccount.endpointUrl}"
+            android:text="@{session.endpoint.url}"
             app:layout_constraintHorizontal_bias="0.0"
             android:layout_marginStart="@dimen/dimen_10dp"
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
@@ -143,7 +147,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/account_profile"
             style="@style/UmTheme.Widget.OutlinedButton"
-            android:onClick="@{() -> presenter.handleClickProfile(umaccount.personUid)}"
+            android:onClick="@{() -> presenter.handleClickProfile(session.person.personUid)}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimen_16dp"
@@ -158,7 +162,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/account_logout"
             style="@style/UmTheme.Widget.OutlinedButton"
-            android:onClick="@{() -> presenter.handleClickLogout(umaccount)}"
+            android:onClick="@{() -> presenter.handleClickLogout(session)}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimen_16dp"

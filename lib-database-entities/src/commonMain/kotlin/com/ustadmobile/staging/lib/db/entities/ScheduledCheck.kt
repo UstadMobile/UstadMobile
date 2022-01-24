@@ -5,8 +5,6 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 
 
-//@SyncableEntity(indices = [UmIndex(name = "clazzUid_type_index", value = ["scClazzLogUid", " +""checkType"])])
-@SyncableEntity(tableId = 173)
 @Entity
 class ScheduledCheck() {
 

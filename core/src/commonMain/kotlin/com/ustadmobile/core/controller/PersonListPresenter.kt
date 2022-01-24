@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_EXCLUDE_PERSONUIDS_LIST
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
+import com.ustadmobile.core.view.ScopedGrantEditView.Companion.ARG_GRANT_TO_GROUPUID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -66,12 +67,21 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
                 //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
                 // PersonList, PersonEdit, EnrolmentEdit
-                if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
-                    systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
-                            arguments.plus(UstadView.ARG_PERSON_UID to entry.personUid.toString()),
-                            context)
-                }else{
-                    view.finishWithResult(listOf(entry))
+                // ScopedGrant: Pass on the person's individual groupUid
+                val goToViewOnComplete = arguments[UstadView.ARG_GO_TO_COMPLETE]
+
+                when {
+                    goToViewOnComplete == ScopedGrantEditView.VIEW_NAME -> {
+                        val args = arguments + (ARG_GRANT_TO_GROUPUID to entry.personGroupUid.toString())
+                        systemImpl.go(goToViewOnComplete, args, context)
+                    }
+                    goToViewOnComplete != null -> {
+                        val args = arguments + (UstadView.ARG_PERSON_UID to entry.personUid.toString())
+                        systemImpl.go(goToViewOnComplete, args, context)
+                    }
+                    else -> {
+                        view.finishWithResult(listOf(entry))
+                    }
                 }
             }
             ListViewMode.BROWSER -> systemImpl.go(PersonDetailView.VIEW_NAME,

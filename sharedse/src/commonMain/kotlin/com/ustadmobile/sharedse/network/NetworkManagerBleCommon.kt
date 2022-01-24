@@ -1,14 +1,10 @@
 package com.ustadmobile.sharedse.network
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
-import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -65,35 +61,10 @@ abstract class NetworkManagerBleCommon(
 
     private val knownPeerNodes = mutableMapOf<String, Long>()
 
-    private lateinit var nextDownloadItemsLiveData: DoorLiveData<List<DownloadJobItem>>
-
     protected val _connectivityStatus = DoorMutableLiveData<ConnectivityStatus>()
 
     val connectivityStatus: DoorLiveData<ConnectivityStatus>
         get() = _connectivityStatus
-
-    //Was previously internal: this does not compile since Kotlin 1.3.61
-    class DownloadQueueLocalAvailabilityObserver(val localAvailabilityManager: LocalAvailabilityManager): DoorObserver<List<DownloadJobItem>> {
-
-        var currentRequest: AvailabilityMonitorRequest? = null
-
-        override fun onChanged(t: List<DownloadJobItem>) {
-            val prevRequest = currentRequest
-            if(prevRequest != null)
-                localAvailabilityManager.removeMonitoringRequest(prevRequest)
-
-            val newRequest = if(t.isNotEmpty()){
-                AvailabilityMonitorRequest(t.map { it.djiContainerUid }, {})
-            }else {
-                null
-            }
-
-            currentRequest = newRequest
-            if(newRequest != null) {
-                localAvailabilityManager.addMonitoringRequest(newRequest)
-            }
-        }
-    }
 
     private val nodeTimeoutChecker = GlobalScope.async {
         while(isActive) {
@@ -142,11 +113,6 @@ abstract class NetworkManagerBleCommon(
      * Start web server, advertising and discovery
      */
     open fun onCreate() {
-//        nextDownloadItemsLiveData = umAppDatabase.downloadJobItemDao.findNextDownloadJobItems()
-//        nextDownloadItemsLiveData.observeForever(downloadQueueLocalAvailabilityObserver)
-    }
-
-    protected open fun onDownloadJobItemStarted(downloadJobItem: DownloadJobItem) {
 
     }
 

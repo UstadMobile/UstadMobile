@@ -1,19 +1,17 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.controller.SchoolEditPresenter
-import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
+import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 
 
 interface SchoolEditView: UstadEditView<SchoolWithHolidayCalendar> {
 
-    var schoolClazzes : DoorMutableLiveData<List<Clazz>>?
-    var genderOptions: List<SchoolEditPresenter.GenderTypeMessageIdOption>?
+    var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>?
 
     companion object {
 
-        const val VIEW_NAME = "SchoolEditView"
+        const val VIEW_NAME = "SchoolEdit"
 
     }
 

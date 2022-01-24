@@ -1,11 +1,20 @@
 package com.ustadmobile.core.impl
 
+import com.soywiz.klock.DateTime
+import com.soywiz.klock.years
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.util.ext.requirePostfix
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.door.doorMainDispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.js.JsName
-import kotlin.jvm.JvmOverloads
 
 /**
  * Class has all the shared function across all supported platforms
@@ -37,7 +46,13 @@ abstract class UstadMobileSystemCommon {
             /**
              * If true, then popup include popUpToViewName.
              */
-            val popUpToInclusive: Boolean = false)
+            val popUpToInclusive: Boolean = false) {
+
+        companion object {
+            val Default = UstadGoOptions(null, false)
+        }
+
+    }
 
     /**
      * The last destination that was called via the go method. This is used for testing purposes.
@@ -69,44 +84,75 @@ abstract class UstadMobileSystemCommon {
     @JsName("getAppConfigString")
     abstract fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
 
+    /**
+     * Get the default first destination that the user should be taken to after logging in or
+     * selecting to continue as a guest.
+     */
+    fun getAppConfigDefaultFirstDest(context: Any): String {
+        return getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context)
+            ?: ContentEntryList2View.VIEW_NAME_HOME
+    }
+
+    fun goToDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
+        if(deepLink.contains(LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
+            val endpointUrl = deepLink.substringBefore(LINK_ENDPOINT_VIEWNAME_DIVIDER)
+                .requirePostfix("/")
+            val viewUri = deepLink.substringAfter(LINK_ENDPOINT_VIEWNAME_DIVIDER)
+
+
+            val intentMessage = getString(MessageID.opening_link, context)
+                .replace("%1\$s", deepLink)
+
+            val maxDateOfBirth = if(viewUri.startsWith(ParentalConsentManagementView.VIEW_NAME)) {
+                (DateTime.now() - UstadMobileConstants.ADULT_AGE_THRESHOLD.years).unixMillisLong
+            }else {
+                0L
+            }
+
+            //if there are any accounts that match endpoint url the user wants to work with,
+            // then go to the accountmanager list in picker mode, otherwise go directly to the login
+            // screen for that particular server.
+            GlobalScope.launch(doorMainDispatcher()) {
+                if(accountManager.activeSessionCount(maxDateOfBirth) { it == endpointUrl } > 0) {
+                    val args = mapOf(ARG_NEXT to viewUri,
+                        AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
+                        AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
+                        UstadView.ARG_TITLE to getString(MessageID.select_account, context),
+                        UstadView.ARG_INTENT_MESSAGE to intentMessage,
+                        UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
+                        UstadView.ARG_MAX_DATE_OF_BIRTH to maxDateOfBirth.toString())
+                    go(AccountListView.VIEW_NAME, args, context)
+                }else {
+                    val args = mapOf(ARG_NEXT to viewUri,
+                        ARG_INTENT_MESSAGE to intentMessage,
+                        ARG_SERVER_URL to endpointUrl)
+                    go(Login2View.VIEW_NAME, args, context)
+                }
+
+            }
+        }
+    }
 
     /**
-     * Go to a new view : This is simply a convenience wrapper for go(viewName, args, context):
-     * it will parse the a destination into the viewname and arguments, and then build a hashtable
-     * to pass on.
+     * Go to a new view using a ViewLink in the form of ViewName?arg1=val1&arg2=val2 . This function
+     * will parse the arguments from the query string into a map
      *
      * @param destination Destination name in the form of ViewName?arg1=val1&arg2=val2 etc.
      * @param context System context object
+     * @param ustadGoOptions Go Options to specify popUpTo etc.
      */
-    open fun go(destination: String?, context: Any) {
-        val destinationParsed =
-        if(destination?.contains(LINK_INTENT_FILTER) == true){
-            val destinationIndex : Int? = destination.indexOf("/${LINK_INTENT_FILTER}").plus(10)
-
-            val apiUrl = destination.substring(0, destination.indexOf("/${LINK_INTENT_FILTER}")) + '/'
-
-            var charToAdd = "?"
-            val sansApi = destination.substring(destinationIndex?:0+1?:0)?:""
-            if(sansApi.contains('?') || sansApi.contains('&')){
-                charToAdd = "&"
-            }
-            destination.substring(destinationIndex?:0) +
-                    "${charToAdd}${UstadView.ARG_SERVER_URL}=$apiUrl"
-
-        }else{
-            destination
-        }
-        val destinationQueryPos = destinationParsed!!.indexOf('?')
-        if (destinationQueryPos == -1) {
-            go(destinationParsed, mapOf(), context)
-        } else {
-            go(destinationParsed.substring(0, destinationQueryPos), UMFileUtil.parseURLQueryString(
-                    destinationParsed), context)
+    open fun goToViewLink(destination: String, context: Any, ustadGoOptions: UstadGoOptions = UstadGoOptions()) {
+        val destinationQueryPos = destination.indexOf('?')
+        if(destinationQueryPos == -1) {
+            go(destination, mapOf(), context, ustadGoOptions)
+        }else {
+            val destArgs = UMFileUtil.parseURLQueryString(destination)
+            go(destination.substring(0, destinationQueryPos), destArgs, context, ustadGoOptions)
         }
     }
 
     open fun go(viewName: String, args: Map<String, String?>, context: Any) {
-        go(viewName, args, context, 0, UstadGoOptions("", false))
+        go(viewName, args, context, 0, UstadGoOptions(null, false))
     }
 
     open fun go(viewName: String, args: Map<String, String?>, context: Any, ustadGoOptions: UstadGoOptions) {
@@ -166,6 +212,12 @@ abstract class UstadMobileSystemCommon {
     open fun getAppPref(key: String, defaultVal: String, context: Any): String {
         val valFound = getAppPref(key, context)
         return valFound ?: defaultVal
+    }
+
+    open fun getOrPutAppPref(key: String, context: Any, block: () -> String): String {
+        return getAppPref(key, context) ?: block().also { newValue ->
+            setAppPref(key, newValue, context)
+        }
     }
 
     /**
@@ -229,9 +281,6 @@ abstract class UstadMobileSystemCommon {
         return listOf(LOCALE_USE_SYSTEM to getString(MessageID.use_device_language, context)) +
                 availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
     }
-
-    @JsName("getStorageDirAsync")
-    abstract suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
 
     /**
      * Return the mime type for the given extension
@@ -373,12 +422,23 @@ abstract class UstadMobileSystemCommon {
 
         const val LINK_INTENT_FILTER = "umclient"
 
+        /**
+         * The web version of the application will always live under a folder called /umapp/. The
+         * viewname will start with a # (as it uses the REACT hash router). Therefor this string is
+         * used as a divider between the endpoint URL and the view name and its view arguments
+         */
+        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/index.html#"
+
         const val SUBDIR_SITEDATA_NAME = "sitedata"
 
         const val SUBDIR_CONTAINER_NAME = "container"
 
         const val SUBDIR_ATTACHMENTS_NAME = "attachments"
 
+        /**
+         * The RedirectFragment will remove itself from the view stack.
+         */
+        const val PREF_ROOT_VIEWNAME = "rootViewName"
 
     }
 }

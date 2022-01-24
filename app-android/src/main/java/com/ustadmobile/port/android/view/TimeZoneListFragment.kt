@@ -58,7 +58,7 @@ class TimeZoneListFragment : UstadBaseFragment() , TimeZoneListView, OnSearchSub
         mRecyclerAdapter?.submitList(allTimeZones)
 
         mPresenter = TimeZoneListPresenter(requireContext(), arguments.toStringMap(),
-            this, di)
+            this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return mDataBinding?.root
@@ -115,7 +115,7 @@ class TimeZoneListFragment : UstadBaseFragment() , TimeZoneListView, OnSearchSub
             }
         }
 
-        const val RESULT_TIMEZONE_KEY = "timezone"
+
 
     }
 }

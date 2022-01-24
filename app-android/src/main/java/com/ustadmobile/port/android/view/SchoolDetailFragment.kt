@@ -1,48 +1,25 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import androidx.navigation.fragment.findNavController
-import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolDetailBinding
 import com.ustadmobile.core.controller.SchoolDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
-import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
-
-
-class CustomViewNameListFragmentPageAdapter(fm: FragmentManager, behavior: Int,
-                val vl: List<String>, viewNameToFragmentClass: Map<String, Class<out Fragment>>,
-                viewNameToPageTitle: Map<String, String>, val f: Fragment)
-    : ViewNameListFragmentPagerAdapter(fm, behavior, vl, viewNameToFragmentClass, viewNameToPageTitle ) {
-
-    override fun getPageTitle(position: Int): CharSequence? {
-        when (position) {
-            0 -> {
-                return f.getText(R.string.overview).toString()
-            }
-            1 -> {
-                return f.getText(R.string.staff).toString()
-            }
-            2 -> {
-                return f.getText(R.string.students).toString()
-            }
-        }
-        return ""
-    }
-}
 
 class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
@@ -50,10 +27,13 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
     private var mPresenter: SchoolDetailPresenter? = null
 
-    private var mPager: ViewPager? = null
+    private var mPager: ViewPager2? = null
 
+    private var mTabs: TabLayout? = null
 
-    private var mPagerAdapter: CustomViewNameListFragmentPageAdapter? = null
+    private var mediator: TabLayoutMediator? = null
+
+    private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -67,9 +47,10 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
             rootView = it.root
         }
         mPager = mBinding?.fragmentSchoolDetailViewpager
+        mTabs = mBinding?.fragmentSchoolTabsFixed?.tabs
 
         mPresenter = SchoolDetailPresenter(requireContext(),arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         return rootView
     }
@@ -82,45 +63,60 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
         val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
+        val commonArgs = mapOf(UstadView.ARG_NAV_CHILD to true.toString())
 
         val tabs = listOf(
-                SchoolDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
-                        entityUidValue
-                ,
-                SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_FILTER_BY_ROLE}=" +
-                        Role.ROLE_SCHOOL_STAFF_UID +
-                        "&${UstadView.ARG_FILTER_BY_SCHOOLUID}=" + entityUidValue
-                ,
-                SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_FILTER_BY_ROLE}=" +
-                        Role.ROLE_SCHOOL_STUDENT_UID +
-                        "&${UstadView.ARG_FILTER_BY_SCHOOLUID}=" + entityUidValue
-        )
-        val viewNameToTitle = mapOf(
-                SchoolDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
-                SchoolMemberListView.VIEW_NAME to getText(R.string.students).toString(),
-                SchoolMemberListView.VIEW_NAME to getText(R.string.staff).toString()
+            SchoolDetailOverviewView.VIEW_NAME.appendQueryArgs(
+                commonArgs + mapOf(UstadView.ARG_ENTITY_UID to entityUidValue)
+            ),
+            SchoolMemberListView.VIEW_NAME.appendQueryArgs(
+                commonArgs + mapOf(
+                    UstadView.ARG_FILTER_BY_ROLE to Role.ROLE_SCHOOL_STAFF_UID.toString(),
+                    UstadView.ARG_FILTER_BY_SCHOOLUID to entityUidValue)
+            ),
+            SchoolMemberListView.VIEW_NAME.appendQueryArgs(
+                commonArgs + mapOf(
+                    UstadView.ARG_FILTER_BY_ROLE to Role.ROLE_SCHOOL_STUDENT_UID.toString(),
+                    UstadView.ARG_FILTER_BY_SCHOOLUID to entityUidValue)
+            ),
         )
 
-        mPagerAdapter = CustomViewNameListFragmentPageAdapter(childFragmentManager,
-                BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
-                VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle, this
-        )
+        mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager, lifecycle,
+                tabs, VIEW_NAME_TO_FRAGMENT_CLASS)
+        mPager?.adapter = mPagerAdapter
 
-        Handler().post {
-            mPager?.adapter = mPagerAdapter
-            mBinding?.root?.tabs?.setupWithViewPager(mPager)
+        val pager = mPager ?: return
+        val tabList = mTabs ?: return
 
+        mediator = TabLayoutMediator(tabList, pager) { tab, position ->
+            tab.text = when (position) {
+                0 -> {
+                    getText(R.string.overview).toString()
+                }
+                1 -> {
+                    getText(R.string.staff).toString()
+                }
+                2 -> {
+                    getText(R.string.students).toString()
+                }
+                else -> ""
+            }
         }
+        mediator?.attach()
     }
 
     override var title: String? = null
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mediator?.detach()
+        mediator = null
+        mBinding?.fragmentSchoolDetailViewpager?.adapter = null
         mBinding = null
         mPresenter = null
         entity = null
         mPager = null
+        mTabs = null
         mPagerAdapter = null
     }
 

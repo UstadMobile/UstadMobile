@@ -7,20 +7,23 @@ import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NONE
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = Report.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId as deviceId, ${Report.TABLE_ID} AS tableId FROM 
-        ChangeLog
-        JOIN Report ON ChangeLog.chTableId = ${Report.TABLE_ID} AND ChangeLog.chEntityPk = Report.reportUid
-        JOIN DeviceSession ON Report.reportOwnerUid = DeviceSession.dsPersonUid"""],
-    syncFindAllQuery = """
-        SELECT Report.* FROM
-        Report
-        JOIN DeviceSession ON Report.reportOwnerUid = DeviceSession.dsPersonUid
-        WHERE DeviceSession.dsDeviceId = :clientId
-    """
-)
 @Serializable
+@ReplicateEntity(tableId = Report.TABLE_ID, tracker = ReportReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "report_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO Report(reportUid, reportOwnerUid, xAxis, reportDateRangeSelection, fromDate, fromRelTo, fromRelOffSet, fromRelUnit, toDate, toRelTo, toRelOffSet, toRelUnit, reportTitle, reportDescription, reportSeries, reportInactive, isTemplate, priority, reportTitleId, reportDescId, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy, reportLct) 
+         VALUES (NEW.reportUid, NEW.reportOwnerUid, NEW.xAxis, NEW.reportDateRangeSelection, NEW.fromDate, NEW.fromRelTo, NEW.fromRelOffSet, NEW.fromRelUnit, NEW.toDate, NEW.toRelTo, NEW.toRelOffSet, NEW.toRelUnit, NEW.reportTitle, NEW.reportDescription, NEW.reportSeries, NEW.reportInactive, NEW.isTemplate, NEW.priority, NEW.reportTitleId, NEW.reportDescId, NEW.reportMasterChangeSeqNum, NEW.reportLocalChangeSeqNum, NEW.reportLastChangedBy, NEW.reportLct) 
+         /*psql ON CONFLICT (reportUid) DO UPDATE 
+         SET reportOwnerUid = EXCLUDED.reportOwnerUid, xAxis = EXCLUDED.xAxis, reportDateRangeSelection = EXCLUDED.reportDateRangeSelection, fromDate = EXCLUDED.fromDate, fromRelTo = EXCLUDED.fromRelTo, fromRelOffSet = EXCLUDED.fromRelOffSet, fromRelUnit = EXCLUDED.fromRelUnit, toDate = EXCLUDED.toDate, toRelTo = EXCLUDED.toRelTo, toRelOffSet = EXCLUDED.toRelOffSet, toRelUnit = EXCLUDED.toRelUnit, reportTitle = EXCLUDED.reportTitle, reportDescription = EXCLUDED.reportDescription, reportSeries = EXCLUDED.reportSeries, reportInactive = EXCLUDED.reportInactive, isTemplate = EXCLUDED.isTemplate, priority = EXCLUDED.priority, reportTitleId = EXCLUDED.reportTitleId, reportDescId = EXCLUDED.reportDescId, reportMasterChangeSeqNum = EXCLUDED.reportMasterChangeSeqNum, reportLocalChangeSeqNum = EXCLUDED.reportLocalChangeSeqNum, reportLastChangedBy = EXCLUDED.reportLastChangedBy, reportLct = EXCLUDED.reportLct
+         */"""
+     ]
+ )
+))
 open class Report {
 
     @PrimaryKey(autoGenerate = true)
@@ -60,6 +63,10 @@ open class Report {
 
     var priority: Int = 1
 
+    var reportTitleId: Int = 0
+
+    var reportDescId: Int = 0
+
     @MasterChangeSeqNum
     var reportMasterChangeSeqNum: Long = 0
 
@@ -70,6 +77,7 @@ open class Report {
     var reportLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var reportLct: Long = 0
 
     companion object {
@@ -108,23 +116,38 @@ open class Report {
 
         const val TEMPLATE_BLANK_REPORT_UID = 100000L
 
-        private const val TEMPLATE_CONTENT_USAGE_OVER_TIME_UID = 100001L
+        const val TEMPLATE_CONTENT_USAGE_OVER_TIME_UID = 100001L
 
-        private const val TEMPLATE_UNIQUE_CONTENT_USERS_UID = 100002L
+        const val TEMPLATE_UNIQUE_CONTENT_USERS_UID = 100002L
 
-        private const val TEMPLATE_ATTENDANCE_OVER_TIME_BY_CLASS_UID = 100003L
+        const val TEMPLATE_ATTENDANCE_OVER_TIME_BY_CLASS_UID = 100003L
 
-        private const val TEMPLATE_CONTENT_USAGE_BY_CLASS_UID = 100004L
+        const val TEMPLATE_CONTENT_USAGE_BY_CLASS_UID = 100004L
 
-        private const val TEMPLATE_CONTENT_COMPLETION_UID = 100005L
+        const val TEMPLATE_CONTENT_COMPLETION_UID = 100005L
+
+        const val BLANK_REPORT = 1
+        const val BLANK_REPORT_DESC = 2
+        const val CONTENT_USAGE_OVER_TIME = 3
+        const val CONTENT_USAGE_OVER_TIME_DESC = 4
+        const val UNIQUE_CONTENT_USERS_OVER_TIME = 5
+        const val UNIQUE_CONTENT_USERS_OVER_TIME_DESC = 6
+        const val ATTENDANCE_OVER_TIME_BY_CLASS = 7
+        const val ATTENDANCE_OVER_TIME_BY_CLASS_DESC = 8
+        const val CONTENT_USAGE_BY_CLASS = 9
+        const val CONTENT_USAGE_BY_CLASS_DESC = 10
+        const val CONTENT_COMPLETION = 11
+        const val CONTENT_COMPLETION_DESC = 12
 
         val FIXED_TEMPLATES = listOf(
                 Report().apply {
                     reportUid = TEMPLATE_BLANK_REPORT_UID
                     reportTitle = "Blank report"
-                    reportDescription = "Start from scratch"
+                    reportDescription = "Start "
                     isTemplate = true
                     priority = 0
+                    reportTitleId = BLANK_REPORT
+                    reportDescId = BLANK_REPORT_DESC
                     reportSeries = """                
                         [{
                           "reportSeriesUid": 0,
@@ -138,9 +161,11 @@ open class Report {
                 Report().apply {
                     reportUid = TEMPLATE_CONTENT_USAGE_OVER_TIME_UID
                     reportTitle = "Content usage over time"
-                    reportDescription = "Total content usage duration over time (disaggregated by gender)"
+                    reportDescription = "Total content "
                     xAxis = GENDER
                     isTemplate = true
+                    reportTitleId = CONTENT_USAGE_OVER_TIME
+                    reportDescId = CONTENT_USAGE_OVER_TIME_DESC
                     reportSeries = """                
                         [{
                           "reportSeriesUid": 0,
@@ -157,6 +182,8 @@ open class Report {
                     reportDescription = "Number of active users over time"
                     xAxis = MONTH
                     isTemplate = true
+                    reportTitleId = UNIQUE_CONTENT_USERS_OVER_TIME
+                    reportDescId = UNIQUE_CONTENT_USERS_OVER_TIME_DESC
                     reportSeries = """                
                         [{
                          "reportSeriesUid": 0,
@@ -173,6 +200,8 @@ open class Report {
                     reportDescription = "Percentage of students attending over time"
                     isTemplate = true
                     xAxis = CLASS
+                    reportTitleId = ATTENDANCE_OVER_TIME_BY_CLASS
+                    reportDescId = ATTENDANCE_OVER_TIME_BY_CLASS_DESC
                     reportSeries = """                
                         [{
                          "reportSeriesUid": 0,
@@ -189,6 +218,8 @@ open class Report {
                     reportDescription = "Total content usage duration subgroup by class"
                     xAxis = CLASS
                     isTemplate = true
+                    reportTitleId = CONTENT_USAGE_BY_CLASS
+                    reportDescId = CONTENT_USAGE_BY_CLASS_DESC
                     reportSeries = """
                         [{
                             "reportSeriesUid ": 0,
@@ -205,6 +236,8 @@ open class Report {
                     reportDescription = "Number of students who have completed selected content"
                     isTemplate = true
                     xAxis = CONTENT_ENTRY
+                    reportTitleId = CONTENT_COMPLETION
+                    reportDescId = CONTENT_COMPLETION_DESC
                     reportSeries = """
                             [{
                                 "reportSeriesUid": 0,

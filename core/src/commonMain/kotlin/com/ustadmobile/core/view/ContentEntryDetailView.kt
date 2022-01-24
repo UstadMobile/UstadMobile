@@ -8,7 +8,7 @@ interface ContentEntryDetailView : UstadDetailView<ContentEntry>{
 
     companion object {
 
-        const val VIEW_NAME = "ContentEntryDetailView"
+        const val VIEW_NAME = "ContentEntryDetail"
 
     }
 }

@@ -7,12 +7,17 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.ContentEntryAddOptionsView
+import com.toughra.ustadmobile.databinding.FragmentContentEntryAddOptionsBinding
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.controller.ContentEntryAddOptionsListener
+import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
+import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.util.ext.toBundle
+import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
-import kotlinx.android.synthetic.main.fragment_content_entry_add_options.*
-import kotlinx.android.synthetic.main.fragment_content_entry_add_options.view.*
+import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
 /**
  * Fragment class responsible for content creation selection, you can create content by one of the following
@@ -21,45 +26,81 @@ import kotlinx.android.synthetic.main.fragment_content_entry_add_options.view.*
  * CONTENT_CREATE_CONTENT = create content from out content editor
  */
 
-class ContentEntryAddOptionsBottomSheetFragment : BottomSheetDialogFragment(), ContentEntryAddOptionsView, View.OnClickListener {
+class ContentEntryAddOptionsBottomSheetFragment(var listener: ContentEntryAddOptionsListener? = null) : BottomSheetDialogFragment(), ContentEntryAddOptionsView, View.OnClickListener {
 
 
     private var createFolderOptionView: View? = null
 
-    private var importContentOptionView: View? = null
+    private var addLinkOptionView: View? = null
+
+    private var addFolderOptionView: View? = null
+
+    private var addGalleryOptionView: View? = null
+
+    private var addFileOptionView: View? = null
+
+    private lateinit var argsMap: Map<String, String>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_content_entry_add_options, container, false)
-        createFolderOptionView = rootView.content_create_folder
-        importContentOptionView = rootView.content_import_content
-        createFolderOptionView?.setOnClickListener(this)
-        importContentOptionView?.setOnClickListener(this)
-        return rootView
+        argsMap = arguments.toStringMap()
+        val showFolder = argsMap[ARG_SHOW_ADD_FOLDER].toBoolean()
+        return FragmentContentEntryAddOptionsBinding.inflate(inflater, container, false).also {
+            createFolderOptionView = it.contentCreateFolder
+            addLinkOptionView = it.contentAddLink
+            addGalleryOptionView = it.contentAddGallery
+            addFileOptionView = it.contentAddFile
+            addFolderOptionView = it.contentAddFolder
+            it.showFolder = showFolder
+            createFolderOptionView?.setOnClickListener(this)
+            addLinkOptionView?.setOnClickListener(this)
+            addFileOptionView?.setOnClickListener(this)
+            addGalleryOptionView?.setOnClickListener(this)
+            addFolderOptionView?.setOnClickListener(this)
+        }.root
     }
 
     override fun onClick(view: View?) {
-        val isShowing = this.dialog?.isShowing
-       val contentType =  when(view?.id){
-            R.id.content_create_folder -> false
-            R.id.content_import_content -> true
-           else -> -1
-       }
+        when(view?.id){
 
-        findNavController().navigate(R.id.content_entry_edit_dest, UMAndroidUtil.mapToBundle(mapOf(
-                ARG_PARENT_ENTRY_UID to arguments?.get(ARG_PARENT_ENTRY_UID).toString(),
-                ARG_LEAF to contentType.toString())))
-        if(isShowing != null && isShowing){
-            dismiss()
+            R.id.content_add_link -> {
+                listener?.onClickImportLink()
+            }
+            R.id.content_add_gallery ->{
+                listener?.onClickImportGallery()
+            }
+            R.id.content_add_file ->{
+                listener?.onClickImportFile()
+            }
+            R.id.content_add_folder ->{
+                listener?.onClickAddFolder()
+            }
+            R.id.content_create_folder ->{
+                listener?.onClickNewFolder()
+            }
         }
+
+        listener = null
+        dismiss()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        importContentOptionView?.setOnClickListener(null)
+        addLinkOptionView?.setOnClickListener(null)
         createFolderOptionView?.setOnClickListener(null)
-        importContentOptionView = null
+        addGalleryOptionView?.setOnClickListener(null)
+        addFileOptionView?.setOnClickListener(null)
+        addFolderOptionView?.setOnClickListener(null)
+        addLinkOptionView = null
         createFolderOptionView = null
+        addFileOptionView = null
+        addGalleryOptionView = null
+    }
+
+    companion object {
+
+        const val ARG_SHOW_ADD_FOLDER = "showFolder"
+
     }
 
 }

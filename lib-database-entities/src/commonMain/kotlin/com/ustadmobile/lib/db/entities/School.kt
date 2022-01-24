@@ -4,28 +4,31 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT2
+import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 import kotlinx.serialization.Serializable
 
 
 @Entity
-@SyncableEntity(tableId = School.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${School.TABLE_ID} AS tableId FROM
-        ChangeLog 
-        JOIN School ON ChangeLog.chTableId = ${School.TABLE_ID} AND ChangeLog.chEntityPk = School.schoolUid
-        JOIN Person ON Person.personUid IN 
-            (${School.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_SCHOOL_SELECT} ${School.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid"""],
-    syncFindAllQuery = """
-        SELECT School.* FROM
-        School
-        JOIN Person ON Person.personUid IN 
-            (${School.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_SCHOOL_SELECT} ${School.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId
-    """
-)
 @Serializable
+@ReplicateEntity(tableId = School.TABLE_ID, tracker = SchoolReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "school_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO School(schoolUid, schoolName, schoolDesc, schoolAddress, schoolActive, schoolPhoneNumber, schoolGender, schoolHolidayCalendarUid, schoolFeatures, schoolLocationLong, schoolLocationLatt, schoolEmailAddress, schoolTeachersPersonGroupUid, schoolStudentsPersonGroupUid, schoolPendingStudentsPersonGroupUid, schoolCode, schoolMasterChangeSeqNum, schoolLocalChangeSeqNum, schoolLastChangedBy, schoolLct, schoolTimeZone) 
+         VALUES (NEW.schoolUid, NEW.schoolName, NEW.schoolDesc, NEW.schoolAddress, NEW.schoolActive, NEW.schoolPhoneNumber, NEW.schoolGender, NEW.schoolHolidayCalendarUid, NEW.schoolFeatures, NEW.schoolLocationLong, NEW.schoolLocationLatt, NEW.schoolEmailAddress, NEW.schoolTeachersPersonGroupUid, NEW.schoolStudentsPersonGroupUid, NEW.schoolPendingStudentsPersonGroupUid, NEW.schoolCode, NEW.schoolMasterChangeSeqNum, NEW.schoolLocalChangeSeqNum, NEW.schoolLastChangedBy, NEW.schoolLct, NEW.schoolTimeZone) 
+         /*psql ON CONFLICT (schoolUid) DO UPDATE 
+         SET schoolName = EXCLUDED.schoolName, schoolDesc = EXCLUDED.schoolDesc, schoolAddress = EXCLUDED.schoolAddress, schoolActive = EXCLUDED.schoolActive, schoolPhoneNumber = EXCLUDED.schoolPhoneNumber, schoolGender = EXCLUDED.schoolGender, schoolHolidayCalendarUid = EXCLUDED.schoolHolidayCalendarUid, schoolFeatures = EXCLUDED.schoolFeatures, schoolLocationLong = EXCLUDED.schoolLocationLong, schoolLocationLatt = EXCLUDED.schoolLocationLatt, schoolEmailAddress = EXCLUDED.schoolEmailAddress, schoolTeachersPersonGroupUid = EXCLUDED.schoolTeachersPersonGroupUid, schoolStudentsPersonGroupUid = EXCLUDED.schoolStudentsPersonGroupUid, schoolPendingStudentsPersonGroupUid = EXCLUDED.schoolPendingStudentsPersonGroupUid, schoolCode = EXCLUDED.schoolCode, schoolMasterChangeSeqNum = EXCLUDED.schoolMasterChangeSeqNum, schoolLocalChangeSeqNum = EXCLUDED.schoolLocalChangeSeqNum, schoolLastChangedBy = EXCLUDED.schoolLastChangedBy, schoolLct = EXCLUDED.schoolLct, schoolTimeZone = EXCLUDED.schoolTimeZone
+         */"""
+     ]
+ )
+))
 open class School() {
 
     @PrimaryKey(autoGenerate = true)
@@ -75,6 +78,7 @@ open class School() {
     var schoolLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var schoolLct: Long = 0
 
 
@@ -128,21 +132,43 @@ open class School() {
         const val SCHOOL_GENDER_FEMALE : Int = 2
         const val SCHOOL_GENDER_MIXED : Int = 3
 
-
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
-            SELECT DISTINCT Person.PersonUid FROM Person
-            LEFT JOIN PersonGroupMember ON Person.personUid = PersonGroupMember.groupMemberPersonUid
-            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
-            WHERE 
-            CAST(Person.admin AS INTEGER) = 1
-            OR 
-            (EntityRole.ertableId = ${School.TABLE_ID} AND 
-            EntityRole.erEntityUid = School.schoolUid AND
-            (Role.rolePermissions &  
+        const val JOIN_SCOPEDGRANT_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                    AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+                OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                    AND ScopedGrant.sgEntityUid = School.schoolUid))
         """
 
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 = ") > 0)"
+
+        const val JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT1 = """
+            JOIN ScopedGrant
+                 ON $JOIN_SCOPEDGRANT_ON_CLAUSE
+                        AND (SCopedGrant.sgPermissions &
+        """
+
+        const val JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
+                                                     ) > 0
+             JOIN PersonGroupMember AS PrsGrpMbr
+                   ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
+              JOIN UserSession
+                   ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
+                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+                      
+        """
+
+        const val JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT1 = """
+            JOIN ScopedGrant 
+                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                        AND (ScopedGrant.sgPermissions &
+                 
+        """
+
+        const val JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT2 = """
+                    ) > 0
+            JOIN School
+                 ON $JOIN_SCOPEDGRANT_ON_CLAUSE
+        """
+
 
     }
 

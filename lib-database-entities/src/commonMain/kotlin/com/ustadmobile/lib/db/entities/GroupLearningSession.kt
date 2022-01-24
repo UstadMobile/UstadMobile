@@ -1,34 +1,30 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = GroupLearningSession.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${GroupLearningSession.TABLE_ID} AS tableId FROM 
-        ChangeLog
-        JOIN GroupLearningSession ON ChangeLog.chTableId = ${GroupLearningSession.TABLE_ID} AND ChangeLog.chEntityPk = GroupLearningSession.groupLearningSessionUid
-        JOIN LearnerGroup ON LearnerGroup.learnerGroupUid = GroupLearningSession.groupLearningSessionLearnerGroupUid
-        JOIN LearnerGroupMember ON LearnerGroupMember.learnerGroupMemberLgUid = LearnerGroup.learnerGroupUid
-        JOIN Person ON Person.personUid = LearnerGroupMember.learnerGroupMemberPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
-    syncFindAllQuery = """
-        SELECT GroupLearningSession.* FROM 
-        GroupLearningSession
-        JOIN LearnerGroup ON LearnerGroup.learnerGroupUid = GroupLearningSession.groupLearningSessionLearnerGroupUid
-        JOIN LearnerGroupMember ON LearnerGroupMember.learnerGroupMemberLgUid = LearnerGroup.learnerGroupUid
-        JOIN Person ON Person.personUid = LearnerGroupMember.learnerGroupMemberPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId
-    """)
+@ReplicateEntity(tableId = GroupLearningSession.TABLE_ID,
+    tracker = GroupLearningSessionReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "grouplearningsession_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO GroupLearningSession(groupLearningSessionUid, groupLearningSessionContentUid, groupLearningSessionLearnerGroupUid, groupLearningSessionInactive, groupLearningSessionMCSN, groupLearningSessionCSN, groupLearningSessionLCB, groupLearningSessionLct) 
+         VALUES (NEW.groupLearningSessionUid, NEW.groupLearningSessionContentUid, NEW.groupLearningSessionLearnerGroupUid, NEW.groupLearningSessionInactive, NEW.groupLearningSessionMCSN, NEW.groupLearningSessionCSN, NEW.groupLearningSessionLCB, NEW.groupLearningSessionLct) 
+         /*psql ON CONFLICT (groupLearningSessionUid) DO UPDATE 
+         SET groupLearningSessionContentUid = EXCLUDED.groupLearningSessionContentUid, groupLearningSessionLearnerGroupUid = EXCLUDED.groupLearningSessionLearnerGroupUid, groupLearningSessionInactive = EXCLUDED.groupLearningSessionInactive, groupLearningSessionMCSN = EXCLUDED.groupLearningSessionMCSN, groupLearningSessionCSN = EXCLUDED.groupLearningSessionCSN, groupLearningSessionLCB = EXCLUDED.groupLearningSessionLCB, groupLearningSessionLct = EXCLUDED.groupLearningSessionLct
+         */"""
+     ]
+ )
+))
 @Serializable
 class GroupLearningSession {
 
@@ -51,6 +47,7 @@ class GroupLearningSession {
     var groupLearningSessionLCB: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var groupLearningSessionLct: Long = 0
 
 

@@ -9,3 +9,8 @@ fun WebView.loadWebUrl(url: String?) {
         this.loadUrl(url)
     }
 }
+
+@BindingAdapter("htmlData")
+fun WebView.loadHtmlData(htmlData: String?) {
+    loadData(htmlData ?: "<html></html>", "text/html", "UTF-8")
+}

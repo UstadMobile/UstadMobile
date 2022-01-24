@@ -57,7 +57,7 @@ class SiteTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), SiteTer
         }
 
         mPresenter = SiteTermsEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(backStackSavedState)
 
         return rootView
@@ -138,6 +138,7 @@ class SiteTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), SiteTer
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

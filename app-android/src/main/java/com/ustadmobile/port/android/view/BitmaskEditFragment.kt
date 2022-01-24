@@ -56,20 +56,6 @@ class BitmaskEditFragment: UstadEditFragment<LongWrapper>(), BitmaskEditView,
 
     private var mRecyclerView: RecyclerView? = null
 
-    class BitmaskViewHolder(val itemBinding: ItemBitmaskBinding): RecyclerView.ViewHolder(itemBinding.root)
-
-    class BitmaskRecyclerViewAdapter: ListAdapter<BitmaskFlag, BitmaskViewHolder>(DIFFUTIL_BITMASKFLAG) {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BitmaskViewHolder {
-            return BitmaskViewHolder(ItemBitmaskBinding.inflate(LayoutInflater.from(parent.context),
-                parent, false))
-        }
-
-        override fun onBindViewHolder(holder: BitmaskViewHolder, position: Int) {
-            holder.itemBinding.bitmaskFlag = getItem(position)
-        }
-    }
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
@@ -79,7 +65,7 @@ class BitmaskEditFragment: UstadEditFragment<LongWrapper>(), BitmaskEditView,
         }
 
         mPresenter = BitmaskEditPresenter(requireContext(), arguments.toStringMap(), this,
-                 di, viewLifecycleOwner)
+                 di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         mRecyclerViewAdapter = BitmaskRecyclerViewAdapter()
@@ -104,19 +90,10 @@ class BitmaskEditFragment: UstadEditFragment<LongWrapper>(), BitmaskEditView,
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }
 
-    companion object {
-        val DIFFUTIL_BITMASKFLAG = object: DiffUtil.ItemCallback<BitmaskFlag>() {
-            override fun areItemsTheSame(oldItem: BitmaskFlag, newItem: BitmaskFlag): Boolean {
-                return oldItem.flagVal == newItem.flagVal
-            }
 
-            override fun areContentsTheSame(oldItem: BitmaskFlag, newItem: BitmaskFlag): Boolean {
-                return oldItem == newItem
-            }
-        }
-    }
 }

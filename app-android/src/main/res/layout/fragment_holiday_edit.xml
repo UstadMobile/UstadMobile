@@ -18,6 +18,13 @@
             name="fieldsEnabled"
             type="boolean" />
 
+        <variable
+            name="timeZoneId"
+            type="String" />
+
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -72,7 +79,10 @@
                     app:runOnClickWhenFocused="@{true}"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={holiday.holStartTime}" />
+                    app:dateTimeInMillis="@={holiday.holStartTime}"
+                    app:timeZoneId="@{timeZoneId}"
+                    app:dateTimeInMillisMode="@{dateTimeMode}"
+                    />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -93,7 +103,9 @@
                     app:runOnClickWhenFocused="@{true}"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={holiday.holEndTime}" />
+                    app:dateTimeInMillis="@={holiday.holEndTime}"
+                    app:timeZoneId="@{timeZoneId}"
+                    app:dateTimeInMillisMode="@{dateTimeMode}" />
 
             </com.google.android.material.textfield.TextInputLayout>
 

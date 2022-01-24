@@ -6,25 +6,23 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = LearnerGroupMember.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${LearnerGroupMember.TABLE_ID} AS tableId FROM 
-        ChangeLog
-        JOIN LearnerGroupMember ON ChangeLog.chTableId = ${LearnerGroupMember.TABLE_ID} AND ChangeLog.chEntityPk = LearnerGroupMember.learnerGroupMemberUid
-        JOIN Person ON Person.personUid = LearnerGroupMember.learnerGroupMemberPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
-    syncFindAllQuery = """
-        SELECT LearnerGroupMember.* FROM 
-        LearnerGroupMember
-        JOIN Person ON Person.personUid = LearnerGroupMember.learnerGroupMemberPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId
-    """)
+@ReplicateEntity(tableId = LearnerGroupMember.TABLE_ID, tracker = LearnerGroupMemberReplicate::class)
 @Serializable
+@Triggers(arrayOf(
+ Trigger(
+     name = "learnergroupmember_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO LearnerGroupMember(learnerGroupMemberUid, learnerGroupMemberPersonUid, learnerGroupMemberLgUid, learnerGroupMemberRole, learnerGroupMemberActive, learnerGroupMemberMCSN, learnerGroupMemberCSN, learnerGroupMemberLCB, learnerGroupMemberLct) 
+         VALUES (NEW.learnerGroupMemberUid, NEW.learnerGroupMemberPersonUid, NEW.learnerGroupMemberLgUid, NEW.learnerGroupMemberRole, NEW.learnerGroupMemberActive, NEW.learnerGroupMemberMCSN, NEW.learnerGroupMemberCSN, NEW.learnerGroupMemberLCB, NEW.learnerGroupMemberLct) 
+         /*psql ON CONFLICT (learnerGroupMemberUid) DO UPDATE 
+         SET learnerGroupMemberPersonUid = EXCLUDED.learnerGroupMemberPersonUid, learnerGroupMemberLgUid = EXCLUDED.learnerGroupMemberLgUid, learnerGroupMemberRole = EXCLUDED.learnerGroupMemberRole, learnerGroupMemberActive = EXCLUDED.learnerGroupMemberActive, learnerGroupMemberMCSN = EXCLUDED.learnerGroupMemberMCSN, learnerGroupMemberCSN = EXCLUDED.learnerGroupMemberCSN, learnerGroupMemberLCB = EXCLUDED.learnerGroupMemberLCB, learnerGroupMemberLct = EXCLUDED.learnerGroupMemberLct
+         */"""
+     ]
+ )
+))
 open class LearnerGroupMember {
 
     @PrimaryKey(autoGenerate = true)
@@ -48,6 +46,7 @@ open class LearnerGroupMember {
     var learnerGroupMemberLCB: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var learnerGroupMemberLct: Long = 0
 
     companion object {

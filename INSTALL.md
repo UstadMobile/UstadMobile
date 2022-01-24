@@ -17,8 +17,9 @@ $ mkdir /home/ustad/server
 $ cp /my/Download/ustad-server-all.jar /home/ustad/ustad-server-all.jar
 
 # Install java (on Ubuntu)
-$ apt-get install openjdk-8-jre
+$ apt-get install openjdk-8-jre ffmpeg
 ```
+Note: FFMPEG is optional, but is recommended. It is used by the server to compress video.
 
 ## Install HTTPS Certificate (recommended)
 
@@ -71,6 +72,10 @@ ktor {
         # instances can run using the same server.
         dbmode = singleton
         datadir = data
+
+        # The app download link for Android users. Users will be redirected here if they select
+        # to download the app
+        androidDownloadHref = "https://play.google.com/store/apps/details?id=com.toughra.ustadmobile"
     }
 
     database {
@@ -133,6 +138,20 @@ SSLProxyEngine On
 TimeOut 600
 ProxyTimeout 600
 RequestReadTimeout body=10,MinRate=1000
+```
+
+HTTP2 requires Apache mpm-event and will not work with mpm-prefork and the normal vanilla php.
+The FastCGI php version must be used instead if PHP is required.
+
+```
+a2dismod mpm_prefork
+a2enmod mpm_event
+
+#If PHP is also required on the same Apache server:
+apt-get install php7.4-fpm
+a2enmod proxy_fcgi setenvif
+a2enconf php7.4-fpm
+a2dismod php7.4
 ```
 
 ## Connect using the Ustad app

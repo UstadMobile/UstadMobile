@@ -227,7 +227,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         reportRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = ReportDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         chartAdapter?.presenter = mPresenter
 

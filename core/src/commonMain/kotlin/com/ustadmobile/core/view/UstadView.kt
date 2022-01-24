@@ -96,13 +96,13 @@ interface UstadView {
 
         const val ARG_FILTER_BY_PERMISSION = "filterByPermission"
 
-        const val ARG_FILTER_BY_CLAZZUID = "filterByClazzUid"
+        const val ARG_CLAZZUID = "clazzUid"
 
         const val ARG_FILTER_BY_PERSONGROUPUID = "filterByPersonGroupUid"
 
         const val ARG_FILTER_BY_ENROLMENT_ROLE = "filterByEnrolmentRole"
 
-        const val ARG_CLAZZWORK_UID = "clazzworkUid"
+        const val ARG_CLAZZ_ASSIGNMENT_UID = "clazzAssignmentUid"
 
         const val ARG_PERSON_UID = "personUid"
 
@@ -112,7 +112,7 @@ interface UstadView {
 
         const val ARG_SERVER_URL = "serverUrl"
 
-        const val ARG_INTENT = "argIntent"
+        const val ARG_DEEPLINK = "argIntent"
 
         const val ARG_SNACK_MESSAGE = "snack_message"
 
@@ -123,6 +123,8 @@ interface UstadView {
         const val ARG_ENTITY_NAME = "argEntityName"
 
         const val CURRENT_DEST = ""
+
+        const val ROOT_DEST = "root"
 
         /**
          * if after selecting from a list, need to open an edit page
@@ -157,7 +159,44 @@ interface UstadView {
          */
         const val ARG_RESULT_DEST_ID = "result_dest"
 
+        /**
+         * When navigating from one screen to another for purposes of returning a result,
+         * this specifies the viewname to which the result should be returned.
+         */
+        const val ARG_RESULT_DEST_VIEWNAME = "result_viewname"
+
         const val ARG_REGISTRATION_ALLOWED = "registration_allowed"
+
+        /**
+         * When navigating from one screen to another for purposes of returning a result,
+         * this specifies the key name in the savedstate of the viewname into which the
+         * result will be saved as JSON.
+         */
+        const val ARG_RESULT_DEST_KEY = "result_key"
+
+
+        /**
+         * The intent message to display to the user when they open the Login or Account List screen.
+         * This tells the user what they are selecting an account for  e.g. opening link, parental
+         * registration approval, etc.
+         */
+        const val ARG_INTENT_MESSAGE = "intMsg"
+
+        const val ARG_TITLE = "title"
+
+        /**
+         * Indicates whether this view is a top level view reached via navigation or a subview (
+         * e.g. a tab). See UstadBaseController.navChild property.
+         */
+        const val ARG_NAV_CHILD = "navChild"
+
+        /**
+         * Used to 'enforce' a minimum age policy for certain screens (e.g. parent - child consent
+         * management). This can be used on AccountList to show only adult accounts (e.g.
+         * date of birth < MAX DATE OF BIRTH), or LoginPresenter where an adult account is required.
+         */
+        const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
+
 
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L

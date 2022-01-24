@@ -42,7 +42,7 @@ class WebChunkFragment : UstadBaseFragment(), WebChunkView, FragmentBackHandler 
         webView?.settings?.mediaPlaybackRequiresUserGesture = false
 
         mPresenter = WebChunkPresenter(this,
-                arguments.toStringMap(), this, di)
+                arguments.toStringMap(), this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return mBinding?.root

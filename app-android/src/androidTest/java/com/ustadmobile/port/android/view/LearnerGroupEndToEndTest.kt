@@ -9,7 +9,7 @@ import androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
-import com.agoda.kakao.common.views.KView
+import io.github.kakaocup.kakao.common.views.KView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -17,13 +17,11 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.DownloadJobItem
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.*
 import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
@@ -53,12 +51,18 @@ class LearnerGroupEndToEndTest : TestCase() {
 
     @Before
     fun setup() {
-        dbRule.insertPersonForActiveUser(Person().apply {
+        val adminPerson = Person().apply {
             admin = true
             firstNames = "Test"
             lastName = "Teacher"
             username = "Ms Teach"
-        })
+        }
+        dbRule.insertPersonAndStartSession(adminPerson)
+
+        runBlocking {
+            dbRule.repo.grantScopedPermission(adminPerson, Role.ALL_PERMISSIONS,
+                ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+        }
 
         Person().apply {
             firstNames = "New"
@@ -83,15 +87,14 @@ class LearnerGroupEndToEndTest : TestCase() {
             dbRule.repo.addEntriesToContainerFromZipResource(container.containerUid, this::class.java,
                     "/com/ustadmobile/port/android/view/tincan-group.zip",
                     ContainerAddOptions(temporaryFolder.newFolder().toDoorUri()))
-        }
 
-        DownloadJobItem().apply {
-            djiContentEntryUid = 1
-            djiContainerUid = container.containerUid
-            djiStatus = JobStatus.COMPLETE
-            djiUid = dbRule.db.downloadJobItemDao.insert(this).toInt()
+            ContentJobItem().apply {
+                cjiContentEntryUid = 1
+                cjiContainerUid = container.containerUid
+                cjiRecursiveStatus = JobStatus.COMPLETE
+                cjiUid = dbRule.db.contentJobItemDao.insertJobItem(this)
+            }
         }
-
     }
 
     @AdbScreenRecord("given Downloaded Entry when GroupActivity Clicked then Learner Group Created And Content Viewed As Group")
@@ -137,7 +140,7 @@ class LearnerGroupEndToEndTest : TestCase() {
             PersonListScreen {
                 recycler {
                     childWith<PersonListScreen.Person> {
-                        withDescendant { withId(R.id.item_person_text) }
+                        withDescendant { withText("New Student") }
                     } perform {
                         personName{
                             hasText("New Student")

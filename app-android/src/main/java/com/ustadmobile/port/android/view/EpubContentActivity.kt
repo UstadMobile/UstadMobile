@@ -13,29 +13,34 @@ import androidx.annotation.Keep
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
-import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.coroutineScope
 import androidx.recyclerview.widget.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityEpubContentBinding
 import com.toughra.ustadmobile.databinding.ItemEpubcontentViewBinding
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.controller.EpubContentPresenter
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.port.android.view.ext.adjustHeightToDisplayHeight
 import com.ustadmobile.port.android.view.ext.adjustHeightToWrapContent
 import com.ustadmobile.core.util.ext.dpAsPx
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.port.android.view.ext.scrollToAnchor
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.android.synthetic.main.appbar_material_with_progress.*
-import kotlinx.android.synthetic.main.appbar_material_with_progress.view.*
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.android.closestDI
+import org.kodein.di.android.x.closestDI
+import org.kodein.di.bind
+import org.kodein.di.provider
 
 class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnItemClickListener,
-        TocListView.OnItemClickListener {
+        TocListView.OnItemClickListener, DIAware {
 
     /**
      * Javascript interface that is used as part of the system to manage scrolling to a hash link
@@ -54,6 +59,24 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         }
 
     }
+
+    /**
+     * Override and create a child DI to provide access to the multiplatform
+     * NavController implementation.
+     */
+    override val di by DI.lazy {
+        val closestDi: DI by closestDI(applicationContext)
+        extend(closestDi)
+
+        bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
+            lifecycle.coroutineScope
+        }
+
+        bind<DoorLifecycleOwner>() with provider {
+            this@EpubContentActivity
+        }
+    }
+
 
     private val mScrollDownInterface = ScrollDownJavascriptInterface()
 
@@ -116,16 +139,16 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
     override var progressVisible: Boolean = false
         set(value) {
             field = value
-            mBinding.root.progressBar?.visibility = if(progressVisible) View.VISIBLE else View.GONE
+            mBinding.appbar.progressBar.visibility = if(progressVisible) View.VISIBLE else View.GONE
         }
 
     override var progressValue: Int = 0
         set(value) {
             progressVisible = progressValue != 100
             if (progressValue == -1) {
-                mBinding.root.progressBar?.isIndeterminate = true
+                mBinding.appbar.progressBar.isIndeterminate = true
             } else {
-                mBinding.root.progressBar?.progress = value
+                mBinding.appbar.progressBar.progress = value
             }
             field = value
         }
@@ -255,7 +278,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
                     parent, false)
 
             if (Build.VERSION.SDK_INT >= 17) {
-                mBinding.epubContentview.settings?.mediaPlaybackRequiresUserGesture = false
+                mBinding.epubContentview.settings.mediaPlaybackRequiresUserGesture = false
             }
 
             mBinding.epubContentview.settings.javaScriptEnabled = true
@@ -410,7 +433,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         mSavedInstanceState = savedInstanceState
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_epub_content)
 
-        setSupportActionBar(mBinding.root.toolbar)
+        setSupportActionBar(mBinding.appbar.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mContentPagerAdapter = EpubContentPagerAdapter(mScrollDownInterface)

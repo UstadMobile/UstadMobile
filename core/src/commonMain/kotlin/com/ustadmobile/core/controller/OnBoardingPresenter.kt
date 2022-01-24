@@ -3,12 +3,11 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LOCALE_USE_SYSTEM
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
-import com.ustadmobile.core.view.OnBoardingView.Companion.PREF_TAG
 import org.kodein.di.DI
 import org.kodein.di.instance
 
 class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: OnBoardingView, di: DI) :
-        UstadBaseController<OnBoardingView>(context, arguments, view, di) {
+        UstadBaseController<OnBoardingView>(context, arguments, view, di, activeSessionRequired = false) {
 
     private val impl: UstadMobileSystemImpl by instance()
 

@@ -4,22 +4,28 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
-import java.io.File
+import org.kodein.di.DI
+import org.kodein.di.android.di
+import org.kodein.di.direct
+import org.kodein.di.instance
 
-class StorageOptionsAutocompleteTextView: DropDownListAutoCompleteTextView<UMStorageDir> {
+class StorageOptionsAutocompleteTextView: DropDownListAutoCompleteTextView<ContainerStorageDir> {
 
-    private val messageIdDropdownAdapter = object: DropDownListAutoCompleteAdapter<UMStorageDir> {
+    private val di: DI by di(context)
 
-        override fun getId(item: UMStorageDir): Long {return 0}
+    private val messageIdDropdownAdapter = object: DropDownListAutoCompleteAdapter<ContainerStorageDir> {
+
+        override fun getId(item: ContainerStorageDir): Long {return 0}
 
         @SuppressLint("UsableSpace")
-        override fun getText(item: UMStorageDir): String {
-            return String.format(UstadMobileSystemImpl.instance.getString(
+        override fun getText(item: ContainerStorageDir): String {
+            val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+            return String.format(systemImpl.getString(
                     MessageID.download_storage_option_device, context as Any), item.name,
-                    UMFileUtil.formatFileSize(File(item.dirURI).usableSpace))
+                    UMFileUtil.formatFileSize(item.usableSpace))
         }
 
     }

@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.DateRangeView
 import com.ustadmobile.lib.db.entities.DateRangeMoment
 import com.ustadmobile.lib.db.entities.Moment
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 
 
 interface DateRangeFragmentEventHandler {
@@ -36,7 +37,7 @@ class DateRangeFragment: UstadEditFragment<DateRangeMoment>(), DateRangeView,
         }
 
         mPresenter = DateRangePresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
         return rootView
     }
@@ -51,6 +52,8 @@ class DateRangeFragment: UstadEditFragment<DateRangeMoment>(), DateRangeView,
         set(value) {
             field = value
             mBinding?.dateRangeMoment = value
+            mBinding?.dateTimeMode = MODE_START_OF_DAY
+            mBinding?.timeZoneId = "UTC"
         }
 
     override var relUnitOptions: List<DateRangePresenter.RelUnitMessageIdOption>? = null
@@ -88,6 +91,7 @@ class DateRangeFragment: UstadEditFragment<DateRangeMoment>(), DateRangeView,
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

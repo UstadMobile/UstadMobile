@@ -26,19 +26,16 @@ import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.port.android.impl.UserFeedbackException
-import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.android.synthetic.main.activity_main.*
 import org.acra.ACRA
 import org.kodein.di.DIAware
-import org.kodein.di.android.di
+import org.kodein.di.android.closestDI
 import org.kodein.di.instance
 import java.util.*
 
@@ -51,7 +48,7 @@ import java.util.*
 abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotifications,
         UstadView, ShakeDetector.Listener, BleNetworkManagerProvider, DIAware {
 
-    override val di by di()
+    override val di by closestDI()
 
     /**
      * Get the toolbar that's used for the support action bar
@@ -67,17 +64,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
     lateinit var appUpdateManager: AppUpdateManager
 
     private val systemImpl: UstadMobileSystemImpl by instance()
-
-
-    private val mSyncServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            mSyncServiceBound = true
-        }
-
-        override fun onServiceDisconnected(name: ComponentName) {
-            mSyncServiceBound = false
-        }
-    }
 
     private val appUpdatedListener: InstallStateUpdatedListener by lazy {
         object : InstallStateUpdatedListener {
@@ -105,7 +91,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
      * TODO: This should not be done on every onResume of every activity. It could go to HomeActivity
      */
     private fun checkForAppUpdate() {
-        appUpdateManager = AppUpdateManagerFactory.create(this);
+        appUpdateManager = AppUpdateManagerFactory.create(this)
         // Returns an intent object that you use to check for an update.
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
 
@@ -133,9 +119,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
         }
     }
 
-    private var mSyncServiceBound = false
-
-
     private var shakeDetector: ShakeDetector? = null
     private var sensorManager: SensorManager? = null
     internal var feedbackDialogVisible = false
@@ -146,15 +129,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
     override fun onCreate(savedInstanceState: Bundle?) {
         //enable webview debugging
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true);
+            WebView.setWebContentsDebuggingEnabled(true)
         }
         super.onCreate(savedInstanceState)
         localeOnCreate = systemImpl.getDisplayedLocale(this)
-
-
-        val syncServiceIntent = Intent(this, UmAppDatabaseSyncService::class.java)
-        bindService(syncServiceIntent, mSyncServiceConnection,
-                Context.BIND_AUTO_CREATE or Context.BIND_ADJUST_WITH_ACTIVITY)
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         shakeDetector = ShakeDetector(this)
@@ -175,7 +153,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
         val editText = dialogView.findViewById<TextInputEditText>(R.id.feedback_edit_comment)
         builder.setView(dialogView)
         builder.setPositiveButton(R.string.send) { dialogInterface, whichButton ->
-            ACRA.getErrorReporter().handleSilentException(UserFeedbackException(editText.text.toString()))
+            ACRA.errorReporter.handleSilentException(UserFeedbackException(editText.text.toString()))
             Toast.makeText(this, R.string.feedback_thanks, Toast.LENGTH_LONG).show()
             dialogInterface.cancel()
         }
@@ -222,21 +200,19 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
     }
 
     public override fun onDestroy() {
-        if (mSyncServiceBound) {
-            unbindService(mSyncServiceConnection)
-        }
         shakeDetector = null
         sensorManager = null
         super.onDestroy()
     }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
-        val snackBar = Snackbar.make(coordinator_layout, message, Snackbar.LENGTH_LONG)
+        val snackBar = Snackbar.make(findViewById(R.id.coordinator_layout), message, Snackbar.LENGTH_LONG)
         if (actionMessageId != 0) {
             snackBar.setAction(systemImpl.getString(actionMessageId, this)) { action() }
             snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.secondaryColor))
         }
-        snackBar.anchorView = bottom_nav_view
+
+        snackBar.anchorView = findViewById(R.id.bottom_nav_view)
         snackBar.show()
     }
 

@@ -7,12 +7,24 @@ import com.ustadmobile.lib.db.entities.LanguageVariant.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 
-@SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${TABLE_ID} as tableId FROM DeviceSession
-    """])
 @Entity
 @Serializable
+@ReplicateEntity(tableId = TABLE_ID, tracker = LanguageVariantReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "languagevariant_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO LanguageVariant(langVariantUid, langUid, countryCode, name, langVariantLocalChangeSeqNum, langVariantMasterChangeSeqNum, langVariantLastChangedBy, langVariantLct) 
+         VALUES (NEW.langVariantUid, NEW.langUid, NEW.countryCode, NEW.name, NEW.langVariantLocalChangeSeqNum, NEW.langVariantMasterChangeSeqNum, NEW.langVariantLastChangedBy, NEW.langVariantLct) 
+         /*psql ON CONFLICT (langVariantUid) DO UPDATE 
+         SET langUid = EXCLUDED.langUid, countryCode = EXCLUDED.countryCode, name = EXCLUDED.name, langVariantLocalChangeSeqNum = EXCLUDED.langVariantLocalChangeSeqNum, langVariantMasterChangeSeqNum = EXCLUDED.langVariantMasterChangeSeqNum, langVariantLastChangedBy = EXCLUDED.langVariantLastChangedBy, langVariantLct = EXCLUDED.langVariantLct
+         */"""
+     ]
+ )
+))
 class LanguageVariant() {
 
 
@@ -35,6 +47,7 @@ class LanguageVariant() {
     var langVariantLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var langVariantLct: Long = 0
 
     override fun equals(other: Any?): Boolean {

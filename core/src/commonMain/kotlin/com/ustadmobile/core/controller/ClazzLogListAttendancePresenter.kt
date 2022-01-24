@@ -78,12 +78,12 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        clazzUidFilter = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0
+        clazzUidFilter = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
         updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { ClazzLogListSortOption(it, context) }
         view.graphData = graphDisplayData
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
             val hasAttendancePermission = repo.clazzDao.personHasPermissionWithClazz(
                     accountManager.activeAccount.personUid, clazzUidFilter,
                     Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT)
@@ -113,7 +113,7 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     }
 
     private fun updateListOnView() {
-        GlobalScope.launch {
+        presenterScope.launch {
             clazzWithSchool = repo.clazzDao.getClazzWithSchool(clazzUidFilter)
             withContext((doorMainDispatcher())) {
                 clazzTimeZone = clazzWithSchool?.effectiveTimeZone() ?: "UTC"

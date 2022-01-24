@@ -6,7 +6,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.@BaseFileName@View
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.@Entity@Dao
@@ -23,6 +23,8 @@ import kotlinx.coroutines.runBlocking
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.test.waitUntil
 import org.kodein.di.DI
+import com.ustadmobile.core.util.activeDbInstance
+import com.ustadmobile.core.util.activeRepoInstance
 
 
 /**
@@ -68,6 +70,9 @@ class @BaseFileName@PresenterTest {
 
     @Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
+        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
         val presenterArgs = mapOf<String, String>()
 
         val presenter = @BaseFileName@Presenter(context,
@@ -103,6 +108,8 @@ class @BaseFileName@PresenterTest {
             someName = "Spelling Clazz"
             @Entity_VariableName@Uid = clientDbRule.repo.@Entity_VariableName@Dao.insert(this)
         }
+        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.@Entity_VariableName@Uid.toString())
         val presenter = @BaseFileName@Presenter(context,

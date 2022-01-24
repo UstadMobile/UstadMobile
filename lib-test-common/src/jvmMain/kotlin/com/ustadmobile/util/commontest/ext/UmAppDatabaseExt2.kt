@@ -57,7 +57,7 @@ fun UmAppDatabase.assertContainerEqualToOther(containerUid: Long, otherDb: UmApp
     val entriesInThisDb = containerEntryDao.findByContainer(containerUid)
     val entriesInOtherDb = otherDb.containerEntryDao.findByContainer(containerUid)
 
-    if(acceptEmptyContainer != true) {
+    if(!acceptEmptyContainer) {
         Assert.assertNotEquals("Container is not empty", 0,
             entriesInThisDb.size)
     }

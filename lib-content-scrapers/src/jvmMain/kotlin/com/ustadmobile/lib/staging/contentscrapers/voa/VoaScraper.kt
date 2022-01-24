@@ -11,6 +11,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.IOUtils
@@ -87,7 +88,9 @@ class VoaScraper : Runnable {
 
     override fun run() {
         System.gc()
-        val db = UmAppDatabase.getInstance(Any())
+        //replace this with DI
+        lateinit var db: UmAppDatabase
+        //val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         val repository = db //db.getRepository("https://localhost", "")
         val containerDao = repository.containerDao
         val queueDao = db.scrapeQueueItemDao

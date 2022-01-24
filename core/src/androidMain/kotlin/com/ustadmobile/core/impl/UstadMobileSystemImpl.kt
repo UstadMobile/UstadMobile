@@ -39,8 +39,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.AsyncTask
-import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
@@ -52,6 +50,8 @@ import androidx.fragment.app.DialogFragment
 import androidx.navigation.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.nav.toNavOptions
+import com.ustadmobile.core.io.ext.isGzipped
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
@@ -60,6 +60,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
+import org.kodein.di.android.di
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.*
@@ -79,10 +80,6 @@ import java.util.zip.ZipOutputStream
 actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     private var appConfig: Properties? = null
-
-    private val deviceStorageIndex = 0
-
-    private val sdCardStorageIndex = 1
 
     private var appPreferences: SharedPreferences? = null
 
@@ -131,7 +128,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         override fun doInBackground(vararg params: Boolean?): String {
             val apkFile = File(context.applicationInfo.sourceDir)
             //TODO: replace this with something from appconfig.properties
-            val impl = instance
+            val di: DI by di(context)
+            val impl : UstadMobileSystemImpl = di.direct.instance()
 
             val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context) + "-" +
                     impl.getVersion(context)
@@ -193,7 +191,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int, ustadGoOptions: UstadGoOptions) {
 
-        val destinationQueryPos = viewName!!.indexOf('?')
+        val destinationQueryPos = viewName.indexOf('?')
         val viewNameOnly = if (destinationQueryPos == -1) {
             viewName
         }else {
@@ -210,26 +208,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
 
             //Note: default could be set using style as per https://stackoverflow.com/questions/50482095/how-do-i-define-default-animations-for-navigation-actions
-            val options = navOptions {
-                anim {
-                    enter = android.R.anim.slide_in_left
-                    exit = android.R.anim.slide_out_right
-                    popEnter = android.R.anim.slide_in_left
-                    popExit = android.R.anim.slide_out_right
-                }
-
-                val popUpToViewName = ustadGoOptions.popUpToViewName
-                if(popUpToViewName != null) {
-                    val popUpToDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
-                        navController.currentDestination?.id ?: 0
-                    }else {
-                        destinationProvider.lookupDestinationName(popUpToViewName)
-                                ?.destinationId ?: 0
-                    }
-
-                    popUpTo(popUpToDestId) { inclusive = ustadGoOptions.popUpToInclusive }
-                }
-            }
+            val options = ustadGoOptions.toNavOptions(navController, destinationProvider)
 
             navController.navigate(ustadDestination.destinationId,
                     allArgs.toBundleWithNullableValues(), options)
@@ -333,50 +312,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun getSystemLocale(context: Any): String {
         return Locale.getDefault().toString()
-    }
-
-
-    /**
-     * Get a list of available directories on Android. Get the internal directory and the memory
-     * card (if any). This will result in a lis tof UMStorageDir with a path in the following format:
-     * ExternalFilesDir[i]/sitedata/container
-     */
-    @SuppressLint("UsableSpace")
-    suspend fun getStorageDirsAsync(context: Context, endpoint: Endpoint) : List<UMStorageDir> = withContext(Dispatchers.IO) {
-        ContextCompat.getExternalFilesDirs(context, null).mapIndexed { index, it ->
-            val siteDir = it.siteDataSubDir(endpoint)
-            val storageDir = File(siteDir, SUBDIR_CONTAINER_NAME)
-            storageDir.takeIf { !it.exists() }?.mkdirs()
-            val nameMessageId = if(index == 0) MessageID.phone_memory else MessageID.memory_card
-            UMStorageDir(storageDir.toUri().toString(), name = getString(nameMessageId, context),
-                    removableMedia = index == 0, isAvailable = true, isWritable = true,
-                    usableSpace = it.usableSpace)
-        }
-    }
-
-    @Deprecated("This is not really a cross platform function. Selecting a storage directory should be done at a platform level e.g. it may lead to a file picker dialog, etc")
-    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> = withContext(Dispatchers.IO){
-        val dirList = ArrayList<UMStorageDir>()
-        val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
-        val contentDirName = getContentDirName(context)
-
-        var umDir = File(storageOptions[deviceStorageIndex], contentDirName!!)
-        if (!umDir.exists()) umDir.mkdirs()
-        dirList.add(UMStorageDir(umDir.absolutePath,
-                getString(MessageID.phone_memory, context), true,
-                isAvailable = true, isWritable = canWriteFileInDir(umDir.absolutePath),
-                usableSpace = umDir.usableSpace))
-
-        if (storageOptions.size > 1) {
-            val sdCardStorage = storageOptions[sdCardStorageIndex]
-            umDir = File(sdCardStorage, contentDirName)
-            if (!umDir.exists()) umDir.mkdirs()
-            dirList.add(UMStorageDir(umDir.absolutePath,
-                    getString(MessageID.memory_card, context), true,
-                    isAvailable = true, isWritable = canWriteFileInDir(umDir.absolutePath),
-                    usableSpace = umDir.usableSpace))
-        }
-        return@withContext dirList
     }
 
     /**
@@ -522,7 +457,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
         var file = File(path)
 
-        if (isFileGzipped(file)) {
+        if (file.isGzipped()) {
 
             var gzipIn: GZIPInputStream? = null
             var destOut: FileOutputStream? = null
@@ -548,14 +483,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ctx.startActivity(intent)
         } else {
             throw NoAppFoundException("No activity found for mimetype: $mMimeType", mMimeType)
-        }
-    }
-
-    private fun isFileGzipped(file: File): Boolean {
-        file.inputStream().use {
-            val signature = ByteArray(2)
-            val nread = it.read(signature)
-            return nread == 2 && signature[0] == GZIPInputStream.GZIP_MAGIC.toByte() && signature[1] == (GZIPInputStream.GZIP_MAGIC shr 8).toByte()
         }
     }
 
@@ -622,6 +549,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
          * @return A singleton instance
          */
         @JvmStatic
+        @Deprecated("This old static getter should not be used! Use DI instead!")
         actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
     }

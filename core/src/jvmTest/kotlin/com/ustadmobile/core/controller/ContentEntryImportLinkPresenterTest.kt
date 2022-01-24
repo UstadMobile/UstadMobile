@@ -1,35 +1,34 @@
 package com.ustadmobile.core.controller
 
-import com.google.gson.Gson
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.timeout
-import org.mockito.kotlin.verify
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
+import com.ustadmobile.core.contentjob.MetadataResult
+import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.UmAccount
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
-import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
+import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.singleton
+import org.kodein.di.instance
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.timeout
+import org.mockito.kotlin.verify
 
 class ContentEntryImportLinkPresenterTest {
 
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ContentEntryImportLinkView
-
-    private lateinit var accountManager: UstadAccountManager
 
     private lateinit var context: Any
 
@@ -41,52 +40,36 @@ class ContentEntryImportLinkPresenterTest {
 
     @Before
     fun setUp() {
-        context = Any()
-
         mockView = mock { }
+        context = Any()
 
         mockWebServer = MockWebServer()
         mockWebServer.start()
 
-        accountManager = mock{
-            on{activeAccount}.thenReturn(UmAccount(0,"","",mockWebServer.url("/").toString()))
-        }
-
         di = DI {
-            bind<UstadAccountManager>() with singleton { accountManager }
-            bind<Gson>() with singleton { Gson() }
-            bind<HttpClient>() with singleton {
-                HttpClient(OkHttp) {
-                    install(JsonFeature)
-                    install(HttpTimeout)
-                }
-            }
+            import(ustadTestRule.diModule)
         }
+        val accountManager: UstadAccountManager by di.instance()
+        accountManager.activeEndpoint = Endpoint(mockWebServer.url("/").toString())
 
-
-        presenter = ContentEntryImportLinkPresenter(context, mapOf(), mockView, di)
-
-
-
+        presenter = ContentEntryImportLinkPresenter(context, mapOf(UstadView.ARG_RESULT_DEST_KEY to ""), mockView, di)
     }
 
     @Test
     fun givenPresenterCreated_whenUserEntersLinkAndIsValid_thenReturnToPreviousScreen() {
 
-        var importedContentEntryMetaData = ImportedContentEntryMetaData(
-                ContentEntryWithLanguage(), "application/epub+zip",
-                "file://abc.zip", "googleDriveScraper")
+        val metadataResult = MetadataResult(ContentEntryWithLanguage(),EpubTypePluginCommonJvm.PLUGIN_ID)
 
-        var response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json")
+        val response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json")
             .setBody(Buffer().write(
-                safeStringify(di, ImportedContentEntryMetaData.serializer(), importedContentEntryMetaData).toByteArray()))
+                safeStringify(di, MetadataResult.serializer(), metadataResult).toByteArray()))
 
         mockWebServer.enqueue(response)
 
         presenter.handleClickDone(mockWebServer.url("/").toString())
 
         verify(mockView, timeout(5000)).showHideProgress(false)
-        verify(mockView, timeout(5000)).finishWithResult(importedContentEntryMetaData)
+        verify(mockView, timeout(5000)).finishWithResult(metadataResult)
     }
 
     @Test
@@ -100,6 +83,11 @@ class ContentEntryImportLinkPresenterTest {
         verify(mockView, timeout(5000)).showHideProgress(false)
         verify(mockView, timeout(5000)).validLink = false
         verify(mockView, timeout(5000)).showHideProgress(true)
+    }
+
+    @After
+    fun after(){
+        mockWebServer.shutdown()
     }
 
 }

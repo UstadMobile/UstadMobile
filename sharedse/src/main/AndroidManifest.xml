@@ -2,29 +2,9 @@
     package="com.ustadmobile.port.sharedse">
 
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <!-- Required for BLE peer-to-peer GATT server -->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-
-
-    <!-- Required for peer-to-peer connecting using WiFi direct -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
-    <!-- Required to use BLE scanning for peer devices -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
 
     <application android:supportsRtl="true"
         android:usesCleartextTraffic="true">
-
-        <service android:name="com.ustadmobile.core.networkmanager.DownloadNotificationService"
-            android:enabled="true"/>
 
     </application>
 </manifest>

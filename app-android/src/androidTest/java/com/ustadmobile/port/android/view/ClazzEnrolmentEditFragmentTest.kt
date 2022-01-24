@@ -13,16 +13,12 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.schedule.toLocalMidnight
-import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.port.android.screen.ClazzEditScreen
 import com.ustadmobile.port.android.screen.ClazzEnrolmentEditScreen
-import com.ustadmobile.port.android.view.binding.getRealStringValue
-import com.ustadmobile.port.android.view.binding.setDateString
 import com.ustadmobile.test.port.android.util.*
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
@@ -53,7 +49,7 @@ class ClazzEnrolmentEditFragmentTest : TestCase() {
     @Before
     fun setup() {
         runBlocking {
-            dbRule.insertPersonForActiveUser(Person().apply {
+            dbRule.insertPersonAndStartSession(Person().apply {
                 firstNames = "Bob"
                 lastName = "Jones"
                 admin = true
@@ -82,7 +78,7 @@ class ClazzEnrolmentEditFragmentTest : TestCase() {
             }
 
             val bundle = bundleOf(UstadView.ARG_PERSON_UID to person.personUid.toString(),
-                    UstadView.ARG_FILTER_BY_CLAZZUID to clazz.clazzUid.toString(),
+                    UstadView.ARG_CLAZZUID to clazz.clazzUid.toString(),
                     UstadView.ARG_SAVE_TO_DB to true.toString())
 
             fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
@@ -148,7 +144,7 @@ class ClazzEnrolmentEditFragmentTest : TestCase() {
             }
 
             val bundle = bundleOf(UstadView.ARG_PERSON_UID to person.personUid.toString(),
-                    UstadView.ARG_FILTER_BY_CLAZZUID to clazz.clazzUid.toString(),
+                    UstadView.ARG_CLAZZUID to clazz.clazzUid.toString(),
                     UstadView.ARG_SAVE_TO_DB to true.toString(),
                     UstadView.ARG_ENTITY_UID to enrolment!!.clazzEnrolmentUid.toString())
 

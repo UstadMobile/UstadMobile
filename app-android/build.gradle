@@ -2,31 +2,29 @@
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven {
-            url "https://dl.bintray.com/ustadmobile/adbscreenrecord"
+            url "https://devserver3.ustadmobile.com/maven"
         }
     }
 
     dependencies {
-        classpath "digital.wup:android-maven-publish:$version_android_maven_publish"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
-        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
     }
 }
 
 plugins {
-    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha05"
+    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha06"
+    id 'maven-publish'
 }
 
 apply plugin: 'com.android.library'
 apply plugin: "kotlin-android"
-apply plugin: 'kotlin-android-extensions'
+
 //Jacoco on Android is persistently getting stuck - see https://github.com/arturdm/jacoco-android-gradle-plugin/issues/60.
 // Should be disabled until this is fixed or excluded unless we are specifically running tests for coverage.
 //apply plugin: "jacoco"
-apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: 'kotlinx-serialization'
 apply plugin: "kotlin-kapt"
 
@@ -128,12 +126,10 @@ android {
         //When using variables the build analyzer reports that major tasks reran because of a
         // 'chnage' in the value of minSdkVersion, hence hardcoding them here.
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
 
         multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
-        versionCode rootProject.ext.ustadVersionCode
-        versionName rootProject.version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
         buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""
@@ -147,18 +143,6 @@ android {
         }
 
         missingDimensionStrategy 'api', 'api18'
-    }
-
-    flavorDimensions "config"
-
-    productFlavors {
-        /**
-         * Used for day to day work in Android studio to avoid the need to use multidex when running tests
-         */
-        devMinApi21 {
-            dimension "config"
-            minSdkVersion 21
-        }
     }
 
     buildTypes {
@@ -267,8 +251,12 @@ tasks.whenTaskAdded { task ->
         //TODO: Fix lib-content-editor to track up to date correctly, then add ":lib-content-editor:build" dependency
         task.dependsOn(generateCoreStringToAndroidResMap)
     }
-}
 
+    // TODO remove after merge with replication
+    if (task.name.equals("lint")) {
+        task.enabled = false
+    }
+}
 
 configurations.all {
     resolutionStrategy {
@@ -289,14 +277,15 @@ dependencies {
     implementation project(":lib-database-entities")
     implementation project(':lib-util')
 
-    implementation "com.github.aakira:napier:$version_napier"
+    implementation "io.github.aakira:napier:$version_napier"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
     implementation "androidx.activity:activity:$version_androidx_activity"
     implementation "androidx.activity:activity-ktx:$version_androidx_activity"
     implementation "androidx.fragment:fragment:$version_androidx_fragment"
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy_support"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+    implementation "commons-io:commons-io:$version_commons_io"
 
     //ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
@@ -323,13 +312,10 @@ dependencies {
     //Klock
     implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
 
-    //Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-
     //Crash reporting
     implementation "ch.acra:acra-http:$version_android_acra"
 
-    implementation 'com.linkedin.android.litr:litr:1.4.3'
+    implementation "com.linkedin.android.litr:litr:$version_android_litr"
 
 
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
@@ -339,13 +325,12 @@ dependencies {
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
     implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
 
-    implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
-
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"
 
     //Page indicator
-    implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
+    // Should be replaced with https://github.com/tommybuonomo/dotsindicator
+    //implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
 
     // shake detector
     implementation "com.squareup:seismic:$version_android_seismic"
@@ -360,10 +345,7 @@ dependencies {
     //Chart library
     implementation "com.github.PhilJay:MPAndroidChart:$version_mpandroidchart"
 
-    implementation "com.google.android:flexbox:$version_android_flexbox"
-
-    //SVG support for Android
-    implementation 'com.pixplicity.sharp:library:1.1.0'
+    implementation "com.google.android.flexbox:flexbox:$version_android_flexbox"
 
     //Gson for JSON serializing and deserializing
     implementation "com.google.code.gson:gson:$version_gson"
@@ -384,8 +366,6 @@ dependencies {
     //image compressor
     implementation "id.zelory:compressor:$version_compressor"
 
-    //Range seekbar by Crystal
-    implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
 
     //Android play core for update support within the application
     implementation "com.google.android.play:core:$version_play_core"
@@ -398,6 +378,15 @@ dependencies {
 
     //HTML editor
     implementation "com.github.wordpress-mobile.WordPress-Aztec-Android:aztec:$version_android_aztec"
+
+    // Dependencies of Aztec: Versions must be fixed to ensure that they point to versions available
+    // on mavenCentral after jcenter shutdown.
+    implementation "org.wordpress:utils:$version_android_wordpress_utils"
+    implementation "com.android.volley:volley:$version_android_volley"
+
+    //Persian-Date-Picker
+    implementation 'com.github.varunasingh:Persian-Date-Picker-Dialog-Strings:primary-SNAPSHOT'
+
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
@@ -457,23 +446,34 @@ task sourceJar(type: Jar) {
     classifier "source"
 }
 
-publishing {
-    publications {
-        //For the moment - publish only vanilla debug variant. Can publish others as per:
-        // https://github.com/wupdigital/android-maven-publish
-        mavenLocalconfigAar(MavenPublication) {
-            from components.findByName("androidVanillaDebug")
-            groupId rootProject.group
-            artifactId project.name
-            version rootProject.version
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = rootProject.group
+                artifactId = project.name
+                version = rootProject.version
+            }
+            // Creates a Maven publication called “debug”.
+            debug(MavenPublication) {
+                // Applies the component for the debug build variant.
+                from components.debug
+
+                groupId = rootProject.group
+                artifactId = project.name
+                version = rootProject.version
+            }
         }
 
-    }
 
-    repositories {
-        //Set this in projectdir/extrasettings.gradle
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
+        repositories {
+            maven {
+                url rootProject.ext.buildConfigProperties['repo.dir']
+            }
         }
     }
 }

@@ -20,11 +20,15 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 
-class SiteTermsDetailPresenter(context: Any,
-                               arguments: Map<String, String>, view: SiteTermsDetailView,
-                               lifecycleOwner: DoorLifecycleOwner,
-                               di: DI)
-    : UstadDetailPresenter<SiteTermsDetailView, SiteTerms>(context, arguments, view, di, lifecycleOwner) {
+class SiteTermsDetailPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: SiteTermsDetailView,
+    lifecycleOwner: DoorLifecycleOwner,
+    di: DI
+) : UstadDetailPresenter<SiteTermsDetailView, SiteTerms>(
+    context, arguments, view, di, lifecycleOwner, activeSessionRequired = false
+) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

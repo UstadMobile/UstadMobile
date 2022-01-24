@@ -10,17 +10,15 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.util.ext.createPersonGroupAndMemberWithEnrolment
-import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.ClazzMemberListView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT_PENDING
-import com.ustadmobile.util.test.ext.insertPersonWithRole
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -85,7 +83,7 @@ class ClazzMemberListPresenterTest {
             clazzEnrolmentUid = repo.clazzEnrolmentDao.insert(this)
         }
 
-        val presenterArgs = mapOf<String,String>(ARG_FILTER_BY_CLAZZUID to "42")
+        val presenterArgs = mapOf<String,String>(ARG_CLAZZUID to "42")
         val presenter = ClazzMemberListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
@@ -117,20 +115,15 @@ class ClazzMemberListPresenterTest {
         }
 
         runBlocking {
-            repo.insertPersonWithRole(activePerson,
-            Role().apply {
-                rolePermissions = Role.PERMISSION_CLAZZ_ADD_STUDENT or Role.PERMISSION_CLAZZ_ADD_TEACHER
-            }, EntityRole().apply {
-                erTableId = Clazz.TABLE_ID
-                erEntityUid = testClazz.clazzUid
-            })
+            repo.grantScopedPermission(activePerson,
+                Role.PERMISSION_CLAZZ_ADD_STUDENT or Role.PERMISSION_CLAZZ_ADD_TEACHER,
+                Clazz.TABLE_ID, testClazz.clazzUid)
         }
 
-        val endpointUrl = accountManager.activeAccount.endpointUrl
-        accountManager.activeAccount = UmAccount(activePerson.personUid, activePerson.username,
-                "", endpointUrl, activePerson.firstNames, activePerson.lastName)
+        val endpointUrl = accountManager.activeEndpoint.url
 
-        val presenterArgs = mapOf<String,String>(ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString())
+        accountManager.startLocalTestSessionBlocking(activePerson, endpointUrl)
+        val presenterArgs = mapOf(ARG_CLAZZUID to testClazz.clazzUid.toString())
         val presenter = ClazzMemberListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
@@ -170,22 +163,17 @@ class ClazzMemberListPresenterTest {
             personUid = pendingPerson.personUid
         }
         runBlocking {
-            repo.createPersonGroupAndMemberWithEnrolment(enrolment)
+            repo.processEnrolmentIntoClass(enrolment)
 
-            repo.insertPersonWithRole(activePerson,
-                    Role().apply {
-                        rolePermissions = Role.PERMISSION_CLAZZ_ADD_STUDENT or Role.PERMISSION_CLAZZ_ADD_TEACHER
-                    }, EntityRole().apply {
-                erTableId = Clazz.TABLE_ID
-                erEntityUid = testClazz.clazzUid
-            })
+            repo.grantScopedPermission(activePerson,
+                Role.PERMISSION_CLAZZ_ADD_STUDENT or Role.PERMISSION_CLAZZ_ADD_TEACHER,
+                Clazz.TABLE_ID, testClazz.clazzUid)
         }
 
-        val endpointUrl = accountManager.activeAccount.endpointUrl
-        accountManager.activeAccount = UmAccount(activePerson.personUid, activePerson.username,
-                "", endpointUrl, activePerson.firstNames, activePerson.lastName)
+        val endpointUrl = accountManager.activeEndpoint.url
+        accountManager.startLocalTestSessionBlocking(activePerson, endpointUrl)
 
-        val presenterArgs = mapOf<String,String>(ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString())
+        val presenterArgs = mapOf<String,String>(ARG_CLAZZUID to testClazz.clazzUid.toString())
         val presenter = ClazzMemberListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)

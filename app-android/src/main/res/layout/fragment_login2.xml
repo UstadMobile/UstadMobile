@@ -28,6 +28,10 @@
             name="versionInfo"
             type="String" />
 
+        <variable
+            name="intentMessage"
+            type="String" />
+
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -37,6 +41,26 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/login_intent_message"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:text="@{intentMessage}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/top_constraint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="login_intent_message" />
+
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:visibility="gone"
@@ -51,8 +75,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.textfield.TextInputLayout
-                app:layout_constraintTop_toBottomOf="@+id/organisation_icon"
-                android:layout_marginTop="@dimen/dimen_40dp"
+                android:layout_marginTop="16dp"
                 android:id="@+id/username_view"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
@@ -62,15 +85,15 @@
                 app:errorTextColor="?colorError"
                 app:hintEnabled="true"
                 android:enabled="@{fieldsEnabled}"
+                app:layout_constraintTop_toBottomOf="@+id/top_constraint"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintStart_toStartOf="parent">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/person_username"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text"
+                    android:inputType="textNoSuggestions"
                     android:text="@={username}"
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
             </com.google.android.material.textfield.TextInputLayout>

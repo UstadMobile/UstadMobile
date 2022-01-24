@@ -22,7 +22,7 @@ class TestBleMessageAssembler {
             val messageLength = (Math.random() * (maxMessageLength - minMessageLength)).toInt() + minMessageLength
             messageBytes[i] = ByteArray(messageLength)
             for (j in 0 until messageLength) {
-                messageBytes[i][j] = (Math.random() * 256 - 128).toByte()
+                messageBytes[i][j] = (Math.random() * 256 - 128).toInt().toByte()
             }
 
             messages[i] = BleMessage(ENTRY_STATUS_REQUEST,

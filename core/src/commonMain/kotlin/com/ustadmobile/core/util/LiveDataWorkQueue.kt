@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util
 
+import io.github.aakira.napier.Napier
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.util.copyOnWriteListOf
@@ -42,10 +43,17 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
                 launch {
                     while(isActive) {
                         val nextItem = channel.receive()
-                        onItemStarted.invoke(nextItem)
-                        itemRunner(nextItem)
-                        queuedOrActiveItems.remove(nextItem)
-                        onItemFinished(nextItem)
+                        try {
+                            onItemStarted.invoke(nextItem)
+                            itemRunner(nextItem)
+                        }catch(e: Exception) {
+                            Napier.e("LiveDataWorkQueue: exception running item $nextItem",
+                                throwable = e)
+                        }finally {
+                            queuedOrActiveItems.remove(nextItem)
+                            onItemFinished(nextItem)
+                        }
+
                         if(queuedOrActiveItems.isEmpty() && channel.isEmpty)
                             onQueueEmpty.invoke(nextItem)
                     }

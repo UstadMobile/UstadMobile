@@ -79,6 +79,12 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
             mBinding?.connectAsGuest?.visibility = if(value) View.VISIBLE else View.GONE
         }
 
+    override var loginIntentMessage: String? = null
+        set(value) {
+            field = value
+            mBinding?.intentMessage = value
+        }
+
     override fun clearFields() {
         mBinding?.password = ""
         mBinding?.username = ""
@@ -94,7 +100,7 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         }
 
         mPresenter = Login2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this,
-                di)
+                di).withViewLifecycle()
         mBinding?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return rootView

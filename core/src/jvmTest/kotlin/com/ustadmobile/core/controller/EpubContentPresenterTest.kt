@@ -1,24 +1,27 @@
 package com.ustadmobile.core.controller
 
-import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.navigateToErrorScreen
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.io.ext.openEntryInputStream
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -34,7 +37,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.timeout
 import org.mockito.Mockito.verify
-import org.xmlpull.v1.XmlPullParser
+import org.mockito.kotlin.*
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
@@ -67,6 +70,8 @@ class EpubContentPresenterTest {
 
     lateinit var contentEntry: ContentEntry
 
+    var selectedClazzUid = 1000L
+
     @Before
     @Throws(IOException::class, XmlPullParserException::class)
     fun setup() {
@@ -83,11 +88,20 @@ class EpubContentPresenterTest {
         }
 
         val accountManager: UstadAccountManager = di.direct.instance()
-        accountManager.activeAccount = UmAccount(42L, "user", "",
-                "http://localhost:4200/", "bob", "jones")
-
         val repo: UmAppDatabase by di.activeRepoInstance()
         val db: UmAppDatabase by di.activeDbInstance()
+
+        val person = runBlocking {
+            repo.insertPersonAndGroup(Person().apply {
+                personUid = 42L
+                username = "user"
+                firstNames = "bob"
+                lastName = "jones"
+            })
+        }
+
+        accountManager.startLocalTestSessionBlocking(person, accountManager.activeEndpoint.url)
+
 
         contentEntry = ContentEntry("Test epub", "test", true, true).apply {
             contentEntryUid = repo.contentEntryDao.insert(this)
@@ -96,6 +110,11 @@ class EpubContentPresenterTest {
         epubContainer = Container().apply {
             containerContentEntryUid = contentEntry.contentEntryUid
             containerUid = repo.containerDao.insert(this)
+        }
+
+        Clazz().apply{
+            clazzUid = selectedClazzUid
+            repo.clazzDao.insert(this)
         }
 
         containerDirTmp = tmpFileRule.newFolder("containerDirTmp")
@@ -131,6 +150,7 @@ class EpubContentPresenterTest {
         val args = HashMap<String, String>()
         args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
         args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+        args[UstadView.ARG_CLAZZUID] = selectedClazzUid.toString()
 
         val presenter = EpubContentPresenter(Any(), args, mockEpubView, di)
         presenter.onCreate(args)
@@ -146,7 +166,7 @@ class EpubContentPresenterTest {
         verify(mockStatementEndpoint, timeout(5000)).storeStatements(argWhere {
             val progressRecorded = it.firstOrNull()?.result?.extensions?.get("https://w3id.org/xapi/cmi5/result/extensions/progress") as? Int
             progressRecorded != null && progressRecorded > 0
-        }, anyOrNull(), eq(contentEntry.contentEntryUid))
+        }, anyOrNull(), eq(contentEntry.contentEntryUid), eq(selectedClazzUid))
 
         argumentCaptor<List<String>>().apply {
             verify(mockEpubView, timeout(20000)).spineUrls = capture()
@@ -175,6 +195,7 @@ class EpubContentPresenterTest {
         val args = HashMap<String, String>()
         args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
         args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+        args[UstadView.ARG_CLAZZUID] = selectedClazzUid.toString()
 
         val presenter = EpubContentPresenter(Any(), args, mockEpubView, di)
         presenter.onCreate(args)
@@ -188,11 +209,33 @@ class EpubContentPresenterTest {
         verify(mockEpubView).scrollToSpinePosition(3, "anchor")
     }
 
+    @Test
+    fun givenInvalidEpub_whenLoaded_shouldGoToErrorScreen(){
+        val db: UmAppDatabase by di.activeDbInstance()
+        db.containerEntryDao.deleteByContainerUid(epubContainer.containerUid)
+
+        val args = HashMap<String, String>()
+        args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
+        args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+        args[UstadView.ARG_CLAZZUID] = selectedClazzUid.toString()
+
+        val presenter = EpubContentPresenter(Any(), args, mockEpubView, di)
+        presenter.onCreate(args)
+        presenter.onStart()
+
+        val spyController: UstadNavController = di.direct.instance()
+        verify(spyController, timeout(1000)).navigateToErrorScreen(
+                org.mockito.kotlin.eq(Exception()), org.mockito.kotlin.eq(di), org.mockito.kotlin.eq(Any()))
+
+    }
+
+
     //@Test
     fun givenValidEpub_whenHandlePageChangeCalledAndTitleIsKnown_thenShouldSetWindowTitle() {
         val args = HashMap<String, String>()
         args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
         args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+        args[UstadView.ARG_CLAZZUID] = selectedClazzUid.toString()
 
         val presenter = EpubContentPresenter(Any(), args, mockEpubView, di)
         presenter.onCreate(args)
@@ -213,6 +256,7 @@ class EpubContentPresenterTest {
         val args = HashMap<String, String>()
         args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
         args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+        args[UstadView.ARG_CLAZZUID] = selectedClazzUid.toString()
 
         val presenter = EpubContentPresenter(Any(), args, mockEpubView, di)
         presenter.onCreate(args)

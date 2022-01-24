@@ -99,22 +99,8 @@
         android:layout_height="wrap_content">
 
         <Button
-            tools:text="Button 1"
-            android:id="@+id/action_btn_pause_download"
-            style="@style/UmTheme.StackedButton"
-            />
-
-        <Button
             tools:text="Button 2"
-            android:layout_below="@+id/action_btn_pause_download"
             android:id="@+id/action_btn_cancel_download"
-            style="@style/UmTheme.StackedButton"
-            />
-
-        <Button
-            tools:text="Button 3"
-            android:layout_below="@+id/action_btn_cancel_download"
-            android:id="@+id/action_btn_continue_download"
             style="@style/UmTheme.StackedButton"
             />
 

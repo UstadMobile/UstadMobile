@@ -6,10 +6,23 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = XObjectEntity.TABLE_ID, notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${XObjectEntity.TABLE_ID} AS tableId 
-        FROM DeviceSession"""])
 @Serializable
+@ReplicateEntity(tableId =  XObjectEntity.TABLE_ID, tracker = XObjectEntityReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "xobjectentity_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO XObjectEntity(xObjectUid, objectType, objectId, definitionType, interactionType, correctResponsePattern, objectContentEntryUid, xObjectMasterChangeSeqNum, xObjectocalChangeSeqNum, xObjectLastChangedBy, xObjectLct) 
+         VALUES (NEW.xObjectUid, NEW.objectType, NEW.objectId, NEW.definitionType, NEW.interactionType, NEW.correctResponsePattern, NEW.objectContentEntryUid, NEW.xObjectMasterChangeSeqNum, NEW.xObjectocalChangeSeqNum, NEW.xObjectLastChangedBy, NEW.xObjectLct) 
+         /*psql ON CONFLICT (xObjectUid) DO UPDATE 
+         SET objectType = EXCLUDED.objectType, objectId = EXCLUDED.objectId, definitionType = EXCLUDED.definitionType, interactionType = EXCLUDED.interactionType, correctResponsePattern = EXCLUDED.correctResponsePattern, objectContentEntryUid = EXCLUDED.objectContentEntryUid, xObjectMasterChangeSeqNum = EXCLUDED.xObjectMasterChangeSeqNum, xObjectocalChangeSeqNum = EXCLUDED.xObjectocalChangeSeqNum, xObjectLastChangedBy = EXCLUDED.xObjectLastChangedBy, xObjectLct = EXCLUDED.xObjectLct
+         */"""
+     ]
+ )
+))
 class XObjectEntity {
 
     @PrimaryKey(autoGenerate = true)
@@ -37,6 +50,7 @@ class XObjectEntity {
     var xObjectLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var xObjectLct: Long = 0
 
     constructor() {

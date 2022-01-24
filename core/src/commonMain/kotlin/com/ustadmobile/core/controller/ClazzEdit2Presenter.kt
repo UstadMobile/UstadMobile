@@ -1,28 +1,33 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.controller.TimeZoneListPresenter.Companion.RESULT_TIMEZONE_KEY
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.*
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
-import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_PARENT_GROUP
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -34,9 +39,19 @@ class ClazzEdit2Presenter(context: Any,
          di, lifecycleOwner) {
 
     private val scheduleOneToManyJoinEditHelper
-            = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid,
-            ARG_SAVEDSTATE_SCHEDULES, ListSerializer(Schedule.serializer()),
-            ListSerializer(Schedule.serializer()), this, Schedule::class) {scheduleUid = it}
+            = OneToManyJoinEditHelperMp(Schedule::scheduleUid,
+            ARG_SAVEDSTATE_SCHEDULES,
+            ListSerializer(Schedule.serializer()),
+            ListSerializer(Schedule.serializer()),
+            this,
+            requireSavedStateHandle(),
+            Schedule::class) {scheduleUid = it}
+
+    val scheduleOneToManyJoinListener = scheduleOneToManyJoinEditHelper.createNavigateForResultListener(
+        ScheduleEditView.VIEW_NAME, Schedule.serializer())
+
+    val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(repo, this,
+        requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -44,6 +59,45 @@ class ClazzEdit2Presenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.clazzSchedules = scheduleOneToManyJoinEditHelper.liveList
+        view.scopedGrants = scopedGrantOneToManyHelper.liveList
+    }
+
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        requireSavedStateHandle().getLiveData<String?>(RESULT_TIMEZONE_KEY).observe(lifecycleOwner) {
+            entity?.clazzTimeZone = it
+            view.entity = entity
+        }
+
+        observeSavedStateResult(SAVEDSTATE_KEY_SCHOOL, ListSerializer(School.serializer()),
+            School::class) {
+            val school = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.school = school
+            entity?.clazzSchoolUid = school.schoolUid
+            view.entity = entity
+
+            requireSavedStateHandle()[SAVEDSTATE_KEY_SCHOOL] = null
+        }
+
+        observeSavedStateResult(SAVEDSTATE_KEY_HOLIDAYCALENDAR,
+            ListSerializer(HolidayCalendar.serializer()), HolidayCalendar::class) {
+            val calendar = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.holidayCalendar = calendar
+            entity?.clazzHolidayUMCalendarUid = calendar.umCalendarUid
+            view.entity = entity
+
+            requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
+        }
+
+        observeSavedStateResult(SAVEDSTATE_KEY_FEATURES,
+            ListSerializer(LongWrapper.serializer()), LongWrapper::class) {
+            val wrapper = it.firstOrNull() ?: return@observeSavedStateResult
+
+            entity?.clazzFeatures = wrapper.longValue
+            view.entity = entity
+            requireSavedStateHandle()[SAVEDSTATE_KEY_FEATURES] = null
+        }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWithHolidayCalendarAndSchool? {
@@ -62,8 +116,50 @@ class ClazzEdit2Presenter(context: Any,
         val schedules = db.onRepoWithFallbackToDb(2000) {
             it.scheduleDao.takeIf { clazzUid != 0L }?.findAllSchedulesByClazzUidAsync(clazzUid)
         } ?: listOf()
-
         scheduleOneToManyJoinEditHelper.liveList.sendValue(schedules)
+
+        if(clazzUid != 0L) {
+            val scopedGrants = db.onRepoWithFallbackToDb(2000) {
+                it.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID, clazzUid)
+            }
+            scopedGrantOneToManyHelper.liveList.setVal(scopedGrants)
+        }else if(db is DoorDatabaseRepository){
+            /*
+            This should be enabled once a field has been added on Clazz for the adminGroupUid
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Admins"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = ScopedGrant.FLAG_ADMIN_GROUP.or(FLAG_NO_DELETE)
+                    sgPermissions = Role.ALL_PERMISSIONS
+                }
+            })
+            */
+
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Teachers"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = ScopedGrant.FLAG_TEACHER_GROUP.or(FLAG_NO_DELETE)
+                    sgPermissions = Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT
+                }
+            })
+
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Students"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = ScopedGrant.FLAG_STUDENT_GROUP.or(FLAG_NO_DELETE)
+                    sgPermissions = Role.ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT
+                }
+            })
+
+            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
+                name = "Parents"
+                scopedGrant = ScopedGrant().apply {
+                    sgFlags = (ScopedGrant.FLAG_PARENT_GROUP or FLAG_NO_DELETE)
+                    sgPermissions = Role.ROLE_CLAZZ_PARENT_PERMISSION_DEFAULT
+                }
+            })
+        }
+        
         return clazz
     }
 
@@ -78,7 +174,6 @@ class ClazzEdit2Presenter(context: Any,
         }
 
         scheduleOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
-
         return clazz
     }
 
@@ -89,8 +184,46 @@ class ClazzEdit2Presenter(context: Any,
                     entityVal)
     }
 
+    fun handleClickTimezone() {
+        navigateForResult(NavigateForResultOptions<String>(
+            this,
+            currentEntityValue = entity?.clazzTimeZone,
+            destinationViewName = TimeZoneListView.VIEW_NAME,
+            entityClass = String::class,
+            serializationStrategy = String.serializer(),
+            destinationResultKey = RESULT_TIMEZONE_KEY))
+    }
+
+    fun handleClickHolidayCalendar() {
+        navigateForResult(
+            NavigateForResultOptions(this,
+            null, HolidayCalendarListView.VIEW_NAME, HolidayCalendar::class,
+            HolidayCalendar.serializer(), SAVEDSTATE_KEY_HOLIDAYCALENDAR)
+        )
+    }
+
+    fun handleClickSchool() {
+        val args = mutableMapOf(
+            UstadView.ARG_FILTER_BY_PERMISSION to Role.PERMISSION_PERSON_DELEGATE.toString())
+        navigateForResult(
+            NavigateForResultOptions(this,
+            null, SchoolListView.VIEW_NAME, School::class,
+            School.serializer(), SAVEDSTATE_KEY_SCHOOL,
+                arguments = args)
+        )
+    }
+
+    fun handleClickFeatures() {
+        navigateForResult(NavigateForResultOptions(this,
+            LongWrapper(entity?.clazzFeatures ?: 0),
+            BitmaskEditView.VIEW_NAME,
+            LongWrapper::class,
+            LongWrapper.serializer(),
+            SAVEDSTATE_KEY_FEATURES))
+    }
+
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
 
             if (entity.clazzStartTime == 0L) {
                 view.clazzStartDateError = systemImpl.getString(MessageID.field_required_prompt, context)
@@ -122,6 +255,12 @@ class ClazzEdit2Presenter(context: Any,
                 it.scheduleClazzUid = entity.clazzUid
             }
 
+            scopedGrantOneToManyHelper.commitToDatabase(repo, entity.clazzUid, flagToGroupMap = mapOf(
+                FLAG_TEACHER_GROUP to entity.clazzTeachersPersonGroupUid,
+                FLAG_STUDENT_GROUP to entity.clazzStudentsPersonGroupUid,
+                FLAG_PARENT_GROUP to entity.clazzParentsPersonGroupUid,
+            ))
+
 
             val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight
 
@@ -136,7 +275,7 @@ class ClazzEdit2Presenter(context: Any,
             // ClazzEdit, EnrolmentEdit
             if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
                 systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
-                        arguments.plus(UstadView.ARG_FILTER_BY_CLAZZUID to entity.clazzUid.toString()),
+                        arguments.plus(UstadView.ARG_CLAZZUID to entity.clazzUid.toString()),
                         context)
             }else{
                 onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
@@ -144,17 +283,15 @@ class ClazzEdit2Presenter(context: Any,
         }
     }
 
-    fun handleAddOrEditSchedule(schedule: Schedule) {
-        scheduleOneToManyJoinEditHelper.onEditResult(schedule)
-    }
-
-    fun handleRemoveSchedule(schedule: Schedule) {
-        scheduleOneToManyJoinEditHelper.onDeactivateEntity(schedule)
-    }
-
     companion object {
 
         const val ARG_SAVEDSTATE_SCHEDULES = "schedules"
+
+        const val SAVEDSTATE_KEY_SCHOOL = "School"
+
+        const val SAVEDSTATE_KEY_HOLIDAYCALENDAR = "HolidayCalendar"
+
+        const val SAVEDSTATE_KEY_FEATURES = "ClazzFeatures"
 
     }
 

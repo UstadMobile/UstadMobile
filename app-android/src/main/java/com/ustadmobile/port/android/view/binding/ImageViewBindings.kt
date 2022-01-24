@@ -1,21 +1,24 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.view.View
 import android.widget.ImageView
-import androidx.activity.ComponentActivity
 import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.isContentComplete
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.*
 import org.kodein.di.*
@@ -64,9 +67,10 @@ fun ImageView.getRealImageFilePath(): String? {
 }
 
 
-@BindingAdapter("imageForeignKey")
-fun ImageView.setImageForeignKey(imageForeignKey: Long){
+@BindingAdapter("imageForeignKey", "imageForeignKeyEndpoint", requireAll = false)
+fun ImageView.setImageForeignKey(imageForeignKey: Long, imageForeignKeyEndpoint: String? = null){
     foreignKeyProps.foreignKey = imageForeignKey
+    foreignKeyProps.foreignKeyEndpoint = imageForeignKeyEndpoint
     updateImageFromForeignKey()
 }
 
@@ -80,7 +84,6 @@ fun ImageView.imageForeignKeyPlaceholder(imageForeignKeyPlaceholder: Drawable?) 
 fun ImageView.setImageForeignKeyAutoHide(autoHide: Boolean) {
     foreignKeyProps.autoHide = autoHide
 }
-
 
 val ImageView.foreignKeyProps: ImageViewForeignKeyProps
     get(){
@@ -105,10 +108,9 @@ fun ImageView.setImageForeignKeyAdapter(foreignKeyAttachmentUriAdapter: ForeignK
  */
 private fun ImageView.updateImageFromForeignKey() {
     val foreignKeyPropsVal = foreignKeyProps
+    val tint = ImageViewCompat.getImageTintList(this)
     val adapter = foreignKeyPropsVal.foreignKeyAttachmentUriAdapter
-    if(foreignKeyPropsVal.foreignKey != 0L && adapter != null &&
-            foreignKeyPropsVal.foreignKeyLoadingOrDisplayed != foreignKeyPropsVal.foreignKey) {
-
+    if(adapter != null && foreignKeyPropsVal.foreignKeyLoadingOrDisplayed != foreignKeyPropsVal.foreignKey) {
         //something new to load - cancel anything loading now and load this instead
         foreignKeyPropsVal.currentJob?.cancel()
 
@@ -118,41 +120,39 @@ private fun ImageView.updateImageFromForeignKey() {
 
         foreignKeyPropsVal.currentJob = GlobalScope.async {
             val accountManager : UstadAccountManager = di.direct.instance()
-            val db : UmAppDatabase = di.direct.on(accountManager.activeAccount).instance(DoorTag.TAG_DB)
-            val repo : UmAppDatabase = di.direct.on(accountManager.activeAccount).instance(DoorTag.TAG_REPO)
-            listOf(db, repo).forEach {
-                if(!coroutineContext.isActive)
-                    return@async
-
+            val endpointUrl = foreignKeyPropsVal.foreignKeyEndpoint ?: accountManager.activeAccount.endpointUrl
+            val repo : UmAppDatabase = di.direct.on(Endpoint(endpointUrl)).instance(DoorTag.TAG_REPO)
+            repo.onDbThenRepoWithTimeout(10000) { dbToUse: UmAppDatabase, lastResult: Uri? ->
                 val uri = withTimeoutOrNull(10000) {
-                    adapter.getAttachmentUri(foreignKeyVal, it)?.let {
+                    adapter.getAttachmentUri(foreignKeyVal, dbToUse)?.let {
                         repo.resolveAttachmentAndroidUri(it)
                     }
-                }
+                } ?: lastResult
 
-                if(!(it === repo && uri == null)) {
-                    withContext(Dispatchers.Main) {
-                        if(foreignKeyPropsVal.imageUriDisplayed != uri) {
-                            Picasso.get().load(uri)
-                                    .apply {
-                                        foreignKeyPropsVal.placeholder?.also {
-                                            placeholder(it)
-                                        }
-                                    }
-                                    .into(this@updateImageFromForeignKey)
+                withContext(Dispatchers.Main) {
+                    val placeholderVal = foreignKeyPropsVal.placeholder
+                    if(uri != null && uri != foreignKeyPropsVal.imageUriDisplayed ) {
+                        Picasso.get().load(uri)
+                            .into(this@updateImageFromForeignKey)
 
-                            foreignKeyPropsVal.imageUriDisplayed = uri
-                        }
+                        foreignKeyPropsVal.imageUriDisplayed = uri
+                    }else if(uri == null && placeholderVal != null) {
+                        //show placeholder
+                        setImageDrawable(placeholderVal)
+                        imageTintList = tint
+                        foreignKeyPropsVal.imageUriDisplayed = null
+                    }
 
-                        if(foreignKeyPropsVal.autoHide) {
-                            this@updateImageFromForeignKey.visibility = if(uri != null) {
-                                View.VISIBLE
-                            }else {
-                                View.GONE
-                            }
+                    if(foreignKeyPropsVal.autoHide) {
+                        this@updateImageFromForeignKey.visibility = if(uri != null) {
+                            View.VISIBLE
+                        }else {
+                            View.GONE
                         }
                     }
                 }
+
+                uri
             }
 
             //mission complete - unset job reference
@@ -219,24 +219,20 @@ fun ImageView.setImageLookupMap(imageLookupMap: Map<Int, Int>?, imageLookupFallb
     updateFromImageLookupMap()
 }
 
-@BindingAdapter(value=["iconStatusFlag"])
-fun ImageView.setIconOnStatusFlag(statusFlag: Int){
-    when {
-        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED ->{
+@BindingAdapter(value = ["iconProgressFlag"])
+fun ImageView.setIconOnProgressFlag(progress: ContentEntryStatementScoreProgress?) {
+    when (progress?.isContentComplete()) {
+        StatementEntity.CONTENT_COMPLETE, StatementEntity.CONTENT_PASSED -> {
             setImageResource(R.drawable.ic_content_complete)
             visibility = View.VISIBLE
         }
-        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED -> {
-            setImageResource(R.drawable.ic_content_complete)
-            visibility = View.VISIBLE
-        }
-        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED -> {
-            setImageResource(R.drawable.ic_content_complete)
-            visibility = View.VISIBLE
-        }
-        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED -> {
+        StatementEntity.CONTENT_FAILED -> {
             setImageResource(R.drawable.ic_content_fail)
             visibility = View.VISIBLE
+        }
+        StatementEntity.CONTENT_INCOMPLETE -> {
+            setImageDrawable(null)
+            visibility = View.GONE
         }
         else -> {
             setImageDrawable(null)

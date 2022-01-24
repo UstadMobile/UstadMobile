@@ -1,9 +1,8 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -25,7 +24,7 @@ class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
 
     private val inputCheckDelay: Long = 500
 
-    private val inputCheckHandler: Handler = Handler()
+    private val inputCheckHandler: Handler = Handler(Looper.getMainLooper())
 
     private val inputCheckerCallback = Runnable {
         val typedLink = siteLink
@@ -66,7 +65,7 @@ class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
             it.showProgress = false
         }
         mPresenter = SiteEnterLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di)
+                this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         mBinding?.presenter = mPresenter
         mBinding?.organisationLink?.addTextChangedListener(object: TextWatcher {

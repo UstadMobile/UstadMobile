@@ -1,23 +1,20 @@
 package com.ustadmobile.port.android.view
 
-import android.widget.DatePicker
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.fragment.findNavController
-import com.agoda.kakao.picker.date.KDatePicker
+import com.google.gson.Gson
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.days
 import com.soywiz.klock.hours
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.networkmanager.defaultGson
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.core.controller.ClazzEdit2Presenter
+import com.ustadmobile.core.util.OneToManyJoinEditHelperMp.Companion.SUFFIX_RETKEY_DEFAULT
+import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
@@ -29,11 +26,12 @@ import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
-import org.hamcrest.CoreMatchers
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.text.DateFormat
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.util.*
 
 @AdbScreenRecord("Class edit screen tests")
@@ -59,6 +57,12 @@ class ClazzEditFragmentTest : TestCase() {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
+    lateinit var gson: Gson
+
+    @Before
+    fun setup() {
+        gson = getApplicationDi().direct.instance()
+    }
 
     @AdbScreenRecord("")
     @Test
@@ -72,7 +76,9 @@ class ClazzEditFragmentTest : TestCase() {
         init {
             fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
                 ClazzEditFragment().also {
-                    it.installNavController(systemImplNavRule.navController)
+                    it.installNavController(systemImplNavRule.navController,
+                        initialDestId = R.id.clazz_edit_dest)
+
                     it.arguments = bundleOf()
                 }
             }
@@ -114,16 +120,18 @@ class ClazzEditFragmentTest : TestCase() {
                     }
 
                     it.findNavController().currentBackStackEntry?.savedStateHandle
-                            ?.set("Schedule", defaultGson().toJson(listOf(schedule)))
+                            ?.set(ClazzEdit2Presenter.ARG_SAVEDSTATE_SCHEDULES + SUFFIX_RETKEY_DEFAULT,
+                                gson.toJson(listOf(schedule)))
                 }
 
                 fragmentScenario.onFragment {fragment ->
                     fragment.findNavController().currentBackStackEntry?.savedStateHandle
-                            ?.set("HolidayCalendar", defaultGson().toJson(listOf(existingHolidayCal)))
+                            ?.set(ClazzEdit2Presenter.SAVEDSTATE_KEY_HOLIDAYCALENDAR,
+                                gson.toJson(listOf(existingHolidayCal)))
                 }
 
-                val repo = dbRule.repo as DoorDatabaseSyncRepository
-                repo.clientId
+//                val repo = dbRule.repo as DoorDatabaseRepository
+//                repo.clientId
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
                 val clazzes = dbRule.db.clazzDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
@@ -163,10 +171,14 @@ class ClazzEditFragmentTest : TestCase() {
                     clazzUid = dbRule.repo.clazzDao.insert(this)
                 }
 
+                val args = mapOf(UstadView.ARG_ENTITY_UID to existingClazz.clazzUid.toString())
+
                 val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                        fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingClazz.clazzUid)) {
+                        fragmentArgs = args.toBundle()) {
                     ClazzEditFragment().also {
-                        it.installNavController(systemImplNavRule.navController)
+                        it.installNavController(systemImplNavRule.navController,
+                            initialDestId = R.id.clazz_edit_dest,
+                            initialArgs = args.toBundle())
                     }
                 }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                         .withScenarioIdlingResourceRule(crudIdlingResourceRule)
@@ -174,8 +186,8 @@ class ClazzEditFragmentTest : TestCase() {
 
                 //Freeze and serialize the value as it was first shown to the user
                 var entityLoadedByFragment = fragmentScenario.waitUntilLetOnFragment { it.entity }
-                val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
-                val newClazzValues = defaultGson().fromJson(entityLoadedJson, ClazzWithHolidayCalendarAndSchool::class.java).apply {
+                val entityLoadedJson = gson.toJson(entityLoadedByFragment)
+                val newClazzValues = gson.fromJson(entityLoadedJson, ClazzWithHolidayCalendarAndSchool::class.java).apply {
                     clazzName = "Updated Clazz"
                 }
 
@@ -189,7 +201,7 @@ class ClazzEditFragmentTest : TestCase() {
 
                 Assert.assertEquals("Entity in database was loaded for user",
                         "New Clazz",
-                        defaultGson().fromJson(entityLoadedJson, ClazzWithHolidayCalendarAndSchool::class.java).clazzName)
+                        gson.fromJson(entityLoadedJson, ClazzWithHolidayCalendarAndSchool::class.java).clazzName)
 
                 val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existingClazz.clazzUid)
                         .waitUntilWithFragmentScenario(fragmentScenario) { it?.clazzName == "Updated Clazz" }

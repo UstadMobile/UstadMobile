@@ -8,18 +8,22 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.UstadBaseController
+import com.ustadmobile.core.impl.nav.NavControllerAdapter
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
-import com.ustadmobile.port.android.view.util.ProgressBarLifecycleObserver
-import com.ustadmobile.port.android.view.util.TitleLifecycleObserver
-import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
-import org.kodein.di.DIAware
-import org.kodein.di.android.x.di
+import com.ustadmobile.port.android.view.util.*
+import kotlinx.coroutines.CoroutineScope
+import org.kodein.di.*
+import org.kodein.di.android.x.closestDI
 import java.util.*
 
 /**
@@ -39,7 +43,26 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     protected var progressBarManager: ProgressBarLifecycleObserver? = null
 
-    override val di by di()
+    /**
+     * Override and create a child DI to provide access to the multiplatform
+     * NavController implementation.
+     */
+    override val di by DI.lazy {
+        val closestDi: DI by closestDI()
+        extend(closestDi)
+
+        bind<UstadNavController>() with provider {
+            NavControllerAdapter(findNavController(), instance())
+        }
+
+        bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
+            viewLifecycleOwner.lifecycleScope
+        }
+
+        bind<DoorLifecycleOwner>() with provider {
+            viewLifecycleOwner
+        }
+    }
 
     override var loading: Boolean = false
         get() = field
@@ -103,15 +126,22 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
             viewLifecycleOwner.lifecycle.addObserver(it)
         }
 
-        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(ARG_SNACK_MESSAGE)?.observe(
+        val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
+        savedStateHandle?.getLiveData<String>(ARG_SNACK_MESSAGE)?.observe(
                 viewLifecycleOwner) {
             showSnackBar(it)
         }
+
+        arguments?.getString(ARG_SNACK_MESSAGE)?.also { snackBarMsg ->
+            val snackbarShown: String? = savedStateHandle?.get(KEY_ARG_SNACKBAR_SHOWN)
+            if(snackbarShown?.toBoolean() != true) {
+                showSnackBar(snackBarMsg)
+                savedStateHandle?.set(KEY_ARG_SNACKBAR_SHOWN, true.toString())
+            }
+        }
+
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
@@ -125,6 +155,10 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
         }
     }
 
+    fun <T : UstadBaseController<*>> T.withViewLifecycle(): T {
+        viewLifecycleOwner.lifecycle.addObserver(PresenterViewLifecycleObserver(this))
+        return this
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -139,12 +173,12 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     companion object {
 
-
-
         /**
          * The key to use in the SavedStateHandle to save the result
          */
         const val ARG_RESULT_DEST_KEY = "result_key"
+
+        const val KEY_ARG_SNACKBAR_SHOWN = "argSnackbarShown"
 
     }
 

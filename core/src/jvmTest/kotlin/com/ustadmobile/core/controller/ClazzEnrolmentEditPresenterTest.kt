@@ -69,6 +69,9 @@ class ClazzEnrolmentEditPresenterTest {
             clazzUid = repo.clazzDao.insert(this)
         }
 
+        val existingClazz = repo.clazzDao.findByUid(testClazz.clazzUid)
+        println(existingClazz)
+
         activePerson = Person().apply {
             firstNames = "Test"
             lastName = "User"
@@ -83,7 +86,7 @@ class ClazzEnrolmentEditPresenterTest {
 
         val presenterArgs = mapOf<String, String>(
                 UstadView.ARG_PERSON_UID to activePerson.personUid.toString(),
-                UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString(),
+                UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString(),
                 UstadView.ARG_SAVE_TO_DB to true.toString())
         val systemImpl: UstadMobileSystemImpl by di.instance()
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -92,14 +95,14 @@ class ClazzEnrolmentEditPresenterTest {
                 presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
-        val initialEntity = mockView.captureLastEntityValue()!!
+        val initialEntity = mockView.captureLastEntityValue(timeoutMillis = 5000)!!
 
         initialEntity.clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
 
         presenter.handleClickSave(initialEntity)
 
         runBlocking {
-            repo.waitUntil(5000, listOf("ClazzEnrolmentWithClazz")) {
+            repo.waitUntil(5000, listOf("ClazzEnrolment")) {
                 runBlocking {
                     repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
                             activePerson.personUid).isNotEmpty()
@@ -131,7 +134,7 @@ class ClazzEnrolmentEditPresenterTest {
 
         val presenterArgs = mapOf<String, String>(
                 UstadView.ARG_PERSON_UID to activePerson.personUid.toString(),
-                UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString(),
+                UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString(),
                 UstadView.ARG_SAVE_TO_DB to true.toString(),
                 UstadView.ARG_ENTITY_UID to testEntity.clazzEnrolmentUid.toString())
         val presenter = ClazzEnrolmentEditPresenter(context,
@@ -148,9 +151,9 @@ class ClazzEnrolmentEditPresenterTest {
         presenter.handleClickSave(initialEntity)
 
         runBlocking {
-            repo.waitUntil(5000, listOf("ClazzEnrolment")) {
+            repo.waitUntil(120000, listOf("ClazzEnrolment")) {
                 runBlocking {
-                    repo.clazzEnrolmentDao.findByUid(testEntity.clazzEnrolmentUid)?.clazzEnrolmentDateLeft != Long.MAX_VALUE
+                    repo.clazzEnrolmentDao.findByUid(testEntity.clazzEnrolmentUid)?.clazzEnrolmentLeavingReasonUid == LeavingReason.FAMILY_PROBLEM_UID
                 }
             }
         }

@@ -6,30 +6,18 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = AgentEntity.TABLE_ID,
-    notifyOnUpdate = [
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId as deviceId, ${AgentEntity.TABLE_ID} as tableId FROM 
-        ChangeLog
-        JOIN AgentEntity ON ChangeLog.chTableId = ${AgentEntity.TABLE_ID} AND ChangeLog.chEntityPk = AgentEntity.agentUid
-        JOIN Person ON Person.personUid = AgentEntity.agentPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        """
-    ],
-
-    syncFindAllQuery = """
-        SELECT AgentEntity.* FROM 
-        AgentEntity
-        JOIN Person ON Person.personUid = AgentEntity.agentPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId
-        """
+@ReplicateEntity(tableId = AgentEntity.TABLE_ID, tracker = AgentEntityReplicate::class)
+@Triggers(arrayOf(
+ Trigger(name = "agententity_remote_insert",
+         order = Trigger.Order.INSTEAD_OF,
+         on = Trigger.On.RECEIVEVIEW,
+         events = [Trigger.Event.INSERT],
+         sqlStatements = [
+         "REPLACE INTO AgentEntity(agentUid, agentMbox, agentMbox_sha1sum, agentOpenid, agentAccountName, agentHomePage, agentPersonUid, statementMasterChangeSeqNum, statementLocalChangeSeqNum, statementLastChangedBy, agentLct) VALUES (NEW.agentUid, NEW.agentMbox, NEW.agentMbox_sha1sum, NEW.agentOpenid, NEW.agentAccountName, NEW.agentHomePage, NEW.agentPersonUid, NEW.statementMasterChangeSeqNum, NEW.statementLocalChangeSeqNum, NEW.statementLastChangedBy, NEW.agentLct) " +
+         "/*psql ON CONFLICT (agentUid) DO UPDATE SET agentMbox = EXCLUDED.agentMbox, agentMbox_sha1sum = EXCLUDED.agentMbox_sha1sum, agentOpenid = EXCLUDED.agentOpenid, agentAccountName = EXCLUDED.agentAccountName, agentHomePage = EXCLUDED.agentHomePage, agentPersonUid = EXCLUDED.agentPersonUid, statementMasterChangeSeqNum = EXCLUDED.statementMasterChangeSeqNum, statementLocalChangeSeqNum = EXCLUDED.statementLocalChangeSeqNum, statementLastChangedBy = EXCLUDED.statementLastChangedBy, agentLct = EXCLUDED.agentLct*/"
+         ])
+ )
 )
-
 @Serializable
 class AgentEntity {
 
@@ -57,6 +45,7 @@ class AgentEntity {
     @LastChangedBy
     var statementLastChangedBy: Int = 0
 
+    @ReplicationVersionId
     @LastChangedTime
     var agentLct: Long = 0
 

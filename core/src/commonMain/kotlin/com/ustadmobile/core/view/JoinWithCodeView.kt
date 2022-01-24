@@ -10,6 +10,8 @@ interface JoinWithCodeView: UstadView {
 
     fun finish()
 
+    var buttonLabel: String?
+
     companion object {
 
         const val VIEW_NAME = "JoinWithCode"

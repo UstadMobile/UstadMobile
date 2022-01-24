@@ -31,7 +31,7 @@ class ContainerAddOptions(val storageDirUri: DoorUri,
 
         val DEFAULT_COMPRESSION_FILTER = object: CompressionFilter {
             private val mediaExtensions = listOf(".mp4", ".mkv", ".webm", ".mov", ".avi", ".flv",
-                ".mp3", ".ogg", ".wav", ".au", ".3gp", ".m4a")
+                ".mp3", ".ogg", ".wav", ".au", ".3gp", ".m4a", ".m4v")
 
             override fun shouldCompress(pathInContainer: String, mimeType: String?) : Boolean{
                 val isVideoExtension = pathInContainer.toLowerCase().let { pathLowerCase ->

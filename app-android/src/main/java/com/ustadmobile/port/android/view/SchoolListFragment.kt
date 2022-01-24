@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
-import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -59,7 +58,7 @@ class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAn
                               savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = SchoolListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = SchoolListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
@@ -108,12 +107,6 @@ class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAn
     override fun onClick(v: View?) {
         if(v?.id == R.id.item_createnew_layout) {
             navigateToEditEntity(null, R.id.school_edit_dest, School::class.java)
-
-            var args = bundleOf()
-
-            navigateToEditEntity(null, R.id.school_edit_dest, School::class.java,
-                    argBundle = args)
-
         }else{
             super.onClick(v)
         }

@@ -82,6 +82,16 @@ object UmViewActions {
         }
     }
 
+    fun hasInputLayoutError(expectedErrorText: Int): Matcher<View> = object: TypeSafeMatcher<View>() {
+        override fun describeTo(description: Description?) { }
+
+        override fun matchesSafely(item: View?): Boolean {
+            if (item !is TextInputLayout) return false
+            val error = item.error ?: ""
+            return item.context.getString(expectedErrorText) == error
+        }
+    }
+
     fun atPosition(position: Int, itemMatcher: Matcher<View?>): Matcher<View?>? {
         return object : BoundedMatcher<View?, RecyclerView>(RecyclerView::class.java) {
             override fun describeTo(description: Description) {

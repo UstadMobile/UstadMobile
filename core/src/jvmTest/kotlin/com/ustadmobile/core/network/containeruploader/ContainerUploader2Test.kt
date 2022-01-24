@@ -13,7 +13,7 @@ import com.ustadmobile.core.io.UploadSessionParams
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
 import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
-import com.ustadmobile.core.networkmanager.ContainerUploaderRequest2
+import com.ustadmobile.core.network.NetworkProgressListener
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
 import com.ustadmobile.core.util.ext.encodeBase64
@@ -35,6 +35,10 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import org.mockito.kotlin.any
+import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.SequenceInputStream
@@ -90,7 +94,7 @@ class ContainerUploader2Test {
                     MockResponse().setResponseCode(204)
                 }
                 request.requestUrl.toString().endsWith("/close") -> {
-                    MockResponse().setResponseCode(200)
+                    MockResponse().setResponseCode(204)
                 }
 
                 else -> {
@@ -148,10 +152,10 @@ class ContainerUploader2Test {
 
         val accountManager: UstadAccountManager = di.direct.instance()
         siteEndpoint = Endpoint(mockWebServer.url("/").toString())
-        accountManager.activeAccount.endpointUrl = siteEndpoint.url
+        accountManager.activeEndpoint = siteEndpoint
 
-        clientDb = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
-        clientRepo = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
+        clientDb = di.on(siteEndpoint).direct.instance(tag = DoorTag.TAG_DB)
+        clientRepo = di.on(siteEndpoint).direct.instance(tag = DoorTag.TAG_REPO)
 
         container = Container().apply {
             containerUid = clientRepo.containerDao.insert(this)
@@ -174,7 +178,8 @@ class ContainerUploader2Test {
         val uploadRequest = ContainerUploaderRequest2(UUID.randomUUID().toString(),
                 entriesToUpload, mockWebServer.url("/").toString())
 
-        val uploader = ContainerUploader2(uploadRequest, 200 * 1024, siteEndpoint, di)
+        val uploader = ContainerUploader2(uploadRequest, 200 * 1024, siteEndpoint,
+            null, di)
         val result = runBlocking { uploader.upload() }
 
         //now read the stream
@@ -203,7 +208,9 @@ class ContainerUploader2Test {
         val uploadRequest = ContainerUploaderRequest2(UUID.randomUUID().toString(),
                 entriesToUpload, mockWebServer.url("/").toString())
 
-        val uploader = ContainerUploader2(uploadRequest, 200 * 1024, siteEndpoint, di)
+        val mockProgressListener: NetworkProgressListener = mock { }
+        val uploader = ContainerUploader2(uploadRequest, 200 * 1024, siteEndpoint,
+            mockProgressListener, di)
         val result = runBlocking { uploader.upload() }
 
         //now read the stream
@@ -230,5 +237,6 @@ class ContainerUploader2Test {
         }
 
         Assert.assertEquals("Result is JobStatus.COMPLETE", JobStatus.COMPLETE, result)
+        verify(mockProgressListener, atLeastOnce()).onProgress(any(), any())
     }
 }

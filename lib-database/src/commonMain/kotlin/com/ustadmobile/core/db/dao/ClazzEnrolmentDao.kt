@@ -1,25 +1,92 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.SyncNode
+import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 
 @Repository
 @Dao
 abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
+    @Query("""
+     REPLACE INTO ClazzEnrolmentReplicate(cePk, ceDestination)
+      SELECT DISTINCT ClazzEnrolment.clazzEnrolmentUid AS ceUid,
+             :newNodeId AS ceDestination
+        FROM UserSession
+             JOIN PersonGroupMember 
+                   ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_SELECT} 
+                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2} 
+             JOIN ClazzEnrolment 
+                   ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
+       WHERE UserSession.usClientNodeId = :newNodeId
+         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+         AND ClazzEnrolment.clazzEnrolmentLct != COALESCE(
+             (SELECT ceVersionId
+                FROM ClazzEnrolmentReplicate
+               WHERE cePk = ClazzEnrolment.clazzEnrolmentUid
+                 AND ceDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
+             SET cePending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([ClazzEnrolment::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+     @Query("""
+ REPLACE INTO ClazzEnrolmentReplicate(cePk, ceDestination)
+  SELECT DISTINCT ClazzEnrolment.clazzEnrolmentUid AS ceUid,
+         UserSession.usClientNodeId AS ceDestination
+    FROM ChangeLog
+         JOIN ClazzEnrolment
+             ON ChangeLog.chTableId = ${ClazzEnrolment.TABLE_ID}
+                AND ChangeLog.chEntityPk = ClazzEnrolment.clazzEnrolmentUid
+         JOIN Clazz
+             ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+         ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+             ${Role.PERMISSION_CLAZZ_SELECT}
+             ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND ClazzEnrolment.clazzEnrolmentLct != COALESCE(
+         (SELECT ceVersionId
+            FROM ClazzEnrolmentReplicate
+           WHERE cePk = ClazzEnrolment.clazzEnrolmentUid
+             AND ceDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(cePk, ceDestination) DO UPDATE
+     SET cePending = true
+  */               
+    """)
+    @ReplicationRunOnChange([ClazzEnrolment::class])
+    @ReplicationCheckPendingNotificationsFor([ClazzEnrolment::class])
+    abstract suspend fun replicateClazzEnrolmentOnChange()
+
+    /**
+     * Note: When actually enroling into a class, use UmAppDatbaseExt#processEnrolmentIntoClass
+     * to ensure that permissions, group membership, etc. are taken care of
+     */
     @Insert
     abstract fun insertListAsync(entityList: List<ClazzEnrolment>)
 
     open suspend fun updateDateLeft(clazzEnrolmentUidList: List<Long>, endDate: Long) {
+        val updateTime = systemTimeInMillis()
         clazzEnrolmentUidList.forEach {
-            updateDateLeftByUid(it, endDate)
+            updateDateLeftByUid(it, endDate, updateTime)
         }
     }
 
@@ -28,23 +95,34 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS} LIMIT 1""")
     abstract suspend fun findByPersonUidAndClazzUidAsync(personUid: Long, clazzUid: Long): ClazzEnrolment?
 
-    @Query("""SELECT ClazzEnrolment.*, LeavingReason.* FROM ClazzEnrolment LEFT JOIN
+    @Query("""SELECT ClazzEnrolment.*, LeavingReason.*, 
+         COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
+         FROM ClazzEnrolment LEFT JOIN
         LeavingReason ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
+        LEFT JOIN Clazz ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+        LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
         WHERE clazzEnrolmentPersonUid = :personUid 
         AND ClazzEnrolment.clazzEnrolmentActive 
         AND clazzEnrolmentClazzUid = :clazzUid ORDER BY clazzEnrolmentDateLeft DESC""")
     abstract fun findAllEnrolmentsByPersonAndClazzUid(personUid: Long, clazzUid: Long):
-            DataSource.Factory<Int, ClazzEnrolmentWithLeavingReason>
+            DoorDataSourceFactory<Int, ClazzEnrolmentWithLeavingReason>
 
-    @Query("""SELECT ClazzEnrolment.*, LeavingReason.* FROM ClazzEnrolment LEFT JOIN
+    @Query("""SELECT ClazzEnrolment.*, LeavingReason.*,
+         COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
+         FROM ClazzEnrolment LEFT JOIN
         LeavingReason ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
+        LEFT JOIN Clazz ON Clazz.clazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+        LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
         WHERE ClazzEnrolment.clazzEnrolmentUid = :enrolmentUid""")
     abstract suspend fun findEnrolmentWithLeavingReason(enrolmentUid: Long): ClazzEnrolmentWithLeavingReason?
 
-    @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentDateLeft = :endDate,
-            clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)
-            WHERE clazzEnrolmentUid = :clazzEnrolmentUid""")
-    abstract suspend fun updateDateLeftByUid(clazzEnrolmentUid: Long, endDate: Long)
+    @Query("""
+        UPDATE ClazzEnrolment 
+          SET clazzEnrolmentDateLeft = :endDate,
+              clazzEnrolmentLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL},
+              clazzEnrolmentLct = :updateTime
+        WHERE clazzEnrolmentUid = :clazzEnrolmentUid""")
+    abstract suspend fun updateDateLeftByUid(clazzEnrolmentUid: Long, endDate: Long, updateTime: Long)
 
     @Update
     abstract suspend fun updateAsync(entity: ClazzEnrolment): Int
@@ -73,7 +151,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND ClazzEnrolment.clazzEnrolmentActive
         ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
     """)
-    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>
+    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DoorDataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>
 
     @Query("""SELECT COALESCE(MAX(clazzEnrolmentDateLeft),0) FROM ClazzEnrolment WHERE 
         ClazzEnrolment.clazzEnrolmentPersonUid = :selectedPerson 
@@ -92,20 +170,42 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     """)
     abstract suspend fun findAllClazzesByPersonWithClazzAsListAsync(personUid: Long): List<ClazzEnrolmentWithClazz>
 
-    @Query("""SELECT ClazzEnrolment.*, Person.*
-        FROM ClazzEnrolment
-        LEFT JOIN Person ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
+    @Query("""
+        SELECT ClazzEnrolment.*, Person.*
+          FROM ClazzEnrolment
+    LEFT JOIN Person ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
-        AND :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft
-        AND (:roleFilter = 0 OR ClazzEnrolment.clazzEnrolmentRole = :roleFilter)
+              AND :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+              AND ClazzEnrolment.clazzEnrolmentDateLeft
+              AND CAST(clazzEnrolmentActive AS INTEGER) = 1
+              AND (:roleFilter = 0 OR ClazzEnrolment.clazzEnrolmentRole = :roleFilter)
+              AND (:personUidFilter = 0 OR ClazzEnrolment.clazzEnrolmentPersonUid = :personUidFilter)
     """)
-    abstract suspend fun getAllClazzEnrolledAtTimeAsync(clazzUid: Long, date: Long, roleFilter: Int): List<ClazzEnrolmentWithPerson>
+    abstract suspend fun getAllClazzEnrolledAtTimeAsync(clazzUid: Long, date: Long, roleFilter: Int,
+        personUidFilter: Long = 0): List<ClazzEnrolmentWithPerson>
 
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract suspend fun findByUid(uid: Long): ClazzEnrolment?
 
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzEnrolment?>
+
+    @Query("""
+                UPDATE ClazzEnrolment
+                   SET clazzEnrolmentActive = :active,
+                       clazzEnrolmentLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL},
+                       clazzEnrolmentLct= :changeTime
+                WHERE clazzEnrolmentPersonUid = :personUid 
+                      AND clazzEnrolmentClazzUid = :clazzUid
+                      AND clazzEnrolmentRole = :roleId""")
+    abstract suspend fun updateClazzEnrolmentActiveForPersonAndClazz(
+        personUid: Long,
+        clazzUid: Long,
+        roleId: Int,
+        active: Boolean,
+        changeTime: Long
+    ): Int
+
 
     @Query("""SELECT Person.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
         ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
@@ -126,8 +226,9 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         ClazzEnrolment.clazzEnrolmentPersonUid AND 
         ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
         AND ClazzEnrolment.clazzEnrolmentActive) AS enrolmentRole
+        FROM PersonGroupMember
+        ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
         
-         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
          WHERE
          PersonGroupMember.groupMemberPersonUid = :accountPersonUid
          AND PersonGroupMember.groupMemberActive 
@@ -160,26 +261,16 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                 ELSE 0
             END DESC
     """)
+    @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonGroupMember", "ScopedGrant"])
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%",
-                                       filter: Int, accountPersonUid: Long, currentTime: Long): DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>
+                                       filter: Int, accountPersonUid: Long, currentTime: Long): DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>
 
 
-    @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentActive = :enrolled,
-                clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
-                WHERE clazzEnrolmentPersonUid = :personUid AND clazzEnrolmentClazzUid = :clazzUid""")
-    abstract suspend fun updateClazzEnrolmentActiveForPersonAndClazz(personUid: Long, clazzUid: Long, enrolled: Int): Int
-
-    suspend fun updateClazzEnrolmentActiveForPersonAndClazz(personUid: Long, clazzUid: Long, enrolled: Boolean): Int {
-        return if (enrolled) {
-            updateClazzEnrolmentActiveForPersonAndClazz(personUid, clazzUid, 1)
-        } else {
-            updateClazzEnrolmentActiveForPersonAndClazz(personUid, clazzUid, 0)
-        }
-    }
-
-    @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentActive = :enrolled,
-            clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
-            WHERE clazzEnrolmentUid = :clazzEnrolmentUid""")
+    @Query("""
+        UPDATE ClazzEnrolment 
+          SET clazzEnrolmentActive = :enrolled,
+              clazzEnrolmentLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
+        WHERE clazzEnrolmentUid = :clazzEnrolmentUid""")
     abstract fun updateClazzEnrolmentActiveForClazzEnrolment(clazzEnrolmentUid: Long, enrolled: Int): Int
 
     fun updateClazzEnrolmentActiveForClazzEnrolment(clazzEnrolmentUid: Long, enrolled: Boolean): Int {
@@ -190,10 +281,28 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         }
     }
 
-    @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentRole = :role,
-            clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
-            WHERE clazzEnrolmentPersonUid = :personUid AND clazzEnrolmentClazzUid = :clazzUid""")
-    abstract suspend fun updateClazzEnrolmentRole(personUid: Long, clazzUid: Long, role: Int)
+    @Query("""
+            UPDATE ClazzEnrolment 
+               SET clazzEnrolmentRole = :newRole,
+                   clazzEnrolmentLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL},
+                   clazzEnrolmentLct = :updateTime      
+                   
+             -- Avoid potential for duplicate approvals if user was previously refused      
+             WHERE clazzEnrolmentUid = COALESCE( 
+                    (SELECT clazzEnrolmentUid
+                       FROM ClazzEnrolment
+                      WHERE clazzEnrolmentPersonUid = :personUid 
+                            AND clazzEnrolmentClazzUid = :clazzUid
+                            AND clazzEnrolmentRole = :oldRole
+                            AND CAST(clazzEnrolmentActive AS INTEGER) = 1
+                      LIMIT 1), 0)""")
+    abstract suspend fun updateClazzEnrolmentRole(
+        personUid: Long,
+        clazzUid: Long,
+        newRole: Int,
+        oldRole: Int,
+        updateTime: Long
+    ): Int
 
     companion object {
 

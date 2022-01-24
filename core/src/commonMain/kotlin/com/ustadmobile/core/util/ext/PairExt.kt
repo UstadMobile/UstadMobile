@@ -26,12 +26,12 @@ fun Pair<Int, Int>.fitWithin(maxDimension: Int = 640): Pair<Int, Int>{
 
         val ratio = maxDimension.toFloat() / originalWidth.toFloat()
         val newPair =  Pair(maxDimension, (originalHeight * ratio).toInt())
-        return VALID_RESOLUTIONS.minBy { it.variance(newPair) } ?: newPair
+        return VALID_RESOLUTIONS.minByOrNull { it.variance(newPair) } ?: newPair
     }else if(originalHeight > originalWidth && originalHeight > maxDimension){
 
         val ratio = maxDimension.toFloat() / originalHeight.toFloat()
         val newPair = Pair((originalWidth * ratio).toInt(), maxDimension)
-        return VALID_RESOLUTIONS.minBy { it.variance(newPair) } ?: newPair
+        return VALID_RESOLUTIONS.minByOrNull { it.variance(newPair) } ?: newPair
     }
-    return VALID_RESOLUTIONS.minBy { it.variance(this) } ?: this
+    return VALID_RESOLUTIONS.minByOrNull { it.variance(this) } ?: this
 }

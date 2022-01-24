@@ -12,6 +12,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ABSENT
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
@@ -71,11 +72,11 @@ class ClazzLogEditAttendancePresenter(context: Any,
         }
 
 
-        val clazzLog = withTimeoutOrNull(2000) {
+        val clazzLog = db.onRepoWithFallbackToDb(2000) {
             if(currentClazzLogUid == 0L && newClazzLog != null) {
                 newClazzLog
             }else {
-                db.takeIf { currentClazzLogUid != 0L }?.clazzLogDao?.findByUidAsync(currentClazzLogUid)
+                it.takeIf { currentClazzLogUid != 0L }?.clazzLogDao?.findByUidAsync(currentClazzLogUid)
             }
         } ?: ClazzLog()
 

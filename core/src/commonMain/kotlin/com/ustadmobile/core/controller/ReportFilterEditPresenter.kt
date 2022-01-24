@@ -61,9 +61,9 @@ class ReportFilterEditPresenter(context: Any,
         : MessageIdOption(day.messageId, context, day.optionVal)
 
     enum class ContentCompletionStatusOption(val optionVal: Int, val messageId: Int) {
-        COMPLETED(ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED, MessageID.completed),
-        PASSED(ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED, MessageID.passed),
-        FAILED(ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED, MessageID.failed)
+        COMPLETED(StatementEntity.CONTENT_COMPLETE, MessageID.completed),
+        PASSED(StatementEntity.CONTENT_PASSED, MessageID.passed),
+        FAILED(StatementEntity.CONTENT_FAILED, MessageID.failed)
     }
 
     class ContentCompletionStatusMessageIdOption(day: ContentCompletionStatusOption, context: Any)

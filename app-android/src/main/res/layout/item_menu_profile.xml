@@ -5,22 +5,20 @@
     android:layout_height="@dimen/dimen_25dp"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@drawable/profile_menu_bg"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <TextView
-        android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-        android:id="@+id/person_name_letter"
-        android:textColor="?colorOnPrimary"
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/person_name_profilepic"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:textStyle="bold"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        android:tint="@color/onPrimaryColor"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:text="A"
+        android:contentDescription="@string/profile"
         />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

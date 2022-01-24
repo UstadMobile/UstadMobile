@@ -5,9 +5,6 @@ buildscript {
         }
 
         mavenCentral()
-        maven {
-            url "https://kotlin.bintray.com/kotlinx"
-        }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
@@ -22,14 +19,6 @@ apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.android.library'
 apply plugin: 'jacoco'
 apply plugin: "maven-publish"
-
-
-repositories {
-    mavenCentral()
-    maven {
-        url "http://devserver2.ustadmobile.com/repo-mvn"
-    }
-}
 
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
@@ -53,9 +42,8 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        missingDimensionStrategy 'api', 'api18'
     }
 
     compileOptions {
@@ -129,7 +117,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "io.ktor:ktor-gson:$version_ktor"
-                implementation "com.github.aakira:napier:$version_napier"
+                implementation "io.github.aakira:napier:$version_napier"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
 
 
@@ -238,14 +226,14 @@ kotlin {
                 implementation project(":lib-database")
                 implementation project(":lib-test-common")
 
-                implementation "com.github.aakira:napier:$version_napier"
+                implementation "io.github.aakira:napier:$version_napier"
                 implementation "com.soywiz.korlibs.klock:klock:$version_klock"
 
                 implementation "junit:junit:$version_junit"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "io.github.aakira:napier-jvm:$version_napier"
                 implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
                 implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
 

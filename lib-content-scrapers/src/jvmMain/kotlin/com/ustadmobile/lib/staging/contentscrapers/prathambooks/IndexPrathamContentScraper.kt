@@ -39,6 +39,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import java.util.function.Consumer
 
 
@@ -82,7 +83,8 @@ class IndexPrathamContentScraper {
         ContentScraperUtil.setChromeDriverLocation()
         val cookie = loginPratham()
 
-        db = UmAppDatabase.getInstance(Any())
+
+        //db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         repository = db //db!!.getRepository("https://localhost", "")
         contentEntryDao = repository!!.contentEntryDao
         contentParentChildJoinDao = repository!!.contentEntryParentChildJoinDao

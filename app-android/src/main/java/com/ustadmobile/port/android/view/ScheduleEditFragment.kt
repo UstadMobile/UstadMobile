@@ -29,7 +29,7 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
         }
 
         mPresenter = ScheduleEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView
@@ -60,6 +60,7 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

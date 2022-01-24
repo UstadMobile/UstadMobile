@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="android.view.View"/>
+
+        <variable
+            name="score"
+            type="com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress" />
+
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:id="@+id/item_class_assignment_score_description_cl">
+
+        <View
+            android:id="@+id/dividerTop"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dimen_1dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@android:color/darker_gray" />
+
+
+        <TextView
+            tools:text="100%"
+            android:id="@+id/item_person_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            app:scorePercentage="@{score}"
+            app:showScoreVisibility="@{score}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dividerTop"
+            style="@style/UmTheme.TextAppearance.Body1"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+        <TextView
+            android:paddingEnd="@dimen/dimen_5dp"
+            tools:text="(4/4)"
+            android:id="@+id/item_person_total_score_results"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:text='@{"(" + score.resultScore + &quot;/&quot; + score.resultMax + ")"}'
+            app:showScoreVisibility="@{score}"
+            app:layout_constraintStart_toEndOf="@+id/item_person_score"
+            app:layout_constraintTop_toBottomOf="@id/dividerTop"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            style="@style/UmTheme.TextAppearance.Body1"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+
+        <TextView
+            android:id="@+id/your_total_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/item_person_score"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:text="@string/total_score" />
+
+        <View
+            android:id="@+id/dividerBottom"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dimen_1dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            app:layout_constraintTop_toBottomOf="@id/your_total_score"
+            android:background="@android:color/darker_gray" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

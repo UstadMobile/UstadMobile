@@ -1,24 +1,26 @@
 
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.db.JobStatus
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -49,8 +51,6 @@ class ContentEntryDetailOverviewPresenterTest {
 
     private val defaultTimeout = 3000L
 
-    private lateinit var containerManager: ContainerDownloadManager
-
     private var presenterArgs: Map<String, String>? = null
 
     private lateinit var localAvailabilityManager: LocalAvailabilityManager
@@ -60,7 +60,6 @@ class ContentEntryDetailOverviewPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        containerManager = spy{}
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
@@ -126,7 +125,49 @@ class ContentEntryDetailOverviewPresenterTest {
         presenter.handleClickEdit()
 
         verify(systemImpl).go(eq(ContentEntryEdit2View.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString())), any())
+                eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString(),
+                UstadView.ARG_LEAF to true.toString())), any())
+    }
+
+    @Test
+    fun givenContentEntryExists_whenContentJobItemInProgress_thenShouldSetProgressBarView() {
+        val db: UmAppDatabase by di.activeDbInstance()
+
+        val contentJob = ContentJob().apply {
+            cjUid = 1
+        }
+        val contentJobItem = ContentJobItem().apply {
+            cjiUid = 1
+            cjiJobUid = 1
+            cjiStatus = JobStatus.RUNNING
+            cjiRecursiveStatus = JobStatus.RUNNING
+            cjiItemProgress = 50
+            cjiItemTotal = 100
+            cjiContentEntryUid = createdEntry!!.contentEntryUid
+            cjiContainerUid = entryContainer.containerUid
+        }
+        runBlocking {
+            db.contentJobDao.insertAsync(contentJob)
+            db.contentJobItemDao.insertJobItem(contentJobItem)
+        }
+
+
+        val presenter = ContentEntryDetailOverviewPresenter(context,
+                presenterArgs!!, mockView, di, mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        sleep(defaultTimeout)
+
+        argumentCaptor<List<ContentJobItemProgress>> {
+            verify(mockView).contentJobItemProgress = capture()
+            val contentJobItemCaptured = this.firstValue[0]
+            Assert.assertEquals("progress match",
+                    contentJobItem.cjiItemProgress.toInt(), contentJobItemCaptured.progress)
+            Assert.assertEquals("total match",
+                    contentJobItem.cjiItemTotal.toInt(), contentJobItemCaptured.total)
+        }
+
     }
 
 }

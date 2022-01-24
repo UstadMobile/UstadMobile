@@ -5,7 +5,7 @@ apply plugin: 'kotlin-kapt'
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
@@ -31,8 +31,6 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -57,6 +55,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             testCoverageEnabled = false
+            testCoverageEnabled = false
         }
     }
 
@@ -80,6 +79,8 @@ tasks.whenTaskAdded { task ->
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation "com.ustadmobile.door:door-room-jdbc:$version_door"
 
     implementation project(":lib-database-entities")
     implementation "com.ustadmobile.door:door-runtime:$version_door"
@@ -107,7 +108,7 @@ dependencies {
 
 
     //Logging
-    implementation "com.github.aakira:napier:$version_napier"
+    implementation "io.github.aakira:napier:$version_napier"
 
 
 

@@ -60,7 +60,7 @@ class HolidayCalendarListFragment()
         val view = super.onCreateView(inflater, container, savedInstanceState)
 
         mPresenter = HolidayCalendarListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this,  di, viewLifecycleOwner)
+                this,  di, viewLifecycleOwner).withViewLifecycle()
         mDataRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_a_new_holiday_calendar))

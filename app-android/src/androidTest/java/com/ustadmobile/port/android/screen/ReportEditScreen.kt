@@ -4,13 +4,13 @@ import android.content.Context
 import android.view.View
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.test.espresso.Espresso
-import com.agoda.kakao.common.views.KSwipeView
-import com.agoda.kakao.common.views.KView
-import com.agoda.kakao.edit.KTextInputLayout
-import com.agoda.kakao.image.KImageView
-import com.agoda.kakao.recycler.KRecyclerItem
-import com.agoda.kakao.recycler.KRecyclerView
-import com.agoda.kakao.text.KTextView
+import io.github.kakaocup.kakao.common.views.KSwipeView
+import io.github.kakaocup.kakao.common.views.KView
+import io.github.kakaocup.kakao.edit.KTextInputLayout
+import io.github.kakaocup.kakao.image.KImageView
+import io.github.kakaocup.kakao.recycler.KRecyclerItem
+import io.github.kakaocup.kakao.recycler.KRecyclerView
+import io.github.kakaocup.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.kaspersky.kaspresso.testcases.core.testcontext.TestContext
 import com.toughra.ustadmobile.R
@@ -20,8 +20,11 @@ import com.ustadmobile.core.util.ext.toDisplayString
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.port.android.view.ReportEditFragment
 import com.ustadmobile.test.port.android.KNestedScrollView
+import com.ustadmobile.test.port.android.util.getApplicationDi
 import com.ustadmobile.test.port.android.util.setMessageIdOption
 import org.hamcrest.Matcher
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 object ReportEditScreen : KScreen<ReportEditScreen>() {
 
@@ -195,7 +198,8 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
                             }
 
                             filterName {
-                                hasText(filters.toDisplayString(context))
+                                val di = getApplicationDi()
+                                hasText(filters.toDisplayString(di.direct.instance(), context))
                             }
 
                         }

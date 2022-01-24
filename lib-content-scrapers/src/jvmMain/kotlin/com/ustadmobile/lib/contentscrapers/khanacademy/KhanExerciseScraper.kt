@@ -48,7 +48,7 @@ import java.util.*
 import java.util.regex.Pattern
 
 
-class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : HarScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
+class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, override val di: DI) : HarScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     override fun scrapeUrl(sourceUrl: String) {
 
@@ -547,7 +547,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
             contentInputStream.writeToFile(harExtraFile)
             val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
             repo.addFileToContainer(scraperResult.containerUid, harExtraFile.toDoorUri(),
-                    harExtraFile.name, containerAddOptions)
+                    harExtraFile.name, Any(), di, containerAddOptions)
             harExtraFile.delete()
         }
 

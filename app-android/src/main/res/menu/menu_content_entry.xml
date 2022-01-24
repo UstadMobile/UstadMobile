@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:orderInCategory="1"
+        android:id="@+id/action_share"
+        android:icon="@drawable/ic_baseline_share_24"
+        app:iconTint="@color/onPrimaryColor"
+        android:title="@string/share"
+        app:showAsAction="always"/>
     <item android:id="@+id/content_entry_group_activity" android:title="@string/group_activity"/>
 </menu>

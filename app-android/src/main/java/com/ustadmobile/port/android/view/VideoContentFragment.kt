@@ -80,6 +80,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
     private var containerUid: Long = 0
 
+    private val systemImpl: UstadMobileSystemImpl by instance()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mBinding = FragmentVideoContentBinding.inflate(inflater, container, false).also {
             rootView = it.root
@@ -104,15 +106,10 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         }
 
         mPresenter = VideoContentPresenter(requireContext(),
-                arguments.toStringMap(), this, di)
+                arguments.toStringMap(), this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        viewLifecycleOwner.lifecycle.addObserver(viewLifecycleObserver)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -242,7 +239,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     }
 
     fun showError() {
-        showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found,
+        showSnackBar(systemImpl.getString(MessageID.no_video_file_found,
                 requireContext()), {}, 0)
     }
 
@@ -317,40 +314,34 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         audioPlayer?.stop()
     }
 
-    private val viewLifecycleObserver = object : DefaultLifecycleObserver {
-
-        override fun onStart(owner: LifecycleOwner) {
-            super.onStart(owner)
-            if (Util.SDK_INT > 23) {
-                initializePlayer()
-            }
+    override fun onStart() {
+        super.onStart()
+        if (Util.SDK_INT > 23) {
+            initializePlayer()
         }
+    }
 
-        override fun onResume(owner: LifecycleOwner) {
-            super.onResume(owner)
-            if (Util.SDK_INT <= 23 || player == null) {
-                initializePlayer()
-            }
-            mPresenter?.onResume()
+    override fun onResume() {
+        super.onResume()
+        if (Util.SDK_INT <= 23 || player == null) {
+            initializePlayer()
         }
+    }
 
-        override fun onPause(owner: LifecycleOwner) {
-            super.onPause(owner)
-            if (Util.SDK_INT <= 23) {
-                releasePlayer()
-                releaseAudio()
-            }
+    override fun onPause() {
+        super.onPause()
+        if (Util.SDK_INT <= 23) {
+            releasePlayer()
+            releaseAudio()
         }
+    }
 
-        override fun onStop(owner: LifecycleOwner) {
-            super.onStop(owner)
-            if (Util.SDK_INT > 23) {
-                releasePlayer()
-                releaseAudio()
-            }
-
+    override fun onStop() {
+        super.onStop()
+        if (Util.SDK_INT > 23) {
+            releasePlayer()
+            releaseAudio()
         }
-
     }
 
     private fun buildMediaSource(uri: Uri): MediaSource {

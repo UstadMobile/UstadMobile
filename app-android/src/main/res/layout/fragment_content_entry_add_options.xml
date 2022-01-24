@@ -1,73 +1,195 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/bottom_content_option_sheet"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clipToPadding="true"
-    app:behavior_hideable="true"
-    app:behavior_peekHeight="@dimen/dimen_0dp"
-    android:paddingBottom="@dimen/dimen_10dp"
-    android:orientation="vertical"
-    android:elevation="@dimen/dimen_16dp"
-    style="@style/UmTheme.ShapeAppearance.MediumComponent"
-    android:paddingTop="@dimen/dimen_10dp"
-    app:layout_behavior="@string/bottom_sheet_behavior">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <RelativeLayout
-        android:clickable="true"
-        android:background="@drawable/bg_listitem"
-        android:focusable="true"
-        android:id="@+id/content_create_folder"
-        android:layout_marginTop="@dimen/dimen_8dp"
-        android:padding="@dimen/dimen_16dp"
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="showFolder"
+            type="boolean" />
+
+    </data>
+
+
+    <LinearLayout
+        android:id="@+id/bottom_content_option_sheet"
+        style="@style/UmTheme.ShapeAppearance.MediumComponent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:targetApi="m">
-        <androidx.appcompat.widget.AppCompatImageView
-            android:tint="?colorOnIconTint"
-            android:id="@+id/create_category"
-            app:srcCompat="@drawable/ic_create_new_folder_white_24dp"
-            android:layout_centerVertical="true"
-            app:tint="?colorOnIconTint"
-            android:layout_width="@dimen/dimen_22dp"
-            android:layout_height="@dimen/dimen_22dp" />
+        android:clipToPadding="true"
+        android:elevation="@dimen/dimen_16dp"
+        android:orientation="vertical"
+        android:paddingTop="@dimen/dimen_10dp"
+        android:paddingBottom="@dimen/dimen_10dp"
+        app:behavior_hideable="true"
+        app:behavior_peekHeight="@dimen/dimen_0dp"
+        app:layout_behavior="@string/bottom_sheet_behavior">
 
         <TextView
-            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-            android:layout_marginStart="@dimen/dimen_16dp"
-            android:layout_toEndOf="@+id/create_category"
+            android:id="@+id/content_create_folder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_listitem"
+            android:visibility="@{showFolder ? View.VISIBLE : View.GONE}"
+            android:drawablePadding="@dimen/dimen_16dp"
+            android:padding="@dimen/dimen_16dp"
             android:text="@string/content_editor_create_new_category"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:clickable="true"
-        android:background="@drawable/bg_listitem"
-        android:focusable="true"
-        android:id="@+id/content_import_content"
-        android:padding="@dimen/dimen_16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <androidx.appcompat.widget.AppCompatImageView
-            android:tint="?colorOnIconTint"
-            app:srcCompat="@drawable/ic_exit_to_app_black_24dp"
-            android:id="@+id/import_file"
-            android:layout_centerVertical="true"
-            app:tint="?colorOnIconTint"
-            android:layout_width="@dimen/dimen_22dp"
-            android:layout_height="@dimen/dimen_22dp" />
-
-        <TextView
-            android:text="@string/import_content"
-            android:layout_marginStart="@dimen/dimen_16dp"
-            android:layout_toEndOf="@+id/import_file"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            app:drawableStartCompat="@drawable/ic_create_new_folder_white_24dp"
+            app:drawableTint="?colorOnIconTint" />
+
+        <RelativeLayout
+            android:id="@+id/content_add_link"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </RelativeLayout>
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_listitem"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/dimen_16dp">
 
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/add_using_link_icon"
+                android:layout_width="@dimen/dimen_22dp"
+                android:layout_height="@dimen/dimen_22dp"
+                android:layout_alignTop="@id/add_using_link_title"
+                android:tint="?colorOnIconTint"
+                app:srcCompat="@drawable/link"
+                app:tint="?colorOnIconTint" />
 
-</LinearLayout>
+            <TextView
+                android:id="@+id/add_using_link_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/add_using_link_icon"
+                android:text="@string/add_using_link"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/add_using_link_title"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/add_using_link_icon"
+                android:text="@string/add_link_description"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/content_add_gallery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_listitem"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/dimen_16dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/add_gallery_icon"
+                android:layout_width="@dimen/dimen_22dp"
+                android:layout_height="@dimen/dimen_22dp"
+                android:layout_alignTop="@id/add_gallery_title"
+                android:tint="?colorOnIconTint"
+                app:srcCompat="@drawable/ic_perm_media_black_24dp"
+                app:tint="?colorOnIconTint" />
+
+            <TextView
+                android:id="@+id/add_gallery_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/add_gallery_icon"
+                android:text="@string/add_from_gallery"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/add_gallery_title"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/add_gallery_icon"
+                android:text="@string/add_gallery_description"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/content_add_file"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_listitem"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/dimen_16dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/add_file_icon"
+                android:layout_width="@dimen/dimen_22dp"
+                android:layout_height="@dimen/dimen_22dp"
+                android:layout_alignTop="@id/add_file_title"
+                android:tint="?colorOnIconTint"
+                app:srcCompat="@drawable/ic_round_upload_file_24"
+                app:tint="?colorOnIconTint" />
+
+            <TextView
+                android:id="@+id/add_file_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/add_file_icon"
+                android:text="@string/add_file"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/add_file_title"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/add_file_icon"
+                android:text="@string/add_file_description"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/content_add_folder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_listitem"
+            android:clickable="true"
+            android:visibility="@{showFolder ? View.VISIBLE : View.GONE}"
+            android:focusable="true"
+            android:padding="@dimen/dimen_16dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/add_folder_icon"
+                android:layout_width="@dimen/dimen_22dp"
+                android:layout_height="@dimen/dimen_22dp"
+                android:layout_alignTop="@id/add_folder_title"
+                android:tint="?colorOnIconTint"
+                app:srcCompat="@drawable/ic_round_drive_folder_upload_24"
+                app:tint="?colorOnIconTint" />
+
+            <TextView
+                android:id="@+id/add_folder_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/add_folder_icon"
+                android:text="@string/add_folder"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/add_folder_title"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/add_folder_icon"
+                android:text="@string/add_folder_description"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2" />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</layout>

@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.google.common.collect.Lists
 import com.google.gson.GsonBuilder
 import com.neovisionaries.i18n.CountryCode
@@ -67,7 +67,6 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.HashMap
 import java.util.logging.Level
 import java.util.regex.Pattern
 import java.util.zip.ZipEntry
@@ -96,7 +95,6 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBP_EXT
-import com.ustadmobile.lib.contentscrapers.abztract.Scraper
 import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
@@ -888,6 +886,7 @@ object ContentScraperUtil {
     }
 
 
+
     /**
      * @param contentEntry    entry that is joined to file
      * @param mobileOptimized isMobileOptimized
@@ -899,6 +898,8 @@ object ContentScraperUtil {
      * @returns the entry file
      */
     @Throws(IOException::class)
+    // TODO scrapers need di to support
+    @Deprecated("not updated since scrapers")
     fun insertContainer(containerDao: ContainerDao, contentEntry: ContentEntry,
                         mobileOptimized: Boolean, fileType: String,
                         lastModified: Long, tmpDir: File, db: UmAppDatabase,
@@ -914,16 +915,18 @@ object ContentScraperUtil {
         val containerAddOptions = ContainerAddOptions(storageDirUri = containerDir.toDoorUri())
         runBlocking {
             if (tmpDir.isDirectory) {
-                repository.addDirToContainer(container.containerUid, tmpDir.toDoorUri(),
-                        true, containerAddOptions)
+               /* repository.addDirToContainer(container.containerUid, tmpDir.toDoorUri(),
+                        true, containerAddOptions, di)*/
             } else if(fileType == ScraperConstants.MIMETYPE_ZIP ||
                     fileType == ScraperConstants.MIMETYPE_EPUB ||
                     fileType == ScraperConstants.MIMETYPE_TINCAN){
-                repository.addEntriesToContainerFromZip(container.containerUid,
-                        tmpDir.toDoorUri(), containerAddOptions)
+                repository.addEntriesToContainerFromZip(
+                        container.containerUid,
+                        tmpDir.toDoorUri(), containerAddOptions, Any()
+                )
             }else{
-                repository.addFileToContainer(container.containerUid, tmpDir.toDoorUri(),
-                        tmpDir.name, containerAddOptions)
+             /*   repository.addFileToContainer(container.containerUid, tmpDir.toDoorUri(),
+                        tmpDir.name, containerAddOptions, di)*/
             }
         }
 

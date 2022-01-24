@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCommetsListBinding
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
@@ -9,7 +10,7 @@ import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class CommentsRecyclerAdapter()
     : SelectablePagedListAdapter<CommentsWithPerson,
-        CommentsRecyclerAdapter.CommentsWithPersonViewHolder>(ClazzWorkDetailOverviewFragment.DIFF_CALLBACK_COMMENTS) {
+        CommentsRecyclerAdapter.CommentsWithPersonViewHolder>(DIFF_CALLBACK_COMMENTS) {
 
     class CommentsWithPersonViewHolder(val binding: ItemCommetsListBinding)
         : RecyclerView.ViewHolder(binding.root)
@@ -28,5 +29,24 @@ class CommentsRecyclerAdapter()
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
+    }
+
+    companion object{
+
+        val DIFF_CALLBACK_COMMENTS =
+                object : DiffUtil.ItemCallback<CommentsWithPerson>() {
+                    override fun areItemsTheSame(oldItem: CommentsWithPerson,
+                                                 newItem: CommentsWithPerson): Boolean {
+                        return oldItem.commentsUid == newItem.commentsUid
+                    }
+
+                    override fun areContentsTheSame(oldItem: CommentsWithPerson,
+                                                    newItem: CommentsWithPerson): Boolean {
+                        return oldItem.commentsPersonUid == newItem.commentsPersonUid &&
+                                oldItem.commentsText == newItem.commentsText &&
+                                oldItem.commentsDateTimeUpdated == newItem.commentsDateTimeUpdated
+                    }
+                }
+
     }
 }

@@ -8,6 +8,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_PDF
 import com.ustadmobile.lib.contentscrapers.ShrinkerUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang.exception.ExceptionUtils
@@ -21,7 +22,9 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
     private var isContentUpdated: Boolean = true
 
     override fun run() {
-        val db = UmAppDatabase.getInstance(Any())
+        //replace with DI
+        lateinit var db: UmAppDatabase
+        //val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         val repository = db// db.getRepository("https://localhost", "")
         val containerDao = repository.containerDao
         val queueDao = db.scrapeQueueItemDao

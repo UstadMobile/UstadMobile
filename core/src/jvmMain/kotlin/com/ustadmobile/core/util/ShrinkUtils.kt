@@ -1,7 +1,8 @@
 package com.ustadmobile.core.util
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import com.ustadmobile.core.catalog.contenttype.VideoTypePlugin
+import com.ustadmobile.core.contentjob.ContentPlugin
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.ext.commandExists
 import java.io.BufferedReader
@@ -61,7 +62,7 @@ object ShrinkUtils {
 
             //ffmpeg might return N/A if a ratio is not specified by the file. We need to validate
             //the input here so we don't give an invalid parameter to ffmpeg.
-            val ratio = VideoTypePlugin.validateRatio(stream.readLine())
+            val ratio = validateRatio(stream.readLine())
 
             stream.close()
             process.waitFor()
@@ -78,6 +79,27 @@ object ShrinkUtils {
             process?.destroy()
         }
         return Triple(0, 0, "")
+    }
+
+
+    /**
+     * Validate a ratio string that should be in the form of "x:y" where x and y are positive,
+     * non-zero integers. ffprobe might return N/A or something other than a valid aspect ratio,
+     * so this input needs validated.
+     *
+     * @return the ratioStr trimmed if it is valid, null otherwise
+     */
+    fun validateRatio(ratioStr: String): String? {
+        val parts = ratioStr.trim().split(':')
+        if(parts.size != 2)
+            return null //not valid
+
+        val partInts = parts.map { it.toIntOrNull() }
+        return if(partInts.all { it != null && it > 0 }) {
+            ratioStr.trim()
+        }else {
+            null
+        }
     }
 
 

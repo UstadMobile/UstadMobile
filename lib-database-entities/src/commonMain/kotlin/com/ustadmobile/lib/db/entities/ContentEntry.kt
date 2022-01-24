@@ -15,11 +15,18 @@ import kotlinx.serialization.Serializable
  * there should be the appropriate ContentEntryParentChildJoin entities present.
  */
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId 
-        FROM DeviceSession 
-    """])
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContentEntryReplicate::class)
+ @Triggers(arrayOf(
+     Trigger(name = "contententry_remote_insert",
+             order = Trigger.Order.INSTEAD_OF,
+             on = Trigger.On.RECEIVEVIEW,
+             events = [Trigger.Event.INSERT],
+             sqlStatements = [
+             "REPLACE INTO ContentEntry(contentEntryUid, title, description, entryId, author, publisher, licenseType, licenseName, licenseUrl, sourceUrl, thumbnailUrl, lastModified, primaryLanguageUid, languageVariantUid, contentFlags, leaf, publik, ceInactive, completionCriteria, minScore, contentTypeFlag, contentOwner, contentEntryLocalChangeSeqNum, contentEntryMasterChangeSeqNum, contentEntryLastChangedBy, contentEntryLct) VALUES (NEW.contentEntryUid, NEW.title, NEW.description, NEW.entryId, NEW.author, NEW.publisher, NEW.licenseType, NEW.licenseName, NEW.licenseUrl, NEW.sourceUrl, NEW.thumbnailUrl, NEW.lastModified, NEW.primaryLanguageUid, NEW.languageVariantUid, NEW.contentFlags, NEW.leaf, NEW.publik, NEW.ceInactive, NEW.completionCriteria, NEW.minScore, NEW.contentTypeFlag, NEW.contentOwner, NEW.contentEntryLocalChangeSeqNum, NEW.contentEntryMasterChangeSeqNum, NEW.contentEntryLastChangedBy, NEW.contentEntryLct) " +
+             "/*psql ON CONFLICT (contentEntryUid) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, entryId = EXCLUDED.entryId, author = EXCLUDED.author, publisher = EXCLUDED.publisher, licenseType = EXCLUDED.licenseType, licenseName = EXCLUDED.licenseName, licenseUrl = EXCLUDED.licenseUrl, sourceUrl = EXCLUDED.sourceUrl, thumbnailUrl = EXCLUDED.thumbnailUrl, lastModified = EXCLUDED.lastModified, primaryLanguageUid = EXCLUDED.primaryLanguageUid, languageVariantUid = EXCLUDED.languageVariantUid, contentFlags = EXCLUDED.contentFlags, leaf = EXCLUDED.leaf, publik = EXCLUDED.publik, ceInactive = EXCLUDED.ceInactive, completionCriteria = EXCLUDED.completionCriteria, minScore = EXCLUDED.minScore, contentTypeFlag = EXCLUDED.contentTypeFlag, contentOwner = EXCLUDED.contentOwner, contentEntryLocalChangeSeqNum = EXCLUDED.contentEntryLocalChangeSeqNum, contentEntryMasterChangeSeqNum = EXCLUDED.contentEntryMasterChangeSeqNum, contentEntryLastChangedBy = EXCLUDED.contentEntryLastChangedBy, contentEntryLct = EXCLUDED.contentEntryLct*/"
+             ])
+     )
+ )
 @Serializable
 open class ContentEntry() {
 
@@ -103,7 +110,19 @@ open class ContentEntry() {
      */
     var ceInactive: Boolean = false
 
+    /**
+     *  Represents if the entry is marked as completed by the content, student or min score
+     */
+    var completionCriteria: Int = COMPLETION_CRITERIA_AUTOMATIC
+
+    /**
+     * Minimum score for content to mark as complete if completion criteria is set to min score
+     */
+    var minScore: Int = 0
+
     var contentTypeFlag: Int = 0
+
+    var contentOwner: Long = 0
 
     @LocalChangeSeqNum
     var contentEntryLocalChangeSeqNum: Long = 0
@@ -115,6 +134,7 @@ open class ContentEntry() {
     var contentEntryLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var contentEntryLct: Long = 0
 
     constructor(title: String, description: String, leaf: Boolean, publik: Boolean) : this() {
@@ -174,6 +194,10 @@ open class ContentEntry() {
         const val FLAG_CONTENT_EDITOR = 2
 
         const val FLAG_SCRAPPED = 4
+
+        const val COMPLETION_CRITERIA_AUTOMATIC = 0
+        const val COMPLETION_CRITERIA_MIN_SCORE = 1
+        const val COMPLETION_CRITERIA_MARKED_BY_STUDENT = 2
     }
 
     override fun equals(other: Any?): Boolean {
@@ -199,6 +223,8 @@ open class ContentEntry() {
         if (publik != other.publik) return false
         if (ceInactive != other.ceInactive) return false
         if (contentTypeFlag != other.contentTypeFlag) return false
+        if (completionCriteria != other.completionCriteria) return false
+        if (minScore != other.minScore) return false
         if (contentEntryLocalChangeSeqNum != other.contentEntryLocalChangeSeqNum) return false
         if (contentEntryMasterChangeSeqNum != other.contentEntryMasterChangeSeqNum) return false
         if (contentEntryLastChangedBy != other.contentEntryLastChangedBy) return false
@@ -226,6 +252,8 @@ open class ContentEntry() {
         result = 31 * result + publik.hashCode()
         result = 31 * result + ceInactive.hashCode()
         result = 31 * result + contentTypeFlag
+        result = 31 * result + completionCriteria
+        result = 31 * result + minScore
         result = 31 * result + contentEntryLocalChangeSeqNum.hashCode()
         result = 31 * result + contentEntryMasterChangeSeqNum.hashCode()
         result = 31 * result + contentEntryLastChangedBy

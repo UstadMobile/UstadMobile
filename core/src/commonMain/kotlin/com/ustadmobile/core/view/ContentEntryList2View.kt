@@ -5,20 +5,12 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 
 interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
 
-    fun showContentEntryAddOptions(parentEntryUid: Long)
+    fun showContentEntryAddOptions()
 
     /**
      * Show the download dialog button. If required by the OS, show a permission dialog first
      */
     fun showDownloadDialog(args: Map<String, String>)
-
-    /**
-     * Show ContentEntryList in picker mode so the user can select a folder to move entries to.
-     *
-     * @param selectedContentEntryParentChildJoinUids a string which is a comma separated list of
-     * the selected ContentEntryParentChildJoinUids (e.g. that should be saved to the savedStateHandle)
-     */
-    fun showMoveEntriesFolderPicker(selectedContentEntryParentChildJoinUids: String)
 
     var title: String?
 
@@ -26,21 +18,28 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
     companion object {
 
-        const val ARG_DOWNLOADED_CONTENT = "downloaded"
+        const val ARG_SHOW_ONLY_FOLDER_FILTER = "folder"
 
-        const val ARG_CONTENT_FILTER = "filter"
+        const val ARG_DISPLAY_CONTENT_BY_OPTION = "displayOption"
 
-        const val ARG_FOLDER_FILTER = "folder"
+        const val ARG_DISPLAY_CONTENT_BY_CLAZZ = "displayContentByClazz"
 
-        const val ARG_LIBRARIES_CONTENT = "libraries"
+        const val ARG_DISPLAY_CONTENT_BY_PARENT = "displayContentByParent"
 
-        const val ARG_CLAZZWORK_FILTER = "clazzworkFilter"
+        const val ARG_CLAZZ_ASSIGNMENT_FILTER = "clazzAssignmentFilter"
+
+        //Used to make the item on the home screen seen as a different screen
+        const val VIEW_NAME_HOME = "ContentEntryListHome"
 
         const val VIEW_NAME = "ContentEntryListView"
+
+        const val FOLDER_VIEW_NAME = "ContentEntryListFolderView"
 
         const val ARG_MOVING_CONTENT = "SelectedItems"
 
         const val ARG_MOVING_COUNT = "moveCount"
+
+        const val ARG_SELECT_FOLDER_VISIBLE = "selectFolderVisible"
 
     }
 

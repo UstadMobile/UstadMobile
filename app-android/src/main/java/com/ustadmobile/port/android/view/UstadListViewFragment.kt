@@ -35,6 +35,7 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.port.android.view.ext.repoLoadingStatus
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -59,6 +60,8 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     protected var currentLiveData: LiveData<PagedList<DT>>? = null
 
     protected var dbRepo: UmAppDatabase? = null
+
+    private val systemImpl: UstadMobileSystemImpl by instance()
 
     /**
      * Whether or not UstadListViewFragment should attempt to manage the MergeAdapter. The MergeAdapter
@@ -117,8 +120,10 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
             menu.clear()
-            val systemImpl = UstadMobileSystemImpl.instance
             val fragmentContext = fragmentHost?.requireContext() ?: return false
+            val systemImpl: UstadMobileSystemImpl =
+                (fragmentHost as? UstadListViewFragment<*, *>)?.systemImpl ?: return false
+
             fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
                 val optionText = systemImpl.getString(item.messageId, fragmentContext)
                 menu.add(0, item.commandId, index, optionText).apply {

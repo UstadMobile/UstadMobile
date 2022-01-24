@@ -6,22 +6,24 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = StateEntity.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${StateEntity.TABLE_ID} AS tableId FROM 
-        ChangeLog
-        JOIN StateEntity ON ChangeLog.chTableId = ${StateEntity.TABLE_ID} AND ChangeLog.chEntityPk = StateEntity.stateUid
-        JOIN AgentEntity ON StateEntity.agentUid = AgentEntity.agentUid
-        JOIN DeviceSession ON AgentEntity.agentPersonUid = DeviceSession.dsPersonUid"""],
-    syncFindAllQuery = """
-        SELECT StateEntity.* FROM
-        StateEntity
-        JOIN AgentEntity ON StateEntity.agentUid = AgentEntity.agentUid
-        JOIN DeviceSession ON AgentEntity.agentPersonUid = DeviceSession.dsPersonUid
-        WHERE DeviceSession.dsDeviceId = :clientId
-    """)
 @Serializable
-class StateEntity {
+@ReplicateEntity(tableId = StateEntity.TABLE_ID, tracker = StateEntityReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "stateentity_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO StateEntity(stateUid, stateId, agentUid, activityId, registration, isIsactive, timestamp, stateMasterChangeSeqNum, stateLocalChangeSeqNum, stateLastChangedBy, stateLct) 
+         VALUES (NEW.stateUid, NEW.stateId, NEW.agentUid, NEW.activityId, NEW.registration, NEW.isIsactive, NEW.timestamp, NEW.stateMasterChangeSeqNum, NEW.stateLocalChangeSeqNum, NEW.stateLastChangedBy, NEW.stateLct) 
+         /*psql ON CONFLICT (stateUid) DO UPDATE 
+         SET stateId = EXCLUDED.stateId, agentUid = EXCLUDED.agentUid, activityId = EXCLUDED.activityId, registration = EXCLUDED.registration, isIsactive = EXCLUDED.isIsactive, timestamp = EXCLUDED.timestamp, stateMasterChangeSeqNum = EXCLUDED.stateMasterChangeSeqNum, stateLocalChangeSeqNum = EXCLUDED.stateLocalChangeSeqNum, stateLastChangedBy = EXCLUDED.stateLastChangedBy, stateLct = EXCLUDED.stateLct
+         */"""
+     ]
+ )
+))
+class StateEntity() {
 
     @PrimaryKey(autoGenerate = true)
     var stateUid: Long = 0
@@ -48,9 +50,10 @@ class StateEntity {
     var stateLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var stateLct: Long = 0
 
-    constructor(activityId: String?, agentUid: Long, registration: String?, stateId: String?, isActive: Boolean, timestamp: Long) {
+    constructor(activityId: String?, agentUid: Long, registration: String?, stateId: String?, isActive: Boolean, timestamp: Long) : this(){
         this.activityId = activityId
         this.agentUid = agentUid
         this.registration = registration
@@ -59,15 +62,11 @@ class StateEntity {
         this.timestamp = timestamp
     }
 
-    constructor() {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
 
-    }
-
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || this::class != o::class) return false
-
-        val that = o as StateEntity?
+        val that = other as StateEntity?
 
         if (stateUid != that!!.stateUid) return false
         if (agentUid != that.agentUid) return false

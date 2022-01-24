@@ -5,7 +5,6 @@ import android.view.*
 import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.paging.PagedListAdapter
@@ -23,18 +22,15 @@ import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
-import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SAVE_TO_DB
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -170,9 +166,9 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        filterByClazzUid = arguments?.getString(ARG_FILTER_BY_CLAZZUID)?.toLong() ?: 0
+        filterByClazzUid = arguments?.getString(ARG_CLAZZUID)?.toLong() ?: 0
         mPresenter = ClazzMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner).withViewLifecycle()
 
         mDataRecyclerViewAdapter = ClazzMemberListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_a_teacher)
@@ -200,10 +196,6 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
                 mPendingStudentListRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
 
-        presenterLifecycleObserver = PresenterViewLifecycleObserver(mPresenter).also {
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
-
         return view
     }
 
@@ -217,7 +209,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         val bundle = bundleOf(
                 ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
                 ARG_FILTER_BY_ENROLMENT_ROLE to role.toString(),
-                ARG_FILTER_BY_CLAZZUID to (arguments?.get(ARG_FILTER_BY_CLAZZUID) ?: "-1"),
+                ARG_CLAZZUID to (arguments?.get(ARG_CLAZZUID) ?: "-1"),
                 ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME,
                 ARG_POPUPTO_ON_FINISH to ClazzMemberListView.VIEW_NAME,
                 ARG_HIDE_CLAZZES to true.toString(),
@@ -242,9 +234,6 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         menu.findItem(R.id.menu_search).isVisible = true
     }
 
-    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
-
-
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
@@ -257,10 +246,6 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
-        presenterLifecycleObserver?.also {
-            viewLifecycleOwner.lifecycle.removeObserver(it)
-        }
-        presenterLifecycleObserver = null
     }
 
     override val displayTypeRepo: Any?

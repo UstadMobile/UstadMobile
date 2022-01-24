@@ -1,28 +1,27 @@
 package com.ustadmobile.core.controller
 
-import com.google.gson.Gson
-import org.mockito.kotlin.*
-import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
+import com.ustadmobile.core.util.ext.grantScopedPermission
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import kotlinx.coroutines.runBlocking
+import org.junit.*
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
+import org.mockito.kotlin.*
 
 
 class PersonAccountEditPresenterTest  {
@@ -39,8 +38,6 @@ class PersonAccountEditPresenterTest  {
 
     private lateinit var di: DI
 
-    private lateinit var mockWebServer: MockWebServer
-
     private lateinit var repo: UmAppDatabase
 
     private lateinit var serverUrl: String
@@ -49,11 +46,13 @@ class PersonAccountEditPresenterTest  {
 
     private val mPersonUid: Long = 234567
 
-    private val loggedPersonUid:Long = 234568
+    private val loggedInPersonUid:Long = 234568
 
     private lateinit var accountManager: UstadAccountManager
 
     private lateinit var impl: UstadMobileSystemImpl
+
+    private lateinit var mockAuthManager: AuthManager
 
     @Before
     fun setUp() {
@@ -63,45 +62,32 @@ class PersonAccountEditPresenterTest  {
         mockView = mock{}
         impl = mock()
 
-        mockWebServer = MockWebServer()
-        mockWebServer.start()
-
-        serverUrl = mockWebServer.url("/").toString()
+        serverUrl = "https://dummysite.ustadmobile.app/"
 
         accountManager = mock{
-            on{activeAccount}.thenReturn(UmAccount(loggedPersonUid,"","",serverUrl))
+            on { activeEndpoint }.thenReturn(Endpoint(serverUrl))
+            on{activeAccount}.thenReturn(UmAccount(loggedInPersonUid,"","",serverUrl))
+        }
+
+        mockAuthManager = mock {
+
         }
 
         di = DI {
             import(ustadTestRule.diModule)
             bind<UstadAccountManager>(overrides = true) with singleton { accountManager }
             bind<UstadMobileSystemImpl>(overrides = true) with singleton { impl }
+            bind<AuthManager>() with singleton { mockAuthManager }
         }
 
         repo = di.directActiveRepoInstance()
     }
 
-    @After
-    fun tearDown() {
-        mockWebServer.shutdown()
-    }
-
-    private fun enQueuePasswordChangeResponse(success: Boolean = true){
-        if(success){
-            mockWebServer.enqueue(MockResponse()
-                    .setResponseCode(200)
-                    .setBody(Gson().toJson(UmAccount(mPersonUid, "", "auth", "")))
-                    .setHeader("Content-Type", "application/json"))
-        }else{
-            mockWebServer.enqueue(MockResponse().setResponseCode(403))
-        }
-    }
-
-
     private fun createPerson(withUsername: Boolean = false, isAdmin: Boolean = false,
                              matchPassword: Boolean = false): PersonWithAccount {
         val password = "password"
         val confirmPassword = if(matchPassword) password else "password1"
+
         val person =  PersonWithAccount().apply {
             fatherName = "Doe"
             firstNames = "Jane"
@@ -112,15 +98,24 @@ class PersonAccountEditPresenterTest  {
             personUid = mPersonUid
             newPassword = password
             confirmedPassword = confirmPassword
-            repo.personDao.insert(this)
+            runBlocking { repo.insertPersonAndGroup(this@apply) }
         }
 
-        PersonWithAccount().apply {
+
+        //Create an person object for the logged in person
+        val loggedInPerson = PersonWithAccount().apply {
             admin = isAdmin
             username = "First"
             lastName = "User"
-            personUid = loggedPersonUid
-            repo.personDao.insert(this)
+            personUid = loggedInPersonUid
+            runBlocking { repo.insertPersonAndGroup(this@apply)}
+        }
+
+        if(isAdmin) {
+            runBlocking {
+                repo.grantScopedPermission(loggedInPerson.personGroupUid, Role.ALL_PERMISSIONS,
+                    ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+            }
         }
 
         return person
@@ -195,9 +190,14 @@ class PersonAccountEditPresenterTest  {
 
     @Test
     fun givenPresenterCreatedInPasswordResetMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldChangePassword(){
-        enQueuePasswordChangeResponse()
 
         val person = createPerson(isAdmin = true, withUsername = true, matchPassword = true)
+
+        mockAuthManager.stub {
+            onBlocking { authenticate(eq(person.username!!), eq("existingpassword"), any()) }
+                .thenReturn(AuthResult(person, true))
+        }
+
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
                 UstadView.ARG_SERVER_URL to serverUrl)
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
@@ -207,11 +207,12 @@ class PersonAccountEditPresenterTest  {
 
         person.newPassword = "new"
         person.confirmedPassword = "new"
-        presenter.handleClickSave(person)
+        presenter.handleClickSave(person.also {
+            it.currentPassword = "existingpassword"
+        })
 
-        verifyBlocking(accountManager, timeout(defaultTimeOut)) {
-            changePassword(eq(person.username!!), anyOrNull(), eq(person.newPassword!!),
-                    eq(serverUrl))
+        verifyBlocking(mockAuthManager, timeout(defaultTimeOut)) {
+            setAuth(eq(person.personUid), eq(person.newPassword!!))
         }
 
         verify(mockView, timeout(defaultTimeOut)).finishWithResult(any())
@@ -220,27 +221,27 @@ class PersonAccountEditPresenterTest  {
 
     @Test
     fun givenPresenterCreatedInAccountCreationMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
-        enQueuePasswordChangeResponse()
-
         val person = createPerson(isAdmin = false, withUsername = false, matchPassword = true)
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
                 UstadView.ARG_SERVER_URL to serverUrl)
-        val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
+        val presenter = PersonAccountEditPresenter(context, args, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
 
         presenter.handleClickSave(person.apply { username = "username" })
-        verifyBlocking(accountManager, timeout(defaultTimeOut).atLeastOnce()){
-            register(any(), any(), any())
+        verifyBlocking(mockAuthManager, timeout(defaultTimeOut)) {
+            setAuth(eq(person.personUid), eq(person.newPassword!!))
         }
+
+        val personInDb = runBlocking { repo.personDao.findByUid(person.personUid) }
+        Assert.assertEquals("Person now has username set", person.username,
+            personInDb?.username)
     }
 
 
     @Test
     fun givenPresenterCreatedInAccountCreationMode_whenPasswordDoNotMatchAndSaveClicked_thenShouldErrors(){
-        enQueuePasswordChangeResponse()
-
         val person = createPerson(isAdmin = true, withUsername = false, matchPassword = false)
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
                 UstadView.ARG_SERVER_URL to serverUrl)

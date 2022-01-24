@@ -1,18 +1,69 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.SyncNode
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
+import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
 
 @Dao
 @Repository
 abstract class ReportDao : BaseDao<Report> {
+
+    @Query("""
+     REPLACE INTO ReportReplicate(reportPk, reportDestination)
+      SELECT DISTINCT Report.reportUid AS reportPk,
+             :newNodeId AS reportDestination
+        FROM Report
+             JOIN UserSession
+                  ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+                     AND CAST(Report.isTemplate AS INTEGER) = 1
+       WHERE Report.reportLct != COALESCE(
+             (SELECT reportVersionId
+                FROM ReportReplicate
+               WHERE reportPk = Report.reportUid
+                 AND reportDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(reportPk, reportDestination) DO UPDATE
+             SET reportPending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([Report::class])
+    abstract suspend fun replicateOnNewNodeTemplates(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+ REPLACE INTO ReportReplicate(reportPk, reportDestination)
+  SELECT DISTINCT Report.reportUid AS reportUid,
+         UserSession.usClientNodeId AS reportDestination
+    FROM ChangeLog
+         JOIN Report
+              ON ChangeLog.chTableId = ${Report.TABLE_ID} 
+                 AND ChangeLog.chEntityPk = Report.reportUid
+         JOIN UserSession
+              ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+                 AND CAST(Report.isTemplate AS INTEGER) = 1
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND Report.reportLct != COALESCE(
+         (SELECT reportVersionId
+            FROM ReportReplicate
+           WHERE reportPk = Report.reportUid
+             AND reportDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(reportPk, reportDestination) DO UPDATE
+     SET reportPending = true
+  */               
+ """)
+    @ReplicationRunOnChange([Report::class])
+    @ReplicationCheckPendingNotificationsFor([Report::class])
+    abstract suspend fun replicateOnChangeTemplates()
 
     @RawQuery
     abstract fun getResults(query: DoorQuery): List<Report>
@@ -32,7 +83,7 @@ abstract class ReportDao : BaseDao<Report> {
             """)
     abstract fun findAllActiveReport(searchBit: String, personUid: Long, sortOrder: Int,
                                      isTemplate: Boolean)
-            : DataSource.Factory<Int, Report>
+            : DoorDataSourceFactory<Int, Report>
 
     @Query("SELECT * FROM Report WHERE reportUid = :entityUid")
     abstract suspend fun findByUid(entityUid: Long): Report?
@@ -57,7 +108,7 @@ abstract class ReportDao : BaseDao<Report> {
     abstract fun findAllActiveReportList(isTemplate: Boolean): List<Report>
 
     @Query("""UPDATE Report SET reportInactive = :inactive,
-                reportLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                reportLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
                 WHERE reportUid = :uid""")
     abstract fun updateReportInactive(inactive: Boolean, uid: Long)
 

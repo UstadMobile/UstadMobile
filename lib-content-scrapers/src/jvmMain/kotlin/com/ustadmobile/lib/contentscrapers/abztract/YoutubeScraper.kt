@@ -24,7 +24,7 @@ import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.system.exitProcess
 
-open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
+open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, open val di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     private val ytPath: String
     private val gson: Gson
@@ -124,7 +124,7 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
         val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
         runBlocking {
             repo.addFileToContainer(container.containerUid, videoFile.toDoorUri(),
-                    videoFile.name, containerAddOptions)
+                    videoFile.name, Any(), di, containerAddOptions)
         }
 
         showContentEntry()

@@ -51,21 +51,24 @@ object XapiUtil {
     fun insertOrUpdateVerbLangMap(dao: XLangMapEntryDao, verb: Verb, verbEntity: VerbEntity, languageDao: LanguageDao, languageVariantDao: LanguageVariantDao) {
         val verbDisplay = verb.display
         if (verbDisplay != null) {
-            val listToInsert = verbDisplay.map {
-                val split = it.key.split("-")
-                val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
-                val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
+            val listToInsert = verbDisplay.mapNotNull {
+                val lang = insertOrUpdateLanguageByTwoCode(languageDao, it.key.substringBefore('-'))
+                val variant = it.key.substringAfter("-", "").let {
+                    if(it != "")
+                        insertOrUpdateLanguageVariant(languageVariantDao, it, lang)
+                    else
+                        null
+                }
 
                 val existingMap = dao.getXLangMapFromVerb(verbEntity.verbUid, lang.langUid)
 
                 if(existingMap == null){
-                    XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid
-                            ?: 0, it.value)
+                    XLangMapEntry(verbEntity.verbUid, 0, lang.langUid,
+                        variant?.langVariantUid ?: 0, it.value)
                 }else{
                     null
                 }
-
-            }?.filterNotNull()
+            }
 
             if (listToInsert != null && listToInsert.isNotEmpty()) {
                 dao.insertList(listToInsert)
@@ -278,7 +281,8 @@ object XapiUtil {
                                       instructorUid: Long, agentUid: Long, authorityUid: Long, teamUid: Long,
                                       subActorUid: Long, subVerbUid: Long, subObjectUid: Long,
                                       contentEntryUid: Long = 0L,
-                                      learnerGroupUid: Long, contentEntryRoot: Boolean = false): StatementEntity {
+                                      learnerGroupUid: Long, contentEntryRoot: Boolean = false
+                                      ,clazzUid: Long = 0L): StatementEntity {
 
         val statementId = statement.id
                 ?: throw IllegalArgumentException("Statement $statement to be stored has no id!")
@@ -303,6 +307,7 @@ object XapiUtil {
                 it.statementContentEntryUid = contentEntryUid
                 it.statementLearnerGroupUid = learnerGroupUid
                 it.contentEntryRoot = contentEntryRoot
+                it.statementClazzUid = clazzUid
                 it.fullStatement = gson.toJson(statement)
             }
 
@@ -349,17 +354,15 @@ object XapiUtil {
     }
 
     fun insertOrUpdateEntryProgress(statementEntity: StatementEntity, repo: UmAppDatabase, verbEntity: VerbEntity) {
-        var statusFlag = getStatusFlag(verbEntity.urlId)
+        val statusFlag = getStatusFlag(verbEntity.urlId)
         var progress  = statementEntity.extensionProgress
         if(progress == 0 &&
-                (statusFlag == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED ||
+                (statusFlag == StatementEntity.CONTENT_COMPLETE ||
+                        statusFlag == StatementEntity.CONTENT_PASSED ||
                         statementEntity.resultCompletion)){
             progress = 100
-            statusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
             repo.statementDao.updateProgress(statementEntity.statementUid, progress)
         }
-        repo.contentEntryProgressDao.updateProgress(statementEntity.statementContentEntryUid,
-                statementEntity.statementPersonUid, progress, statusFlag)
     }
 
 
@@ -369,13 +372,13 @@ object XapiUtil {
 
     private val statusFlagMap = mapOf(
             "http://adlnet.gov/expapi/verbs/completed"
-                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED,
+                    to StatementEntity.CONTENT_COMPLETE,
             "http://adlnet.gov/expapi/verbs/passed"
-                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED,
+                    to StatementEntity.CONTENT_PASSED,
             "http://adlnet.gov/expapi/verbs/failed"
-                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED,
+                    to StatementEntity.CONTENT_FAILED,
             "https://w3id.org/xapi/adl/verbs/satisfied"
-                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED)
+                    to StatementEntity.CONTENT_COMPLETE)
 
 
     fun Boolean.toInt() = if (this) 1 else 0

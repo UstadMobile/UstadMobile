@@ -3,7 +3,6 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.ClientSyncManager
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
@@ -12,21 +11,6 @@ import kotlinx.serialization.Serializable
     //Index to handle permission queries
     Index(value=["rolePermissions"])
 ])
-@SyncableEntity(tableId = Role.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${Role.TABLE_ID} AS tableId 
-        FROM DeviceSession""",
-
-        //Anyone who has this role must do a full resync when the role itself changes
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClientSyncManager.TABLEID_SYNC_ALL_TABLES} AS tableId FROM 
-        ChangeLog
-        JOIN Role ON ChangeLog.chTableId = ${Role.TABLE_ID} AND ChangeLog.chEntityPk = Role.roleUid
-        JOIN EntityRole ON EntityRole.erRoleUid = Role.roleUid
-        JOIN PersonGroupMember ON PersonGroupMember.groupMemberGroupUid = EntityRole.erGroupUid
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
-        """
-    ])
 @Serializable
 open class Role() {
 
@@ -47,6 +31,7 @@ open class Role() {
     var roleLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var roleLct: Long = 0
 
     //bit flags made of up PERMISSION_ constants
@@ -136,12 +121,12 @@ open class Role() {
 
         const val PERMISSION_PERSON_PICTURE_UPDATE: Long = 4194304
 
-        const val PERMISSION_CLAZZWORK_SELECT : Long = 8388608
+        const val PERMISSION_ASSIGNMENT_SELECT : Long = 8388608
 
         //There is no "insert" for CLAZZ_ASSIGNMENT as they are all tied to classes, so are considered updates
-        const val PERMISSION_CLAZZWORK_UPDATE : Long = 16777216
+        const val PERMISSION_ASSIGNMENT_UPDATE : Long = 16777216
 
-        const val PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS : Long= 33554432
+        const val PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS : Long= 33554432
 
         const val PERMISSION_CONTENT_SELECT : Long= 67108864
 
@@ -179,6 +164,25 @@ open class Role() {
 
         const val PERMISSION_PERSON_LEARNINGRECORD_UPDATE: Long = 2199023255552L
 
+        //Note: to create further constants, use the Tools - Kotlin - REPL to double each value
+        const val PERMISSION_CLAZZ_CONTENT_SELECT: Long = 4398046511104L
+
+        const val PERMISSION_CLAZZ_CONTENT_UPDATE: Long = 8796093022208L
+
+        const val PERMISSION_PERSONCONTACT_SELECT: Long = 17592186044416L
+
+        const val PERMISSION_PERSONCONTACT_UPDATE: Long = 35184372088832L
+
+        const val PERMISSION_PERSONSOCIOECONOMIC_SELECT: Long = 70368744177664L
+
+        const val PERMISSION_PERSONSOCIOECONOMIC_UPDATE: Long = 140737488355328L
+
+        const val PERMISSION_ADD_CLASS_TO_SCHOOL: Long = 281474976710656L
+
+        const val PERMISSION_AUTH_SELECT: Long = 562949953421312L
+
+        const val PERMISSION_AUTH_UPDATE: Long = 1125899906842624L
+
         //Predefined roles that are added by the system
         const val ROLE_CLAZZ_TEACHER_NAME = "Teacher"
 
@@ -198,11 +202,14 @@ open class Role() {
                 PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT or
                 PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT or
                 PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE or
-                PERMISSION_CLAZZWORK_SELECT or
-                PERMISSION_CLAZZWORK_UPDATE or
-                        PERMISSION_PERSON_LEARNINGRECORD_SELECT or
-                        PERMISSION_PERSON_LEARNINGRECORD_INSERT or
-                        PERMISSION_PERSON_LEARNINGRECORD_UPDATE
+                PERMISSION_ASSIGNMENT_SELECT or
+                PERMISSION_ASSIGNMENT_UPDATE or
+                PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS or
+                PERMISSION_PERSON_LEARNINGRECORD_SELECT or
+                PERMISSION_PERSON_LEARNINGRECORD_INSERT or
+                PERMISSION_PERSON_LEARNINGRECORD_UPDATE or
+                PERMISSION_CLAZZ_CONTENT_SELECT or
+                PERMISSION_CLAZZ_CONTENT_UPDATE
 
 
         const val ROLE_CLAZZ_STUDENT_NAME = "Class Student"
@@ -212,8 +219,9 @@ open class Role() {
         const val ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT: Long =
                 PERMISSION_CLAZZ_SELECT or
                 PERMISSION_CLAZZ_OPEN or
+                PERMISSION_CLAZZ_CONTENT_SELECT or
                 PERMISSION_PERSON_SELECT or
-                PERMISSION_CLAZZWORK_SELECT
+                PERMISSION_ASSIGNMENT_SELECT
 
         const val ROLE_CLAZZ_STUDENT_PENDING_NAME = "Student Pending"
 
@@ -243,7 +251,7 @@ open class Role() {
                 PERMISSION_PERSON_UPDATE or
                 PERMISSION_PERSON_INSERT or
                 PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT or
-                PERMISSION_CLAZZWORK_SELECT or
+                PERMISSION_ASSIGNMENT_SELECT or
                 PERMISSION_SCHOOL_SELECT or
                 PERMISSION_SCHOOL_ADD_STUDENT
 
@@ -284,9 +292,9 @@ open class Role() {
                         PERMISSION_PERSON_PICTURE_SELECT or
                         PERMISSION_PERSON_PICTURE_INSERT or
                         PERMISSION_PERSON_PICTURE_UPDATE or
-                        PERMISSION_CLAZZWORK_SELECT  or
-                        PERMISSION_CLAZZWORK_UPDATE  or
-                        PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS or
+                        PERMISSION_ASSIGNMENT_SELECT  or
+                        PERMISSION_ASSIGNMENT_UPDATE  or
+                        PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS or
                         PERMISSION_CONTENT_SELECT or
                         PERMISSION_CONTENT_INSERT or
                         PERMISSION_CONTENT_UPDATE or
@@ -300,6 +308,27 @@ open class Role() {
                         PERMISSION_RESET_PASSWORD or
                         PERMISSION_SCHOOL_ADD_STAFF or
                         PERMISSION_SCHOOL_ADD_STUDENT
+
+
+        /**
+         * Permissions that are automatically granted to a parent via a ScopedGrant where the
+         * grant scoped is by Person to the personUid of the child
+         */
+        const val ROLE_PARENT_PERSON_PERMISSIONS_DEFAULT: Long =
+            PERMISSION_PERSON_SELECT or
+            PERMISSION_PERSONCONTACT_SELECT or
+            PERMISSION_PERSONSOCIOECONOMIC_SELECT or
+            PERMISSION_PERSON_LEARNINGRECORD_SELECT or
+            PERMISSION_PERSON_PICTURE_SELECT or
+            PERMISSION_RESET_PASSWORD
+
+        const val ROLE_CLAZZ_PARENT_PERMISSION_DEFAULT: Long = PERMISSION_CLAZZ_SELECT or
+                PERMISSION_CLAZZ_OPEN or
+                PERMISSION_PERSON_SELECT or
+                PERMISSION_ASSIGNMENT_SELECT
+
+        const val ALL_PERMISSIONS = Long.MAX_VALUE
+
 
     }
 }

@@ -1,17 +1,29 @@
 package com.ustadmobile.port.android.view
 
 import android.app.Application
+import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import com.google.gson.Gson
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.toBundle
+import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.port.android.screen.LoginScreen
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
+import com.ustadmobile.test.port.android.util.getApplicationDi
+import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import junit.framework.Assert.assertEquals
+import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -20,6 +32,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
 @AdbScreenRecord("Login screen Test")
@@ -48,6 +63,60 @@ class Login2FragmentTest : TestCase(){
         mockWebServer.shutdown()
     }
 
+    private fun launchFragment(serverUrl: String = mockWebServer.url("/").toString(),
+                       fillAllFields: Boolean = false,
+                       userRegistrationAllowed: Boolean = false,
+                       guestLoginAllowed: Boolean = false
+    ) {
+        val workspace = Site().apply {
+            siteName = ""
+            guestLogin = guestLoginAllowed
+            registrationAllowed = userRegistrationAllowed
+            authSalt = randomString(20)
+        }
+
+        val di = getApplicationDi()
+        val repo : UmAppDatabase = di.on(Endpoint(serverUrl)).direct.instance(tag = DoorTag.TAG_REPO)
+        repo.siteDao.insert(workspace)
+
+        val args = mutableMapOf(
+            UstadView.ARG_SITE to Json.encodeToString(Site.serializer(), workspace),
+            UstadView.ARG_NEXT to ContentEntryList2View.VIEW_NAME)
+
+        args[UstadView.ARG_SERVER_URL] = serverUrl
+
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+            fragmentArgs = args.toBundle()) {
+            Login2Fragment().also {
+                it.installNavController(systemImplNavRule.navController,
+                initialDestId = R.id.login_dest)
+            }
+        }
+
+        if (fillAllFields) {
+            LoginScreen{
+                userNameTextInput {
+                    edit {
+                        typeText(this@LoginScreen.VALID_USER)
+                    }
+                }
+                passwordTextInput {
+                    edit {
+                        typeText(this@LoginScreen.VALID_PASS)
+                    }
+                }
+
+                closeSoftKeyboard()
+
+                loginButton {
+                    click()
+                }
+            }
+        }
+
+    }
+
+
     @AdbScreenRecord("given registration is allowed when logging in then should show create account button")
     @Test
     fun givenRegistrationIsAllowed_whenLogin_shouldShowRegisterButton() {
@@ -56,7 +125,7 @@ class Login2FragmentTest : TestCase(){
 
         }.run {
             LoginScreen {
-                launchFragment(registration = true, systemImplNavRule = systemImplNavRule)
+                launchFragment(userRegistrationAllowed = true)
                 createAccount {
                     isDisplayed()
                 }
@@ -76,7 +145,7 @@ class Login2FragmentTest : TestCase(){
 
         }.run {
             LoginScreen {
-                launchFragment(registration = false, systemImplNavRule = systemImplNavRule)
+                launchFragment(userRegistrationAllowed = false)
                 createAccount {
                     isNotDisplayed()
                 }
@@ -95,7 +164,7 @@ class Login2FragmentTest : TestCase(){
 
         }.run {
             LoginScreen {
-                launchFragment(guestConnection = true, systemImplNavRule = systemImplNavRule)
+                launchFragment(guestLoginAllowed = true)
                 connectAsGuest {
                     isDisplayed()
                 }
@@ -114,7 +183,7 @@ class Login2FragmentTest : TestCase(){
 
         }.run {
             LoginScreen {
-                launchFragment(guestConnection = false, systemImplNavRule = systemImplNavRule)
+                launchFragment(guestLoginAllowed = false)
                 connectAsGuest {
                     isNotDisplayed()
                 }
@@ -131,12 +200,12 @@ class Login2FragmentTest : TestCase(){
 
         }.run {
             LoginScreen {
-                launchFragment(registration = true, systemImplNavRule = systemImplNavRule)
+                launchFragment(userRegistrationAllowed = true)
                 createAccount {
                     click()
                 }
-                assertEquals("It navigated to account creation screen",
-                        R.id.site_terms_detail_accept_dest, systemImplNavRule.navController.currentDestination?.id)
+                assertEquals("It navigated to register age redirect",
+                        R.id.register_age_redirect_dest, systemImplNavRule.navController.currentDestination?.id)
             }
         }
 
@@ -150,14 +219,14 @@ class Login2FragmentTest : TestCase(){
 
         }.run {
             LoginScreen {
-                launchFragment(guestConnection = true, systemImplNavRule = systemImplNavRule)
+                launchFragment(guestLoginAllowed = true)
                 connectAsGuest {
                     isClickable()
                     click()
                 }
                 flakySafely {
                     assertEquals("It navigated to account creation screen",
-                            R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
+                            R.id.content_entry_list_dest, systemImplNavRule.navController.currentDestination?.id)
                 }
             }
         }
@@ -185,13 +254,13 @@ class Login2FragmentTest : TestCase(){
 
                 val httpUrl = mockWebServer.url("/").toString()
 
-                launchFragment(httpUrl, fillAllFields = true, systemImplNavRule = systemImplNavRule)
+                launchFragment(httpUrl, fillAllFields = true)
 
             }
 
             flakySafely {
                 assertEquals("It navigated to the default screen",
-                        R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
+                        R.id.content_entry_list_dest, systemImplNavRule.navController.currentDestination?.id)
             }
 
         }
@@ -218,7 +287,7 @@ class Login2FragmentTest : TestCase(){
             val httpUrl = mockWebServer.url("/").toString()
 
             LoginScreen {
-                launchFragment(httpUrl, fillAllFields = true, systemImplNavRule = systemImplNavRule)
+                launchFragment(httpUrl, fillAllFields = true)
                 loginErrorText {
                     isDisplayed()
                     hasText(context.getString(R.string.wrong_user_pass_combo))
@@ -239,7 +308,7 @@ class Login2FragmentTest : TestCase(){
         }.run {
             val httpUrl = mockWebServer.url("/").toString()
             LoginScreen {
-                launchFragment(httpUrl, fillAllFields = true, systemImplNavRule = systemImplNavRule)
+                launchFragment(httpUrl, fillAllFields = true)
                 loginErrorText {
                     hasText(context.getString(R.string.login_network_error))
                     isDisplayed()
@@ -260,7 +329,7 @@ class Login2FragmentTest : TestCase(){
             val httpUrl = mockWebServer.url("/").toString()
 
             LoginScreen{
-                launchFragment(httpUrl, fillAllFields = true, systemImplNavRule = systemImplNavRule)
+                launchFragment(httpUrl, fillAllFields = true)
                 userNameTextInput{
                     hasInputLayoutError(context.getString(R.string.field_required_prompt))
                 }

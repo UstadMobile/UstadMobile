@@ -1,7 +1,7 @@
 package com.ustadmobile.port.android.screen
 
-import com.agoda.kakao.bottomnav.KBottomNavigationView
-import com.agoda.kakao.common.views.KView
+import io.github.kakaocup.kakao.bottomnav.KBottomNavigationView
+import io.github.kakaocup.kakao.common.views.KView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.MainActivity
@@ -14,7 +14,7 @@ object MainScreen : KScreen<MainScreen>() {
         get() = MainActivity::class.java
 
     val fab: KView = KView {
-        withId(R.id.activity_listfragmelayout_behaviornt_fab)
+        withId(R.id.activity_main_extendedfab)
     }
 
     val toolBarTitle: KView = KView { withId(R.id.toolbar)}

@@ -16,6 +16,22 @@
             name="currentPasswordVisibility"
             type="Integer" />
 
+        <variable
+            name="usernameError"
+            type="String"
+            />
+
+        <variable
+            name="currentPasswordError"
+            type="String" />
+
+        <variable
+            name="passwordError"
+            type="String"
+            />
+        <variable
+            name="passwordConfirmError"
+            type="String" />
 
         <variable
             name="activityEventHandler"
@@ -42,6 +58,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
+                app:errorText="@{usernameError}"
+                app:errorEnabled="@{usernameError != null}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -49,9 +67,34 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/account_username_text"
                     android:text="@={person.username}"
+                    android:inputType="textNoSuggestions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/username" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/new_password_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                app:errorText="@{passwordError}"
+                app:errorEnabled="@{passwordError != null}"
+                android:layout_margin="@dimen/dimen_16dp"
+                app:passwordToggleEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/current_password_textinputlayout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/new_password_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:hint="@string/new_password"
+                    android:text="@={person.newPassword}"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -68,7 +111,8 @@
                 app:passwordToggleEnabled="true"
                 app:errorTextColor="?colorError"
                 app:hintEnabled="true"
-                android:enabled="@{!person.admin}"
+                app:errorText="@{currentPasswordError}"
+                app:errorEnabled="@{currentPasswordError != null}"
                 app:layout_constraintTop_toBottomOf="@+id/username_textinputlayout">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -81,29 +125,6 @@
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/new_password_textinputlayout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_8dp"
-                android:hint="@string/new_password"
-                app:errorTextColor="?colorError"
-                app:hintEnabled="true"
-                android:layout_margin="@dimen/dimen_16dp"
-                app:passwordToggleEnabled="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/current_password_textinputlayout">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/new_password_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPassword"
-                    android:text="@={person.newPassword}"
-                    android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
-            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/confirm_password_textinputlayout"
@@ -115,6 +136,8 @@
                 app:errorTextColor="?colorError"
                 app:hintEnabled="true"
                 android:layout_margin="@dimen/dimen_16dp"
+                app:errorText="@{passwordConfirmError}"
+                app:errorEnabled="@{passwordConfirmError != null}"
                 app:passwordToggleEnabled="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

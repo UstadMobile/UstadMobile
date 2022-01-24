@@ -115,13 +115,6 @@
         android:id="@+id/settings_list_dest"
         android:name="com.ustadmobile.port.android.view.SettingsFragment"
         android:label="@string/settings" />
-    <fragment
-        android:id="@+id/role_list_dest"
-        android:name="com.ustadmobile.port.android.view.RoleListFragment"
-        android:label="@string/roles" />
-    <fragment
-        android:id="@+id/role_edit_dest"
-        android:name="com.ustadmobile.port.android.view.RoleEditFragment" />
 
     <fragment
         android:id="@+id/school_edit_dest"
@@ -136,31 +129,31 @@
         android:id="@+id/schoolmember_list_dest"
         android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment" />
     <fragment
-        android:id="@+id/clazzwork_list_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkListFragment" />
-    <fragment
-        android:id="@+id/clazzwork_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkEditFragment" />
-    <fragment
-        android:id="@+id/clazzworkquestionandoptions_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkQuestionAndOptionsEditFragment" />
-    <fragment
-        android:id="@+id/clazzwork_detail_list"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailFragment" />
+        android:id="@+id/clazz_assignment_list"
+        android:name="com.ustadmobile.port.android.view.ClazzAssignmentListFragment" />
 
     <fragment
-        android:id="@+id/home_content_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryListTabsFragment"
-        android:label="@string/content">
-        <argument
-            android:name="parentUid"
-            android:defaultValue="-4103245208651563007L"
-            app:argType="long" />
-    </fragment>
+        android:id="@+id/clazz_assignment_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzAssignmentEditFragment" />
+
+    <fragment
+        android:id="@+id/clazz_assignment_detail_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailFragment"/>
+
+    <fragment
+        android:id="@+id/clazz_assignment_detail_student_progress"
+        android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailStudentProgressFragment"/>
 
     <fragment
         android:id="@+id/content_entry_list_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment" />
+        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
+        android:label="@string/content">
+    </fragment>
+
+    <fragment
+        android:id="@+id/content_entry_list_home_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
+        android:label="@string/content"/>
 
     <fragment
         android:id="@+id/content_entry_list_select_folder"
@@ -205,14 +198,6 @@
         android:id="@+id/content_entry_detail_overview_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryDetailOverviewFragment"
         android:label="" />
-    <fragment
-        android:id="@+id/clazzwork_detail_progress_list"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment" />
-
-    <fragment
-        android:id="@+id/clazzworksubmission_marking_edit"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkSubmissionMarkingFragment"
-        />
 
     <fragment
         android:id="@+id/clazz_enrolment_list"
@@ -269,7 +254,6 @@
     <fragment
         android:id="@+id/account_list_dest"
         android:name="com.ustadmobile.port.android.view.AccountListFragment"
-        android:label="@string/accounts"
         />
 
     <fragment
@@ -284,6 +268,15 @@
         android:label=""
         />
 
+    <fragment
+        android:id="@+id/select_file_view"
+        android:name="com.ustadmobile.port.android.view.SelectFileFragment"
+        />
+
+    <fragment
+        android:id="@+id/select_folder_view"
+        android:name="com.ustadmobile.port.android.view.SelectFolderFragment"/>
+
 
     <fragment
         android:id="@+id/webchunk_view"
@@ -293,11 +286,6 @@
     <fragment
         android:id="@+id/person_account_edit_dest"
         android:name="com.ustadmobile.port.android.view.PersonAccountEditFragment"
-        android:label="" />
-
-    <fragment
-        android:id="@+id/entityrole_edit_dest"
-        android:name="com.ustadmobile.port.android.view.EntityRoleEditFragment"
         android:label="" />
 
     <fragment
@@ -349,6 +337,30 @@
         android:id="@+id/site_terms_edit_dest"
         android:name="com.ustadmobile.port.android.view.SiteTermsEditFragment"
         android:label="@string/edit_terms_and_policies"/>
+
+    <fragment
+        android:id="@+id/register_minor_wait_for_parent_dest"
+        android:name="com.ustadmobile.port.android.view.RegisterMinorWaitForParentFragment"
+        android:label="@string/almost_done"/>
+
+    <fragment
+        android:id="@+id/register_age_redirect_dest"
+        android:name="com.ustadmobile.port.android.view.RegisterAgeRedirectFragment"
+        android:label="@string/register"/>
+
+    <fragment
+        android:id="@+id/parental_consent_management_dest"
+        android:name="com.ustadmobile.port.android.view.ParentalConsentManagementFragment"
+        android:label="@string/parental_consent"/>
+
+    <fragment
+        android:id="@+id/scoped_grant_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ScopedGrantEditFragment"/>
+
+    <fragment
+        android:id="@+id/error_report_dest"
+        android:name="com.ustadmobile.port.android.view.ErrorReportFragment"
+        android:label="@string/oops"/>
 
 
 </navigation>

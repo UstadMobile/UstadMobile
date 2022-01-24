@@ -2,7 +2,7 @@ plugins {
     id 'application'
     id 'kotlin'
     id 'com.github.psxpaul.execfork' version '0.1.13'
-    id 'com.github.johnrengelman.shadow'
+    id 'com.github.johnrengelman.shadow' version "$version_shadow"
 }
 
 

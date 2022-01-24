@@ -7,11 +7,22 @@ import com.ustadmobile.lib.db.entities.Holiday.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId
-        FROM DeviceSession
-    """])
+@Triggers(arrayOf(
+ Trigger(
+     name = "holiday_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO Holiday(holUid, holMasterCsn, holLocalCsn, holLastModBy, holLct, holActive, holHolidayCalendarUid, holStartTime, holEndTime, holName) 
+         VALUES (NEW.holUid, NEW.holMasterCsn, NEW.holLocalCsn, NEW.holLastModBy, NEW.holLct, NEW.holActive, NEW.holHolidayCalendarUid, NEW.holStartTime, NEW.holEndTime, NEW.holName) 
+         /*psql ON CONFLICT (holUid) DO UPDATE 
+         SET holMasterCsn = EXCLUDED.holMasterCsn, holLocalCsn = EXCLUDED.holLocalCsn, holLastModBy = EXCLUDED.holLastModBy, holLct = EXCLUDED.holLct, holActive = EXCLUDED.holActive, holHolidayCalendarUid = EXCLUDED.holHolidayCalendarUid, holStartTime = EXCLUDED.holStartTime, holEndTime = EXCLUDED.holEndTime, holName = EXCLUDED.holName
+         */"""
+     ]
+ )
+))
+@ReplicateEntity(tableId = TABLE_ID, tracker = HolidayReplicate::class)
 @Serializable
 class Holiday() {
 
@@ -28,6 +39,7 @@ class Holiday() {
     var holLastModBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var holLct: Long = 0
 
     var holActive: Boolean = true

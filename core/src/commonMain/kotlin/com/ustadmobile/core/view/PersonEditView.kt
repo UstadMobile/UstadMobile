@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 
 interface PersonEditView: UstadEditView<PersonWithAccount> {
@@ -12,11 +11,12 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var personPicture: PersonPicture?
 
-    var clazzList: DoorLiveData<List<ClazzEnrolmentWithClazz>>?
+    /**
+     * This is set only when registering a minor
+     */
+    var approvalPersonParentJoin: PersonParentJoin?
 
-    var rolesAndPermissionsList: DoorLiveData<List<EntityRoleWithNameAndRole>>?
-
-    var registrationMode: Boolean?
+    var registrationMode: Int
 
     var usernameError: String?
 
@@ -24,11 +24,17 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var passwordError: String?
 
+    var emailError: String?
+
     var confirmError: String?
 
     var dateOfBirthError: String?
 
-    var canDelegatePermissions: Boolean?
+    var parentContactError: String?
+
+    var firstNamesFieldError: String?
+    var lastNameFieldError: String?
+    var genderFieldError: String?
 
     var firstNameError: String?
 
@@ -53,10 +59,33 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
         const val ARG_REGISTRATION_MODE = "RegMode"
 
         /**
+         * If the form is in registration mode, then the date of birth must be supplied as an
+         * argument.
+         */
+        const val ARG_DATE_OF_BIRTH = "DateOfBirth"
+
+        /**
          * If this is set then this means that the person registering has come from a link. Since someone in the system has invited another person
          * we use this flag to remove the age restrictions of being under 13 to sign up.
          */
         const val REGISTER_VIA_LINK = "RegViaLink"
+
+        /**
+         * Registration mode argument value indicating that this is not being used in registration mode
+         */
+        const val REGISTER_MODE_NONE = 0
+
+        /**
+         * Registration mode argument value indicating that this is being used to register a user
+         * who is not a minor (age > 13)
+         */
+        const val REGISTER_MODE_ENABLED = 1
+
+        /**
+         * Registration mode argument value indicating that a minor is being registered
+         */
+        const val REGISTER_MODE_MINOR = 2
+
 
     }
 

@@ -5,8 +5,13 @@ import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
 import com.soywiz.klock.parse
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.checkJndiSetup
 import io.ktor.client.*
@@ -19,6 +24,7 @@ import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import kotlin.random.Random
 
 class TestClazzLogCreator {
 
@@ -35,8 +41,11 @@ class TestClazzLogCreator {
     @Before
     fun setup() {
         checkJndiSetup()
-        db = UmAppDatabase.Companion.getInstance(Any())
-        db.clearAllTables()
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
+        db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+            .addSyncCallback(nodeIdAndAuth)
+            .build()
+            .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
 
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {
@@ -48,8 +57,8 @@ class TestClazzLogCreator {
             }
         }
 
-        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/dummy", httpClient,
-            okHttpClient))
+        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
+            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
     }
 
     private fun createClazzAndSchedule(clazzName: String, holidayCalendarUid: Long = 0,

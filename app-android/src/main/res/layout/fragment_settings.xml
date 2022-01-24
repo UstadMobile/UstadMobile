@@ -21,11 +21,6 @@
 
 
         <variable
-            name="rolesVisible"
-            type="boolean" />
-
-
-        <variable
             name="reasonLeavingVisible"
             type="boolean" />
 
@@ -93,56 +88,6 @@
                     app:layout_constraintStart_toEndOf="@+id/imageView14"
                     app:layout_constraintTop_toBottomOf="@+id/textView10" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/activity_settings2_roles_cl"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dimen_8dp"
-                android:visibility="@{rolesVisible ? View.VISIBLE : View.GONE}"
-                android:background="?android:selectableItemBackground"
-                android:onClick="@{() -> presenter.goToRolesList()}">
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/activity_settings2_roles_imageview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/dimen_8dp"
-                    android:layout_marginTop="@dimen/dimen_8dp"
-                    android:layout_marginBottom="@dimen/dimen_8dp"
-                    android:tint="?colorOnIconTint"
-                    app:layout_constraintBottom_toTopOf="@+id/activity_settings2_roles_title"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.0"
-                    app:srcCompat="@drawable/ic_badge_24dp" />
-
-                <TextView
-                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                    android:id="@+id/activity_settings2_roles_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/dimen_8dp"
-                    android:layout_marginTop="@dimen/dimen_8dp"
-                    android:text="@string/roles"
-                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_roles_imageview"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-                    android:id="@+id/activity_settings2_roles_desc"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/dimen_8dp"
-                    android:layout_marginTop="@dimen/dimen_8dp"
-                    android:layout_marginBottom="@dimen/dimen_8dp"
-                    android:text="@string/roles_setting_desc"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_roles_imageview"
-                    app:layout_constraintTop_toBottomOf="@+id/activity_settings2_roles_title" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/activity_settings2_workspace_cl"

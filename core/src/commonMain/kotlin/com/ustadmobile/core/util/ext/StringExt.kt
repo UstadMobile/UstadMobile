@@ -7,6 +7,10 @@ import kotlin.text.Typography.ellipsis
 
 fun String.inBrackets() = "($this)"
 
+/**
+ * To ensure consistency between JVM and Android, Base64 encoding
+ * **must** be done with NO_WRAP
+ */
 expect fun String.base64StringToByteArray(): ByteArray
 
 fun String?.toQueryLikeParam() = if(this.isNullOrEmpty()) "%" else "%$this%"
@@ -31,4 +35,53 @@ fun String.truncate(maxLength: Int = 24): String{
     } else{
         this
     }
+}
+
+/**
+ * Check if the current string starts with https:// or http://
+ */
+fun String.startsWithHttpProtocol(): Boolean = toLowerCase().let {
+    it.startsWith("http://") || it.startsWith("https://")
+}
+
+fun String.requireHttpPrefix(defaultProtocol: String = "https"): String {
+    if(startsWithHttpProtocol())
+        return this
+    else
+        return "$defaultProtocol://$this"
+}
+
+/**
+ * Where this string is a URI of some kind, append query arguments to it. If the string
+ * already contains a ?, then the arguments will be appended after an &amp;
+ * Otherwise, a ? will be added and then the query args
+ */
+fun String.appendQueryArgs(queryArgs: String): String {
+    var retVal = this
+    if(this.contains("?"))
+        retVal += "&"
+    else
+        retVal += "?"
+
+    retVal += queryArgs
+
+    return retVal
+}
+
+/**
+ * Where this string is a URI of some kind, append query arguments to it. If the string
+ * already contains a ?, then the arguments will be appended after an &amp;
+ * Otherwise, a ? will be added and then the query args
+ */
+fun String.appendQueryArgs(vararg pairs: Pair<String, String>): String {
+    return appendQueryArgs(mapOf(*pairs).toQueryString())
+}
+
+/**
+ * Where this string is a URI of some kind, append query arguments to it. If the string
+ * already contains a ?, then the arguments will be appended after an &amp;
+ * Otherwise, a ? will be added and then the query args
+ */
+fun String.appendQueryArgs(args: Map<String, String>): String {
+    return appendQueryArgs(args.toQueryString())
 }

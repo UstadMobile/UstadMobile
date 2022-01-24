@@ -5,7 +5,6 @@ plugins {
     id 'kotlinx-atomicfu'
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
-    id 'kotlin-android-extensions'
     id 'maven-publish'
 }
 
@@ -25,8 +24,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 30
-        missingDimensionStrategy 'api', 'api18'
+        targetSdkVersion 31
     }
 
     packagingOptions {
@@ -86,11 +84,10 @@ kotlin {
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "com.soywiz.korlibs.klock:klock:$version_klock"
-                implementation "com.github.aakira:napier:$version_napier"
+                implementation "io.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.ustadmobile.door:door-runtime:$version_door"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation "com.ustadmobile.door:door-runtime:$version_door"
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
                 compileOnly "com.ustadmobile.door:room-annotations:$version_door"
@@ -101,9 +98,12 @@ kotlin {
         }
 
         commonJvmMain {
+            kotlin.srcDirs += "build/generated/source/umlocale-namemap"
             dependencies {
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
@@ -122,10 +122,13 @@ kotlin {
 
         jvmMain {
             dependsOn commonJvmMain
+            resources.srcDirs += ["locale/main", "src/main/assets"]
 
             dependencies {
+                implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
             }
         }
 
@@ -179,6 +182,7 @@ kotlin {
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
                 implementation "androidx.work:work-runtime:$version_android_workmanager"
+                implementation "androidx.work:work-runtime-ktx:$version_android_workmanager"
                 implementation project(":lib-database-android")
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 //Image loading library
@@ -186,7 +190,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-android:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
 
-                implementation 'com.linkedin.android.litr:litr:1.4.3'
+                implementation "com.linkedin.android.litr:litr:$version_android_litr"
 
                 //dependency injection
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
@@ -196,6 +200,7 @@ kotlin {
                 implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
                 implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
 
+                implementation "com.google.android.material:material:$version_android_material"
             }
         }
 
@@ -210,14 +215,23 @@ task prepareLocale {
     outputs.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
 
     doFirst {
-        File outFile = project.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
-        if(!outFile.parentFile.exists()) {
-            outFile.parentFile.mkdirs()
+        File messageIdFile = project.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
+
+        if(!messageIdFile.parentFile.exists()) {
+            messageIdFile.parentFile.mkdirs()
         }
-        outFile.text = ''
-        outFile << 'package com.ustadmobile.core.generated.locale\n\n'
-        outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
-        outFile << 'object MessageID{\n\n'
+
+        messageIdFile.text = ''
+        messageIdFile << 'package com.ustadmobile.core.generated.locale\n\n'
+        messageIdFile << '/** DO NOT EDIT. GENERATED CODE */\n'
+        messageIdFile << 'object MessageID{\n\n'
+
+        String messageIdMap = """package com.ustadmobile.core.generated.locale\n\n
+        object MessageIdMap {
+        
+            private val strMap = mapOf(
+                
+        """
 
         Map<String, Integer> messageIds = new HashMap<>()
         AtomicInteger messageIdGenerator = new AtomicInteger(2000)
@@ -228,26 +242,39 @@ task prepareLocale {
                 String msgName = str.@name
 
                 if (!messageIds.containsKey(msgName)) {
-                    Integer value;
-                    if (str.attributes().get("value") != null) {
-                        value = new Integer(str.attributes().get("value"))
-                    } else {
-                        value = new Integer(messageIdGenerator.getAndIncrement())
-                    }
-
-                    messageIds.put(msgName, value)
+                    messageIds.put(msgName, new Integer(messageIdGenerator.getAndIncrement()))
                 }
             }
         }
 
         Iterator<String> nameIterator = messageIds.keySet().iterator()
 
+        boolean first = true
         while (nameIterator.hasNext()) {
             String strName = nameIterator.next()
             Integer value = messageIds.get(strName)
-            outFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
+            messageIdFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
+            if(!first) {
+                messageIdMap += ",\n"
+            }
+
+            messageIdMap += String.valueOf(value) + ' to "' + strName + '"'
+            first = false
         }
-        outFile << '}'
+        messageIdFile << '}'
+
+        messageIdMap += """)
+        operator fun get(messageId: Int) = strMap[messageId]
+        
+        val idMap: Map<Int, String> = strMap.toMap()
+        
+        }"""
+        File messageIdMapFile = project.file("build/generated/source/umlocale-namemap/com/ustadmobile/core/generated/locale/MessageIdMap.kt")
+        if(!messageIdMapFile.parentFile.exists()) {
+            messageIdMapFile.parentFile.mkdirs()
+        }
+
+        messageIdMapFile.text = messageIdMap
     }
 }
 

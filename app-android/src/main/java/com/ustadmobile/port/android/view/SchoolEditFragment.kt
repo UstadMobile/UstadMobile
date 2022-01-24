@@ -4,36 +4,25 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
-import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolEditBinding
-import com.toughra.ustadmobile.databinding.ItemClazzSimpleEditBinding
 import com.ustadmobile.core.controller.SchoolEditPresenter
+import com.ustadmobile.core.controller.ScopedGrantEditPresenter
+import com.ustadmobile.core.controller.TimeZoneListPresenter.Companion.RESULT_TIMEZONE_KEY
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.view.SchoolEditView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.HolidayCalendar
-import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
 interface SchoolEditFragmentEventHandler {
-    fun onClickEditClazz(clazz: Clazz?)
-    fun onClickDeleteClazz(clazz: Clazz)
-    fun onClickAddClazz()
     fun handleClickTimeZone()
     fun showHolidayCalendarPicker()
 }
@@ -45,57 +34,29 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
     private var mPresenter: SchoolEditPresenter? = null
 
+    private var scopedGrantRecyclerAdapter: ScopedGrantAndNameEditRecyclerViewAdapter? = null
+
     override val mEditPresenter: UstadEditPresenter<*, SchoolWithHolidayCalendar>?
         get() = mPresenter
 
-    private var clazzRecyclerAdapter: ClazzRecyclerAdapter? = null
-
-    private var clazzRecyclerView : RecyclerView? = null
-
-    private val clazzObserver = Observer<List<Clazz>?>{
-        t -> clazzRecyclerAdapter?.submitList(t)
-    }
-
-    class ClazzRecyclerAdapter(
-            val activityEventHandler: SchoolEditFragmentEventHandler,
-            var presenter: SchoolEditPresenter?)
-        : ListAdapter<Clazz, ClazzRecyclerAdapter.ClazzViewHolder>(DIFF_CALLBACK_CLAZZ) {
-
-        class ClazzViewHolder(val binding: ItemClazzSimpleEditBinding)
-            : RecyclerView.ViewHolder(binding.root)
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzViewHolder {
-            val viewHolder = ClazzViewHolder(ItemClazzSimpleEditBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false))
-            viewHolder.binding.mPresenter = presenter
-            viewHolder.binding.mActivity = activityEventHandler
-            return viewHolder
+    override var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>? = null
+        set(value) {
+            field?.removeObserver(scopedGrantListObserver)
+            field = value
+            value?.observe(viewLifecycleOwner, scopedGrantListObserver)
         }
 
-        override fun onBindViewHolder(holder: ClazzViewHolder, position: Int) {
-            holder.binding.clazz = getItem(position)
-        }
+    private val scopedGrantListObserver = Observer<List<ScopedGrantAndName>> {
+            t -> scopedGrantRecyclerAdapter?.submitList(t)
     }
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         val rootView: View
         mBinding = FragmentSchoolEditBinding.inflate(inflater, container,false).also {
                         rootView = it.root
                         it.activityEventHandler = this
                     }
-
-        clazzRecyclerView = rootView.findViewById(R.id.fragment_school_edit_class_rv)
-        clazzRecyclerAdapter = ClazzRecyclerAdapter(this, null)
-        clazzRecyclerView?.adapter = clazzRecyclerAdapter
-        clazzRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
-
-        mPresenter = SchoolEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
-
-        clazzRecyclerAdapter?.presenter = mPresenter
 
         return rootView
     }
@@ -105,13 +66,21 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         setEditFragmentTitle(R.string.add_a_new_school, R.string.edit_school)
         val navController = findNavController()
 
-        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+        mPresenter = SchoolEditPresenter(requireContext(), arguments.toStringMap(), this,
+            di, viewLifecycleOwner).withViewLifecycle()
 
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-            Clazz::class.java){
-            val clazz = it.firstOrNull()?: return@observeResult
-            mPresenter?.handleAddOrEditClazz(clazz)
+        val permissionList = ScopedGrantEditPresenter.PERMISSION_LIST_MAP[School.TABLE_ID]
+            ?: throw IllegalStateException("ScopedGrantEdit permission list not found!")
+        scopedGrantRecyclerAdapter = ScopedGrantAndNameEditRecyclerViewAdapter(
+            mPresenter?.scopedGrantOneToManyHelper, permissionList)
+
+        mBinding?.schoolEditFragmentPermissionsInc?.itemScopedGrantOneToNRecycler?.apply {
+            adapter = scopedGrantRecyclerAdapter
+            layoutManager = LinearLayoutManager(requireContext())
         }
+
+
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 HolidayCalendar::class.java) {
@@ -122,7 +91,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         }
 
 
-        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>(TimeZoneListFragment.RESULT_TIMEZONE_KEY)
+        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>(RESULT_TIMEZONE_KEY)
                 ?.observe(viewLifecycleOwner) {
                     entity?.schoolTimeZone = it
                     mBinding?.school = entity
@@ -134,8 +103,6 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         mBinding = null
         mPresenter = null
         entity = null
-        clazzRecyclerAdapter = null
-        clazzRecyclerView = null
     }
 
     override fun onResume() {
@@ -147,20 +114,11 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         set(value) {
             field = value
             mBinding?.school = value
-            mBinding?.genderOptions = this.genderOptions
         }
-
-    override var schoolClazzes: DoorMutableLiveData<List<Clazz>>? = null
-        set(value) {
-            field?.removeObserver(clazzObserver)
-            field = value
-            value?.observe(this, clazzObserver)
-        }
-
-    override var genderOptions: List<SchoolEditPresenter.GenderTypeMessageIdOption>? = null
 
     override var fieldsEnabled: Boolean = false
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }
@@ -178,27 +136,10 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         }
     }
 
-    override fun onClickEditClazz(clazz: Clazz?) {
-        onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(clazz, R.id.clazz_detail_dest, Clazz::class.java,
-        argBundle = bundleOf(UstadView.ARG_ENTITY_UID to clazz?.clazzUid.toString()))
-    }
-
-    override fun onClickDeleteClazz(clazz: Clazz) {
-        mPresenter?.handleRemoveSchedule(clazz)
-    }
-
-    override fun onClickAddClazz() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(Clazz::class.java,
-                R.id.clazz_list_dest,
-                bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to entity?.schoolUid.toString()))
-    }
-
     override fun handleClickTimeZone() {
         onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(String::class.java, R.id.time_zone_list_dest,
-                destinationResultKey = TimeZoneListFragment.RESULT_TIMEZONE_KEY)
+                destinationResultKey = RESULT_TIMEZONE_KEY)
     }
 
     override fun showHolidayCalendarPicker() {

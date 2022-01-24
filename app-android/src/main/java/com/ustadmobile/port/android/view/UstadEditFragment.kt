@@ -1,22 +1,29 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.port.android.util.ext.saveStateToCurrentBackStackStateHandle
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
+import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 
 abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> {
 
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
+
+    override var fieldsEnabled: Boolean = true
+        set(value) {
+            if(field != value) {
+                field = value
+                activity?.invalidateOptionsMenu()
+            }
+        }
 
     override fun finishWithResult(result: List<T>) {
         saveResultToBackStackSavedStateHandle(result)
@@ -30,6 +37,16 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_done, menu)
+
+        val menuItem = menu.findItem(R.id.menu_done)
+
+        menuItem.title = if(mEditPresenter?.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB) {
+            requireContext().getString(R.string.save)
+        }else {
+            requireContext().getString(R.string.done)
+        }
+
+        menuItem.isEnabled = fieldsEnabled
     }
 
     protected fun setEditFragmentTitle(newTitleId: Int, editStringId: Int) {

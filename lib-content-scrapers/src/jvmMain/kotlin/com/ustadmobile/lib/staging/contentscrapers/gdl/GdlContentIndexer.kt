@@ -20,6 +20,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY_SA
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY_SA_NC
 import com.ustadmobile.core.util.LiveDataWorkQueue
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.apache.commons.lang.exception.ExceptionUtils
@@ -224,7 +225,9 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             UMLogUtil.logInfo(args[1])
             ContentScraperUtil.checkIfPathsToDriversExist()
             try {
-                val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao
+                //This needs replaced with DI
+                lateinit var runDao: ScrapeRunDao
+                //val runDao = UmAppDatabase.getInstance(Any(), replaceMeWithDi()).scrapeRunDao
 
 
                 scrapeFromRoot(File(args[0]), File(args[1]), 0)
@@ -249,7 +252,9 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
                 throw IllegalArgumentException("Malformed url$startUrl", e)
             }
 
-            val db = UmAppDatabase.getInstance(Any())
+            //This needs replaced with DI
+            lateinit var db: UmAppDatabase
+            //val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
             val repository = db // db.getRepository("https://localhost", "")
 
             destinationDir.mkdirs()

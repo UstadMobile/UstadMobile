@@ -15,12 +15,14 @@ import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 
 typealias UploadSessionFactory = (sessionUuid: UUID, containerEntryPaths: List<ContainerEntryWithMd5>,
-                          site: Endpoint, di: DI) -> UploadSession
+                                  site: Endpoint, di: DI) -> UploadSession
 
-class UploadSessionManager(val site: Endpoint, override val di: DI,
-                           private val inactiveCheckInterval: Int = 60000,
-                           private val sessionTimeout: Int = 60000 * 20,
-                           private val uploadSessionFactory: UploadSessionFactory = DEFAULT_UPLOAD_SESSION_FACTORY) : Closeable, DIAware{
+class UploadSessionManager(
+    val site: Endpoint, override val di: DI,
+    private val inactiveCheckInterval: Int = 60000,
+    private val sessionTimeout: Int = 60000 * 20,
+    private val uploadSessionFactory: UploadSessionFactory = DEFAULT_UPLOAD_SESSION_FACTORY
+) : Closeable, DIAware{
 
     private val timeoutChecker = GlobalScope.launch {
         while(true) {

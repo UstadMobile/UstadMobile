@@ -39,18 +39,29 @@
             android:layout_height="wrap_content">
 
 
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="0dp"
+                android:layout_height="200dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/illustration_connect" />
+
             <TextView
                 android:id="@+id/site_link_instructions_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:text="@string/please_enter_the_linK"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/site_link_view"
@@ -131,18 +142,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/use_public_site"
-                android:onClick="@{() -> presenter.handleClickUsePublicLibrary()}"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginVertical="@dimen/dimen_8dp"
-                app:layout_constraintTop_toBottomOf="@+id/or_text"
-                android:text="@string/use_public_library_site"
-                app:icon="@drawable/library_books_24px"
-                style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
-                />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/create_new_site"
@@ -151,7 +150,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
-                app:layout_constraintTop_toBottomOf="@+id/use_public_site"
+                app:layout_constraintTop_toBottomOf="@+id/or_text"
                 android:text="@string/create_site"
                 style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
                 app:icon="@drawable/ic_add_black_24dp"/>
@@ -167,15 +166,15 @@
                 android:layout_marginVertical="@dimen/dimen_8dp"/>
 
             <TextView
+                android:id="@+id/textView"
                 android:layout_width="@dimen/dimen_0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toEndOf="@+id/info_icon"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/create_new_site"
-                android:layout_marginStart="@dimen/dimen_8dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
+                android:layout_marginStart="@dimen/dimen_8dp"
                 android:text="@string/sites_can_be_help_text"
-                />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/info_icon"
+                app:layout_constraintTop_toBottomOf="@+id/create_new_site" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

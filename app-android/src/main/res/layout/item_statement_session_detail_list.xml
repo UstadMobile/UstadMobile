@@ -80,6 +80,20 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="@dimen/dimen_16dp" />
 
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            android:paddingEnd="@dimen/dimen_5dp"
+            tools:text="Question 1"
+            android:id="@+id/item_person_object_question_answer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:statementQuestionAnswer="@{statement}"
+            app:layout_constraintStart_toStartOf="@+id/item_person_verb_title"
+            app:layout_constraintTop_toBottomOf="@+id/item_person_object_description"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_marginStart="@dimen/dimen_5dp"
             tools:text="20/12/2021 15:00"
@@ -89,7 +103,7 @@
             android:layout_width="12dp"
             android:layout_height="12dp"
             app:layout_constraintStart_toStartOf="@+id/item_person_verb_title"
-            app:layout_constraintTop_toBottomOf="@+id/item_person_object_description"
+            app:layout_constraintTop_toBottomOf="@+id/item_person_object_question_answer"
             app:layout_constraintBottom_toBottomOf="@id/item_person_start_date_time"
             />
 
@@ -103,7 +117,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@+id/item_person_start_date_image"
-            app:layout_constraintTop_toBottomOf="@+id/item_person_object_description"
+            app:layout_constraintTop_toBottomOf="@+id/item_person_object_question_answer"
             android:layout_marginBottom="@dimen/dimen_16dp" />
 
 
@@ -117,7 +131,7 @@
             app:durationMinsSecs="@{statement.resultDuration}"
             android:visibility="@{statement.resultDuration &lt; 1000 ? View.GONE : View.VISIBLE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_start_date_time"
-            app:layout_constraintTop_toBottomOf="@+id/item_person_object_description"
+            app:layout_constraintTop_toBottomOf="@+id/item_person_object_question_answer"
             android:layout_marginBottom="@dimen/dimen_16dp" />
 
 
@@ -126,7 +140,7 @@
             android:id="@+id/item_person_progress_image"
             android:tint="?colorOnIconTint"
             app:srcCompat="@drawable/exo_ic_check"
-            android:visibility="@{statement.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            android:visibility="@{statement.resultScoreMax > 0 ? View.VISIBLE : View.GONE}"
             android:layout_width="12dp"
             android:layout_height="12dp"
             app:layout_constraintStart_toStartOf="@+id/item_person_start_date_image"
@@ -142,7 +156,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{@string/percentage_score((int)(statement.resultScoreScaled * 100))}"
-            android:visibility="@{statement.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            android:visibility="@{statement.resultScoreMax > 0 ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_progress_image"
             app:layout_constraintTop_toBottomOf="@+id/item_person_start_date_time"
             android:layout_marginBottom="@dimen/dimen_16dp" />
@@ -156,7 +170,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text='@{"(" + statement.resultScoreRaw + &quot;/&quot; + statement.resultScoreMax + ")"}'
-            android:visibility="@{statement.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            android:visibility="@{statement.resultScoreMax > 0 ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_progress"
             app:layout_constraintTop_toBottomOf="@+id/item_person_start_date_time"
             android:layout_marginBottom="@dimen/dimen_16dp" />

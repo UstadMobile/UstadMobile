@@ -146,7 +146,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
         seriesRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = ReportEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+                di, viewLifecycleOwner).withViewLifecycle()
 
         seriesAdapter?.presenter = mPresenter
 
@@ -217,6 +217,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

@@ -4,16 +4,13 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.ContainerEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -28,6 +25,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
     private var entry: ContentEntry? = null
     private var entryUuid: Long = 0
     internal var containerUid: Long = 0
+    var clazzUid: Long = 0L
 
     val accountManager: UstadAccountManager by instance()
 
@@ -40,10 +38,6 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
     var timeVideoPlayed = 0L
 
     lateinit var contextRegistration: String
-
-    internal lateinit var contentEntryDao: ContentEntryDao
-    internal lateinit var containerDao: ContainerDao
-    internal lateinit var containerEntryDao: ContainerEntryDao
 
     data class VideoParams(val videoPath: String? = null,
                            val audioPath: ContainerEntryWithContainerEntryFile? = null,
@@ -60,17 +54,15 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        containerEntryDao = db.containerEntryDao
-        containerDao = db.containerDao
-        contentEntryDao = db.contentEntryDao
         contextRegistration = randomUuid().toString()
 
         entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
+        clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
 
         view.loading = true
         GlobalScope.launch(doorMainDispatcher()) {
-            entry = contentEntryDao.getContentByUuidAsync(entryUuid)
+            entry = db.contentEntryDao.findByUidAsync(entryUuid)
             view.entry = entry
         }
 
@@ -104,15 +96,12 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
             return
         }
 
-        GlobalScope.launch {
+        GlobalScope.launch{
             val progress = (position.toFloat() / videoLength * 100).toInt()
-            val flag = if (progress == 100) ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED or ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED else 0
-            repo.contentEntryProgressDao.updateProgress(entryUuid, accountManager.activeAccount.personUid, progress, flag)
-
             entry?.also {
                 statementEndpoint.storeProgressStatement(
                         accountManager.activeAccount, it, progress,
-                        playerPlayedVideoDuration,contextRegistration)
+                        playerPlayedVideoDuration,contextRegistration, clazzUid)
             }
         }
     }

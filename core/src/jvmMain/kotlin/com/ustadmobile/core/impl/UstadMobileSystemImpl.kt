@@ -31,11 +31,13 @@
 
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.UMFileUtil
 import java.io.*
 import java.util.*
-import kotlin.collections.ArrayList
+import com.ustadmobile.core.generated.locale.MessageIdMap
+import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.getStringsXmlResource
+import org.xmlpull.v1.XmlPullParserFactory
+import java.util.concurrent.ConcurrentHashMap
 
 
 /**
@@ -44,12 +46,42 @@ import kotlin.collections.ArrayList
  *
  *
  * @author mike, kileha3
+ * @param xppFactory - XmlPullParser factory that
  */
-actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
+actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
+                                        private val dataRoot: File
+) : UstadMobileSystemCommon(){
 
-    private var appConfig: Properties? = null
+    private val appConfig: Properties by lazy {
+        Properties().also { props ->
+            this::class.java.getResourceAsStream(APPCONFIG_PROPERTIES_PATH)?.use { propsIn ->
+                props.load(propsIn)
+            }
+        }
+    }
 
-    private var tmpPrefs = mutableMapOf<String, String>()
+    private val messageIdMapFlipped: Map<String, Int> by lazy {
+        MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
+    }
+
+    private val defaultStringsXml: StringsXml by lazy {
+        this::class.java.getStringsXmlResource("/values/strings_ui.xml", xppFactory,
+            messageIdMapFlipped)
+    }
+
+    private val foreignStringsXml: MutableMap<String, StringsXml> = ConcurrentHashMap()
+
+    private val appPrefs : Properties by lazy {
+        Properties().apply {
+            val propFile = File(dataRoot, PREFS_FILENAME)
+            if(propFile.exists()) {
+                FileReader(propFile).use { fileReader ->
+                    load(fileReader)
+                }
+            }
+
+        }
+    }
 
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
@@ -76,27 +108,22 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
     actual override fun getString(messageCode: Int, context: Any): String{
         //This is really only used in tests, so we just want to be sure that it is returning
         //something that is distinct
-        return "$messageCode"
+        return getString(getDisplayedLocale(context), messageCode, context)
     }
 
+    fun getString(localeCode: String, messageId: Int, context: Any): String {
+        val localeCodeLower = localeCode.toLowerCase(Locale.ROOT)
 
-    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> {
-        val dirList = ArrayList<UMStorageDir>()
-        val systemBaseDir = System.getProperty("user.dir")
-        val contentDirName = getContentDirName(context)
-
-        dirList.add(UMStorageDir(systemBaseDir, getString(MessageID.device, context),
-                removableMedia = false, isAvailable = true,
-                usableSpace = File(systemBaseDir).usableSpace))
-
-        //Find external directories
-        val externalDirs = findRemovableStorage()
-        for (extDir in externalDirs) {
-            dirList.add(UMStorageDir(UMFileUtil.joinPaths(extDir!!, contentDirName!!),
-                    getString(MessageID.memory_card, context),
-                    true, true, false))
+        val stringsXml = if(localeCodeLower.startsWith("en")) {
+            defaultStringsXml
+        }else {
+            foreignStringsXml.computeIfAbsent(localeCodeLower.substring(0, 2)) {
+                this::class.java.getStringsXmlResource("/values-$it/strings_ui.xml", xppFactory,
+                    messageIdMapFlipped, defaultStringsXml)
+            }
         }
-        return dirList
+
+        return stringsXml[messageId]
     }
 
 
@@ -129,7 +156,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @return value of that preference
      */
     actual override fun getAppPref(key: String, context: Any): String?{
-        return tmpPrefs[key]
+        return appPrefs.getProperty(key)
     }
 
 
@@ -140,14 +167,18 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      */
     actual override fun setAppPref(key: String, value: String?, context: Any){
         if(value != null) {
-            tmpPrefs[key] = value
+            appPrefs[key] = value
         }else {
-            tmpPrefs.remove(key)
+            appPrefs.remove(key)
+        }
+
+        FileWriter(File(dataRoot, PREFS_FILENAME)).use {
+            appPrefs.store(it, "UTF-8")
         }
     }
 
     fun clearPrefs() {
-        tmpPrefs.clear()
+        appPrefs.clear()
     }
 
 
@@ -158,7 +189,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @return String with version number
      */
     actual fun getVersion(context: Any): String{
-        TODO("not implemented")
+        return "JVM"
     }
 
     /**
@@ -196,22 +227,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @return The value of the key if found, if not, the default value provided
      */
     actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?{
-        if (appConfig == null) {
-            val appPrefResource = "/com/ustadmobile/core/appconfig.properties"
-            appConfig = Properties()
-            var prefIn: InputStream? = null
-
-            try {
-                prefIn =  this::class.java.getResourceAsStream(appPrefResource)
-                appConfig!!.load(prefIn)
-            } catch (e: IOException) {
-                UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
-            } finally {
-                prefIn?.close()
-            }
-        }
-
-        return appConfig!!.getProperty(key, defaultVal)
+        return appConfig.getProperty(key, defaultVal)
     }
 
 
@@ -246,6 +262,15 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         return canWriteFiles
     }
 
+
+
+    /**
+     * Open the given link in a browser and/or tab depending on the platform
+     */
+    actual fun openLinkInBrowser(url: String, context: Any) {
+        //On JVM - do nothing at the moment. This is only used for unit testing with verify calls.
+    }
+
     actual companion object {
         /**
          * Get an instance of the system implementation - relies on the platform
@@ -253,15 +278,15 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
          *
          * @return A singleton instance
          */
+        @Deprecated("Don't use this! Use this class via DI")
         @JvmStatic
-        actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
-    }
+        actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl(
+            XmlPullParserFactory.newInstance(), File("."))
 
-    /**
-     * Open the given link in a browser and/or tab depending on the platform
-     */
-    actual fun openLinkInBrowser(url: String, context: Any) {
-        //On JVM - do nothing at the moment. This is only used for unit testing with verify calls.
+        const val APPCONFIG_PROPERTIES_PATH = "/com/ustadmobile/core/appconfig.properties"
+
+        const val PREFS_FILENAME = "prefs.properties"
+
     }
 
 }

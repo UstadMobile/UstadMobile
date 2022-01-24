@@ -12,7 +12,7 @@
 
         <variable
             name="person"
-            type="com.ustadmobile.lib.db.entities.Person" />
+            type="com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin" />
 
         <variable
             name="personImageAdapter"
@@ -39,8 +39,19 @@
             type="Integer" />
 
         <variable
+            name="manageParentConsentVisible"
+            type="boolean" />
+
+        <variable
             name="presenter"
             type="PersonDetailPresenter" />
+
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
+        <variable
+            name="timeZoneId"
+            type="String" />
 
     </data>
 
@@ -74,178 +85,97 @@
                 app:constraint_referenced_ids="fragment_person_detail_picture_imageview"
                 tools:layout_editor_absoluteY="@dimen/layout_dimen_256dp" />
 
-            <!-- This could be replaced with a MaterialButton when the PR accepting top aligned icon is accepted
-            https://github.com/material-components/material-components-android/pull/1129 -->
-            <!-- Note we cannot use a compound drawable because this would not work with vector
-            drawable on Android 4.4 and below -->
-            <LinearLayout
-                android:id="@+id/fragment_person_detail_call_linlayout"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.phoneNum)}"
-                android:layout_width="wrap_content"
+
+            <HorizontalScrollView
+                android:id="@+id/fragment_person_detail_actionbutton_scrollview"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="@dimen/dimen_8dp"
-                android:background="@drawable/bg_listitem"
-                app:onClickDial="@{person.phoneNum}"
-                android:orientation="vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_picture_image_barrier"
-                tools:ignore="UseCompoundDrawables">
-
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_marginStart="@dimen/dimen_8dp"
-                    android:layout_marginEnd="@dimen/dimen_8dp"
-                    android:id="@+id/fragment_person_detail_call_icon_imageview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:tint="?colorOnTintPrimary"
-                    app:srcCompat="@drawable/ic_phone_black_24dp" />
-
-                <TextView
-                    android:layout_gravity="center_horizontal"
-                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                    android:id="@+id/fragment_person_detail_call_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="?colorOnTintPrimary"
-                    android:text="@string/call" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/fragment_person_detail_text_linlayout"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.phoneNum)}"
-                app:onClickSms="@{person.phoneNum}"
-                android:background="@drawable/bg_listitem"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/dimen_16dp"
-                android:paddingVertical="@dimen/dimen_8dp"
-                android:orientation="vertical"
-                app:layout_constraintStart_toEndOf="@+id/fragment_person_detail_call_linlayout"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_picture_image_barrier">
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_marginStart="@dimen/dimen_8dp"
-                    android:layout_marginEnd="@dimen/dimen_8dp"
-                    android:tint="?colorOnTintPrimary"
-                    android:id="@+id/fragment_person_text_icon"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_message_bcd4_24dp" />
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:layout_gravity="center_horizontal"
-                    android:textColor="?colorOnTintPrimary"
-                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                    android:id="@+id/fragment_person_detail_text_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/text" />
-            </LinearLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/fragment_person_detail_call_linlayout"
+                        android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.phoneNum)}"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:icon="@drawable/ic_phone_black_24dp"
+                        app:iconGravity="top"
+                        app:onClickDial="@{person.phoneNum}"
+                        android:text="@string/call"/>
 
-            <LinearLayout
-                android:id="@+id/fragment_person_detail_email_linlayout"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.emailAddr)}"
-                app:onClickEmail="@{person.emailAddr}"
-                android:background="@drawable/bg_listitem"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="@dimen/dimen_8dp"
-                android:orientation="vertical"
-                app:layout_constraintStart_toEndOf="@+id/fragment_person_detail_text_linlayout"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_picture_imageview"
-                tools:ignore="UseCompoundDrawables">
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_marginStart="@dimen/dimen_8dp"
-                    android:layout_marginEnd="@dimen/dimen_8dp"
-                    android:id="@+id/fragment_person_detail_email_image"
-                    android:layout_width="wrap_content"
-                    android:tint="?colorOnTintPrimary"
-                    android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_email_black_24dp" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/fragment_person_detail_text_linlayout"
+                        android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.phoneNum)}"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        app:onClickSms="@{person.phoneNum}"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text"
+                        app:iconGravity="top"
+                        app:icon="@drawable/ic_message_bcd4_24dp" />
 
-                <TextView
-                    android:layout_gravity="center_horizontal"
-                    android:textColor="?colorOnTintPrimary"
-                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                    android:id="@+id/textView35"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/email" />
-            </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/create_account_view"
-                android:visibility="@{createAccountVisibility}"
-                android:background="@drawable/bg_listitem"
-                android:layout_width="@dimen/dimen_110dp"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="@dimen/dimen_8dp"
-                android:onClick="@{() -> presenter.handleCreateAccount()}"
-                android:orientation="vertical"
-                app:layout_constraintStart_toEndOf="@+id/fragment_person_detail_email_linlayout"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_picture_imageview"
-                tools:ignore="UseCompoundDrawables">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/fragment_person_detail_email_linlayout"
+                        android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.emailAddr)}"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        app:onClickEmail="@{person.emailAddr}"
+                        app:iconGravity="top"
+                        app:icon="@drawable/ic_email_black_24dp"
+                        android:text="@string/email"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxWidth="@dimen/dimen_110dp" />
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginStart="@dimen/dimen_8dp"
-                    android:layout_marginEnd="@dimen/dimen_8dp"
-                    android:id="@+id/create_account_image"
-                    android:layout_width="wrap_content"
-                    android:tint="?colorOnTintPrimary"
-                    android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_person_black_24dp" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/create_account_view"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="@dimen/dimen_110dp"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{() -> presenter.handleCreateAccount()}"
+                        android:text="@string/create_account"
+                        android:visibility="@{createAccountVisibility}"
+                        app:icon="@drawable/ic_person_black_24dp"
+                        app:iconGravity="top" />
 
-                <TextView
-                    android:gravity="center"
-                    android:layout_gravity="center_horizontal"
-                    android:textColor="?colorOnTintPrimary"
-                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                    android:id="@+id/create_account_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/create_account" />
-            </LinearLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/change_account_password_view"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxWidth="@dimen/dimen_110dp"
+                        android:visibility="@{changePasswordVisibility}"
+                        android:onClick="@{() -> presenter.handleChangePassword()}"
+                        android:text="@string/change_password"
+                        app:iconGravity="top"
+                        app:icon="@drawable/person_with_key"
+                        />
 
-            <LinearLayout
-                android:id="@+id/change_account_password_view"
-                android:visibility="@{changePasswordVisibility}"
-                android:background="@drawable/bg_listitem"
-                android:layout_width="@dimen/dimen_110dp"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="@dimen/dimen_8dp"
-                android:orientation="vertical"
-                android:onClick="@{() -> presenter.handleChangePassword()}"
-                app:layout_constraintStart_toEndOf="@+id/fragment_person_detail_email_linlayout"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_picture_imageview"
-                tools:ignore="UseCompoundDrawables">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/manage_parental_consent_button"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:visibility="@{person.parentJoin != null ? View.VISIBLE : View.GONE}"
+                        android:layout_width="wrap_content"
+                        android:maxWidth="@dimen/dimen_110dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/manage_parental_consent"
+                        app:iconGravity="top"
+                        app:icon="@drawable/ic_baseline_supervised_user_circle_24"
+                        android:onClick="@{() -> presenter.handleClickManageParentalConsent()}"
+                        />
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginStart="@dimen/dimen_8dp"
-                    android:layout_marginEnd="@dimen/dimen_8dp"
-                    android:id="@+id/change_password_image"
-                    android:layout_width="wrap_content"
-                    android:tint="?colorOnTintPrimary"
-                    android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/person_with_key" />
+                </LinearLayout>
 
-                <TextView
-                    android:gravity="center"
-                    android:layout_gravity="center_horizontal"
-                    android:textColor="?colorOnTintPrimary"
-                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                    android:id="@+id/change_password_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/change_password" />
-            </LinearLayout>
+
+            </HorizontalScrollView>
+
 
 
             <androidx.constraintlayout.widget.Barrier
@@ -253,7 +183,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="fragment_person_detail_call_linlayout,fragment_person_detail_text_linlayout,fragment_person_detail_email_linlayout,create_account_view, change_account_password_view"
+                app:constraint_referenced_ids="fragment_person_detail_actionbutton_scrollview,fragment_person_detail_picture_image_barrier"
                 />
 
             <View
@@ -285,7 +215,7 @@
                 android:layout_height="@dimen/dimen_24dp"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
-                android:tint="?colorOnIconTint"
+                app:tint="?colorOnIconTint"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_header_basicdetails_text"
                 app:srcCompat="@drawable/ic_event_black_24dp" />
@@ -297,7 +227,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dimen_8dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
-                app:dateLong="@{person.dateOfBirth}"
+                app:dateTimeInMillis="@{person.dateOfBirth}"
+                app:timeZoneId="@{timeZoneId}"
+                app:dateTimeInMillisMode="@{dateTimeMode}"
                 android:visibility="@{person.dateOfBirth != 0 ? View.VISIBLE : View.GONE}"
                 tools:text="DD/MM/YYYY"
                 app:layout_constraintStart_toEndOf="@+id/fragment_person_detail_dob_imageview"
@@ -357,7 +289,7 @@
                 android:visibility="@{person.personOrgId != null ? View.VISIBLE : View.GONE}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:tint="?colorOnIconTint"
+                app:tint="?colorOnIconTint"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 app:layout_constraintStart_toStartOf="parent"
@@ -403,7 +335,7 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_10dp"
                 app:layout_constraintStart_toStartOf="parent"
-                android:tint="?colorOnIconTint"
+                app:tint="?colorOnIconTint"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_orgid_barrier"
                 app:srcCompat="@drawable/ic_account_circle_black_24dp" />
 

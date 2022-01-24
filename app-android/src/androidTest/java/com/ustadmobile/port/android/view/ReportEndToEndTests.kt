@@ -16,6 +16,7 @@ import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.*
+import com.ustadmobile.test.port.android.util.getApplicationDi
 import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.util.test.ext.insertTestStatementsForReports
@@ -26,6 +27,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 @RunWith(AndroidJUnit4::class)
 @AdbScreenRecord("Report end-to-end test")
@@ -39,14 +42,15 @@ class ReportEndToEndTests : TestCase() {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    val impl = UstadMobileSystemImpl.instance
+    lateinit var impl: UstadMobileSystemImpl
 
     private val context = ApplicationProvider.getApplicationContext<Application>()
 
     @Before
     fun setup() {
+        impl = getApplicationDi().direct.instance()
         runBlocking {
-            dbRule.insertPersonForActiveUser(Person().apply {
+            dbRule.insertPersonAndStartSession(Person().apply {
                 admin = true
                 firstNames = "Bob"
                 lastName = "Jones"

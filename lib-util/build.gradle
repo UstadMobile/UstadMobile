@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
     }
 
     packagingOptions {
@@ -67,7 +67,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation kotlin('stdlib-common')
-                implementation "com.github.aakira:napier:$version_napier"
+                implementation "io.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.ustadmobile.door:door-runtime:$version_door"
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
@@ -76,7 +76,6 @@ kotlin {
 
         commonJvmMain {
             dependencies {
-                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
             }
         }
@@ -90,7 +89,7 @@ kotlin {
 
         jvmMain {
             dependencies {
-
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
             }
 
             dependsOn commonJvmMain

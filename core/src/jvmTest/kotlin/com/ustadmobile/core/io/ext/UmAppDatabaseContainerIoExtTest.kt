@@ -69,7 +69,7 @@ class UmAppDatabaseContainerIoExtTest {
 
 
         runBlocking {
-            repo.addDirToContainer(container.containerUid, tmpDir.toDoorUri(), true,
+            repo.addDirToContainer(container.containerUid, tmpDir.toDoorUri(), true, Any(), di,
                 ContainerAddOptions(containerFilesDir.toDoorUri()))
         }
 
@@ -97,8 +97,10 @@ class UmAppDatabaseContainerIoExtTest {
 
 
         runBlocking {
-            repo.addEntriesToContainerFromZip(container.containerUid, epubTmp.toDoorUri(),
-                ContainerAddOptions(containerFilesDir.toDoorUri()))
+            repo.addEntriesToContainerFromZip(
+                    container.containerUid, epubTmp.toDoorUri(),
+                    ContainerAddOptions(containerFilesDir.toDoorUri()), Any()
+            )
         }
     }
 

@@ -60,7 +60,7 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         mPresenter = PersonGroupListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this,  di, viewLifecycleOwner)
+                this,  di, viewLifecycleOwner).withViewLifecycle()
         mDataBinding?.presenter = mPresenter
         mDataRecyclerViewAdapter = PersonGroupListRecyclerAdapter(mPresenter)
         mPresenter?.onCreate(savedInstanceState.toStringMap())

@@ -13,10 +13,11 @@
         android:layout_height="match_parent">
 
         <include
+            android:id="@+id/main_collapsing_toolbar"
             layout="@layout/appbar_material_collapsing"/>
 
 
-        <fragment
+        <androidx.fragment.app.FragmentContainerView
             android:id="@+id/activity_main_navhost_fragment"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
@@ -28,7 +29,7 @@
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             style="@style/UmTheme.ShapeAppearance.SmallComponent"
-            android:id="@+id/activity_listfragmelayout_behaviornt_fab"
+            android:id="@+id/activity_main_extendedfab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/add_class"

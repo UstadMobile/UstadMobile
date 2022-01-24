@@ -13,6 +13,7 @@ import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import java.io.File
@@ -53,7 +54,8 @@ class IndexDdlContent {
         containerDir.mkdirs()
         this.containerDir = containerDir
 
-        db = UmAppDatabase.getInstance(Any())
+        //THIS NEEDS REPLACED WITH DI
+        //db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         val repository = db
         contentEntryDao = repository.contentEntryDao
         contentParentChildJoinDao = repository.contentEntryParentChildJoinDao

@@ -2,33 +2,33 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
-@Entity
-@SyncableEntity(tableId = StatementEntity.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${StatementEntity.TABLE_ID} AS tableId 
-        FROM 
-        ChangeLog
-        JOIN StatementEntity ON ChangeLog.chTableId = ${StatementEntity.TABLE_ID} AND ChangeLog.chEntityPk = StatementEntity.statementUid
-        JOIN AgentEntity ON StatementEntity.agentUid = AgentEntity.agentUid
-        JOIN Person ON Person.personUid = AgentEntity.agentPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
-    syncFindAllQuery = """
-        SELECT StatementEntity.* FROM
-        StatementEntity
-        JOIN AgentEntity ON StatementEntity.agentUid = AgentEntity.agentUid
-        JOIN Person ON Person.personUid = AgentEntity.agentPersonUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId"""
-)
+@Entity(indices = [
+    // index used to cache the best assignments from the statements
+    Index(value = ["statementContentEntryUid","statementPersonUid","contentEntryRoot",
+                    "timestamp","statementLocalChangeSeqNum"])
+])
 @Serializable
+@ReplicateEntity(tableId = StatementEntity.TABLE_ID, tracker = StatementEntityReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "statemententity_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO StatementEntity(statementUid, statementId, statementPersonUid, statementVerbUid, xObjectUid, subStatementActorUid, substatementVerbUid, subStatementObjectUid, agentUid, instructorUid, authorityUid, teamUid, resultCompletion, resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, resultScoreMax, resultDuration, resultResponse, timestamp, stored, contextRegistration, contextPlatform, contextStatementId, fullStatement, statementMasterChangeSeqNum, statementLocalChangeSeqNum, statementLastChangedBy, statementLct, extensionProgress, contentEntryRoot, statementContentEntryUid, statementLearnerGroupUid, statementClazzUid) 
+         VALUES (NEW.statementUid, NEW.statementId, NEW.statementPersonUid, NEW.statementVerbUid, NEW.xObjectUid, NEW.subStatementActorUid, NEW.substatementVerbUid, NEW.subStatementObjectUid, NEW.agentUid, NEW.instructorUid, NEW.authorityUid, NEW.teamUid, NEW.resultCompletion, NEW.resultSuccess, NEW.resultScoreScaled, NEW.resultScoreRaw, NEW.resultScoreMin, NEW.resultScoreMax, NEW.resultDuration, NEW.resultResponse, NEW.timestamp, NEW.stored, NEW.contextRegistration, NEW.contextPlatform, NEW.contextStatementId, NEW.fullStatement, NEW.statementMasterChangeSeqNum, NEW.statementLocalChangeSeqNum, NEW.statementLastChangedBy, NEW.statementLct, NEW.extensionProgress, NEW.contentEntryRoot, NEW.statementContentEntryUid, NEW.statementLearnerGroupUid, NEW.statementClazzUid) 
+         /*psql ON CONFLICT (statementUid) DO UPDATE 
+         SET statementId = EXCLUDED.statementId, statementPersonUid = EXCLUDED.statementPersonUid, statementVerbUid = EXCLUDED.statementVerbUid, xObjectUid = EXCLUDED.xObjectUid, subStatementActorUid = EXCLUDED.subStatementActorUid, substatementVerbUid = EXCLUDED.substatementVerbUid, subStatementObjectUid = EXCLUDED.subStatementObjectUid, agentUid = EXCLUDED.agentUid, instructorUid = EXCLUDED.instructorUid, authorityUid = EXCLUDED.authorityUid, teamUid = EXCLUDED.teamUid, resultCompletion = EXCLUDED.resultCompletion, resultSuccess = EXCLUDED.resultSuccess, resultScoreScaled = EXCLUDED.resultScoreScaled, resultScoreRaw = EXCLUDED.resultScoreRaw, resultScoreMin = EXCLUDED.resultScoreMin, resultScoreMax = EXCLUDED.resultScoreMax, resultDuration = EXCLUDED.resultDuration, resultResponse = EXCLUDED.resultResponse, timestamp = EXCLUDED.timestamp, stored = EXCLUDED.stored, contextRegistration = EXCLUDED.contextRegistration, contextPlatform = EXCLUDED.contextPlatform, contextStatementId = EXCLUDED.contextStatementId, fullStatement = EXCLUDED.fullStatement, statementMasterChangeSeqNum = EXCLUDED.statementMasterChangeSeqNum, statementLocalChangeSeqNum = EXCLUDED.statementLocalChangeSeqNum, statementLastChangedBy = EXCLUDED.statementLastChangedBy, statementLct = EXCLUDED.statementLct, extensionProgress = EXCLUDED.extensionProgress, contentEntryRoot = EXCLUDED.contentEntryRoot, statementContentEntryUid = EXCLUDED.statementContentEntryUid, statementLearnerGroupUid = EXCLUDED.statementLearnerGroupUid, statementClazzUid = EXCLUDED.statementClazzUid
+         */"""
+     ]
+ )
+))
 open class StatementEntity {
 
     @PrimaryKey(autoGenerate = true)
@@ -95,6 +95,7 @@ open class StatementEntity {
     var statementLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var statementLct: Long = 0
 
     var extensionProgress: Int = 0
@@ -115,14 +116,58 @@ open class StatementEntity {
 
     var statementLearnerGroupUid: Long = 0
 
+    var statementClazzUid: Long = 0
+
     companion object {
 
         const val TABLE_ID = 60
 
         const val RESULT_UNSET = 0.toByte()
 
-        const val RESULT_SUCCESS = 1.toByte()
+        const val RESULT_SUCCESS = 2.toByte()
 
-        const val RESULT_FAILURE = 2.toByte()
+        const val RESULT_FAILURE = 1.toByte()
+
+        const val CONTENT_COMPLETE = 100
+
+        const val CONTENT_INCOMPLETE = 101
+
+        const val CONTENT_PASSED = 102
+
+        const val CONTENT_FAILED = 103
+
+
+        const val FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+             OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = StatementEntity.statementPersonUid)
+             OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = StatementEntity.statementClazzUid)
+             OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = (
+                    SELECT clazzSchoolUid
+                      FROM Clazz
+                     WHERE clazzUid = StatementEntity.statementClazzUid))
+             )
+        """
+
+
+        const val FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+             OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = StatementEntity.statementPersonUid)
+             OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = StatementEntity.statementClazzUid)
+             OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = (
+                    SELECT clazzSchoolUid
+                      FROM Clazz 
+                     WHERE clazzUid = StatementEntity.statementClazzUid))
+            )         
+        """
+
+
     }
 }

@@ -10,6 +10,8 @@ interface DestinationProvider {
 
     fun lookupDestinationById(destinationId: Int): UstadDestination?
 
+    fun lookupViewNameById(destinationId: Int): String?
+
     val navControllerViewId: Int
 
 }

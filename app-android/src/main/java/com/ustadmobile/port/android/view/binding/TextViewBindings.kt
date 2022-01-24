@@ -3,37 +3,39 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
+import android.view.View
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.model.BitmaskFlag
+import com.ustadmobile.core.model.BitmaskMessageId
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.VerbEntity.Companion.VERB_ANSWERED_UID
 import java.util.*
-import com.soywiz.klock.DateFormat as KlockDateFormat
-import com.ustadmobile.core.util.ext.roleToString
-import com.ustadmobile.core.util.ext.outcomeToString
 import java.util.concurrent.TimeUnit
+import com.soywiz.klock.DateFormat as KlockDateFormat
 
 @BindingAdapter("textMessageId")
 fun TextView.setTextMessageId(messageId: Int) {
-    text = UstadMobileSystemImpl.instance.getString(messageId, context)
+    text = systemImpl.getString(messageId, context)
 }
 
 @BindingAdapter("hintMessageId")
 fun TextView.setHintMessageId(messageId: Int) {
-    hint = UstadMobileSystemImpl.instance.getString(messageId, context)
+    hint = systemImpl.getString(messageId, context)
 }
 
 @BindingAdapter("customFieldHint")
 fun TextView.setCustomFieldHint(customField: CustomField?) {
     hint = if (customField != null) {
-        UstadMobileSystemImpl.instance.getString(customField.customFieldLabelMessageID, context)
+        systemImpl.getString(customField.customFieldLabelMessageID, context)
     } else {
         ""
     }
@@ -41,12 +43,23 @@ fun TextView.setCustomFieldHint(customField: CustomField?) {
 
 @BindingAdapter(value = ["textBitmaskValue", "textBitmaskFlags"], requireAll = false)
 fun TextView.setBitmaskListText(textBitmaskValue: Long?, textBitmaskFlags: List<BitmaskFlag>?) {
-    val systemImpl = UstadMobileSystemImpl.instance
     if (textBitmaskValue == null || textBitmaskFlags == null)
         return
 
     text = textBitmaskFlags.filter { (it.flagVal and textBitmaskValue) == it.flagVal }
             .joinToString { systemImpl.getString(it.messageId, context) }
+}
+
+@BindingAdapter(value = ["bitmaskValue", "flagMessageIds"], requireAll = false)
+fun TextView.setBitmaskListTextFromMap(bitmaskValue: Long?, flagMessageIds: List<BitmaskMessageId>?) {
+    if(bitmaskValue == null || flagMessageIds == null)
+        return
+
+    val impl = systemImpl
+
+    text = flagMessageIds.map { it.toBitmaskFlag(bitmaskValue) }
+        .filter { it.enabled }
+        .joinToString { impl.getString(it.messageId, context) }
 }
 
 /**
@@ -88,7 +101,7 @@ fun TextView.setTextMessageIdOptions(textMessageIdLookupMap: Map<Int, Int>?,
                                      fallbackMessageId: Int?, fallbackMessage: String?) {
     setTag(R.id.tag_messageidoptions_list, textMessageIdLookupMap)
     setTag(R.id.tag_messageidoption_fallback, fallbackMessage ?:
-        fallbackMessageId?.let { UstadMobileSystemImpl.instance.getString(it, context) } ?: "")
+        fallbackMessageId?.let { systemImpl.getString(it, context) } ?: "")
 
     updateFromTextMessageIdOptions()
 }
@@ -101,7 +114,7 @@ private fun TextView.updateFromTextMessageIdOptions() {
     if(currentOption != null && textMessageIdOptions != null) {
         val messageId = textMessageIdOptions[currentOption]
         if(messageId != null) {
-            text = UstadMobileSystemImpl.instance.getString(messageId, context)
+            text = systemImpl.getString(messageId, context)
         }else if(fallbackMessage != null) {
             text = fallbackMessage
         }
@@ -110,7 +123,7 @@ private fun TextView.updateFromTextMessageIdOptions() {
 
 @BindingAdapter(value= ["textMessageIdOptionSelected","textMessageIdOptions"], requireAll = true)
 fun TextView.setTextFromMessageIdList(textMessageIdOptionSelected: Int, textMessageIdOptions: List<MessageIdOption>) {
-    text = UstadMobileSystemImpl.instance.getString(textMessageIdOptions
+    text = systemImpl.getString(textMessageIdOptions
             ?.firstOrNull { it.code == textMessageIdOptionSelected }?.messageId ?: 0, context)
 }
 
@@ -121,21 +134,13 @@ fun TextView.setTextFromCustomFieldDropDownOption(customFieldValue: CustomFieldV
             ?.firstOrNull { it.customFieldValueOptionUid == customFieldValue?.customFieldValueCustomFieldValueOptionUid }
     if (selectedOption != null) {
         text = if (selectedOption.customFieldValueOptionMessageId != 0) {
-            UstadMobileSystemImpl.instance.getString(selectedOption.customFieldValueOptionMessageId, context)
+            systemImpl.getString(selectedOption.customFieldValueOptionMessageId, context)
         } else {
             selectedOption.customFieldValueOptionName ?: ""
         }
     } else {
         text = ""
     }
-}
-
-@SuppressLint("SetTextI18n")
-@BindingAdapter(value = ["textFromDateLong", "textToDateLong"])
-fun TextView.setTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long) {
-    val dateFormat = DateFormat.getDateFormat(context)
-    text = "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} -" +
-            " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) dateFormat.format(textToDateLong) else ""}"
 }
 
 @SuppressLint("SetTextI18n")
@@ -209,34 +214,6 @@ fun TextView.setFileSize(fileSize: Long) {
     text = UMFileUtil.formatFileSize(fileSize)
 }
 
-@BindingAdapter(value=["clazzMemberWithClazzWorkAndProgress"])
-fun TextView.setClazzWorkMarking(clazzEnrolmentWithClazzWorkAndProgress: ClazzEnrolmentWithClazzWorkProgress){
-    var line = clazzEnrolmentWithClazzWorkAndProgress.mClazzWorkSubmission.statusString(context)
-    if(clazzEnrolmentWithClazzWorkAndProgress.clazzWorkHasContent && clazzEnrolmentWithClazzWorkAndProgress.mProgress >= 0) {
-        line += " ${context.getString(R.string.completed)} " +
-                "${clazzEnrolmentWithClazzWorkAndProgress.mProgress.toInt()}% " +
-                context.getString(R.string.of_content)
-    }
-    text = line
-}
-
-fun ClazzWorkSubmission?.statusString(context: Context) = when {
-    this == null -> context.getString(R.string.not_submitted_cap)
-    this.clazzWorkSubmissionDateTimeMarked > 0 -> context.getString(R.string.marked).capitalize()
-    this.clazzWorkSubmissionDateTimeFinished > 0 -> context.getString(R.string.submitted).capitalize()
-    else -> context.getString(R.string.not_submitted_cap).capitalize()
-
-}
-
-@BindingAdapter(value=["selectedClazzWorkQuestionType"])
-fun TextView.setTypeText(clazzWorkQuestionType: Int){
-    if(clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT){
-        text = context.getString(R.string.sel_question_type_free_text)
-    }else if(clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE){
-        text = context.getString(R.string.quiz)
-    }
-}
-
 
 @BindingAdapter(value=["responseTextFilled"])
 fun TextView.setResponseTextFilled(responseText: String?){
@@ -249,17 +226,17 @@ fun TextView.setResponseTextFilled(responseText: String?){
 
 @BindingAdapter("memberRoleName")
 fun TextView.setMemberRoleName(clazzEnrolment: ClazzEnrolment?) {
-    text = clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
+    text = clazzEnrolment?.roleToString(context, systemImpl) ?: ""
 }
 
 @BindingAdapter("memberEnrolmentOutcomeWithReason")
 fun TextView.setMemberEnrolmentOutcome(clazzEnrolment: ClazzEnrolmentWithLeavingReason?){
-    text = "${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)} - ${clazzEnrolment?.outcomeToString(context,  UstadMobileSystemImpl.instance)}"
+    text = "${clazzEnrolment?.roleToString(context, systemImpl)} - ${clazzEnrolment?.outcomeToString(context,  systemImpl)}"
 }
 
 @BindingAdapter("clazzEnrolmentWithClazzAndOutcome")
 fun TextView.setClazzEnrolmentWithClazzAndOutcome(clazzEnrolment: ClazzEnrolmentWithClazz?){
-    text = "${clazzEnrolment?.clazz?.clazzName} (${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)}) - ${clazzEnrolment?.outcomeToString(context,  UstadMobileSystemImpl.instance)}"
+    text = "${clazzEnrolment?.clazz?.clazzName} (${clazzEnrolment?.roleToString(context, systemImpl)}) - ${clazzEnrolment?.outcomeToString(context,  systemImpl)}"
 }
 
 @BindingAdapter("showisolang")
@@ -295,16 +272,21 @@ fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
 
 }
 
-@BindingAdapter("statementDate")
-fun TextView.setStatementDate(person: PersonWithAttemptsSummary){
-    val dateFormatter = DateFormat.getDateFormat(context)
-    var statementDate = dateFormatter.format(person.startDate)
+@BindingAdapter(value=["statementStartDate", "statementEndDate"])
+fun TextView.setStatementDate(statementStartDate: Long, statementEndDate: Long){
+    if(statementStartDate == 0L){
+        text = ""
+        return
+    }
 
-    if(person.endDate != 0L && person.endDate != Long.MAX_VALUE){
-        val startDate = DateTime(person.startDate)
-        val endDate = DateTime(person.endDate)
+    val dateFormatter = DateFormat.getDateFormat(context)
+    var statementDate = dateFormatter.format(statementStartDate)
+
+    if(statementEndDate != 0L && statementEndDate!= Long.MAX_VALUE){
+        val startDate = DateTime(statementStartDate)
+        val endDate = DateTime(statementEndDate)
         if(startDate.dayOfYear != endDate.dayOfYear){
-            statementDate += " - ${dateFormatter.format(person.endDate)}"
+            statementDate += " - ${dateFormatter.format(statementEndDate)}"
         }
     }
 
@@ -339,6 +321,15 @@ fun TextView.setDurationHoursAndMinutes(duration: Long){
 
 }
 
+@BindingAdapter("scorePercentage")
+fun TextView.setScorePercentage(scoreProgress: ContentEntryStatementScoreProgress?){
+    if(scoreProgress == null){
+        return
+    }
+    // (4/5) * (1 - 20%) = penalty applied to score
+    text = "${scoreProgress.calculateScoreWithPenalty()}%"
+}
+
 @BindingAdapter("durationMinsSecs")
 fun TextView.setDurationMinutesAndSeconds(duration: Long){
     val minutes = TimeUnit.MILLISECONDS.toMinutes(duration).toInt()
@@ -356,6 +347,47 @@ fun TextView.setDurationMinutesAndSeconds(duration: Long){
             seconds.toInt(), seconds.toInt())
 
     text = durationString
+
+}
+
+@BindingAdapter("statementQuestionAnswer")
+fun TextView.setStatementQuestionAnswer(statementEntity: StatementEntity){
+    if(statementEntity.statementVerbUid != VERB_ANSWERED_UID){
+        visibility = View.GONE
+        return
+    }else{
+        visibility = View.VISIBLE
+    }
+    val fullStatementJson = statementEntity.fullStatement ?: return
+    val statement = gson.fromJson(fullStatementJson, Statement::class.java)
+    var statementText = statement?.`object`?.definition?.description?.get("en-US")
+    val answerResponse = statement.result?.response
+    if(answerResponse?.isNotEmpty() == true || answerResponse?.contains("[,]") == true){
+        val responses = answerResponse.split("[,]")
+        val choiceMap = statement.`object`?.definition?.choices
+        val sourceMap = statement?.`object`?.definition?.source
+        val targetMap = statement?.`object`?.definition?.target
+        statementText += "<br />"
+        responses.forEachIndexed { i, it ->
+
+            var description = choiceMap?.find { choice -> choice.id == it }?.description?.get("en-US")
+            if(it.contains("[.]")){
+                val dragResponse = it.split("[.]")
+                description = ""
+                description += sourceMap?.find { source -> source.id == dragResponse[0] }?.description?.get("en-US")
+                description += " on "
+                description += targetMap?.find { target -> target.id == dragResponse[1] }?.description?.get("en-US")
+            }
+
+
+            statementText += "${i+1}: ${if(description.isNullOrEmpty()) it else description} <br />"
+
+
+        }
+
+    }
+    text = HtmlCompat.fromHtml(statementText ?: "", HtmlCompat.FROM_HTML_MODE_LEGACY)
+
 
 }
 

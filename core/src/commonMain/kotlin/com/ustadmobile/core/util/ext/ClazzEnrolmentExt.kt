@@ -10,7 +10,8 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 val ROLE_TO_MESSAGEID_MAP = mapOf(
         ClazzEnrolment.ROLE_STUDENT to MessageID.student,
         ClazzEnrolment.ROLE_STUDENT_PENDING to MessageID.student,
-        ClazzEnrolment.ROLE_TEACHER to MessageID.teacher
+        ClazzEnrolment.ROLE_TEACHER to MessageID.teacher,
+        ClazzEnrolment.ROLE_PARENT to MessageID.parent
 )
 
 fun ClazzEnrolment.roleToString(context: Any, systemImpl: UstadMobileSystemImpl): String {

@@ -8,7 +8,6 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
-import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.android.screen.ContentEntryEditScreen
 import com.ustadmobile.test.port.android.util.clickOptionMenu
@@ -47,7 +46,8 @@ class ContentEntryEdit2FragmentTest : TestCase() {
                         ARG_PARENT_ENTRY_UID to 10000L.toString()),
                 themeResId = R.style.UmTheme_App) {
             ContentEntryEdit2Fragment().also {
-                it.installNavController(systemImplNavRule.navController)
+                it.installNavController(systemImplNavRule.navController,
+                        initialDestId = R.id.content_entry_edit_dest)
             }
         }
 
@@ -86,8 +86,6 @@ class ContentEntryEdit2FragmentTest : TestCase() {
                     }
                 }
 
-                val repo = dbRule.repo as DoorDatabaseSyncRepository
-                repo.clientId
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
                 val entries = dbRule.db.contentEntryDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
@@ -100,26 +98,6 @@ class ContentEntryEdit2FragmentTest : TestCase() {
 
         }
 
-    }
-    
-
-    @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects non zipped file, should save to database")
-    @Test
-    fun givenNoEntryYet_whenFormFilledNonZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase() {
-        init {
-
-        }.run {
-
-            ContentEntryEditScreen {
-
-                val entry = createEntryFromFile("video.mp4", "Dummy Title",
-                        systemImplNavRule = systemImplNavRule, dbRule = dbRule)
-                flakySafely {
-                    Assert.assertEquals("Entry's data set", "Dummy Title",entry.title)
-                }
-            }
-
-        }
     }
 
 

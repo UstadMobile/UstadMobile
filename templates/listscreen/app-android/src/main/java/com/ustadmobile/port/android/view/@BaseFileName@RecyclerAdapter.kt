@@ -46,7 +46,8 @@ class @BaseFileName@RecyclerAdapter(var itemListener: @BaseFileName@ItemListener
 
             override fun areContentsTheSame(oldItem: @DisplayEntity@,
                                             newItem: @DisplayEntity@): Boolean {
-                return oldItem == newItem
+                //Check only those fields that are displayed to the user to minimize refreshes
+                TODO("e.g. return oldItem.field1 == newItem.field1 && oldItem.field2 == newItem.field2")
             }
         }
     }

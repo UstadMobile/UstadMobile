@@ -9,26 +9,18 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.lib.db.entities.UmAccount
+import org.kodein.di.DI
 
 class @BaseFileName@Presenter(context: Any, arguments: Map<String, String>, view: @BaseFileName@View,
                                 di: DI, lifecycleOwner: DoorLifecycleOwner,
-                          private val @Entity_VariableName@ItemListener: Default@BaseFileName@ItemListener = Default@BaseFileName@ItemListener(view, ListViewMode.BROWSER, systemImpl, context))
+                          private val @Entity_VariableName@ItemListener: Default@BaseFileName@ItemListener = Default@BaseFileName@ItemListener(view, ListViewMode.BROWSER, context, di))
     : UstadListPresenter<@BaseFileName@View, @Entity@>(context, arguments, view, di, lifecycleOwner), @BaseFileName@ItemListener by @Entity_VariableName@ItemListener {
 
-    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
-
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
-    }
-
-    class @Entity@ListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         updateListOnView()
         @Entity_VariableName@ItemListener.listViewMode = mListMode
-        view.sortOptions = SortOrder.values().toList().map { @Entity@ListSortOption(it, context) }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -38,12 +30,7 @@ class @BaseFileName@Presenter(context: Any, arguments: Map<String, String>, view
 
     private fun updateListOnView() {
         /* TODO: Update the list on the view from the appropriate DAO query, e.g.
-        view.list = when(sortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.daoName.findAllActiveClazzesSortByNameAsc(
-                    searchQuery, loggedInPersonUid)
-            SortOrder.ORDER_NAME_DSC -> repo.daoName.findAllActiveClazzesSortByNameDesc(
-                    searchQuery, loggedInPersonUid)
-        }
+        view.list = repo.daoName.findAllActiveClazzesSortByNameAsc(searchQuery, loggedInPersonUid, sortFlag)
         */
     }
 
@@ -55,11 +42,4 @@ class @BaseFileName@Presenter(context: Any, arguments: Map<String, String>, view
          */
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? @Entity@ListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            updateListOnView()
-        }
-    }
 }

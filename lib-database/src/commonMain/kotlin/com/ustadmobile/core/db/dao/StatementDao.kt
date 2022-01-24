@@ -1,14 +1,11 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorQuery
-import com.ustadmobile.door.SimpleDoorQuery
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.*
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.Serializable
 import kotlin.js.JsName
@@ -16,6 +13,66 @@ import kotlin.js.JsName
 @Dao
 @Repository
 abstract class StatementDao : BaseDao<StatementEntity> {
+
+    @Query("""
+     REPLACE INTO StatementEntityReplicate(sePk, seDestination)
+      SELECT DISTINCT StatementEntity.statementUid AS sePk,
+             :newNodeId AS seDestination
+        FROM UserSession
+             JOIN PersonGroupMember
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             JOIN ScopedGrant
+                  ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                     AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+             JOIN StatementEntity
+                 ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
+       WHERE UserSession.usClientNodeId = :newNodeId
+         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+         AND StatementEntity.statementLct != COALESCE(
+             (SELECT seVersionId
+                FROM StatementEntityReplicate
+               WHERE sePk = StatementEntity.statementUid
+                 AND seDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(sePk, seDestination) DO UPDATE
+             SET sePending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([StatementEntity::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+ REPLACE INTO StatementEntityReplicate(sePk, seDestination)
+  SELECT DISTINCT StatementEntity.statementUid AS seUid,
+         UserSession.usClientNodeId AS seDestination
+    FROM ChangeLog
+         JOIN StatementEntity
+               ON ChangeLog.chTableId = ${StatementEntity.TABLE_ID}
+                  AND ChangeLog.chEntityPk = StatementEntity.statementUid
+         JOIN ScopedGrant
+              ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+                 AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+         JOIN PersonGroupMember
+              ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+         JOIN UserSession
+              ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                 AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId
+           FROM SyncNode
+          LIMIT 1)
+     AND StatementEntity.statementLct != COALESCE(
+         (SELECT seVersionId
+            FROM StatementEntityReplicate
+           WHERE sePk = StatementEntity.statementUid
+             AND seDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(sePk, seDestination) DO UPDATE
+     SET sePending = true
+  */
+    """)
+    @ReplicationRunOnChange([StatementEntity::class])
+    @ReplicationCheckPendingNotificationsFor([StatementEntity::class])
+    abstract suspend fun replicateOnChange()
 
     @JsName("insertListAsync")
     @Insert
@@ -38,7 +95,8 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     }
 
     @RawQuery(observedEntities = [StatementEntity::class, Person::class, XLangMapEntry::class])
-    abstract fun getListResults(query: DoorQuery): DataSource.Factory<Int, StatementEntityWithDisplayDetails>
+    @QueryLiveTables(["StatementEntity", "Person", "XLangMapEntry"])
+    abstract fun getListResults(query: DoorQuery): DoorDataSourceFactory<Int, StatementEntityWithDisplayDetails>
 
 
     // This is required because of above raw query
@@ -50,7 +108,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
 
 
     @Query("""UPDATE StatementEntity SET extensionProgress = :progress,
-            statementLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            statementLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
             WHERE statementUid = :uid""")
     abstract fun updateProgress(uid: Long, progress: Int)
 
@@ -62,23 +120,44 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             MAX(ResultSource.timestamp) AS endDate, 
             SUM(ResultSource.resultDuration) AS duration, 
             MAX(CASE WHEN ResultSource.contentEntryRoot 
-                THEN ResultSource.resultScoreScaled * 100 
-                ELSE 0 END) AS score, 
-            MAX(ResultSource.extensionProgress) AS progress 
+                THEN resultScoreRaw
+                ELSE 0 END) AS resultScore, 
+            MAX(CASE WHEN ResultSource.contentEntryRoot 
+                THEN resultScoreMax
+                ELSE 0 END) AS resultMax,   
+            MAX(CASE WHEN ResultSource.contentEntryRoot 
+                THEN resultScoreScaled
+                ELSE 0 END) AS resultScaled, 
+            MAX(ResultSource.extensionProgress) AS progress,
+            0 AS penalty,
+            'FALSE' AS contentComplete,
+            0 AS success,
+            
+            CASE WHEN ResultSource.resultCompletion 
+                THEN 1 ELSE 0 END AS totalCompletedContent,
+                
+            1 as totalContent, 
+            
+             
+         
+            '' AS latestPrivateComment
         
          FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 
             StatementEntity.contextRegistration, StatementEntity.timestamp, 
-            StatementEntity.resultDuration, StatementEntity.resultScoreScaled, 
-            StatementEntity.contentEntryRoot, StatementEntity.extensionProgress
-        
-         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+            StatementEntity.resultDuration, StatementEntity.resultScoreRaw, 
+            StatementEntity.resultScoreMax, StatementEntity.resultScoreScaled,
+            StatementEntity.contentEntryRoot, StatementEntity.extensionProgress, 
+            StatementEntity.resultCompletion
+            FROM PersonGroupMember
+            ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
              LEFT JOIN StatementEntity 
                 ON StatementEntity.statementPersonUid = Person.personUid 
                     WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
                         AND PersonGroupMember.groupMemberActive  
                         AND statementContentEntryUid = :contentEntryUid
-                        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
-             GROUP BY StatementEntity.statementUid) AS ResultSource 
+                        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText              
+                   GROUP BY StatementEntity.statementUid 
+                   ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC) AS ResultSource 
          GROUP BY ResultSource.personUid 
          ORDER BY CASE(:sortOrder) 
                 WHEN $SORT_FIRST_NAME_ASC THEN ResultSource.firstNames
@@ -101,7 +180,37 @@ abstract class StatementDao : BaseDao<StatementEntity> {
          """)
     abstract fun findPersonsWithContentEntryAttempts(contentEntryUid: Long, accountPersonUid: Long,
                                                      searchText: String, sortOrder: Int)
-            : DataSource.Factory<Int, PersonWithAttemptsSummary>
+            : DoorDataSourceFactory<Int, PersonWithAttemptsSummary>
+
+
+    @Query("""
+        SELECT 
+                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
+                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+                COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                
+                COALESCE((CASE WHEN resultCompletion 
+                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                1 as totalContent, 
+                0 as penalty
+                
+        FROM ContentEntry
+            LEFT JOIN StatementEntity
+							ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :accountPersonUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)
+                               
+       WHERE contentEntryUid = :contentEntryUid
+    """)
+    abstract suspend fun getBestScoreForContentForPerson(contentEntryUid: Long, accountPersonUid: Long): ContentEntryStatementScoreProgress?
 
     @Query("""
         SELECT MIN(timestamp) AS startDate, 
@@ -121,19 +230,27 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             MAX(CASE WHEN contentEntryRoot 
                      THEN resultScoreMax ELSE 0 END) AS resultMax,
             MAX(CASE WHEN contentEntryRoot 
-                     THEN resultScoreScaled ELSE 0 END) AS resultScoreScaled  
+                     THEN resultScoreScaled ELSE 0 END) AS resultScoreScaled,
+                       
+            SUM(CASE WHEN resultCompletion AND StatementEntity.contentEntryRoot 
+                THEN 1 ELSE 0 END) AS totalCompletedContent,
+                
+             1 as totalContent          
+                       
         FROM StatementEntity 
-            LEFT JOIN Person 
-                ON Person.personUid = StatementEntity.statementPersonUid 
+             JOIN ScopedGrant 
+                 ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+                 AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+             JOIN PersonGroupMember 
+                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid  
+                AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
         WHERE statementContentEntryUid = :contentEntryUid   
-            AND statementPersonUid = :personUid 
-            AND :accountPersonUid 
-                IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
+          AND statementPersonUid = :personUid 
         GROUP BY StatementEntity.contextRegistration 
-        ORDER BY startDate DESC
+        ORDER BY startDate DESC, resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC
          """)
     abstract fun findSessionsForPerson(contentEntryUid: Long, accountPersonUid: Long, personUid: Long)
-            : DataSource.Factory<Int, PersonWithSessionsDisplay>
+            : DoorDataSourceFactory<Int, PersonWithSessionsDisplay>
 
 
     @Query("""
@@ -141,8 +258,12 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             verbLangMap.valueLangMap AS verbDisplay, 
             xobjectMap.valueLangMap AS objectDisplay 
         FROM StatementEntity
-                LEFT JOIN Person 
-                    ON StatementEntity.statementPersonUid = Person.personUid 
+                 JOIN ScopedGrant 
+                    ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+                    AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+                 JOIN PersonGroupMember 
+                    ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid  
+                AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
                 LEFT JOIN VerbEntity 
                     ON VerbEntity.verbUid = StatementEntity.statementVerbUid 
                 LEFT JOIN XLangMapEntry verbLangMap 
@@ -152,13 +273,72 @@ abstract class StatementDao : BaseDao<StatementEntity> {
          WHERE statementContentEntryUid = :contentEntryUid 
             AND statementPersonUid = :personUid 
             AND contextRegistration = :contextRegistration 
-            AND :accountPersonUid 
-                IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
          ORDER BY StatementEntity.timestamp DESC
          """)
     abstract fun findSessionDetailForPerson(contentEntryUid: Long, accountPersonUid: Long,
                                             personUid: Long, contextRegistration: String)
-            : DataSource.Factory<Int, StatementWithSessionDetailDisplay>
+            : DoorDataSourceFactory<Int, StatementWithSessionDetailDisplay>
+
+
+    @Query("""
+        SELECT SUM(resultScoreRaw) AS resultScore, 
+               SUM(resultScoreMax) AS resultMax,
+               MAX(extensionProgress) AS progress,
+               0 as penalty,
+               0 as success,
+               'FALSE' as contentComplete,
+               0 AS resultScaled,
+               COALESCE((CASE WHEN resultCompletion 
+               THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                1 as totalContent
+               
+         FROM (SELECT * FROM StatementEntity 
+                WHERE contextRegistration = :contextRegistration
+                  AND NOT contentEntryRoot
+                  AND statementVerbUid = ${VerbEntity.VERB_ANSWERED_UID} 
+             GROUP BY xObjectUid)
+    """)
+    abstract suspend fun calculateScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
+
+
+    @Query("""
+        SELECT resultScoreRaw AS resultScore, 
+               resultScoreMax AS resultMax,
+               extensionProgress AS progress,
+               0 AS penalty,
+               resultSuccess AS success,
+               resultCompletion AS contentComplete, 
+               resultScoreScaled AS resultScaled,
+                1 AS totalCompletedContent,
+                1 as totalContent
+               
+          FROM StatementEntity
+         WHERE resultCompletion
+          AND contextRegistration = :contextRegistration
+          AND contentEntryRoot
+     ORDER BY resultScoreScaled DESC, 
+              extensionProgress DESC, 
+              resultSuccess DESC 
+              LIMIT 1
+    """)
+    abstract suspend fun findCompletedScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
+
+
+    @Query("""
+        SELECT contextRegistration 
+          FROM StatementEntity
+         WHERE statementPersonUid = :accountPersonUid
+           AND statementContentEntryUid = :entryUid
+           AND NOT EXISTS (SELECT statementUid FROM StatementEntity
+                            WHERE statementPersonUid = :accountPersonUid
+                             AND statementContentEntryUid = :entryUid
+                             AND (statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID} 
+                                    OR statementVerbUid = ${VerbEntity.VERB_SATISFIED_UID}))
+      ORDER BY timestamp DESC 
+    """)
+    abstract suspend fun findLatestRegistrationStatement(accountPersonUid: Long, entryUid: Long): String?
+
 
     @Serializable
     data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")

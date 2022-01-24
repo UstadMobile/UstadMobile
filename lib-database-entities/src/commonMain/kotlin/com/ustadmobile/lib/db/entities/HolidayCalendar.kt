@@ -9,13 +9,24 @@ import kotlinx.serialization.Serializable
  * Represents a Caledar which will be liked to multiple holidays, schedules etc
  * Its basically a collection of dates and time. (holidays and schedules)
  */
-@SyncableEntity(tableId = HolidayCalendar.TABLE_ID,
-        notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${HolidayCalendar.TABLE_ID} AS tableId 
-        FROM DeviceSession
-    """])
 @Entity
 @Serializable
+@ReplicateEntity(tableId = HolidayCalendar.TABLE_ID, tracker = HolidayCalendarReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "holidaycalendar_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO HolidayCalendar(umCalendarUid, umCalendarName, umCalendarCategory, umCalendarActive, umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum, umCalendarLastChangedBy, umCalendarLct) 
+         VALUES (NEW.umCalendarUid, NEW.umCalendarName, NEW.umCalendarCategory, NEW.umCalendarActive, NEW.umCalendarMasterChangeSeqNum, NEW.umCalendarLocalChangeSeqNum, NEW.umCalendarLastChangedBy, NEW.umCalendarLct) 
+         /*psql ON CONFLICT (umCalendarUid) DO UPDATE 
+         SET umCalendarName = EXCLUDED.umCalendarName, umCalendarCategory = EXCLUDED.umCalendarCategory, umCalendarActive = EXCLUDED.umCalendarActive, umCalendarMasterChangeSeqNum = EXCLUDED.umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum = EXCLUDED.umCalendarLocalChangeSeqNum, umCalendarLastChangedBy = EXCLUDED.umCalendarLastChangedBy, umCalendarLct = EXCLUDED.umCalendarLct
+         */"""
+     ]
+ )
+))
 open class HolidayCalendar() {
 
     @PrimaryKey(autoGenerate = true)
@@ -40,6 +51,7 @@ open class HolidayCalendar() {
     var umCalendarLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var umCalendarLct: Long = 0
 
     constructor(name: String, category: Int): this() {

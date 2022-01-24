@@ -12,6 +12,7 @@ import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import java.io.File
@@ -69,7 +70,8 @@ class IndexEtekkathoScraper {
         containerDir.mkdirs()
 
         containerDirectory = containerDir
-        db = UmAppDatabase.getInstance(Any())
+        //replace this with di
+        //db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         repository = db //db!!.getRepository("https://localhost", "")
         contentEntryDao = repository!!.contentEntryDao
         contentParentChildJoinDao = repository!!.contentEntryParentChildJoinDao

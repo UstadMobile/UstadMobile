@@ -10,13 +10,6 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlin.random.Random
 
 data class TestClazzAndMembers (val clazz: Clazz, val teacherList: List<ClazzEnrolment>, val studentList: List<ClazzEnrolment>)
-data class TestClazzWork(val clazzAndMembers: TestClazzAndMembers, val clazzWork: ClazzWork,
-            val quizQuestionsAndOptions: TestClazzWorkWithQuestionAndOptionsAndResponse? = null,
-                         val submissions: List<ClazzWorkSubmission>? = mutableListOf())
-data class TestClazzWorkWithQuestionAndOptionsAndResponse(val clazzWork: ClazzWork,
-      val questionsAndOptions: List<ClazzWorkQuestionAndOptions>, val responses: List<ClazzWorkQuestionResponse?>)
-data class TestContentAndJoin(val contentList : List<ContentEntry> ,
-                               val joinList: List<ClazzWorkContentJoin>)
 
 
 private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime: Long): ClazzEnrolment {
@@ -25,297 +18,80 @@ private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime:
     }
 }
 
-suspend fun UmAppDatabase.insertTestClazzWork(clazzWork: ClazzWork):TestClazzWork {
-    val clazzAndMembers = insertTestClazzAndMembers(5, 2)
-    clazzWork.apply{
-        clazzWorkClazzUid = clazzAndMembers.clazz.clazzUid
-        clazzWorkUid = clazzWorkDao.insertAsync(this)
+fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false): ClazzAssignmentRollUp{
+
+    val testClazz = Clazz().apply {
+        clazzUid = 100
+        clazzDao.insert(this)
     }
 
-    return TestClazzWork(clazzAndMembers, clazzWork)
-}
-
-suspend fun UmAppDatabase.insertPublicAndPrivateComments(dateNow: Long, clazzWork:
-                ClazzWork, clazzAndMembers: TestClazzAndMembers){
-    //Public+Private comments
-    for(studentWithIndex in clazzAndMembers.studentList.withIndex()){
-        val index = studentWithIndex.index
-        val student = studentWithIndex.value
-        Comments().apply {
-            commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
-            commentsEntityUid = clazzWork.clazzWorkUid
-            commentsPublic = index%2 ==0
-            if(commentsPublic){
-                commentsText = "Public comment $index"
-            }else{
-                commentsText = "Private comment $index"
-            }
-            commentsPersonUid = student.clazzEnrolmentPersonUid
-            commentsInActive = false
-            commentsDateTimeAdded = dateNow
-            commentsUid = commentsDao.insertAsync(this)
-
-        }
+    val student = Person().apply{
+        firstNames = "Student"
+        lastName = "A"
+        this.admin = admin
+        this.personUid = 42
+        personDao.insert(this)
     }
 
-}
-
-suspend fun UmAppDatabase.insertQuizQuestionsAndOptions(
-        clazzWork: ClazzWork, responded: Boolean = false, clazzMemberUid: Long = 0, personUid: Long = 0,
-        quizQuestionType: Int, quizQuestionTypeMixed: Boolean = false,
-        partialFilled: Boolean = false, clazzMember2Uid: Long = 0, person2Uid: Long = 0): TestClazzWorkWithQuestionAndOptionsAndResponse {
-
-    clazzWork.apply {
-        clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
-        if(clazzWorkUid != 0L){
-            clazzWorkDao.updateAsync(this)
-        }else {
-            clazzWorkUid = clazzWorkDao.insertAsync(this)
-        }
+    val contentEntry = ContentEntry().apply {
+        title = "Quiz 1"
+        this.contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+        this.description = "Math Quiz"
+        leaf = true
+        contentEntryUid = contentEntryDao.insert(this)
     }
 
-    var  clazzWorkQuestionsAndOptions = listOf<ClazzWorkQuestionAndOptions>()
-    val responses = mutableListOf<ClazzWorkQuestionResponse>()
-    if(clazzWork.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
-        //Create questions
-        val questionNamer: (Int) -> String = { "Question $it" }
-        var qn = 0
-        clazzWorkQuestionsAndOptions = (1..5).map {
-            qn++
-            ClazzWorkQuestionAndOptions(ClazzWorkQuestion(), mutableListOf(), mutableListOf())
-                    .apply {
-                        clazzWorkQuestion.clazzWorkQuestionActive = true
-                        clazzWorkQuestion.clazzWorkQuestionText = questionNamer(it)
-                        clazzWorkQuestion.clazzWorkQuestionClazzWorkUid = clazzWork.clazzWorkUid
-                        clazzWorkQuestion.clazzWorkQuestionIndex = it
-                        if (!quizQuestionTypeMixed) {
-                            clazzWorkQuestion.clazzWorkQuestionType = quizQuestionType
-                        } else {
-                            clazzWorkQuestion.clazzWorkQuestionType = if (it % 2 == 0) {
-                                ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT
-                            } else {
-                                ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE
-                            }
-                        }
-                        clazzWorkQuestion.clazzWorkQuestionUid = clazzWorkQuestionDao.insertAsync(clazzWorkQuestion)
-                        if (clazzWorkQuestion.clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE) {
-                            //Add options
-                            val optionsToPut = (1..3).map {
-                                ClazzWorkQuestionOption().apply {
-                                    clazzWorkQuestionOptionText = "Question $qn Option $it"
-                                    clazzWorkQuestionOptionQuestionUid = clazzWorkQuestion.clazzWorkQuestionUid
-                                    clazzWorkQuestionOptionActive = true
-
-                                    clazzWorkQuestionOptionUid = clazzWorkQuestionOptionDao.insertAsync(this)
-                                }
-                            }
-                            options = optionsToPut
-                        }else if(clazzWorkQuestion.clazzWorkQuestionType ==
-                                ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT){
-
-                        }
-                    }
-        }
-
-
-        if (responded && clazzMemberUid != 0L && personUid != 0L ) {
-            //Create question response
-            for ((index, question) in clazzWorkQuestionsAndOptions.withIndex()) {
-
-                //Skip some
-                if(index == 2 && partialFilled){
-                    continue
-                }
-                if(index == 3 && partialFilled){
-                    continue
-                }
-                val response =
-                        ClazzWorkQuestionResponse().apply {
-                            clazzWorkQuestionResponseClazzWorkUid = question.clazzWorkQuestion.clazzWorkQuestionClazzWorkUid
-                            clazzWorkQuestionResponseQuestionUid = question.clazzWorkQuestion.clazzWorkQuestionUid
-                            if (question.clazzWorkQuestion.clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT) {
-                                clazzWorkQuestionResponseText = "Answer $index"
-                            } else {
-                                val size = question.options.size
-                                if (size > 0) {
-                                    val r = Random.nextInt(0, size)
-                                    clazzWorkQuestionResponseOptionSelected =
-                                            question.options.get(r).clazzWorkQuestionOptionUid
-                                }
-                            }
-                            clazzWorkQuestionResponsePersonUid = personUid
-                            clazzWorkQuestionResponseInactive = false
-                            //TODO: Dates
-                            clazzWorkQuestionResponseDateResponded = 0
-
-                            clazzWorkQuestionResponseUid = clazzWorkQuestionResponseDao.insertAsync(this)
-                        }
-                responses.add(response)
-
-
-                if(clazzMember2Uid != 0L && person2Uid != 0L ) {
-                    val response2 =
-                            ClazzWorkQuestionResponse().apply {
-                                clazzWorkQuestionResponseClazzWorkUid = question.clazzWorkQuestion.clazzWorkQuestionClazzWorkUid
-                                clazzWorkQuestionResponseQuestionUid = question.clazzWorkQuestion.clazzWorkQuestionUid
-                                if (question.clazzWorkQuestion.clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT) {
-                                    clazzWorkQuestionResponseText = "Answer for 2nd student $index"
-                                } else {
-                                    val size = question.options.size
-                                    if (size > 0) {
-                                        val r = Random.nextInt(0, size)
-                                        clazzWorkQuestionResponseOptionSelected =
-                                                question.options.get(r).clazzWorkQuestionOptionUid
-                                    }
-                                }
-                                clazzWorkQuestionResponsePersonUid = person2Uid
-                                clazzWorkQuestionResponseInactive = false
-                                //TODO: Dates
-                                clazzWorkQuestionResponseDateResponded = 0
-
-                                clazzWorkQuestionResponseUid = clazzWorkQuestionResponseDao.insertAsync(this)
-                            }
-
-                    responses.add(response2)
-                }
-            }
-        }
+    val clazzEnrolment = ClazzEnrolment().apply {
+        clazzEnrolmentClazzUid = testClazz.clazzUid
+        clazzEnrolmentDateJoined = DateTime(2021, 5, 1).unixMillisLong
+        clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
+        clazzEnrolmentPersonUid = student.personUid
+        clazzEnrolmentOutcome = ClazzEnrolment.OUTCOME_IN_PROGRESS
+        clazzEnrolmentUid = clazzEnrolmentDao.insert(this)
     }
 
-    return TestClazzWorkWithQuestionAndOptionsAndResponse(clazzWork, clazzWorkQuestionsAndOptions,
-            responses)
+    val clazzAssignment = ClazzAssignment().apply {
+        caTitle = "New Clazz Assignment"
+        caDescription = "complete quiz"
+        caDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
+        caClazzUid = testClazz.clazzUid
+        caUid = clazzAssignmentDao.insert(this)
+    }
+
+    ClazzAssignmentContentJoin().apply {
+        cacjContentUid = contentEntry.contentEntryUid
+        cacjAssignmentUid = clazzAssignment.caUid
+        cacjUid = clazzAssignmentContentJoinDao.insert(this)
+    }
+
+    val cacheClazzAssignment = ClazzAssignmentRollUp().apply {
+        this.cacheClazzAssignmentUid = clazzAssignment.caUid
+        this.cacheContentEntryUid = contentEntry.contentEntryUid
+        this.cacheContentComplete = true
+        this.cacheMaxScore = 15
+        this.cachePersonUid = student.personUid
+        this.cacheStudentScore = 5
+        this.cacheProgress = 100
+        this.cacheUid = clazzAssignmentRollUpDao.insert(this)
+    }
+
+    StatementEntity().apply {
+        statementContentEntryUid = contentEntry.contentEntryUid
+        contentEntryRoot = true
+        resultCompletion = true
+        extensionProgress = 100
+        resultScoreRaw = 5
+        resultScoreMax = 15
+        statementPersonUid = student.personUid
+        statementVerbUid = VerbEntity.VERB_COMPLETED_UID
+        contextRegistration = randomUuid().toString()
+        statementUid = statementDao.insert(this)
+    }
+
+    return cacheClazzAssignment
 
 }
 
-suspend fun UmAppDatabase.createTestContentEntriesAndJoinToClazzWork(clazzWork: ClazzWork,
-                                 numContentEntries: Int): TestContentAndJoin{
-
-    val joinList = mutableListOf<ClazzWorkContentJoin>()
-    val contentList = (1 .. numContentEntries).map {
-        ContentEntry().apply {
-            title = "Content  $it"
-            description = "Content description $it"
-            entryId = "42$it"
-            author = "Mr.Tester McTestface"
-            publik = true
-            publisher = "TestCorp"
-            leaf = true
-            contentEntryUid = contentEntryDao.insertAsync(this)
-
-            joinList.add(ClazzWorkContentJoin().apply {
-
-                clazzWorkContentJoinContentUid = contentEntryUid
-                clazzWorkContentJoinClazzWorkUid = clazzWork.clazzWorkUid
-                clazzWorkContentJoinInactive = false
-                clazzWorkContentJoinUid = clazzWorkContentJoinDao.insertAsync(this)
-            })
-        }
-    }
-
-    return TestContentAndJoin(contentList, joinList)
-}
-
-suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
-        clazzWork: ClazzWork, responded : Boolean = false, submissionType: Int = -1 ,
-        quizQuestionTypeMixed: Boolean = false, quizQuestionType: Int = 0,
-        submitted: Boolean = false, isStudentToClazz : Boolean = false, dateNow: Long = 0,
-        marked: Boolean = true, partialFilled: Boolean = false, multipleSubmissions:Boolean = false
-    ):TestClazzWork {
-    val clazzAndMembers = insertTestClazzAndMembers(5, 2)
-    clazzWork.apply{
-        clazzWorkTitle = "Espresso Clazz Work A"
-        clazzWorkClazzUid = clazzAndMembers.clazz.clazzUid
-        if(submissionType < 0){
-            clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
-        }else{
-            clazzWorkSubmissionType = submissionType
-        }
-        clazzWorkMaximumScore = 120
-        if(clazzWorkUid != 0L){
-            clazzWorkDao.updateAsync(this)
-        }else {
-            clazzWorkUid = clazzWorkDao.insertAsync(this)
-        }
-
-        clazzWorkInstructions = "Pass espresso test for ClazzWork"
-        clazzWorkCommentsEnabled = true
-    }
-
-    //Getting member
-    val clazzEnrolment: ClazzEnrolment
-
-    val studentClazzMember = clazzAndMembers.studentList.get(1)
-    val student2ClazzMember = clazzAndMembers.studentList.get(3)
-    val teacherClazzMember = clazzAndMembers.teacherList.get(0)
-
-    if(isStudentToClazz){
-        clazzEnrolment = clazzAndMembers.studentList.get(0)
-    }else{
-        clazzEnrolment = clazzAndMembers.teacherList.get(0)
-    }
-
-    var quizQuestionsAndOptions: TestClazzWorkWithQuestionAndOptionsAndResponse? = null
-    if(clazzWork.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
-        if(multipleSubmissions){
-            quizQuestionsAndOptions = insertQuizQuestionsAndOptions(clazzWork, responded, studentClazzMember.clazzEnrolmentUid,
-                    studentClazzMember.clazzEnrolmentPersonUid, quizQuestionType, quizQuestionTypeMixed, partialFilled,
-            student2ClazzMember.clazzEnrolmentUid, student2ClazzMember.clazzEnrolmentPersonUid)
-        }else {
-            quizQuestionsAndOptions = insertQuizQuestionsAndOptions(clazzWork, responded, studentClazzMember.clazzEnrolmentUid,
-                    studentClazzMember.clazzEnrolmentPersonUid, quizQuestionType, quizQuestionTypeMixed, partialFilled)
-
-        }
-
-    }
-
-    val submissions : MutableList<ClazzWorkSubmission> = mutableListOf()
-    //Create Submission
-    if(submitted ){
-        ClazzWorkSubmission().apply {
-            clazzWorkSubmissionClazzWorkUid = clazzWork.clazzWorkUid
-            clazzWorkSubmissionPersonUid = studentClazzMember.clazzEnrolmentPersonUid
-            if(marked) {
-                clazzWorkSubmissionMarkerPersonUid = teacherClazzMember.clazzEnrolmentPersonUid
-                clazzWorkSubmissionScore = 89
-                clazzWorkSubmissionDateTimeMarked = dateNow
-            }
-            clazzWorkSubmissionInactive = false
-            clazzWorkSubmissionDateTimeStarted = dateNow - 7000
-            clazzWorkSubmissionDateTimeUpdated = dateNow - 7000
-            clazzWorkSubmissionDateTimeFinished = dateNow - 7000
-            if(submissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT){
-                clazzWorkSubmissionText = "This is the test submission"
-            }
-
-            clazzWorkSubmissionUid = clazzWorkSubmissionDao.insertAsync(this)
-            submissions.add(this)
-        }
-
-        if(multipleSubmissions){
-            ClazzWorkSubmission().apply {
-                clazzWorkSubmissionClazzWorkUid = clazzWork.clazzWorkUid
-                clazzWorkSubmissionPersonUid = student2ClazzMember.clazzEnrolmentPersonUid
-                if(marked) {
-                    clazzWorkSubmissionMarkerPersonUid = teacherClazzMember.clazzEnrolmentPersonUid
-                    clazzWorkSubmissionDateTimeMarked = dateNow
-                }
-                clazzWorkSubmissionInactive = false
-                clazzWorkSubmissionDateTimeStarted = dateNow - 7000
-                clazzWorkSubmissionDateTimeUpdated = dateNow - 7000
-                clazzWorkSubmissionDateTimeFinished = dateNow - 7000
-                if(submissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT){
-                    clazzWorkSubmissionText = "This is the test submission2"
-                }
-
-                clazzWorkSubmissionUid = clazzWorkSubmissionDao.insertAsync(this)
-                submissions.add(this)
-            }
-        }
-    }
-
-
-    return TestClazzWork(clazzAndMembers, clazzWork, quizQuestionsAndOptions, submissions.toList())
-}
 
 suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numClazzTeachers: Int = 1,
                                                     clazzJoinTime: Long = (getSystemTimeInMillis() - (86400 * 1000)),
@@ -917,56 +693,9 @@ suspend fun UmAppDatabase.insertVideoContent(): Container {
     spanishQuiz.leaf = true
     spanishQuiz.contentEntryUid = contentEntryDao.insert(spanishQuiz)
 
-    val container = Container()
-    container.containerContentEntryUid = spanishQuiz.contentEntryUid
-    val containerUid = containerDao.insert(container)
-    container.containerUid = containerUid
-
-    return container
-}
-
-suspend fun UmAppDatabase.insertPersonWithRole(person: Person, role: Role,
-    entityRole: EntityRole = EntityRole()) {
-    person.also {
-        if(it.personUid == 0L) {
-
-            val groupPerson = PersonGroup().apply {
-                groupName = "Person individual group"
-                personGroupFlag = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP
-            }
-            //Create person's group
-            groupPerson.groupUid = personGroupDao.insertAsync(groupPerson)
-
-            //Assign to person
-            it.personGroupUid = groupPerson.groupUid
-            it.personUid = personDao.insertAsync(it)
-
-            //Assign person to PersonGroup ie: Create PersonGroupMember
-            personGroupMemberDao.insertAsync(
-                    PersonGroupMember(it.personUid, it.personGroupUid))
-
-
-        }else {
-            personDao.insertOrReplace(it)
-        }
-    }
-
-    role.also {
-        if(it.roleUid == 0L) {
-            it.roleUid = roleDao.insert(it)
-        }else {
-            roleDao.insertOrReplace(it)
-        }
-    }
-
-    entityRole.also {
-        it.erGroupUid = person.personGroupUid
-        it.erRoleUid = role.roleUid
-        it.erActive = true
-        if(it.erUid == 0L) {
-            it.erUid = entityRoleDao.insertAsync(it)
-        }else {
-            entityRoleDao.insertOrReplace(it)
-        }
+    return Container().apply {
+        containerContentEntryUid = spanishQuiz.contentEntryUid
+        containerUid  = containerDao.insert(this)
     }
 }
+

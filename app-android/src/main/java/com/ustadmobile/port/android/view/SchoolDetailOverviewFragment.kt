@@ -96,7 +96,7 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
         clazzRecyclerView = rootView.findViewById(R.id.fragment_school_detail_overview_detail_clazz_rv)
 
         mPresenter = SchoolDetailOverviewPresenter(requireContext(), arguments.toStringMap(),
-                this,  di, viewLifecycleOwner)
+                this,  di, viewLifecycleOwner).withViewLifecycle()
 
         clazzRecyclerAdapter = ClazzRecyclerAdapter(mPresenter)
         clazzRecyclerView?.adapter = clazzRecyclerAdapter

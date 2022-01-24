@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentEntryImportLinkBinding
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
@@ -45,7 +45,7 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
         setHasOptionsMenu(true)
 
         mPresenter = ContentEntryImportLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di)
+                this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toStringMap())
 
     }
@@ -65,7 +65,7 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
         return super.onOptionsItemSelected(item)
     }
 
-    override fun finishWithResult(result: ImportedContentEntryMetaData) {
+    override fun finishWithResult(result: MetadataResult) {
         saveResultToBackStackSavedStateHandle(listOf(result))
     }
 

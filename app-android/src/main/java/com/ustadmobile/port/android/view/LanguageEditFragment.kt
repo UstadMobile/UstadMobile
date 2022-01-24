@@ -35,7 +35,7 @@ class LanguageEditFragment: UstadEditFragment<Language>(), LanguageEditView, Lan
         }
 
         mPresenter = LanguageEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
 
         return rootView
     }
@@ -73,6 +73,7 @@ class LanguageEditFragment: UstadEditFragment<Language>(), LanguageEditView, Lan
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

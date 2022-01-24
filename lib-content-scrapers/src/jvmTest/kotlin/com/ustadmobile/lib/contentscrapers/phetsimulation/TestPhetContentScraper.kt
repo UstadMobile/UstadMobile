@@ -1,6 +1,11 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import okhttp3.mockwebserver.Dispatcher
@@ -8,7 +13,6 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.Okio
 import okio.buffer
 import okio.source
 import org.junit.Assert
@@ -17,6 +21,7 @@ import org.junit.Test
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
+import kotlin.random.Random
 
 
 class TestPhetContentScraper {
@@ -241,9 +246,14 @@ class TestPhetContentScraper {
     @Throws(IOException::class)
     fun givenServerOnline_whenUrlFound_findAllSimulations() {
 
-        val db = UmAppDatabase.getInstance(Any())
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE),
+            randomUuid().toString())
+        val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+            .addSyncCallback(nodeIdAndAuth)
+            .build()
+            .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
         val repo = db //db.getRepository("https://localhost", "")
-        db.clearAllTables()
+        db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
 
         val index = IndexPhetContentScraper()
         val mockWebServer = MockWebServer()
@@ -293,12 +303,15 @@ class TestPhetContentScraper {
 
 
     @Test
-    @Throws(IOException::class)
     fun givenDirectoryOfTranslationsIsCreated_findAllTranslationRelations() {
-
-        val db = UmAppDatabase.getInstance(Any())
+        val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE),
+            randomUuid().toString())
+        val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+            .addSyncCallback(nodeIdAndAuth)
+            .build()
+            .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
         val repo = db//db.getRepository("https://localhost", "")
-        db.clearAllTables()
+        db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
 
         val tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile()
         val containerDir = Files.createTempDirectory("container").toFile()

@@ -472,7 +472,7 @@
                 android:id="@+id/fragment_school_detail_overview_detail_clazz_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:listitem="@layout/item_clazz_simple_edit"
+                tools:listitem="@layout/item_clazz_simple_detail"
                 tools:itemCount="2"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_overview_classes_heading"
                 app:layout_constraintStart_toStartOf="parent" />

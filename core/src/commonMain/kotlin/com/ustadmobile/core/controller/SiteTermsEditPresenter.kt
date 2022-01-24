@@ -45,7 +45,7 @@ class SiteTermsEditPresenter(context: Any,
                 termsHtml = systemImpl.getString(MessageID.terms_and_policies_text, context)
             }
 
-            GlobalScope.launch(doorMainDispatcher()) {
+            presenterScope.launch {
                 //set the language to be the default for a new policy
                 val displayLocale = systemImpl.getDisplayedLocale(context)
                 repo.onDbThenRepoWithTimeout(5000) { db, lastResult ->
@@ -80,7 +80,7 @@ class SiteTermsEditPresenter(context: Any,
             return
         }
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
 
             //TODO: Call commitToDatabase on any onetomany join helpers
             view.finishWithResult(listOf(entity))

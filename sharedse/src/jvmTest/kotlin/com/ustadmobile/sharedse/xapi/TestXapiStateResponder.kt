@@ -9,6 +9,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
@@ -34,11 +35,10 @@ import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import okhttp3.OkHttpClient
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -65,12 +65,15 @@ class TestXapiStateResponder {
 
     private lateinit var okHttpClient: OkHttpClient
 
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
+
     @Before
     @Throws(IOException::class)
     fun setup() {
         checkJndiSetup()
         val endpointScope = EndpointScope()
-        val systemImplSpy = spy(UstadMobileSystemImpl.instance)
 
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp){
@@ -83,14 +86,23 @@ class TestXapiStateResponder {
         }
 
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
-            bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
+            bind<UstadMobileSystemImpl>() with singleton {
+                spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance(),
+                    temporaryFolder.newFolder()))
+            }
+            bind<UstadAccountManager>() with singleton {
+                UstadAccountManager(instance(), Any(), di)
+            }
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
                 builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
                 builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
                 builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
                 builder.create()
+            }
+
+            bind<Pbkdf2Params>() with singleton {
+                Pbkdf2Params()
             }
 
             bindDbAndRepoWithEndpoint(endpointScope)

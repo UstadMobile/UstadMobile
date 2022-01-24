@@ -1,19 +1,19 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putIfNotAlreadySet
+import com.ustadmobile.core.util.ext.requireHttpPrefix
+import com.ustadmobile.core.util.ext.requirePostfix
+import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.*
 import io.ktor.client.features.*
-import io.ktor.client.request.get
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
@@ -21,7 +21,7 @@ import org.kodein.di.instance
 
 class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view: SiteEnterLinkView,
                              di: DI) :
-        UstadBaseController<SiteEnterLinkView>(context, arguments, view, di) {
+        UstadBaseController<SiteEnterLinkView>(context, arguments, view, di, activeSessionRequired = false) {
 
     private var site: Site? = null
 
@@ -31,18 +31,19 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
 
     private val httpClient: HttpClient by instance()
 
+    private var validatedLink: String? = null
+
     fun handleClickNext(){
         val mSite = site
-        if(mSite != null){
+        val validatedLinkVal = validatedLink
+        if(mSite != null && validatedLinkVal != null){
             val args = arguments.toMutableMap().also {
                 val siteLink = view.siteLink
                 if(siteLink != null)
-                    it[ARG_SERVER_URL] = siteLink
+                    it[ARG_SERVER_URL] = validatedLinkVal
 
                 it[ARG_SITE] = Json.encodeToString(Site.serializer(), mSite)
             }
-
-            args.putIfNotAlreadySet(ARG_POPUPTO_ON_FINISH, SiteEnterLinkView.VIEW_NAME)
 
             impl.go(Login2View.VIEW_NAME, args, context)
         }
@@ -55,16 +56,12 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
             checkTextLinkJob = null
         }
 
-        checkTextLinkJob = GlobalScope.async(doorMainDispatcher()) {
+        checkTextLinkJob = presenterScope.async {
             try {
-                var formattedHref = if(href.startsWith("http")) href else "https://$href"
-                formattedHref = UMFileUtil.joinPaths(formattedHref, "Site","verify")
-                site = httpClient.get<Site>(formattedHref) {
-                    timeout {
-                        requestTimeoutMillis = LINK_REQUEST_TIMEOUT
-                    }
-                }
+                val endpointUrl = href.requireHttpPrefix().requirePostfix("/")
+                site = httpClient.verifySite(endpointUrl)
                 view.validLink = site != null
+                validatedLink = endpointUrl
             }catch (e: Exception) {
                 view.validLink = false
             }
@@ -90,7 +87,7 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
     }
 
     fun handleClickCreateNewSite() {
-        impl.openLinkInBrowser("https://www.ustadmobile.com/hosting/", context)
+        impl.openLinkInBrowser("https://www.ustadmobile.com/", context)
     }
 
 

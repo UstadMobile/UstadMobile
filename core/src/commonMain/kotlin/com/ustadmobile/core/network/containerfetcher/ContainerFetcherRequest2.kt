@@ -24,5 +24,5 @@ class ContainerFetcherRequest2(
          * this is always a local file directory, but in future other storage mechanisms might be
          * used. For a directory on JVM/Android use the File.toKmpUriString function.
          */
-        val destDirUri: String) {
-}
+        val destDirUri: String
+)

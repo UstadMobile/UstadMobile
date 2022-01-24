@@ -76,7 +76,7 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
 
         addRoute("/:${ContainerEntryListResponder.PATH_VAR_ENDPOINT}/ContainerEntryList/findByContainerWithMd5",
                 ContainerEntryListResponder::class.java, di)
-        addRoute("/:${XapiStatementResponder.URI_PARAM_ENDPOINT}/xapi/:contentEntryUid/statements",
+        addRoute("/:${XapiStatementResponder.URI_PARAM_ENDPOINT}/xapi/:contentEntryUid/:clazzUid/statements",
                 XapiStatementResponder::class.java, di)
         addRoute("/:${XapiStateResponder.URI_PARAM_ENDPOINT}/xapi/activities/state",
                 XapiStateResponder::class.java, di)
@@ -113,7 +113,7 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
         val endpointDb: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
         val endpointRepo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
 
-        val container = endpointRepo.containerDao.findByUid(containerUid)
+        val container = endpointRepo.containerDao.findByUidAsync(containerUid)
                 ?: throw IllegalArgumentException("Container $containerUid on $endpointUrl not found")
 
         val mountPath = "/${sanitizeDbNameFromUrl(endpointUrl)}/container/$containerUid/"

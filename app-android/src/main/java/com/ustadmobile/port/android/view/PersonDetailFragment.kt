@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -22,20 +21,19 @@ import com.ustadmobile.core.controller.PersonDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), PersonDetailView,
-        EntityRoleItemHandler{
+class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), PersonDetailView{
 
     private var mBinding: FragmentPersonDetailBinding? = null
 
@@ -68,15 +66,6 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             }
         }
 
-    override var rolesAndPermissions: DataSource.Factory<Int, EntityRoleWithNameAndRole>? = null
-        set(value) {
-            rolesAndPermissionsLiveData?.removeObserver(rolesAndPermissionsObserver)
-            field = value
-            val entityRoleDao = dbRepo?.entityRoleDao?: return
-            rolesAndPermissionsLiveData = value?.asRepositoryLiveData(entityRoleDao)
-            rolesAndPermissionsLiveData?.observe(viewLifecycleOwner, rolesAndPermissionsObserver)
-        }
-
     override var clazzes: DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>? = null
         get() = field
         set(value) {
@@ -107,47 +96,39 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
         t -> clazzEnrolmentWithClazzRecyclerAdapter?.submitList(t)
     }
 
-    private var rolesAndPermissionsLiveData: LiveData<PagedList<EntityRoleWithNameAndRole>>? = null
-    private var rolesAndPermissionsRecyclerAdapter: EntityRoleRecyclerAdapter? = null
-    private val rolesAndPermissionsObserver = Observer<PagedList<EntityRoleWithNameAndRole>?> {
-        t -> rolesAndPermissionsRecyclerAdapter?.submitList(t)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         val rootView: View
 
-        val impl: UstadMobileSystemImpl by instance()
         clazzEnrolmentWithClazzRecyclerAdapter = ClazzEnrolmentWithClazzRecyclerAdapter(
             null)
-        rolesAndPermissionsRecyclerAdapter = EntityRoleRecyclerAdapter(false, this)
         mBinding = FragmentPersonDetailBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.createAccountVisibility = View.GONE
             it.changePasswordVisibility = View.GONE
             it.classesRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.classesRecyclerview.adapter = clazzEnrolmentWithClazzRecyclerAdapter
-            it.rolesAndPermissionsRecyclerview.layoutManager = LinearLayoutManager(requireContext())
-            it.rolesAndPermissionsRecyclerview.adapter = rolesAndPermissionsRecyclerAdapter
-
         }
 
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
+        return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         mPresenter = PersonDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+            di, viewLifecycleOwner).withViewLifecycle()
         clazzEnrolmentWithClazzRecyclerAdapter?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
         mBinding?.presenter = mPresenter
-        return rootView
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding?.classesRecyclerview?.adapter = null
         clazzEnrolmentWithClazzRecyclerAdapter = null
-        mBinding?.rolesAndPermissionsRecyclerview?.adapter = null
-        rolesAndPermissionsRecyclerAdapter = null
         dbRepo = null
         mBinding = null
         mPresenter = null
@@ -163,14 +144,14 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
         }
     }
 
-    override var entity: PersonWithDisplayDetails? = null
+    override var entity: PersonWithPersonParentJoin? = null
         get() = field
         set(value) {
             field = value
             mBinding?.person = value
-            if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
-                (activity as? AppCompatActivity)?.supportActionBar?.title =
-                        value?.firstNames + " " + value?.lastName
+            ustadFragmentTitle = value?.fullName()
+            mBinding?.dateTimeMode = MODE_START_OF_DAY
+            mBinding?.timeZoneId = "UTC"
         }
 
 
@@ -204,14 +185,6 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
                     CustomField.ICON_EMAIL to R.drawable.ic_email_black_24dp,
                     CustomField.ICON_ADDRESS to R.drawable.ic_location_pin_24dp)
 
-    }
-
-    override fun handleClickEntityRole(entityRole: EntityRoleWithNameAndRole) {
-        //TODO: This
-    }
-
-    override fun handleRemoveEntityRole(entityRole: EntityRoleWithNameAndRole) {
-        //Not applicable
     }
 
 }

@@ -7,7 +7,7 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlin.reflect.KClass
 
-class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
+open class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
                                              serializationKey: String,
                                              serializationStrategy: SerializationStrategy<List<T>>,
                                              deserializationStrategy: DeserializationStrategy<List<T>>,
@@ -30,7 +30,7 @@ class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
             pksToDeactivate.addAll(pksToDeactivateStr.split(',').map { it.toLong() })
         }
 
-        val fakePkStartVal = (liveList.getValue()?.map { pkGetter(it) }?.min() ?: 0L) -1
+        val fakePkStartVal = (liveList.getValue()?.map { pkGetter(it) }?.minOrNull() ?: 0L) -1
         atomicLong.value = fakePkStartVal
     }
 
@@ -42,7 +42,7 @@ class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
         dao.deactivateByUids(primaryKeysToDeactivate)
     }
 
-    override open fun doesNewEntityRequireFakePk(pk: Long) = (pk == 0L)
+    override fun doesNewEntityRequireFakePk(pk: Long) = (pk == 0L)
 
     override fun onSaveState(outState: MutableMap<String, String>) {
         super.onSaveState(outState)

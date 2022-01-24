@@ -1,10 +1,14 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
 import android.content.res.Configuration
 import android.media.session.PlaybackState.STATE_BUFFERING
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.test.core.app.ApplicationProvider
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.STATE_READY
+import com.google.android.exoplayer2.ui.PlayerView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -15,20 +19,20 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
+import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.port.android.screen.VideoContentScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.util.test.ext.insertVideoContent
-import kotlinx.android.synthetic.main.fragment_video_content.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.kodein.di.DIAware
 
 
 @AdbScreenRecord("Video Content Screen Test")
@@ -56,11 +60,12 @@ class VideoContentFragmentTest : TestCase() {
     @Suppress("BlockingMethodInNonBlockingContext")
     @Before
     fun setup() {
+        val localDi = (ApplicationProvider.getApplicationContext<Context>() as DIAware).di
         runBlocking {
             container = dbRule.repo.insertVideoContent()
             dbRule.repo.addEntryToContainerFromResource(container.containerUid, this::class.java,
                     "/com/ustadmobile/app/android/video.mp4", "video.mp4",
-                    ContainerAddOptions(temporaryFolder.newFolder().toDoorUri()))
+                    localDi, ContainerAddOptions(temporaryFolder.newFolder().toDoorUri()))
         }
     }
 
@@ -89,7 +94,8 @@ class VideoContentFragmentTest : TestCase() {
                     click()
                 }
                 fragmentScenario.onFragment {
-                    val playState = it.activity_video_player_view.player?.playbackState
+                    val videoPlayer = it.view?.findViewById<PlayerView>(R.id.activity_video_player_view)
+                    val playState = videoPlayer?.player?.playbackState
                     Assert.assertTrue("player is playing", playState == STATE_BUFFERING || playState == STATE_READY)
                 }
 
@@ -106,15 +112,16 @@ class VideoContentFragmentTest : TestCase() {
                     isGone()
                 }
 
-                var contentProgress: ContentEntryProgress? = null
-                while(contentProgress == null){
-                    contentProgress = dbRule.db.contentEntryProgressDao
-                            .getProgressByContentAndPerson(container.containerContentEntryUid,
-                                    dbRule.account.personUid)
-                    Thread.sleep(200)
+                runBlocking {
+                    var statement: ContentEntryStatementScoreProgress? = null
+                    while(statement == null){
+                        statement = dbRule.db.statementDao
+                                .getBestScoreForContentForPerson(
+                                        container.containerContentEntryUid, dbRule.account.personUid)
+                    }
+                    Assert.assertEquals("progress started since user pressed play", 0,
+                            statement.progress)
                 }
-                Assert.assertEquals("progress started since user pressed play", 0,
-                        contentProgress.contentEntryProgressProgress)
 
             }
 

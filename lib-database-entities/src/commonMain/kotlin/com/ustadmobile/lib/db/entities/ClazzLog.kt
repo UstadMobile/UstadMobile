@@ -10,27 +10,22 @@ import kotlinx.serialization.Serializable
  * could also be related to behavior logs etc. in the future.
  */
 
-@SyncableEntity(tableId = ClazzLog.TABLE_ID,
-    notifyOnUpdate = [
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzLog.TABLE_ID} AS tableId FROM 
-        ChangeLog
-        JOIN ClazzLog ON ChangeLog.chTableId = ${ClazzLog.TABLE_ID} AND ClazzLog.clazzLogUid = ChangeLog.chEntityPk
-        JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid 
-        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
-        """
-    ],
-    syncFindAllQuery =
-        """
-        SELECT ClazzLog.* FROM
-        ClazzLog
-        JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid
-        JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZ_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId
-        """
-)
+@ReplicateEntity(tableId =  ClazzLog.TABLE_ID, tracker = ClazzLogReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "clazzlog_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO ClazzLog(clazzLogUid, clazzLogClazzUid, logDate, timeRecorded, clazzLogDone, cancellationNote, clazzLogCancelled, clazzLogNumPresent, clazzLogNumAbsent, clazzLogNumPartial, clazzLogScheduleUid, clazzLogStatusFlag, clazzLogMSQN, clazzLogLCSN, clazzLogLCB, clazzLogLastChangedTime) 
+         VALUES (NEW.clazzLogUid, NEW.clazzLogClazzUid, NEW.logDate, NEW.timeRecorded, NEW.clazzLogDone, NEW.cancellationNote, NEW.clazzLogCancelled, NEW.clazzLogNumPresent, NEW.clazzLogNumAbsent, NEW.clazzLogNumPartial, NEW.clazzLogScheduleUid, NEW.clazzLogStatusFlag, NEW.clazzLogMSQN, NEW.clazzLogLCSN, NEW.clazzLogLCB, NEW.clazzLogLastChangedTime) 
+         /*psql ON CONFLICT (clazzLogUid) DO UPDATE 
+         SET clazzLogClazzUid = EXCLUDED.clazzLogClazzUid, logDate = EXCLUDED.logDate, timeRecorded = EXCLUDED.timeRecorded, clazzLogDone = EXCLUDED.clazzLogDone, cancellationNote = EXCLUDED.cancellationNote, clazzLogCancelled = EXCLUDED.clazzLogCancelled, clazzLogNumPresent = EXCLUDED.clazzLogNumPresent, clazzLogNumAbsent = EXCLUDED.clazzLogNumAbsent, clazzLogNumPartial = EXCLUDED.clazzLogNumPartial, clazzLogScheduleUid = EXCLUDED.clazzLogScheduleUid, clazzLogStatusFlag = EXCLUDED.clazzLogStatusFlag, clazzLogMSQN = EXCLUDED.clazzLogMSQN, clazzLogLCSN = EXCLUDED.clazzLogLCSN, clazzLogLCB = EXCLUDED.clazzLogLCB, clazzLogLastChangedTime = EXCLUDED.clazzLogLastChangedTime
+         */"""
+     ]
+ )
+))
 @Entity
 @Serializable
 open class ClazzLog()  {
@@ -70,6 +65,7 @@ open class ClazzLog()  {
     var clazzLogLCB: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var clazzLogLastChangedTime: Long = 0
 
     constructor(clazzLogUid: Long, clazzUid: Long, logDate: Long, scheduleUid: Long): this() {

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentjob.MetadataResult
 
 interface ContentEntryImportLinkView : UstadView {
 
@@ -8,7 +8,7 @@ interface ContentEntryImportLinkView : UstadView {
 
     var validLink: Boolean
 
-    fun finishWithResult(result: ImportedContentEntryMetaData)
+    fun finishWithResult(result: MetadataResult)
 
     companion object {
 

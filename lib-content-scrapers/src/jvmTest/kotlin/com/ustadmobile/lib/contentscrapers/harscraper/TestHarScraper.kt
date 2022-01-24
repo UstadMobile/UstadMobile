@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.harscraper
 
 import com.google.gson.GsonBuilder
-import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.contentformats.har.HarRegexPair
@@ -9,13 +8,17 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
+import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.io.ext.openInputStream
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexer
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -27,12 +30,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import org.mockito.kotlin.spy
 import java.io.File
 import java.io.StringWriter
-import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import javax.naming.InitialContext
-
+import kotlin.random.Random
 
 class TestHarScraper {
 
@@ -55,7 +58,7 @@ class TestHarScraper {
 
     private lateinit var di: DI
     private lateinit var endpointScope: EndpointScope
-    private val endpoint = Endpoint(TestFolderIndexer.TEST_ENDPOINT)
+    private val endpoint = Endpoint(TEST_ENDPOINT)
 
     private val RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/harcontent"
 
@@ -65,12 +68,19 @@ class TestHarScraper {
         endpointScope = EndpointScope()
 
         di = DI {
+            bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
+                NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
+            }
+
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
-                    it.clearAllTables()
-                })
+                spy(
+                    DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+                    .addSyncCallback(nodeIdAndAuth)
+                    .build()
+                    .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId))
             }
             bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
                 containerFolder
@@ -192,6 +202,12 @@ class TestHarScraper {
         Assert.assertEquals("regex was found and removed",  "http://localhost:${url.port}/pic_trull.jpg?style=abc.css", entry!!.request.url)
 
         scraper.close()
+
+    }
+
+    companion object {
+
+        const val TEST_ENDPOINT = "http://test.localhost.com/"
 
     }
 

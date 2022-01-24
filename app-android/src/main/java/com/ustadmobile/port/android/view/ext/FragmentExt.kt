@@ -8,7 +8,9 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
+import com.google.gson.Gson
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ListViewMode
@@ -17,17 +19,37 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.util.ext.putResultDestInfo
 import com.ustadmobile.port.android.view.UstadBaseFragment
 import com.ustadmobile.port.android.view.UstadEditFragment
+import org.kodein.di.DI
+import org.kodein.di.android.x.closestDI
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 /**
  * Save the result of a fragment (e.g. a selection from a list or newly created entity) to the
  * BackStack SavedStateHandle as specified by ARG_RESULT_DEST_ID and ARG_RESULT_DEST_KEY
  */
 fun Fragment.saveResultToBackStackSavedStateHandle(result: List<*>) {
-    saveResultToBackStackSavedStateHandle(defaultGson().toJson(result))
+    val di: DI by closestDI()
+    val gson: Gson by di.instance()
+
+    saveResultToBackStackSavedStateHandle(gson.toJson(result))
 }
 
 fun Fragment.saveResultToBackStackSavedStateHandle(result: String) {
-    val saveToDestination = arguments?.getString(UstadView.ARG_RESULT_DEST_ID)
+    var saveToDestination = arguments?.getString(UstadView.ARG_RESULT_DEST_ID)
+    val saveToDestinationViewName = arguments?.getString(UstadView.ARG_RESULT_DEST_VIEWNAME)
+
+    //This is a transition arrangement so that this function will be able to return results when
+    // the process was initiated by the multiplatform functions. We can simply lookup the
+    // destination view id
+    if(saveToDestination == null && saveToDestinationViewName != null) {
+        val di: DI by closestDI()
+        val destinationProvider: DestinationProvider = di.direct.instance()
+
+        saveToDestination = destinationProvider.lookupDestinationName(saveToDestinationViewName)
+            ?.destinationId?.toString()
+    }
+
     val saveToKey = arguments?.getString(UstadBaseFragment.ARG_RESULT_DEST_KEY)
     val navController = findNavController()
     if(saveToDestination != null && saveToKey != null) {
@@ -76,8 +98,25 @@ fun <T> Fragment.navigateToEditEntity(entity: T?, destinationId: Int, entityClas
     val backStateEntryVal = navController.currentBackStackEntry
 
     if(backStateEntryVal != null) {
-        argBundle.putResultDestInfo(backStateEntryVal, destinationResultKey,
-            overwriteDest = overwriteDestination ?: (this is UstadEditFragment<*>))
+        //Provide compatibility with multiplatform results
+        val currentDestViewName = backStateEntryVal.arguments
+            ?.getString(UstadView.ARG_RESULT_DEST_VIEWNAME)
+        val currentDestKey = backStateEntryVal.arguments
+            ?.getString(UstadView.ARG_RESULT_DEST_KEY)
+
+        val di: DI by closestDI()
+        val destProvider: DestinationProvider by di.instance()
+        val overwriteDestVal = (this is UstadEditFragment<*>)
+
+        if(!overwriteDestVal && currentDestViewName != null && currentDestKey != null){
+            argBundle.putString(UstadView.ARG_RESULT_DEST_VIEWNAME, currentDestViewName)
+            argBundle.putString(UstadView.ARG_RESULT_DEST_KEY, currentDestKey)
+            val destId = destProvider.lookupDestinationName(currentDestViewName)?.destinationId ?: 0
+            argBundle.putString(UstadView.ARG_RESULT_DEST_ID, destId.toString())
+        }else {
+            argBundle.putResultDestInfo(backStateEntryVal, destinationResultKey,
+                overwriteDest = overwriteDestination ?: (this is UstadEditFragment<*>))
+        }
     }
 
     if(entity != null)

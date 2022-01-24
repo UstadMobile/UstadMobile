@@ -3,8 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
+
+
+    <item
+        android:orderInCategory="98"
+        android:id="@+id/menu_main_settings"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="@string/settings"
+        android:contentDescription="@string/settings"
+        android:visible="true"
+        app:showAsAction="always"/>
+
     <item
         android:id="@+id/menu_search"
+        android:orderInCategory="99"
         android:icon="@android:drawable/ic_menu_search"
         android:title="@string/search"
         android:contentDescription="@string/search"
@@ -14,15 +26,8 @@
         />
 
     <item
-        android:id="@+id/menu_main_settings"
-        android:icon="@drawable/ic_settings_white_24dp"
-        android:title="@string/settings"
-        android:contentDescription="@string/settings"
-        android:visible="true"
-        app:showAsAction="always"/>
-
-    <item
         android:id="@+id/menu_main_profile"
+        android:orderInCategory="100"
         android:title="@string/profile"
         android:visible="true"
         android:contentDescription="@string/profile"

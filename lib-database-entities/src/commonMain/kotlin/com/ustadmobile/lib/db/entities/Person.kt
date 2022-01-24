@@ -1,11 +1,11 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Person.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT1
-import com.ustadmobile.lib.db.entities.Person.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT2
-import com.ustadmobile.lib.db.entities.Person.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT4
+import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
+import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
@@ -14,34 +14,22 @@ import kotlinx.serialization.Serializable
  */
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID, notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${TABLE_ID} AS tableId FROM 
-        ChangeLog
-        JOIN Person ON ChangeLog.chTableId = $TABLE_ID AND ChangeLog.chEntityPk = Person.personUid
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( $ENTITY_PERSONS_WITH_PERMISSION_PT1 0 $ENTITY_PERSONS_WITH_PERMISSION_PT2 ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4 )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
-    syncFindAllQuery = """
-        SELECT Person.*
-        FROM
-         DeviceSession
-         JOIN PersonGroupMember ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
-         LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-         LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
-         LEFT JOIN Person ON CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = DeviceSession.dsPersonUid) AS INTEGER) = 1
-             OR (Person.personUid = DeviceSession.dsPersonUid)
-             OR ((Role.rolePermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0 AND (EntityRole.erTableId= ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid)
-             OR ((Role.rolePermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0 AND EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid))
-             OR ((Role.rolePermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0 AND EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid)) OR
-             ((Role.rolePermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0 AND EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
-             SELECT DISTINCT Clazz.clazzSchoolUid 
-             FROM Clazz
-             JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
-             )))
-         WHERE
-         DeviceSession.dsDeviceId = :clientId
-        """
-    )
+@ReplicateEntity(tableId = TABLE_ID, tracker = PersonReplicate::class)
+ @Triggers(arrayOf(
+     Trigger(
+         name = "person_remote_insert",
+         order = Trigger.Order.INSTEAD_OF,
+         on = Trigger.On.RECEIVEVIEW,
+         events = [Trigger.Event.INSERT],
+         sqlStatements = [
+             """REPLACE INTO Person(personUid, username, firstNames, lastName, emailAddr, phoneNum, gender, active, admin, personNotes, fatherName, fatherNumber, motherName, motherNum, dateOfBirth, personAddress, personOrgId, personGroupUid, personMasterChangeSeqNum, personLocalChangeSeqNum, personLastChangedBy, personLct, personCountry, personType) 
+             VALUES (NEW.personUid, NEW.username, NEW.firstNames, NEW.lastName, NEW.emailAddr, NEW.phoneNum, NEW.gender, NEW.active, NEW.admin, NEW.personNotes, NEW.fatherName, NEW.fatherNumber, NEW.motherName, NEW.motherNum, NEW.dateOfBirth, NEW.personAddress, NEW.personOrgId, NEW.personGroupUid, NEW.personMasterChangeSeqNum, NEW.personLocalChangeSeqNum, NEW.personLastChangedBy, NEW.personLct, NEW.personCountry, NEW.personType) 
+             /*psql ON CONFLICT (personUid) DO UPDATE 
+             SET username = EXCLUDED.username, firstNames = EXCLUDED.firstNames, lastName = EXCLUDED.lastName, emailAddr = EXCLUDED.emailAddr, phoneNum = EXCLUDED.phoneNum, gender = EXCLUDED.gender, active = EXCLUDED.active, admin = EXCLUDED.admin, personNotes = EXCLUDED.personNotes, fatherName = EXCLUDED.fatherName, fatherNumber = EXCLUDED.fatherNumber, motherName = EXCLUDED.motherName, motherNum = EXCLUDED.motherNum, dateOfBirth = EXCLUDED.dateOfBirth, personAddress = EXCLUDED.personAddress, personOrgId = EXCLUDED.personOrgId, personGroupUid = EXCLUDED.personGroupUid, personMasterChangeSeqNum = EXCLUDED.personMasterChangeSeqNum, personLocalChangeSeqNum = EXCLUDED.personLocalChangeSeqNum, personLastChangedBy = EXCLUDED.personLastChangedBy, personLct = EXCLUDED.personLct, personCountry = EXCLUDED.personCountry, personType = EXCLUDED.personType
+             */"""
+         ]
+     )
+ ))
 @Serializable
 open class Person() {
 
@@ -83,7 +71,7 @@ open class Person() {
      */
     var personOrgId: String? = null
 
-    //This person's groupUid
+    //The PersonGroup that is created for this individual
     var personGroupUid: Long = 0L
 
     @MasterChangeSeqNum
@@ -96,9 +84,14 @@ open class Person() {
     var personLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var personLct: Long = 0
 
     var personCountry: String? = null
+
+    @ColumnInfo(defaultValue = "${TYPE_NORMAL_PERSON}")
+    var personType: Int = TYPE_NORMAL_PERSON
+
 
     fun fullName():String{
         var f = ""
@@ -188,53 +181,86 @@ open class Person() {
 
         const val GENDER_OTHER = 4
 
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
-            SELECT DISTINCT Person_Perm.personUid FROM Person Person_Perm
-            LEFT JOIN PersonGroupMember ON Person_Perm.personUid = PersonGroupMember.groupMemberPersonUid
-            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
-            WHERE
-            CAST(Person_Perm.admin AS INTEGER) = 1 OR ( (
-            """
+        const val TYPE_NORMAL_PERSON = 0
 
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 =  """
-            = 0) AND (Person_Perm.personUid = Person.personUid))
-            OR
-            (
-            ((EntityRole.erTableId = ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid) OR 
-            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid)) OR
-            (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.PersonUid)) OR
-            (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
-                SELECT DISTINCT Clazz.clazzSchoolUid 
-                FROM Clazz
-                JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
-            ))
-            ) 
-            AND (Role.rolePermissions & 
+        const val TYPE_SYSTEM = 1
+
+        const val JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1 = """
+            JOIN ScopedGrant
+                 ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                    AND (ScopedGrant.sgPermissions &"""
+
+        //In between is where to put the required permission
+
+        //The class subquery is most efficient and logical when ScopedGrant has already been joined
+        // (e.g. we are looking to join from ScopedGrant out to person)
+        const val FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
+                ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                    AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+                 OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                    AND ScopedGrant.sgEntityUid = Person.personUid)
+                 OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}       
+                    AND Person.personUid IN (
+                        SELECT DISTINCT clazzEnrolmentPersonUid
+                          FROM ClazzEnrolment
+                         WHERE clazzEnrolmentClazzUid =ScopedGrant.sgEntityUid 
+                           AND ClazzEnrolment.clazzEnrolmentActive))
+                 OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                    AND Person.personUid IN (
+                        SELECT DISTINCT schoolMemberPersonUid
+                          FROM SchoolMember
+                         WHERE schoolMemberSchoolUid = ScopedGrant.sgEntityUid
+                           AND schoolMemberActive))
+                           )
         """
 
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT4 = ") > 0)"
 
-        const val FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1 = """
-            FROM
-             PersonGroupMember
-             LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-             LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid 
-             LEFT JOIN Person ON
-             CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = :accountPersonUid) AS INTEGER) = 1
-                 OR (Person.personUid = :accountPersonUid)
-             OR ((Role.rolePermissions & """
+        const val JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2 = """
+                                                    ) > 0
+            JOIN Person 
+                 ON $FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
+        """
 
-        const val FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2 = """) > 0
-                 AND ((EntityRole.erTableId= ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid)
-                 OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid AND ClazzEnrolment.clazzEnrolmentActive))
-                 OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid)) OR
-                 (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
-                 SELECT DISTINCT Clazz.clazzSchoolUid 
-                 FROM Clazz
-                 JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
-                 ))))"""
 
+
+        //The class/school subquery is most efficient and logical when Person has already been joined
+        // (e.g. we are looking to join from Person out to ScopedGrant)
+        const val FROM_SCOPEDGRANT_TO_PERSON_JOIN_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                    AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+                 OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                    AND ScopedGrant.sgEntityUid = Person.personUid)
+                 OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}       
+                    AND ScopedGrant.sgEntityUid IN (
+                        SELECT DISTINCT clazzEnrolmentClazzUid
+                          FROM ClazzEnrolment
+                         WHERE clazzEnrolmentPersonUid = Person.personUid 
+                           AND ClazzEnrolment.clazzEnrolmentActive))
+                 OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                    AND ScopedGrant.sgEntityUid IN (
+                        SELECT DISTINCT schoolMemberSchoolUid
+                          FROM SchoolMember
+                         WHERE schoolMemberPersonUid = Person.personUid
+                           AND schoolMemberActive))
+                           )
+        """
+
+
+        const val JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1 = """
+            JOIN ScopedGrant 
+                   ON $FROM_SCOPEDGRANT_TO_PERSON_JOIN_ON_CLAUSE
+                   AND (ScopedGrant.sgPermissions & 
+        """
+
+
+        const val JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2 = """
+                                                     ) > 0
+             JOIN PersonGroupMember AS PrsGrpMbr
+                   ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
+              JOIN UserSession
+                   ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
+                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+        """
 
     }
 

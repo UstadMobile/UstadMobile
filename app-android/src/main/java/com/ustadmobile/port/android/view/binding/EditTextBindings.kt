@@ -11,8 +11,10 @@ import androidx.databinding.InverseBindingAdapter
 import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScheduleEditPresenter
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.systemImpl
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.ReportTemplateListFragment
+import com.ustadmobile.port.android.view.ReportTemplateListFragment.Companion.REPORT_TITLE_TO_ID
 import java.text.MessageFormat
 import java.util.*
 
@@ -33,7 +35,6 @@ private fun scheduleTimeToDate(msSinceMidnight: Int) : Date{
 
 @BindingAdapter("scheduleText")
 fun TextView.setScheduleText(schedule: Schedule) {
-    val systemImpl = UstadMobileSystemImpl.instance
     val frequencyMessageId = ScheduleEditPresenter.FrequencyOption.values()
             .firstOrNull { it.optionVal == schedule.scheduleFrequency }?.messageId ?: 0
     val dayMessageId = ScheduleEditPresenter.DayOptions.values()
@@ -121,9 +122,25 @@ fun getRealValueInt(et: TextView): Int {
     return et.text.toString().toInt()?:0
 }
 
-@BindingAdapter(value = ["minValue", "setMaxValue"])
-fun EditText.setMinMax(min: String, max: Int){
-    filters =   arrayOf(InputFilterMinMax(Integer.valueOf(min), max))
+@BindingAdapter(value = ["minValue", "maxValue"])
+fun EditText.setMinMax(min: Int, max: Int){
+    filters = arrayOf(InputFilterMinMax(min, max))
+}
+
+@SuppressLint("SetTextI18n")
+@BindingAdapter("reportTitleText")
+fun TextView.setReportTitleText(report: Report) {
+    val reportTitleId = report.reportTitleId
+    text = REPORT_TITLE_TO_ID[reportTitleId]?.let {
+        systemImpl.getString(it, context)} ?: report.reportTitle
+}
+
+@SuppressLint("SetTextI18n")
+@BindingAdapter("reportDescText")
+fun TextView.setReportDescText(report: Report) {
+    val reportDescId = report.reportDescId
+    text = REPORT_TITLE_TO_ID[reportDescId]?.let {
+        systemImpl.getString(it, context)} ?: report.reportDescription
 }
 
 

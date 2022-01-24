@@ -16,23 +16,20 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.dbVersionHeader
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.ContentEntryDetailScreen
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.*
+import com.ustadmobile.test.rules.SystemImplTestNavHostRule
+import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.UmAppDatabaseServerRequiredTest
 import com.ustadmobile.util.test.ext.insertContentEntryWithTranslations
 import io.ktor.client.*
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.parameter
-import io.ktor.client.request.post
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
+import io.ktor.client.request.*
+import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -81,15 +78,16 @@ class ContentEntryDetailOverviewFragmentTest : TestCase() {
             val accountManager: UstadAccountManager by di.instance()
             val activeAccount = accountManager.activeAccount
 
-            ContentEntryProgress().apply {
-                contentEntryProgressContentEntryUid = testEntry.contentEntryUid
-                contentEntryProgressProgress = 100
-                contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED
-                contentEntryProgressActive = true
-                contentEntryProgressPersonUid = activeAccount.personUid
-                contentEntryProgressUid = dbRule.repo.contentEntryProgressDao.insert(this)
+            StatementEntity().apply {
+                extensionProgress = 100
+                statementPersonUid = activeAccount.personUid
+                statementContentEntryUid = testEntry.contentEntryUid
+                contentEntryRoot = true
+                resultCompletion = true
+                extensionProgress = 100
+                statementVerbUid = VerbEntity.VERB_COMPLETED_UID
+                statementUid = dbRule.repo.statementDao.insert(this)
             }
-
 
             launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                     fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
@@ -242,6 +240,101 @@ class ContentEntryDetailOverviewFragmentTest : TestCase() {
                 R.id.content_entry_detail_dest, systemImplNavRule.navController.currentDestination?.id)
 
     }
+
+    @Test
+    fun givenContentEntryImported_whenJobWaitingForConnection_thenShowOpenButtonAndProgressBar(){
+
+        val entryTitle = "Dummy Title"
+        init {
+
+            val contentJob = ContentJob().apply {
+                cjUid = 1
+                cjNotificationTitle = "Waiting for connection"
+            }
+
+            val testEntry = ContentEntryWithLanguage().apply {
+                title = entryTitle
+                description = "Dummy description"
+                leaf = true
+                contentEntryUid = dbRule.repo.contentEntryDao.insert(this)
+            }
+
+            val container = Container().apply {
+                containerUid = 1
+                containerContentEntryUid = testEntry.contentEntryUid
+                dbRule.repo.containerDao.insert(this)
+            }
+
+            val contentJobItem = ContentJobItem().apply {
+                cjiUid = 1
+                cjiJobUid = 1
+                cjiContentEntryUid = testEntry.contentEntryUid
+                cjiContainerUid = container.containerUid
+                cjiItemProgress = 50
+                cjiItemTotal = 100
+                cjiStatus = JobStatus.WAITING_FOR_CONNECTION
+            }
+
+            val contentJob2 = ContentJob().apply {
+                cjUid = 2
+                cjNotificationTitle = "Link Import"
+            }
+            val contentJobItem2 = ContentJobItem().apply {
+                cjiUid = 2
+                cjiJobUid = 2
+                cjiContentEntryUid = testEntry.contentEntryUid
+                cjiContainerUid = container.containerUid
+                cjiItemProgress = 0
+                cjiItemTotal = 100
+                cjiStatus = JobStatus.QUEUED
+            }
+
+
+            val containerEntry = ContainerEntry().apply {
+                this.ceContainerUid = container.containerUid
+                this.ceUid = dbRule.db.containerEntryDao.insert(this)
+            }
+
+            runBlocking {
+                dbRule.db.contentJobDao.insertAsync(contentJob)
+                dbRule.db.contentJobItemDao.insertJobItem(contentJobItem)
+
+                dbRule.db.contentJobDao.insertAsync(contentJob2)
+                dbRule.db.contentJobItemDao.insertJobItem(contentJobItem2)
+            }
+
+            launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
+                ContentEntryDetailOverviewFragment().also { fragment ->
+                    fragment.installNavController(systemImplNavRule.navController)
+                }
+            }
+
+        }.run {
+
+            ContentEntryDetailScreen {
+
+                entryTitleTextView {
+                    isDisplayed()
+                    hasText(entryTitle)
+                }
+
+                downloadOpenButton{
+                    isDisplayed()
+                    hasText(R.string.open)
+                }
+
+                progressRecycler{
+                    isVisible()
+                    hasSize(2)
+                }
+
+            }
+
+        }
+
+    }
+
 
     //This test is work-in-progress
     //@Test

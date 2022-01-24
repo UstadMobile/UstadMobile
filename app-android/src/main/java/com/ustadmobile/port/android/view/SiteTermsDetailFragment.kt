@@ -56,7 +56,7 @@ class SiteTermsDetailFragment: UstadDetailFragment<SiteTerms>(), SiteTermsDetail
         super.onViewCreated(view, savedInstanceState)
 
         mPresenter = SiteTermsDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
     }
 

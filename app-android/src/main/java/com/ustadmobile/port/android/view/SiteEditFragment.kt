@@ -110,7 +110,7 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView, SiteEditFragmen
         }
 
         mPresenter = SiteEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
         siteTermsRecyclerAdapter?.presenter = mPresenter
 
         mPresenter?.onCreate(backStackSavedState)
@@ -137,6 +137,7 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView, SiteEditFragmen
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

@@ -26,11 +26,7 @@ class SettingsFragment : UstadBaseFragment(), SettingsView {
             field = value
             mBinding?.holidayCalendarVisible = value
         }
-    override var rolesVisible: Boolean = false
-        set(value) {
-            field = value
-            mBinding?.rolesVisible = value
-        }
+
     override var reasonLeavingVisible: Boolean = false
         set(value) {
             field = value
@@ -51,7 +47,7 @@ class SettingsFragment : UstadBaseFragment(), SettingsView {
         }
 
         mPresenter = SettingsPresenter(requireContext(), arguments.toStringMap(),
-                this, di)
+                this, di).withViewLifecycle()
         mPresenter?.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState))
 
         mBinding?.presenter = mPresenter

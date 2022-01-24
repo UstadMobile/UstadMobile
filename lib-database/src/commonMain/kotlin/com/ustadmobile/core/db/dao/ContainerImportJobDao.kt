@@ -18,9 +18,14 @@ abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
     @Query("SELECT * FROM ContainerImportJob where cijUid = :uploadId")
     abstract fun findByUid(uploadId: Long): ContainerImportJob?
 
-    @Query("""SELECT * FROM ContainerImportJob WHERE cijJobStatus = $QUEUED
-           AND (NOT cijImportCompleted OR (SELECT connectivityState from ConnectivityStatus WHERE connectivityState IN
-            ($STATE_METERED, $STATE_UNMETERED)))
+    @Query("""
+            SELECT * 
+              FROM ContainerImportJob 
+             WHERE cijJobStatus = $QUEUED
+                   AND (NOT cijImportCompleted OR 
+                   (SELECT connectivityState 
+                      FROM ConnectivityStatus)
+                   IN ($STATE_METERED, $STATE_UNMETERED))
              LIMIT 10""")
     abstract fun findJobs(): DoorLiveData<List<ContainerImportJob>>
 

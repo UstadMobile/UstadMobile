@@ -1,114 +1,114 @@
 
 plugins {
     id 'application'
-    id 'org.jetbrains.kotlin.multiplatform'
+    id 'kotlin'
     id 'maven-publish'
-    id 'com.github.johnrengelman.shadow'
+
+    id 'com.github.johnrengelman.shadow' version "$version_shadow"
     id 'kotlinx-serialization'
-    id 'com.github.psxpaul.execfork' version '0.1.13'
 }
 
 
-kotlin {
-
-    jvm {
-        compilations.main.kotlinOptions {
-            // Setup the Kotlin compiler options for the 'main' compilation:
-            jvmTarget = "$version_kotlin_jvmTarget"
-        }
-
-        compilations.test.kotlinOptions {
-            // Setup the Kotlin compiler options for the 'main' compilation:
-            jvmTarget = "$version_kotlin_jvmTarget"
-        }
+compileKotlin{
+    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions {
+        freeCompilerArgs += "-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview"
     }
+}
 
-    sourceSets {
-
-        commonMain {
-            dependencies {
-                implementation "io.ktor:ktor-client-core:$version_ktor"
-                implementation "io.ktor:ktor-client-json:$version_ktor"
-                implementation "io.ktor:ktor-io:$version_ktor"
-            }
-        }
-
-        jvmMain {
-
-            kotlin.srcDir("build/generated/source/door")
-
-            dependencies {
-                implementation fileTree(dir: 'libs', include: ['*.jar'])
-                implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "io.ktor:ktor-server-servlet:$version_ktor"
-                implementation "io.ktor:ktor-jackson:$version_ktor"
-                implementation "io.ktor:ktor-gson:$version_ktor"
-                implementation "io.ktor:ktor-client-core:$version_ktor"
-                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
-                implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
-                implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
-                implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "org.postgresql:postgresql:$version_postgres_jdbc"
-
-
-                implementation "commons-io:commons-io:$version_commons_io"
-                implementation "org.jsoup:jsoup:$version_jsoup"
-                implementation "com.google.code.gson:gson:$version_gson"
-                implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
-                implementation "ch.qos.logback:logback-classic:$version_logback"
-
-                implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
-
-                implementation "com.github.aakira:napier-jvm:$version_napier"
-
-                implementation project(":core")
-                implementation project(":sharedse")
-                implementation project(":lib-database")
-                implementation project(":lib-database-mpp")
-                implementation "com.ustadmobile.door:room-annotations:$version_door"
-                implementation "com.ustadmobile.door:door-runtime:$version_door"
-                implementation project(":lib-database-entities")
-                implementation project(":lib-util")
-                implementation project(":lib-content-scrapers")
-
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-
-                implementation "io.netty:netty-tcnative-boringssl-static:$version_netty_tcnative"
-            }
-        }
-
-        jvmTest {
-            dependencies {
-
-                implementation project(":lib-test-common")
-                implementation project(":sharedse")
-
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-                implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
-
-                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
-
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-                implementation "org.postgresql:postgresql:$version_postgres_jdbc"
-
-
-            }
-        }
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions {
+        freeCompilerArgs += "-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview"
     }
+}
+
+sourceSets.main {
+    java.srcDirs("$buildDir/generated/source/door")
+}
+
+
+dependencies {
+    implementation "io.ktor:ktor-client-core:$version_ktor"
+    implementation "io.ktor:ktor-client-json:$version_ktor"
+    implementation "io.ktor:ktor-io:$version_ktor"
+    implementation "com.soywiz.korlibs.klock:klock:$version_klock"
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "io.ktor:ktor-server-netty:$version_ktor"
+    implementation "io.ktor:ktor-server-servlet:$version_ktor"
+    implementation "io.ktor:ktor-jackson:$version_ktor"
+    implementation "io.ktor:ktor-gson:$version_ktor"
+    implementation "io.ktor:ktor-client-core:$version_ktor"
+    implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+    implementation "io.ktor:ktor-html-builder:$version_ktor"
+    implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
+    implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
+    implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
+
+    implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+    implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    implementation "org.postgresql:postgresql:$version_postgres_jdbc"
+
+
+    implementation "commons-io:commons-io:$version_commons_io"
+    implementation "org.jsoup:jsoup:$version_jsoup"
+    implementation "com.google.code.gson:gson:$version_gson"
+    implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
+    implementation "ch.qos.logback:logback-classic:$version_logback"
+
+    implementation "org.kodein.di:kodein-di:$version_kodein_di"
+    implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+
+    implementation "io.github.aakira:napier-jvm:$version_napier"
+
+    implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
+    implementation "net.sf.kxml:kxml2:$version_kxml"
+
+    implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
+
+    implementation project(":core")
+    implementation project(":sharedse")
+    implementation project(":lib-database")
+    implementation project(":lib-database-mpp")
+    implementation "com.ustadmobile.door:room-annotations:$version_door"
+    implementation "com.ustadmobile.door:door-runtime:$version_door"
+    implementation project(":lib-database-entities")
+    implementation project(":lib-util")
+    implementation project(":lib-content-scrapers")
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+
+    implementation "io.netty:netty-tcnative-boringssl-static:$version_netty_tcnative"
+
+    implementation "com.sun.mail:jakarta.mail:$version_jakartamail"
+    implementation "org.apache.commons:commons-compress:$version_apache_commons_compress"
+
+    //test
+    testImplementation project(":lib-test-common")
+    testImplementation project(":sharedse")
+
+    testImplementation "io.ktor:ktor-server-test-host:$version_ktor"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
+
+    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+    testImplementation "io.ktor:ktor-server-netty:$version_ktor"
+    testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+
+    testImplementation "io.ktor:ktor-client-okhttp:$version_ktor"
+    testImplementation "io.ktor:ktor-client-gson:$version_ktor"
+
+    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+    testImplementation "org.postgresql:postgresql:$version_postgres_jdbc"
+
 }
 
 mainClassName = 'com.ustadmobile.lib.rest.ServerAppMain'
@@ -119,11 +119,6 @@ shadowJar {
         attributes 'Main-Class': mainClassName
     }
     archiveBaseName = "ustad-server"
-
-    def target = kotlin.targets.jvm
-    from target.compilations.main.output
-    def runtimeClasspath = target.compilations.main.runtimeDependencyFiles
-    configurations = [runtimeClasspath]
 }
 
 

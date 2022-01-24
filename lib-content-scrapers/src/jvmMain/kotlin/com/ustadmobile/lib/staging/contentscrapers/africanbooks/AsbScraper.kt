@@ -10,6 +10,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import com.ustadmobile.lib.db.entities.LanguageVariant
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.exception.ExceptionUtils
@@ -71,7 +72,9 @@ class AsbScraper {
 
         val africanBooksUrl = generateURL()
 
-        val db = UmAppDatabase.getInstance(Any())
+        //Replace this with DI
+        lateinit var db: UmAppDatabase
+        //val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         val repository = db //db.getRepository("https://localhost", "");
         val contentEntryDao = repository.contentEntryDao
         val contentParentChildJoinDao = repository.contentEntryParentChildJoinDao

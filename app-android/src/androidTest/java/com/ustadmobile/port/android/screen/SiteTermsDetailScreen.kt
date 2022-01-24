@@ -1,8 +1,8 @@
 package com.ustadmobile.port.android.screen
 
 import com.kaspersky.kaspresso.screens.KScreen
-import com.agoda.kakao.text.KTextView
-import com.agoda.kakao.web.KWebView
+import io.github.kakaocup.kakao.text.KTextView
+import io.github.kakaocup.kakao.web.KWebView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.SiteTermsDetailFragment
 

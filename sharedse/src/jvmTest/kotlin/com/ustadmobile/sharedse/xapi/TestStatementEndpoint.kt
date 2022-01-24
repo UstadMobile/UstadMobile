@@ -24,6 +24,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import io.ktor.utils.io.*
 import okhttp3.OkHttpClient
 import org.junit.Assert
 import org.junit.Before
@@ -182,7 +183,6 @@ class TestStatementEndpoint {
 
         val statementEntity = repo.statementDao.findByStatementId("442f1133-bcd0-42b5-957e-4ad36f9414e0")
         val xObject = repo.xObjectDao.findByXobjectUid(statementEntity!!.xObjectUid)
-        val progressEntry = repo.contentEntryProgressDao.getProgressByContentAndPerson(statementEntity.statementContentEntryUid, statementEntity.statementPersonUid)
 
         Assert.assertEquals("Statement entity has correctly assigned contententryuid",
                 entry.contentEntryUid, xObject?.objectContentEntryUid)
@@ -193,7 +193,7 @@ class TestStatementEndpoint {
                 statementEntity?.statementVerbUid)
         Assert.assertEquals("Statement has contentEntryUid set", entry.contentEntryUid,
                 statementEntity?.statementContentEntryUid)
-        Assert.assertEquals("progress was updated", 17, progressEntry!!.contentEntryProgressProgress)
+        Assert.assertEquals("progress was updated", 17, statementEntity.extensionProgress)
     }
 
     @Test
@@ -207,22 +207,12 @@ class TestStatementEndpoint {
             contentEntryUid = repo.contentEntryDao.insert(this)
         }
 
-        val entryProgress = ContentEntryProgress().apply {
-            contentEntryProgressProgress = 10
-            contentEntryProgressContentEntryUid = entry.contentEntryUid
-            contentEntryProgressPersonUid = 0
-            contentEntryProgressStatusFlag = 0
-            contentEntryProgressActive = true
-            contentEntryProgressUid = repo.contentEntryProgressDao.insert(this)
-        }
-
 
         endpoint.storeStatements(listOf(gson.fromJson(statementStr, Statement::class.java)), "",
                 contentEntryUid = entry.contentEntryUid)
 
         val statementEntity = repo.statementDao.findByStatementId("442f1133-bcd0-42b5-957e-4ad36f9414e0")
         val xObject = repo.xObjectDao.findByXobjectUid(statementEntity!!.xObjectUid)
-        val progressEntry = repo.contentEntryProgressDao.getProgressByContentAndPerson(statementEntity.statementContentEntryUid, statementEntity.statementPersonUid)
 
         Assert.assertEquals("Statement entity has correctly assigned contententryuid",
                 entry.contentEntryUid, xObject?.objectContentEntryUid)
@@ -233,7 +223,7 @@ class TestStatementEndpoint {
                 statementEntity?.statementVerbUid)
         Assert.assertEquals("Statement has contentEntryUid set", entry.contentEntryUid,
                 statementEntity?.statementContentEntryUid)
-        Assert.assertEquals("progress was updated", 17, progressEntry!!.contentEntryProgressProgress)
+        Assert.assertEquals("progress was updated", 17, statementEntity!!.extensionProgress)
     }
 
 
@@ -325,15 +315,6 @@ class TestStatementEndpoint {
         val entry = ContentEntry().apply {
             entryId = "http://demo.com/"
             contentEntryUid = repo.contentEntryDao.insert(this)
-        }
-
-        val entryProgress = ContentEntryProgress().apply {
-            contentEntryProgressProgress = 10
-            contentEntryProgressContentEntryUid = entry.contentEntryUid
-            contentEntryProgressPersonUid = 0
-            contentEntryProgressStatusFlag = 0
-            contentEntryProgressActive = true
-            contentEntryProgressUid = repo.contentEntryProgressDao.insert(this)
         }
 
         val learnerGroup = LearnerGroup().apply{

@@ -3,32 +3,30 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_CLAZZLOGATTENDANCERECORD_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE
 import kotlinx.serialization.Serializable
 
-@SyncableEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
-    notifyOnUpdate = [
-        """
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzLogAttendanceRecord.TABLE_ID} AS tableId FROM 
-            ChangeLog
-            JOIN ClazzLogAttendanceRecord ON ChangeLog.chTableId = ${ClazzLogAttendanceRecord.TABLE_ID} AND ChangeLog.chEntityPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
-            JOIN Person ON Person.personUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        """
-    ],
-    syncFindAllQuery = """
-            SELECT ClazzLogAttendanceRecord.* FROM
-            ClazzLogAttendanceRecord
-            JOIN Person ON Person.personUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid
-            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-            WHERE DeviceSession.dsDeviceId = :clientId
-        """)
+@ReplicateEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
+    tracker = ClazzLogAttendanceRecordReplicate::class)
 @Entity
 @Serializable
-open class ClazzLogAttendanceRecord() {
+@Triggers(arrayOf(
+ Trigger(
+     name = "clazzlogattendancerecord_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO ClazzLogAttendanceRecord(clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime) 
+         VALUES (NEW.clazzLogAttendanceRecordUid, NEW.clazzLogAttendanceRecordClazzLogUid, NEW.clazzLogAttendanceRecordPersonUid, NEW.attendanceStatus, NEW.clazzLogAttendanceRecordMasterChangeSeqNum, NEW.clazzLogAttendanceRecordLocalChangeSeqNum, NEW.clazzLogAttendanceRecordLastChangedBy, NEW.clazzLogAttendanceRecordLastChangedTime) 
+         /*psql ON CONFLICT (clazzLogAttendanceRecordUid) DO UPDATE 
+         SET clazzLogAttendanceRecordClazzLogUid = EXCLUDED.clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordPersonUid = EXCLUDED.clazzLogAttendanceRecordPersonUid, attendanceStatus = EXCLUDED.attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum = EXCLUDED.clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy = EXCLUDED.clazzLogAttendanceRecordLastChangedBy, clazzLogAttendanceRecordLastChangedTime = EXCLUDED.clazzLogAttendanceRecordLastChangedTime
+         */"""
+     ]
+ )
+))
+open class ClazzLogAttendanceRecord {
 
     @PrimaryKey(autoGenerate = true)
     var clazzLogAttendanceRecordUid: Long = 0
@@ -49,6 +47,7 @@ open class ClazzLogAttendanceRecord() {
     var clazzLogAttendanceRecordLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var clazzLogAttendanceRecordLastChangedTime: Long = 0
 
 
@@ -82,6 +81,51 @@ open class ClazzLogAttendanceRecord() {
 
 
     companion object {
+
+        const val FROM_CLAZZLOGATTENDANCERECORD_TO_SCOPEDGRANT_JOIN_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+             OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid)
+             OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = (
+                    SELECT clazzLogClazzUid 
+                      FROM ClazzLog
+                     WHERE clazzLogUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid))
+             OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = (
+                    SELECT clazzSchoolUid
+                      FROM Clazz
+                     WHERE clazzUid = (
+                            SELECT clazzLogClazzUid 
+                              FROM ClazzLog
+                             WHERE clazzLogUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid)))
+                     
+                     )
+            
+        """
+
+        const val FROM_SCOPEDGRANT_TO_CLAZZLOGATTENDANCERECORD_JOIN_ON_CLAUSE = """
+            ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+             OR (ScopedGrant.sgTableId = ${Person.TABLE_ID}
+                AND ScopedGrant.sgEntityUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid)
+             OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                AND ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid IN (
+                    SELECT clazzLogUid 
+                      FROM ClazzLog
+                     WHERE clazzLogClazzUid = ScopedGrant.sgEntityUid))
+             OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                AND ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid IN (
+                     SELECT clazzLogUid
+                       FROM ClazzLog
+                      WHERE clazzLogClazzUid IN (
+                            SELECT clazzUid
+                              FROM Clazz
+                             WHERE clazzSchoolUid = ScopedGrant.sgEntityUid)))
+            )         
+        """
+
 
         const val TABLE_ID = 15
 

@@ -84,7 +84,7 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mPresenter = XapiPackageContentPresenter(requireContext(), arguments.toStringMap(),
-                this, di)
+                this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
     }
 
@@ -93,6 +93,11 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
         super.onConfigurationChanged(newConfig)
         val isPortrait = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
         (context as? MainActivity)?.onAppBarExpand(isPortrait)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mPresenter?.onStop()
     }
 
     override fun onDestroy() {

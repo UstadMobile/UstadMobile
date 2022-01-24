@@ -28,13 +28,26 @@ class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
         }
     override var code: String? = null
         set(value) {
-            mBinding?.code = value
+            mBinding?.joinCode = value
             field = value
         }
 
     private var mBinding: FragmentJoinWithCodeBinding? = null
 
     private var mPresenter: JoinWithCodePresenter? = null
+
+    override var buttonLabel: String?
+        get() = mBinding?.buttonLabel
+        set(value) {
+            mBinding?.buttonLabel = value
+        }
+
+    override var loading: Boolean
+        get() = super.loading
+        set(value) {
+            super.loading = value
+            mBinding?.buttonEnabled = !value
+        }
 
     override fun finish() {
         findNavController().navigateUp()
@@ -67,23 +80,9 @@ class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
         }
 
         mPresenter = JoinWithCodePresenter(requireContext(), arguments.toStringMap(), this,
-            di)
+            di).withViewLifecycle()
+        mBinding?.presenter = mPresenter
         mPresenter?.onCreate(null)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.menu_done, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.menu_done) {
-            val code = mBinding?.code ?: return super.onOptionsItemSelected(item)
-            mPresenter?.handleClickDone(code)
-            return true
-        }
-
-        return super.onOptionsItemSelected(item)
     }
 
     override fun onDestroyView() {

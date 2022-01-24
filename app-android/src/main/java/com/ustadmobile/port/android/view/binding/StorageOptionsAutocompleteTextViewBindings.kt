@@ -4,13 +4,13 @@ import android.widget.AdapterView
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
-import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView
 import com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
 import com.ustadmobile.port.android.view.StorageOptionsAutocompleteTextView
 
 @BindingAdapter(value=["storageOptions", "selectedStorageOption"], requireAll =  false)
-fun StorageOptionsAutocompleteTextView.setStorageOptions(storageOptions: MutableList<UMStorageDir>?, selectedStorageOption: Int?) {
+fun StorageOptionsAutocompleteTextView.setStorageOptions(storageOptions: MutableList<ContainerStorageDir>?, selectedStorageOption: Int?) {
     val optionToUse = storageOptions ?: mutableListOf()
     if(optionToUse == this.dropDownOptions)
         return
@@ -33,6 +33,6 @@ fun StorageOptionsAutocompleteTextView.setSelectedMessageIdListener(inverseBindi
 
 
 @BindingAdapter("onStorageOptionSelected")
-fun StorageOptionsAutocompleteTextView.setOnStorageOptionSelected(itemSelectedListener: DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<UMStorageDir>?) {
+fun StorageOptionsAutocompleteTextView.setOnStorageOptionSelected(itemSelectedListener: DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<ContainerStorageDir>?) {
     this.onDropDownListItemSelectedListener = itemSelectedListener
 }

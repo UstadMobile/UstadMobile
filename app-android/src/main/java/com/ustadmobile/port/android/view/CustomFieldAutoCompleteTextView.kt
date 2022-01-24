@@ -4,14 +4,21 @@ import android.content.Context
 import android.util.AttributeSet
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.CustomFieldValueOption
+import org.kodein.di.DI
+import org.kodein.di.android.di
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 class CustomFieldAutoCompleteTextView : DropDownListAutoCompleteTextView<CustomFieldValueOption> {
+
+    private val di: DI by di(context)
 
     private val customFieldValueOptionAdapter = object: DropDownListAutoCompleteAdapter<CustomFieldValueOption> {
         override fun getId(item: CustomFieldValueOption) = item.customFieldValueOptionUid
         override fun getText(item: CustomFieldValueOption): String {
             return if(item.customFieldValueOptionMessageId != 0) {
-                UstadMobileSystemImpl.instance.getString(item.customFieldValueOptionMessageId, context)
+                val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+                systemImpl.getString(item.customFieldValueOptionMessageId, context)
             }else {
                 item.customFieldValueOptionName ?: "ERR: unnamed option"
             }

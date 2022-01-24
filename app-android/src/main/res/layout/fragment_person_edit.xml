@@ -7,10 +7,16 @@
         <import type="java.util.List"/>
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="android.text.InputType"/>
+        <import type="com.ustadmobile.core.util.ext.IntExtKt"/>
+        <import type="com.ustadmobile.core.view.PersonEditView"/>
 
         <variable
             name="person"
             type="com.ustadmobile.lib.db.entities.PersonWithAccount" />
+
+        <variable
+            name="approvalPersonParentJoin"
+            type="com.ustadmobile.lib.db.entities.PersonParentJoin" />
 
         <variable
             name="personPicture"
@@ -34,17 +40,13 @@
             type="boolean" />
 
         <variable
-            name="isAdmin"
-            type="boolean"/>
-
-        <variable
             name="genderOptions"
             type="List&lt;IdOption&gt;" />
 
         <variable
             name="registrationMode"
-            type="boolean" />
-        
+            type="int" />
+
         <variable
             name="hideClazzes"
             type="boolean" />
@@ -52,6 +54,51 @@
         <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.PersonEditFragmentEventHandler" />
+
+        <variable
+            name="parentContactError"
+            type="String" />
+
+        <variable
+            name="firstNamesError"
+            type="String" />
+
+        <variable
+            name="lastNameError"
+            type="String" />
+
+        <variable
+            name="usernameError"
+            type="String" />
+
+        <variable
+            name="genderFieldError"
+            type="String" />
+
+        <variable
+            name="passwordError"
+            type="String" />
+
+        <variable
+            name="passwordConfirmError"
+            type="String"
+            />
+
+        <variable
+            name="dateOfBirthFieldError"
+            type="String" />
+
+        <variable
+            name="emailError"
+            type="String" />
+
+        <variable
+            name="timeZoneId"
+            type="String" />
+
+        <variable name="dateTimeMode"
+            type="Integer"/>
+
 
     </data>
 
@@ -97,9 +144,12 @@
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
+                app:errorText="@{firstNamesError}"
+                app:errorEnabled="@{firstNamesError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:errorTextColor="?colorError"
                 app:layout_constraintTop_toBottomOf="@id/item_presenter_field_row_picture_photoicon"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 >
@@ -122,8 +172,11 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 app:hintEnabled="true"
+                app:errorText="@{lastNameError}"
+                app:errorEnabled="@{lastNameError != null}"
                 android:enabled="@{fieldsEnabled}"
                 android:layout_marginEnd="@dimen/dimen_16dp"
+                app:errorTextColor="?colorError"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/firstnames_textinputlayout">
@@ -147,9 +200,12 @@
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
+                app:errorText="@{genderFieldError}"
+                app:errorEnabled="@{genderFieldError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:errorTextColor="?colorError"
                 app:layout_constraintTop_toBottomOf="@+id/lastname_textInputLayout">
 
                 <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
@@ -162,6 +218,43 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/parent_contact_textInputLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
+                app:errorText="@{parentContactError}"
+                app:errorEnabled="@{parentContactError != null}"
+                app:errorTextColor="?colorError"
+                android:layout_marginEnd="@dimen/dimen_16dp"
+                android:visibility="@{IntExtKt.hasFlag(registrationMode, PersonEditView.REGISTER_MODE_MINOR) ? View.VISIBLE : View.GONE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/gender_textinputlayout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/parentcontact_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:hint="@string/parents_email_address"
+                    android:text="@={approvalPersonParentJoin.ppjEmail}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/gender_parent_contact_bottom_barrier"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="parent_contact_textInputLayout,gender_textinputlayout"/>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/birthday_textinputlayout"
                 android:layout_width="match_parent"
@@ -172,16 +265,21 @@
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:hintEnabled="true"
+                app:errorText="@{dateOfBirthFieldError}"
+                app:errorEnabled="@{dateOfBirthFieldError != null}"
                 android:enabled="@{fieldsEnabled}"
+                android:visibility="@{IntExtKt.hasFlag(registrationMode, PersonEditView.REGISTER_MODE_ENABLED) ? View.GONE : View.VISIBLE}"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/gender_textinputlayout">
+                app:layout_constraintTop_toBottomOf="@+id/gender_parent_contact_bottom_barrier">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/birthday_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/birthday"
-                    app:dateLong="@={person.dateOfBirth}"
+                    app:dateTimeInMillis="@={person.dateOfBirth}"
+                    app:timeZoneId="@{timeZoneId}"
+                    app:dateTimeInMillisMode="@{dateTimeMode}"
                     app:dateUseSpinners="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     android:cursorVisible="false"
@@ -191,6 +289,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/phonenumber_textinputlayout"
+                android:visibility="@{IntExtKt.hasFlag(registrationMode, PersonEditView.REGISTER_MODE_MINOR) ? View.GONE : View.VISIBLE}"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -209,12 +308,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
-                    android:inputType="text"
+                    android:maxLength="15"
+                    android:inputType="number"
                     android:hint="@string/phone_number" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/email_textinputlayout"
+                android:visibility="@{IntExtKt.hasFlag(registrationMode, PersonEditView.REGISTER_MODE_MINOR) ? View.GONE : View.VISIBLE}"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -222,6 +323,8 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
+                app:errorText="@{emailError}"
+                app:errorEnabled="@{emailError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -232,12 +335,13 @@
                     android:text="@={person.emailAddr}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text"
+                    android:inputType="textEmailAddress"
                     android:hint="@string/email" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/address_textinputlayout"
+                android:visibility="@{IntExtKt.hasFlag(registrationMode, PersonEditView.REGISTER_MODE_MINOR) ? View.GONE : View.VISIBLE}"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -258,8 +362,17 @@
                     android:hint="@string/address" />
             </com.google.android.material.textfield.TextInputLayout>
 
+
+            <androidx.constraintlayout.widget.Barrier
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:id="@+id/optional_fields_bottom_barrier"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="gender_textinputlayout,birthday_textinputlayout,phonenumber_textinputlayout,email_textinputlayout,address_textinputlayout"
+                />
+
             <com.google.android.material.textfield.TextInputLayout
-                android:visibility="@{registrationMode ?  View.VISIBLE: View.GONE}"
+                android:visibility="@{IntExtKt.hasFlag(registrationMode, PersonEditView.REGISTER_MODE_ENABLED) ?  View.VISIBLE: View.GONE}"
                 android:id="@+id/username_textinputlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -268,10 +381,13 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
+                app:errorText="@{usernameError}"
+                app:errorEnabled="@{usernameError != null}"
                 android:enabled="@{fieldsEnabled}"
+                app:errorTextColor="?colorError"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/address_textinputlayout">
+                app:layout_constraintTop_toBottomOf="@+id/optional_fields_bottom_barrier">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/username_text"
@@ -285,7 +401,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:visibility="@{registrationMode ?  View.VISIBLE: View.GONE}"
+                android:visibility="@{IntExtKt.hasFlag(registrationMode, PersonEditView.REGISTER_MODE_ENABLED) ?  View.VISIBLE: View.GONE}"
                 android:id="@+id/password_textinputlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -298,6 +414,8 @@
                 app:passwordToggleEnabled="true"
                 app:errorTextColor="?colorError"
                 app:hintEnabled="true"
+                app:errorText="@{passwordError}"
+                app:errorEnabled="@{passwordError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintTop_toBottomOf="@+id/username_textinputlayout">
 
@@ -312,7 +430,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:visibility="@{registrationMode ?  View.VISIBLE: View.GONE}"
+                android:visibility="@{IntExtKt.hasFlag(registrationMode, PersonEditView.REGISTER_MODE_ENABLED) ?  View.VISIBLE: View.GONE}"
                 android:id="@+id/confirm_password_textinputlayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -323,6 +441,8 @@
                 android:layout_margin="@dimen/dimen_16dp"
                 app:passwordToggleEnabled="true"
                 app:hintEnabled="true"
+                app:errorText="@{passwordConfirmError}"
+                app:errorEnabled="@{passwordConfirmError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -349,49 +469,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/confirm_password_textinputlayout"
                 android:layout_height="wrap_content"/>
-
-            <TextView
-                android:visibility="@{registrationMode || hideClazzes ?  View.GONE: View.VISIBLE}"
-                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                android:id="@+id/clazzlist_header_textview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/dimen_16dp"
-                android:text="@string/classes"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/error_text" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:visibility="@{registrationMode || hideClazzes ?  View.GONE: View.VISIBLE}"
-                android:layout_marginTop="@dimen/dimen_8dp"
-                android:id="@+id/clazzlist_recyclerview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/clazzlist_header_textview"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <TextView
-                android:visibility="@{isAdmin ?  View.VISIBLE: View.GONE}"
-                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                android:id="@+id/roles_and_permissions_header_textview"
-                android:layout_width="match_parent"
-
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/dimen_16dp"
-                android:text="@string/roles_and_permissions"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/clazzlist_recyclerview" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/roles_and_permissions_rv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dimen_8dp"
-                android:visibility="@{isAdmin ?  View.VISIBLE: View.GONE}"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/roles_and_permissions_header_textview" />
-
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

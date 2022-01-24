@@ -36,6 +36,7 @@
             app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
             app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
             tools:src="@drawable/ic_account_circle_black_24dp"
+            android:tint="?colorOnIconTint"
             android:layout_width="@dimen/dimen_40dp"
             android:layout_height="@dimen/dimen_40dp"
             android:layout_marginTop="@dimen/dimen_16dp"

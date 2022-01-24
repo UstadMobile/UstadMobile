@@ -33,10 +33,16 @@ class @BaseFileName@Fragment: UstadEditFragment<@Entity@>(), @BaseFileName@View,
         }
 
         mPresenter = @BaseFileName@Presenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
-        mPresenter?.onCreate(backStackSavedState)
+                viewLifecycleOwner, di).withViewLifecycle()
+
 
         return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        mPresenter?.onCreate(backStackSavedState)
     }
 
     override fun onDestroyView() {
@@ -56,6 +62,7 @@ class @BaseFileName@Fragment: UstadEditFragment<@Entity@>(), @BaseFileName@View,
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
+            super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
         }

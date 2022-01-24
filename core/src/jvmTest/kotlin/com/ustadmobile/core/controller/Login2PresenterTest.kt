@@ -14,18 +14,17 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
-import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.ext.bindJndiForActiveEndpoint
+import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
+import com.ustadmobile.util.test.rules.bindPresenterCoroutineRule
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
 import org.kodein.di.*
 import org.mockito.ArgumentMatchers
 import javax.naming.InitialContext
@@ -52,6 +51,11 @@ class Login2PresenterTest {
 
     private lateinit var mockRepo: UmAppDatabase
 
+    @JvmField
+    @Rule
+    val presenterScopeRule  = CoroutineDispatcherRule()
+
+
     @Before
     fun setUp(){
         view = mock {
@@ -60,7 +64,11 @@ class Login2PresenterTest {
                 Unit
             }
         }
-        impl = mock ()
+
+        impl = mock {
+            on {getAppConfigDefaultFirstDest(any())}.thenReturn(ContentEntryList2View.VIEW_NAME)
+        }
+
         accountManager = mock{
             onBlocking { login(eq(VALID_USER), eq(VALID_PASS), any(), any()) }.thenAnswer {
                 val url = it.arguments[2] as String
@@ -74,7 +82,7 @@ class Login2PresenterTest {
         mockPersonDao = mock {}
         mockWebServer = MockWebServer()
         mockWebServer.start()
-        mockRepo = mock(extraInterfaces = arrayOf(DoorDatabaseSyncRepository::class)) {}
+        mockRepo = mock(extraInterfaces = arrayOf(DoorDatabaseRepository::class)) {}
 
         val endpointScope = EndpointScope()
         di = DI {
@@ -87,6 +95,8 @@ class Login2PresenterTest {
             bind<Gson>() with singleton {
                 Gson()
             }
+
+            bindPresenterCoroutineRule(presenterScopeRule)
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
@@ -159,15 +169,16 @@ class Login2PresenterTest {
         val presenter = Login2Presenter(context, createParams(registration = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleCreateAccount()
-        verify(impl).go(eq(SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS), any(), any())
+        verify(impl).go(eq(RegisterAgeRedirectView.VIEW_NAME), any(), any())
     }
 
-    @Test
+    //TODO: Rework this to use the new usersession
+    //@Test
     fun givenConnectAsGuestIsVisible_whenClicked_shouldOpenContentSection(){
         val presenter = Login2Presenter(context, createParams(guestConnection = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleConnectAsGuest()
-        verify(impl).go(eq(ContentEntryListTabsView.VIEW_NAME), any(), any(), any())
+        verify(impl).go(eq(ContentEntryList2View.VIEW_NAME), any(), any(), any())
     }
 
     @Test
@@ -187,18 +198,12 @@ class Login2PresenterTest {
 
         presenter.handleLogin(VALID_USER, VALID_PASS)
 
-        verify(impl, timeout(defaultTimeout)).go(any(), any(), any(), any())
-//        argumentCaptor<String>{
-//            verify(view, timeout(defaultTimeout)).navigateToNextDestination(anyOrNull(),capture(), capture())
-//            Assert.assertEquals("Next destination was opened",
-//                    nextDestination, secondValue)
-//
-//            Assert.assertEquals("Back stack was popped up to the provided from-destination",
-//                    fromDestination, firstValue)
-//        }
+        verify(impl, timeout(defaultTimeout)).go(eq(nextDestination), any(), any(),
+            argWhere {
+                it.popUpToViewName == UstadView.ROOT_DEST
+            })
 
         verifyBlocking(accountManager, timeout(defaultTimeout)) { login(VALID_USER, VALID_PASS, httpUrl) }
-        verifyBlocking(mockRepo as DoorDatabaseSyncRepository, timeout(defaultTimeout)) { invalidateAllTables() }
     }
 
     @Test
@@ -222,15 +227,7 @@ class Login2PresenterTest {
 
         presenter.handleLogin(VALID_USER, VALID_PASS)
 
-        verify(impl, timeout(defaultTimeout)).go(any(), any(), any(), any())
-//        argumentCaptor<String>{
-//            verify(view, timeout(defaultTimeout)).navigateToNextDestination(anyOrNull(),capture(), capture())
-//            Assert.assertEquals("Next destination was opened",
-//                    nextDestination, secondValue)
-//            Assert.assertEquals("Back stack was popped up to the default from-destination",
-//                    Login2View.VIEW_NAME, firstValue)
-//        }
-
+        verify(impl, timeout(defaultTimeout)).go(eq(nextDestination), any(), any(), any())
         verifyBlocking(accountManager) { login(VALID_USER, VALID_PASS, httpUrl) }
     }
 
@@ -256,14 +253,7 @@ class Login2PresenterTest {
         presenter.handleLogin(VALID_USER, VALID_PASS)
 
 
-        verify(impl, timeout(defaultTimeout)).go(any(), any(), any(), any())
-//        argumentCaptor<String>{
-//            verify(view, timeout(defaultTimeout)).navigateToNextDestination(anyOrNull(),capture(), capture())
-//            Assert.assertEquals("Next destination was opened",
-//                    nextDestination, secondValue)
-//            Assert.assertEquals("Back stack was popped up to the default from-destination",
-//                    GetStartedView.VIEW_NAME, firstValue)
-//        }
+        verify(impl, timeout(defaultTimeout)).go(eq(nextDestination), any(), any(), any())
 
         verifyBlocking(accountManager) { login(VALID_USER, VALID_PASS, httpUrl) }
     }
@@ -331,7 +321,9 @@ class Login2PresenterTest {
 
         presenter.handleLogin(" $VALID_USER ", "$VALID_PASS ")
 
-        verifyBlocking(accountManager) { login(VALID_USER, VALID_PASS, httpUrl) }
+        verifyBlocking(accountManager, timeout(defaultTimeout)) {
+            login(eq(VALID_USER), eq(VALID_PASS), eq(httpUrl), any())
+        }
     }
 
 

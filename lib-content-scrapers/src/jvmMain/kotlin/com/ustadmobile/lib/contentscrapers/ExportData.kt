@@ -3,6 +3,7 @@ package com.ustadmobile.lib.contentscrapers
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.openInputStream
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.getFileNameFromUrl
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import org.apache.commons.cli.*
 import org.apache.commons.io.FileUtils
 import java.io.File
@@ -12,7 +13,7 @@ import kotlin.system.exitProcess
 
 class ExportData(private val containerUid: Long, val path: String) {
 
-    var db: UmAppDatabase = UmAppDatabase.getInstance(Any())
+    var db: UmAppDatabase = TODO("UmAppDatabase.getInstance(Any(), replaceMeWithDi())")
 
     init {
         val destDir = File(path)

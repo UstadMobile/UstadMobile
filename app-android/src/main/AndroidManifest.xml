@@ -21,19 +21,23 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- Required to use BLE scanning for peer devices -->
 
-    <!-- Location permissions required for BLE scanning and WiFi scanning -->
-    <!--
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    -->
+    <!-- This is required on android 12 to handle shake detection -->
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"/>
 
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- To obtain wifi lock to avoid wifi powering down during download -->
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- To obtain wifi lock to avoid wifi powering down during download -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- Required to show download progress indicator -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Remove permission requested by wordpress utils -->
+    <uses-permission
+        android:name="android.permission.GET_ACCOUNTS"
+        tools:node="remove" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -45,14 +49,23 @@
         android:usesCleartextTraffic="true">
         <activity android:name="com.ustadmobile.port.android.view.MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:exported="true"
             android:launchMode="singleTask">
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="*" android:pathPattern="..*umclient/.*"
+                <data android:host="*" android:pathPattern="/umapp/.*"
                     android:scheme="http" />
+                <data android:host="*" android:pathPattern="/.*/umapp/.*"
+                    android:scheme="http" />
+
+                <data android:host="*" android:pathPattern="/umapp/.*"
+                    android:scheme="https" />
+                <data android:host="*" android:pathPattern="/.*/umapp/.*"
+                    android:scheme="https" />
+
             </intent-filter>
 
 
@@ -62,6 +75,7 @@
         <activity
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
             android:noHistory="true"
+            android:exported="true"
             />
 
         <provider
@@ -75,22 +89,21 @@
         </provider>
 
         <activity
+            android:exported="false"
             android:name="com.ustadmobile.port.android.view.EpubContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="" />
 
         <activity
+            android:exported="true"
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-
-        <service
-            android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
-            android:enabled="true" />
 
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/app_name"
+            android:exported="true"
             android:noHistory="true">
 
             <intent-filter>

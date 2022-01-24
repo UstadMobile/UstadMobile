@@ -1,23 +1,21 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzDetailBinding
 import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.port.android.view.ext.createTabLayoutStrategy
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
-import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
 
 
 interface ClazzDetailFragmentEventHandler {
@@ -32,8 +30,9 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
     private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
 
+    private var mediator: TabLayoutMediator? = null
+
     override var tabs: List<String>? = null
-        get() = field
         set(value) {
             if(field == value)
                 return
@@ -44,24 +43,23 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                 return
 
             field = value
-            mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
-                    BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, value, viewNameToFragmentMap,
-                    viewNameToTitleMap.map { it.key to requireContext().getString(it.value) }.toMap())
-            Handler().post {
-                mBinding.also {
-                    if(it == null)
-                        return@also
+            mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager, lifecycle,
+                    value, VIEWNAME_TO_FRAGMENT_MAP)
 
-                    it.fragmentClazzDetailViewpager.adapter = mPagerAdapter
-                    it.root.tabs.setupWithViewPager(it.fragmentClazzDetailViewpager)
-                }
-            }
+            val pager = mBinding?.fragmentClazzDetailViewpager ?: return
+            val tabList = mBinding?.fragmentClazzTabs?.tabs ?: return
+
+            pager.adapter = mPagerAdapter
+
+            mediator = TabLayoutMediator(tabList, pager,
+                VIEWNAME_TO_TITLE_MAP.createTabLayoutStrategy(value, requireContext()))
+            mediator?.attach()
         }
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val rootView: View
 
         //The fab will be managed by the underlying tabs
@@ -69,11 +67,8 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
         mBinding = FragmentClazzDetailBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.root.tabs.tabGravity = TabLayout.GRAVITY_FILL
+            it.fragmentClazzTabs.tabs.tabGravity = TabLayout.GRAVITY_FILL
         }
-
-        mPresenter = ClazzDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
 
         return rootView
     }
@@ -81,11 +76,16 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+        mPresenter = ClazzDetailPresenter(requireContext(), arguments.toStringMap(), this,
+                di, viewLifecycleOwner).withViewLifecycle()
+
+        mPresenter?.onCreate(backStackSavedState)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mediator?.detach()
+        mediator = null
         mBinding?.fragmentClazzDetailViewpager?.adapter = null
         mPagerAdapter = null
         mBinding = null
@@ -95,7 +95,6 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     }
 
     override var entity: Clazz? = null
-        get() = field
         set(value) {
             field = value
             ustadFragmentTitle = value?.clazzName
@@ -103,19 +102,21 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         }
 
     companion object {
-        val viewNameToFragmentMap = mapOf<String, Class<out Fragment>>(
+        val VIEWNAME_TO_FRAGMENT_MAP = mapOf<String, Class<out Fragment>>(
                 ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java,
+                ContentEntryList2View.VIEW_NAME to ContentEntryList2Fragment::class.java,
                 ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java,
                 ClazzLogListAttendanceView.VIEW_NAME to ClazzLogListAttendanceFragment::class.java,
-                ClazzWorkListView.VIEW_NAME to ClazzWorkListFragment::class.java
+                ClazzAssignmentListView.VIEW_NAME to ClazzAssignmentListFragment::class.java
 
         )
 
-        val viewNameToTitleMap = mapOf(
+        val VIEWNAME_TO_TITLE_MAP = mapOf(
                 ClazzDetailOverviewView.VIEW_NAME to R.string.overview,
+                ContentEntryList2View.VIEW_NAME to R.string.content,
                 ClazzMemberListView.VIEW_NAME to R.string.members,
                 ClazzLogListAttendanceView.VIEW_NAME to R.string.attendance,
-                ClazzWorkListView.VIEW_NAME to R.string.clazz_work
+                ClazzAssignmentListView.VIEW_NAME to R.string.assignments
         )
 
     }

@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.Fragment@Entity@DetailBinding
+import androidx.navigation.fragment.findNavController
+
 import com.ustadmobile.core.controller.@Entity@DetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -39,8 +41,9 @@ class @BaseFileName@Fragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@De
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onCreate(view, savedInstanceState)
         mPresenter = @Entity@DetailPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+                viewLifecycleOwner, di).withViewLifecycle()
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
     }
 

@@ -19,7 +19,7 @@ cd app-ktor-server
 cp src/jvmMain/resources/application.conf ./
 ```
 
-2. Run using the runserver.sh script:
+3. Run using the runserver.sh script:
 
 ```
 # Linux

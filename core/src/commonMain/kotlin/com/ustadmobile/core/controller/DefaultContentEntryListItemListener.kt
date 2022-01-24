@@ -10,6 +10,7 @@ import org.kodein.di.instance
 class DefaultContentEntryListItemListener(var view: ContentEntryList2View? = null,
                                           var presenter: ContentEntryList2Presenter? = null,
                                           var mListMode: ListViewMode = ListViewMode.BROWSER,
+                                          var clazzUid: Long,
                                           val context: Any,
                                           override val di: DI) : ContentEntryListItemListener, DIAware {
 
@@ -28,10 +29,12 @@ class DefaultContentEntryListItemListener(var view: ContentEntryList2View? = nul
             mListMode == ListViewMode.BROWSER -> {
                 val args = if(entry.leaf) {
                     mapOf(UstadView.ARG_ENTITY_UID to entry.contentEntryUid.toString(),
+                            UstadView.ARG_CLAZZUID to clazzUid.toString(),
                             UstadView.ARG_PARENT_ENTRY_TITLE to entry.title)
                 } else {
                     mapOf( UstadView.ARG_PARENT_ENTRY_UID to entry.contentEntryUid.toString(),
-                            ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT)
+                            UstadView.ARG_CLAZZUID to clazzUid.toString(),
+                            ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT)
                 }
                 systemImpl.go(if(entry.leaf) ContentEntryDetailView.VIEW_NAME
                 else ContentEntryList2View.VIEW_NAME, args,context)
@@ -40,10 +43,15 @@ class DefaultContentEntryListItemListener(var view: ContentEntryList2View? = nul
     }
 
     override fun onClickSelectContentEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+
+        presenter?.handleMoveWithSelectedEntry(entry)
+
         view?.finishWithResult(listOf(entry))
     }
 
     override fun onClickDownloadContentEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
-        view?.showDownloadDialog(mapOf(UstadView.ARG_CONTENT_ENTRY_UID to entry.contentEntryUid.toString()))
+        systemImpl.go("DownloadDialog",
+                mapOf(UstadView.ARG_CONTENT_ENTRY_UID to entry.contentEntryUid.toString()),
+                context)
     }
 }

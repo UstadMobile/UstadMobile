@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-import androidx.paging.DataSource
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
@@ -34,7 +34,7 @@ interface UstadListView<RT, DT>: UstadView {
 
     var addMode: ListViewAddMode
 
-    var list: DataSource.Factory<Int, DT>?
+    var list: DoorDataSourceFactory<Int, DT>?
 
     @Deprecated("impl sortOptions from UstadListPresenter")
     var sortOptions: List<MessageIdOption>?

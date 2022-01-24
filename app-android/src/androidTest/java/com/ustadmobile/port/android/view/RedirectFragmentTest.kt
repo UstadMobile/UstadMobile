@@ -53,7 +53,7 @@ class RedirectFragmentTest {
         launchFragment()
 
         assertEquals("It navigated to content entry list screen",
-                R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
+                R.id.content_entry_list_dest, systemImplNavRule.navController.currentDestination?.id)
     }
 
     private fun launchFragment(isFromOnBoard: Boolean = false){

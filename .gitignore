@@ -48,6 +48,7 @@ core/libs/downloads/
 core/dist/*.jar
 core/lib/
 core/build/
+core/data
 
 #Scraper files
 lib-content-scrapers/src/main/java/com/ustadmobile/lib/contentscrapers/buildconfig/*
@@ -225,4 +226,7 @@ app-ktor-server/application.conf
 
 #data directory for running the server
 app-ktor-server/data
+
+#Resources copied for production app-ktor-server
+app-ktor-server/src/main/resources/umapp
 

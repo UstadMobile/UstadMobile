@@ -6,16 +6,16 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.AlreadyEnroledInClassException
+import com.ustadmobile.core.util.ext.AlreadyEnroledInSchoolException
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.enrolPersonIntoSchoolAtLocalTimezone
-import com.ustadmobile.core.view.JoinWithCodeView
-import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -35,126 +35,130 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        val goOptions = UstadMobileSystemCommon.UstadGoOptions("",
-                true)
-
-        var endpointUrl = accountManager.activeAccount.endpointUrl
-        if(!endpointUrl.endsWith("/")){
-            endpointUrl = "$endpointUrl/"
+        val tableId = arguments[UstadView.ARG_CODE_TABLE]?.toIntOrNull()
+        val codeArg = arguments[UstadView.ARG_CODE] ?:""
+        view.code = codeArg
+        view.buttonLabel = if(tableId == Clazz.TABLE_ID) {
+            systemImpl.getString(MessageID.join_class, context)
+        }else {
+            systemImpl.getString(MessageID.join_school, context)
         }
 
-        var apiUrl = arguments[UstadView.ARG_SERVER_URL] ?:""
-        if(apiUrl.isEmpty()){
-            apiUrl = accountManager.activeAccount.endpointUrl
-        }
-        if(!apiUrl.endsWith("/")){
-            apiUrl = "$apiUrl/"
-        }
+        entityTableId = tableId ?: 0
+    }
 
-        val tableId = arguments[UstadView.ARG_CODE_TABLE]
-        val code = arguments[UstadView.ARG_CODE] ?:""
-        entityTableId = tableId?.toInt()?:0
-        val loggedInPersonUid = accountManager.activeAccount.personUid
+    override fun onStart() {
+        super.onStart()
 
-        GlobalScope.launch() {
-            val validEntity = when (entityTableId) {
-                Clazz.TABLE_ID -> {
-                    dbRepo.clazzDao.findByClazzCode(code) != null
-                }
-                School.TABLE_ID -> {
-                    dbRepo.schoolDao.findBySchoolCode(code) != null
-                }
-                else -> {
-                    false
-                }
-            }
+        //If the code is in the args, we should make only one attempt to use it
+        //Because it can lead to navigation, this must be done in onStart
+        val codeFromArgsUsed = ustadNavController.currentBackStackEntry?.savedStateHandle
+            ?.get<String>(CODE_FROM_ARGS_USED)?.toBoolean() ?: false
 
-            if (apiUrl.isNotEmpty() && validEntity && endpointUrl.equals(apiUrl)
-                    && loggedInPersonUid != 0L) {
-                view.runOnUiThread(Runnable {
-                    view.code = code
-                })
-
-                //Continue..
-
-            } else if (apiUrl.isNotEmpty() && !endpointUrl.equals(apiUrl)) {
-
-                //Ignoring entity check and proceeding to login
-                //Go to login
-                view.runOnUiThread(Runnable {
-
-                    systemImpl.go(Login2View.VIEW_NAME, mapOf(UstadView.ARG_SERVER_URL to apiUrl,
-                            PersonEditView.REGISTER_VIA_LINK to "true",
-                        UstadView.ARG_NEXT to
-                                "${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_SERVER_URL}=${apiUrl}" +
-                                "&${UstadView.ARG_CODE_TABLE}=${tableId}&${UstadView.ARG_CODE}=$code",
-                    Login2View.ARG_NO_GUEST to "true"),
-                        context, goOptions)
-                })
-            } else if (!validEntity) {
-
-                view.runOnUiThread(Runnable {
-                    //Send message invalid code.
-                    if(code.isNotEmpty()){
-                        view.code = code
-                        view.errorText = systemImpl.getString(MessageID.invalid_register_code,
-                                context)
-                    }
-
-                })
-            } else {
-                //Go to login
-                view.runOnUiThread(Runnable {
-
-                    systemImpl.go(Login2View.VIEW_NAME, mapOf(UstadView.ARG_SERVER_URL to apiUrl,
-                            PersonEditView.REGISTER_VIA_LINK to "true",
-                            UstadView.ARG_NEXT to
-                                    "${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_SERVER_URL}=${apiUrl}" +
-                                    "&${UstadView.ARG_CODE_TABLE}=${tableId}&${UstadView.ARG_CODE}=$code",
-                            Login2View.ARG_NO_GUEST to "true"),
-                            context, goOptions)
-                })
+        if(!codeFromArgsUsed) {
+            val codeArg = arguments[UstadView.ARG_CODE] ?:""
+            if(codeArg.isNotEmpty()) {
+                ustadNavController.currentBackStackEntry?.savedStateHandle
+                    ?.set(CODE_FROM_ARGS_USED, true.toString())
+                handleClickDone(codeArg)
+            }else {
+                view.loading = false
             }
         }
+
     }
 
     fun handleClickDone(code: String) {
-        GlobalScope.launch(doorMainDispatcher()) {
-            if(code.isEmpty()){
-                view.errorText = systemImpl.getString(MessageID.field_required_prompt, context)
-                return@launch
-            }
+        if(code.isEmpty()){
+            view.errorText = systemImpl.getString(MessageID.field_required_prompt, context)
+            return
+        }
 
+        view.loading = true
+        presenterScope.launch {
             if(entityTableId == Clazz.TABLE_ID){
-                val clazzToJoin = dbRepo.clazzDao.findByClazzCode(code.trim())
+                var clazzToJoin = dbRepo.clazzDao.findByClazzCode(code.trim())
+                if(clazzToJoin == null) {
+                    try {
+                        clazzToJoin = dbRepo.clazzDao.findByClazzCodeFromWeb(code.trim())
+                        if(clazzToJoin != null)
+                            dbRepo.clazzDao.insertAsync(clazzToJoin)
+                    }catch(e: Exception) {
+                        Napier.w("Could not retrieve class using class code ${code.trim()} by http",
+                            e)
+                    }
+                }
+
                 val personToEnrol = dbRepo.takeIf { clazzToJoin != null }?.personDao
                         ?.findByUid(accountManager.activeAccount.personUid)
-                if(clazzToJoin  != null && personToEnrol != null) {
-                    dbRepo.enrolPersonIntoClazzAtLocalTimezone(personToEnrol,
+                try {
+                    if(clazzToJoin  != null && personToEnrol != null) {
+                        dbRepo.enrolPersonIntoClazzAtLocalTimezone(personToEnrol,
                             clazzToJoin.clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING)
-                    view.finish()
-                }else {
-                    view.errorText = systemImpl.getString(MessageID.invalid_register_code,
+                        val message = systemImpl.getString(MessageID.please_wait_for_approval, context)
+                        systemImpl.go(ClazzList2View.VIEW_NAME,
+                            mapOf(ARG_SNACK_MESSAGE to message), context,
+                            UstadMobileSystemCommon.UstadGoOptions(popUpToViewName = UstadView.CURRENT_DEST,
+                                popUpToInclusive = true))
+                    }else {
+                        view.loading = false
+                        view.errorText = systemImpl.getString(MessageID.invalid_register_code,
                             context)
+                    }
+                }catch(e: AlreadyEnroledInClassException) {
+                    view.loading = false
+                    view.errorText = systemImpl.getString(MessageID.you_are_already_in_class, context)
+                        .replace("%1\$s", clazzToJoin?.clazzName ?: "")
                 }
             }else if(entityTableId == School.TABLE_ID){
-                val schoolToJoin = dbRepo.schoolDao.findBySchoolCode(code.trim())
+                var schoolToJoin = dbRepo.schoolDao.findBySchoolCode(code.trim())
+                if(schoolToJoin == null) {
+                    try {
+                        schoolToJoin = dbRepo.schoolDao.findBySchoolCodeFromWeb(code.trim())
+                        if(schoolToJoin != null)
+                            dbRepo.schoolDao.insertAsync(schoolToJoin)
+                    }catch(e: Exception) {
+                        Napier.w("Could not load school via http for code ${code.trim()}", e)
+                    }
+                }
                 val personToEnrol = dbRepo.takeIf { schoolToJoin != null }?.personDao
                         ?.findByUid(accountManager.activeAccount.personUid)
-                if(schoolToJoin  != null && personToEnrol != null) {
-                    dbRepo.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol,
+                try {
+                    if(schoolToJoin  != null && personToEnrol != null) {
+                        dbRepo.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol,
                             schoolToJoin.schoolUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID)
-                    view.finish()
-                }else {
-                    view.errorText = systemImpl.getString(MessageID.invalid_register_code,
+                        val message = systemImpl.getString(MessageID.please_wait_for_approval,
                             context)
+                        systemImpl.go(SchoolListView.VIEW_NAME,
+                            mapOf(ARG_SNACK_MESSAGE to message), context,
+                            UstadMobileSystemCommon.UstadGoOptions(popUpToViewName = UstadView.CURRENT_DEST,
+                                popUpToInclusive = true))
+                    }else {
+                        view.loading = false
+                        view.errorText = systemImpl.getString(MessageID.invalid_register_code,
+                            context)
+                    }
+                }catch(e: AlreadyEnroledInSchoolException) {
+                    view.loading = false
+                    view.errorText = systemImpl.getString(MessageID.you_are_already_in_school, context)
+                        .replace("%1\$s", schoolToJoin?.schoolName ?: "")
                 }
+
             }else {
-                view.errorText = systemImpl.getString(MessageID.invalid_register_code,
-                        context)
+                view.loading = false
+                view.errorText = systemImpl.getString(MessageID.invalid_register_code, context)
             }
 
         }
+    }
+
+    companion object {
+
+        /**
+         * Used to remember if the code from the arguments has already been used
+         */
+        const val CODE_FROM_ARGS_USED = "codeEntered"
+
     }
 
 }

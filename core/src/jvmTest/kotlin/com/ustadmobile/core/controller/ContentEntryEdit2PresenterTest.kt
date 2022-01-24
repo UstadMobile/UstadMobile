@@ -1,22 +1,17 @@
 package com.ustadmobile.core.controller
 
-import org.mockito.kotlin.*
-import com.ustadmobile.core.contentformats.ContentImportManager
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
-import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.activeRepoInstance
-import com.ustadmobile.core.util.directActiveDbInstance
-import com.ustadmobile.core.util.directActiveRepoInstance
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
@@ -27,10 +22,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.instance
-import org.kodein.di.singleton
+import org.kodein.di.*
+import org.mockito.kotlin.*
 
 
 class ContentEntryEdit2PresenterTest {
@@ -65,7 +58,13 @@ class ContentEntryEdit2PresenterTest {
 
     private lateinit var di: DI
 
-    private lateinit var contentImportManager: ContentImportManager
+    private lateinit var contentPluginManager: ContentPluginManager
+
+    private lateinit var contentJobManager: ContentJobManager
+
+    private val metadataResult =  MetadataResult(ContentEntryWithLanguage(), TestPlugin.PLUGIN_ID)
+
+    private val storageDir = createTemporaryDir("container").toFile()
 
 
     @Before
@@ -74,15 +73,13 @@ class ContentEntryEdit2PresenterTest {
         container = createMockContainer()
         contentEntry = createMockEntryWithLanguage()
         mockLifecycleOwner = mock { }
-        contentImportManager = mock {}
-
-        systemImpl = mock {
-
-            onBlocking { getStorageDirsAsync(any()) }.thenAnswer {
-                mutableListOf(UMStorageDir("", "", removableMedia = false,
-                        isAvailable = false))
+        contentJobManager = mock { }
+        contentPluginManager = mock {
+            onBlocking { extractMetadata(any(), any()) }.thenAnswer {
+                    metadataResult
             }
-
+        }
+        systemImpl = mock {
             on { getString(any(), any()) }.thenAnswer { errorMessage }
         }
 
@@ -90,7 +87,15 @@ class ContentEntryEdit2PresenterTest {
         di = DI {
             import(ustadTestRule.diModule)
             bind<UstadMobileSystemImpl>(overrides = true) with singleton { systemImpl }
-            bind<ContentImportManager>() with singleton { contentImportManager }
+            bind<ContainerStorageManager>() with scoped(ustadTestRule.endpointScope).singleton {
+                ContainerStorageManager(listOf(storageDir))
+            }
+            bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
+                contentPluginManager
+            }
+            bind<ContentJobManager>() with singleton {
+                contentJobManager
+            }
         }
 
         db = di.directActiveDbInstance()
@@ -98,12 +103,6 @@ class ContentEntryEdit2PresenterTest {
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
-        runBlocking {
-            whenever(systemImpl.getStorageDirsAsync(any())).thenAnswer {
-                mutableListOf(UMStorageDir("", "", removableMedia = false,
-                        isAvailable = false))
-            }
-        }
 
         whenever(systemImpl.getString(any(), any())).thenReturn(errorMessage)
 
@@ -121,10 +120,10 @@ class ContentEntryEdit2PresenterTest {
             on { compressionEnabled }.thenAnswer{ true }
             on { videoDimensions }.thenAnswer{ Pair(0,0) }
             on { selectedStorageIndex }.thenAnswer { 0 }
-            on { storageOptions }.thenAnswer { runBlocking { systemImpl.getStorageDirsAsync(context) } }
-            on { entryMetaData }.thenAnswer {
+            on { storageOptions }.thenAnswer { di.onActiveAccountDirect().instance<ContainerStorageManager>().storageList }
+            on { metadataResult }.thenAnswer {
                 if (isUriNull) null else
-                    ImportedContentEntryMetaData(ContentEntryWithLanguage(), "application/epub+zip", "file://Dummy")
+                    metadataResult
             }
         }
     }
@@ -157,19 +156,23 @@ class ContentEntryEdit2PresenterTest {
         val presenter = ContentEntryEdit2Presenter(context, mapOf(UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString()), mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)
-
         val initialEntry = mockView.captureLastEntityValue()
-        presenter.handleClickSave(contentEntry)
+        runBlocking{
+            presenter.handleFileSelection("content://dummy")
+            presenter.handleClickSave(contentEntry)
+        }
+
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao, timeout(5000)) {
+            verifyBlocking(mockEntryDao, timeout(5000).atLeastOnce()) {
                 insertAsync(capture())
             }
             assertEquals("Got expected content entry title", contentEntry.title, firstValue.title)
         }
 
-        verifyBlocking(contentImportManager, timeout(timeoutInMill)) {
-            queueImportContentFromFile(eq("file://Dummy"), any(), any(), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
+        verifyBlocking(contentJobManager, timeout(timeoutInMill)) {
+            enqueueContentJob(any(), any())
+            //enqueueContentJob(eq("content://Dummy"), any(), any(),eq(ContainerImportJob.Companion.CLIENT_IMPORT_MODE), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
         }
 
 
@@ -193,8 +196,9 @@ class ContentEntryEdit2PresenterTest {
             assertEquals("Got expected folder title", contentEntry.title, firstValue.title)
         }
 
-        verifyBlocking(contentImportManager, times(0)) {
-            queueImportContentFromFile(eq("file://Dummy"), any(), any(), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
+        verifyBlocking(contentJobManager, times(0)) {
+            enqueueContentJob(any(), any())
+            //queueImportContentFromFile(eq("content://Dummy"), any(), any(), eq(ContainerImportJob.Companion.CLIENT_IMPORT_MODE), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
         }
     }
 
@@ -206,11 +210,14 @@ class ContentEntryEdit2PresenterTest {
         val presenter = ContentEntryEdit2Presenter(context,
                 mapOf(ARG_ENTITY_UID to contentEntry.contentEntryUid.toString(),
                         UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString()), mockView, mockLifecycleOwner, di)
-
         presenter.onCreate(null)
         val entrySetOnView = mockView.captureLastEntityValue()
-        entrySetOnView!!.title = "Updated Title"
-        presenter.handleClickSave(entrySetOnView)
+        runBlocking{
+            presenter.handleFileSelection("content://dummy")
+            entrySetOnView!!.title = "Updated Title"
+            presenter.handleClickSave(entrySetOnView)
+        }
+
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
             verifyBlocking(mockEntryDao, timeout(5000)) {
@@ -219,8 +226,9 @@ class ContentEntryEdit2PresenterTest {
             assertEquals("Got expected content entry title", "Updated Title", firstValue.title)
         }
 
-        verifyBlocking(contentImportManager, timeout(timeoutInMill)) {
-            queueImportContentFromFile(eq("file://Dummy"), any(), any(), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
+        verifyBlocking(contentJobManager, timeout(timeoutInMill)) {
+            enqueueContentJob(any(), any())
+            //queueImportContentFromFile(eq("content://Dummy"), any(), any(),eq(ContainerImportJob.Companion.CLIENT_IMPORT_MODE), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
         }
 
     }

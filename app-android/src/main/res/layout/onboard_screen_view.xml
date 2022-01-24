@@ -17,11 +17,10 @@
         android:layout_above="@+id/heading"
         android:layout_marginTop="@dimen/dimen_16dp"
         android:layout_marginBottom="@dimen/dimen_40dp"
-        android:tint="?colorPrimaryDark"
         app:layout_constraintBottom_toTopOf="@+id/heading"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
-        app:srcCompat="@drawable/downloading_data"
+        app:srcCompat="@drawable/illustration_offline_usage"
         tools:layout_editor_absoluteX="20dp" />
 
     <androidx.appcompat.widget.AppCompatTextView

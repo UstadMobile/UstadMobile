@@ -6,8 +6,14 @@ import androidx.work.WorkerParameters
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.DAY_IN_MS
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_CLAZZUID
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_ENDPOINTURL
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_FROMTIME
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_TOTIME
 import org.kodein.di.DI
 import org.kodein.di.android.di
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -20,24 +26,19 @@ class ClazzLogScheduleWorker(context: Context, workerParams: WorkerParameters) :
         val repo: UmAppDatabase by di.on(Endpoint(endpoint)).instance(tag = TAG_REPO)
         val fromTime = inputData.getLong(INPUT_FROMTIME, Long.MAX_VALUE)
         val toTime = inputData.getLong(INPUT_TOTIME, 0L)
-        val clazzUidFilter = inputData.getLong(INPUT_CLAZZUIDFILTER, 0)
-        val matchLocalFromDay = inputData.getBoolean(INPUT_MATCH_LOCAL_FROM_DAY, false)
-        repo.createClazzLogs(fromTime, toTime, clazzUidFilter, matchLocalFromDay)
+        val clazzUid = inputData.getLong(INPUT_CLAZZUID, 0)
+        val nextRunTime = repo.createClazzLogs(fromTime, toTime, clazzUid)
+
+        val clazzLogCreatorManager: ClazzLogCreatorManager = di.direct.instance()
+
+        /* TODO: When merging the Feed branch, this will return the next run time
+        See https://github.com/UstadMobile/UstadMobile/blob/888a46edadbbc21668f6420d881999235906a389/core/src/androidMain/kotlin/com/ustadmobile/core/schedule/ClazzLogScheduleWorker.kt
+        if(nextRunTime > 0)
+            clazzLogCreatorManager.requestClazzLogCreation(clazzUid, endpoint, nextRunTime,
+                (nextRunTime + DAY_IN_MS) - 1)
+         */
 
         return Result.success()
     }
 
-    companion object {
-
-        const val INPUT_ENDPOINTURL = "dbName"
-
-        const val INPUT_FROMTIME = "fromTime"
-
-        const val INPUT_TOTIME = "toTime"
-
-        const val INPUT_CLAZZUIDFILTER = "clazzUidFilter"
-
-        const val INPUT_MATCH_LOCAL_FROM_DAY = "matchLocalFromDay"
-
-    }
 }

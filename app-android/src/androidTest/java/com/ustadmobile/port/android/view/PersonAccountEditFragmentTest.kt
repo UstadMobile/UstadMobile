@@ -2,20 +2,27 @@ package com.ustadmobile.port.android.view
 
 import android.app.Application
 import android.content.Context
+import androidx.fragment.app.testing.FragmentScenario
+import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonWithAccount
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.core.util.ext.grantScopedPermission
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.ext.toBundle
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.PersonAccountEditScreen
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
+import com.ustadmobile.test.port.android.util.clickOptionMenu
+import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import junit.framework.Assert.assertEquals
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -66,6 +73,65 @@ class PersonAccountEditFragmentTest : TestCase(){
         mockWebServer.shutdown()
     }
 
+    private fun launchFragment(person: PersonWithAccount, fillForm: Boolean = false, fillUsername: Boolean = false,
+                       fillCurrentPassword: Boolean = false, fillNewPassword: Boolean = false,
+                       fillConfirmPassword: Boolean = true,
+                       serverUrl: String, systemImplNavRule: SystemImplTestNavHostRule): FragmentScenario<PersonAccountEditFragment> {
+
+        val args = mapOf(
+            UstadView.ARG_ENTITY_UID to person.personUid.toString(),
+            UstadView.ARG_SERVER_URL to serverUrl).toBundle()
+
+        val scenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+            fragmentArgs = args) {
+            PersonAccountEditFragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }
+
+        PersonAccountEditScreen.takeIf { fillForm }?.apply {
+
+            if(fillUsername){
+                usernameTextInput {
+                    edit {
+                        click()
+                        typeText("dummyUser")
+                    }
+                }
+            }
+
+            if(fillCurrentPassword){
+                currentPasswordTextInput {
+                    edit {
+                        click()
+                        typeText(person.currentPassword!!)
+                    }
+                }
+            }
+
+            if(fillNewPassword){
+                newPasswordTextInput {
+                    edit {
+                        click()
+                        typeText(person.newPassword!!)
+                    }
+                }
+            }
+
+            if(fillConfirmPassword){
+                confirmNewPassTextInput {
+                    edit {
+                        click()
+                        typeText(person.confirmedPassword!!)
+                    }
+                }
+            }
+            scenario.clickOptionMenu(R.id.menu_done)
+        }
+        return scenario
+    }
+
+
     private fun enqueueResponse(success:Boolean = true, responseCode: Int = 200){
         if(success){
             mockWebServer.enqueue(MockResponse()
@@ -80,21 +146,31 @@ class PersonAccountEditFragmentTest : TestCase(){
     }
 
     private fun createPerson(withUsername: Boolean = false, isAdmin: Boolean = false,
-                             matchPassword: Boolean = false): PersonWithAccount {
+                             matchPassword: Boolean = false,
+                             activeUserIsEditingOwnAccount: Boolean = false): PersonWithAccount {
 
-        Person().apply {
-            admin = isAdmin
-            username = "First"
-            lastName = "User"
-            personUid = 42
-            dbRule.repo.personDao.insert(this)
+        if(!activeUserIsEditingOwnAccount) {
+            val activeUserPerson = dbRule.insertPersonAndStartSession(Person().apply {
+                admin = isAdmin
+                username = "First"
+                lastName = "User"
+                personUid = UmAppDatabaseAndroidClientRule.DEFAULT_ACTIVE_USER_PERSONUID
+            })
+
+            if(!isAdmin) {
+                //scoped grant must be made for account management permission for the person being displayed
+                runBlocking {
+                    dbRule.repo.grantScopedPermission(activeUserPerson, Role.PERMISSION_RESET_PASSWORD,
+                        Person.TABLE_ID, mPersonUid)
+                }
+            }
         }
 
 
         val password = "password"
         val confirmPassword = if(matchPassword) password else "password1"
 
-        return PersonWithAccount().apply {
+        val personToEditAccount = PersonWithAccount().apply {
             fatherName = "Doe"
             firstNames = "Jane"
             lastName = "Doe"
@@ -105,8 +181,15 @@ class PersonAccountEditFragmentTest : TestCase(){
             newPassword = password
             currentPassword = password
             confirmedPassword = confirmPassword
-            dbRule.repo.personDao.insert(this)
         }
+
+        if(activeUserIsEditingOwnAccount) {
+            dbRule.insertPersonAndStartSession(personToEditAccount)
+        }else {
+            runBlocking { dbRule.repo.insertPersonAndGroup(personToEditAccount) } as Person
+        }
+
+        return personToEditAccount
     }
 
 
@@ -146,14 +229,15 @@ class PersonAccountEditFragmentTest : TestCase(){
         }
     }
 
-    @AdbScreenRecord("given person account edit launched and active person is not admin  current password should be hidden")
+    @AdbScreenRecord("given person account edit launched and active person is not admin  current password should be displayed")
     @Test
     fun givenPersonAccountEditLaunched_whenActivePersonIsNotAdmin_thenShouldShowCurrentPassword(){
 
         init{
 
         }.run{
-            val person = createPerson(true, isAdmin = false)
+            val person = createPerson(true, isAdmin = false,
+                activeUserIsEditingOwnAccount = true)
             PersonAccountEditScreen{
 
                 launchFragment(person,false, systemImplNavRule = systemImplNavRule, serverUrl = serverUrl)
@@ -264,7 +348,8 @@ class PersonAccountEditFragmentTest : TestCase(){
         init{
             enqueueResponse()
         }.run{
-            val person = createPerson(true, isAdmin = false, matchPassword = true)
+            val person = createPerson(true, isAdmin = false, matchPassword = true,
+                activeUserIsEditingOwnAccount = true)
             PersonAccountEditScreen{
 
                 launchFragment(person, true, fillUsername = false, fillCurrentPassword = true,
@@ -291,7 +376,8 @@ class PersonAccountEditFragmentTest : TestCase(){
             enqueueResponse(false, 403)
 
         }.run{
-            val person = createPerson(true, isAdmin = false, matchPassword = true)
+            val person = createPerson(true, isAdmin = false, matchPassword = true,
+                activeUserIsEditingOwnAccount = true)
             PersonAccountEditScreen{
 
                 launchFragment(person, true, fillUsername = false, fillCurrentPassword = true,
@@ -321,10 +407,10 @@ class PersonAccountEditFragmentTest : TestCase(){
                 val fragmentScenario = launchFragment(person, true, fillUsername = true,
                         fillCurrentPassword = false, fillNewPassword = true,
                         systemImplNavRule = systemImplNavRule, serverUrl = serverUrl)
-                val mPerson = dbRule.db.personDao.findByUidLive(person.personUid).waitUntilWithFragmentScenario(fragmentScenario) {
+                val personInDb = dbRule.db.personDao.findByUidLive(person.personUid).waitUntilWithFragmentScenario(fragmentScenario) {
                     it?.username != null
                 }
-                assertEquals("Account was created successfully", person.username , mPerson?.username)
+                assertEquals("Account was created successfully", "dummyuser" , personInDb?.username)
 
             }
 
@@ -372,7 +458,7 @@ class PersonAccountEditFragmentTest : TestCase(){
             val person = createPerson(false, isAdmin = false, matchPassword = false)
             PersonAccountEditScreen{
 
-                launchFragment(person, true, fillUsername = true, fillCurrentPassword = true,
+                launchFragment(person, true, fillUsername = true, fillCurrentPassword = false,
                         fillNewPassword = true,
                         systemImplNavRule = systemImplNavRule, serverUrl = serverUrl)
 

@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/home_content_dest"
+        android:id="@+id/content_entry_list_home_dest"
         android:icon="@drawable/library_books_24px"
         android:title="@string/content" />
 

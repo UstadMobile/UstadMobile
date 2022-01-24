@@ -62,6 +62,7 @@ import com.ustadmobile.lib.contentscrapers.ck12.practice.*
 import com.ustadmobile.lib.contentscrapers.harscraper.setupProxyWithSelenium
 import com.ustadmobile.lib.contentscrapers.harscraper.scrapeUrlwithHar
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import net.lightbody.bmp.BrowserMobProxyServer
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
@@ -171,7 +172,9 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
 
 
     override fun run() {
-        val db = UmAppDatabase.getInstance(Any())
+        //This needs to use DI instead
+        lateinit var db: UmAppDatabase
+        //val db = UmAppDatabase.getInstance(Any(), replaceMeWithDi())
         val repository = db// db.getRepository("https://localhost", "")
         val containerDao = repository.containerDao
         val queueDao = db.scrapeQueueItemDao

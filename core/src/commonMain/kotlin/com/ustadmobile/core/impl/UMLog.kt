@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.core.impl
 
-import com.github.aakira.napier.Napier
+import io.github.aakira.napier.Napier
 import kotlin.jvm.JvmStatic
 
 /**

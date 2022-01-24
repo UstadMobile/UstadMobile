@@ -30,12 +30,25 @@
  */
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.impl.UmLifecycleListener
-import com.ustadmobile.core.impl.UmLifecycleOwner
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.impl.nav.navigateToErrorScreen
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.putResultDestInfo
+import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorObserver
 import kotlinx.atomicfu.atomic
-import org.kodein.di.DI
-import org.kodein.di.DIAware
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import org.kodein.di.*
 import kotlin.js.JsName
 
 /**
@@ -45,9 +58,13 @@ import kotlin.js.JsName
  *
  * @author mike
  */
-abstract class UstadBaseController<V : UstadView>(override val context: Any,
-                                                  protected val arguments: Map<String, String>,
-                                                  val view: V, override val di: DI): UmLifecycleOwner, DIAware {
+abstract class UstadBaseController<V : UstadView>(
+    override val context: Any,
+    protected val arguments: Map<String, String>,
+    val view: V,
+    override val di: DI,
+    open val activeSessionRequired: Boolean = true
+): UmLifecycleOwner, DIAware {
 
     private val lifecycleListeners = mutableListOf<UmLifecycleListener>()
 
@@ -58,6 +75,38 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
     protected var savedState: Map<String, String>? = null
         private set
 
+    protected val ustadNavController: UstadNavController by instance()
+
+    /**
+     * There are two possible scenarios for using a presenter:
+     *
+     *  1) Top level view e.g. ClazzDetail reached by navigation with the navcontroller. There is
+     *     only one top level view active at a time.
+     *  2) Embedded and not reached via the navcontroller (e.g. ClazzDetailOverview which is
+     *     displayed as a tab).
+     *
+     *  This can be used to control which presenters are observing for the end of a user session to
+     *  avoid a situation where multiple presenters react to a user being logged out, to decide
+     *  whether or not the presenter should observe for return results, etc.
+     */
+    protected open val navChild: Boolean
+        get() = arguments[UstadView.ARG_NAV_CHILD]?.toBoolean() == true
+
+    /**
+     * A coroutine scope that is tied to the lifecycle of the presenter. It will be canceled after
+     * onDestroy. This avoids longer-running async processes accidentally interacting with a view
+     * that has been destroyed etc.
+     */
+    protected val presenterScope: CoroutineScope by instance(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE)
+
+    private val activeSessionObserver = DoorObserver<UserSessionWithPersonAndEndpoint?> {
+        if(it == null) {
+            presenterScope.launch {
+                navigateToStartNewUserSession()
+            }
+        }
+    }
+
     /**
      * Handle when the presenter is created. Analogous to Android's onCreate
      *
@@ -65,7 +114,9 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
      */
     @JsName("onCreate")
     open fun onCreate(savedState: Map<String, String>?) {
-        if(created) throw IllegalStateException("onCreate must be called ONCE AND ONLY ONCE! It has already been called")
+        if(created)
+            throw IllegalStateException("onCreate must be called ONCE AND ONLY ONCE! It has already been called")
+
         created = true
         this.savedState = savedState
 
@@ -76,6 +127,14 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
 
 
         lifecycleStatus.value = CREATED
+
+        if(activeSessionRequired && !navChild) {
+            val accountManager: UstadAccountManager = direct.instance()
+            val lifecycleOwner: DoorLifecycleOwner? = direct.instanceOrNull()
+            if(lifecycleOwner != null) {
+                accountManager.activeUserSessionLive.observe(lifecycleOwner, activeSessionObserver)
+            }
+        }
     }
 
     /**
@@ -158,9 +217,159 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
         lifecycleListeners.remove(listener)
     }
 
+    /**
+     * This is used in roughly the same way as on Android. It can be called by the underlying
+     * platform (e.g. Androids own onSaveInstanceState when the app is being destroyed) or
+     * directly by the presenter e.g. to save the state of the entity before a user navigates away
+     * to pick something.
+     */
     open fun onSaveInstanceState(savedState: MutableMap<String, String>) {
 
     }
+
+    /**
+     * Save state to the nav controller savedStateHandle for the current back stack entry.
+     * This will call onSaveInstanceState and save the resulting string map into the savedstatehandle.
+     */
+    open fun saveStateToNavController() {
+        val stateMap = mutableMapOf<String, String>()
+        onSaveInstanceState(stateMap)
+
+        val stateHandle = ustadNavController.currentBackStackEntry?.savedStateHandle
+        if(stateHandle != null) {
+            stateMap.forEach {
+                stateHandle[it.key] = it.value
+            }
+        }
+    }
+
+
+    /**
+     * Save the result to the savedStateHandle on the backstack as directed by the current
+     * arguments. ARG_RESULT_DEST_VIEWNAME and ARG_RESULT_DEST_KEY will specify which entry on
+     * the backstack to lookup, and what key name should be used in the saved state handle once
+     * it has been looked up.
+     */
+    protected fun finishWithResult(result: String) {
+        val saveToViewName = arguments[ARG_RESULT_DEST_VIEWNAME]
+        val saveToKey = arguments[ARG_RESULT_DEST_KEY]
+
+        if(saveToViewName != null && saveToKey != null){
+            val destBackStackEntry = ustadNavController.getBackStackEntry(saveToViewName)
+            destBackStackEntry?.savedStateHandle?.set(saveToKey, result)
+
+            ustadNavController.popBackStack(saveToViewName, false)
+        }
+    }
+
+
+    fun requireSavedStateHandle(): UstadSavedStateHandle {
+        return ustadNavController.currentBackStackEntry?.savedStateHandle
+            ?: throw IllegalStateException("Require saved state handle: no current back stack entry")
+    }
+
+    private fun <T: Any> NavigateForResultOptions<T>.putPresenterResultDestInfo() {
+        val currentBackStackEntryVal = ustadNavController.currentBackStackEntry
+        val effectiveResultKey = destinationResultKey ?: entityClass.simpleName
+        ?: throw IllegalArgumentException("putPresenterResultDestInfo: no destination key and no class name")
+
+        if(currentBackStackEntryVal != null) {
+            arguments.putResultDestInfo(currentBackStackEntryVal, effectiveResultKey,
+                overwriteDestination)
+        }
+    }
+
+    /**
+     * Navigate to another screen for purposes of returning a result. This allows the initiator
+     * (e.g. this presenter) to take the user to another screen for picking another entity (e.g.
+     * from a Class Member screen to the Person List screen to pick someone to add to the class.
+     * This process can continue via multiple screens (e.g. in the person list screen, the user
+     * might choose to add a new person, which is then returned to the original initiator).
+     *
+     * This works by:
+     *
+     * 1) The initiator passes arguments UstadView.ARG_RESULT_DEST_VIEWNAME and UstadView.ARG_RESULT_DEST_KEY
+     *    that specify the destination view name for the result and a key name.
+     *
+     * 2) Edit/list screens use the arguments received to lookup the SavedState handle for the
+     *    initiator and then saves the result into the specified key of the saved state handle. The
+     *    edit/list screen then pops the back stack
+     *
+     * 3) The initiator observes the saved state handle to watch the incoming result
+     *
+     * This is roughly modeled on the recommended process for Android NavController as per
+     *  https://developer.android.com/guide/navigation/navigation-programmatic#returning_a_result
+     */
+    fun <T: Any> navigateForResult(options: NavigateForResultOptions<T>) {
+        saveStateToNavController()
+        options.putPresenterResultDestInfo()
+
+        val currentEntityValue = options.currentEntityValue
+        if(currentEntityValue != null) {
+            options.arguments[UstadEditView.ARG_ENTITY_JSON] = safeStringify(
+                di, options.serializationStrategy, options.entityClass,currentEntityValue)
+        }
+
+        ustadNavController.navigate(options.destinationViewName, options.arguments)
+    }
+
+    /**
+     * Navigate to the error screen. Pass details of the exception so it is recorded and displayed
+     * to the user accordingly.
+     */
+    fun navigateToErrorScreen(exception: Exception) {
+        ustadNavController.navigateToErrorScreen(exception, di, context)
+    }
+
+    /**
+     * Navigate when the user does not have an active session and needs to start one. E.g.
+     * When the user logs out of the currently active account, when the app starts and there
+     * is no currently active account, or when the active session is terminated remotely (e.g. due
+     * to password change or parental consent change).
+     *
+     * In this case the backstack will be cleared. Navigation will be as follows:
+     * If the user has remaining sessions on the device:
+     *   Navigate to AccountList to select an existing session (with the option to start a new session)
+     *
+     * If there are no remaining sessions and server selection is allowed:
+     *   Navigate to SiteEnterLink for the user to select what server to connect to
+     *
+     * If there are no remaining sessions and the app is locked to a single server:
+     *   Navigate to Login for the user to login
+     */
+    suspend fun navigateToStartNewUserSession() {
+        val accountManager: UstadAccountManager = direct.instance()
+        val impl: UstadMobileSystemImpl = direct.instance()
+        val numAccountsRemaining = accountManager.activeSessionCount()
+        val canSelectServer = impl.getAppConfigBoolean(
+            AppConfig.KEY_ALLOW_SERVER_SELECTION,
+            context)
+
+        //Wherever the user is going now, we must wipe the backstack
+        val goOptions = UstadMobileSystemCommon.UstadGoOptions(
+            popUpToViewName = UstadView.ROOT_DEST, popUpToInclusive = false)
+
+        when {
+            numAccountsRemaining == 0 && canSelectServer -> {
+                impl.go(SiteEnterLinkView.VIEW_NAME, mapOf(), context, goOptions)
+            }
+
+            numAccountsRemaining == 0 && !canSelectServer -> {
+                impl.go(Login2View.VIEW_NAME, mapOf(), context, goOptions)
+            }
+
+            numAccountsRemaining > 0 -> {
+                impl.go(
+                    AccountListView.VIEW_NAME,
+                    mapOf(
+                        AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
+                        UstadView.ARG_TITLE to impl.getString(MessageID.select_account, context),
+                        UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString()),
+                    context, goOptions)
+            }
+        }
+    }
+
 
     companion object {
 

@@ -1,7 +1,10 @@
 package com.ustadmobile.test.http
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.rest.umRestApplication
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -31,6 +34,10 @@ import com.ustadmobile.util.test.ReverseProxyDispatcher
 import io.ktor.server.engine.ApplicationEngineEnvironment
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.net.InetAddress
+import kotlin.random.Random.Default.nextInt
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
+import com.ustadmobile.core.db.ext.addSyncCallback
+import kotlin.random.Random.Default.nextLong
 
 val umRestServerInstances = mutableMapOf<Int, TestApplicationHolder>()
 
@@ -92,11 +99,13 @@ fun Application.testServerManager() {
             val initialContext = InitialContext()
 
             val dbName = "testserver-$appPort"
-            initialContext.bindNewSqliteDataSourceIfNotExisting(dbName, isPrimary = true)
+            val nodeIdAndAuth = NodeIdAndAuth(nextLong(), randomUuid().toString())
+            initialContext.bindNewSqliteDataSourceIfNotExisting(dbName)
 
-
-            val umDb = UmAppDatabase.getInstance(Any(), dbName)
-            umDb.clearAllTables()
+            val umDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+                .addSyncCallback(nodeIdAndAuth)
+                .build()
+                .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
 
             val umRestServer = embeddedServer(Netty, port = appPort, host= proxyHost, module = {
                 umRestApplication(devMode = true, singletonDbName = dbName)

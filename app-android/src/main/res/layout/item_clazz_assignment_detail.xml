@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="android.view.View"/>
+        <import type="java.util.TimeZone"/>
+
+        <variable
+            name="clazzAssignment"
+            type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+
+        <variable
+            name="timeZone"
+            type="String" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:id="@+id/item_clazz_assignmetn_detail_description_cl"
+        >
+
+        <TextView
+            android:id="@+id/item_ca_detail_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_16dp"
+            android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(clazzAssignment.caDescription)}"
+            android:text="@{clazzAssignment.caDescription}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Read the stories and describe the main characters." />
+
+
+        <ImageView
+            android:id="@+id/item_ca_detail_description_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:contentDescription="@string/school"
+            app:tint="?colorOnIconTint"
+            app:visibleIfDateSet="@{clazzAssignment.caDeadlineDate}"
+            android:src="@drawable/ic_event_available_black_24dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_ca_detail_description" />
+
+        <TextView
+            android:id="@+id/item_ca_detail_description_deadline_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/school"
+            app:visibleIfDateSet="@{clazzAssignment.caDeadlineDate}"
+            app:textLocalDateTime="@{clazzAssignment.caDeadlineDate}"
+            app:textLocalDateTimeZone="@{TimeZone.getTimeZone(timeZone)}"
+            app:layout_constraintStart_toEndOf="@+id/item_ca_detail_description_icon"
+            app:layout_constraintTop_toBottomOf="@+id/item_ca_detail_description"
+            tools:text="28/Feb/2020 - 8:00 am" />
+
+        <TextView
+            android:id="@+id/item_ca_detail_description_timezone"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@string/school"
+            android:text="@{timeZone}"
+            app:visibleIfDateSet="@{clazzAssignment.caDeadlineDate}"
+            app:layout_constraintBottom_toBottomOf="@+id/item_ca_detail_description_deadline_date"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_ca_detail_description_deadline_date"
+            app:layout_constraintTop_toTopOf="@+id/item_ca_detail_description_deadline_date"
+            tools:text="(Asia, Dubai)" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

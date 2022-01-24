@@ -50,7 +50,7 @@ class JoinWithCodeFragmentTest : TestCase() {
                 personUid = dbRule.repo.personDao.insert(this)
             }
 
-            dbRule.insertPersonForActiveUser(Person().apply {
+            dbRule.insertPersonAndStartSession(Person().apply {
                 admin = true
                 firstNames = "Test"
                 lastName = "User"
@@ -62,6 +62,7 @@ class JoinWithCodeFragmentTest : TestCase() {
             launchFragmentInContainer(themeResId = R.style.UmTheme_App, fragmentArgs = bundle) {
                 JoinWithCodeFragment().also {
                     it.installNavController(systemImplNavRule.navController)
+                    systemImplNavRule.navController.navigate(R.id.join_with_code_dest)
                 }
             }
 

@@ -52,13 +52,14 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        //coreLibraryDesugaringEnabled true
+        coreLibraryDesugaringEnabled true
     }
 
     defaultConfig {
         applicationId "${baseAppId}.launcher"
+        resConfigs "en","fa","ps","ar","tg","bn","ne","my","ru", "tl"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.ext.ustadVersion
         multiDexEnabled true //required for all variants to use java library desugaring
@@ -122,10 +123,18 @@ configurations.all {
     exclude group: "org.json", module: "json"
 }
 
-
+/*
+ * This causes a problem on app-android-launcher on de-contentjob branch for no apparent reason, but
+ * resolves itself in the replication branch. The lint task throws a noclassdeffoundexception
+ */
+tasks.whenTaskAdded { task ->
+    if (task.name.startsWith("lint")) {
+        task.enabled = false
+    }
+}
 
 dependencies {
-    //coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
 
     api project(':core')
     api project(':sharedse')
@@ -134,10 +143,8 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
-    implementation "com.github.aakira:napier:$version_napier"
+    implementation "io.github.aakira:napier:$version_napier"
     implementation "com.google.android.material:material:$version_android_material"
-
-    implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
 
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"
 

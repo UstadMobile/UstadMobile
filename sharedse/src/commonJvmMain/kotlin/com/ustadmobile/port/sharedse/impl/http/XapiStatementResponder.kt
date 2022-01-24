@@ -22,6 +22,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.*
 import java.util.*
+import io.github.aakira.napier.Napier
 
 class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
@@ -63,6 +64,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
 
         val contentEntryUid = urlParams[URLPARAM_CONTENTENTRYUID]?.toLongOrNull() ?: 0L
+        val clazzUid = urlParams[URLPARAM_CLAZZUID]?.toLongOrNull() ?: 0L
         try {
             val statement : String = session.parseRequestBody() ?:
                 return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
@@ -76,18 +78,25 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
             if (statement != null) {
                 val statements = getStatementsFromJson(statement.trim { it <= ' ' }, gson)
                 val statementEndpoint: XapiStatementEndpoint =  di.on(Endpoint(endpointUrl)).direct.instance()
-                statementEndpoint.storeStatements(statements, statementId, contentEntryUid = contentEntryUid)
+                statementEndpoint.storeStatements(statements, statementId,
+                        contentEntryUid = contentEntryUid, clazzUid)
             } else {
                 throw StatementRequestException("no content found", 204)
             }
         } catch (e: StatementRequestException) {
+            Napier.e("StatementException", e)
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.lookup(e.errorCode),
                     "application/octet", e.message)
         } catch (e: IOException) {
+            Napier.e("IOException", e)
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
                     "application/octet", e.message)
         } catch (e: NanoHTTPD.ResponseException) {
+            Napier.e("ResponseException", e)
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/octet", e.message)
+        } catch(e: Exception) {
+            Napier.e("Other Exception", e)
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "text/plain", e.message)
         }
         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NO_CONTENT,
                 "application/octet", null)
@@ -99,6 +108,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
         val endpointUrl = urlParams.get(URI_PARAM_ENDPOINT) ?: throw IllegalArgumentException("No endpoint")
 
         val contentEntryUid = urlParams[URLPARAM_CONTENTENTRYUID]?.toLongOrNull() ?: 0L
+        val clazzUid = urlParams[URLPARAM_CLAZZUID]?.toLongOrNull() ?: 0L
         val uuids: List<String>
         var `is`: InputStream? = null
         try {
@@ -124,7 +134,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
             val statementEndpoint: XapiStatementEndpoint =  di.on(Endpoint(endpointUrl)).direct.instance()
             uuids = statementEndpoint.storeStatements(statements, "",
-                    contentEntryUid = contentEntryUid)
+                    contentEntryUid = contentEntryUid, clazzUid)
             `is` = ByteArrayInputStream(gson.toJson(uuids).toByteArray())
 
             return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK,
@@ -183,6 +193,8 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
         private const val PARAM_APPREPO_INDEX = 0
 
         const val URLPARAM_CONTENTENTRYUID = "contentEntryUid"
+
+        const val URLPARAM_CLAZZUID = "clazzUid"
 
         const val URI_PARAM_ENDPOINT = "endpoint"
     }

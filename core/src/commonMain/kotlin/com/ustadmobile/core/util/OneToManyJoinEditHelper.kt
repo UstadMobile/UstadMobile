@@ -10,7 +10,7 @@ import org.kodein.di.DI
 import kotlin.reflect.KClass
 
 /**
- * This class is designed to help manager a one to many join in edit mode. E.g. Clazz has a 1:n
+ * This class is designed to help manage a one to many join in edit mode. E.g. Clazz has a 1:n
  * join with Schedule. The editing of that entity is done in memory and passed to/from presenters
  * using JSON.
  *
@@ -53,11 +53,11 @@ open class OneToManyJoinEditHelper<T : Any, K>(val pkGetter: (T) -> K,
             pksToInsert += pkGetter(entity)
             val listVal = liveList.getValue() ?: return
             val newList = listVal + entity
-            liveList.sendValue(newList)
+            liveList.setVal(newList)
         }else {
             val newList = currentList.toMutableList()
             newList[entityIndex] = entity
-            liveList.sendValue(newList)
+            liveList.setVal(newList)
         }
     }
 

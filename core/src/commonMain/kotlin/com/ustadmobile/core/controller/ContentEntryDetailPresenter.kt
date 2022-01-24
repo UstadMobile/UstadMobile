@@ -1,10 +1,11 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
@@ -42,8 +43,8 @@ class ContentEntryDetailPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntry? {
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
         val entry = withContext(Dispatchers.Default) {
-            withTimeoutOrNull(2000) { db.contentEntryDao.findByUidAsync(entityUid) }
-        } ?: ContentEntry()
+            db.onRepoWithFallbackToDb(2000) { it.contentEntryDao.findByUidAsync(entityUid) }
+        }
 
         setupTabs()
 
@@ -53,8 +54,16 @@ class ContentEntryDetailPresenter(context: Any,
 
     private fun setupTabs() {
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
-        view.tabs = listOf("${ContentEntryDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid",
-                "${ContentEntryDetailAttemptsListView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
+        val commonArgs = mapOf(
+            UstadView.ARG_NAV_CHILD to true.toString(),
+            UstadView.ARG_ENTITY_UID to entityUid.toString(),
+            UstadView.ARG_CLAZZUID to (arguments[UstadView.ARG_CLAZZUID] ?: "0")
+        )
+
+        view.tabs = listOf(
+            ContentEntryDetailOverviewView.VIEW_NAME.appendQueryArgs(commonArgs),
+            ContentEntryDetailAttemptsListView.VIEW_NAME.appendQueryArgs(commonArgs)
+        )
     }
 
 
