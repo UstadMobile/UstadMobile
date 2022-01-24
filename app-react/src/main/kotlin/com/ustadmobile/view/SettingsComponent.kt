@@ -58,6 +58,7 @@ class SettingsComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(pr
 
     override fun onCreateView() {
         super.onCreateView()
+        fabManager?.visible = false
         ustadComponentTitle = getString(MessageID.settings)
         mPresenter = SettingsPresenter(this, arguments, this, di)
         mPresenter?.onCreate(mapOf())
