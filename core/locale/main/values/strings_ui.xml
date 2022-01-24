@@ -1463,5 +1463,10 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="parent">Parent</string>
 
+    <string name="upload">Upload</string>
+
+    <string name="selected_file_summary">Selected %1$s with %2$s in size</string>
+
+    <string name="drag_and_drop_or_click_to_add_file">Drag and drop a file here or click</string>
 
 </resources>
