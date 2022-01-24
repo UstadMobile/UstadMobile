@@ -1318,4 +1318,10 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!-- This is an option when we ask users about their connectivity access -->
     <string name="limited_i_avoid_downloading_too_much">Limited - I avoid downloading too much</string>
 
+    <string name="upload">Upload</string>
+
+    <string name="drag_and_drop_or_click_info">Drag and drop a file here or click</string>
+
+    <string name="selected_file_info">Selected %1$s with %2$s in size</string>
+
 </resources>
