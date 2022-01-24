@@ -101,8 +101,9 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props), Spl
                         +partnersList
                         +alignEndItems
                     }
-                    umPartner("irc.png")
-                    umPartner("expo.png")
+                    umPartner("tajik_emblem.webp")
+                    umPartner("unicef_tj.webp")
+                    umPartner("Eu_logo_tg.webp")
                 }
             }
         }
