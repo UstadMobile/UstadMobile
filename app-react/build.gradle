@@ -70,12 +70,11 @@ dependencies {
 
 task distro(dependsOn: ['browserDistribution']){
     def umAppDir = rootProject.file("app-ktor-server/src/main/resources/umapp/")
-
     doFirst{
-        delete{
-            delete umAppDir.path
+        rootProject.delete(umAppDir)
+        if(!umAppDir.exists()){
+            umAppDir.mkdirs()
         }
-        umAppDir.mkdirs()
     }
 
     doLast {
