@@ -369,14 +369,13 @@ abstract class UmAppDatabase : DoorDatabase() {
                     1 as personGroupFlag,
                     0 as groupMasterCsn,
                     0 as groupLocalCsn,
-                    (SELECT nodeClientId FROM SyncNode) as groupLastChangedBy
+                    0 as groupLastChangedBy
                     FROM person
                     where admin = true
                     AND personGroupUid = 0""")
                 database.execSQL("""
                     UPDATE Person SET
-                    personGroupUid = (SELECT groupUid FROM PersonGroup WHERE groupName = ('PGA' || Person.personUid) LIMIT 1),
-                    personLastChangedBy = (SELECT nodeClientId FROM SyncNode) 
+                    personGroupUid = (SELECT groupUid FROM PersonGroup WHERE groupName = ('PGA' || Person.personUid) LIMIT 1)
                     WHERE
                     admin = true AND personGroupUid = 0
                 """)
@@ -386,7 +385,7 @@ abstract class UmAppDatabase : DoorDatabase() {
                     Person.personGroupUid AS groupMemberGroupUid,
                     0 AS groupMemberMasterCsn,
                     0 AS groupMemberLocalCsn,
-                    (SELECT nodeClientId FROM SyncNode) AS groupMemberLastChangedBy
+                    0 AS groupMemberLastChangedBy
                     FROM Person
                     WHERE admin = true
                     AND (SELECT COUNT(*) FROM PersonGroupMember WHERE PersonGroupmember.groupMemberGroupUid = Person.personGroupUid) = 0
@@ -2009,8 +2008,7 @@ abstract class UmAppDatabase : DoorDatabase() {
                 database.execSQL("""UPDATE ContentEntry 
                                        SET contentOwner = (SELECT personUid 
                                                              FROM Person 
-                                                            WHERE admin LIMIT 1),
-                                          contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) """)
+                                                            WHERE admin LIMIT 1)""")
             }else{
                 database.execSQL("""ALTER TABLE ContentEntry ADD COLUMN contentOwner INTEGER DEFAULT 0 NOT NULL""")
             }
@@ -2050,11 +2048,7 @@ abstract class UmAppDatabase : DoorDatabase() {
             }else {
                 database.execSQL("""
                     UPDATE Site
-                       SET authSalt = '${randomString(20)}',
-                           siteLcb = (SELECT COALESCE(
-                                             (SELECT nodeClientId 
-                                                FROM SyncNode
-                                               LIMIT 1), 0))
+                       SET authSalt = '${randomString(20)}'
                 """)
                 database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2 (  pauthUid  BIGINT  PRIMARY KEY  NOT NULL , pauthMechanism  TEXT , pauthAuth  TEXT , pauthLcsn  BIGINT  NOT NULL , pauthPcsn  BIGINT  NOT NULL , pauthLcb  INTEGER  NOT NULL , pauthLct  BIGINT  NOT NULL )")
                 database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonAuth2_mcsn_seq")
@@ -2397,11 +2391,7 @@ abstract class UmAppDatabase : DoorDatabase() {
             if(database.dbType() == DoorDbType.POSTGRES) {
                 database.execSQL("""
                     UPDATE ScopedGrant 
-                       SET sgPermissions = (sgPermissions | ${Role.PERMISSION_CLAZZ_CONTENT_SELECT}),
-                           sgLcb = COALESCE((
-                           SELECT nodeClientId
-                             FROM SyncNode
-                            LIMIT 1), 0) 
+                       SET sgPermissions = (sgPermissions | ${Role.PERMISSION_CLAZZ_CONTENT_SELECT})
                      WHERE (sgFlags & $FLAG_STUDENT_GROUP) = $FLAG_STUDENT_GROUP   
                 """)
 
@@ -2409,11 +2399,7 @@ abstract class UmAppDatabase : DoorDatabase() {
                         Role.PERMISSION_CLAZZ_CONTENT_UPDATE
                 database.execSQL("""
                     UPDATE ScopedGrant 
-                       SET sgPermissions = (sgPermissions | ${teacherAddPermissions}),
-                           sgLcb = COALESCE((
-                           SELECT nodeClientId
-                             FROM SyncNode
-                            LIMIT 1), 0) 
+                       SET sgPermissions = (sgPermissions | ${teacherAddPermissions})
                      WHERE (sgFlags & $FLAG_TEACHER_GROUP) = $FLAG_TEACHER_GROUP   
                 """)
 
@@ -2431,7 +2417,7 @@ abstract class UmAppDatabase : DoorDatabase() {
                                 groupLastChangedBy, groupLct, groupName, groupActive, 
                                 personGroupFlag)
                          SELECT 0 AS groupMasterCsn, 0 AS groupLocalCsn,
-                                (SELECT nodeClientId FROM SyncNode LIMIT 1) AS groupLastChangedBy,
+                                0 AS groupLastChangedBy,
                                 0 AS groupLct,
                                 ('Class-Parents-' || CAST(Clazz.clazzUid AS TEXT)) AS groupName,
                                 true AS groupActive,
@@ -2445,8 +2431,7 @@ abstract class UmAppDatabase : DoorDatabase() {
                            (SELECT groupUid 
                               FROM PersonGroup
                              WHERE clazzParentsPersonGroupUid = 0
-                               AND groupName = ('Class-Parents-' || CAST(Clazz.clazzUid AS TEXT))),
-                           clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)    
+                               AND groupName = ('Class-Parents-' || CAST(Clazz.clazzUid AS TEXT)))  
                 """)
 
                 database.execSQL("""
@@ -2585,7 +2570,11 @@ abstract class UmAppDatabase : DoorDatabase() {
             if(db.dbType() == DoorDbType.SQLITE) {
                 DatabaseTriggers.sqliteContentJobItemTriggers.toList()
             }else {
-                DatabaseTriggers.postgresContentJobItemTriggers.toList()
+                DatabaseTriggers.postgresContentJobItemTriggers.toList() + listOf(
+                    "ALTER TABLE Language ALTER COLUMN languageactive DROP DEFAULT",
+                    "ALTER TABLE Language ALTER COLUMN languageActive TYPE BOOL " +
+                        "USING CASE WHEN LanguageActive = 0 THEN FALSE ELSE TRUE END"
+                )
             }
         }
 
@@ -2691,6 +2680,7 @@ abstract class UmAppDatabase : DoorDatabase() {
             if (database.dbType() == DoorDbType.SQLITE) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
             } else {
+                database.execSQL("ALTER TABLE SyncNode ALTER COLUMN nodeClientId TYPE BIGINT")
                 database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  SERIAL  PRIMARY KEY  NOT NULL )")
             }
 
