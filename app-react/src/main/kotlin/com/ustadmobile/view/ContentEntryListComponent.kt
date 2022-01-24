@@ -17,6 +17,7 @@ import com.ustadmobile.mui.components.umMenuItem
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.view.ext.createContentEntryListItem
+import com.ustadmobile.view.ext.showContentCreationOptions
 import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.document
 import kotlinx.css.display
@@ -25,7 +26,6 @@ import react.RBuilder
 import react.setState
 import styled.css
 import styled.styledDiv
-import kotlin.js.Date
 
 
 class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry,
@@ -95,28 +95,8 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
     }
 
     override fun RBuilder.renderAddContentOptionsDialog() {
-
         if(showAddEntryOptions){
-            val options = mutableListOf(
-                UmDialogOptionItem("create_new_folder",
-                    MessageID.content_editor_create_new_category) {
-                    mPresenter?.onClickNewFolder()
-                },
-                UmDialogOptionItem("link",MessageID.add_using_link,
-                    MessageID.add_link_description) {
-                    mPresenter?.onClickImportLink()
-                },
-                UmDialogOptionItem("collections",MessageID.add_from_gallery,
-                    MessageID.add_gallery_description) {
-                    mPresenter?.onClickImportGallery()
-                },
-                UmDialogOptionItem("note_add",MessageID.add_file,
-                    MessageID.add_file_description) {
-                    mPresenter?.onClickImportFile()
-                }
-            )
-
-            renderDialogOptions(systemImpl,options, Date().getTime().toLong()){
+            showContentCreationOptions(mPresenter, systemImpl){
                 setState {
                     showAddEntryOptions = false
                 }
@@ -126,7 +106,7 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
 
 
     override fun showDownloadDialog(args: Map<String, String>) {
-        TODO("showDownloadDialog: Not yet implemented")
+        //TODO("showDownloadDialog: Not yet implemented")
     }
 
     override fun RBuilder.renderEditOptionMenu() {

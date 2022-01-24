@@ -66,6 +66,8 @@ import com.ustadmobile.door.ext.nodeIdAuthCache
 import com.ustadmobile.door.util.NodeIdAuthCache
 import com.ustadmobile.core.db.RepIncomingListener
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
+import io.ktor.response.*
+import kotlinx.coroutines.delay
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -344,6 +346,15 @@ fun Application.umRestApplication(dbModeOverride: String? = null,
 
 
 
+    }
+
+    //Ensure that older clients that make http calls to pages that no longer exist will not make
+    // an infinite number of calls and exhaust their data bundle etc.
+    install(StatusPages) {
+        status(HttpStatusCode.NotFound) {
+            delay(10000L)
+            call.respondText("Not found", ContentType.Text.Plain, HttpStatusCode.NotFound)
+        }
     }
 
     install(Routing) {
