@@ -1,19 +1,15 @@
 package com.ustadmobile.controller
 
-import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.util.safeStringify
-import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.SelectFileView.Companion.ARG_SELECTION_MODE
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.util.urlSearchParamsToMap
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -35,7 +31,10 @@ class SelectFilePresenter(
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
 
+    private var parentEntryUid: Long = 0L
+
     override fun onCreate(savedState: Map<String, String>?){
+        parentEntryUid = arguments[UstadView.ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
         view.acceptedMimeTypes = urlSearchParamsToMap()[ARG_SELECTION_MODE].toString().split(";")
     }
 
@@ -56,32 +55,31 @@ class SelectFilePresenter(
         request.send(formData)
         request.onreadystatechange = {
             if(request.readyState.toInt() == 4){
-                view.loading = false
                 val response = safeParse(di, FileUploadResponse.serializer(), request.responseText)
-                GlobalScope.launch(Dispatchers.Main) {
-                    if(response.contentEntryUid > 0){
-                        val parentEntryUid = arguments[UstadView.ARG_PARENT_ENTRY_UID]
-                        val leafContent = arguments[UstadView.ARG_LEAF]?.toBoolean() ?: false
-                        val contentEntry = ContentEntryWithLanguage().apply {
-                            contentEntryUid = response.contentEntryUid
-                            leaf = leafContent
+                if(response.contentEntryUid > 0){
+                    repo.contentEntryDao.findLiveContentEntry(response.contentEntryUid).observe(lifecycleOwner){ entry ->
+                        if(entry != null){
+                            val args = mutableMapOf(
+                                UstadView.ARG_PARENT_ENTRY_TITLE to entry.title,
+                                UstadView.ARG_CLAZZUID to "0",
+                                UstadView.ARG_CONTENT_ENTRY_UID to entry.contentEntryUid.toString()
+                            )
+                            val contentEntryJoin = ContentEntryParentChildJoin().apply {
+                                cepcjChildContentEntryUid = entry.contentEntryUid
+                                cepcjParentContentEntryUid = parentEntryUid
+                            }
+
+                            GlobalScope.launch{
+                                repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
+                                view.loading = false
+                                systemImpl.go(ContentEntryDetailView.VIEW_NAME, args, this)
+                            }
                         }
-                        val metadata = safeStringify(di, MetadataResult.serializer(),
-                            MetadataResult(entry = contentEntry, pluginId = -1)
-                        )
-                        val entry = repo.contentEntryDao.findByUidAsync(response.contentEntryUid)
-                        val args = mutableMapOf(
-                            ContentEntryEdit2View.ARG_IMPORTED_METADATA to metadata,
-                            UstadView.ARG_CONTENT_ENTRY_UID to response.contentEntryUid.toString(),
-                            UstadView.ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
-                            UstadView.ARG_POPUPTO_ON_FINISH to ContentEntryList2View.VIEW_NAME_HOME,
-                            UstadView.ARG_LEAF to arguments[UstadView.ARG_LEAF].toString()
-                        )
-                        systemImpl.go(ContentEntryEdit2View.VIEW_NAME, args, this)
-                    }else {
-                        view.unSupportedFileError = systemImpl.getString(
-                            MessageID.import_link_content_not_supported, this)
                     }
+                }else {
+                    view.loading = false
+                    view.unSupportedFileError = systemImpl.getString(
+                        MessageID.import_link_content_not_supported, this)
                 }
             }
         }
