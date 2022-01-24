@@ -4,6 +4,7 @@ package com.ustadmobile.view.ext
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.controller.BitmaskEditPresenter
+import com.ustadmobile.core.controller.ContentEntryAddOptionsListener
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.ChartData
@@ -40,10 +41,7 @@ import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.*
 import com.ustadmobile.util.getViewNameFromUrl
-import com.ustadmobile.view.ChartOptions
-import com.ustadmobile.view.ChartType
-import com.ustadmobile.view.ContentEntryListComponent
-import com.ustadmobile.view.umChart
+import com.ustadmobile.view.*
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import mui.material.GridProps
@@ -1122,8 +1120,10 @@ fun RBuilder.createContentEntryListItem(
     }*/
 }
 
-
-fun RBuilder.renderCreateCommentSection(label: String,onClick: () -> Unit){
+/**
+ * Responsible for creating a comment place holder view on a view
+ */
+fun RBuilder.renderCreateCommentSection(label: String, onClick: () -> Unit){
     umItem(GridSize.cells12, flexDirection = FlexDirection.row){
         styledSpan {
             css{
@@ -1216,8 +1216,10 @@ fun setStatementQuestionAnswer(statementEntity: StatementEntity): String{
     }
 }
 
-
-
+/**
+ * Create top summary cards which might be used to show main action on a screen
+ * like how we have used them on PersonDetail screen for top quick actions
+ */
 fun RBuilder.createSummaryCard(title: Any?, subTitle: String){
     umItem(GridSize.cells12, GridSize.cells4){
 
@@ -1242,6 +1244,9 @@ fun RBuilder.createSummaryCard(title: Any?, subTitle: String){
     }
 }
 
+/**
+ * Responsible for creating google chart
+ */
 fun RBuilder.drawChart(
     chartData: ChartData ? = null,
     height: Int = 400,
@@ -1322,5 +1327,41 @@ fun RBuilder.drawChart(
         }
 
         onChartRendered?.invoke(drawChart)
+    }
+}
+
+/**
+ * Renders content creation options when user clicks add or update buttons
+ */
+fun RBuilder.showContentCreationOptions(
+    listener: ContentEntryAddOptionsListener?,
+    systemImpl: UstadMobileSystemImpl,
+    showAddFolder: Boolean = true,
+    onDialogClosed: () -> Unit){
+
+    val options = if(showAddFolder) mutableListOf(
+        UmDialogOptionItem("create_new_folder",
+            MessageID.content_editor_create_new_category) {
+            listener?.onClickNewFolder()
+        })
+    else mutableListOf()
+
+    options.addAll(listOf(
+        UmDialogOptionItem("link",MessageID.add_using_link,
+            MessageID.add_link_description) {
+            listener?.onClickImportLink()
+        },
+        UmDialogOptionItem("collections",MessageID.add_from_gallery,
+            MessageID.add_gallery_description) {
+            listener?.onClickImportGallery()
+        },
+        UmDialogOptionItem("note_add",MessageID.add_file,
+            MessageID.add_file_description) {
+            listener?.onClickImportFile()
+        }
+    ))
+
+    renderDialogOptions(systemImpl,options, Date().getTime().toLong()){
+        onDialogClosed()
     }
 }

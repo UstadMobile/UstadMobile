@@ -33,6 +33,8 @@ class SelectFilePresenter(
 
     private var parentEntryUid: Long = 0L
 
+
+
     override fun onCreate(savedState: Map<String, String>?){
         parentEntryUid = arguments[UstadView.ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
         view.acceptedMimeTypes = urlSearchParamsToMap()[ARG_SELECTION_MODE].toString().split(";")
@@ -57,22 +59,28 @@ class SelectFilePresenter(
             if(request.readyState.toInt() == 4){
                 val response = safeParse(di, FileUploadResponse.serializer(), request.responseText)
                 if(response.contentEntryUid > 0){
-                    repo.contentEntryDao.findLiveContentEntry(response.contentEntryUid).observe(lifecycleOwner){ entry ->
+                    //Wait for replication engine to replicate before processing the content entry
+                    db.contentEntryDao.findLiveContentEntry(response.contentEntryUid).observe(lifecycleOwner){ entry ->
                         if(entry != null){
                             val args = mutableMapOf(
-                                UstadView.ARG_PARENT_ENTRY_TITLE to entry.title,
+                                UstadView.ARG_ENTITY_UID to entry.contentEntryUid.toString(),
                                 UstadView.ARG_CLAZZUID to "0",
-                                UstadView.ARG_CONTENT_ENTRY_UID to entry.contentEntryUid.toString()
-                            )
+                                UstadView.ARG_PARENT_ENTRY_TITLE to entry.title,
+                                )
                             val contentEntryJoin = ContentEntryParentChildJoin().apply {
                                 cepcjChildContentEntryUid = entry.contentEntryUid
                                 cepcjParentContentEntryUid = parentEntryUid
                             }
 
+                            //Make sure entry has it's container ready before navigation
+                            db.contentEntryDao.findEntryWithContainerByEntryIdLive(entry.contentEntryUid).observe(lifecycleOwner){
+                                if(it != null){
+                                    view.loading = false
+                                    systemImpl.go(ContentEntryDetailView.VIEW_NAME, args, this)
+                                }
+                            }
                             GlobalScope.launch{
                                 repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
-                                view.loading = false
-                                systemImpl.go(ContentEntryDetailView.VIEW_NAME, args, this)
                             }
                         }
                     }

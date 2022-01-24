@@ -9,6 +9,7 @@ import com.ustadmobile.mui.components.themeContext
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
+import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.document
@@ -72,13 +73,13 @@ class SelectFileComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
             }
         }
 
-    private var dropZoneText: String = getString(MessageID.import_content)
+    private var dropZoneText: String = getString(MessageID.drag_and_drop_or_click_to_add_file)
 
     override fun onCreateView() {
         super.onCreateView()
         mPresenter = SelectFilePresenter(this, arguments, this, this, di)
         fabManager?.icon = "upload"
-        fabManager?.text = getString(MessageID.submit)
+        fabManager?.text = getString(MessageID.upload)
         fabManager?.visible = true
         fabManager?.onClickListener = {
             mPresenter.handleClickSave(selectedFiles)
@@ -107,8 +108,8 @@ class SelectFileComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                                 if(selectedFiles.isNotEmpty()){
                                     val file = (it as Array<dynamic>).first().file
                                     setState {
-                                        dropZoneText = "${file.name} -" +
-                                                " ${UMFileUtil.formatFileSize(file.size.toString().toLong())}"
+                                        dropZoneText = getString(MessageID.selected_file_summary).format(file.name.toString(),
+                                            UMFileUtil.formatFileSize(file.size.toString().toLong()))
                                     }
                                 }
                             }

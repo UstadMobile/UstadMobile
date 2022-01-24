@@ -19,6 +19,7 @@ import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.switchMargin
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.view.ext.showContentCreationOptions
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.*
@@ -144,6 +145,8 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
     var showWebPreview = false
 
+    var showContentCreationOptionsDialog = false
+
 
     override var videoUri: String? = null
         get() = field
@@ -212,7 +215,9 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                                 color = UMColor.secondary,
                                 variant = ButtonVariant.contained,
                                 onClick = {
-                                    //update
+                                    setState{
+                                        showContentCreationOptionsDialog = true
+                                    }
                                 }){
                                 css{
                                     padding = "15px"
@@ -391,6 +396,14 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                     }
                 }
 
+            }
+        }
+
+        if(showContentCreationOptionsDialog){
+            showContentCreationOptions(mPresenter, systemImpl, false){
+                setState {
+                    showContentCreationOptionsDialog = false
+                }
             }
         }
     }
