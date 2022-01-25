@@ -39,8 +39,6 @@ import com.ustadmobile.view.ext.umTopBar
 import kotlinext.js.jsObject
 import kotlinx.browser.document
 import kotlinx.browser.window
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.padding
