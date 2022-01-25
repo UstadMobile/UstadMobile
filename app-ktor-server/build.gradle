@@ -121,6 +121,20 @@ shadowJar {
     archiveBaseName = "ustad-server"
 }
 
+task deleteWebResources{
+    doLast{
+        def dir = project.file("src/main/resources/umapp")
+        if(dir.exists()){
+            println("Deleteting files from ${dir.path}")
+            delete {
+                delete dir
+            }
+        }else {
+            println("${dir.path} doesn't exist, skipping")
+        }
+    }
+}
+
 
 sourceCompatibility = "8"
 targetCompatibility = "8"
