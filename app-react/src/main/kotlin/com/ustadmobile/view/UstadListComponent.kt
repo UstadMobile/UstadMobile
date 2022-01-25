@@ -19,7 +19,7 @@ import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignCenterItems
-import com.ustadmobile.util.StyleManager.centerContainer
+import com.ustadmobile.util.StyleManager.centerEmptyContainer
 import com.ustadmobile.util.StyleManager.chipSetFilter
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -260,7 +260,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     private fun RBuilder.renderEmptyList(){
       if(showEmptyState){
           umGridContainer {
-              css (centerContainer)
+              css (centerEmptyContainer)
               styledDiv {
                   css{
                       +alignCenterItems
@@ -532,7 +532,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             }
 
             umItem(GridSize.cells5, flexDirection = FlexDirection.rowReverse) {
-               if(selectedListItems.isEmpty()){
+               if(selectedListItems.isEmpty() && !showEmptyState){
                    styledSpan {
                        css{
                            marginLeft = 2.spacingUnits
