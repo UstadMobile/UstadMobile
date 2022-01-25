@@ -419,6 +419,15 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         alignItems = Align.center
     }
 
+
+    val centerEmptyContainer by css {
+        display = Display.flex
+        justifyContent = JustifyContent.center
+        height = 70.vh
+        width = 80.vw
+        alignItems = Align.center
+    }
+
     val videoPlayerWrapper by css {
         display = Display.flex
         justifyContent = JustifyContent.center

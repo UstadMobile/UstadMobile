@@ -39,8 +39,6 @@ import com.ustadmobile.view.ext.umTopBar
 import kotlinext.js.jsObject
 import kotlinx.browser.document
 import kotlinx.browser.window
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.padding
@@ -106,59 +104,62 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
     override fun RBuilder.render() {
         themeContext.Consumer { _ ->
 
-            styledDiv {
-                css (mainComponentWrapperContainer)
-
-                //Loading indicator
-                umLinearProgress(color = if(isDarkModeActive()) UMColor.secondary
-                else UMColor.primary) {
-                    css(mainComponentProgressIndicator)
-                    attrs.asDynamic().id = "um-progress"
-                }
-
+            val appLoaded = systemImpl.getAppPref(SplashView.TAG_LOADED,"false", this).toBoolean()
+            if(appLoaded){
                 styledDiv {
-                    css(mainComponentContainer)
+                    css (mainComponentWrapperContainer)
 
-                    umTopBar(appState,
-                        currentDestination,
-                        if(systemImpl.isRtlActive()) "..." else "" +
-                                "${getString(MessageID.search)} " +
-                                if(systemImpl.isRtlActive()) "" else "...",
-                        activeAccount?.firstName){
-                        GlobalScope.launch {
-                            appDatabase.exportDatabase()
-                        }
-                        systemImpl.go(AccountListView.VIEW_NAME, mapOf(), this)
+                    //Loading indicator
+                    umLinearProgress(color = if(isDarkModeActive()) UMColor.secondary
+                    else UMColor.primary) {
+                        css(mainComponentProgressIndicator)
+                        attrs.asDynamic().id = "um-progress"
                     }
 
-                    if(currentDestination.showNavigation){
-                        renderSideNavigation()
-                    }
-
-                    // Main content area, this div holds the contents
                     styledDiv {
-                        css(mainComponentContentContainer)
-                        appBarSpacer()
+                        css(mainComponentContainer)
+
+                        umTopBar(appState,
+                            currentDestination,
+                            if(systemImpl.isRtlActive()) "..." else "" +
+                                    "${getString(MessageID.search)} " +
+                                    if(systemImpl.isRtlActive()) "" else "...",
+                            activeAccount?.firstName){
+                            /*GlobalScope.launch {
+                                appDatabase.exportDatabase()
+                            }*/
+                            systemImpl.go(AccountListView.VIEW_NAME, mapOf(), this)
+                        }
+
+                        if(currentDestination.showNavigation){
+                            renderSideNavigation()
+                        }
+
+                        // Main content area, this div holds the contents
                         styledDiv {
-                            attrs.asDynamic().id = "main-content"
-                            renderRoutes(systemImpl)
+                            css(mainComponentContentContainer)
+                            appBarSpacer()
+                            styledDiv {
+                                attrs.asDynamic().id = "main-content"
+                                renderRoutes(systemImpl)
+                            }
+                        }
+
+                        if(currentDestination.showNavigation){
+                            renderBottomNavigation()
+                        }
+
+                        umFab("","",
+                            id = "um-fab",
+                            color = UMColor.secondary) {
+                            css{
+                                display = Display.none
+                                +mainComponentFab
+                            }
                         }
                     }
-
-                    if(currentDestination.showNavigation){
-                        renderBottomNavigation()
-                    }
-
-                    umFab("","",
-                        id = "um-fab",
-                        color = UMColor.secondary) {
-                        css{
-                            display = Display.none
-                            +mainComponentFab
-                        }
-                    }
+                    renderSnackBar()
                 }
-                renderSnackBar()
             }
         }
     }

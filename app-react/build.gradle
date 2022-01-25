@@ -68,19 +68,13 @@ dependencies {
     implementation "io.github.aakira:napier:$version_napier"
 }
 
-task distro(dependsOn: ['browserDistribution']){
-    def umAppDir = rootProject.file("app-ktor-server/src/main/resources/umapp/")
-    doFirst{
-        rootProject.delete(umAppDir)
-        if(!umAppDir.exists()){
-            umAppDir.mkdirs()
-        }
-    }
-
+task distro(dependsOn: [':app-react:browserDistribution']){
     doLast {
         copy {
             from project.file("build/distributions").path
-            into umAppDir.path
+            into rootProject.file("app-ktor-server/src/main/resources/umapp/").path
         }
     }
 }
+
+distro.mustRunAfter(":app-ktor-server:deleteWebResources")

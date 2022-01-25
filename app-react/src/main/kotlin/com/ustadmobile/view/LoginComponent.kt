@@ -4,6 +4,7 @@ import Breakpoint
 import com.ustadmobile.FieldLabel
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
@@ -119,6 +120,12 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
         ustadComponentTitle = getString(MessageID.login)
         mPresenter = Login2Presenter(this, arguments,this, di)
         mPresenter?.onCreate(mapOf())
+    }
+
+    override fun componentDidUpdate(prevProps: UmProps, prevState: UmState, snapshot: Any) {
+        if(accountManager.activeSession != null){
+            systemImpl.go(ContentEntryList2View.VIEW_NAME_HOME, mapOf(), this)
+        }
     }
 
     override fun RBuilder.render() {

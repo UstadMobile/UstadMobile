@@ -91,8 +91,8 @@ class SplashPresenter(private val view: SplashView): DIAware {
             impl.currentTranslations = Pair(currentAssetPath, currentStrings)
         }
         view.appName = impl.getString(MessageID.app_name,this)
+        impl.setAppPref(SplashView.TAG_LOADED,"true", this)
         view.loading = false
-        impl.setAppPref(SplashView.TAG_LOADED,"false", this)
     }
 
     override val di: DI

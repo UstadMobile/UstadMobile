@@ -14,7 +14,6 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.asRepository
-import com.ustadmobile.util.ContainerMounterJs
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mui.components.umThemeProvider
@@ -24,7 +23,9 @@ import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxDiState
 import com.ustadmobile.redux.ReduxThemeState
 import com.ustadmobile.util.BrowserTabTracker
+import com.ustadmobile.util.ContainerMounterJs
 import com.ustadmobile.util.ThemeManager.createAppTheme
+import com.ustadmobile.view.SplashView
 import com.ustadmobile.view.renderSplashComponent
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
@@ -35,6 +36,7 @@ import io.ktor.client.engine.js.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.browser.document
+import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +50,7 @@ fun main() {
     defaultJsonSerializer()
     BrowserTabTracker.init()
     Napier.base(DebugAntilog())
+    localStorage.removeItem(SplashView.TAG_LOADED)
     window.onload = {
         render(document.getElementById("root")) {
             val diState = ReduxDiState(
