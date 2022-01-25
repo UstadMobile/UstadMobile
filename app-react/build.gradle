@@ -14,6 +14,9 @@ repositories {
 kotlin {
     js(LEGACY) {
         browser {
+            distribution {
+                directory = rootProject.file("app-ktor-server/src/main/resources/umapp")
+            }
             binaries.executable()
             webpackTask {
                 cssSupport.enabled = true
@@ -67,14 +70,3 @@ dependencies {
     implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "io.github.aakira:napier:$version_napier"
 }
-
-task distro(dependsOn: [':app-react:browserDistribution']){
-    doLast {
-        copy {
-            from project.file("build/distributions").path
-            into rootProject.file("app-ktor-server/src/main/resources/umapp/").path
-        }
-    }
-}
-
-distro.mustRunAfter(":app-ktor-server:deleteWebResources")
