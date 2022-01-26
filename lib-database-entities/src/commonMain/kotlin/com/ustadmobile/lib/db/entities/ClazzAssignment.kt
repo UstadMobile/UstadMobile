@@ -77,6 +77,9 @@ open class ClazzAssignment {
     @ColumnInfo(defaultValue = "0")
     var caMaxScore: Int = 0
 
+    @ColumnInfo(defaultValue = "0")
+    var caXObjectUid: Long = 0
+
     @ColumnInfo(index = true)
     var caClazzUid: Long = 0
 

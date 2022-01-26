@@ -1,6 +1,5 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
@@ -10,6 +9,7 @@ import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_ACTIVE_ASC
 import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_ACTIVE_DESC
 import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_NAME_ASC
 import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_NAME_DESC
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
@@ -221,11 +221,13 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
 
 
     @Query("""
-        SELECT COALESCE(SUM(ResultSource.cacheMaxScore),0) AS resultMax, 
-               COALESCE(SUM(ResultSource.cacheStudentScore),0) AS resultScore, 
-               0 as resultScaled,
+        SELECT 0 AS resultMax, 
+               0 AS resultScore, 
+               COALESCE(SUM(ResultScore.cacheFinalWeightScoreWithPenalty),0) as resultScaled,
                'FALSE' as contentComplete, 0 as progress, 0 as success,
-               COALESCE(AVG(ResultSource.cachePenalty),0) AS penalty,
+               0 AS penalty,
+               
+               COALESCE(SUM(ResultScore.cacheWeight),0) As resultWeight,
                
               COALESCE((SUM(CASE 
                         WHEN CAST(ResultSource.cacheContentComplete AS INTEGER) > 0 
@@ -233,13 +235,12 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                         
                COALESCE(COUNT(DISTINCT ResultSource.cacheContentEntryUid), 0) AS totalContent
  
-     	  FROM (SELECT ClazzAssignmentRollUp.cacheStudentScore, ClazzAssignmentRollUp.cacheMaxScore,
-                        ClazzAssignmentRollUp.cachePenalty, ClazzAssignmentRollUp.cacheContentComplete,
-                        ClazzAssignmentRollUp.cacheContentEntryUid
+     	  FROM (SELECT ClazzAssignmentRollUp.cacheContentComplete,
+                        ClazzAssignmentRollUp.cacheContentEntryUid, ClazzAssignmentRollUp.cacheWeight, 
+                        ClazzAssignmentRollUp.cacheFinalWeightScoreWithPenalty
      	 	      FROM ClazzAssignmentContentJoin 
                          LEFT JOIN ClazzAssignmentRollUp
-                         ON ClazzAssignmentRollUp.cacheContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid 
-                         AND ClazzAssignmentRollUp.cachePersonUid = :personUid
+                         ON ClazzAssignmentRollUp.cachePersonUid = :personUid
                          AND ClazzAssignmentRollUp.cacheClazzAssignmentUid = :caUid
                   WHERE ClazzAssignmentContentJoin.cacjActive
                   GROUP BY ClazzAssignmentContentJoin.cacjContentUid

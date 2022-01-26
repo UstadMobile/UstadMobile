@@ -214,7 +214,19 @@ class ClazzAssignmentEditPresenter(context: Any,
 
 
             if (entity.caUid == 0L) {
-                entity.caUid = repo.clazzAssignmentDao.insertAsync(entity)
+                repo.withDoorTransactionAsync(UmAppDatabase::class) { db ->
+                    entity.caUid = db.clazzAssignmentDao.insertAsync(entity)
+
+                    val clazzAssignmentObjectId = UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
+                            "/clazzAssignment/${entity.caUid}")
+                    val xobject = XObjectEntity().apply {
+                        this.objectId = clazzAssignmentObjectId
+                        this.objectType = "Activity"
+                    }
+                    xobject.xObjectUid = db.xObjectDao.insertAsync(xobject)
+                    entity.caXObjectUid = xobject.xObjectUid
+                    db.clazzAssignmentDao.updateAsync(entity)
+                }
             } else {
                 repo.clazzAssignmentDao.updateAsync(entity)
             }
@@ -225,15 +237,15 @@ class ClazzAssignmentEditPresenter(context: Any,
             val contentToDelete = contentOneToManyJoinEditHelper.primaryKeysToDeactivate
             val contentToUpdate = contentOneToManyJoinEditHelper.entitiesToUpdate
 
-            repo.clazzAssignmentContentJoinDao.insertListAsync(contentToInsert.map {
-                ClazzAssignmentContentJoin().apply {
-                    cacjContentUid = it.contentEntryUid
-                    cacjAssignmentUid = entity.caUid
-                    cacjWeight = it.assignmentContentWeight
-                }
-            })
             // run in transaction
             repo.withDoorTransactionAsync(UmAppDatabase::class) { db ->
+                db.clazzAssignmentContentJoinDao.insertListAsync(contentToInsert.map {
+                    ClazzAssignmentContentJoin().apply {
+                        cacjContentUid = it.contentEntryUid
+                        cacjAssignmentUid = entity.caUid
+                        cacjWeight = it.assignmentContentWeight
+                    }
+                })
                 contentToUpdate.forEach {
                     db.clazzAssignmentContentJoinDao.updateWeightForAssignmentAndContent(it.contentEntryUid, entity.caUid, it.assignmentContentWeight)
                 }

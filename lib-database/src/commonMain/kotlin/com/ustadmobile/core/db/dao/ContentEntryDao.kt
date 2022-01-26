@@ -337,7 +337,10 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT * FROM ContentEntry where contentEntryUid = :parentUid LIMIT 1")
     abstract fun findLiveContentEntry(parentUid: Long): DoorLiveData<ContentEntry?>
 
-    @Query("SELECT contentEntryUid FROM ContentEntry WHERE entryId = :objectId LIMIT 1")
+    @Query("""SELECT COALESCE((SELECT contentEntryUid 
+                                      FROM ContentEntry 
+                                     WHERE entryId = :objectId 
+                                     LIMIT 1),0) AS ID""")
     @JsName("getContentEntryUidFromXapiObjectId")
     abstract fun getContentEntryUidFromXapiObjectId(objectId: String): Long
 

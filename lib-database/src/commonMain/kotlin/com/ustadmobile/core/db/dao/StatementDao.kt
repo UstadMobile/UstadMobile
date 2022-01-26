@@ -212,6 +212,22 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     """)
     abstract suspend fun getBestScoreForContentForPerson(contentEntryUid: Long, accountPersonUid: Long): ContentEntryStatementScoreProgress?
 
+
+
+    @Query("""
+        SELECT * 
+          FROM StatementEntity
+         WHERE statementPersonUid = :studentUid
+           AND statementVerbUid = ${VerbEntity.VERB_SUBMITTED_UID}
+           AND xObjectUid = (SELECT xObjectUid 
+                               FROM XObjectEntity 
+                              WHERE objectId = :assignmentId 
+                              LIMIT 1)           
+      ORDER BY timestamp                
+    """)
+    abstract suspend fun findSubmittedStatementFromStudent(studentUid: Long, assignmentId: String): StatementEntity?
+
+
     @Query("""
         SELECT MIN(timestamp) AS startDate, 
             MAX(CASE 
@@ -287,7 +303,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                0 as penalty,
                0 as success,
                'FALSE' as contentComplete,
-               0 AS resultScaled,
+               0 AS resultScaled, 
                COALESCE((CASE WHEN resultCompletion 
                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
                 

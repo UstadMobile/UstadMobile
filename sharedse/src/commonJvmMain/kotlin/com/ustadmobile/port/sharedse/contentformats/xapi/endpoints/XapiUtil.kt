@@ -126,7 +126,7 @@ object XapiUtil {
         val definition = xobject.definition
         val changedXObject = XObjectEntity(xobject.id, xobject.objectType,
                 if (definition != null) definition.type else "", if (definition != null) definition.interactionType else "",
-                if (definition != null) gson.toJson(definition.correctResponsePattern) else "", contentEntryUidVal)
+                if (definition != null) gson.toJson(definition.correctResponsePattern) else "", contentEntryUidVal, xobject.statementRefUid)
 
         if (entity == null) {
             changedXObject.xObjectUid = dao.insert(changedXObject)

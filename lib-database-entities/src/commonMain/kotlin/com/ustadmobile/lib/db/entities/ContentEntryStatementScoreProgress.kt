@@ -12,6 +12,8 @@ class ContentEntryStatementScoreProgress {
 
     var resultScaled: Float = 0f
 
+    var resultWeight: Int = 0
+
     var contentComplete: Boolean = false
 
     var progress: Int = 0

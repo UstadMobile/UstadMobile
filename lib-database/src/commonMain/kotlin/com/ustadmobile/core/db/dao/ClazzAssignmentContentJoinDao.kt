@@ -92,6 +92,8 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
         COALESCE(ClazzAssignmentRollUp.cacheProgress,0) AS progress,                   
                  
         0 as resultScaled,
+        
+        COALESCE(ClazzAssignmentContentJoin.cacjWeight, 0) AS resultWeight,
                             
         COALESCE(ClazzAssignmentRollUp.cacheContentComplete,'FALSE') AS contentComplete,
         

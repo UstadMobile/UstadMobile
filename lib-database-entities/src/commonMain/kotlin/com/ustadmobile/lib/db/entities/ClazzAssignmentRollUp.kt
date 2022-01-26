@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -23,6 +24,12 @@ class ClazzAssignmentRollUp {
     var cacheStudentScore: Int = 0
 
     var cacheMaxScore: Int = 0
+
+    @ColumnInfo(defaultValue = "0")
+    var cacheFinalWeightScoreWithPenalty: Float = 0f
+
+    @ColumnInfo(defaultValue = "0")
+    var cacheWeight: Int = 0
 
     var cacheProgress: Int = 0
 

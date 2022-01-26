@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.text.format.DateFormat
 import android.view.View
 import android.widget.TextView
@@ -329,6 +328,16 @@ fun TextView.setScorePercentage(scoreProgress: ContentEntryStatementScoreProgres
     // (4/5) * (1 - 20%) = penalty applied to score
     text = "${scoreProgress.calculateScoreWithPenalty()}%"
 }
+
+@BindingAdapter("scoreWithWeight")
+fun TextView.setFinalScoreWithWeight(scoreProgress: ContentEntryStatementScoreProgress?){
+    if(scoreProgress == null){
+        return
+    }
+    text = "${scoreProgress.calculateScoreWithWeight()}"
+}
+
+
 
 @BindingAdapter("durationMinsSecs")
 fun TextView.setDurationMinutesAndSeconds(duration: Long){

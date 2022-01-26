@@ -74,7 +74,7 @@
 
         <TextView
             android:paddingStart="@dimen/dimen_5dp"
-            tools:text="100%"
+            tools:text="80%"
             android:id="@+id/item_person_progress"
             app:drawableStartCompat="@drawable/ic_baseline_emoji_events_24"
             android:drawablePadding="@dimen/dimen_4dp"
@@ -197,6 +197,21 @@
             app:layout_constraintTop_toBottomOf="@+id/item_content_person_attempt"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="@dimen/dimen_16dp" />
+
+
+        <TextView
+            android:id="@+id/content_weight"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/dimen_5dp"
+            android:paddingEnd="@dimen/dimen_5dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            app:layout_constraintStart_toStartOf="@id/item_person_progress"
+            app:layout_constraintTop_toBottomOf="@id/item_person_progress"
+            tools:text="Weight: 10%"
+            android:text="@{@string/weight_percentage(contentEntry.scoreProgress.resultWeight)}"
+            android:visibility="@{contentEntry.scoreProgress.resultWeight > 0 ? View.VISIBLE : View.GONE}"
+            />
 
 
 

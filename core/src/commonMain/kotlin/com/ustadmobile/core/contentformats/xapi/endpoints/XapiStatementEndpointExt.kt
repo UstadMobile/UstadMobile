@@ -90,9 +90,51 @@ fun XapiStatementEndpoint.storeCompletedStatement(account: UmAccount, entry: Con
     storeStatements(listOf(statement), "", entry.contentEntryUid, clazzUid)
 }
 
+fun XapiStatementEndpoint.storeSubmitFileSubmissionStatement(account: UmAccount,
+                                                             contextRegistration: String,
+                                                             assignment: ClazzAssignment
+){
+
+    val statement = Statement().apply {
+        this.actor = Actor().apply {
+            this.account = Account().apply {
+                this.homePage = account.endpointUrl
+                this.name = account.username
+            }
+        }
+        this.verb = Verb().apply {
+            this.id = VerbEntity.VERB_SUBMITTED_URL
+            this.display = mapOf("en-US" to "submitted")
+        }
+        this.context = XContext().apply {
+            registration = contextRegistration
+        }
+        this.result = Result().apply {
+            this.completion = false
+            success = false
+        }
+        this.`object` = XObject().apply {
+            this.id = UMFileUtil.joinPaths(account.endpointUrl,
+                    "/clazzAssignment/${assignment.caUid}")
+            this.objectType = "Activity"
+            this.definition = Definition().apply {
+                this.name = mapOf("en-US" to (assignment.caTitle ?: ""))
+                this.description = mapOf("en-US" to (assignment.caDescription ?: ""))
+            }
+        }
+    }
+
+    storeStatements(listOf(statement), "", 0, assignment.caClazzUid)
+
+
+
+}
+
+
+
 fun XapiStatementEndpoint.storeMarkedStatement(
         account: UmAccount, student: Person, contextRegistration: String,
-        grade:Int, assignment: ClazzAssignment){
+        grade: Int, assignment: ClazzAssignment, studentSubmitStatement: StatementEntity?){
 
     val statement = Statement().apply {
         this.actor = Actor().apply {
@@ -102,7 +144,7 @@ fun XapiStatementEndpoint.storeMarkedStatement(
             }
         }
         this.verb = Verb().apply {
-            this.id = "http://adlnet.gov/expapi/verbs/scored"
+            this.id = VerbEntity.VERB_SCORED_URL
             this.display = mapOf("en-US" to "scored")
         }
         this.context = XContext().apply {
@@ -125,13 +167,9 @@ fun XapiStatementEndpoint.storeMarkedStatement(
                 }
         }
         this.`object` = XObject().apply {
-            this.id = UMFileUtil.joinPaths(account.endpointUrl,
-                    "/clazzAssignment/${assignment.caUid}")
-            this.objectType = "Activity"
-            this.definition = Definition().apply {
-                this.name = mapOf("en-US" to (assignment.caTitle ?: ""))
-                this.description = mapOf("en-US" to (assignment.caDescription ?: ""))
-            }
+            this.id = studentSubmitStatement?.statementId
+            this.objectType = "StatementRef"
+            this.statementRefUid = studentSubmitStatement?.statementUid ?: 0
         }
     }
 

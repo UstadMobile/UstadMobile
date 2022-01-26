@@ -144,9 +144,18 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
         val person = view.person ?: return false
         val assignment = view.entity ?: return false
         presenterScope.launch {
+            val clazzAssignmentObjectId = UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
+                    "/clazzAssignment/${selectedClazzAssignmentUid}")
+            val statement = repo.statementDao.findSubmittedStatementFromStudent(person.personUid, clazzAssignmentObjectId)
+            if(statement == null){
+                view.submitMarkError = " "
+                return@launch
+            }
             withContext(Dispatchers.Default) {
                 statementEndpoint.storeMarkedStatement(
-                    accountManager.activeAccount, person, randomUuid().toString(), grade, assignment)
+                    accountManager.activeAccount,
+                        person, randomUuid().toString(),
+                        grade, assignment, statement)
             }
         }
         return true
