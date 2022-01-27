@@ -1,5 +1,7 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.storeSubmitFileSubmissionStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
@@ -15,13 +17,18 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
 class ClazzAssignmentDetailOverviewPresenter(context: Any,
@@ -37,6 +44,8 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                                                              ClazzAssignment.TABLE_ID, true))
     : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner){
 
+
+    val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
 
     override val persistenceMode: PersistenceMode
           get() = PersistenceMode.DB
@@ -185,6 +194,13 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             repo.assignmentFileSubmissionDao.setFilesAsSubmittedForStudent(
                     entity?.caUid ?: 0,
                     accountManager.activeAccount.personUid, true, systemTimeInMillis())
+            withContext(Dispatchers.Default) {
+                val assignment = view.entity ?: return@withContext
+                statementEndpoint.storeSubmitFileSubmissionStatement(
+                        accountManager.activeAccount,
+                        randomUuid().toString(),
+                        assignment)
+            }
         }
     }
 
