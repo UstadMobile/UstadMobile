@@ -76,6 +76,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     private var fileSubmissionLiveData: LiveData<PagedList<AssignmentFileSubmission>>? = null
     private val fileSubmissionObserver = Observer<PagedList<AssignmentFileSubmission>?> {
         t -> run {
+        markSubmissionAdapter?.markGradeEnabled = !t.isEmpty()
         fileSubmissionAdapter?.submitList(t)
     }
     }

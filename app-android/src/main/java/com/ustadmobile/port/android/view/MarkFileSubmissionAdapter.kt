@@ -31,6 +31,15 @@ class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentPr
             viewHolder?.itemBinding?.errorText = value
         }
 
+    var markGradeEnabled = false
+        set(value){
+            if(field == value)
+                return
+            field = value
+            viewHolder?.itemBinding?.markGradeEnabled = value
+        }
+
+
     var markNextStudentEnabled = false
         set(value){
             if(field == value)
@@ -50,6 +59,7 @@ class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentPr
             it.itemBinding.eventHandler = eventHandler
             it.itemBinding.assignment = assignment
             it.itemBinding.markNextStudentEnabled = markNextStudentEnabled
+            it.itemBinding.markGradeEnabled = markGradeEnabled
         }
         return viewHolder as MarkFileSubmissionViewHolder
     }

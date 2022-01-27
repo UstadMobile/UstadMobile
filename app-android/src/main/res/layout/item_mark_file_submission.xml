@@ -20,6 +20,10 @@
             type="Boolean" />
 
         <variable
+            name="markGradeEnabled"
+            type="Boolean" />
+
+        <variable
             name="eventHandler"
             type="com.ustadmobile.port.android.view.ClazzAssignmentDetailStudentProgressFragmentEventHandler" />
 
@@ -67,6 +71,7 @@
             app:layout_constraintTop_toBottomOf="@id/mark_file_submission_text_input"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            android:enabled="@{markGradeEnabled}"
             android:onClick="@{() -> eventHandler.onSubmitGradeClicked()}"
             android:text="@string/submit_grade"
             />
@@ -77,7 +82,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimen_8dp"
             android:text="@string/submit_grade_and_mark_next"
-            android:enabled="@{markNextStudentEnabled}"
+            android:enabled="@{markGradeEnabled &amp; markNextStudentEnabled}"
             app:layout_constraintTop_toBottomOf="@id/mark_file_submission_submit_grade"
             android:onClick="@{() -> eventHandler.onSubmitGradeAndMarkNextClicked() }"
             />
