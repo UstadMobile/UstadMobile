@@ -72,9 +72,13 @@ abstract class ClazzContentJoinDao: BaseDao<ClazzContentJoin> {
 
     @Query("""UPDATE ClazzContentJoin 
                        SET ccjActive = :toggleVisibility, 
-                           ccjLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                           ccjLct = :changedTime 
                      WHERE ccjContentEntryUid IN (:selectedItem)""")
-    abstract suspend fun toggleVisibilityClazzContent(toggleVisibility: Boolean, selectedItem: List<Long>)
+    abstract suspend fun toggleVisibilityClazzContent(
+        toggleVisibility: Boolean,
+        selectedItem: List<Long>,
+        changedTime: Long
+    )
 
     @Query("""
         SELECT ccjContentEntryUid 

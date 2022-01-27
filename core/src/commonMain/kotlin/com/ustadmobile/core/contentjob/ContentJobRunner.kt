@@ -14,6 +14,7 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -61,22 +62,24 @@ class ContentJobRunner(
 
     private val connectivityLiveData: ConnectivityLiveData by on(endpoint).instance()
 
+    private val logPrefix: String
+        get() = "ContentJobRunner@$doorIdentityHashCode Job#${jobId} :"
 
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
         var done : Boolean
         try {
-            Napier.d("connectivity observer forever")
+            Napier.d("$logPrefix connectivity observer forever")
             withContext(doorMainDispatcher()) {
                 connectivityLiveData.liveData.observeForever(this@ContentJobRunner)
             }
 
             do {
-                Napier.d("waiting for signal to check queue")
+                Napier.d("$logPrefix waiting for signal to check queue")
                 checkQueueSignalChannel.receive()
                 val numProcessorsAvailable = numProcessors - activeJobItemIds.size
-                Napier.d("num process available :$numProcessorsAvailable")
+                Napier.d("$logPrefix num process available :$numProcessorsAvailable")
                 if (numProcessorsAvailable > 0) {
                     //Check queue and filter out any duplicates that are being actively processed
                     val queueItems = db.contentJobItemDao.findNextItemsInQueue(jobId, numProcessors * 2).filter {
@@ -84,7 +87,7 @@ class ContentJobRunner(
                     }
 
                     val numJobsToAdd = min(numProcessorsAvailable, queueItems.size)
-                    Napier.d("num of Jobs to add :$numJobsToAdd")
+                    Napier.d("$logPrefix num of Jobs to add :$numJobsToAdd")
 
                     for (i in 0 until numJobsToAdd) {
                         val contentJobItemUid = queueItems[i].contentJobItem?.cjiUid ?: 0L
@@ -96,7 +99,7 @@ class ContentJobRunner(
 
 
                 done = db.contentJobItemDao.isJobDone(jobId)
-                Napier.d("is job Done :$done")
+                Napier.d("$logPrefix is job Done :$done")
             } while (!done)
         }catch(e: Exception) {
             Napier.d(e.stackTraceToString(), e)
@@ -104,20 +107,22 @@ class ContentJobRunner(
             withContext(NonCancellable + doorMainDispatcher()) {
                 connectivityLiveData.liveData.removeObserver(this@ContentJobRunner)
             }
-            Napier.d("close produce job")
+            Napier.d("$logPrefix close produce job")
             close()
         }
     }
 
     private fun CoroutineScope.launchProcessor(id: Int, channel: ReceiveChannel<ContentJobItemAndContentJob>) = launch {
         val tmpDir = createTemporaryDir("job-$id")
-        Napier.d("created tempDir job-$id")
+        Napier.d("$logPrefix created tempDir job-$id")
 
         for(item in channel) {
             val itemUri = item.contentJobItem?.sourceUri?.let { DoorUri.parse(it) } ?: continue
 
             val processContext = ContentJobProcessContext(itemUri, tmpDir, mutableMapOf(), di)
-            println("Proessor #$id processing job #${item.contentJobItem?.cjiUid} attempt #${item.contentJobItem?.cjiAttemptCount}")
+            Napier.d("$logPrefix : " +
+                "Proessor #$id processing job #${item.contentJobItem?.cjiUid} " +
+                "attempt #${item.contentJobItem?.cjiAttemptCount}")
 
             var processResult: ProcessResult? = null
             var processException: Throwable? = null
@@ -189,7 +194,7 @@ class ContentJobRunner(
                 processResult = jobResult.await()
                 db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult.status)
                 db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
-                println("Processor #$id completed job #${item.contentJobItem?.cjiUid}")
+                Napier.d("$logPrefix Processor #$id completed job #${item.contentJobItem?.cjiUid}")
                 delay(1000)
 
             }catch(e: Exception) {
@@ -232,7 +237,8 @@ class ContentJobRunner(
                     }catch (e: Exception){
                         e.printStackTrace()
                     }
-                    println("Processor #$id sending check queue signal after finishing with #${item.contentJobItem?.cjiUid}")
+                    Napier.d("$logPrefix Processor #$id sending check queue signal after " +
+                        "finishing with #${item.contentJobItem?.cjiUid}")
                 }
 
                 withContext(NonCancellable + doorMainDispatcher()) {
@@ -277,10 +283,10 @@ class ContentJobRunner(
                    https://www.lukaslechner.com/why-exception-handling-with-kotlin-coroutines-is-so-hard-and-how-to-successfully-master-it*/
                 coroutineScope {
                     repeat(numProcessors) {
-                        Napier.d("launch processor $it")
+                        Napier.d("$logPrefix launch processor $it")
                         jobList += launchProcessor(it, producerVal)
                     }
-                    Napier.d("run Job, send queue signal")
+                    Napier.d("$logPrefix run Job, send queue signal")
                     checkQueueSignalChannel.send(true)
                 }
 
@@ -296,7 +302,7 @@ class ContentJobRunner(
                 }
             }
 
-            Napier.d("run Job, send queue signal")
+            Napier.d("$logPrefix run Job, send queue signal")
             checkQueueSignalChannel.send(true)
         }
 

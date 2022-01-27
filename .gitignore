@@ -227,3 +227,6 @@ app-ktor-server/application.conf
 #data directory for running the server
 app-ktor-server/data
 
+#Resources copied for production app-ktor-server
+app-ktor-server/src/main/resources/umapp
+

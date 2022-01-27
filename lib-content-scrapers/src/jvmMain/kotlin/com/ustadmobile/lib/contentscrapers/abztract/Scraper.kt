@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETPYE_MPEG
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_EPUB
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_KHAN
@@ -77,11 +78,13 @@ abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentCon
     }
 
     fun hideContentEntry() {
-        repo.contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
+        repo.contentEntryDao.updateContentEntryInActive(contentEntryUid, true,
+            systemTimeInMillis())
     }
 
     fun showContentEntry() {
-        repo.contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
+        repo.contentEntryDao.updateContentEntryInActive(contentEntryUid, false,
+            systemTimeInMillis())
     }
 
     fun setScrapeDone(successful: Boolean, errorCode: Int) {
