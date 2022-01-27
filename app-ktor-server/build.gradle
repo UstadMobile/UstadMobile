@@ -139,6 +139,6 @@ targetCompatibility = "8"
 
 if(findProperty("skipreactproductionbundle") != "true") {
     shadowJar.dependsOn(":app-react:browserDistribution")
-    shadowJar.mustRunAfter "deleteWebAppResources"
+    shadowJar.mustRunAfter("deleteWebAppResources")
 }
 
