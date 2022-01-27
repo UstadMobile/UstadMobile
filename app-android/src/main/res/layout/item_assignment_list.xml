@@ -127,6 +127,7 @@
             android:drawablePadding="@dimen/dimen_4dp"
             app:drawableTint="?colorOnIconTint"
             android:layout_marginStart="@dimen/dimen_12dp"
+            app:layout_goneMarginStart="@dimen/dimen_0dp"
             android:id="@+id/item_person_progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -136,6 +137,14 @@
             app:layout_constraintTop_toBottomOf="@id/line2_description"
             android:layout_marginBottom="@dimen/dimen_16dp" />
 
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/deadline_barrier"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="line3_deadline,item_person_progress"
+            app:barrierDirection="bottom"/>
+
         <TextView
             android:id="@+id/line3_progress_text"
             android:layout_width="0dp"
@@ -144,7 +153,7 @@
             android:text="@{@string/three_num_items_with_name_with_comma(assignment.progressSummary.notStartedStudents, @string/not_started, assignment.progressSummary.calculateStartedStudents(), @string/started, assignment.progressSummary.completedStudents, @string/completed)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/line1_title"
-            app:layout_constraintTop_toBottomOf="@+id/line3_deadline"
+            app:layout_constraintTop_toBottomOf="@+id/deadline_barrier"
             tools:text="1 not started, 2 started, 2 completed" />
 
 
