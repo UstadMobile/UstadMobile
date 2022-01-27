@@ -2,12 +2,16 @@ package com.ustadmobile.core.db
 
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
-import com.ustadmobile.door.*
+import com.ustadmobile.door.DoorDatabase
+import com.ustadmobile.door.DoorDbType
+import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.MinReplicationVersion
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
-import com.ustadmobile.door.migration.*
+import com.ustadmobile.door.migration.DoorMigration
+import com.ustadmobile.door.migration.DoorMigrationStatementList
+import com.ustadmobile.door.migration.DoorMigrationSync
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
