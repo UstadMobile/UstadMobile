@@ -130,6 +130,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 ELSE 0 END) AS resultScaled, 
             MAX(ResultSource.extensionProgress) AS progress,
             0 AS penalty,
+            0 as resultWeight,
             'FALSE' AS contentComplete,
             0 AS success,
             
@@ -191,6 +192,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 COALESCE(StatementEntity.extensionProgress,0) AS progress, 
                 COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
                 COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                0 as resultWeight,
                 
                 COALESCE((CASE WHEN resultCompletion 
                 THEN 1 ELSE 0 END),0) AS totalCompletedContent,
@@ -300,6 +302,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
         SELECT SUM(resultScoreRaw) AS resultScore, 
                SUM(resultScoreMax) AS resultMax,
                MAX(extensionProgress) AS progress,
+               0 as resultWeight,
                0 as penalty,
                0 as success,
                'FALSE' as contentComplete,
@@ -323,6 +326,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                resultScoreMax AS resultMax,
                extensionProgress AS progress,
                0 AS penalty,
+               0 as resultWeight,
                resultSuccess AS success,
                resultCompletion AS contentComplete, 
                resultScoreScaled AS resultScaled,

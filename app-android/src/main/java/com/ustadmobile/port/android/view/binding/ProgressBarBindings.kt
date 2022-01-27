@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.databinding.BindingAdapter
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
+import com.ustadmobile.core.util.ext.calculateScoreWithWeight
 import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
@@ -24,4 +25,13 @@ fun ProgressBar.setScoreProgress(scoreProgress: ContentEntryStatementScoreProgre
         return
     }
     progress = scoreProgress.calculateScoreWithPenalty()
+}
+
+
+@BindingAdapter("scoreWithWeight")
+fun ProgressBar.setScoreWithWeight(scoreProgress: ContentEntryStatementScoreProgress?){
+    if(scoreProgress == null){
+        return
+    }
+    progress = scoreProgress.calculateScoreWithWeight()
 }

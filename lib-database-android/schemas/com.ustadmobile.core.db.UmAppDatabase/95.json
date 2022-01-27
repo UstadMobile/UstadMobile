@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 95,
-    "identityHash": "2c1fa757c5f0cc10f64528df950b94d8",
+    "identityHash": "2d4bb8d64ad796a3b02a8c49f4a11152",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -3118,7 +3118,7 @@
       },
       {
         "tableName": "XObjectEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xObjectUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `objectType` TEXT, `objectId` TEXT, `definitionType` TEXT, `interactionType` TEXT, `correctResponsePattern` TEXT, `objectContentEntryUid` INTEGER NOT NULL, `xObjectMasterChangeSeqNum` INTEGER NOT NULL, `xObjectocalChangeSeqNum` INTEGER NOT NULL, `xObjectLastChangedBy` INTEGER NOT NULL, `xObjectLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xObjectUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `objectType` TEXT, `objectId` TEXT, `definitionType` TEXT, `interactionType` TEXT, `correctResponsePattern` TEXT, `objectContentEntryUid` INTEGER NOT NULL, `objectStatementRefUid` INTEGER NOT NULL DEFAULT 0, `xObjectMasterChangeSeqNum` INTEGER NOT NULL, `xObjectocalChangeSeqNum` INTEGER NOT NULL, `xObjectLastChangedBy` INTEGER NOT NULL, `xObjectLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "xObjectUid",
@@ -3161,6 +3161,13 @@
             "columnName": "objectContentEntryUid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "objectStatementRefUid",
+            "columnName": "objectStatementRefUid",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "xObjectMasterChangeSeqNum",
@@ -5208,7 +5215,7 @@
       },
       {
         "tableName": "ClazzAssignment",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caAssignmentType` INTEGER NOT NULL DEFAULT 0, `caDeadlineDate` INTEGER NOT NULL, `caStartDate` INTEGER NOT NULL, `caLateSubmissionType` INTEGER NOT NULL, `caLateSubmissionPenalty` INTEGER NOT NULL, `caGracePeriodDate` INTEGER NOT NULL, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caRequireFileSubmission` INTEGER NOT NULL DEFAULT 1, `caFileSubmissionWeight` INTEGER NOT NULL DEFAULT 0, `caFileType` INTEGER NOT NULL DEFAULT 0, `caSizeLimit` INTEGER NOT NULL DEFAULT 50, `caNumberOfFiles` INTEGER NOT NULL DEFAULT 1, `caEditAfterSubmissionType` INTEGER NOT NULL DEFAULT 0, `caMarkingType` INTEGER NOT NULL DEFAULT 0, `caMaxScore` INTEGER NOT NULL DEFAULT 0, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caAssignmentType` INTEGER NOT NULL DEFAULT 0, `caDeadlineDate` INTEGER NOT NULL, `caStartDate` INTEGER NOT NULL, `caLateSubmissionType` INTEGER NOT NULL, `caLateSubmissionPenalty` INTEGER NOT NULL, `caGracePeriodDate` INTEGER NOT NULL, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caRequireFileSubmission` INTEGER NOT NULL DEFAULT 1, `caFileSubmissionWeight` INTEGER NOT NULL DEFAULT 0, `caFileType` INTEGER NOT NULL DEFAULT 0, `caSizeLimit` INTEGER NOT NULL DEFAULT 50, `caNumberOfFiles` INTEGER NOT NULL DEFAULT 1, `caEditAfterSubmissionType` INTEGER NOT NULL DEFAULT 0, `caMarkingType` INTEGER NOT NULL DEFAULT 0, `caMaxScore` INTEGER NOT NULL DEFAULT 0, `caXObjectUid` INTEGER NOT NULL DEFAULT 0, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "caUid",
@@ -5335,6 +5342,13 @@
           {
             "fieldPath": "caMaxScore",
             "columnName": "caMaxScore",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "caXObjectUid",
+            "columnName": "caXObjectUid",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
@@ -5564,7 +5578,7 @@
       },
       {
         "tableName": "ClazzAssignmentRollUp",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cacheUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cachePersonUid` INTEGER NOT NULL, `cacheContentEntryUid` INTEGER NOT NULL, `cacheClazzAssignmentUid` INTEGER NOT NULL, `cacheStudentScore` INTEGER NOT NULL, `cacheMaxScore` INTEGER NOT NULL, `cacheProgress` INTEGER NOT NULL, `cacheContentComplete` INTEGER NOT NULL, `cacheSuccess` INTEGER NOT NULL, `cachePenalty` INTEGER NOT NULL, `lastCsnChecked` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cacheUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cachePersonUid` INTEGER NOT NULL, `cacheContentEntryUid` INTEGER NOT NULL, `cacheClazzAssignmentUid` INTEGER NOT NULL, `cacheStudentScore` INTEGER NOT NULL, `cacheMaxScore` INTEGER NOT NULL, `cacheFinalWeightScoreWithPenalty` REAL NOT NULL DEFAULT 0, `cacheWeight` INTEGER NOT NULL DEFAULT 0, `cacheProgress` INTEGER NOT NULL, `cacheContentComplete` INTEGER NOT NULL, `cacheSuccess` INTEGER NOT NULL, `cachePenalty` INTEGER NOT NULL, `lastCsnChecked` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cacheUid",
@@ -5601,6 +5615,20 @@
             "columnName": "cacheMaxScore",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "cacheFinalWeightScoreWithPenalty",
+            "columnName": "cacheFinalWeightScoreWithPenalty",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "cacheWeight",
+            "columnName": "cacheWeight",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "cacheProgress",
@@ -9296,7 +9324,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2c1fa757c5f0cc10f64528df950b94d8')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2d4bb8d64ad796a3b02a8c49f4a11152')"
     ]
   }
 }

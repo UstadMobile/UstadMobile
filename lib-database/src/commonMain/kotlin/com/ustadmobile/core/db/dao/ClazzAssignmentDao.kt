@@ -164,10 +164,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                              FROM ClazzAssignmentRollUp
                             WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid), 'FALSE') AS contentComplete,
                           
-            COALESCE((SELECT AVG(cachePenalty) 
-                        FROM ClazzAssignmentRollUp 
-                       WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
-                         AND cachePersonUid = :accountPersonUid),0) AS penalty,
+            0 AS penalty,
                                                
             COALESCE((SELECT COUNT(cacheContentComplete)
                         FROM ClazzAssignmentRollUp
@@ -177,12 +174,21 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
             
             COALESCE((SELECT COUNT(DISTINCT cacheContentEntryUid) 
                               FROM ClazzAssignmentRollUp
-                             WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid), 0) AS totalContent,
-                            
-                                               
+                             WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid), 0) AS totalContent,                    
                           
              0 as success,           
-             0 as resultScaled,    
+             COALESCE((SELECT SUM(cacheFinalWeightScoreWithPenalty)
+                         FROM ClazzAssignmentRollUp 
+                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid 
+                          AND cacheContentComplete 
+                          AND cachePersonUid = :accountPersonUid), 0) AS resultScaled,
+                              
+             COALESCE((SELECT SUM(cacheWeight)
+                         FROM ClazzAssignmentRollUp 
+                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid 
+                          AND cacheContentComplete 
+                          AND cachePersonUid = :accountPersonUid), 0) AS resultWeight,                    
+                              
               
               0 as progress
              
@@ -223,11 +229,11 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     @Query("""
         SELECT 0 AS resultMax, 
                0 AS resultScore, 
-               COALESCE(SUM(ResultScore.cacheFinalWeightScoreWithPenalty),0) as resultScaled,
+               COALESCE(SUM(ResultSource.cacheFinalWeightScoreWithPenalty),0) as resultScaled,
                'FALSE' as contentComplete, 0 as progress, 0 as success,
                0 AS penalty,
                
-               COALESCE(SUM(ResultScore.cacheWeight),0) As resultWeight,
+               COALESCE(SUM(ResultSource.cacheWeight),0) As resultWeight,
                
               COALESCE((SUM(CASE 
                         WHEN CAST(ResultSource.cacheContentComplete AS INTEGER) > 0 
@@ -238,12 +244,10 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
      	  FROM (SELECT ClazzAssignmentRollUp.cacheContentComplete,
                         ClazzAssignmentRollUp.cacheContentEntryUid, ClazzAssignmentRollUp.cacheWeight, 
                         ClazzAssignmentRollUp.cacheFinalWeightScoreWithPenalty
-     	 	      FROM ClazzAssignmentContentJoin 
-                         LEFT JOIN ClazzAssignmentRollUp
-                         ON ClazzAssignmentRollUp.cachePersonUid = :personUid
-                         AND ClazzAssignmentRollUp.cacheClazzAssignmentUid = :caUid
-                  WHERE ClazzAssignmentContentJoin.cacjActive
-                  GROUP BY ClazzAssignmentContentJoin.cacjContentUid
+     	 	      FROM ClazzAssignmentRollUp 
+                 WHERE ClazzAssignmentRollUp.cachePersonUid = :personUid
+                   AND ClazzAssignmentRollUp.cacheClazzAssignmentUid = :caUid
+              GROUP BY ClazzAssignmentRollUp.cacheContentEntryUid
      	  ) AS ResultSource
     """)
     abstract suspend fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): ContentEntryStatementScoreProgress?
@@ -263,24 +267,26 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 ) AS progress,
                 
                 0 as success, 
-                0 as resultScaled,
+                
+              COALESCE((SELECT SUM(cacheFinalWeightScoreWithPenalty)
+                         FROM ClazzAssignmentRollUp 
+                        WHERE cacheClazzAssignmentUid = :assignmentUid
+                          AND cacheContentComplete 
+                          AND cachePersonUid = ResultSource.personUid), 0) AS resultScaled,
+                              
+             COALESCE((SELECT SUM(cacheWeight)
+                         FROM ClazzAssignmentRollUp 
+                        WHERE cacheClazzAssignmentUid = :assignmentUid
+                          AND cacheContentComplete 
+                          AND cachePersonUid = ResultSource.personUid), 0) AS resultWeight,       
                 
                 'FALSE' as contentComplete,
                 
-                (SELECT SUM(cacheStudentScore) 
-                         FROM ClazzAssignmentRollUp 
-                        WHERE cacheClazzAssignmentUid = :assignmentUid
-                          AND cachePersonUid =  ResultSource.personUid) AS resultScore,
+                0 AS resultScore,
                           
-                (SELECT SUM(cacheMaxScore)
-                             FROM ClazzAssignmentRollUp 
-                            WHERE cacheClazzAssignmentUid = :assignmentUid
-                              AND cachePersonUid = ResultSource.personUid) AS resultMax, 
+                0 AS resultMax, 
                                         
-                 (SELECT AVG(cachePenalty)
-                             FROM ClazzAssignmentRollUp 
-                            WHERE cacheClazzAssignmentUid = :assignmentUid
-                              AND cachePersonUid = ResultSource.personUid) AS penalty,   
+                0 AS penalty,   
                                                     
                    COALESCE((SELECT COUNT(cacheContentComplete)
                         FROM ClazzAssignmentRollUp

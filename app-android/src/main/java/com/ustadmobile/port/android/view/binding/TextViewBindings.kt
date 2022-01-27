@@ -330,11 +330,11 @@ fun TextView.setScorePercentage(scoreProgress: ContentEntryStatementScoreProgres
 }
 
 @BindingAdapter("scoreWithWeight")
-fun TextView.setFinalScoreWithWeight(scoreProgress: ContentEntryStatementScoreProgress?){
+fun TextView.setScoreWithWeight(scoreProgress: ContentEntryStatementScoreProgress?){
     if(scoreProgress == null){
         return
     }
-    text = "${scoreProgress.calculateScoreWithWeight()}"
+    text = "${scoreProgress.calculateScoreWithWeight()}%"
 }
 
 

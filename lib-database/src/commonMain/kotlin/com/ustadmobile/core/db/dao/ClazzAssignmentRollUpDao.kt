@@ -14,7 +14,7 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
         REPLACE INTO ClazzAssignmentRollUp 
                 (cachePersonUid, cacheContentEntryUid, cacheClazzAssignmentUid, 
                  cacheStudentScore, cacheMaxScore, cacheWeight,  cacheProgress,
-                 cacheContentComplete, cacheSuccess,cachePenalty, lastCsnChecked)
+                 cacheContentComplete, cacheSuccess,cachePenalty, cacheFinalWeightScoreWithPenalty, lastCsnChecked)
                  
         WITH MaxScoreTable (maxScore, maxScoreContentEntryUid) 
                 AS (SELECT MAX(resultScoreMax), statementContentEntryUid 
@@ -43,7 +43,7 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                      THEN (COALESCE(CAST(resultScoreRaw AS REAL),0) / COALESCE((SELECT maxScore 
                           FROM MaxScoreTable),0) * 100 * cacjWeight * (1 - (CAST(caLateSubmissionPenalty AS REAL)/100)))
                      ELSE (COALESCE(CAST(resultScoreRaw AS REAL),0) / COALESCE((SELECT maxScore 
-                          FROM MaxScoreTable),0) * 100 * cacjWeight)  END) AS cacheFinalScoreWithPenalty    
+                          FROM MaxScoreTable),0) * 100 * cacjWeight)  END) AS cacheFinalWeightScoreWithPenalty,   
                      
                0 AS lastCsnChecked
           FROM ClazzAssignmentContentJoin
