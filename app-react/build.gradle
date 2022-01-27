@@ -70,3 +70,5 @@ dependencies {
     implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "io.github.aakira:napier:$version_napier"
 }
+
+browserDistribution.dependsOn("app-ktor-server:deleteWebAppResources")
