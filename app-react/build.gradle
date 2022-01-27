@@ -71,4 +71,4 @@ dependencies {
     implementation "io.github.aakira:napier:$version_napier"
 }
 
-browserDistribution.dependsOn("app-ktor-server:deleteWebAppResources")
+browserDistribution.dependsOn(":app-ktor-server:deleteWebAppResources")
