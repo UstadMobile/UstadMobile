@@ -125,10 +125,10 @@ task deleteWebAppResources{
     doLast{
         def dir = project.file("src/main/resources/umapp")
         if(dir.exists()){
-            println("Deleteting files from ${dir.path}")
+            println("Deleteting web resource directory (${dir.path}) at ${new Date().format('yyyy-MM-dd HH:mm ss')}")
             delete dir
         }else {
-            println("${dir.path} doesn't exist, skipping")
+            println("${dir.path} doesn't exist, skipping deleting directory")
         }
     }
 }
@@ -139,5 +139,6 @@ targetCompatibility = "8"
 
 if(findProperty("skipreactproductionbundle") != "true") {
     shadowJar.dependsOn(":app-react:browserDistribution")
+    shadowJar.mustRunAfter "deleteWebAppResources"
 }
 
