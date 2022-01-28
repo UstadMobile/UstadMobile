@@ -3,6 +3,7 @@ package com.ustadmobile.core.account
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.SyncEntitiesReceivedEvent
 import com.ustadmobile.door.SyncListener
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.UserSession
 import kotlinx.coroutines.GlobalScope
@@ -26,7 +27,8 @@ class EndSessionParentChildJoinSyncListener(
         GlobalScope.takeIf { consentRevokedChildPersonUidList.isNotEmpty() }?.launch {
             consentRevokedChildPersonUidList.forEach { childPersonUid ->
                 repo.userSessionDao.endOtherSessions(childPersonUid, 0,
-                    UserSession.STATUS_LOGGED_OUT, UserSession.REASON_CONSENT_REVOKED)
+                    UserSession.STATUS_LOGGED_OUT, UserSession.REASON_CONSENT_REVOKED,
+                    systemTimeInMillis())
             }
         }
 

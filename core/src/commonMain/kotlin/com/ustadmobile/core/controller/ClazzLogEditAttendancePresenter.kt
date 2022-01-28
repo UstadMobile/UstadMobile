@@ -13,6 +13,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ABSENT
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
@@ -226,7 +227,8 @@ class ClazzLogEditAttendancePresenter(context: Any,
         repo.clazzLogAttendanceRecordDao.updateListAsync(insertUpdatePartition.second)
 
         //now update the average attendance for the class
-        repo.clazzDao.updateClazzAttendanceAverageAsync(clazzLogs.firstOrNull()?.clazzLogClazzUid ?: 0)
+        repo.clazzDao.updateClazzAttendanceAverageAsync(
+            clazzLogs.firstOrNull()?.clazzLogClazzUid ?: 0, systemTimeInMillis())
     }
 
     override fun handleClickSave(entity: ClazzLog) {

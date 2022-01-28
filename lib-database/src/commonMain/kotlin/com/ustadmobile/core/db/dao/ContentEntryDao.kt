@@ -193,7 +193,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun findByTitle(title: String): DoorLiveData<ContentEntry?>
 
     @Query("""
-       SELECT COALESCE((SELECT cjIsMeteredAllowed 
+       SELECT COALESCE((SELECT CAST(cjIsMeteredAllowed AS INTEGER) 
                 FROM ContentJobItem 
                 JOIN ContentJob
                     ON ContentJobItem.cjiJobUid = ContentJob.cjUid

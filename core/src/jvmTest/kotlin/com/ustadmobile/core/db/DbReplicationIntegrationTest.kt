@@ -33,7 +33,6 @@ import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
-import org.junit.Test
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.After
@@ -125,7 +124,7 @@ class DbReplicationIntegrationTest {
                 .addCallback(ContentJobItemTriggersCallback())
                 .build().also { db ->
                     db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
-                    db.addIncomingReplicationListener(RepIncomingListener(db))
+                    db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
                 }
         }
 

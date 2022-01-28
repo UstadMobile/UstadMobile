@@ -147,6 +147,7 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
      GROUP BY ClazzAssignmentContentJoin.cacjContentUid, ResultSource.statementContentEntryUid
      ORDER BY ContentEntry.title, ContentEntry.contentEntryUid   
     """)
+    @SqliteOnly
     abstract fun findAllContentWithAttemptsByClazzAssignmentUid(clazzAssignmentUid: Long,
                                                                personUid: Long, accountPersonUid: Long):
             DoorDataSourceFactory<Int, ContentWithAttemptSummary>

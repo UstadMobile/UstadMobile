@@ -178,6 +178,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 ELSE 0
             END DESC
          """)
+    @SqliteOnly //This would need a considered group by to work on postgres
     abstract fun findPersonsWithContentEntryAttempts(contentEntryUid: Long, accountPersonUid: Long,
                                                      searchText: String, sortOrder: Int)
             : DoorDataSourceFactory<Int, PersonWithAttemptsSummary>
@@ -249,6 +250,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
         GROUP BY StatementEntity.contextRegistration 
         ORDER BY startDate DESC, resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC
          """)
+    @SqliteOnly
     abstract fun findSessionsForPerson(contentEntryUid: Long, accountPersonUid: Long, personUid: Long)
             : DoorDataSourceFactory<Int, PersonWithSessionsDisplay>
 
@@ -293,12 +295,14 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 
                 1 as totalContent
                
-         FROM (SELECT * FROM StatementEntity 
+         FROM (SELECT * 
+                 FROM StatementEntity 
                 WHERE contextRegistration = :contextRegistration
                   AND NOT contentEntryRoot
                   AND statementVerbUid = ${VerbEntity.VERB_ANSWERED_UID} 
-             GROUP BY xObjectUid)
+             GROUP BY xObjectUid) AS SessionStatements
     """)
+    @SqliteOnly
     abstract suspend fun calculateScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
 
 

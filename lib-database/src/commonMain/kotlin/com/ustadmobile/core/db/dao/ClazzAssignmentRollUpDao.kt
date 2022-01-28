@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.SqliteOnly
 import com.ustadmobile.lib.db.entities.ClazzAssignmentRollUp
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 
@@ -82,6 +83,7 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                     AND COALESCE(StatementEntity.resultSuccess,0) >= COALESCE(ClazzAssignmentRollUp.cacheSuccess,0))
       GROUP BY cacheClazzAssignmentUid, cacheContentEntryUid, cachePersonUid
     """)
+    @SqliteOnly
     abstract suspend fun cacheBestStatements(clazzUid: Long, assignmentUid: Long, personUid: Long)
 
     @Query("""

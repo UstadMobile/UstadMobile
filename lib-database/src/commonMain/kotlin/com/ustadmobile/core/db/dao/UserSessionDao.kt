@@ -138,16 +138,18 @@ abstract class UserSessionDao {
            SET usAuth = null,
                usStatus = :newStatus,
                usReason = :reason,
-               usLcb = (SELECT COALESCE(
-                               (SELECT nodeClientId
-                                  FROM SyncNode
-                                 LIMIT 1), 0))
+               usLct = :changeTime
          WHERE usPersonUid = :personUid
            AND usClientNodeId != :exemptNodeId
            AND usStatus != :newStatus                     
     """)
-    abstract suspend fun endOtherSessions(personUid: Long, exemptNodeId: Long, newStatus: Int,
-                                          reason: Int)
+    abstract suspend fun endOtherSessions(
+        personUid: Long,
+        exemptNodeId: Long,
+        newStatus: Int,
+        reason: Int,
+        changeTime: Long
+    )
 
     @Query("""
         SELECT DISTINCT UserSession.usClientNodeId
