@@ -28,13 +28,18 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                  ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
        WHERE UserSession.usClientNodeId = :newNodeId
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+       --notpsql
          AND StatementEntity.statementLct != COALESCE(
              (SELECT seVersionId
                 FROM StatementEntityReplicate
                WHERE sePk = StatementEntity.statementUid
-                 AND seDestination = :newNodeId), 0) 
+                 AND seDestination = UserSession.usClientNodeId), 0)
+       --endnotpsql           
       /*psql ON CONFLICT(sePk, seDestination) DO UPDATE
-             SET sePending = true
+             SET sePending = (SELECT StatementEntity.statementLct
+            FROM StatementEntity
+           WHERE StatementEntity.statementUid = EXCLUDED.sePk ) 
+                 != StatementEntityReplicate.seVersionId
       */       
     """)
     @ReplicationRunOnNewNode
