@@ -586,10 +586,12 @@ suspend fun UmAppDatabase.insertPersonAuthCredentials2(personUid: Long,
     val db = (this as DoorDatabaseRepository).db as UmAppDatabase
     val effectiveSite = site ?: db.siteDao.getSite()
     val authSalt = effectiveSite?.authSalt ?: throw IllegalStateException("insertAuthCredentials: No auth salt!")
+    val lastChangedBy = db.syncNodeDao.getLocalNodeClientId()
 
     personAuth2Dao.insertAsync(PersonAuth2().apply {
         pauthUid = personUid
         pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
         pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
+        pauthLcb = lastChangedBy
     })
 }

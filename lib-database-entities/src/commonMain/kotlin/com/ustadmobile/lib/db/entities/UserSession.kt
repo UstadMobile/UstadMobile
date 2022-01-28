@@ -13,24 +13,19 @@ import kotlinx.serialization.Serializable
 @ReplicateEntity(tableId = UserSession.TABLE_ID, tracker = UserSessionReplicate::class,
     priority = ReplicateEntity.HIGHEST_PRIORITY)
 @Triggers(arrayOf(
-    Trigger(name="usersession_remote_ins",
-        order = Trigger.Order.INSTEAD_OF,
-        on = Trigger.On.RECEIVEVIEW,
-        events = [Trigger.Event.INSERT],
-        sqlStatements = arrayOf(
-            """
-                REPLACE INTO UserSession(usUid, usPcsn, usLcsn, usLcb, usLct, usPersonUid, 
-                             usClientNodeId, usStartTime, usEndTime, usStatus, usReason, usAuth, 
-                             usSessionType)
-                      VALUES (NEW.usUid, NEW.usPcsn, NEW.usLcsn, NEW.usLcb, NEW.usLct, NEW.usPersonUid,
-                             NEW.usClientNodeId, NEW.usStartTime, NEW.usEndTime, NEW.usStatus, 
-                             NEW.usReason, NEW.usAuth, NEW.usSessionType)
-                /*postgres ON CONFLICT (usUid) DO UPDATE
-                             SET usStatus = EXCLUDED.usStatus,
-                                 usEndTime = EXCLUDED.usEndTime,
-                                 usReason = EXCLUDED.usReason */
-            """
-        ))
+ Trigger(
+     name = "usersession_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO UserSession(usUid, usPcsn, usLcsn, usLcb, usLct, usPersonUid, usClientNodeId, usStartTime, usEndTime, usStatus, usReason, usAuth, usSessionType) 
+         VALUES (NEW.usUid, NEW.usPcsn, NEW.usLcsn, NEW.usLcb, NEW.usLct, NEW.usPersonUid, NEW.usClientNodeId, NEW.usStartTime, NEW.usEndTime, NEW.usStatus, NEW.usReason, NEW.usAuth, NEW.usSessionType) 
+         /*psql ON CONFLICT (usUid) DO UPDATE 
+         SET usPcsn = EXCLUDED.usPcsn, usLcsn = EXCLUDED.usLcsn, usLcb = EXCLUDED.usLcb, usLct = EXCLUDED.usLct, usPersonUid = EXCLUDED.usPersonUid, usClientNodeId = EXCLUDED.usClientNodeId, usStartTime = EXCLUDED.usStartTime, usEndTime = EXCLUDED.usEndTime, usStatus = EXCLUDED.usStatus, usReason = EXCLUDED.usReason, usAuth = EXCLUDED.usAuth, usSessionType = EXCLUDED.usSessionType
+         */"""
+     ]
+ )
 ))
 class UserSession {
 

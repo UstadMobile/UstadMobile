@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin
+import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
@@ -35,7 +36,7 @@ abstract class ContentEntryContentCategoryJoinDao : BaseDao<ContentEntryContentC
          JOIN ContentEntryContentCategoryJoin
              ON ChangeLog.chTableId = ${ContentEntryContentCategoryJoin.TABLE_ID}
                 AND ChangeLog.chEntityPk = ContentEntryContentCategoryJoin.ceccjUid
-         JOIN UserSession
+         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
    WHERE UserSession.usClientNodeId != (
          SELECT nodeClientId 
            FROM SyncNode

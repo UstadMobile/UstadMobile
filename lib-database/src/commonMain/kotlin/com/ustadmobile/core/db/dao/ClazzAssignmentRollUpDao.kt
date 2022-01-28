@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.SqliteOnly
 import com.ustadmobile.lib.db.entities.ClazzAssignmentRollUp
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 
@@ -36,7 +37,7 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                (CASE WHEN StatementEntity.timestamp > ClazzAssignment.caDeadlineDate 
                      THEN ClazzAssignment.caLateSubmissionPenalty 
                      ELSE 0 END) AS cachePenalty,
-               COALESCE((SELECT MAX(statementLocalChangeSeqNum) FROM StatementEntity),0) AS lastCsnChecked
+               0 AS lastCsnChecked
           FROM ClazzAssignmentContentJoin
 	            LEFT JOIN ClazzAssignment 
                 ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
@@ -51,10 +52,7 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                                             ON ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid 
                                     WHERE StatementEntity.statementContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid
                                       AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                                      AND StatementEntity.contentEntryRoot 
-                                      AND StatementEntity.statementLocalChangeSeqNum >= 
-                                                COALESCE((SELECT MAX(lastCsnChecked) 
-                                                            FROM ClazzAssignmentRollUp),0)
+                                      AND StatementEntity.contentEntryRoot                                    
                                       AND StatementEntity.timestamp 
                                             BETWEEN ClazzAssignment.caStartDate
                                             AND ClazzAssignment.caGracePeriodDate
@@ -82,6 +80,7 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                     AND COALESCE(StatementEntity.resultSuccess,0) >= COALESCE(ClazzAssignmentRollUp.cacheSuccess,0))
       GROUP BY cacheClazzAssignmentUid, cacheContentEntryUid, cachePersonUid
     """)
+    @SqliteOnly
     abstract suspend fun cacheBestStatements(clazzUid: Long, assignmentUid: Long, personUid: Long)
 
     @Query("""
