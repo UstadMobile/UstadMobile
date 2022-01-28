@@ -15,6 +15,7 @@ import kotlinx.serialization.json.long
 /**
  * SyncListener that will end any other session on other devices when a user changes their password.
  */
+@Suppress("Unused") //This is actually used in UmRestApplication
 class EndSessionPersonAuth2IncomingReplicationListener(
     private val db: UmAppDatabase
 ): IncomingReplicationListener{
@@ -31,7 +32,7 @@ class EndSessionPersonAuth2IncomingReplicationListener(
 
                 Napier.i("PersonAuth changed: end other sessions for Person uid $authUid" +
                     " except from node id $pauthLcb (where password was changed)")
-                txDb.userSessionDao.endOtherSessions(authUid, pauthLcb,
+                val numSessionsEnded = txDb.userSessionDao.endOtherSessions(authUid, pauthLcb,
                     UserSession.STATUS_NEEDS_REAUTH, UserSession.REASON_PASSWORD_CHANGED,
                     systemTimeInMillis())
             }
