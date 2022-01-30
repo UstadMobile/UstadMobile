@@ -2573,7 +2573,7 @@ abstract class UmAppDatabase : DoorDatabase() {
                 DatabaseTriggers.postgresContentJobItemTriggers.toList() + listOf(
                     "ALTER TABLE Language ALTER COLUMN languageactive DROP DEFAULT",
                     "ALTER TABLE Language ALTER COLUMN languageActive TYPE BOOL " +
-                        "USING CASE WHEN LanguageActive = 0 THEN FALSE ELSE TRUE END"
+                        "USING CASE WHEN CAST(LanguageActive AS INTEGER) = 0 THEN FALSE ELSE TRUE END"
                 )
             }
         }
