@@ -56,7 +56,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "${baseAppId}.launcher"
+        applicationId "${baseAppId}"
         resConfigs "en","fa","ps","ar","tg","bn","ne","my","ru", "tl"
         minSdkVersion 21
         targetSdkVersion 31
