@@ -121,7 +121,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:showScoreVisibility="@{fileSubmissionScore}"
-            android:text='@{"(" + fileSubmissionScore.resultScore + &quot;/&quot; + assignment.caMaxScore + ")"}'
+            android:text='@{"(" + fileSubmissionScore.resultScore + &quot;/&quot; + fileSubmissionScore.resultMax + ")"}'
             app:layout_constraintStart_toEndOf="@+id/file_mark_score"
             app:layout_constraintTop_toBottomOf="@+id/file_submission_weight" />
 

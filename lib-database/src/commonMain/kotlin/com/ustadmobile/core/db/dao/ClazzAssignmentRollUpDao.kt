@@ -116,11 +116,6 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
               JOIN ClazzEnrolment
               ON ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
               
-              LEFT JOIN ClazzAssignmentRollUp
-              ON ClazzAssignmentRollUp.cacheContentEntryUid = 0
-              AND ClazzAssignmentRollUp.cachePersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-              AND ClazzAssignmentRollUp.cacheClazzAssignmentUid = ClazzAssignment.caUid
-              
               LEFT JOIN StatementEntity AS SubmissionStatement
 	          ON SubmissionStatement.statementUid = (SELECT statementUid 
                                    FROM StatementEntity
@@ -137,7 +132,6 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                                   
               LEFT JOIN StatementEntity AS MarkingStatement
               ON MarkingStatement.xObjectUid = ObjectStatementRef.xObjectUid
-                                  
               
         WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
           AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
@@ -147,11 +141,7 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
           AND (:clazzUid = 0 OR ClazzAssignment.caClazzUid = :clazzUid)
           AND (:assignmentUid = 0 OR ClazzAssignment.caUid = :assignmentUid)
           AND (:personUid = 0 OR ClazzEnrolment.clazzEnrolmentPersonUid = :personUid)
-          AND (COALESCE(MarkingStatement.resultScoreRaw,0) >= COALESCE(ClazzAssignmentRollUp.cacheStudentScore,0)
-                    AND COALESCE(MarkingStatement.extensionProgress,0) >= COALESCE(ClazzAssignmentRollUp.cacheProgress,0)
-                    AND COALESCE(MarkingStatement.resultSuccess,0) >= COALESCE(ClazzAssignmentRollUp.cacheSuccess,0))
       GROUP BY cacheClazzAssignmentUid, cacheContentEntryUid, cachePersonUid     
-      
     """)
     abstract suspend fun cacheBestStatements(clazzUid: Long, assignmentUid: Long, personUid: Long)
 
