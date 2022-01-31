@@ -33,11 +33,7 @@ android {
     }
 
     compileSdkVersion rootProject.ext.version_android_compile_sdk
-    buildToolsVersion rootProject.ext.version_android_buildtools
 
-    lintOptions {
-        abortOnError false
-    }
 
     kotlinOptions {
         jvmTarget = "1.8"
@@ -56,8 +52,8 @@ android {
     }
 
     defaultConfig {
-        applicationId "${baseAppId}.launcher"
-        resConfigs "en","fa","ps","ar","tg","bn","ne","my","ru", "tl"
+        applicationId "${baseAppId}"
+        resConfigs 'en', 'fa', 'ps', 'ar', 'tg', 'bn', 'ne', 'my', 'ru', 'tl'
         minSdkVersion 21
         targetSdkVersion 31
         versionCode rootProject.ext.ustadVersionCode
@@ -68,7 +64,6 @@ android {
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + rootProject.ext.buildConfigProperties["android.acra.auth"] + "\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        missingDimensionStrategy 'api', 'api18'
     }
 
     signingConfigs {
@@ -84,18 +79,6 @@ android {
         jumboMode = true
     }
 
-    flavorDimensions "config"
-
-    productFlavors {
-       devMinApi21 {
-            dimension "config"
-            minSdkVersion 21
-            applicationId "${baseAppId}"
-            testApplicationId "${baseAppId}.test"
-            versionCode rootProject.ext.ustadVersionCode
-        }
-    }
-
     buildTypes {
         debug {
             testCoverageEnabled = true
@@ -107,6 +90,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
+    }
+    lint {
+        abortOnError false
     }
 }
 
