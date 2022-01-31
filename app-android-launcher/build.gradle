@@ -33,11 +33,7 @@ android {
     }
 
     compileSdkVersion rootProject.ext.version_android_compile_sdk
-    buildToolsVersion rootProject.ext.version_android_buildtools
 
-    lintOptions {
-        abortOnError false
-    }
 
     kotlinOptions {
         jvmTarget = "1.8"
@@ -57,7 +53,7 @@ android {
 
     defaultConfig {
         applicationId "${baseAppId}"
-        resConfigs "en","fa","ps","ar","tg","bn","ne","my","ru", "tl"
+        resConfigs 'en', 'fa', 'ps', 'ar', 'tg', 'bn', 'ne', 'my', 'ru', 'tl'
         minSdkVersion 21
         targetSdkVersion 31
         versionCode rootProject.ext.ustadVersionCode
@@ -94,6 +90,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
+    }
+    lint {
+        abortOnError false
     }
 }
 

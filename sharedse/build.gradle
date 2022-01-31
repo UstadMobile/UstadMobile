@@ -22,11 +22,6 @@ apply plugin: "maven-publish"
 
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
-    buildToolsVersion rootProject.ext.version_android_buildtools
-
-    lintOptions {
-        abortOnError false
-    }
 
 
     buildTypes {
@@ -54,6 +49,9 @@ android {
         unitTests {
             returnDefaultValues = true
         }
+    }
+    lint {
+        abortOnError false
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {

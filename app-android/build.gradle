@@ -115,14 +115,12 @@ android {
         }
     }
 
-    lintOptions {
-        abortOnError false
-    }
 
     compileSdkVersion rootProject.ext.version_android_compile_sdk
-    buildToolsVersion rootProject.ext.version_android_buildtools
 
     defaultConfig {
+        testInstrumentationRunnerArguments clearPackageData: 'true', notAnnotation: 'com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest'
+
         //When using variables the build analyzer reports that major tasks reran because of a
         // 'chnage' in the value of minSdkVersion, hence hardcoding them here.
         minSdkVersion 21
@@ -131,10 +129,8 @@ android {
         multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunnerArguments clearPackageData: 'true'
         buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""
         buildConfigField "String", "TEST_PORT", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"] + "\""
-        testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
 
         //see https://proandroiddev.com/current-issues-with-kotlin-multiplatform-and-how-to-fix-them-5ae62822a546
         packagingOptions {
@@ -154,6 +150,9 @@ android {
             minifyEnabled false
             testCoverageEnabled = false
         }
+    }
+    lint {
+        abortOnError false
     }
 
     kotlinOptions {

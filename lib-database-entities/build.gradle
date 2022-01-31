@@ -8,7 +8,6 @@ plugins {
 
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
-    buildToolsVersion rootProject.ext.version_android_buildtools
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
