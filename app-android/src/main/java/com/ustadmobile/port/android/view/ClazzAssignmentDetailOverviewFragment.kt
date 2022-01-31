@@ -239,7 +239,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         set(value) {
             field = value
             scoreRecyclerAdapter?.score = value
-            scoreRecyclerAdapter?.visible = value?.resultMax?: 0 > 0
+            scoreRecyclerAdapter?.visible = value?.resultScaled?: 0f > 0f
         }
 
     override var clazzAssignmentContent: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
@@ -304,6 +304,12 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         }
 
     override var maxNumberOfFilesSubmission: Int = 0
+
+    override var fileSubmissionScore: ContentEntryStatementScoreProgress? = null
+        set(value) {
+            field = value
+            fileSubmissionHeaderAdapter?.fileSubmissionScore = value
+        }
 
     override var entity: ClazzAssignment? = null
         get() = field

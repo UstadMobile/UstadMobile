@@ -57,7 +57,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
 
 
     private var contentHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
-    private var fileSubmissionHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
+    private var fileSubmissionHeaderAdapter: FileSubmissionHeaderAdapter? = null
     private var contentRecyclerAdapter: ContentWithAttemptRecyclerAdapter? = null
 
     private var contentLiveData: LiveData<PagedList<
@@ -121,7 +121,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         contentRecyclerAdapter = ContentWithAttemptRecyclerAdapter(mPresenter)
 
 
-        fileSubmissionHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.file_submission).toString()).apply {
+        fileSubmissionHeaderAdapter = FileSubmissionHeaderAdapter(getText(R.string.file_submission).toString()).apply {
             visible = false
         }
 
@@ -235,6 +235,12 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             fileSubmissionHeaderAdapter?.visible = value
         }
 
+    override var fileSubmissionScore: ContentEntryStatementScoreProgress?= null
+        set(value) {
+            field = value
+            fileSubmissionHeaderAdapter?.fileSubmissionScore = value
+        }
+
     override var markNextStudentEnabled: Boolean = false
         set(value) {
             field = value
@@ -259,7 +265,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         set(value) {
             field = value
             scoreRecyclerAdapter?.score = value
-            scoreRecyclerAdapter?.visible = value?.resultMax?: 0 > 0
+            scoreRecyclerAdapter?.visible = value?.resultScaled ?: 0f > 0f
         }
 
 

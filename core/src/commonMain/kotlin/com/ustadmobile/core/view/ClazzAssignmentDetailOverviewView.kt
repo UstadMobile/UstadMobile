@@ -26,6 +26,8 @@ interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignment> {
 
     var maxNumberOfFilesSubmission: Int
 
+    var fileSubmissionScore: ContentEntryStatementScoreProgress?
+
     companion object {
 
         const val VIEW_NAME = "ClazzAssignmentDetailOverviewView"

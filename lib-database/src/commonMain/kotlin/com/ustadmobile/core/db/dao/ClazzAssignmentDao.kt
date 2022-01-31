@@ -230,7 +230,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
         SELECT 0 AS resultMax, 
                0 AS resultScore, 
                COALESCE(SUM(ResultSource.cacheFinalWeightScoreWithPenalty),0) as resultScaled,
-               'FALSE' as contentComplete, 0 as progress, 0 as success,
+               'FALSE' as contentComplete, 
+               COALESCE(AVG(ResultSource.cacheProgress),0) as progress, 0 as success,
                0 AS penalty,
                
                COALESCE(SUM(ResultSource.cacheWeight),0) As resultWeight,
@@ -241,7 +242,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                         
                COALESCE(COUNT(DISTINCT ResultSource.cacheContentEntryUid), 0) AS totalContent
  
-     	  FROM (SELECT ClazzAssignmentRollUp.cacheContentComplete,
+     	  FROM (SELECT ClazzAssignmentRollUp.cacheContentComplete, ClazzAssignmentRollUp.cacheProgress,
                         ClazzAssignmentRollUp.cacheContentEntryUid, ClazzAssignmentRollUp.cacheWeight, 
                         ClazzAssignmentRollUp.cacheFinalWeightScoreWithPenalty
      	 	      FROM ClazzAssignmentRollUp 
@@ -250,7 +251,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
               GROUP BY ClazzAssignmentRollUp.cacheContentEntryUid
      	  ) AS ResultSource
     """)
-    abstract suspend fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): ContentEntryStatementScoreProgress?
+    abstract fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): DoorLiveData<ContentEntryStatementScoreProgress?>
     
     @Query("""
          SELECT ResultSource.personUid, ResultSource.firstNames, ResultSource.lastName,

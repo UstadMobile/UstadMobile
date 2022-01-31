@@ -2,18 +2,24 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.*
+import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.view.ClazzAssignmentDetailView
+import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
@@ -238,7 +244,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             val contentToUpdate = contentOneToManyJoinEditHelper.entitiesToUpdate
 
             // run in transaction
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { db ->
+           // repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
                 db.clazzAssignmentContentJoinDao.insertListAsync(contentToInsert.map {
                     ClazzAssignmentContentJoin().apply {
                         cacjContentUid = it.contentEntryUid
@@ -249,7 +255,7 @@ class ClazzAssignmentEditPresenter(context: Any,
                 contentToUpdate.forEach {
                     db.clazzAssignmentContentJoinDao.updateWeightForAssignmentAndContent(it.contentEntryUid, entity.caUid, it.assignmentContentWeight)
                 }
-            }
+            //}
 
             repo.clazzAssignmentContentJoinDao.deactivateByUids(contentToDelete, entity.caUid)
 

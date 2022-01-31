@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemAssignmentFileSubmissionHeaderBinding
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class FileSubmissionHeaderAdapter(heading: String): SingleItemRecyclerViewAdapter<
@@ -25,6 +26,13 @@ class FileSubmissionHeaderAdapter(heading: String): SingleItemRecyclerViewAdapte
             viewHolder?.itemBinding?.assignment = value
         }
 
+    var fileSubmissionScore: ContentEntryStatementScoreProgress? = null
+        set(value){
+            if(field == value)
+                return
+            field = value
+            viewHolder?.itemBinding?.fileSubmissionScore = value
+        }
 
 
     class FileSubmissionHeaderViewHolder(var itemBinding: ItemAssignmentFileSubmissionHeaderBinding)
@@ -32,16 +40,16 @@ class FileSubmissionHeaderAdapter(heading: String): SingleItemRecyclerViewAdapte
 
     private var viewHolder: FileSubmissionHeaderViewHolder? = null
 
-
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileSubmissionHeaderViewHolder {
-        return FileSubmissionHeaderViewHolder(
+        viewHolder = FileSubmissionHeaderViewHolder(
                 ItemAssignmentFileSubmissionHeaderBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
                     it.headingText = headingText
                     it.assignment = assignment
                     it.headingText = headingText
+                    it.fileSubmissionScore = fileSubmissionScore
                 })
+        return viewHolder as FileSubmissionHeaderViewHolder
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

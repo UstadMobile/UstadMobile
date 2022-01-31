@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
@@ -100,11 +101,18 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
                 )
             }
 
+            db.clazzAssignmentRollUpDao.getScoreForFileSubmission(clazzAssignment.caUid, selectedPersonUid)
+                    .observeWithLifecycleOwner(lifecycleOwner){
+                        view.fileSubmissionScore = it
+                    }
         }
         view.hasFileSubmission = clazzAssignment.caRequireFileSubmission
 
-        view.studentScore = db.clazzAssignmentDao.getStatementScoreProgressForAssignment(
+        db.clazzAssignmentDao.getStatementScoreProgressForAssignment(
                 clazzAssignment.caUid, selectedPersonUid)
+                .observeWithLifecycleOwner(lifecycleOwner){
+                    view.studentScore = it
+                }
 
         if(clazzAssignment.caPrivateCommentsEnabled){
             view.clazzAssignmentPrivateComments = db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
@@ -156,6 +164,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
                     accountManager.activeAccount,
                         person, randomUuid().toString(),
                         grade, assignment, statement)
+                repo.clazzAssignmentRollUpDao.cacheBestStatements(selectedClazzUid, selectedClazzAssignmentUid, selectedPersonUid)
             }
         }
         return true

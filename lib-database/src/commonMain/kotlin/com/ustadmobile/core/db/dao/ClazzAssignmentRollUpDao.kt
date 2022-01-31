@@ -2,9 +2,11 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzAssignmentRollUp
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 
 @Dao
 @Repository
@@ -152,6 +154,29 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
       
     """)
     abstract suspend fun cacheBestStatements(clazzUid: Long, assignmentUid: Long, personUid: Long)
+
+
+    @Query("""
+        SELECT COALESCE(ClazzAssignmentRollUp.cacheMaxScore,0) AS resultMax, 
+               COALESCE(ClazzAssignmentRollUp.cacheStudentScore,0) AS resultScore, 
+               0 as resultScaled,
+               COALESCE(ClazzAssignmentRollUp.cacheContentComplete,'FALSE') AS contentComplete,
+               COALESCE(AVG(cacheProgress),0) as progress, 0 as success,
+               COALESCE(ClazzAssignmentRollUp.cachePenalty,0) AS penalty,
+               
+               COALESCE(SUM(cacheWeight),0) As resultWeight,
+               
+              COALESCE((CASE WHEN ClazzAssignmentRollUp.cacheContentComplete 
+                                            THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                        
+               1 AS totalContent
+ 
+     	  FROM ClazzAssignmentRollUp
+         WHERE cachePersonUid = :personUid
+           AND cacheClazzAssignmentUid = :assignmentUid
+           AND cacheContentEntryUid = 0
+    """)
+    abstract fun getScoreForFileSubmission(assignmentUid: Long, personUid: Long): DoorLiveData<ContentEntryStatementScoreProgress?>
 
     @Query("""
         DELETE

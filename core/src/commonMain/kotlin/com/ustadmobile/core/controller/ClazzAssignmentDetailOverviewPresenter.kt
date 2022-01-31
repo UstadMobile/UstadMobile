@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.core.util.ext.effectiveTimeZone
+import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.SelectFileView
@@ -114,10 +115,17 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                             clazzAssignment.caUid, loggedInPersonUid)
                 }
 
+                db.clazzAssignmentRollUpDao.getScoreForFileSubmission(clazzAssignment.caUid, loggedInPersonUid)
+                        .observeWithLifecycleOwner(lifecycleOwner){
+                            view.fileSubmissionScore = it
+                        }
 
             }
-            view.clazzMetrics = db.clazzAssignmentDao.getStatementScoreProgressForAssignment(
+            db.clazzAssignmentDao.getStatementScoreProgressForAssignment(
                     clazzAssignment.caUid, loggedInPersonUid)
+                    .observeWithLifecycleOwner(lifecycleOwner){
+                        view.clazzMetrics = it
+                    }
         }else{
             // isTeacher
             view.showFileSubmission = false

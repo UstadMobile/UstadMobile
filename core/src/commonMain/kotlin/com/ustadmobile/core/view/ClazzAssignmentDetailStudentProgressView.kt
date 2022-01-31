@@ -20,6 +20,8 @@ interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignm
 
     var hasFileSubmission: Boolean
 
+    var fileSubmissionScore: ContentEntryStatementScoreProgress?
+
     var markNextStudentEnabled: Boolean
 
     companion object {
