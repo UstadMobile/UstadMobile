@@ -1,13 +1,13 @@
 package com.ustadmobile.port.android.screen
 
 import android.view.View
+import com.kaspersky.kaspresso.screens.KScreen
+import com.toughra.ustadmobile.R
+import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment
 import io.github.kakaocup.kakao.edit.KEditText
 import io.github.kakaocup.kakao.recycler.KRecyclerItem
 import io.github.kakaocup.kakao.recycler.KRecyclerView
-import com.kaspersky.kaspresso.screens.KScreen
 import io.github.kakaocup.kakao.text.KTextView
-import com.toughra.ustadmobile.R
-import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment
 import org.hamcrest.Matcher
 
 object ClazzAssignmentDetailOverviewScreen : KScreen<ClazzAssignmentDetailOverviewScreen>() {
@@ -42,7 +42,6 @@ object ClazzAssignmentDetailOverviewScreen : KScreen<ClazzAssignmentDetailOvervi
 
     class TotalScore(parent: Matcher<View>) : KRecyclerItem<TotalScore>(parent) {
         val score: KTextView = KTextView(parent) {withId(R.id.item_person_score)}
-        val scoreResults: KTextView = KTextView(parent) {withId(R.id.item_person_total_score_results)}
     }
 
     class ClassComments(parent: Matcher<View>) : KRecyclerItem<ClassComments>(parent) {

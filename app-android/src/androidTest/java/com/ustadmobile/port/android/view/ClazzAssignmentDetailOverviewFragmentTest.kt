@@ -155,9 +155,6 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
                         this.score{
                             hasText("33%")
                         }
-                        this.scoreResults{
-                            hasText("(5/15)")
-                        }
 
                     }
 

@@ -4,13 +4,13 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
-import com.ustadmobile.port.android.screen.ClazzAssignmentDetailStudentProgressScreen
+import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.screen.ClazzAssignmentDetailStudentProgressScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
@@ -150,9 +150,6 @@ class ClazzAssignmentDetailStudentProgressFragmentTest : TestCase()  {
 
                         this.score{
                             hasText("33%")
-                        }
-                        this.scoreResults{
-                            hasText("(5/15)")
                         }
 
                     }
