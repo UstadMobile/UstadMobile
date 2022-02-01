@@ -66,6 +66,9 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
 
+        mPresenter = ClazzAssignmentDetailStudentProgressOverviewListPresenter(requireContext(),
+                arguments.toStringMap(), this,
+                di, viewLifecycleOwner)
 
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
@@ -74,10 +77,6 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
 
         mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,progressSummaryAdapter, mDataRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
-
-        mPresenter = ClazzAssignmentDetailStudentProgressOverviewListPresenter(requireContext(),
-                arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
 
 
         return view
