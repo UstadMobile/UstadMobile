@@ -10,8 +10,7 @@
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="com.ustadmobile.core.util.ext.ContentEntryStatementScoreProgressExtKt"/>
         <import type="android.view.View"/>
-        <import type="com.ustadmobile.port.android.view.ContentEntryDetailAttemptsListFragment"/>
-        <import type="com.ustadmobile.port.android.view.ContentEntryDetailAttemptsListFragment.PersonWithStatementDisplayListRecyclerAdapter"/>
+        <import type="com.ustadmobile.port.android.view.ClazzAssignmentDetailStudentProgressListOverviewFragment.PersonWithAssignmentStatementDisplayListRecyclerAdapter"/>
 
         <variable
             name="person"
@@ -23,7 +22,7 @@
 
         <variable
             name="selectablePagedListAdapter"
-            type="PersonWithStatementDisplayListRecyclerAdapter" />
+            type="PersonWithAssignmentStatementDisplayListRecyclerAdapter" />
     </data>
 
 
@@ -156,7 +155,7 @@
             android:id="@+id/attempt_score_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@{@string/percentage_score(ContentEntryStatementScoreProgressExtKt.calculateScoreWithPenalty(person.scoreProgress))}"
+            android:text="@{@string/percentage_score(ContentEntryStatementScoreProgressExtKt.calculateScoreWithWeight(person.scoreProgress))}"
             app:showScoreVisibility="@{person.scoreProgress}"
             app:layout_constraintTop_toBottomOf="@id/attempt_progress_text"
             app:layout_constraintStart_toStartOf="@id/attempt_progress_text"
@@ -175,7 +174,7 @@
             android:max="100"
             android:visibility="@{person.scoreProgress == null || person.scoreProgress.resultMax == 0 ? View.GONE : View.VISIBLE}"
             app:showScoreVisibility="@{person.scoreProgress}"
-            app:scoreProgress="@{person.scoreProgress}"
+            app:scoreWithWeight="@{person.scoreProgress}"
             android:progressTint="@color/primaryColor"
             app:layout_constraintEnd_toStartOf="@id/attempt_score_text"
             app:layout_constraintBottom_toBottomOf="@id/attempt_score_text"

@@ -27,11 +27,13 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
        SELECT clazzEnrolmentPersonUid AS cachePersonUid, 
                 COALESCE(cacjContentUid,0) AS cacheContentEntryUid, caUid AS cacheClazzAssignmentUid, 
                COALESCE(resultScoreRaw,0) AS cacheStudentScore, 
-               COALESCE(cacjWeight, 0) AS cacheWeight,
-               
+              
+              
                COALESCE((SELECT maxScore 
                           FROM MaxScoreTable 
                          WHERE cacjContentUid = maxScoreContentEntryUid), 0) AS cacheMaxScore,
+                         
+               COALESCE(cacjWeight, 0) AS cacheWeight,
                         
                           
                COALESCE(StatementEntity.extensionProgress,0) AS cacheProgress,
@@ -43,9 +45,9 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                      
               (CASE WHEN StatementEntity.timestamp > ClazzAssignment.caDeadlineDate 
                      THEN (COALESCE(CAST(resultScoreRaw AS REAL),0) / COALESCE((SELECT maxScore 
-                          FROM MaxScoreTable),0) * 100 * cacjWeight * (1 - (CAST(caLateSubmissionPenalty AS REAL)/100)))
+                          FROM MaxScoreTable WHERE cacjContentUid = maxScoreContentEntryUid),0) * 100 * cacjWeight * (1 - (CAST(caLateSubmissionPenalty AS REAL)/100)))
                      ELSE (COALESCE(CAST(resultScoreRaw AS REAL),0) / COALESCE((SELECT maxScore 
-                          FROM MaxScoreTable),0) * 100 * cacjWeight)  END) AS cacheFinalWeightScoreWithPenalty,   
+                          FROM MaxScoreTable WHERE cacjContentUid = maxScoreContentEntryUid),0) * 100 * cacjWeight)  END) AS cacheFinalWeightScoreWithPenalty,   
                      
                0 AS lastCsnChecked
           FROM ClazzAssignmentContentJoin

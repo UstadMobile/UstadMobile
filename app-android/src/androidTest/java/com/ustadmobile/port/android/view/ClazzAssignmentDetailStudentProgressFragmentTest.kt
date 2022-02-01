@@ -82,12 +82,14 @@ class ClazzAssignmentDetailStudentProgressFragmentTest : TestCase()  {
             caDescription = "complete quiz"
             caDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
             caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = false
             caUid = dbRule.repo.clazzAssignmentDao.insert(this)
         }
 
         ClazzAssignmentContentJoin().apply {
             cacjContentUid = contentEntry.contentEntryUid
             cacjAssignmentUid = clazzAssignment.caUid
+            cacjWeight = 100
             cacjUid = dbRule.repo.clazzAssignmentContentJoinDao.insert(this)
         }
 
@@ -97,6 +99,8 @@ class ClazzAssignmentDetailStudentProgressFragmentTest : TestCase()  {
             this.cacheContentComplete = true
             this.cacheMaxScore = 15
             this.cachePersonUid = student.personUid
+            this.cacheFinalWeightScoreWithPenalty = 3300f
+            this.cacheWeight = 100
             this.cacheStudentScore = 5
             this.cacheProgress = 100
             this.cacheUid = dbRule.repo.clazzAssignmentRollUpDao.insert(this)

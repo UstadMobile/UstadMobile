@@ -4,13 +4,13 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
-import com.ustadmobile.port.android.screen.ClazzAssignmentDetailStudentProgressListScreen
+import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.screen.ClazzAssignmentDetailStudentProgressListScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
@@ -82,14 +82,15 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragmentTest : TestCase() 
         val clazzAssignment = ClazzAssignment().apply {
             caTitle = "New Clazz Assignment"
             caDescription = "complete quiz"
-            caDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
             caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = false
             caUid = dbRule.repo.clazzAssignmentDao.insert(this)
         }
 
         ClazzAssignmentContentJoin().apply {
             cacjContentUid = contentEntry.contentEntryUid
             cacjAssignmentUid = clazzAssignment.caUid
+            cacjWeight = 100
             cacjUid = dbRule.repo.clazzAssignmentContentJoinDao.insert(this)
         }
 
@@ -100,9 +101,12 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragmentTest : TestCase() 
             this.cacheMaxScore = 15
             this.cachePersonUid = student.personUid
             this.cacheStudentScore = 5
+            this.cacheFinalWeightScoreWithPenalty = 3300f
+            this.cacheWeight = 100
             this.cacheProgress = 100
             this.cacheUid = dbRule.repo.clazzAssignmentRollUpDao.insert(this)
         }
+
 
         StatementEntity().apply {
             statementContentEntryUid = contentEntry.contentEntryUid

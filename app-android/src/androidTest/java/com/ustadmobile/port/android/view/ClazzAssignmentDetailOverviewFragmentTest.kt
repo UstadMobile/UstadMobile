@@ -74,6 +74,7 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
         val clazzAssignment = ClazzAssignment().apply {
             caTitle = "New Clazz Assignment"
             caDescription = "complete quiz"
+            caRequireFileSubmission = false
             caDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
             caClazzUid = testClazz.clazzUid
             caUid = dbRule.repo.clazzAssignmentDao.insert(this)
@@ -82,6 +83,7 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
         ClazzAssignmentContentJoin().apply {
             cacjContentUid = contentEntry.contentEntryUid
             cacjAssignmentUid = clazzAssignment.caUid
+            cacjWeight = 100
             cacjUid = dbRule.repo.clazzAssignmentContentJoinDao.insert(this)
         }
 
@@ -92,6 +94,8 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
             this.cacheMaxScore = 15
             this.cachePersonUid = 42
             this.cacheStudentScore = 5
+            this.cacheWeight = 100
+            this.cacheFinalWeightScoreWithPenalty = 3300f
             this.cacheProgress = 100
             this.cacheUid = dbRule.repo.clazzAssignmentRollUpDao.insert(this)
         }
@@ -127,7 +131,7 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
                         }
 
                         deadline {
-                            containsText("May 5, 2021")
+                            containsText("5 May 2021")
                         }
                     }
 
