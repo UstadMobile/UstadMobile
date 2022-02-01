@@ -5,10 +5,15 @@
 
     <data>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="android.view.View"/>
 
         <variable
             name="assignmentProgressSummary"
             type="com.ustadmobile.lib.db.entities.AssignmentProgressSummary" />
+
+        <variable
+            name="showMarked"
+            type="Boolean" />
 
 
     </data>

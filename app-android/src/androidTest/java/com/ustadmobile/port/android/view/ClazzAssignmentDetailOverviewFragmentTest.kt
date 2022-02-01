@@ -131,7 +131,8 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
                         }
 
                         deadline {
-                            containsText("5 May 2021")
+                            containsText("May")
+                            containsText("5")
                         }
                     }
 
