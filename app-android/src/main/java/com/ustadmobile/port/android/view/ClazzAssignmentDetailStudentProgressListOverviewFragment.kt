@@ -66,13 +66,14 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
 
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
+        progressSummaryAdapter = AssignmentProgressSummaryRecyclerAdapter(null)
+
         mPresenter = ClazzAssignmentDetailStudentProgressOverviewListPresenter(requireContext(),
                 arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
-                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
-        progressSummaryAdapter = AssignmentProgressSummaryRecyclerAdapter(null)
         mDataRecyclerViewAdapter = PersonWithAssignmentStatementDisplayListRecyclerAdapter(mPresenter)
 
         mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,progressSummaryAdapter, mDataRecyclerViewAdapter)

@@ -148,7 +148,29 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                     (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
                                        FROM ClazzAssignmentContentJoin 
                                       WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid)) 
-                  ELSE 0 END) AS completedStudents, 
+                  ELSE 0 END) AS completedStudents,
+                   
+                    (CASE WHEN (SELECT hasPermission 
+                         FROM CtePermissionCheck)
+                  THEN (SELECT COUNT(DISTINCT(StatementEntity.statementPersonUid)) 
+                           FROM StatementEntity 
+                                JOIN XObjectEntity 
+                                ON XObjectEntity.xObjectUid = StatementEntity.xObjectUid 
+                                
+                                JOIN StatementEntity as SubmissionStatement 
+                                ON SubmissionStatement.statementId = XObjectEntity.objectId
+                                
+                                JOIN ClazzEnrolment
+                                ON ClazzEnrolment.clazzEnrolmentPersonUid = StatementEntity.statementPersonUid
+                               
+                          WHERE SubmissionStatement.xObjectUid = ClazzAssignment.caXObjectUid
+                            AND ClazzEnrolment.clazzEnrolmentActive
+                            AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                            AND ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
+                            AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
+                    ELSE 0 END) AS markedStudents,          
+                   
+                   
            
             $GET_ALL_ASSIGNMENTS_SCORE_FOR_CURRENT_USER_SQL AS resultScore,
                           
@@ -440,8 +462,29 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                        FROM ClazzAssignmentContentJoin 
                                       WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid
                                         AND cacjActive)) 
-                  ELSE 0 END) AS completedStudents
-
+                  ELSE 0 END) AS completedStudents,
+                  
+                  
+             (CASE WHEN (SELECT hasPermission 
+                           FROM CtePermissionCheck)
+                   THEN (SELECT COUNT(DISTINCT(StatementEntity.statementPersonUid)) 
+                           FROM StatementEntity 
+                                JOIN XObjectEntity 
+                                ON XObjectEntity.xObjectUid = StatementEntity.xObjectUid 
+                                
+                                JOIN StatementEntity as SubmissionStatement 
+                                ON SubmissionStatement.statementId = XObjectEntity.objectId
+                                
+                                JOIN ClazzEnrolment
+                                ON ClazzEnrolment.clazzEnrolmentPersonUid = StatementEntity.statementPersonUid
+                               
+                          WHERE SubmissionStatement.xObjectUid = ClazzAssignment.caXObjectUid
+                            AND ClazzEnrolment.clazzEnrolmentActive
+                            AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                            AND ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
+                            AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
+                   ELSE 0 END) AS markedStudents
+                           
         
         FROM ClazzAssignment
        WHERE caActive

@@ -13,6 +13,8 @@ class AssignmentProgressSummary {
 
     var totalStudents: Int = 0
 
+    var markedStudents: Int = 0
+
     var hasMetricsPermission: Boolean = false
 
     fun calculateStartedStudents(): Int {
