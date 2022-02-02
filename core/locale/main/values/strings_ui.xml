@@ -713,6 +713,10 @@
 
     <string name="marking_type">Marking type</string>
 
+    <string name="no_files_submitted">No files submitted</string>
+    <string name="files_submitted">Files submitted</string>
+    <string name="files_marked">Files marked</string>
+
     <string name="peers">Peers</string>
 
     <string name="file_type">File type</string>

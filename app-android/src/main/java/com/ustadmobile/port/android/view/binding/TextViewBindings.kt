@@ -10,6 +10,7 @@ import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.model.BitmaskMessageId
 import com.ustadmobile.core.util.MessageIdOption
@@ -237,6 +238,21 @@ fun TextView.setMemberEnrolmentOutcome(clazzEnrolment: ClazzEnrolmentWithLeaving
 fun TextView.setClazzEnrolmentWithClazzAndOutcome(clazzEnrolment: ClazzEnrolmentWithClazz?){
     text = "${clazzEnrolment?.clazz?.clazzName} (${clazzEnrolment?.roleToString(context, systemImpl)}) - ${clazzEnrolment?.outcomeToString(context,  systemImpl)}"
 }
+
+@BindingAdapter("fileSubmissionStatus")
+fun TextView.setFileSubmissionStatus(status: Int){
+    val statusMessageId = FILE_SUBMISSION_STATUS_TO_MESSAGEID_MAP[status] ?: 0
+    text = systemImpl.getString(statusMessageId, context)
+}
+
+
+val FILE_SUBMISSION_STATUS_TO_MESSAGEID_MAP = mapOf(
+        ClazzAssignment.FILE_NOT_SUBMITTED to MessageID.no_files_submitted,
+        ClazzAssignment.FILE_MARKED to MessageID.files_marked,
+        ClazzAssignment.FILE_SUBMITTED to MessageID.files_submitted
+)
+
+
 
 @BindingAdapter("showisolang")
 fun TextView.setIsoLang(language: Language){

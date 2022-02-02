@@ -320,13 +320,23 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
             COALESCE((SELECT COUNT(DISTINCT cacheContentEntryUid) 
                               FROM ClazzAssignmentRollUp
                              WHERE cacheClazzAssignmentUid = :assignmentUid), 0) AS totalContent,                              
-                                                    
+                                                   
+           COALESCE((CASE WHEN NOT ResultSource.caRequireFileSubmission 
+                          THEN ${ClazzAssignment.FILE_SUBMISSION_NOT_REQUIRED} 
+                          WHEN MarkedStatement.statementUid IS NOT NULL 
+                          THEN ${ClazzAssignment.FILE_MARKED} 
+                          WHEN SubmissionStatement.statementUid IS NOT NULL 
+                          THEN ${ClazzAssignment.FILE_SUBMITTED} 
+                          ELSE ${ClazzAssignment.FILE_NOT_SUBMITTED} END), 
+                               ${ClazzAssignment.FILE_SUBMISSION_NOT_REQUIRED} ) AS fileSubmissionStatus,
+                                 
 
             cm.commentsText AS latestPrivateComment
         
          FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 
             StatementEntity.contextRegistration, StatementEntity.timestamp, 
-            StatementEntity.resultDuration 
+            StatementEntity.resultDuration, ClazzAssignment.caXObjectUid, 
+            ClazzAssignment.caRequireFileSubmission
                 FROM PersonGroupMember
          ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
              LEFT JOIN ClazzEnrolment
@@ -364,6 +374,17 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                     AND NOT commentsPublic
                                     AND Comments.commentsPersonUid = ResultSource.personUid
                                ORDER BY commentsDateTimeAdded DESC LIMIT 1)
+                   LEFT JOIN StatementEntity AS SubmissionStatement
+                   ON SubmissionStatement.xObjectUid = ResultSource.caXObjectUid
+                   AND SubmissionStatement.statementPersonUid = ResultSource.personUid
+                   
+                   LEFT JOIN XObjectEntity
+                   ON SubmissionStatement.statementId = XObjectEntity.objectId
+                   
+                   LEFT JOIN StatementEntity AS MarkedStatement
+                   ON XObjectEntity.xObjectUid = MarkedStatement.xObjectUid
+                   AND MarkedStatement.statementPersonUid = ResultSource.personUid
+                   
          GROUP BY ResultSource.personUid 
          ORDER BY CASE(:sortOrder) 
                 WHEN $SORT_FIRST_NAME_ASC THEN ResultSource.firstNames

@@ -120,6 +120,11 @@ open class ClazzAssignment {
         const val FILE_TYPE_VIDEO = 3
         const val FILE_TYPE_AUDIO = 4
 
+        const val FILE_SUBMISSION_NOT_REQUIRED = 0
+        const val FILE_NOT_SUBMITTED = 1
+        const val FILE_SUBMITTED = 2
+        const val FILE_MARKED = 3
+
     }
 
 

@@ -139,7 +139,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 
             1 as totalContent, 
             
-             
+            0 as fileSubmissionStatus, 
          
             '' AS latestPrivateComment
         
