@@ -120,7 +120,16 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                   AND StatementEntity.timestamp
                                         BETWEEN ClazzAssignment.caStartDate
                                         AND ClazzAssignment.caGracePeriodDate
-                                  ))
+                                  )
+                         AND (ClazzAssignment.caRequireFileSubmission 
+                              AND NOT EXISTS
+                              (SELECT statementUid
+                                 FROM StatementEntity
+                                WHERE StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                                  AND StatementEntity.xObjectUid = ClazzAssignment.caXObjectUid
+                                  AND StatementEntity.timestamp
+                                      BETWEEN ClazzAssignment.caStartDate
+                                      AND ClazzAssignment.caGracePeriodDate)))             
                 ELSE 0 END) AS notStartedStudents,
                 
                   0 as startedStudents,
@@ -147,7 +156,16 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                            AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid) = 
                                     (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
                                        FROM ClazzAssignmentContentJoin 
-                                      WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid)) 
+                                      WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid)
+                           AND (ClazzAssignment.caRequireFileSubmission 
+                              AND EXISTS
+                              (SELECT statementUid
+                                 FROM StatementEntity
+                                WHERE StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                                  AND StatementEntity.xObjectUid = ClazzAssignment.caXObjectUid
+                                  AND StatementEntity.timestamp
+                                      BETWEEN ClazzAssignment.caStartDate
+                                      AND ClazzAssignment.caGracePeriodDate)))            
                   ELSE 0 END) AS completedStudents,
                    
                     (CASE WHEN (SELECT hasPermission 
@@ -455,7 +473,16 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                    AND StatementEntity.timestamp
                                         BETWEEN ClazzAssignment.caStartDate
                                         AND ClazzAssignment.caGracePeriodDate
-                                  ))
+                                  )
+                         AND (ClazzAssignment.caRequireFileSubmission 
+                              AND NOT EXISTS
+                              (SELECT statementUid
+                                 FROM StatementEntity
+                                WHERE StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                                  AND StatementEntity.xObjectUid = ClazzAssignment.caXObjectUid
+                                  AND StatementEntity.timestamp
+                                      BETWEEN ClazzAssignment.caStartDate
+                                      AND ClazzAssignment.caGracePeriodDate))) 
                 ELSE 0 END) AS notStartedStudents,
                 
                 0 as startedStudents,
@@ -484,7 +511,16 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                     (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
                                        FROM ClazzAssignmentContentJoin 
                                       WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid
-                                        AND cacjActive)) 
+                                        AND cacjActive)
+                           AND (ClazzAssignment.caRequireFileSubmission 
+                              AND EXISTS
+                              (SELECT statementUid
+                                 FROM StatementEntity
+                                WHERE StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                                  AND StatementEntity.xObjectUid = ClazzAssignment.caXObjectUid
+                                  AND StatementEntity.timestamp
+                                      BETWEEN ClazzAssignment.caStartDate
+                                      AND ClazzAssignment.caGracePeriodDate)))               
                   ELSE 0 END) AS completedStudents,
                   
                   

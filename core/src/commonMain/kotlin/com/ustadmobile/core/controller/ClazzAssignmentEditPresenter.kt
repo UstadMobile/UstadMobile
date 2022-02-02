@@ -259,7 +259,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             repo.clazzAssignmentContentJoinDao.deactivateByUids(contentToDelete, entity.caUid)
 
-            repo.clazzAssignmentRollUpDao.deleteCachedInactiveContent()
+            repo.clazzAssignmentRollUpDao.deleteCachedInactiveContent(entity.caUid)
 
             onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
 

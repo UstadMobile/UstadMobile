@@ -179,8 +179,14 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                 IN (SELECT cacjContentUid 
                      FROM ClazzAssignmentContentJoin
                     WHERE NOT cacjActive)
+           OR (cacheClazzAssignmentUid 
+              IN (SELECT caUid 
+                   FROM ClazzAssignment
+                  WHERE caUid = :caUid
+                    AND NOT caRequireFileSubmission) 
+               AND cacheContentEntryUid = 0)                                        
     """)
-    abstract suspend fun deleteCachedInactiveContent()
+    abstract suspend fun deleteCachedInactiveContent(caUid: Long)
 
 
     @Query("""
