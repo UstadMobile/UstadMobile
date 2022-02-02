@@ -150,7 +150,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:visibility="@{assignment.progressSummary.hasMetricsPermission ? View.VISIBLE : View.GONE}"
-            android:text="@{@string/three_num_items_with_name_with_comma(assignment.progressSummary.notStartedStudents, @string/not_started, assignment.progressSummary.calculateStartedStudents(), @string/started, assignment.progressSummary.completedStudents, @string/completed)}"
+            android:text="@{@string/four_num_items_with_name_with_comma(assignment.progressSummary.notStartedStudents, @string/not_started, assignment.progressSummary.calculateStartedStudents(), @string/started, assignment.progressSummary.completedStudents, @string/completed, assignment.progressSummary.markedStudents, @string/marked)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/line1_title"
             app:layout_constraintTop_toBottomOf="@+id/deadline_barrier"
