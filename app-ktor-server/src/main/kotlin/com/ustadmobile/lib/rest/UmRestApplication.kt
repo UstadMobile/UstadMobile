@@ -63,7 +63,7 @@ import com.ustadmobile.door.ext.doorDatabaseMetadata
 import kotlinx.coroutines.GlobalScope
 import com.ustadmobile.door.ext.nodeIdAuthCache
 import com.ustadmobile.door.util.NodeIdAuthCache
-import com.ustadmobile.core.db.RepIncomingListener
+import com.ustadmobile.core.db.PermissionManagementIncomingReplicationListener
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 import io.ktor.response.*
 import kotlinx.coroutines.delay
@@ -188,7 +188,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     .addCallback(ContentJobItemTriggersCallback())
                     .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .build()
-            db.addIncomingReplicationListener(RepIncomingListener(db))
+            db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
+
+            //Add listener that will end sessions when authentication has been updated
+            db.addIncomingReplicationListener(EndSessionPersonAuth2IncomingReplicationListener(db))
             runBlocking {
                 db.connectivityStatusDao.insertAsync(ConnectivityStatus().apply {
                     connectivityState = ConnectivityStatus.STATE_UNMETERED
@@ -234,8 +237,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 useReplicationSubscription = false
             })
 
-            //Add listener that will end sessions when authentication has been updated
-            //repo.addSyncListener(PersonAuth2::class, EndSessionPersonAuth2SyncListener(repo))
             repo.preload()
             repo.ktorInitRepo()
             runBlocking {
@@ -345,6 +346,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     // an infinite number of calls and exhaust their data bundle etc.
     install(StatusPages) {
         status(HttpStatusCode.NotFound) {
+            Napier.e("NOT FOUND! ${call.request.uri}!")
             delay(10000L)
             call.respondText("Not found", ContentType.Text.Plain, HttpStatusCode.NotFound)
         }

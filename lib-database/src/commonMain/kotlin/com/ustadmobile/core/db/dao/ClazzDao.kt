@@ -215,14 +215,30 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                         (SELECT SUM(clazzLogNumPresent) + SUM(clazzLogNumPartial) + SUM(clazzLogNumAbsent)
                         FROM ClazzLog 
                        WHERE clazzLogClazzUid = :clazzUid 
-                        AND clazzLogStatusFlag = $STATUS_RECORDED)) AS REAL), 0)
-        WHERE clazzUid = :clazzUid
+                        AND clazzLogStatusFlag = $STATUS_RECORDED)) AS REAL), 0),
+               clazzLct = :timeChanged         
+         WHERE clazzUid = :clazzUid
     """)
-    abstract suspend fun updateClazzAttendanceAverageAsync(clazzUid: Long)
+    @PostgresQuery("""
+        UPDATE Clazz 
+           SET attendanceAverage = 
+               COALESCE(CAST(
+                    (SELECT SUM(clazzLogNumPresent) 
+                       FROM ClazzLog 
+                      WHERE clazzLogClazzUid = :clazzUid
+                       AND clazzLogStatusFlag = 4) AS REAL) /
+                    
+                    CAST(GREATEST(1.0, 
+                        (SELECT SUM(clazzLogNumPresent) + SUM(clazzLogNumPartial) + SUM(clazzLogNumAbsent)
+                        FROM ClazzLog 
+                       WHERE clazzLogClazzUid = :clazzUid 
+                        AND clazzLogStatusFlag = $STATUS_RECORDED)) AS REAL), 0),
+               clazzLct = :timeChanged         
+         WHERE clazzUid = :clazzUid
+    """)
+    abstract suspend fun updateClazzAttendanceAverageAsync(clazzUid: Long, timeChanged: Long)
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
-//    @Query("SELECT EXISTS(SELECT 1 FROM Clazz WHERE " +
-//            "Clazz.clazzUid = :clazzUid AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_PERMISSION))")
     @Query("""
         SELECT EXISTS( 
                SELECT PrsGrpMbr.groupMemberPersonUid

@@ -14,7 +14,6 @@ version rootProject.version
 
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
-    buildToolsVersion rootProject.ext.version_android_buildtools
 
     buildTypes {
         release {

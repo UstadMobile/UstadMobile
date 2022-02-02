@@ -17,13 +17,19 @@ abstract class XLangMapEntryDao : BaseDao<XLangMapEntry> {
           SELECT DISTINCT XLangMapEntry.statementLangMapUid AS xlmePk,
                  :newNodeId AS xlmeDestination
             FROM XLangMapEntry
-           WHERE XLangMapEntry.statementLangMapLct != COALESCE(
+                 JOIN UserSession ON UserSession.usClientNodeId = :newNodeId
+             --notpsql      
+             WHERE XLangMapEntry.statementLangMapLct != COALESCE(
                  (SELECT xlmeVersionId
                     FROM XLangMapEntryReplicate
                    WHERE xlmePk = XLangMapEntry.statementLangMapUid
-                     AND xlmeDestination = :newNodeId), 0) 
+                     AND xlmeDestination = UserSession.usClientNodeId), 0)
+             --endnotpsql         
           /*psql ON CONFLICT(xlmePk, xlmeDestination) DO UPDATE
-                 SET xlmePending = true
+                 SET xlmePending = (SELECT XLangMapEntry.statementLangMapLct
+                                      FROM XLangmapEntry
+                                     WHERE XLangmapEntry.statementLangMapUid = EXCLUDED.xlmePk)
+                                        != XLangMapEntryReplicate.xlmeVersionId
           */       
      """)
     @ReplicationRunOnNewNode

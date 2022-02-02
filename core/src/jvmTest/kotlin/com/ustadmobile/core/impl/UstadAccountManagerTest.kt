@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.IncomingReplicationEvent
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -32,6 +33,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -493,5 +495,45 @@ class UstadAccountManagerTest {
             registerRequest.person.username)
     }
 
+
+    @Test
+    fun givenActiveAccount_whenIncomingReplicationMakesUserSessionInactive_thenShouldEndSession() {
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
+        val activeAccountPerson = Person().apply {
+            firstNames = "Mary"
+            lastName = "Poppins"
+            phoneNum = "1234567"
+            emailAddr = "mary@email.com"
+            username = "mary"
+        }
+
+        runBlocking {
+            db.insertPersonAndGroup(activeAccountPerson)
+        }
+
+        val session = runBlocking {
+            accountManager.addSession(activeAccountPerson, mockServerUrl, "123")
+        }
+        accountManager.activeSession = session
+
+        val deactivatedSession = Json.decodeFromString(
+            UserSession.serializer(),
+            Json.encodeToString(UserSession.serializer(), session.userSession)).also {
+                it.usStatus = UserSession.STATUS_LOGGED_OUT
+        }
+
+        val deactivatedSessionObject = Json.encodeToJsonElement(UserSession.serializer(),
+            deactivatedSession)
+
+
+        runBlocking {
+            accountManager.onIncomingReplicationProcessed(
+                IncomingReplicationEvent(JsonArray(listOf(deactivatedSessionObject)),
+                    UserSession.TABLE_ID))
+        }
+
+        //Session should be inactive
+        Assert.assertNull(accountManager.activeSession)
+    }
 
 }

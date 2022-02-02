@@ -273,6 +273,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
               GROUP BY ClazzAssignmentRollUp.cacheContentEntryUid
      	  ) AS ResultSource
     """)
+    @SqliteOnly
     abstract fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): DoorLiveData<ContentEntryStatementScoreProgress?>
     
     @Query("""
@@ -405,6 +406,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 ELSE 0
             END DESC
     """)
+    @SqliteOnly
     abstract fun getAttemptSummaryForStudentsInAssignment(assignmentUid: Long, clazzUid: Long,
                                                           accountPersonUid: Long,
                                                           searchText: String, sortOrder: Int):

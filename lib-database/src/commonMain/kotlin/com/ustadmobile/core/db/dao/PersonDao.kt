@@ -166,6 +166,7 @@ abstract class PersonDao : BaseDao<Person> {
     ): Boolean
 
     @Query("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0)")
+    @PostgresQuery("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), FALSE)")
     abstract suspend fun personIsAdmin(accountPersonUid: Long): Boolean
 
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
