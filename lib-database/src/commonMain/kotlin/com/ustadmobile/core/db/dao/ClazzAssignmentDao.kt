@@ -121,8 +121,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                         BETWEEN ClazzAssignment.caStartDate
                                         AND ClazzAssignment.caGracePeriodDate
                                   )
-                         AND (ClazzAssignment.caRequireFileSubmission 
-                              AND NOT EXISTS
+                         AND (NOT ClazzAssignment.caRequireFileSubmission 
+                              OR NOT EXISTS
                               (SELECT statementUid
                                  FROM StatementEntity
                                 WHERE StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
