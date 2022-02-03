@@ -366,7 +366,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
              ON ClazzAssignment.caUid = :assignmentUid
              
              LEFT JOIN ClazzAssignmentContentJoin 
-             ON ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid 
+             ON ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid
+             AND ClazzAssignmentContentJoin.cacjActive
 		                   
                           
              LEFT JOIN StatementEntity 
@@ -375,10 +376,10 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 AND StatementEntity.timestamp
                 BETWEEN ClazzAssignment.caStartDate
                 AND ClazzAssignment.caGracePeriodDate    
-               
+                
+                
                 WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
                 AND PersonGroupMember.groupMemberActive                      
-                AND ClazzAssignmentContentJoin.cacjActive
                 AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
                 AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}     
                 AND ClazzEnrolment.clazzEnrolmentActive
