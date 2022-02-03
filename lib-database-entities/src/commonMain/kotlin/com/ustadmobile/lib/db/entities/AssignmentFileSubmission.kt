@@ -7,6 +7,7 @@ import com.ustadmobile.lib.db.entities.AssignmentFileSubmission.Companion.TABLE_
 import kotlinx.serialization.Serializable
 
 @Entity
+@EntityWithAttachment
 @ReplicateEntity(tableId = TABLE_ID, tracker = AssignmentFileSubmissionReplicate::class)
 @Triggers(arrayOf(
         Trigger(
@@ -17,7 +18,7 @@ import kotlinx.serialization.Serializable
                 sqlStatements = [
                     """REPLACE INTO AssignmentFileSubmission(afsUid, afsAssignmentUid, afsStudentUid, afsTimestamp, afsTitle, afsSubmitted, afsActive, afsUri, afsMd5, afsSize, afsMasterCsn, afsLocalCsn, afsLastChangedBy, afsLct) 
          VALUES (NEW.afsUid, NEW.afsAssignmentUid, NEW.afsStudentUid, NEW.afsTimestamp, NEW.afsTitle, NEW.afsSubmitted, NEW.afsActive, NEW.afsUri, NEW.afsMd5, NEW.afsSize, NEW.afsMasterCsn, NEW.afsLocalCsn, NEW.afsLastChangedBy, NEW.afsLct) 
-         /*psql ON CONFLICT (caUid) DO UPDATE 
+         /*psql ON CONFLICT (afsUid) DO UPDATE 
          SET afsUid = EXCLUDED.afsUid, afsAssignmentUid = EXCLUDED.afsAssignmentUid, afsStudentUid = EXCLUDED.afsStudentUid, afsTimestamp = EXCLUDED.afsTimestamp, afsTitle = EXCLUDED.afsTitle, afsSubmitted = EXCLUDED.afsSubmitted, afsActive = EXCLUDED.afsActive, afsUri = EXCLUDED.afsUri, afsMd5 = EXCLUDED.afsMd5, afsSize = EXCLUDED.afsSize, afsMasterCsn = EXCLUDED.afsMasterCsn, afsLocalCsn = EXCLUDED.afsLocalCsn, afsLastChangedBy =  EXCLUDED.afsLastChangedBy, afsLct = EXCLUDED.afsLct
          */"""
                     ])
