@@ -78,10 +78,10 @@
             android:id="@+id/item_person_file_submission_status"
             android:layout_width="@dimen/dimen_0dp"
             android:layout_height="wrap_content"
+            android:visibility="@{person.fileSubmissionStatus == 0 ? View.GONE : View.VISIBLE}"
             app:fileSubmissionStatus="@{person.fileSubmissionStatus}"
             app:layout_constraintStart_toStartOf="@+id/item_person_text"
             app:layout_constraintTop_toBottomOf="@+id/item_person_text"
-            app:layout_constraintEnd_toStartOf="@id/item_person_duration"
             android:layout_marginBottom="@dimen/dimen_16dp" />
 
         <!-- Line 2-->
