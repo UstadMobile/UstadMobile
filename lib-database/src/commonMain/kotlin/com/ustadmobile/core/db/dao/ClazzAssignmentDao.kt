@@ -522,8 +522,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                        FROM ClazzAssignmentContentJoin 
                                       WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid
                                         AND cacjActive)
-                           AND (ClazzAssignment.caRequireFileSubmission 
-                              AND EXISTS
+                           AND (NOT ClazzAssignment.caRequireFileSubmission 
+                              OR EXISTS
                               (SELECT statementUid
                                  FROM StatementEntity
                                 WHERE StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
