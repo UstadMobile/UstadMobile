@@ -4,23 +4,27 @@ package com.ustadmobile.core.controller
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzAssignmentDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.core.util.*
-import com.ustadmobile.door.DoorLifecycleObserver
-
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import org.junit.Assert
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
+import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.SelectFileView
+import com.ustadmobile.core.view.SelectFileView.Companion.ARG_SELECTION_MODE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -111,25 +115,6 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     }
 
     @Test
-    fun givenClazzAssignmentExists_whenOnCreateCalled_thenClazzAssignmentIsSetOnView() {
-        createPerson(true)
-        val testEntity = ClazzAssignment().apply {
-            //set variables here
-            caUid = repo.clazzAssignmentDao.insert(this)
-        }
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
-
-        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
-                mockLifecycleOwner, di)
-
-        presenter.onCreate(null)
-
-        val entityValSet = mockView.captureLastEntityValue()!!
-        Assert.assertEquals("Expected entity was set on view",
-                testEntity.caUid, entityValSet.caUid)
-    }
-
-    @Test
     fun givenClazzAssignmentExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
         createPerson(true)
 
@@ -155,7 +140,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     }
 
     @Test
-    fun givenClazzAssignmentWithPrivateCommentsEnabled_whenStudentViews_thenShowScoreWithPrivateComments(){
+    fun givenClazzAssignment_whenStudentViews_thenShowScoreWithPrivateComments(){
         createPerson(false)
 
         val testEntity = ClazzAssignment().apply {
@@ -180,12 +165,16 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         verify(mockView, timeout(1000)).showPrivateComments = eq(true)
         verify(mockView, timeout(1000)).showFileSubmission = eq(true)
         verify(mockView, timeout(1000)).maxNumberOfFilesSubmission = eq(3)
-
+        verify(mockView, timeout(1000)).hasPassedDeadline = eq(false)
+        verify(mockView, timeout(1000).atLeastOnce()).clazzMetrics
+        verify(mockView, timeout(1000).atLeastOnce()).clazzAssignmentFileSubmission
+        verify(mockView, timeout(1000).atLeastOnce()).fileSubmissionScore
+        verify(mockView, timeout(1000).times(0)).clazzAssignmentClazzComments
 
     }
 
     @Test
-    fun givenClazzAssignmentWithPrivateCommentsEnabled_whenTeacherViews_thenDontShowScoreAndPrivateComments(){
+    fun givenClazzAssignment_whenTeacherViews_thenDontShowScoreAndPrivateComments(){
         createPerson(true)
 
         val testEntity = ClazzAssignment().apply {
@@ -209,8 +198,51 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         verify(mockView, timeout(1000)).showPrivateComments = eq(false)
         verify(mockView, timeout(1000)).showFileSubmission = eq(false)
+        verify(mockView, timeout(1000).times(0)).maxNumberOfFilesSubmission
+        verify(mockView, timeout(1000).times(0)).hasPassedDeadline
+        verify(mockView, timeout(1000).times(0)).clazzMetrics
+        verify(mockView, timeout(1000).times(0)).clazzAssignmentFileSubmission
+        verify(mockView, timeout(1000).times(0)).fileSubmissionScore
+        verify(mockView, timeout(1000).times(0)).clazzAssignmentClazzComments
 
     }
+
+    @Test
+    fun givenUserClicksAddFile_whenClicked_thenGoToSelectFileView(){
+
+        createPerson(false)
+
+        val testEntity = ClazzAssignment().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caPrivateCommentsEnabled = true
+            caNumberOfFiles = 3
+            caFileType = ClazzAssignment.FILE_TYPE_VIDEO
+            caUid = repo.clazzAssignmentDao.insert(this)
+        }
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+                mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        mockView.captureLastEntityValue()
+
+        presenter.handleAddFileClicked()
+
+        val testNavController: UstadNavController by di.instance()
+        verify(testNavController).navigate(SelectFileView.VIEW_NAME,
+                mapOf(ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_VIDEO))
+
+    }
+
+
+
+
+
 
 
 }
