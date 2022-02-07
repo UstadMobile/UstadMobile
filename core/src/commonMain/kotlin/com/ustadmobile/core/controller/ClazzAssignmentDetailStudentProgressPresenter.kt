@@ -165,6 +165,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
                         person, randomUuid().toString(),
                         grade, assignment, statement)
                 repo.clazzAssignmentRollUpDao.cacheBestStatements(selectedClazzUid, selectedClazzAssignmentUid, selectedPersonUid)
+                view.showSnackBar(systemImpl.getString(MessageID.saved, context))
             }
         }
         return true

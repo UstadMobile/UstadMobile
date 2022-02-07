@@ -58,6 +58,7 @@
                 android:id="@+id/mark_file_submission_mark"
                 android:digits="0123456789"
                 android:inputType="number"
+                android:imeOptions="actionDone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
