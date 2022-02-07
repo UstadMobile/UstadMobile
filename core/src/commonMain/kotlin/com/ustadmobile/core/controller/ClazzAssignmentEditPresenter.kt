@@ -151,16 +151,25 @@ class ClazzAssignmentEditPresenter(context: Any,
         return clazzAssignment
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): ClazzAssignmentWithTimezone? {
+    override fun onLoadFromJson(bundle: Map<String, String>): ClazzAssignment? {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: ClazzAssignmentWithTimezone? = null
+        var editEntity: ClazzAssignment? = null
         if (entityJsonStr != null) {
-            editEntity = safeParse(di, ClazzAssignmentWithTimezone.serializer(), entityJsonStr)
+            editEntity = safeParse(di, ClazzAssignment.serializer(), entityJsonStr)
         }
 
-        view.timeZone = editEntity?.effectiveTimeZone
+        presenterScope.launch {
+            val caClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: editEntity?.caClazzUid  ?: 0L
+            val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
+                it.clazzDao.getClazzWithSchool(caClazzUid)
+            } ?: ClazzWithSchool()
+
+            val timeZone = clazzWithSchool.effectiveTimeZone()
+            view.timeZone = timeZone
+        }
+
 
         contentOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
 

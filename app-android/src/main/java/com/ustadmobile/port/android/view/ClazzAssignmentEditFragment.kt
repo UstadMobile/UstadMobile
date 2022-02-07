@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.CompoundButton
 import androidx.core.widget.doAfterTextChanged
@@ -21,7 +23,6 @@ import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
@@ -86,11 +87,11 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             it.typeSelectionListener = this
             it.fileRequiredListener = onFileRequiredChanged
             it.caDeadlineDateTextinput.setEndIconOnClickListener(deadlineDateListener)
-            it.caDeadlineDate.doAfterTextChanged{
-                if(it?.isNullOrEmpty() == true){
+            it.caDeadlineDate.doAfterTextChanged{ editable ->
+                if(editable.isNullOrEmpty()){
                     return@doAfterTextChanged
                 }
-                if(it.toString() == currentDeadlineDate){
+                if(editable.toString() == currentDeadlineDate){
                     mBinding?.takeIf { bind -> bind.lateSubmissionVisibility == View.GONE }.also {
                         mBinding?.lateSubmissionVisibility = View.VISIBLE
                     }
