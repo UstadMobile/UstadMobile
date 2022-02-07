@@ -134,7 +134,11 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
               ON ObjectStatementRef.objectStatementRefUid = SubmissionStatement.statementUid                    
                                   
               LEFT JOIN StatementEntity AS MarkingStatement
-              ON MarkingStatement.xObjectUid = ObjectStatementRef.xObjectUid
+               ON MarkingStatement.timestamp = (SELECT timestamp 
+                                                  FROM StatementEntity 
+                                                 WHERE xObjectUid = ObjectStatementRef.xObjectUid 
+                                              ORDER BY timestamp DESC 
+                                                 LIMIT 1)
               
         WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
           AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}

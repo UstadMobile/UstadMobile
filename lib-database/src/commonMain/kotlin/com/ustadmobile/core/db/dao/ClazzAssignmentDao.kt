@@ -395,15 +395,24 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                     AND Comments.commentsPersonUid = ResultSource.personUid
                                ORDER BY commentsDateTimeAdded DESC LIMIT 1)
                    LEFT JOIN StatementEntity AS SubmissionStatement
-                   ON SubmissionStatement.xObjectUid = ResultSource.caXObjectUid
-                   AND SubmissionStatement.statementPersonUid = ResultSource.personUid
+                   ON SubmissionStatement.statementUid = (SELECT statementUid 
+                                   FROM StatementEntity
+                                  WHERE StatementEntity.statementContentEntryUid = 0
+                                    AND xObjectUid = ResultSource.caXObjectUid
+                                    AND StatementEntity.statementPersonUid = ResultSource.personUid
+                               ORDER BY timestamp DESC LIMIT 1)
                    
+                  
                    LEFT JOIN XObjectEntity
                    ON SubmissionStatement.statementId = XObjectEntity.objectId
                    
                    LEFT JOIN StatementEntity AS MarkedStatement
-                   ON XObjectEntity.xObjectUid = MarkedStatement.xObjectUid
-                   AND MarkedStatement.statementPersonUid = ResultSource.personUid
+                   ON MarkedStatement.statementPersonUid = ResultSource.personUid
+                   AND MarkedStatement.timestamp = (SELECT timestamp 
+                                                       FROM StatementEntity 
+                                                      WHERE StatementEntity.xObjectUid = XObjectEntity.xObjectUid 
+                                                   ORDER BY timestamp DESC 
+                                                      LIMIT 1)
                    
          GROUP BY ResultSource.personUid 
          ORDER BY CASE(:sortOrder) 
