@@ -436,7 +436,7 @@ dependencies {
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
-    androidTestImplementation "com.github.UstadMobile.AdbScreenRecorder.lib-client:$version_android_adbscreenrecorder"
+    androidTestImplementation "com.github.UstadMobile.AdbScreenRecorder:lib-client:$version_android_adbscreenrecorder"
 
     kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
 }
