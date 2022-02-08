@@ -1,7 +1,11 @@
 package com.ustadmobile.core.controller
 
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.schedule.localMidnight
+import com.ustadmobile.core.schedule.toLocalMidnight
+import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
 import com.ustadmobile.core.util.UMFileUtil
@@ -139,6 +143,8 @@ class ClazzAssignmentEditPresenter(context: Any,
         val timeZone = clazzWithSchool.effectiveTimeZone()
         view.timeZone = timeZone
 
+        loadEntityIntoDateTime(clazzAssignment)
+
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val contentList = db.onRepoWithFallbackToDb(2000) {
@@ -151,23 +157,28 @@ class ClazzAssignmentEditPresenter(context: Any,
         return clazzAssignment
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): ClazzAssignment? {
+
+    override fun onLoadFromJson(bundle: Map<String, String>): ClazzAssignment {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: ClazzAssignment? = null
-        if (entityJsonStr != null) {
-            editEntity = safeParse(di, ClazzAssignment.serializer(), entityJsonStr)
+        val editEntity = if (entityJsonStr != null) {
+             safeParse(di, ClazzAssignment.serializer(), entityJsonStr)
+        }else{
+            ClazzAssignment().apply {
+                caClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
+            }
         }
 
         presenterScope.launch {
-            val caClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: editEntity?.caClazzUid  ?: 0L
+            val caClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: editEntity.caClazzUid
             val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
                 it.clazzDao.getClazzWithSchool(caClazzUid)
             } ?: ClazzWithSchool()
 
             val timeZone = clazzWithSchool.effectiveTimeZone()
             view.timeZone = timeZone
+            loadEntityIntoDateTime(editEntity)
         }
 
 
@@ -179,8 +190,60 @@ class ClazzAssignmentEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
+        if (entityVal != null) {
+            saveDateTimeIntoEntity(entityVal)
+        }
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
+    }
+
+    fun loadEntityIntoDateTime(entity: ClazzAssignment){
+        val timeZone = view.timeZone ?: "UTC"
+
+        if(entity.caStartDate != 0L){
+            val startDateTimeMidnight = DateTime(entity.caStartDate)
+                    .toLocalMidnight(timeZone).unixMillisLong
+            view.startDate = startDateTimeMidnight
+            view.startTime = entity.caStartDate - startDateTimeMidnight
+        }else{
+            view.startDate = 0
+        }
+
+
+        if(entity.caDeadlineDate != Long.MAX_VALUE){
+            val deadlineDateTimeMidnight = DateTime(entity.caDeadlineDate)
+                    .toLocalMidnight(timeZone).unixMillisLong
+            view.deadlineDate = deadlineDateTimeMidnight
+            view.deadlineTime = entity.caDeadlineDate - deadlineDateTimeMidnight
+        }else{
+            view.deadlineDate = Long.MAX_VALUE
+        }
+
+        if(entity.caGracePeriodDate != 0L){
+            val gracePeriodDateTimeMidnight = DateTime(entity.caGracePeriodDate)
+                    .toLocalMidnight(timeZone).unixMillisLong
+            view.gracePeriodDate = gracePeriodDateTimeMidnight
+            view.gracePeriodTime = entity.caGracePeriodDate - gracePeriodDateTimeMidnight
+        }else{
+            view.gracePeriodDate = Long.MAX_VALUE
+        }
+    }
+
+    fun saveDateTimeIntoEntity(entity: ClazzAssignment){
+        val timeZone = view.timeZone ?: "UTC"
+
+        entity.caStartDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+                .localMidnight.utc.unixMillisLong + view.startTime
+
+        if(view.deadlineDate != Long.MAX_VALUE){
+            entity.caDeadlineDate = DateTime(view.deadlineDate).toOffsetByTimezone(timeZone)
+                    .localMidnight.utc.unixMillisLong + view.deadlineTime
+        }
+
+        if(view.gracePeriodDate != Long.MAX_VALUE){
+            entity.caGracePeriodDate = DateTime(view.gracePeriodDate).toOffsetByTimezone(timeZone)
+                    .localMidnight.utc.unixMillisLong + view.gracePeriodTime
+        }
     }
 
     override fun handleClickSave(entity: ClazzAssignment) {
@@ -190,6 +253,8 @@ class ClazzAssignmentEditPresenter(context: Any,
                 view.caTitleError = systemImpl.getString(MessageID.field_required_prompt, context)
                 return@launch
             }
+
+            saveDateTimeIntoEntity(entity)
 
             if (entity.caStartDate == 0L) {
                 view.caStartDateError = systemImpl.getString(MessageID.field_required_prompt, context)

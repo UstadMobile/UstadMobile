@@ -69,10 +69,12 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         t -> contentRecyclerAdapter?.submitList(t)
     }
 
-    private var deadlineDateListener: View.OnClickListener = View.OnClickListener {
+    private var clearDeadlineListener: View.OnClickListener = View.OnClickListener {
         val entityVal = entity
-        entityVal?.caDeadlineDate = Long.MAX_VALUE
-        entityVal?.caGracePeriodDate = Long.MAX_VALUE
+        deadlineDate = Long.MAX_VALUE
+        gracePeriodDate = Long.MAX_VALUE
+        deadlineTime = 0
+        gracePeriodTime = 0
         entityVal?.caLateSubmissionType = 0
         entityVal?.caLateSubmissionPenalty = 0
         entity = entityVal
@@ -86,7 +88,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             rootView = it.root
             it.typeSelectionListener = this
             it.fileRequiredListener = onFileRequiredChanged
-            it.caDeadlineDateTextinput.setEndIconOnClickListener(deadlineDateListener)
+            it.caDeadlineDateTextinput.setEndIconOnClickListener(clearDeadlineListener)
             it.caDeadlineDate.doAfterTextChanged{ editable ->
                 if(editable.isNullOrEmpty()){
                     return@doAfterTextChanged
@@ -196,6 +198,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             field = value
             mBinding?.caDeadlineError = value
         }
+
     override var caTitleError: String? = null
         get() = field
         set(value) {
@@ -215,11 +218,46 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             field = value
         }
 
+    override var startDate: Long
+        get() = mBinding?.startDate ?: 0
+        set(value) {
+            mBinding?.startDate = value
+        }
+
+    override var startTime: Long
+        get() = mBinding?.startTime ?: 0
+        set(value) {
+            mBinding?.startTime = value
+        }
+
+    override var deadlineDate: Long
+        get() = mBinding?.deadlineDate ?: 0
+        set(value) {
+            mBinding?.deadlineDate = value
+        }
+
+    override var deadlineTime: Long
+        get() = mBinding?.deadlineTime ?: 0
+        set(value) {
+            mBinding?.deadlineTime = value
+        }
+
+    override var gracePeriodDate: Long
+        get() = mBinding?.gracePeriodDate ?: 0
+        set(value) {
+            mBinding?.gracePeriodDate = value
+        }
+
+    override var gracePeriodTime: Long
+        get() = mBinding?.gracePeriodTime ?: 0
+        set(value) {
+            mBinding?.gracePeriodTime = value
+        }
+
     override var timeZone: String? = null
         set(value) {
-            val newText = getText(R.string.class_timezone).toString() + " " + value
-            mBinding?.timeZone = newText
-            field = newText
+            mBinding?.timeZone = value
+            field = value
         }
 
     override var lateSubmissionOptions: List<ClazzAssignmentEditPresenter.LateSubmissionOptionsMessageIdOption>? = null

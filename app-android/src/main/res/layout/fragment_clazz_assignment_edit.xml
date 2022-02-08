@@ -23,6 +23,31 @@
             name="timeZone"
             type="String" />
 
+
+        <variable
+            name="startDate"
+            type="long" />
+
+        <variable
+            name="startTime"
+            type="long" />
+
+        <variable
+            name="deadlineDate"
+            type="long" />
+
+        <variable
+            name="deadlineTime"
+            type="long" />
+
+        <variable
+            name="gracePeriodDate"
+            type="long" />
+
+        <variable
+            name="gracePeriodTime"
+            type="long" />
+
         <variable
             name="caGracePeriodError"
             type="String" />
@@ -202,8 +227,9 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateTimeLong="@={clazzAssignment.caStartDate}"
-                    app:timeZoneWithDate="@{timeZone}"
+                    app:dateTimeInMillis="@={startDate}"
+                    app:timeZoneId="@{timeZone}"
+                    app:dateTimeInMillisMode="@{0}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -227,8 +253,7 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:timeWithZoneValue="@={clazzAssignment.caStartDate}"
-                    app:timeZoneWithTime="@{timeZone}"
+                    app:timeValue="@={startTime}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -239,7 +264,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginStart="32dp"
-                android:text="@{timeZone}"
+                android:text="@{@string/class_timezone_set(timeZone)}"
                 tools:text="Class timezone: Dubai"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ca_start_date_textinput" />
@@ -268,8 +293,9 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateTimeLong="@={clazzAssignment.caDeadlineDate}"
-                    app:timeZoneWithDate="@{timeZone}"
+                    app:dateTimeInMillis="@={deadlineDate}"
+                    app:timeZoneId="@{timeZone}"
+                    app:dateTimeInMillisMode="@{0}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -293,8 +319,7 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:timeWithZoneValue="@={clazzAssignment.caDeadlineDate}"
-                    app:timeZoneWithTime="@{timeZone}"
+                    app:timeValue="@={deadlineTime}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -373,8 +398,9 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateTimeLong="@={clazzAssignment.caGracePeriodDate}"
-                    app:timeZoneWithDate="@{timeZone}"
+                    app:dateTimeInMillis="@={gracePeriodDate}"
+                    app:timeZoneId="@{timeZone}"
+                    app:dateTimeInMillisMode="@{0}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -399,7 +425,7 @@
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
                     app:timeWithZoneValue="@={clazzAssignment.caGracePeriodDate}"
-                    app:timeZoneWithTime="@{timeZone}"
+                    app:timeValue="@={gracePeriodTime}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>

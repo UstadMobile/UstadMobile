@@ -14,6 +14,15 @@ interface ClazzAssignmentEditView: UstadEditView<ClazzAssignment> {
     var caStartDateError: String?
     var caWeightError: String?
 
+    var startDate: Long
+    var startTime: Long
+
+    var deadlineDate: Long
+    var deadlineTime: Long
+
+    var gracePeriodDate: Long
+    var gracePeriodTime: Long
+
     var timeZone: String?
 
     var lateSubmissionOptions: List<ClazzAssignmentEditPresenter.LateSubmissionOptionsMessageIdOption>?

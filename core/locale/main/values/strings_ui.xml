@@ -917,6 +917,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="allow_private_comments_from_students">Allow private comments from students</string>
     <string name="deadline">Deadline</string>
     <string name="class_timezone">Class timezone</string>
+    <!--- Used to show the timezone a clazz is set in -->
+    <string name="class_timezone_set">Class timezone: %1$s</string>
     <string name="maximum_score">Maximum score</string>
     <string name="quiz_questions">Quiz questions</string>
     <string name="time">Time</string>
