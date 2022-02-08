@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- as per
+    https://material.io/resources/color/#!/?view.left=0&view.right=0&secondary.color=BBDEFB&primary.color=1E88E5&primary.text.color=000000
+    -->
 
+    <color name="primaryColor">#1e88e5</color>
+    <color name="primaryLightVariantColor">#90caf9</color>
+    <color name="primaryLightColor">#6ab7ff</color>
+    <color name="primaryDarkColor">#005cb2</color>
+    <color name="primaryVariantColor">#2196f3</color>
+
+    <color name="secondaryColor">#bbdefb</color>
+    <color name="secondaryLightColor">#eeffff</color>
+    <color name="secondaryDarkColor">#8aacc8</color>
+
+    <color name="primaryTextColor">#000000</color>
+    <color name="secondaryTextColor">#000000</color>
 </resources>
