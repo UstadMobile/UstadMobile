@@ -15,6 +15,7 @@ import com.ustadmobile.core.util.graph.MessageIdFormatter
 import com.ustadmobile.core.util.graph.TimeFormatter
 import com.ustadmobile.core.util.graph.UidAndLabelFormatter
 import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
@@ -589,13 +590,15 @@ suspend fun UmAppDatabase.insertPersonAuthCredentials2(
     pbkdf2Params: Pbkdf2Params,
     site: Site? = null
 ) {
-    //TODO(Cast to DoorDatabaseRepository when repo sync is in place)
-    val effectiveSite = site ?: this.siteDao.getSite()
+    val db = (this as DoorDatabaseRepository).db as UmAppDatabase
+    val effectiveSite = site ?: db.siteDao.getSite()
     val authSalt = effectiveSite?.authSalt ?: throw IllegalStateException("insertAuthCredentials: No auth salt!")
+    val lastChangedBy = db.syncNodeDao.getLocalNodeClientId()
 
     personAuth2Dao.insertAsync(PersonAuth2().apply {
         pauthUid = personUid
         pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
         pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
+        pauthLcb = lastChangedBy
     })
 }

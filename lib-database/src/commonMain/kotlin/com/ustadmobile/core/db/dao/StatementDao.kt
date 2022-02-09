@@ -28,13 +28,18 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                  ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
        WHERE UserSession.usClientNodeId = :newNodeId
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+       --notpsql
          AND StatementEntity.statementLct != COALESCE(
              (SELECT seVersionId
                 FROM StatementEntityReplicate
                WHERE sePk = StatementEntity.statementUid
-                 AND seDestination = :newNodeId), 0) 
+                 AND seDestination = UserSession.usClientNodeId), 0)
+       --endnotpsql           
       /*psql ON CONFLICT(sePk, seDestination) DO UPDATE
-             SET sePending = true
+             SET sePending = (SELECT StatementEntity.statementLct
+            FROM StatementEntity
+           WHERE StatementEntity.statementUid = EXCLUDED.sePk ) 
+                 != StatementEntityReplicate.seVersionId
       */       
     """)
     @ReplicationRunOnNewNode
@@ -178,6 +183,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 ELSE 0
             END DESC
          """)
+    @SqliteOnly //This would need a considered group by to work on postgres
     abstract fun findPersonsWithContentEntryAttempts(contentEntryUid: Long, accountPersonUid: Long,
                                                      searchText: String, sortOrder: Int)
             : DoorDataSourceFactory<Int, PersonWithAttemptsSummary>
@@ -249,6 +255,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
         GROUP BY StatementEntity.contextRegistration 
         ORDER BY startDate DESC, resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC
          """)
+    @SqliteOnly
     abstract fun findSessionsForPerson(contentEntryUid: Long, accountPersonUid: Long, personUid: Long)
             : DoorDataSourceFactory<Int, PersonWithSessionsDisplay>
 
@@ -293,12 +300,14 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 
                 1 as totalContent
                
-         FROM (SELECT * FROM StatementEntity 
+         FROM (SELECT * 
+                 FROM StatementEntity 
                 WHERE contextRegistration = :contextRegistration
                   AND NOT contentEntryRoot
                   AND statementVerbUid = ${VerbEntity.VERB_ANSWERED_UID} 
-             GROUP BY xObjectUid)
+             GROUP BY xObjectUid) AS SessionStatements
     """)
+    @SqliteOnly
     abstract suspend fun calculateScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
 
 

@@ -68,6 +68,7 @@ abstract class StateDao : BaseDao<StateEntity> {
     abstract fun findByStateId(id: String?, agentUid: Long, activityId: String?, registration: String?): StateEntity?
 
     @Query("SELECT * FROM StateEntity WHERE agentUid = :agentUid AND activityId = :activityId " + "AND registration = :registration AND isIsactive AND timestamp > :since")
+    @SqliteOnly
     abstract fun findStateIdByAgentAndActivity(agentUid: Long, activityId: String, registration: String, since: String): List<StateEntity>
 
     @Query("""UPDATE StateEntity SET isIsactive = :isActive,

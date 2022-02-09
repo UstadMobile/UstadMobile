@@ -14,6 +14,11 @@ repositories {
 kotlin {
     js(LEGACY) {
         browser {
+            //Specify distribution bundle output directory
+            distribution {
+                directory = rootProject.file("app-ktor-server/src/main/resources/umapp")
+            }
+
             binaries.executable()
             webpackTask {
                 cssSupport.enabled = true
@@ -65,20 +70,3 @@ dependencies {
     implementation "io.github.aakira:napier:$version_napier"
 }
 
-task distro(dependsOn: ['browserDistribution']){
-    def umAppDir = rootProject.file("app-ktor-server/src/main/resources/umapp/")
-
-    doFirst{
-        delete{
-            delete umAppDir.path
-        }
-        umAppDir.mkdirs()
-    }
-
-    doLast {
-        copy {
-            from project.file("build/distributions").path
-            into umAppDir.path
-        }
-    }
-}

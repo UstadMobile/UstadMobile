@@ -1,7 +1,6 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
-import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
@@ -30,7 +29,14 @@ abstract class UserSessionDao {
                      ON UserSessionSubject.usPersonUid = Person.personUid
                 ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
                     ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}     
+                    /* Modify second part of query - remove requirement for session to be active.
+                     * This ensures that deactivations are distributed
+                     */
+                    ) > 0
+                     JOIN PersonGroupMember AS PrsGrpMbr
+                          ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
+                     JOIN UserSession
+                          ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
                         
           WHERE UserSessionSubject.usLct != COALESCE(
                 (SELECT usVersionId
@@ -138,16 +144,18 @@ abstract class UserSessionDao {
            SET usAuth = null,
                usStatus = :newStatus,
                usReason = :reason,
-               usLcb = (SELECT COALESCE(
-                               (SELECT nodeClientId
-                                  FROM SyncNode
-                                 LIMIT 1), 0))
+               usLct = :changeTime
          WHERE usPersonUid = :personUid
            AND usClientNodeId != :exemptNodeId
            AND usStatus != :newStatus                     
     """)
-    abstract suspend fun endOtherSessions(personUid: Long, exemptNodeId: Long, newStatus: Int,
-                                          reason: Int)
+    abstract suspend fun endOtherSessions(
+        personUid: Long,
+        exemptNodeId: Long,
+        newStatus: Int,
+        reason: Int,
+        changeTime: Long
+    )
 
     @Query("""
         SELECT DISTINCT UserSession.usClientNodeId

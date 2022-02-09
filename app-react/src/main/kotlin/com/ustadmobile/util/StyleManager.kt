@@ -695,12 +695,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
 
     val partnerItem by css {
-        height = 50.px
+        height = 40.px
         padding(left = 1.spacingUnits)
         verticalAlign = VerticalAlign.middle
         media(theme.breakpoints.up(tabletAndHighEnd)) {
             padding(left = 2.spacingUnits)
-            height = 80.px
+            height = 60.px
         }
     }
 

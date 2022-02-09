@@ -15,13 +15,20 @@ abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJ
     SELECT DISTINCT ContextXObjectStatementJoin.contextXObjectStatementJoinUid AS cxosjPk,
          :newNodeId AS cxosjDestination
     FROM ContextXObjectStatementJoin
+         LEFT JOIN DoorNode 
+              ON DoorNode.nodeId = :newNodeId
+    --notpsql
     WHERE ContextXObjectStatementJoin.contextXObjectLct != COALESCE(
          (SELECT cxosjVersionId
             FROM ContextXObjectStatementJoinReplicate
            WHERE cxosjPk = ContextXObjectStatementJoin.contextXObjectStatementJoinUid
-             AND cxosjDestination = :newNodeId), 0) 
+             AND cxosjDestination = DoorNode.nodeId), 0) 
+    --endnotpsql         
     /*psql ON CONFLICT(cxosjPk, cxosjDestination) DO UPDATE
-         SET cxosjPending = true
+     SET cxosjPending = (SELECT ContextXObjectStatementJoin.contextXObjectLct
+                           FROM ContextXObjectStatementJoin
+                          WHERE ContextXObjectStatementJoin.contextXObjectStatementJoinUid = EXCLUDED.cxosjPk ) 
+                                != ContextXObjectStatementJoinReplicate.cxosjVersionId             
     */       
     """)
     @ReplicationRunOnNewNode
@@ -34,20 +41,25 @@ abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJ
          UserSession.usClientNodeId AS cxosjDestination
     FROM ChangeLog
          JOIN ContextXObjectStatementJoin
-             ON ChangeLog.chTableId = 66
+             ON ChangeLog.chTableId = ${ContextXObjectStatementJoin.TABLE_ID}
                 AND ChangeLog.chEntityPk = ContextXObjectStatementJoin.contextXObjectStatementJoinUid
          JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
     WHERE UserSession.usClientNodeId != (
          SELECT nodeClientId 
            FROM SyncNode
           LIMIT 1)
+   --notpsql       
      AND ContextXObjectStatementJoin.contextXObjectLct != COALESCE(
          (SELECT cxosjVersionId
             FROM ContextXObjectStatementJoinReplicate
            WHERE cxosjPk = ContextXObjectStatementJoin.contextXObjectStatementJoinUid
              AND cxosjDestination = UserSession.usClientNodeId), 0)
+    --endnotpsql
     /*psql ON CONFLICT(cxosjPk, cxosjDestination) DO UPDATE
-     SET cxosjPending = true
+     SET cxosjPending = (SELECT ContextXObjectStatementJoin.contextXObjectLct
+                           FROM ContextXObjectStatementJoin
+                          WHERE ContextXObjectStatementJoin.contextXObjectStatementJoinUid = EXCLUDED.cxosjPk ) 
+                                != ContextXObjectStatementJoinReplicate.cxosjVersionId             
     */               
     """)
     @ReplicationRunOnChange([ContextXObjectStatementJoin::class])

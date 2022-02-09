@@ -245,6 +245,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                   GROUP BY ClazzAssignmentContentJoin.cacjContentUid
      	  ) AS ResultSource
     """)
+    @SqliteOnly
     abstract suspend fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): ContentEntryStatementScoreProgress?
     
     @Query("""
@@ -354,6 +355,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                 ELSE 0
             END DESC
     """)
+    @SqliteOnly
     abstract fun getAttemptSummaryForStudentsInAssignment(assignmentUid: Long, clazzUid: Long,
                                                           accountPersonUid: Long,
                                                           searchText: String, sortOrder: Int):

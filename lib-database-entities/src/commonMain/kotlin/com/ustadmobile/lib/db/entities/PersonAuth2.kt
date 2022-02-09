@@ -48,7 +48,7 @@ class PersonAuth2 {
     var pauthPcsn: Long = 0
 
     @LastChangedBy
-    var pauthLcb: Int = 0
+    var pauthLcb: Long = 0
 
     @LastChangedTime
     @ReplicationVersionId

@@ -14,7 +14,7 @@ import kotlinx.serialization.json.*
  * clazzenrolment: full revalidation for anyone with permission to select the class
  * schoolenrolment: full revalidation for anyone with permission to select the school.
  */
-class RepIncomingListener(private val db: UmAppDatabase) : IncomingReplicationListener {
+class PermissionManagementIncomingReplicationListener(private val db: UmAppDatabase) : IncomingReplicationListener {
 
     private fun JsonArray.mapLongPropertyOrThrow(propName: String): List<Long> {
         return map { it.jsonObject.get(propName)?.jsonPrimitive?.long

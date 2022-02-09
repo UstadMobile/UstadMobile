@@ -2,12 +2,16 @@ package com.ustadmobile.core.db
 
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
-import com.ustadmobile.door.*
+import com.ustadmobile.door.DoorDatabase
+import com.ustadmobile.door.DoorDbType
+import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.MinReplicationVersion
-import com.ustadmobile.door.migration.*
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.migration.DoorMigration
+import com.ustadmobile.door.migration.DoorMigrationStatementList
+import com.ustadmobile.door.migration.DoorMigrationSync
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -109,7 +113,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 95)
+], version = 96)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -369,14 +373,13 @@ abstract class UmAppDatabase : DoorDatabase() {
                     1 as personGroupFlag,
                     0 as groupMasterCsn,
                     0 as groupLocalCsn,
-                    (SELECT nodeClientId FROM SyncNode) as groupLastChangedBy
+                    0 as groupLastChangedBy
                     FROM person
                     where admin = true
                     AND personGroupUid = 0""")
                 database.execSQL("""
                     UPDATE Person SET
-                    personGroupUid = (SELECT groupUid FROM PersonGroup WHERE groupName = ('PGA' || Person.personUid) LIMIT 1),
-                    personLastChangedBy = (SELECT nodeClientId FROM SyncNode) 
+                    personGroupUid = (SELECT groupUid FROM PersonGroup WHERE groupName = ('PGA' || Person.personUid) LIMIT 1)
                     WHERE
                     admin = true AND personGroupUid = 0
                 """)
@@ -386,7 +389,7 @@ abstract class UmAppDatabase : DoorDatabase() {
                     Person.personGroupUid AS groupMemberGroupUid,
                     0 AS groupMemberMasterCsn,
                     0 AS groupMemberLocalCsn,
-                    (SELECT nodeClientId FROM SyncNode) AS groupMemberLastChangedBy
+                    0 AS groupMemberLastChangedBy
                     FROM Person
                     WHERE admin = true
                     AND (SELECT COUNT(*) FROM PersonGroupMember WHERE PersonGroupmember.groupMemberGroupUid = Person.personGroupUid) = 0
@@ -2009,8 +2012,7 @@ abstract class UmAppDatabase : DoorDatabase() {
                 database.execSQL("""UPDATE ContentEntry 
                                        SET contentOwner = (SELECT personUid 
                                                              FROM Person 
-                                                            WHERE admin LIMIT 1),
-                                          contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) """)
+                                                            WHERE admin LIMIT 1)""")
             }else{
                 database.execSQL("""ALTER TABLE ContentEntry ADD COLUMN contentOwner INTEGER DEFAULT 0 NOT NULL""")
             }
@@ -2050,11 +2052,7 @@ abstract class UmAppDatabase : DoorDatabase() {
             }else {
                 database.execSQL("""
                     UPDATE Site
-                       SET authSalt = '${randomString(20)}',
-                           siteLcb = (SELECT COALESCE(
-                                             (SELECT nodeClientId 
-                                                FROM SyncNode
-                                               LIMIT 1), 0))
+                       SET authSalt = '${randomString(20)}'
                 """)
                 database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth2 (  pauthUid  BIGINT  PRIMARY KEY  NOT NULL , pauthMechanism  TEXT , pauthAuth  TEXT , pauthLcsn  BIGINT  NOT NULL , pauthPcsn  BIGINT  NOT NULL , pauthLcb  INTEGER  NOT NULL , pauthLct  BIGINT  NOT NULL )")
                 database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonAuth2_mcsn_seq")
@@ -2397,11 +2395,7 @@ abstract class UmAppDatabase : DoorDatabase() {
             if(database.dbType() == DoorDbType.POSTGRES) {
                 database.execSQL("""
                     UPDATE ScopedGrant 
-                       SET sgPermissions = (sgPermissions | ${Role.PERMISSION_CLAZZ_CONTENT_SELECT}),
-                           sgLcb = COALESCE((
-                           SELECT nodeClientId
-                             FROM SyncNode
-                            LIMIT 1), 0) 
+                       SET sgPermissions = (sgPermissions | ${Role.PERMISSION_CLAZZ_CONTENT_SELECT})
                      WHERE (sgFlags & $FLAG_STUDENT_GROUP) = $FLAG_STUDENT_GROUP   
                 """)
 
@@ -2409,11 +2403,7 @@ abstract class UmAppDatabase : DoorDatabase() {
                         Role.PERMISSION_CLAZZ_CONTENT_UPDATE
                 database.execSQL("""
                     UPDATE ScopedGrant 
-                       SET sgPermissions = (sgPermissions | ${teacherAddPermissions}),
-                           sgLcb = COALESCE((
-                           SELECT nodeClientId
-                             FROM SyncNode
-                            LIMIT 1), 0) 
+                       SET sgPermissions = (sgPermissions | ${teacherAddPermissions})
                      WHERE (sgFlags & $FLAG_TEACHER_GROUP) = $FLAG_TEACHER_GROUP   
                 """)
 
@@ -2431,7 +2421,7 @@ abstract class UmAppDatabase : DoorDatabase() {
                                 groupLastChangedBy, groupLct, groupName, groupActive, 
                                 personGroupFlag)
                          SELECT 0 AS groupMasterCsn, 0 AS groupLocalCsn,
-                                (SELECT nodeClientId FROM SyncNode LIMIT 1) AS groupLastChangedBy,
+                                0 AS groupLastChangedBy,
                                 0 AS groupLct,
                                 ('Class-Parents-' || CAST(Clazz.clazzUid AS TEXT)) AS groupName,
                                 true AS groupActive,
@@ -2445,8 +2435,7 @@ abstract class UmAppDatabase : DoorDatabase() {
                            (SELECT groupUid 
                               FROM PersonGroup
                              WHERE clazzParentsPersonGroupUid = 0
-                               AND groupName = ('Class-Parents-' || CAST(Clazz.clazzUid AS TEXT))),
-                           clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)    
+                               AND groupName = ('Class-Parents-' || CAST(Clazz.clazzUid AS TEXT)))  
                 """)
 
                 database.execSQL("""
@@ -2585,7 +2574,11 @@ abstract class UmAppDatabase : DoorDatabase() {
             if(db.dbType() == DoorDbType.SQLITE) {
                 DatabaseTriggers.sqliteContentJobItemTriggers.toList()
             }else {
-                DatabaseTriggers.postgresContentJobItemTriggers.toList()
+                DatabaseTriggers.postgresContentJobItemTriggers.toList() + listOf(
+                    "ALTER TABLE Language ALTER COLUMN languageactive DROP DEFAULT",
+                    "ALTER TABLE Language ALTER COLUMN languageActive TYPE BOOL " +
+                        "USING CASE WHEN CAST(LanguageActive AS INTEGER) = 0 THEN FALSE ELSE TRUE END"
+                )
             }
         }
 
@@ -2669,6 +2662,18 @@ abstract class UmAppDatabase : DoorDatabase() {
             }
         }
 
+        val MIGRATION_95_96 = DoorMigrationStatementList(95, 96) { db ->
+            if(db.dbType() == DoorDbType.POSTGRES) {
+                listOf(
+                    "DROP VIEW PersonAuth2_receiveview",
+                    "ALTER TABLE PersonAuth2 ALTER COLUMN pauthLcb TYPE BIGINT",
+                    "CREATE VIEW PersonAuth2_ReceiveView AS  SELECT PersonAuth2.*, PersonAuth2Replicate.* FROM PersonAuth2 LEFT JOIN PersonAuth2Replicate ON PersonAuth2Replicate.paPk = PersonAuth2.pauthUid",
+                    "CREATE OR REPLACE FUNCTION personauth2_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO PersonAuth2(pauthUid, pauthMechanism, pauthAuth, pauthLcsn, pauthPcsn, pauthLcb, pauthLct) VALUES (NEW.pauthUid, NEW.pauthMechanism, NEW.pauthAuth, NEW.pauthLcsn, NEW.pauthPcsn, NEW.pauthLcb, NEW.pauthLct) ON CONFLICT (pauthUid) DO UPDATE SET pauthMechanism = EXCLUDED.pauthMechanism, pauthAuth = EXCLUDED.pauthAuth, pauthLcsn = EXCLUDED.pauthLcsn, pauthPcsn = EXCLUDED.pauthPcsn, pauthLcb = EXCLUDED.pauthLcb, pauthLct = EXCLUDED.pauthLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql",                    "CREATE TRIGGER personauth2_remote_insert_trig INSTEAD OF INSERT ON PersonAuth2_ReceiveView FOR EACH ROW EXECUTE PROCEDURE personauth2_remote_insert_fn()")
+            }else {
+                listOf()
+            }
+        }
+
 
 
         fun migrationList(nodeId: Long) = listOf<DoorMigration>(
@@ -2684,13 +2689,15 @@ abstract class UmAppDatabase : DoorDatabase() {
             MIGRATION_79_80, MIGRATION_80_81, MIGRATION_81_82, MIGRATION_82_83, MIGRATION_83_84,
             MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
             MIGRATION_88_89, MIGRATION_89_90, MIGRATION_90_91,
-            UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95
+            UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
+            MIGRATION_95_96,
         )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->
             if (database.dbType() == DoorDbType.SQLITE) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
             } else {
+                database.execSQL("ALTER TABLE SyncNode ALTER COLUMN nodeClientId TYPE BIGINT")
                 database.execSQL("CREATE TABLE IF NOT EXISTS DoorNode (  auth  TEXT , nodeId  SERIAL  PRIMARY KEY  NOT NULL )")
             }
 

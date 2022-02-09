@@ -44,6 +44,7 @@ import com.ustadmobile.view.ChartOptions
 import com.ustadmobile.view.ChartType
 import com.ustadmobile.view.ContentEntryListComponent
 import com.ustadmobile.view.umChart
+import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import mui.material.GridProps
@@ -89,9 +90,10 @@ private fun guardRoute(
     val viewName = getViewNameFromUrl()
     val activeSession = systemImpl.getAppPref(UstadAccountManager.ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
     val logout = activeSession == null && viewName != null
-            && viewName != Login2View.VIEW_NAME
+            && viewName != Login2View.VIEW_NAME && viewName != "/"
+    //Protest access to app's content without being logged in.
     if(logout){
-        //window.location.href = "./"
+        window.location.href = "./"
     }
     child(component){}
 }
@@ -1188,7 +1190,7 @@ fun setStatementQuestionAnswer(statementEntity: StatementEntity): String{
     try{
         val fullStatementJson = statementEntity.fullStatement ?: return ""
         val statement = JSON.parse<Statement>(fullStatementJson)
-        var statementText = statement. asDynamic()["object"].definition.description["en-US"].toString()
+        var statementText = statement. asDynamic()["object"]?.definition?.description["en-US"].toString()
         val answerResponse = statement.result?.response
         if(answerResponse?.isNotEmpty() == true || answerResponse?.contains("[,]") == true){
             val responses = answerResponse.split("[,]")
@@ -1210,7 +1212,7 @@ fun setStatementQuestionAnswer(statementEntity: StatementEntity): String{
             }
 
         }
-        return statementText ?: ""
+        return statementText
     }catch (e: Exception){
         return ""
     }

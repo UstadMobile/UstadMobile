@@ -30,15 +30,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.*
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
-                          private val appContext: Any,
-                          val di: DI) : SyncListener<UserSession> {
+class UstadAccountManager(
+    private val systemImpl: UstadMobileSystemImpl,
+    private val appContext: Any,
+    val di: DI
+) : IncomingReplicationListener {
 
     data class ResponseWithAccount(val statusCode: Int, val umAccount: UmAccount?)
 
@@ -240,9 +242,9 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             commitActiveEndpointsToPref()
 
         withContext(doorMainDispatcher()) {
-            val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
-//            (repo as DoorDatabaseRepository).addSyncListener(UserSession::class,
-//                this@UstadAccountManager)
+            val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+            db.addIncomingReplicationListener(this@UstadAccountManager)
+
             userSessionLiveDataMediator.addEndpoint(endpoint)
         }
     }
@@ -253,9 +255,9 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             commitActiveEndpointsToPref()
 
         withContext(doorMainDispatcher()) {
-            val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
-//            (repo as DoorDatabaseRepository).removeSyncListener(UserSession::class,
-//                this@UstadAccountManager)
+            val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+            db.removeIncomingReplicationListener(this@UstadAccountManager)
+
             userSessionLiveDataMediator.removeEndpoint(endpoint)
         }
     }
@@ -268,12 +270,20 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
     //When sync data comes in, check to see if a change has been actioned that has ended our active
     // session
-    override fun onEntitiesReceived(evt: SyncEntitiesReceivedEvent<UserSession>) {
-        val activeSessionUpdate = evt.entitiesReceived.firstOrNull {
-            it.usUid == activeSession?.userSession?.usUid
-        }
+    override suspend fun onIncomingReplicationProcessed(
+        incomingReplicationEvent: IncomingReplicationEvent
+    ) {
+        if(incomingReplicationEvent.tableId != UserSession.TABLE_ID)
+            return
 
-        if(activeSessionUpdate != null && activeSessionUpdate.usStatus != UserSession.STATUS_ACTIVE) {
+        val activeSessionUid = activeSession?.userSession?.usUid ?: return
+
+        val activeSessionUpdate = incomingReplicationEvent.incomingReplicationData.firstOrNull {
+            it.jsonObject["usUid"]?.jsonPrimitive?.longOrNull == activeSessionUid
+        } ?: return
+
+        val activeSessionStatus = activeSessionUpdate.jsonObject["usStatus"]?.jsonPrimitive?.intOrNull
+        if(activeSessionStatus != UserSession.STATUS_ACTIVE) {
             activeSession = null
         }
     }
@@ -348,6 +358,22 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             }
         }
 
+        getSiteFromDbOrLoadFromHttp(endpointUrl, repo)
+
+        val newSession = addSession(personInDb, endpointUrl, password)
+
+        activeEndpoint = Endpoint(endpointUrl)
+        activeSession = newSession
+
+        //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
+        responseAccount
+    }
+
+    private suspend fun getSiteFromDbOrLoadFromHttp(
+        endpointUrl: String,
+        repo: UmAppDatabase
+    ) {
+        val db = (repo as DoorDatabaseRepository).db as UmAppDatabase
         val siteInDb = db.siteDao.getSiteAsync()
         if(siteInDb == null) {
             val siteResponse = httpClient.get<HttpResponse> {
@@ -361,13 +387,6 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
                 throw IllegalStateException("Internal error: no Site in database and could not fetch it from server")
             }
         }
-
-        val newSession = addSession(personInDb, endpointUrl, password)
-        activeSession = newSession
-        activeEndpoint = Endpoint(endpointUrl)
-
-        //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
-        responseAccount
     }
 
     suspend fun startGuestSession(endpointUrl: String) {
@@ -377,6 +396,8 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             firstNames = "Guest"
             lastName = "User"
         }, groupFlag = PERSONGROUP_FLAG_PERSONGROUP or PERSONGROUP_FLAG_GUESTPERSON)
+
+        getSiteFromDbOrLoadFromHttp(endpointUrl, repo)
 
         activeSession = addSession(guestPerson, endpointUrl, null)
     }

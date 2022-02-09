@@ -121,11 +121,22 @@ shadowJar {
     archiveBaseName = "ustad-server"
 }
 
+task deleteAppResources{
+    doLast{
+        def webApp = project.file("src/main/resources/static/umapp")
+        if(webApp.exists()){
+            println("Deleteting web resource directory (${webApp.path}) at ${new Date().format('yyyy-MM-dd HH:mm ss')}")
+            delete webApp
+        }
+    }
+}
+
 
 sourceCompatibility = "8"
 targetCompatibility = "8"
 
 if(findProperty("skipreactproductionbundle") != "true") {
-    shadowJar.dependsOn(":app-react:distro")
+    shadowJar.dependsOn(":app-react:browserDistribution")
 }
 
+clean.dependsOn("deleteAppResources")

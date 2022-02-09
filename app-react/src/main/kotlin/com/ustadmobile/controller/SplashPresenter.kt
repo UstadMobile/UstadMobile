@@ -1,6 +1,6 @@
 package com.ustadmobile.controller
 
-import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
@@ -58,12 +58,9 @@ class SplashPresenter(private val view: SplashView): DIAware {
             UmAppDatabase::class,
             UmAppDatabaseJsImplementations, dbName,"./worker.sql-wasm.js")
 
-
-
         val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
 
-        val accountManager: UstadAccountManager by instance()
-        val nodeIdAndAuth:NodeIdAndAuth by di.on(accountManager.activeAccount).instance()
+        val nodeIdAndAuth:NodeIdAndAuth by di.on(Endpoint(apiUrl)).instance()
         dbBuilder.addCallback(ContentJobItemTriggersCallback())
             .addSyncCallback(nodeIdAndAuth)
             .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
@@ -94,8 +91,8 @@ class SplashPresenter(private val view: SplashView): DIAware {
             impl.currentTranslations = Pair(currentAssetPath, currentStrings)
         }
         view.appName = impl.getString(MessageID.app_name,this)
+        impl.setAppPref(SplashView.TAG_LOADED,"true", this)
         view.loading = false
-        impl.setAppPref(SplashView.TAG_LOADED,"false", this)
     }
 
     override val di: DI

@@ -151,6 +151,22 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND ClazzEnrolment.clazzEnrolmentActive
         ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
     """)
+    @PostgresQuery("""SELECT ClazzEnrolment.*, Clazz.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
+        ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
+        ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
+        GREATEST(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) 
+        FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog ON 
+        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid WHERE 
+        ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = :personUid 
+        AND ClazzLog.clazzLogClazzUid = Clazz.clazzUid AND ClazzLog.logDate 
+        BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) 
+        as attendance
+        FROM ClazzEnrolment
+        LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
+        WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
+        AND ClazzEnrolment.clazzEnrolmentActive
+        ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
+    """)
     abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DoorDataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>
 
     @Query("""SELECT COALESCE(MAX(clazzEnrolmentDateLeft),0) FROM ClazzEnrolment WHERE 
@@ -207,24 +223,33 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     ): Int
 
 
-    @Query("""SELECT Person.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
-        ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
-        MAX(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) 
-        FROM ClazzLogAttendanceRecord JOIN ClazzLog ON 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid 
-        WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid 
-        AND ClazzLog.clazzLogClazzUid = :clazzUid)  AS attendance, 
+    @Query("""
+        SELECT Person.*, 
+               (SELECT ((CAST(COUNT(DISTINCT 
+                        CASE WHEN ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
+                                  THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid 
+                             ELSE NULL 
+                             END) 
+                        AS REAL) / 
+                        MAX(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) 
+                   FROM ClazzLogAttendanceRecord 
+                        JOIN ClazzLog 
+                             ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid 
+                  WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid 
+                    AND ClazzLog.clazzLogClazzUid = :clazzUid)  AS attendance, 
         
-    	(SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) FROM ClazzEnrolment WHERE 
-        Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS earliestJoinDate, 
+    	       (SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) 
+                  FROM ClazzEnrolment 
+                 WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS earliestJoinDate, 
         
-    	(SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) FROM ClazzEnrolment WHERE 
-        Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
+    	      (SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) 
+                 FROM ClazzEnrolment 
+                WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
         
-        (SELECT clazzEnrolmentRole FROM clazzEnrolment WHERE Person.personUid = 
-        ClazzEnrolment.clazzEnrolmentPersonUid AND 
-        ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+              (SELECT clazzEnrolmentRole 
+                 FROM clazzEnrolment 
+                WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
+                  AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
         AND ClazzEnrolment.clazzEnrolmentActive) AS enrolmentRole
         FROM PersonGroupMember
         ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
@@ -262,6 +287,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
             END DESC
     """)
     @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonGroupMember", "ScopedGrant"])
+    @SqliteOnly
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%",
                                        filter: Int, accountPersonUid: Long, currentTime: Long): DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>
 
@@ -269,17 +295,13 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""
         UPDATE ClazzEnrolment 
           SET clazzEnrolmentActive = :enrolled,
-              clazzEnrolmentLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
+              clazzEnrolmentLct = :timeChanged
         WHERE clazzEnrolmentUid = :clazzEnrolmentUid""")
-    abstract fun updateClazzEnrolmentActiveForClazzEnrolment(clazzEnrolmentUid: Long, enrolled: Int): Int
-
-    fun updateClazzEnrolmentActiveForClazzEnrolment(clazzEnrolmentUid: Long, enrolled: Boolean): Int {
-        return if (enrolled) {
-            updateClazzEnrolmentActiveForClazzEnrolment(clazzEnrolmentUid, 1)
-        } else {
-            updateClazzEnrolmentActiveForClazzEnrolment(clazzEnrolmentUid, 0)
-        }
-    }
+    abstract fun updateClazzEnrolmentActiveForClazzEnrolment(
+        clazzEnrolmentUid: Long,
+        enrolled: Boolean,
+        timeChanged: Long,
+    ): Int
 
     @Query("""
             UPDATE ClazzEnrolment 

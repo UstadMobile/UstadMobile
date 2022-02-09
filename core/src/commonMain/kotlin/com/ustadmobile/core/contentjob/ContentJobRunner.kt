@@ -13,7 +13,6 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -129,7 +128,8 @@ class ContentJobRunner(
             var mediatorObserver: DoorObserver<Pair<Int, Boolean>>?= null
             val mediatorLiveData = JobConnectivityLiveData(connectivityLiveData,
                     db.contentJobDao.findMeteredAllowedLiveData(
-                            item.contentJob?.cjUid ?: 0, db.dbType()))
+                        item.contentJob?.cjUid ?: 0
+                    ))
 
             try {
 

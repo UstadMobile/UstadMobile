@@ -54,6 +54,7 @@ import java.nio.charset.StandardCharsets
 import javax.naming.InitialContext
 import kotlin.random.Random
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import kotlinx.coroutines.runBlocking
 
 class TestXapiStatementResponder {
 
@@ -118,7 +119,7 @@ class TestXapiStatementResponder {
                     .addSyncCallback(nodeIdAndAuth)
                     .build()
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
-                    .also { it.preload() })
+                    .also { runBlocking { it.preload() } })
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {

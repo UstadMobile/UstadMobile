@@ -258,7 +258,7 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                     }
                 }
 
-                umGridContainer(spacing) {
+                /*umGridContainer(spacing) {
                     css{
                         display = displayProperty(createAccountVisible)
                     }
@@ -300,7 +300,7 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                             css(defaultFullWidth)
                         }
                     }
-                }
+                }*/
             }
         }
     }

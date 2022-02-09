@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.*
+import com.ustadmobile.core.assignment.ClazzAssignmentIncomingReplicationListener
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
@@ -38,6 +39,7 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.addIncomingReplicationListener
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -121,7 +123,8 @@ open class UstadApp : Application(), DIAware {
                 replicationSubscriptionInitListener = RepSubscriptionInitListener()
             }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
-                //it.setupAssignmentSyncListener(context, di)
+                it.addIncomingReplicationListener(
+                    ClazzAssignmentIncomingReplicationListener(context, di))
             }
         }
 

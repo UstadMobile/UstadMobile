@@ -101,7 +101,7 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
         AND SchoolMember.schoolMemberRole = :role
         AND Person.active
         AND (Person.firstNames || ' ' || Person.lastName) LIKE :searchQuery
-        GROUP BY Person.personUid
+        GROUP BY Person.personUid, SchoolMember.schoolMemberUid
          ORDER BY CASE(:sortOrder)
                 WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
                 WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
