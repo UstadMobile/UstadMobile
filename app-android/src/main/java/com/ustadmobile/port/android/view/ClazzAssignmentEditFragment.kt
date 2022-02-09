@@ -156,7 +156,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         set(value) {
             field = value
             mBinding?.clazzAssignment = value
-            mBinding?.lateSubmissionVisibility = if(value?.caDeadlineDate?.isSet == true){
+            mBinding?.lateSubmissionVisibility = if(deadlineDate.isSet){
                 View.VISIBLE
             }else{
                 View.GONE
