@@ -162,13 +162,13 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         //wait for the entity value to be set
         mockView.captureLastEntityValue()
 
-        verify(mockView, timeout(1000)).showPrivateComments = eq(true)
         verify(mockView, timeout(1000)).showFileSubmission = eq(true)
         verify(mockView, timeout(1000)).maxNumberOfFilesSubmission = eq(3)
         verify(mockView, timeout(1000)).hasPassedDeadline = eq(false)
-        verify(mockView, timeout(1000).atLeastOnce()).clazzMetrics
-        verify(mockView, timeout(1000).atLeastOnce()).clazzAssignmentFileSubmission
-        verify(mockView, timeout(1000).atLeastOnce()).fileSubmissionScore
+        verify(mockView, timeout(5000).atLeastOnce()).clazzAssignmentFileSubmission = any()
+        verify(mockView, timeout(1000).atLeastOnce()).fileSubmissionScore = any()
+        verify(mockView, timeout(5000).atLeastOnce()).clazzMetrics = any()
+        verify(mockView, timeout(1000)).showPrivateComments = eq(true)
         verify(mockView, timeout(1000).times(0)).clazzAssignmentClazzComments
 
     }
