@@ -308,6 +308,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
+                app:errorEnabled="@{caDeadlineError != null}"
+                app:errorText="@{caDeadlineError}"
                 app:layout_constraintBottom_toBottomOf="@+id/ca_deadline_date_textinput"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:hint="@string/time"
@@ -410,6 +412,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                app:errorEnabled="@{caGracePeriodError != null}"
+                app:errorText="@{caGracePeriodError}"
                 android:visibility="@{gracePeriodVisibility}"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
@@ -424,7 +428,6 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:timeWithZoneValue="@={clazzAssignment.caGracePeriodDate}"
                     app:timeValue="@={gracePeriodTime}"
                     app:runOnClickWhenFocused="@{true}" />
 

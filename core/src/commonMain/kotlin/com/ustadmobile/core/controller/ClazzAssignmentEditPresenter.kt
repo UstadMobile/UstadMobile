@@ -219,7 +219,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             view.deadlineDate = Long.MAX_VALUE
         }
 
-        if(entity.caGracePeriodDate != 0L){
+        if(entity.caGracePeriodDate != Long.MAX_VALUE){
             val gracePeriodDateTimeMidnight = DateTime(entity.caGracePeriodDate)
                     .toLocalMidnight(timeZone).unixMillisLong
             view.gracePeriodDate = gracePeriodDateTimeMidnight
@@ -266,11 +266,17 @@ class ClazzAssignmentEditPresenter(context: Any,
                 return@launch
             }
 
+
             if (entity.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT ||
                     entity.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY) {
 
-                if (entity.caDeadlineDate == Long.MAX_VALUE) {
+                if (entity.caDeadlineDate == Long.MAX_VALUE || view.deadlineTime == 0L) {
                     view.caDeadlineError = systemImpl.getString(MessageID.field_required_prompt, context)
+                    return@launch
+                }
+
+                if(entity.caGracePeriodDate == Long.MAX_VALUE || view.gracePeriodTime == 0L){
+                    view.caGracePeriodError = systemImpl.getString(MessageID.field_required_prompt, context)
                     return@launch
                 }
 
@@ -318,8 +324,8 @@ class ClazzAssignmentEditPresenter(context: Any,
             val contentToUpdate = contentOneToManyJoinEditHelper.entitiesToUpdate
 
             // run in transaction
-           // repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
-                db.clazzAssignmentContentJoinDao.insertListAsync(contentToInsert.map {
+            repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                txDb.clazzAssignmentContentJoinDao.insertListAsync(contentToInsert.map {
                     ClazzAssignmentContentJoin().apply {
                         cacjContentUid = it.contentEntryUid
                         cacjAssignmentUid = entity.caUid
@@ -327,13 +333,13 @@ class ClazzAssignmentEditPresenter(context: Any,
                     }
                 })
                 contentToUpdate.forEach {
-                    db.clazzAssignmentContentJoinDao.updateWeightForAssignmentAndContent(it.contentEntryUid, entity.caUid, it.assignmentContentWeight)
+                    txDb.clazzAssignmentContentJoinDao.updateWeightForAssignmentAndContent(it.contentEntryUid, entity.caUid, it.assignmentContentWeight)
                 }
-            //}
 
-            repo.clazzAssignmentContentJoinDao.deactivateByUids(contentToDelete, entity.caUid)
+                txDb.clazzAssignmentContentJoinDao.deactivateByUids(contentToDelete, entity.caUid)
 
-            repo.clazzAssignmentRollUpDao.deleteCachedInactiveContent(entity.caUid)
+                txDb.clazzAssignmentRollUpDao.deleteCachedInactiveContent(entity.caUid)
+            }
 
             onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
 
