@@ -11,24 +11,25 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.test.waitUntil
-import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
-import com.ustadmobile.core.view.ClazzAssignmentDetailView
-import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.util.test.waitUntilAsyncOrTimeout
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.School
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
+import org.kodein.di.DIProperty
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.mockito.kotlin.*
@@ -45,6 +46,9 @@ import org.mockito.kotlin.*
 
 class ClazzAssignmentEditPresenterTest {
 
+
+    private lateinit var repo: UmAppDatabase
+
     @JvmField
     @Rule
     var ustadTestRule = UstadTestRule()
@@ -56,8 +60,6 @@ class ClazzAssignmentEditPresenterTest {
     private lateinit var context: Any
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
-
-    private lateinit var repoClazzAssignmentDaoSpy: ClazzAssignmentDao
 
     private lateinit var testClazz: Clazz
 
@@ -76,17 +78,21 @@ class ClazzAssignmentEditPresenterTest {
             import(ustadTestRule.diModule)
         }
 
-        val repo: UmAppDatabase by di.activeRepoInstance()
+        repo = di.directActiveRepoInstance()
         testNavController = di.direct.instance()
 
-        repoClazzAssignmentDaoSpy = spy(repo.clazzAssignmentDao)
-        whenever(repo.clazzAssignmentDao).thenReturn(repoClazzAssignmentDaoSpy)
+        val school = School().apply{
+            schoolTimeZone = "UTC"
+            schoolUid = repo.schoolDao.insert(this)
+        }
 
         testClazz = Clazz().apply {
             clazzName = "Spelling Clazz"
-            clazzUid = repo.clazzDao.insert(this)
+            clazzSchoolUid = school.schoolUid
             clazzStartTime = DateTime(2020, 8, 10).unixMillisLong
+            clazzUid = repo.clazzDao.insert(this)
         }
+
 
 
     }
@@ -94,18 +100,11 @@ class ClazzAssignmentEditPresenterTest {
     @Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
 
-        val repo: UmAppDatabase by di.activeRepoInstance()
-        val db: UmAppDatabase by di.activeDbInstance()
-
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
-        val newAssignment = ClazzAssignment().apply {
-            caClazzUid = testClazz.clazzUid
-        }
-        val jsonStr = Gson().toJson(newAssignment)
-
         val presenterArgs = mutableMapOf<String, String>()
-        presenterArgs[ARG_ENTITY_JSON] = jsonStr
+        presenterArgs[UstadView.ARG_CLAZZUID] = testClazz.clazzUid.toString()
+
         testNavController.navigate(ClazzAssignmentEditView.VIEW_NAME, presenterArgs)
         val presenter = ClazzAssignmentEditPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
@@ -125,26 +124,20 @@ class ClazzAssignmentEditPresenterTest {
                 eq(ClazzAssignmentDetailView.VIEW_NAME),
                 any(), any(), any())
 
-        //TODO: wait until the presenter has saved the entity e.g.
+
         runBlocking {
-            db.waitUntil(5000, listOf("ClazzAssignment")) {
-                db.clazzAssignmentDao.findClazzAssignment()?.caTitle == "Test Clazz Assignment"
+            repo.waitUntil(5000, listOf("ClazzAssignment")) {
+                repo.clazzAssignmentDao.findClazzAssignment()?.caTitle == "Test Clazz Assignment"
             }
+            val entitySaved = repo.clazzAssignmentDao.findClazzAssignment()
+            Assert.assertEquals("Entity was saved to database", "Test Clazz Assignment",
+                    entitySaved!!.caTitle)
         }
-
-        val entitySaved = db.clazzAssignmentDao.findClazzAssignment()
-        Assert.assertEquals("Entity was saved to database", "Test Clazz Assignment",
-                entitySaved!!.caTitle)
-
 
     }
 
     @Test
     fun givenExistingClazzAssignment_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
-
-        val repo: UmAppDatabase by di.activeRepoInstance()
-        val db: UmAppDatabase by di.activeDbInstance()
-
 
         val clazzAssignment = ClazzAssignment().apply {
             caTitle = "test Assignment"
@@ -154,10 +147,15 @@ class ClazzAssignmentEditPresenterTest {
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to clazzAssignment.caUid.toString())
+
         testNavController.navigate(ClazzAssignmentEditView.VIEW_NAME, presenterArgs)
         val presenter = ClazzAssignmentEditPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
+
         presenter.onCreate(null)
+        whenever(mockView.startDate).thenReturn(DateTime(2021,5,10).unixMillisLong)
+        whenever(mockView.deadlineDate).thenReturn(Long.MAX_VALUE)
+        whenever(mockView.gracePeriodDate).thenReturn(Long.MAX_VALUE)
 
         val initialEntity = mockView.captureLastEntityValue()!!
 
@@ -167,13 +165,11 @@ class ClazzAssignmentEditPresenterTest {
         presenter.handleClickSave(initialEntity)
 
         runBlocking {
-            db.waitUntil(5000, listOf("ClazzAssignment")) {
-                runBlocking {
-                    db.clazzAssignmentDao.findByUidAsync(clazzAssignment.caUid)?.caTitle == "New Spelling Clazz"
-                }
+            repo.waitUntilAsyncOrTimeout(5000, listOf("ClazzAssignment")) {
+                repo.clazzAssignmentDao.findByUidAsync(clazzAssignment.caUid)?.caTitle == "New Spelling Clazz"
             }
 
-            val entitySaved = db.clazzAssignmentDao.findByUidAsync(clazzAssignment.caUid)
+            val entitySaved = repo.clazzAssignmentDao.findByUidAsync(clazzAssignment.caUid)
 
             Assert.assertEquals("Name was saved and updated",
                     "New Spelling Clazz", entitySaved!!.caTitle)
