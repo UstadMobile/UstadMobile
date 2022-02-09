@@ -115,7 +115,9 @@ class ClazzAssignmentEditPresenterTest {
 
         //TODO: Make some changes (e.g. as the user would do using data binding
         initialEntity.caTitle = "Test Clazz Assignment"
-        initialEntity.caStartDate = DateTime(2021,5,10).unixMillisLong
+        whenever(mockView.startDate).thenReturn(DateTime(2021,5,10).unixMillisLong)
+        whenever(mockView.deadlineDate).thenReturn(Long.MAX_VALUE)
+        whenever(mockView.gracePeriodDate).thenReturn(Long.MAX_VALUE)
 
         presenter.handleClickSave(initialEntity)
 

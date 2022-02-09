@@ -231,7 +231,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         }
 
     override var deadlineDate: Long
-        get() = mBinding?.deadlineDate ?: 0
+        get() = mBinding?.deadlineDate ?: Long.MAX_VALUE
         set(value) {
             mBinding?.deadlineDate = value
         }
@@ -243,7 +243,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         }
 
     override var gracePeriodDate: Long
-        get() = mBinding?.gracePeriodDate ?: 0
+        get() = mBinding?.gracePeriodDate ?: Long.MAX_VALUE
         set(value) {
             mBinding?.gracePeriodDate = value
         }
