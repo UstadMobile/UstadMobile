@@ -23,6 +23,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -270,6 +271,8 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         presenter.onCreate(null)
 
+        whenever(mockView.entity).thenReturn(testEntity)
+
         mockView.captureLastEntityValue()
 
         val fileSubmissionDaoSpy = spy(repo.assignmentFileSubmissionDao)
@@ -282,10 +285,11 @@ class ClazzAssignmentDetailOverviewPresenterTest {
                 any(), eq(true), any())
         }
 
-
-     /*   verify(xapiStatementEndpointImpl, timeout(1000)).storeStatements(any(),
-                any(), any(), any())*/
-
+        runBlocking {
+            verify(xapiStatementEndpointImpl, timeout(1000))
+                    .storeStatements(any(),
+                            any(), any(), any())
+        }
 
 
     }
