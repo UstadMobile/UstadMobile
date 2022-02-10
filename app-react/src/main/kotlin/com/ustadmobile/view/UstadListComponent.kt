@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.EmptyList
 import com.ustadmobile.core.controller.OnSortOptionSelected
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -17,6 +16,7 @@ import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.util.EmptyList
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.centerContainer
@@ -49,14 +49,14 @@ import styled.css
 import styled.styledDiv
 import styled.styledSpan
 
-abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<UmProps,UmState>(props),
+abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<UmProps, UmState>(props),
     UstadListView<RT, DT>, OnSortOptionSelected {
 
     protected abstract val displayTypeRepo: Any?
 
     protected abstract val listPresenter: UstadListPresenter<*, in DT>?
 
-    private var isEventHandled = false
+    private var isPressEventHandled = false
 
     private var selectedListItems: MutableList<DT> = concurrentSafeListOf()
 
@@ -69,7 +69,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     protected var dbRepo: UmAppDatabase? = null
 
     /**
-     * Flag which shows/hide empty state on a list
+     * State which controls showing/hiding empty UI on a list
      */
     protected var showEmptyState = true
         get() = field
@@ -104,11 +104,11 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     /**
      * Determines number of columns to be used on GridLayout.
-     * GridSize.cells12 = Will take the entire screen
-     * columns = (12/preferred grid size)
+     * GridSize.cells12 - Will take the entire screen
+     * columns - (12/preferred grid size)
      * i.e GridSize.cells4, will display 3 columns (12/4)
      */
-    var multiColumnItemSize = GridSize.cells4
+    var columnSize = GridSize.cells4
         get() = field
         set(value) {
             setState {
@@ -117,13 +117,13 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         }
 
     /**
-     * Flag to indicated which host design to be used on Gridlayout.
+     * State to indicated which host design to be used on Gridlayout.
      * TRUE = Use Card design
      * FALSE = Use plain design
      *
      * i.e it has no effect on LinearLayout when set.
      */
-    var useCards = true
+    var useCardsOnGridLayout = true
         get() = field
         set(value) {
             setState {
@@ -132,7 +132,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         }
 
     /**
-     * Flag to indicate whether the list should be multi (Grid Layout)
+     * State to indicate whether the list should be multi column (Grid Layout)
      * or single column (Linear Layout)
      */
     protected var linearLayout: Boolean = true
@@ -144,11 +144,11 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         }
 
     private val itemPressEventHandler:(Event) -> Unit  = {
-        if(!isEventHandled){
+        if(!isPressEventHandled){
             //Long press detected, add to selection
             handleSelectedEntry(it.asDynamic() as DT)
         }
-        isEventHandled = true
+        isPressEventHandled = true
     }
 
     private val dataObserver = ObserverFnWrapper<List<DT>>{
@@ -167,7 +167,6 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             liveData?.removeObserver(dataObserver)
             liveData?.observe(this, dataObserver)
         }
-
 
     override var selectionOptions: List<SelectionOption>? = null
         get() = field
@@ -219,7 +218,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         window.setTimeout({
             searchManager?.searchListener = listPresenter
-        }, UI_LISTENER_TIMEOUT)
+        }, UI_EVENT_LISTENER_TIMEOUT)
     }
 
     override fun RBuilder.render() {
@@ -240,7 +239,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                     paddingBottom = 2.spacingUnits
                 }
 
-                renderHeaderView()
+                renderListHeaderView()
             }
 
             if(linearLayout)
@@ -248,10 +247,10 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             else
                 renderMultiColumnList()
 
-            renderFooterView()
+            renderListFooterView()
         }
 
-        //Render dialog UI to be shown when fab is clicked  (Bottom sheet replacement)
+        //Render dialog UI to be shown when fab is clicked  (Bottom sheet UI in android)
         renderAddContentOptionsDialog()
     }
 
@@ -264,14 +263,14 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
               styledDiv {
                   css{
                       +alignCenterItems
-                      width = LinearDimension("200px")
+                      width = 200.px
                   }
                   umIcon(emptyList.icon ?: "crop_free", className = "${StyleManager.name}-emptyListIcon")
                   umTypography(emptyList.text ?: getString(MessageID.nothing_here),
                       variant = TypographyVariant.h6,
                       align = TypographyAlign.center){
                       css {
-                          marginTop = LinearDimension("20px")
+                          marginTop = 20.px
                       }
                   }
               }
@@ -279,7 +278,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
           window.setTimeout({
               loading = false
-          }, UI_LISTENER_TIMEOUT)
+          }, UI_EVENT_LISTENER_TIMEOUT)
       }
     }
 
@@ -352,7 +351,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             }else {
                 umGridContainer(GridSpacing.spacing4) {
                     dataListItems.forEach { entry->
-                        umItem(GridSize.cells12, multiColumnItemSize){
+                        umItem(GridSize.cells12, columnSize){
                             css{
                                 cursor = Cursor.pointer
                                 backgroundColor = Color(if(selectedListItems.indexOf(entry) != -1)
@@ -372,10 +371,10 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                                 handleListItemRelease(entry)
                             }
 
-                            if(useCards){
+                            if(useCardsOnGridLayout){
                                 umPaper(elevation = 4) {
                                     css{
-                                        width = LinearDimension("97%")
+                                        width = 97.pct
                                     }
                                     renderListItem(entry)
                                 }
@@ -393,7 +392,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     private fun RBuilder.renderSingleColumnList(){
        umList {
-            css{ +(styleList() ?: if(dataListItems.isNotEmpty()) horizontalList else horizontalListEmpty) }
+            css{ if(dataListItems.isNotEmpty()) horizontalList else horizontalListEmpty }
 
             renderNewItem(false)
 
@@ -406,7 +405,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                             backgroundColor = Color(if(selectedListItems.indexOf(entry) != -1)
                                 theme.palette.action.selected
                             else theme.palette.background.paper)
-                            width = LinearDimension("100%")
+                            width = 100.pct
                         }
                         attrs.asDynamic().alignItems = ListItemAlignItems.flexStart
                         attrs.divider = true
@@ -427,15 +426,15 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     private fun handleListItemPress(entry: DT){
         if(listItemPressTimer != -1) window.clearTimeout(listItemPressTimer)
         listItemPressTimer = window.setTimeout(itemPressEventHandler,1000,entry)
-        isEventHandled = false
+        isPressEventHandled = false
     }
 
     private fun handleListItemRelease(entry: DT){
         if(!showEditOptionsMenu){
             handleClickEntry(entry)
         }else{
-            if(!isEventHandled){
-                isEventHandled = true
+            if(!isPressEventHandled){
+                isPressEventHandled = true
                 if(selectedListItems.isEmpty()){
                     handleClickEntry(entry)
                 }else{
@@ -469,7 +468,8 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
             }
             listFilterOptionChips?.forEach { chip ->
                 val mColor = if(chip == checkedFilterOptionChip)
-                    if(isDarkModeActive()) ChipColor.secondary else ChipColor.primary
+                    if(isDarkModeActive()) ChipColor.secondary
+                    else ChipColor.primary
                 else ChipColor.default
                 umChip(chip.description,
                     color = mColor) {
@@ -522,7 +522,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                             css {
                                 marginTop = 10.px
                                 marginLeft = 2.spacingUnits
-                                fontSize = LinearDimension("1.2em")
+                                fontSize = (1.2).em
                                 display = displayProperty(!hideOptions)
                             }
                             +getString(MessageID.items_selected).format(selectedListItems.size)
@@ -572,9 +572,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     open fun RBuilder.renderEditOptionMenu(){}
 
-    open fun RBuilder.renderHeaderView(){}
+    open fun RBuilder.renderListHeaderView(){}
 
-    open fun RBuilder.renderFooterView(){}
+    open fun RBuilder.renderListFooterView(){}
 
     abstract fun handleClickEntry(entry: DT)
 
@@ -587,10 +587,6 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     }
 
     open fun handleInviteClicked(){}
-
-    open fun styleList(): RuleSet? {
-        return null
-    }
 
     override fun onClickSort(sortOption: SortOrderOption) {
         //activate selected sort option
@@ -617,6 +613,6 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                 SelectionOption.HIDE to "visibility_off",
                 SelectionOption.UNHIDE to "visibility")
 
-        private const val UI_LISTENER_TIMEOUT = 100
+        private const val UI_EVENT_LISTENER_TIMEOUT = 100
     }
 }

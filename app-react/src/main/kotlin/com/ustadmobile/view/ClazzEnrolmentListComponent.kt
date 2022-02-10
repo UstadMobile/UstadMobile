@@ -97,7 +97,7 @@ class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnro
         mPresenter?.onCreate(mapOf())
     }
 
-    override fun RBuilder.renderHeaderView() {
+    override fun RBuilder.renderListHeaderView() {
         umGridContainer(rowSpacing = GridSpacing.spacing2){
             umItem(GridSize.cells12) {
                 createTopMainAction("person",

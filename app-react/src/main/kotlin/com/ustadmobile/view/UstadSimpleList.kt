@@ -55,7 +55,7 @@ abstract class UstadSimpleList<P: SimpleListProps<*>>(mProps: P) : UstadBaseComp
             css{
                 if(!props.mainList){
                     +listComponentContainer
-                    width = LinearDimension("98%")
+                    width = 98.pct
                 } else {
                     +listComponentContainerWithScroll
                 }
@@ -86,7 +86,7 @@ abstract class UstadSimpleList<P: SimpleListProps<*>>(mProps: P) : UstadBaseComp
                 umListItem(button = true, alignItems = ListItemAlignItems.flexStart) {
                     css{
                         backgroundColor = Color(theme.palette.background.paper)
-                        width = LinearDimension("100%")
+                        width = 100.pct
                     }
 
                     attrs.divider = true

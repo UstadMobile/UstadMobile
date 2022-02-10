@@ -97,7 +97,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
         mPresenter?.onCreate(mapOf())
     }
 
-    override fun RBuilder.renderHeaderView() {
+    override fun RBuilder.renderListHeaderView() {
         createListSectionTitle(getString(MessageID.teachers_literal))
     }
 
@@ -110,7 +110,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
         )
     }
 
-    override fun RBuilder.renderFooterView() {
+    override fun RBuilder.renderListFooterView() {
         umGridContainer(rowSpacing = GridSpacing.spacing2) {
             createMemberList(students, getString(MessageID.students),
                 ClazzEnrolment.ROLE_STUDENT, MessageID.add_a_student)

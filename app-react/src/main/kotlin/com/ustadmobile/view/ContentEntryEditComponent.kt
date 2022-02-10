@@ -1,6 +1,6 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.FieldLabel
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter

@@ -1,6 +1,6 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.FieldLabel
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.JoinWithCodePresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.JoinWithCodeView

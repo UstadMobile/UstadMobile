@@ -39,7 +39,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val contentAfterIconMarginLeft by css {
-        marginLeft = LinearDimension("2%")
+        marginLeft = 2.pct
     }
 
     val umItemWithIconAndText by css {
@@ -52,7 +52,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val defaultFullWidth by css {
-        width = LinearDimension("100%")
+        width = 100.pct
     }
 
     val defaultMarginTop  by css{
@@ -78,8 +78,8 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val errorTextClass by css{
         color = Color(theme.palette.error.main)
-        marginLeft = LinearDimension("${if(systemImpl.isRtlActive()) 0 else 16}px")
-        marginRight= LinearDimension("${if(systemImpl.isRtlActive()) 16 else 0}px")
+        marginLeft = (if(systemImpl.isRtlActive()) 0 else 16).px
+        marginRight= (if(systemImpl.isRtlActive()) 16 else 0).px
     }
 
     val errorClass by css {
@@ -101,8 +101,8 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val splashComponentPreloadContainer by css{
-        left = LinearDimension("50%")
-        top = LinearDimension("50%")
+        left = 50.pct
+        top = 50.pct
         marginLeft = (-100).px
         marginTop = (-50).px
         position =  Position.fixed
@@ -190,12 +190,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val mainComponentContentContainer by css {
-        height = LinearDimension("100vh")
+        height = 100.vh
         flexGrow = 1.0
         minWidth = 0.px
         backgroundColor = Color(theme.palette.background.default)
         media(theme.breakpoints.down(Breakpoint.xs)){
-            height = LinearDimension("91vh")
+            height = 91.vh
         }
     }
 
@@ -209,13 +209,15 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val mainComponentBrandIconContainer by css {
         height = 43.px
         marginTop = 20.px
-        width = LinearDimension("100%")
-        padding = "0px ${if(systemImpl.isRtlActive()) 20 else 0 }px 0 ${if(systemImpl.isRtlActive()) 0 else 20 }px"
+        width = 100.pct
+        padding(top = 0.px,
+            right = (if(systemImpl.isRtlActive()) 20 else 0).px,
+            bottom = 0.px, left = (if(systemImpl.isRtlActive()) 0 else 20 ).px)
     }
 
     val mainComponentBrandIcon by css{
-        width = LinearDimension("80%")
-        height = LinearDimension("60%")
+        width = 80.pct
+        height = 60.pct
     }
 
     val mainComponentSideNavMenuList by css {
@@ -229,7 +231,6 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
             marginRight = drawerWidth.px
             media(theme.breakpoints.down(tabletAndHighEnd)) {
                 marginRight = 0.px
-
             }
         }
     }
@@ -238,9 +239,13 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         width = 40.px
         height = 40.px
         cursor = Cursor.pointer
-        margin = "0px ${if(systemImpl.isRtlActive()) 10 else 0 }% 0 ${if(systemImpl.isRtlActive()) 0 else 10 }%"
+        margin(top = 0.px,
+            right = (if(systemImpl.isRtlActive()) 10 else 0).pct, bottom = 0.px,
+            left = (if(systemImpl.isRtlActive()) 0 else 10 ).pct)
         media(theme.breakpoints.down(tabletAndHighEnd)) {
-            margin = "0px ${if(systemImpl.isRtlActive()) 10 else 3 }% 0 ${if(systemImpl.isRtlActive()) 0 else 10 }%"
+            margin(top = 0.px,
+                right = (if(systemImpl.isRtlActive()) 10 else 3).pct, bottom = 0.px,
+                left = (if(systemImpl.isRtlActive()) 0 else 10 ).pct)
         }
         backgroundColor = Color(theme.palette.primary.light)
         alignItems = Align.center
@@ -261,7 +266,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val mainComponentInputSearchClass by css {
-        padding = "8px 8px 8px 50px"
+        padding(8.px,8.px, 8.px, 50.px)
         transition += Transition("width", theme.transitions.duration.standard.ms, Timing.easeInOut, 0.ms)
         width = LinearDimension("30ch")
         media(theme.breakpoints.up(tabletAndHighEnd)) {
@@ -283,20 +288,20 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
             backgroundColor =  styledModule.alpha(theme.palette.common.white, 0.25)
         }
         marginLeft = 0.px
-        width = LinearDimension("100%")
+        width = 100.pct
         media(theme.breakpoints.up(tabletAndHighEnd)) {
             marginLeft = 1.spacingUnits
             width = LinearDimension("auto")
         }
 
         media(theme.breakpoints.down(tabletAndHighEnd)) {
-            width = LinearDimension("80%")
+            width = 80.pct
         }
     }
 
     val mainComponentSearchIcon by css {
         padding = "0 16px"
-        height = LinearDimension("100%")
+        height = 100.pct
         position = Position.absolute
         pointerEvents = PointerEvents.none
         display = Display.flex
@@ -349,7 +354,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val tabsContainer by css {
         flexGrow = 1.0
-        height = LinearDimension("100%")
+        height = 100.pct
         +defaultFullWidth
     }
 
@@ -358,12 +363,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         paddingLeft = 4.spacingUnits
         paddingRight = 4.spacingUnits
         paddingTop = 4.spacingUnits
-        height = LinearDimension("100vh")
+        height = 100.vh
         overflow = Overflow.scroll
         paddingBottom = 16.spacingUnits
-        width = LinearDimension("99.5%")
+        width = (99.5).pct
         media(theme.breakpoints.up(tabletAndHighEnd)){
-            width = LinearDimension("99.5%")
+            width = (99.5).pct
         }
     }
 
@@ -392,7 +397,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
 
     val reportActionText by css {
-        fontSize = LinearDimension("1em")
+        fontSize = 1.em
         textAlign = TextAlign.center
     }
 
@@ -454,20 +459,20 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val listComponentContainerWithScroll by css {
         display = Display.inlineFlex
         flexDirection = FlexDirection.column
-        height = LinearDimension("100vh")
+        height = 100.vh
         overflow = Overflow.scroll
         padding(top = 2.spacingUnits, horizontal = 2.spacingUnits, 0.spacingUnits)
-        width = LinearDimension("100%")
+        width = 100.pct
     }
 
     val entryListItemContainer by css {
-        width = LinearDimension("100%")
+        width = 100.pct
         display = Display.flex
         flexDirection = FlexDirection.row
     }
 
     val listCreateNewContainer by css {
-        padding = "10px"
+        padding(10.px)
         marginBottom = 2.spacingUnits
     }
 
@@ -477,17 +482,17 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val contentEntryListContentTyeIconClass by css {
-        fontSize = LinearDimension("0.65em")
+        fontSize = (0.65).em
         marginBottom = 4.px
     }
 
     val horizontalList by css {
-        width = LinearDimension("100%")
+        width = 100.pct
         backgroundColor = Color(theme.palette.background.paper)
     }
 
     val horizontalListEmpty by css {
-        width = LinearDimension("100%")
+        width = 100.pct
     }
 
     val listItemCreateNewDiv by css {
@@ -498,7 +503,7 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
     val listCreateNewIconClass by css {
-        fontSize = LinearDimension("2.5em")
+        fontSize = (2.5).em
         marginTop = 5.px
     }
 
@@ -511,99 +516,96 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val selectionContainer by css{
         paddingTop = 12.px
         paddingBottom = 12.px
-        width = LinearDimension("100%")
+        width = 100.pct
         backgroundColor = Color(theme.palette.background.default)
     }
 
     val entityImageClass by css {
         textAlign = TextAlign.center
         position = Position.relative
-        width = LinearDimension("98%")
+        width = 98.pct
         height = 300.px
     }
 
     val entityThumbnailClass by css {
         textAlign = TextAlign.center
         position = Position.relative
-        width = LinearDimension("100%")
+        width = 100.pct
         height = 80.px
         media(theme.breakpoints.up(tabletAndHighEnd)){
-            width = LinearDimension("70%")
+            width = 70.pct
             height = 120.px
         }
     }
 
     val entityImageIconClass by css {
-        fontSize = LinearDimension("3em")
+        fontSize = 3.em
     }
 
     val emptyListIcon by css {
         display = Display.table
         margin = "0 auto"
-        fontSize = LinearDimension("7em")
+        fontSize = 7.em
     }
 
     val entryItemImageContainer by css {
-        width = LinearDimension("100%")
+        width = 100.pct
         textAlign = TextAlign.center
     }
 
     val fallBackAvatarClass by css {
-        fontSize = LinearDimension("2em")
+        fontSize = 2.em
         marginBottom = 4.px
     }
 
     val maxThumbnailClass by css {
-        fontSize = LinearDimension("5em")
+        fontSize = 5.em
     }
 
     val mediumThumbnailClass by css {
-        fontSize = LinearDimension("2em")
+        fontSize = 2.em
     }
 
     val defaultThumbnailClass by css {
-        fontSize = LinearDimension("1.2em")
+        fontSize = (1.2).em
     }
 
     val secondaryActionBtn by css{
         width = 60.px
-        padding = "16px"
+        padding(16.px)
     }
 
     val personListItemAvatar by css {
         width = 50.px
         height = 50.px
-        margin = "2px ${if(systemImpl.isRtlActive()) 2.4 else 0 }px 0 ${if(systemImpl.isRtlActive()) 0 else 2.4 }px"
+        margin(2.px, (if(systemImpl.isRtlActive()) 2.4 else 0 ).px, 0.px, (if(systemImpl.isRtlActive()) 0 else 2.4).px)
         color = Color(theme.palette.background.paper)
         backgroundColor = Color(theme.palette.action.disabled)
     }
 
     val contentEntryDetailOverviewComponentOpenBtn by css {
-        margin = "3% 1.5% 3% 1.5%"
-        width = LinearDimension("98%")
+        margin(3.pct,(1.5).pct)
+        width = 98.pct
         media(theme.breakpoints.up(tabletAndHighEnd)){
-            margin = "2% 1.5% 0% 1.5%"
+            margin(2.pct,(1.5).pct, 0.pct,(1.5).pct)
         }
     }
 
     val detailContentProgress by css{
-        margin(left = LinearDimension("1.5%"), right = LinearDimension("1.5%"))
-        width = LinearDimension("98%")
-        media(theme.breakpoints.up(tabletAndHighEnd)){
-            margin(left = LinearDimension("1.5%"), right = LinearDimension("1.5%"))
-        }
+        margin(left = 1.5.pct, right = 1.5.pct)
+        width = 98.pct
     }
 
     val itemContentProgress by css{
-        margin(top = 2.spacingUnits, left = LinearDimension("1.5%"), right = LinearDimension("1.5%"))
-        width = LinearDimension("43%")
+        margin(top = 2.spacingUnits, left = 1.5.pct, right = 1.5.pct)
+        width = 43.pct
         media(theme.breakpoints.up(tabletAndHighEnd)){
-            margin(top = 1.spacingUnits,left = LinearDimension("1.5%"), right = LinearDimension("1.5%"))
+            margin(top = 1.spacingUnits, left = 1.5.pct, right = 1.5.pct)
         }
     }
 
     val detailIconClass by css {
-        fontSize = LinearDimension("2em")
+        fontSize = 2.em
         marginTop = 3.px
     }
 
@@ -671,12 +673,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val gridListSecondaryItemIcons by css {
         marginTop = 4.px
-        fontSize = LinearDimension("1em")
+        fontSize = 1.em
     }
 
     val gridListSecondaryItemDesc by css {
         marginTop = 4.px
-        fontSize = LinearDimension("0.68rem")
+        fontSize = 0.68.rem
     }
 
     val hideOnMobile by css {

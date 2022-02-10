@@ -1,4 +1,4 @@
-package com.ustadmobile
+package com.ustadmobile.util
 
 data class FieldLabel(var text: String? = null,
                       var errorText: String? = null,

@@ -1,7 +1,7 @@
 package com.ustadmobile.view
 
 import Breakpoint
-import com.ustadmobile.FieldLabel
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.Login2View

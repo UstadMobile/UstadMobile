@@ -1,7 +1,6 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
@@ -20,7 +19,9 @@ import com.ustadmobile.util.*
 import kotlinx.atomicfu.atomic
 import kotlinx.browser.window
 import kotlinx.coroutines.Runnable
-import org.kodein.di.*
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -38,8 +39,6 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     lateinit var navController: NavControllerJs
 
     protected var showAddEntryOptions = false
-
-    protected lateinit var appDatabase: UmAppDatabase
 
     private lateinit var progressBarManager: ProgressBarManager
 
@@ -91,7 +90,6 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         }
         lifecycleStatus.value = DoorLifecycleObserver.STARTED
         val umController: UstadNavController by instance()
-        appDatabase = di.direct.on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
         navController = umController as NavControllerJs
     }
 
@@ -109,8 +107,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         searchManager = SearchManager()
         fabManager = FabManager()
 
-        //Handle both arguments from URL and the ones passed during component rendering
-        //i.e from tabs
+        //Handle both arguments from URL and the ones passed during component rendering i.e from tabs
         arguments = when {
             props.asDynamic().arguments != js("undefined") ->
                 props.asDynamic().arguments as Map<String, String>
@@ -205,6 +202,10 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
 
     companion object {
 
+        /**
+         * Delay time in mills which waits for the state changes to complete before applying to the UI
+         * to avoid state update while rendering
+         */
         const val STATE_CHANGE_DELAY = 200
     }
 }

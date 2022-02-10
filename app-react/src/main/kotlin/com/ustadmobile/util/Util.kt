@@ -1,19 +1,11 @@
 package com.ustadmobile.util
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.await
-import kotlinx.serialization.DeserializationStrategy
-import kotlinx.serialization.json.Json
 import kotlin.js.Promise
 
 object Util {
-
-    fun <T> loadDataAsList(sourcePath: String, strategy: DeserializationStrategy<List<T>>): List<T> {
-        val data = UstadMobileSystemImpl.instance.getAppPref(sourcePath, this)
-        return if(data != null) Json.decodeFromString(strategy,data).toMutableList() else listOf()
-    }
 
     suspend fun loadAssetsAsText(fileName: String) : String {
         val res = (window.fetch(fileName) as Promise<dynamic>).await()

@@ -55,13 +55,13 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
         super.onCreateView()
         fabManager?.text = getString(MessageID.clazz)
         linearLayout = false
-        useCards = false
-        multiColumnItemSize = GridSize.cells6
+        useCardsOnGridLayout = false
+        columnSize = GridSize.cells6
         mPresenter = ClazzAssignmentDetailStudentProgressOverviewListPresenter(this, arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
     }
 
-    override fun RBuilder.renderHeaderView() {
+    override fun RBuilder.renderListHeaderView() {
         umGridContainer(GridSpacing.spacing4) {
             createSummaryCard(summary?.notStartedStudents, getString(MessageID.not_started))
             createSummaryCard(summary?.startedStudents, getString(MessageID.started))

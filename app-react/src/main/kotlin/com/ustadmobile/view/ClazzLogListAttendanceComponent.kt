@@ -80,7 +80,7 @@ class ClazzLogListAttendanceComponent (mProps: UmProps) : UstadListComponent<Cla
     }
 
 
-    override fun RBuilder.renderHeaderView() {
+    override fun RBuilder.renderListHeaderView() {
         umGridContainer(GridSpacing.spacing4) {
             if(graphRawData.isNotEmpty()){
                 umItem(GridSize.cells12){
