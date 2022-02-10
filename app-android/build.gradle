@@ -6,6 +6,9 @@ buildscript {
         maven {
             url "https://devserver3.ustadmobile.com/maven"
         }
+        maven {
+            url 'https://jitpack.io/'
+        }
     }
 
     dependencies {
@@ -15,7 +18,7 @@ buildscript {
 }
 
 plugins {
-    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha06"
+    id "com.ustadmobile.adbscreenrecorder"
     id 'maven-publish'
 }
 
@@ -433,7 +436,7 @@ dependencies {
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
-    androidTestImplementation "com.ustadmobile.adbscreenrecorder:lib-client:$version_android_adbscreenrecorder"
+    androidTestImplementation "com.github.UstadMobile.AdbScreenRecorder:lib-client:$version_android_adbscreenrecorder"
 
     kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
 }

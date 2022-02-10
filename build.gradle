@@ -7,12 +7,16 @@ buildscript {
     ext.version_gradle_versions_plugin = "0.28.0"
     ext.atomicfu_version = '0.17.0'
     ext.version_execfork = "0.1.15"
+    ext.version_android_adbscreenrecorder = "0.1-alpha11"
 
     repositories {
         google()
         mavenCentral()
         maven {
             url 'https://plugins.gradle.org/m2/'
+        }
+        maven {
+            url 'https://jitpack.io/'
         }
     }
 
@@ -24,6 +28,7 @@ buildscript {
         classpath "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicfu_version"
         classpath "com.gradle:gradle-enterprise-gradle-plugin:3.7.2"
         classpath "com.github.ben-manes:gradle-versions-plugin:$version_gradle_versions_plugin"
+        classpath "com.github.UstadMobile.AdbScreenRecorder:lib-gradle-plugin:$version_android_adbscreenrecorder"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -184,7 +189,6 @@ ext {
     version_android_leakcanary = "2.7"
     version_android_play_services_safetynet = "17.0.0"
     version_android_circleimageview = "3.1.0"
-    version_android_adbscreenrecorder = "0.1-alpha07"
     version_androidx_viewpager2 = "1.1.0-rc01"
     version_android_aztec = "v1.3.45"
     version_android_wordpress_utils = "2.0.0"

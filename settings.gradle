@@ -3,6 +3,9 @@ pluginManagement {
         maven {
             url "https://devserver3.ustadmobile.com/maven"
         }
+        maven {
+            url "https://jitpack.io/"
+        }
 
         mavenCentral()
         maven {
