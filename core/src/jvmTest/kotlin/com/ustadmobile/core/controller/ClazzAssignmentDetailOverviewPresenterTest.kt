@@ -4,6 +4,8 @@ package com.ustadmobile.core.controller
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.storeSubmitFileSubmissionStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzAssignmentDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -12,23 +14,19 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
+import com.ustadmobile.core.util.onActiveAccount
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.SelectFileView.Companion.ARG_SELECTION_MODE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.instance
-import org.kodein.di.singleton
+import org.kodein.di.*
 import org.mockito.kotlin.*
 
 /**
@@ -60,13 +58,21 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
     private lateinit var repo: UmAppDatabase
 
+    private lateinit var xapiStatementEndpointImpl: XapiStatementEndpoint
+
     @Before
     fun setup() {
-        mockView = mock { }
+        mockView = mock {
+            on { runOnUiThread(any())}.doAnswer{
+                Thread(it.getArgument<Any>(0) as Runnable).start()
+            }
+        }
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
+
+        xapiStatementEndpointImpl = mock{}
 
         val serverUrl = "https://dummysite.ustadmobile.app/"
 
@@ -75,8 +81,12 @@ class ClazzAssignmentDetailOverviewPresenterTest {
             on{activeAccount}.thenReturn(UmAccount(loggedInPersonUid,"","",serverUrl))
         }
 
+
         di = DI {
             import(ustadTestRule.diModule)
+            bind<XapiStatementEndpoint>() with scoped(ustadTestRule.endpointScope).singleton {
+                xapiStatementEndpointImpl
+            }
             bind<UstadAccountManager>(overrides = true) with singleton { accountManager }
         }
 
@@ -236,6 +246,47 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         val testNavController: UstadNavController by di.instance()
         verify(testNavController).navigate(SelectFileView.VIEW_NAME,
                 mapOf(ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_VIDEO))
+
+    }
+
+    @Test
+    fun givenUserClicksSubmitButton_whenClicked_thenShouldCreateStatement(){
+
+        createPerson(false)
+        val testEntity = ClazzAssignment().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caPrivateCommentsEnabled = true
+            caNumberOfFiles = 3
+            caFileType = ClazzAssignment.FILE_TYPE_VIDEO
+            caUid = repo.clazzAssignmentDao.insert(this)
+        }
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+                mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        mockView.captureLastEntityValue()
+
+        val fileSubmissionDaoSpy = spy(repo.assignmentFileSubmissionDao)
+        doReturn(fileSubmissionDaoSpy).`when`(repo).assignmentFileSubmissionDao
+
+        presenter.handleSubmitButtonClicked()
+
+        verifyBlocking(fileSubmissionDaoSpy, timeout(1000)){
+            setFilesAsSubmittedForStudent(eq(testEntity.caUid),
+                any(), eq(true), any())
+        }
+
+
+     /*   verify(xapiStatementEndpointImpl, timeout(1000)).storeStatements(any(),
+                any(), any(), any())*/
+
+
 
     }
 
