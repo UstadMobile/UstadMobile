@@ -44,3 +44,9 @@ fun Long?.formatToStringHoursMinutesSeconds(impl: UstadMobileSystemImpl): String
 fun Long?.isRealDate(): Boolean {
     return this != null && this != 0L && this != 8640000000000000
 }
+
+fun Long?.formatDateRange(endDate: Long?): String {
+    val date = endDate.toDate()?.standardFormat() ?: ""
+    val joiner = if(date.isEmpty()) "" else " - "
+    return this.toDate()?.standardFormat() + joiner + date
+}

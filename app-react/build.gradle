@@ -70,3 +70,9 @@ dependencies {
     implementation "io.github.aakira:napier:$version_napier"
 }
 
+task generateProductionBundle{
+    dependsOn ":app-ktor-server:deleteAppResources"
+    dependsOn ":app-react:browserDistribution"
+    tasks.findByPath(":app-react:browserDistribution").mustRunAfter ":app-ktor-server:deleteAppResources"
+    tasks.findByPath(":app-ktor-server:shadowJar").mustRunAfter ":app-react:browserDistribution"
+}

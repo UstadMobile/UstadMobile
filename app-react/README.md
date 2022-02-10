@@ -94,7 +94,7 @@ For simplicity, the web app is packaged on server as static files, so in order t
 ./gradlew app-ktor-server:shadowJar
 ./runserver.sh
 ```
-This will run ``` app-react:browserDistribution ``` which prepare and packages the web app into a server's jar
+This will run ``` app-react:generateProductionBundle ``` which prepare and packages the web app into a server's jar
 file.  After you build and start the server, you can simply open http://localhost:8087/ in the
 web browser. See the [INSTALL](../INSTALL.md) for production installation instructions.
 

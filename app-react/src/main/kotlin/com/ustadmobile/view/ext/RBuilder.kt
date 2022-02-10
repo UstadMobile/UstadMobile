@@ -540,8 +540,7 @@ fun RBuilder.createPersonWithAttemptProgress(
 
                 if(item.startDate > 0L){
                     umItem (GridSize.cells12){
-                        val endDate = if(item.endDate == 0L) "" else " - ${item.endDate.toDate()?.standardFormat()}"
-                        umTypography("${item.startDate.toDate()?.standardFormat()}$endDate",
+                        umTypography(item.startDate.formatDateRange(item.endDate),
                             variant = TypographyVariant.body1){
                             css (alignTextToStart)
                         }

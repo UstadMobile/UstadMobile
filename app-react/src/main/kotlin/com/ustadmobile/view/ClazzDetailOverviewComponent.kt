@@ -20,13 +20,12 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
 import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.util.ext.formatDateRange
 import com.ustadmobile.view.ext.*
 import react.RBuilder
 import react.setState
 import styled.css
 import styled.styledDiv
-import kotlin.js.Date
 
 class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzWithDisplayDetails>(mProps),
     ClazzDetailOverviewView {
@@ -117,10 +116,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
 
                         createInformation("school", entity?.clazzSchool?.schoolName)
 
-                        val dateTxt = Date(entity?.clazzStartTime ?: 0).standardFormat() +
-                                " - ${Date(entity?.clazzEndTime ?: 0).standardFormat()}"
-
-                        createInformation("event", dateTxt)
+                        createInformation("event", entity?.clazzStartTime.formatDateRange(entity?.clazzEndTime))
 
                         createInformation("event", entity?.clazzHolidayCalendar?.umCalendarName)
 
