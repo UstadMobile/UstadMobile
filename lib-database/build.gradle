@@ -50,9 +50,9 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation project(":lib-util")
                 implementation project(":lib-database-entities")
-                implementation "com.ustadmobile.door:door-runtime:$version_door"
+                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation "io.github.aakira:napier:$version_napier"
-                compileOnly "com.ustadmobile.door:room-annotations:$version_door"
+                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
  
             }
         }
@@ -94,7 +94,7 @@ kapt {
 
 
 dependencies {
-    kapt "com.ustadmobile.door:door-compiler:$version_door"
+    kapt "com.github.UstadMobile.door:door-compiler:$version_door"
 }
 
 def platformTypeAttr = Attribute.of("org.jetbrains.kotlin.platform.type", String)

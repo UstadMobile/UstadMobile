@@ -272,7 +272,7 @@ dependencies {
     implementation project(':core')
     implementation project(':sharedse')
 
-    implementation "com.ustadmobile.door:door-runtime:$version_door"
+    implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(':lib-database-android')
     implementation project(":lib-database-entities")
     implementation project(':lib-util')
