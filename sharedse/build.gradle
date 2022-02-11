@@ -119,10 +119,10 @@ kotlin {
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
 
 
-                implementation "com.ustadmobile.door:door-runtime:$version_door"
+                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
-                compileOnly "com.ustadmobile.door:room-annotations:$version_door"
+                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
             }
         }
