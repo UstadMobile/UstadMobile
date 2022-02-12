@@ -73,6 +73,7 @@ object RouteManager {
         UstadDestination(view = ReportEditView.VIEW_NAME, component = ReportEditComponent::class),
         UstadDestination(view = ReportFilterEditView.VIEW_NAME, component = ReportFilterEditComponent::class),
         UstadDestination(view = ContentEntryList2View.FOLDER_VIEW_NAME, component = ContentEntryListComponent::class),
+        UstadDestination(view = SelectFileView.VIEW_NAME, component = SelectFileComponent::class),
         UstadDestination(view = ReportDetailView.VIEW_NAME, component = ReportDetailComponent::class)
     )
 
@@ -85,7 +86,9 @@ object RouteManager {
         component =  RedirectComponent::class
     }
 
-
+    /**
+     * First destination to navigate to when the app is opened
+     */
     val firstDestination: UstadDestination = destinationList.first {
         it.view == ContentEntryList2View.VIEW_NAME_HOME
     }

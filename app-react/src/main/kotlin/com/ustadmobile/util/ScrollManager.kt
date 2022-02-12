@@ -12,8 +12,11 @@ import org.w3c.dom.events.Event
  * @param triggerThreshold Percentage on which the event should be triggered
  * @param delay How long event should wait to be triggered
  */
-class  ScrollManager(private val viewToObserve: String, private val triggerThreshold:Int = 50,
-                     private val triggerOnDownScroll: Boolean = true, private val delay: Int = 200) {
+class  ScrollManager(
+    private val viewToObserve: String,
+    private val triggerThreshold:Int = 50,
+    private val triggerOnDownScroll: Boolean = true,
+    private val delay: Int = 200) {
 
     private var scrollElement: Element? = null
 

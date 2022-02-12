@@ -726,6 +726,43 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
+    val dropZoneArea by css{
+        backgroundColor = Color("transparent !important")
+        width = 90.pct
+        minHeight = 70.vh
+        border = "10px dashed ${theme.palette.action.selected} !important"
+        alignItems = Align.center
+        display = Display.flex
+        cursor = Cursor.pointer
+        justifyContent = JustifyContent.center
+        flexDirection = FlexDirection.column
+    }
+
+    val dropZoneAreaActive by css{
+        border = "10px dashed ${theme.palette.info.main} !important"
+    }
+
+    val dropZoneAreaSuccess by css{
+        border = "10px dashed ${theme.palette.success.main} !important"
+    }
+
+    val dropZoneAreaError by css{
+        border = "10px dashed ${theme.palette.error.main} !important"
+    }
+
+    val dropZoneIcon by css {
+        marginTop = 15.pct
+        fontSize = 16.em
+        color = Color("${theme.palette.action.selected} !important")
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            marginTop = 5.pct
+        }
+    }
+
+    val dropZoneTxt by css {
+        fontSize = 2.em
+    }
+
     override val di: DI
         get() = ReduxAppStateManager.getCurrentState().di.instance
 

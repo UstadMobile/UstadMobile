@@ -66,10 +66,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findEntryWithLanguageByEntryId")
     abstract suspend fun findEntryWithLanguageByEntryIdAsync(entryUuid: Long): ContentEntryWithLanguage?
 
-    @Query("SELECT ContentEntry.*, Container.* FROM ContentEntry LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container "+
-            "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE ContentEntry.contentEntryUid=:entryUuid")
-    @JsName("findByEntryIdWithContainer")
+    @Query(ENTRY_WITH_CONTAINER_QUERY)
     abstract suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer?
+
+    @Query(ENTRY_WITH_CONTAINER_QUERY)
+    abstract fun findEntryWithContainerByEntryIdLive(entryUuid: Long): DoorLiveData<ContentEntryWithMostRecentContainer?>
 
     @Query("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl LIMIT 1")
     @JsName("findBySourceUrl")
@@ -505,6 +506,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             ContentEntry_recursive
             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid)
             SELECT * FROM ContentEntry_recursive"""
+
+        const val ENTRY_WITH_CONTAINER_QUERY = """
+            SELECT ContentEntry.*, Container.* FROM ContentEntry LEFT 
+                JOIN Container ON Container.containerUid = (
+                    SELECT containerUid FROM Container WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) 
+            WHERE ContentEntry.contentEntryUid=:entryUuid
+            """
 
     }
 }

@@ -70,6 +70,8 @@ external interface Palette {
     var primary: PaletteColor
     var secondary: PaletteColor
     var error: PaletteColor
+    var success: PaletteColor
+    var info: PaletteColor
     var grey: Color
     var text: TypeText
     var divider: String

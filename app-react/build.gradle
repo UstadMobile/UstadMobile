@@ -58,14 +58,15 @@ dependencies {
     implementation npm("@mui/lab","$version_npm_mui_lab")
     implementation npm("date-fns","$version_npm_date_fns")
     implementation npm("html-to-image","$version_npm_html_to_image")
-    implementation "com.ustadmobile.door:room-annotations:$version_door"
+    implementation "com.github.UstadMobile.door:room-annotations:$version_door"
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation npm("react-google-charts","$version_npm_google_charts")
-    implementation "com.ustadmobile.door:door-runtime:$version_door"
+    implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation npm("browser-session-tabs-tracker","$version_npm_tabtracker")
     implementation "io.ktor:ktor-client-js:$version_ktor"
     implementation "io.ktor:ktor-client-json-js:$version_ktor"
     implementation npm("timezones.json","$version_npm_timezones")
+    implementation npm("mime-matcher","^1.0.5")
     implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "io.github.aakira:napier:$version_napier"
 }

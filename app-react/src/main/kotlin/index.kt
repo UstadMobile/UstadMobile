@@ -14,7 +14,6 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.asRepository
-import com.ustadmobile.util.ContainerMounterJs
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mui.components.umThemeProvider
@@ -24,6 +23,7 @@ import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxDiState
 import com.ustadmobile.redux.ReduxThemeState
 import com.ustadmobile.util.BrowserTabTracker
+import com.ustadmobile.util.ContainerMounterJs
 import com.ustadmobile.util.ThemeManager.createAppTheme
 import com.ustadmobile.view.renderSplashComponent
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
@@ -49,7 +49,7 @@ fun main() {
     BrowserTabTracker.init()
     Napier.base(DebugAntilog())
     window.onload = {
-        render(document.getElementById("root")) {
+    render(document.getElementById("root")) {
             val diState = ReduxDiState(
                 DI.lazy { import(diModule) }
             )
