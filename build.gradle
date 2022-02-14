@@ -68,18 +68,8 @@ allprojects {
     }
 }
 
-subprojects {
-    if(Arrays.asList("lib-database-runtime",
-            "lib-database-runtime-jdbc", "lib-database-jdbc", "lib-database-retrofitrepository",
-            "lib-core-fs", "app-rest-server",
-            "core-tests").contains(name)) {
-        apply plugin: "kotlin"
-    }
-}
-
-
 //Major.minor.database version
-version = "0.3.51"
+version = "0.3.52"
 group = "com.ustadmobile.app"
 
 /**
@@ -89,9 +79,9 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 223
+    ustadVersionCode = 224
 
-    version_door = "0.0.46x"
+    version_door = "0.0.50"
     version_xmlpullparserkmp = '0.0.18'
 
     version_gradle_buildconfig_plugin = "1.1.7"

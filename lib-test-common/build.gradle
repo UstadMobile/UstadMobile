@@ -73,7 +73,7 @@ kotlin {
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
-                compileOnly "com.ustadmobile.door:door-runtime:$version_door"
+                compileOnly "com.github.UstadMobile.door:door-runtime:$version_door"
                 compileOnly project(":lib-util")
             }
         }
@@ -86,7 +86,7 @@ kotlin {
 
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
-                compileOnly "com.ustadmobile.door:door-runtime:$version_door"
+                compileOnly "com.github.UstadMobile.door:door-runtime:$version_door"
                 compileOnly project(":lib-util")
             }
         }
