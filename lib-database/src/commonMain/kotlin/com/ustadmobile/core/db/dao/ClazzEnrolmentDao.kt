@@ -311,8 +311,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                                
           LIMIT 1),0)
     """)
-    abstract suspend fun findNextStudentNotMarkedForAssignment(objectId: String,
-                                                               assignmentUid: Long,
+    abstract suspend fun findNextStudentNotMarkedForAssignment(assignmentUid: Long,
                                                                currentStudentUid: Long): Long
 
     @Query("""

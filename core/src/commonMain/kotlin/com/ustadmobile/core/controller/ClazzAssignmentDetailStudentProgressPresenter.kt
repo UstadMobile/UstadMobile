@@ -65,9 +65,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
             repo.clazzAssignmentRollUpDao.cacheBestStatements(
                     selectedClazzUid, selectedClazzAssignmentUid,
                     selectedPersonUid)
-            val clazzAssignmentObjectId = UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
-                    "/clazzAssignment/${selectedClazzAssignmentUid}")
-            nextStudentToMark = repo.clazzEnrolmentDao.findNextStudentNotMarkedForAssignment(clazzAssignmentObjectId,
+            nextStudentToMark = repo.clazzEnrolmentDao.findNextStudentNotMarkedForAssignment(
                     selectedClazzAssignmentUid, selectedPersonUid)
             view.markNextStudentEnabled = nextStudentToMark != 0L
         }
