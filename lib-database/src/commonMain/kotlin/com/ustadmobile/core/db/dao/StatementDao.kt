@@ -243,7 +243,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                        ON XObjectEntity.objectStatementRefUid = SubmissionStatement.statementUid  
                
                  WHERE ClazzAssignment.caUid = :assignmentUid
-                   AND XobjectEntity IS NULL
+                   AND XObjectEntity.xobjectUid IS NULL
                    AND ClazzEnrolment.clazzEnrolmentActive
                    AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                    AND ClazzEnrolment.clazzEnrolmentPersonUid != :currentStudentUid
