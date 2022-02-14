@@ -297,12 +297,17 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
           WHERE ClazzEnrolment.clazzEnrolmentActive
             AND ClazzEnrolment.clazzEnrolmentRole = 1000
             AND ClazzEnrolment.clazzEnrolmentPersonUid != :currentStudentUid
-            AND NOT EXISTS (SELECT statementUid 
-                              FROM StatementEntity 
-                                   LEFT JOIN XObjectEntity 
-                                          ON StatementEntity.xObjectUid = XObjectEntity.xObjectUid 
-                             WHERE XObjectEntity.objectId = :objectId 
-                             LIMIT 1) 
+            AND ClazzEnrolment.clazzEnrolmentPersonUid NOT IN (
+                        SELECT DISTINCT(MarkedStatement.statementPersonUid)
+                          FROM StatementEntity
+                               JOIN XObjectEntity
+                               ON XObjectEntity.objectStatementRefUid = StatementEntity.statementUid    
+              
+                               JOIN StatementEntity AS MarkedStatement
+                               ON MarkedStatement.xObjectUid = XObjectEntity.xObjectUid 
+                         WHERE MarkedStatement.statementContentEntryUid = 0
+                           AND MarkedStatement.statementPersonUid != :currentStudentUid
+                             ) 
                                
           LIMIT 1),0)
     """)

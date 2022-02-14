@@ -1,15 +1,16 @@
 
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzAssignmentDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.onActiveAccountDirect
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -62,7 +63,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenterTest {
             import(ustadTestRule.diModule)
         }
         val repo: UmAppDatabase by di.activeRepoInstance()
-        assignmentRollUp = repo.insertTestClazzAssignment()
+        assignmentRollUp = repo.insertTestClazzAssignment(endpoint = di.onActiveAccountDirect().instance<UstadAccountManager>().activeEndpoint.url)
 
         repoClazzAssignmentDaoSpy = spy(repo.clazzAssignmentDao)
         whenever(repo.clazzAssignmentDao).thenReturn(repoClazzAssignmentDaoSpy)
