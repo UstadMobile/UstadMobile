@@ -2679,11 +2679,40 @@ abstract class UmAppDatabase : DoorDatabase() {
         }
 
         val MIGRATION_96_97 = DoorMigrationStatementList(96, 97) { db ->
-            if(db.dbType() == DoorDbType.SQLITE) {
-                listOf()
+
+            val finalList = mutableListOf("ALTER TABLE ClazzAssignment ADD COLUMN caAssignmentType INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caFileSubmissionWeight INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caFileType INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caSizeLimit INTEGER NOT NULL DEFAULT 50",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caNumberOfFiles INTEGER NOT NULL DEFAULT 1",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caEditAfterSubmissionType INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caMarkingType INTEGER NOT NULL DEFAULT 1",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caMaxScore INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignmentContentJoin ADD COLUMN cacjWeight INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignmentRollUp ADD COLUMN cacheWeight INTEGER NOT NULL DEFAULT 0")
+
+             finalList += if(db.dbType() == DoorDbType.POSTGRES) {
+                listOf("ALTER TABLE XObjectEntity ADD COLUMN objectStatementRefUid BIGINT NOT NULL DEFAULT 0",
+                        "ALTER TABLE ClazzAssignment ADD COLUMN caRequireFileSubmission BOOL NOT NULL DEFAULT true",
+                        "ALTER TABLE ClazzAssignment ADD COLUMN caXObjectUid BIGINT NOT NULL DEFAULT 0",
+                        "ALTER TABLE ClazzAssignmentRollUp ADD COLUMN cacheFinalWeightScoreWithPenalty FLOAT NOT NULL DEFAULT 0",
+                        "CREATE TABLE IF NOT EXISTS AssignmentFileSubmission (  afsAssignmentUid  BIGINT  NOT NULL , afsStudentUid  BIGINT  NOT NULL , afsTimestamp  BIGINT  NOT NULL , afsMimeType  TEXT , afsTitle  TEXT , afsSubmitted  BOOL  NOT NULL , afsActive  BOOL  NOT NULL , afsUri  TEXT , afsMd5  TEXT , afsSize  INTEGER  NOT NULL , afsMasterCsn  BIGINT  NOT NULL , afsLocalCsn  BIGINT  NOT NULL , afsLastChangedBy  INTEGER  NOT NULL , afsLct  BIGINT  NOT NULL , afsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )",
+                        "CREATE TABLE IF NOT EXISTS AssignmentFileSubmissionReplicate (  afsPk  BIGINT  NOT NULL , afsVersionId  BIGINT  NOT NULL  DEFAULT 0 , afsDestination  BIGINT  NOT NULL , afsPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (afsPk, afsDestination) )",
+                        "CREATE INDEX index_AssignmentFileSubmissionReplicate_afsPk_afsVersionId_afsVersionId ON AssignmentFileSubmissionReplicate (afsPk, afsVersionId, afsVersionId)",
+                        "CREATE INDEX index_AssignmentFileSubmissionReplicate_afsDestination_afsPending ON AssignmentFileSubmissionReplicate (afsDestination, afsPending)"
+                )
             }else {
-                listOf()
+                listOf("ALTER TABLE XObjectEntity ADD COLUMN objectStatementRefUid INTEGER NOT NULL DEFAULT 0",
+                        "ALTER TABLE ClazzAssignment ADD COLUMN caRequireFileSubmission INTEGER NOT NULL DEFAULT 1",
+                        "ALTER TABLE ClazzAssignment ADD COLUMN caXObjectUid INTEGER NOT NULL DEFAULT 0",
+                        "ALTER TABLE ClazzAssignmentRollUp ADD COLUMN cacheFinalWeightScoreWithPenalty REAL NOT NULL DEFAULT 0",
+                        "CREATE TABLE IF NOT EXISTS AssignmentFileSubmission (  afsAssignmentUid  INTEGER  NOT NULL , afsStudentUid  INTEGER  NOT NULL , afsTimestamp  INTEGER  NOT NULL , afsMimeType  TEXT , afsTitle  TEXT , afsSubmitted  INTEGER  NOT NULL , afsActive  INTEGER  NOT NULL , afsUri  TEXT , afsMd5  TEXT , afsSize  INTEGER  NOT NULL , afsMasterCsn  INTEGER  NOT NULL , afsLocalCsn  INTEGER  NOT NULL , afsLastChangedBy  INTEGER  NOT NULL , afsLct  INTEGER  NOT NULL , afsUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
+                        "CREATE TABLE IF NOT EXISTS AssignmentFileSubmissionReplicate (  afsPk  INTEGER  NOT NULL , afsVersionId  INTEGER  NOT NULL  DEFAULT 0 , afsDestination  INTEGER  NOT NULL , afsPending  INTEGER  NOT NULL  DEFAULT 1 , PRIMARY KEY (afsPk, afsDestination) )",
+                        "CREATE INDEX index_AssignmentFileSubmissionReplicate_afsPk_afsVersionId_afsVersionId ON AssignmentFileSubmissionReplicate (afsPk, afsVersionId, afsVersionId)",
+                        "CREATE INDEX index_AssignmentFileSubmissionReplicate_afsDestination_afsPending ON AssignmentFileSubmissionReplicate (afsDestination, afsPending)"
+                )
             }
+            finalList
         }
 
 
