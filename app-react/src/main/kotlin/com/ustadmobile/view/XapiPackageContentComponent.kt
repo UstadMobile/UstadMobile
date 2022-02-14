@@ -32,6 +32,7 @@ class XapiPackageContentComponent(mProps: UmProps): UstadBaseComponent<UmProps, 
 
     override fun onCreateView() {
         super.onCreateView()
+        fabManager?.visible = false
         mPresenter = XapiPackageContentPresenter(this,arguments,this,di)
         mPresenter?.onCreate(mapOf())
     }

@@ -12,6 +12,11 @@ interface OnFileAttached {
     fun onInvalidFileAttached()
 }
 
+/**
+ * Manages file selection from storage whether is br normal browsing or drag & drop,
+ * It will filter out files as per mimetype specified and make sure only accepted files
+ * are processed.
+ */
 class FileDropZoneManager(
     dropZoneId: String = "um-dropzone",
     val acceptedMimeTypesAndExtensions: List<String>) {
@@ -24,6 +29,7 @@ class FileDropZoneManager(
 
     @Suppress("UNUSED_VARIABLE")
     private var onFileInputChangedHandler :(Event) -> Unit = {
+        stopEventPropagation(it)
         handleSelectedFile(it.asDynamic().target.files[0] as File)
     }
 
@@ -45,6 +51,7 @@ class FileDropZoneManager(
     }
 
     private var onFileBrowseHandler :(Event) -> Unit = {
+        stopEventPropagation(it)
         dropZoneElement?.classList?.add("${StyleManager.name}-dropZoneAreaActive")
         dropZoneInput?.asDynamic().click()
     }
