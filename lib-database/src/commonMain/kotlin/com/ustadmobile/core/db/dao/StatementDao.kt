@@ -221,6 +221,37 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     abstract suspend fun getBestScoreForContentForPerson(contentEntryUid: Long, accountPersonUid: Long): ContentEntryStatementScoreProgress?
 
 
+    @Query("""
+         SELECT COALESCE((
+                SELECT DISTINCT(statementpersonUid)
+                  FROM ClazzAssignment 
+                      JOIN ClazzEnrolment
+                       ON ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
+                       
+          	           JOIN StatementEntity AS SubmissionStatement
+          	           ON SubmissionStatement.statementUid = (SELECT statementUid 
+                                   FROM StatementEntity
+                                  WHERE StatementEntity.statementContentEntryUid = 0
+                                    AND xObjectUid = ClazzAssignment.caXObjectUid
+                                    AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                                    AND StatementEntity.timestamp 
+                                        BETWEEN ClazzAssignment.caStartDate
+                                        AND ClazzAssignment.caGracePeriodDate
+                               ORDER BY timestamp DESC LIMIT 1)
+                               
+          	           LEFT JOIN XObjectEntity
+                       ON XObjectEntity.objectStatementRefUid = StatementEntity.statementUid  
+               
+                 WHERE ClazzAssignment.caUid = :assignmentUid
+                   AND XobjectEntity IS NULL
+                   AND ClazzEnrolment.clazzEnrolmentActive
+                   AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                   AND ClazzEnrolment.clazzEnrolmentPersonUid != :currentStudentUid
+            LIMIT 1),0)
+    """)
+    abstract suspend fun findNextStudentNotMarkedForAssignment(assignmentUid: Long,
+                                                               currentStudentUid: Long): Long
+
 
     @Query("""
         SELECT * 

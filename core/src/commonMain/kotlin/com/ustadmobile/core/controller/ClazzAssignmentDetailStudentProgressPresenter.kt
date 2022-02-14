@@ -65,7 +65,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
             repo.clazzAssignmentRollUpDao.cacheBestStatements(
                     selectedClazzUid, selectedClazzAssignmentUid,
                     selectedPersonUid)
-            nextStudentToMark = repo.clazzEnrolmentDao.findNextStudentNotMarkedForAssignment(
+            nextStudentToMark = repo.statementDao.findNextStudentNotMarkedForAssignment(
                     selectedClazzAssignmentUid, selectedPersonUid)
             view.markNextStudentEnabled = nextStudentToMark != 0L
         }

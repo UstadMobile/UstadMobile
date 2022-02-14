@@ -289,32 +289,6 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                                        filter: Int, accountPersonUid: Long, currentTime: Long): DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>
 
     @Query("""
-        SELECT COALESCE((SELECT clazzEnrolmentPersonUid 
-          FROM ClazzEnrolment 
-               LEFT JOIN ClazzAssignment
-                      ON ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid 
-                     AND ClazzAssignment.caUid = :assignmentUid 
-          WHERE ClazzEnrolment.clazzEnrolmentActive
-            AND ClazzEnrolment.clazzEnrolmentRole = 1000
-            AND ClazzEnrolment.clazzEnrolmentPersonUid != :currentStudentUid
-            AND ClazzEnrolment.clazzEnrolmentPersonUid NOT IN (
-                        SELECT DISTINCT(MarkedStatement.statementPersonUid)
-                          FROM StatementEntity
-                               JOIN XObjectEntity
-                               ON XObjectEntity.objectStatementRefUid = StatementEntity.statementUid    
-              
-                               JOIN StatementEntity AS MarkedStatement
-                               ON MarkedStatement.xObjectUid = XObjectEntity.xObjectUid 
-                         WHERE MarkedStatement.statementContentEntryUid = 0
-                           AND MarkedStatement.statementPersonUid != :currentStudentUid
-                             ) 
-                               
-          LIMIT 1),0)
-    """)
-    abstract suspend fun findNextStudentNotMarkedForAssignment(assignmentUid: Long,
-                                                               currentStudentUid: Long): Long
-
-    @Query("""
         UPDATE ClazzEnrolment 
           SET clazzEnrolmentActive = :enrolled,
               clazzEnrolmentLct = :timeChanged
