@@ -163,15 +163,16 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
 
     override fun RBuilder.renderAddContentOptionsDialog() {
         if(showAddEntryOptions){
-            val options = if(newClazzListOptionVisible)
-                mutableListOf(UmDialogOptionItem("add",MessageID.add_a_new_class) {
+            val options = if(newClazzListOptionVisible){
+                listOf(UmDialogOptionItem("add",MessageID.add_a_new_class) {
                     mPresenter?.handleClickCreateNewFab()
                 })
-            else mutableListOf()
+            }else {
+                listOf()
+            } + listOf(UmDialogOptionItem("login",MessageID.join_existing_class){
+                mPresenter?.handleClickJoinClazz()
+            })
 
-            options.add(UmDialogOptionItem("login",MessageID.join_existing_class){
-                mPresenter?.handleClickJoinClazz()}
-            )
             renderDialogOptions(systemImpl,options, Date().getTime().toLong()){
                 setState {
                     showAddEntryOptions = false

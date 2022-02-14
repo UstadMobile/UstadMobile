@@ -147,16 +147,18 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
 
     override fun RBuilder.renderAddContentOptionsDialog() {
         if(showAddEntryOptions){
-            val options = mutableListOf(
-                UmDialogOptionItem("add", MessageID.add_a_new_school) {
-                    mPresenter?.handleClickCreateNewFab()
-                },
+            val optionList = if(newSchoolListOptionVisible){
+                listOf(UmDialogOptionItem("add", MessageID.add_a_new_school) {
+                        mPresenter?.handleClickCreateNewFab()
+                })
+            }else {
+                listOf()
+            } + listOf(
                 UmDialogOptionItem("login",MessageID.join_existing_school) {
-                    mPresenter?.handleClickJoinSchool()
-                }
-            )
+                mPresenter?.handleClickJoinSchool()
+            })
 
-            renderDialogOptions(systemImpl,options, Date().getTime().toLong()){
+            renderDialogOptions(systemImpl,optionList, Date().getTime().toLong()){
                 setState {
                     showAddEntryOptions = false
                 }

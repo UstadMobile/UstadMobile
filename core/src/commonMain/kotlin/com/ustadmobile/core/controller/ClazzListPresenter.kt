@@ -13,6 +13,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_INSERT
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
@@ -67,8 +68,8 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         //All user should be able to see the plus button - but only those with permission can create a new class
-        view.newClazzListOptionVisible = true /*repo.entityRoleDao.userHasTableLevelPermission(
-                loggedInPersonUid, PERMISSION_CLAZZ_INSERT)*/
+        view.newClazzListOptionVisible = repo.entityRoleDao.userHasTableLevelPermission(
+            loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
 
         return when(mListMode){
             ListViewMode.PICKER -> view.newClazzListOptionVisible

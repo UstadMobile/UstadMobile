@@ -243,7 +243,6 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
     }
 
     override fun onFabClicked() {
-        super.onFabClicked()
         mPresenter?.handleClickEdit()
     }
 
