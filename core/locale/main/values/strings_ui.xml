@@ -742,6 +742,10 @@
 
     <string name="mark_for_file_submission">Mark for file submissions</string>
 
+    <!-- used to display as an error if the maximum score for an assignment = 0
+        when creating a new assignment-->
+    <string name="score_greater_than_zero">Must be greater than 0</string>
+
 
     <!-- plurals are used to handle different languages that require special treatment
     e.g number 0 in arabic

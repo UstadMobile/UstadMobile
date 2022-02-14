@@ -286,6 +286,12 @@ class ClazzAssignmentEditPresenter(context: Any,
                 }
             }
 
+            if(entity.caRequireFileSubmission && entity.caMaxScore == 0){
+                view.caMaxScoreError = systemImpl.getString(MessageID.field_required_prompt, context)
+                return@launch
+            }
+            
+
             view.loading = true
             view.fieldsEnabled = false
 

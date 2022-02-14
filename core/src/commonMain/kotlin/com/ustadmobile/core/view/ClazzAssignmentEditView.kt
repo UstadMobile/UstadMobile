@@ -12,7 +12,7 @@ interface ClazzAssignmentEditView: UstadEditView<ClazzAssignment> {
     var caDeadlineError: String?
     var caTitleError: String?
     var caStartDateError: String?
-    var caWeightError: String?
+    var caMaxScoreError: String?
 
     var startDate: Long
     var startTime: Long

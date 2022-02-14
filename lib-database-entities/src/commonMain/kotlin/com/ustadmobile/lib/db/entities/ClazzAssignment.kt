@@ -71,8 +71,8 @@ open class ClazzAssignment {
     @ColumnInfo(defaultValue = "0")
     var caEditAfterSubmissionType: Int = 0
 
-    @ColumnInfo(defaultValue = "0")
-    var caMarkingType: Int = 0
+    @ColumnInfo(defaultValue = "1")
+    var caMarkingType: Int = MARKING_TYPE_TEACHER
 
     @ColumnInfo(defaultValue = "0")
     var caMaxScore: Int = 0

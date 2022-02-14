@@ -212,10 +212,11 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             mBinding?.caStartDateError = value
         }
 
-    override var caWeightError: String? = null
+    override var caMaxScoreError: String? = null
         get() = field
         set(value) {
             field = value
+            mBinding?.caMaxScoreError = value
         }
 
     override var startDate: Long

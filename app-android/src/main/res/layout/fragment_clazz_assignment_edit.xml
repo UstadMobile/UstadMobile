@@ -73,6 +73,10 @@
             type="String" />
 
         <variable
+            name="caMaxScoreError"
+            type="String" />
+
+        <variable
             name="lateSubmissionOptions"
             type="java.util.List&lt;IdOption&gt;"/>
 
@@ -669,6 +673,9 @@
                 android:hint="@string/maximum_score"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintEnabled="true"
+                app:errorEnabled="@{caMaxScoreError != null}"
+                app:errorTextColor="?colorError"
+                app:errorText="@{caMaxScoreError}"
                 android:visibility="@{fileSubmissionVisibility}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintStart_toStartOf="parent"
