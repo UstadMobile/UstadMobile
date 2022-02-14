@@ -240,7 +240,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                                ORDER BY timestamp DESC LIMIT 1)
                                
           	           LEFT JOIN XObjectEntity
-                       ON XObjectEntity.objectStatementRefUid = StatementEntity.statementUid  
+                       ON XObjectEntity.objectStatementRefUid = SubmissionStatement.statementUid  
                
                  WHERE ClazzAssignment.caUid = :assignmentUid
                    AND XobjectEntity IS NULL
