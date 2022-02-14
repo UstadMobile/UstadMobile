@@ -324,8 +324,8 @@ class ClazzAssignmentEditPresenter(context: Any,
             val contentToUpdate = contentOneToManyJoinEditHelper.entitiesToUpdate
 
             // run in transaction
-            //repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
-                repo.clazzAssignmentContentJoinDao.insertListAsync(contentToInsert.map {
+            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+                txRepo.clazzAssignmentContentJoinDao.insertListAsync(contentToInsert.map {
                     ClazzAssignmentContentJoin().apply {
                         cacjContentUid = it.contentEntryUid
                         cacjAssignmentUid = entity.caUid
@@ -333,12 +333,12 @@ class ClazzAssignmentEditPresenter(context: Any,
                     }
                 })
                 contentToUpdate.forEach {
-                    repo.clazzAssignmentContentJoinDao.updateWeightForAssignmentAndContent(it.contentEntryUid, entity.caUid, it.assignmentContentWeight)
+                    txRepo.clazzAssignmentContentJoinDao.updateWeightForAssignmentAndContent(it.contentEntryUid, entity.caUid, it.assignmentContentWeight)
                 }
-            repo.clazzAssignmentContentJoinDao.deactivateByUids(contentToDelete, entity.caUid)
-            repo.clazzAssignmentRollUpDao.deleteCachedInactiveContent(entity.caUid)
+                txRepo.clazzAssignmentContentJoinDao.deactivateByUids(contentToDelete, entity.caUid)
+                txRepo.clazzAssignmentRollUpDao.deleteCachedInactiveContent(entity.caUid)
 
-           // }
+            }
 
             onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
 
