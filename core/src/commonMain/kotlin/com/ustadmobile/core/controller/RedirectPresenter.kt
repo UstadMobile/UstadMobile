@@ -34,7 +34,7 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
             }
 
             accountManager.activeSession != null -> {
-                systemImpl.setAppPref(TAG_REDIRECTED, "true", this)
+                systemImpl.setAppPref(TAG_REDIRECTED, "true", context)
                 systemImpl.goToViewLink(ContentEntryList2View.VIEW_NAME_HOME, context)
             }
 

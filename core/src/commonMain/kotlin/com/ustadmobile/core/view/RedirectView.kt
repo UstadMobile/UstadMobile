@@ -6,9 +6,9 @@ interface RedirectView : UstadView {
         val VIEW_NAME = "RedirectView"
 
         /**
-         * Tag for web redirection, when redirected right route will be invoked but
+         * Tag for web redirection: when redirected, route will be invoked but
          * app state and props wont be updated which cause to have a blank page.
-         * This flag will help in updating them
+         * This flag will help in updating state and props
          */
         val TAG_REDIRECTED = "app.redirected"
     }

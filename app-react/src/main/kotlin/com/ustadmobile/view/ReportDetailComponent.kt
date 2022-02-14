@@ -24,6 +24,7 @@ import com.ustadmobile.util.ext.exportToPng
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.util.getViewNameFromUrl
 import com.ustadmobile.view.ext.createTopMainAction
 import com.ustadmobile.view.ext.drawChart
 import com.ustadmobile.view.ext.umGridContainer
@@ -243,7 +244,12 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
     }
 
     override fun onFabClicked() {
-        mPresenter?.handleClickEdit()
+        val report = entity
+        if (report == null || report.reportUid == 0L) {
+            getViewNameFromUrl()?.let {
+                navController.popBackStack(it, true)
+            }
+        } else mPresenter?.handleClickEdit()
     }
 
     override fun onDestroyView() {
