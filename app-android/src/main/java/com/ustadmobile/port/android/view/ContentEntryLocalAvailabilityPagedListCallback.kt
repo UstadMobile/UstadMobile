@@ -2,14 +2,15 @@ package com.ustadmobile.port.android.view
 
 import androidx.paging.PagedList
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
-import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.port.android.view.ext.activeRange
 import java.util.concurrent.atomic.AtomicReference
 
-class ContentEntryLocalAvailabilityPagedListCallback(private val localAvailabilityManager: LocalAvailabilityManager,
-                                                     var pagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?,
-                                                     private var onEntityAvailabilityChanged: ((Map<Long, Boolean>) -> Unit)?) : PagedList.Callback() {
+//This is being kept because it will be used when we re-introduce local sharing via Retriever.
+class ContentEntryLocalAvailabilityPagedListCallback(
+    var pagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?,
+    private var onEntityAvailabilityChanged: ((Map<Long, Boolean>) -> Unit)?
+) : PagedList.Callback() {
 
     private val availabilityMonitorRequest = AtomicReference<AvailabilityMonitorRequest?>()
 
@@ -46,17 +47,17 @@ class ContentEntryLocalAvailabilityPagedListCallback(private val localAvailabili
                     })
             val entityAvailabilityChangeVal = onEntityAvailabilityChanged
             val newRequest = if (containerUidsToMonitor.isNotEmpty() && entityAvailabilityChangeVal != null) {
-                AvailabilityMonitorRequest(containerUidsToMonitor, entityAvailabilityChangeVal)
+                null //AvailabilityMonitorRequest(containerUidsToMonitor, entityAvailabilityChangeVal)
             } else {
                 null
             }
             val oldRequest = availabilityMonitorRequest.getAndSet(newRequest)
             if (oldRequest != null) {
-                localAvailabilityManager.removeMonitoringRequest(oldRequest)
+                //localAvailabilityManager.removeMonitoringRequest(oldRequest)
             }
 
             if (newRequest != null) {
-                localAvailabilityManager.addMonitoringRequest(newRequest)
+                //localAvailabilityManager.addMonitoringRequest(newRequest)
             }
         }
     }
@@ -65,7 +66,7 @@ class ContentEntryLocalAvailabilityPagedListCallback(private val localAvailabili
         val currentRequest = availabilityMonitorRequest.getAndSet(null)
 
         if (currentRequest != null) {
-            localAvailabilityManager.removeMonitoringRequest(currentRequest)
+            //localAvailabilityManager.removeMonitoringRequest(currentRequest)
         }
 
         pagedList = null

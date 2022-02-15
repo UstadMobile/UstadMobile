@@ -86,20 +86,10 @@ abstract class NetworkManagerBleCommon(
 
 
     /**
-     * Check if the device is Bluetooth Low Energy capable
-     * @return True is capable otherwise false
-     */
-    abstract val isBleCapable: Boolean
-
-    /**
      * Check if bluetooth is enabled on the device
      * @return True if enabled otherwise false
      */
     abstract val isBluetoothEnabled: Boolean
-
-    abstract val isVersionLollipopOrAbove: Boolean
-
-    abstract val isVersionKitKatOrBelow: Boolean
 
 
     //private val downloadQueueLocalAvailabilityObserver = DownloadQueueLocalAvailabilityObserver(localAvailabilityManager)
@@ -123,12 +113,6 @@ abstract class NetworkManagerBleCommon(
             restoreWifi()
         }
     }
-
-    /**
-     * Check if the device can create BLE service and advertise it to the peer devices
-     * @return true if can advertise its service else false
-     */
-    abstract fun canDeviceAdvertise(): Boolean
 
 
     /**
@@ -205,8 +189,6 @@ abstract class NetworkManagerBleCommon(
                     responseListener: BleMessageResponseListener) {
 
     }
-
-    abstract suspend fun sendBleMessage(bleMessage: BleMessage, deviceAddr: String): BleMessage?
 
     open fun lockWifi(lockHolder: Any) {
         wifiLockHolders.add(lockHolder)

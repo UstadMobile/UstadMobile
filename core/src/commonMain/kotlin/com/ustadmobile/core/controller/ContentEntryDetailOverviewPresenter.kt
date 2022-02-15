@@ -9,7 +9,6 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
-import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
@@ -27,12 +26,14 @@ import kotlinx.coroutines.*
 import org.kodein.di.*
 
 
-class ContentEntryDetailOverviewPresenter(context: Any,
-                                          arguments: Map<String, String>, view: ContentEntryDetailOverviewView,
-                                          di: DI, lifecycleOwner: DoorLifecycleOwner)
-
-    : UstadDetailPresenter<ContentEntryDetailOverviewView, ContentEntryWithMostRecentContainer>(context,
-        arguments, view, di, lifecycleOwner){
+class ContentEntryDetailOverviewPresenter(
+    context: Any,
+    arguments: Map<String, String>, view: ContentEntryDetailOverviewView,
+    di: DI,
+    lifecycleOwner: DoorLifecycleOwner
+) : UstadDetailPresenter<ContentEntryDetailOverviewView, ContentEntryWithMostRecentContainer>(
+    context, arguments, view, di, lifecycleOwner
+){
 
     val deepLink: String
         get() {
@@ -44,14 +45,8 @@ class ContentEntryDetailOverviewPresenter(context: Any,
 
     private val contentEntryOpener: ContentEntryOpener by di.on(accountManager.activeAccount).instance()
 
-    private val localAvailabilityManager: LocalAvailabilityManager? by on(accountManager.activeAccount).instanceOrNull()
-
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
-
-    private var availabilityRequest: AvailabilityMonitorRequest? = null
-
-    private val availabilityRequestDeferred = CompletableDeferred<AvailabilityMonitorRequest>()
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
 
@@ -67,18 +62,6 @@ class ContentEntryDetailOverviewPresenter(context: Any,
         clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
     }
 
-    override fun onStart() {
-        super.onStart()
-        GlobalScope.launch {
-            localAvailabilityManager?.addMonitoringRequest(availabilityRequestDeferred.await())
-        }
-    }
-
-    override fun onStop() {
-        GlobalScope.launch {
-            localAvailabilityManager?.removeMonitoringRequest(availabilityRequestDeferred.await())
-        }
-    }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithMostRecentContainer? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
@@ -99,18 +82,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
             view.markCompleteVisible = false
         }
 
-        if (db is DoorDatabaseRepository) {
-            val containerUid = entity.container?.containerUid ?: 0L
-            availabilityRequest = AvailabilityMonitorRequest(listOf(containerUid)) { availableEntries ->
-                GlobalScope.launch(doorMainDispatcher()) {
-                    view.locallyAvailable = availableEntries[containerUid] ?: false
-                }
-            }.also {
-                availabilityRequestDeferred.complete(it)
-            }
-        }else{
-
-
+        if (db !is DoorDatabaseRepository) {
             db.containerDao.hasContainerWithFilesToDelete(entityUid)
                     .observeWithLifecycleOwner(lifecycleOwner) {
                         view.canDelete = it ?: false
