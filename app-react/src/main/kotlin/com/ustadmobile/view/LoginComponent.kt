@@ -1,12 +1,12 @@
 package com.ustadmobile.view
 
 import Breakpoint
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextCenter
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -39,7 +39,7 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
 
     private var passwordLabel: FieldLabel = FieldLabel(getString(MessageID.password), id = "password-input")
 
-    private var usernameLabel: FieldLabel = FieldLabel(getString(MessageID.username))
+    private var usernameLabel: FieldLabel = FieldLabel(getString(MessageID.username), id = "username-input")
 
     private val errorText = getString(MessageID.field_required_prompt)
 
@@ -165,6 +165,7 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                             helperText = usernameLabel.errorText,
                             value = username,
                             error = usernameLabel.error,
+                            id = usernameLabel.id,
                             disabled = inProgress,
                             variant = FormControlVariant.outlined,
                             onChange = {
@@ -244,8 +245,9 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                     umItem(GridSize.cells12, gridSizeOnCenterOnMdDown,gridSizeOnCenterLgUp) {
                         umButton(getString(MessageID.login),
                             size = ButtonSize.large,
-                            disabled = inProgress
-                            ,color = UMColor.secondary,
+                            disabled = inProgress,
+                            color = UMColor.secondary,
+                            id = "login-btn",
                             variant = ButtonVariant.contained,
                             onClick = {
                                 mPresenter?.handleLogin(username, password)
