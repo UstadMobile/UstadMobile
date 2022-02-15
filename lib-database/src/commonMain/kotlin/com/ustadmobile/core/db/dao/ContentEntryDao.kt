@@ -243,11 +243,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                           WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
                        ORDER BY cntLastModified DESC LIMIT 1)
             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
-            AND 
-            (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
+            AND (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
             AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden) 
             AND (NOT ContentEntry.leaf OR NOT ContentEntry.leaf = :onlyFolder) 
-            AND (ContentEntry.publik OR :personUid != 0) 
+            AND (ContentEntry.publik 
+                 OR (SELECT username
+                        FROM Person
+                       WHERE personUid = :personUid) IS NOT NULL) 
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 
                 IN (SELECT ceccjContentCategoryUid 
