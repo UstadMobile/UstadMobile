@@ -18,7 +18,7 @@ import com.ustadmobile.core.util.onActiveAccount
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.SelectFileView
-import com.ustadmobile.core.view.SelectFileView.Companion.ARG_SELECTION_MODE
+import com.ustadmobile.core.view.SelectFileView.Companion.ARG_MIMETYPE_SELECTED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -246,7 +246,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         val testNavController: UstadNavController by di.instance()
         verify(testNavController).navigate(SelectFileView.VIEW_NAME,
-                mapOf(ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_VIDEO))
+                mapOf(ARG_MIMETYPE_SELECTED to SelectFileView.SELECTION_MODE_VIDEO))
 
     }
 
