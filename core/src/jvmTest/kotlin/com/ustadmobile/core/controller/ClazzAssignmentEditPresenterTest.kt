@@ -114,6 +114,7 @@ class ClazzAssignmentEditPresenterTest {
 
         //TODO: Make some changes (e.g. as the user would do using data binding
         initialEntity.caTitle = "Test Clazz Assignment"
+        initialEntity.caMaxScore = 2
         whenever(mockView.startDate).thenReturn(DateTime(2021,5,10).unixMillisLong)
         whenever(mockView.deadlineDate).thenReturn(Long.MAX_VALUE)
         whenever(mockView.gracePeriodDate).thenReturn(Long.MAX_VALUE)
@@ -143,6 +144,7 @@ class ClazzAssignmentEditPresenterTest {
             caTitle = "test Assignment"
             caStartDate = DateTime(2020, 10, 10).unixMillisLong
             caClazzUid = testClazz.clazzUid
+            caMaxScore = 2
             caUid = repo.clazzAssignmentDao.insert(this)
         }
 
