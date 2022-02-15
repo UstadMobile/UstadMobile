@@ -13,8 +13,10 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
@@ -123,8 +125,10 @@ class UstadTestRule(
             bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
+                val attachmentsDir = File(tempFolder.siteDataSubDir(this@singleton.context),
+                        UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName, attachmentsDir)
                     .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                     .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())

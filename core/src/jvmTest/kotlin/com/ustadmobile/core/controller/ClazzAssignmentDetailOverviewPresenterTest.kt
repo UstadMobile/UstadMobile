@@ -5,7 +5,6 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
-import com.ustadmobile.core.contentformats.xapi.endpoints.storeSubmitFileSubmissionStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzAssignmentDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -14,7 +13,6 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
-import com.ustadmobile.core.util.onActiveAccount
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.SelectFileView
@@ -23,6 +21,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
+import junit.framework.Assert
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -294,6 +293,87 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
     }
 
+    @Test
+    fun givenUserClicksOpenFileSubmission_whenClicked_thenShouldOpen(){
+
+        createPerson(false)
+        val testEntity = ClazzAssignment().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caPrivateCommentsEnabled = true
+            caNumberOfFiles = 3
+            caFileType = ClazzAssignment.FILE_TYPE_VIDEO
+            caUid = repo.clazzAssignmentDao.insert(this)
+        }
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+                mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        whenever(mockView.entity).thenReturn(testEntity)
+
+        mockView.captureLastEntityValue()
+
+        val fileSubmission = AssignmentFileSubmission().apply {
+            afsUri = "dummy"
+            afsMimeType = "video/*"
+        }
+
+        presenter.handleOpenFileSubmission(fileSubmission)
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+        verify(systemImpl, timeout(1000)).openFileInDefaultViewer(any(), any(), eq(fileSubmission.afsMimeType))
+
+
+    }
+
+    @Test
+    fun givenUserClicksDeleteFileSubmission_whenClicked_thenShouldDeleteFile(){
+
+        createPerson(false)
+        val testEntity = ClazzAssignment().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caPrivateCommentsEnabled = true
+            caNumberOfFiles = 3
+            caFileType = ClazzAssignment.FILE_TYPE_VIDEO
+            caUid = repo.clazzAssignmentDao.insert(this)
+        }
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+                mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        whenever(mockView.entity).thenReturn(testEntity)
+
+        mockView.captureLastEntityValue()
+
+        val afs = AssignmentFileSubmission().apply {
+            afsUri = "dummyUri"
+            afsSubmitted = true
+        }
+
+        val fileSubmissionDaoSpy = spy(repo.assignmentFileSubmissionDao)
+        doReturn(fileSubmissionDaoSpy).`when`(repo).assignmentFileSubmissionDao
+
+        presenter.handleDeleteFileSubmission(afs)
+
+        argumentCaptor<AssignmentFileSubmission>().apply {
+            verifyBlocking(fileSubmissionDaoSpy, timeout(1000)) {
+                updateAsync(capture())
+            }
+            Assert.assertEquals("Got expected uri", null, firstValue.afsUri)
+        }
+
+
+    }
 
 
 
