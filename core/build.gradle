@@ -25,10 +25,14 @@ android {
         minSdkVersion 21
         targetSdkVersion 31
     }
-
     packagingOptions {
-        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+        resources {
+            // .kotlin_metadata files come from multiplatform modules, but are not needed unless we
+            // use kotlin reflection, which we don't.
+            excludes += ['META-INF/INDEX.LIST', '**/*.kotlin_metadata', 'META-INF/*.kotlin_module', 'licenses/**.TXT']
+        }
     }
+
 
     compileOptions {
         sourceCompatibility = '1.8'
