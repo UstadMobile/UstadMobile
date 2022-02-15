@@ -109,7 +109,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 96)
+], version = 97)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -2670,6 +2670,53 @@ abstract class UmAppDatabase : DoorDatabase() {
             }
         }
 
+        val MIGRATION_96_97 = DoorMigrationStatementList(96, 97) { db ->
+            if(db.dbType() == DoorDbType.SQLITE) {
+                listOf("DROP TABLE ZombieAttachmentData",
+                    "CREATE TABLE ZombieAttachmentData (  zaUri  TEXT , zaUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
+                    "DROP TRIGGER IF EXISTS ATTUPD_PersonPicture",
+                    """
+                    |
+                    |        CREATE TRIGGER ATTUPD_PersonPicture
+                    |        AFTER UPDATE ON PersonPicture FOR EACH ROW WHEN
+                    |        OLD.personPictureMd5 IS NOT NULL
+                    |        BEGIN
+                    |        
+                    |        INSERT INTO ZombieAttachmentData(zaUri) 
+                    |        SELECT OLD.personPictureUri AS zaUri
+                    |          FROM PersonPicture   
+                    |         WHERE PersonPicture.personPictureUid = OLD.personPictureUid
+                    |           AND (SELECT COUNT(*) 
+                    |                  FROM PersonPicture
+                    |                 WHERE personPictureMd5 = OLD.personPictureMd5) = 0
+                    |    ; 
+                    |        END
+                    |    
+                    """.trimMargin(),
+                )
+            }else {
+                listOf("DROP TABLE IF EXISTS ZombieAttachmentData",
+                    "CREATE TABLE IF NOT EXISTS ZombieAttachmentData (  zaUri  TEXT , zaUid  SERIAL  PRIMARY KEY  NOT NULL )",
+                    """
+                    |    CREATE OR REPLACE FUNCTION attach_PersonPicture_fn() RETURNS trigger AS ${'$'}${'$'}
+                    |    BEGIN
+                    |    
+                    |    INSERT INTO ZombieAttachmentData(zaUri) 
+                    |    SELECT OLD.personPictureUri AS zaUri
+                    |      FROM PersonPicture   
+                    |     WHERE PersonPicture.personPictureUid = OLD.personPictureUid
+                    |       AND (SELECT COUNT(*) 
+                    |              FROM PersonPicture
+                    |             WHERE personPictureMd5 = OLD.personPictureMd5) = 0
+                    |;
+                    |    RETURN NEW;
+                    |    END ${'$'}${'$'}
+                    |    LANGUAGE plpgsql
+                    """.trimMargin()
+                    )
+            }
+        }
+
 
 
         fun migrationList(nodeId: Long) = listOf<DoorMigration>(
@@ -2686,7 +2733,7 @@ abstract class UmAppDatabase : DoorDatabase() {
             MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
             MIGRATION_88_89, MIGRATION_89_90, MIGRATION_90_91,
             UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
-            MIGRATION_95_96,
+            MIGRATION_95_96, MIGRATION_96_97
         )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->
