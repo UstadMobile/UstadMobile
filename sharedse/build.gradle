@@ -29,9 +29,10 @@ android {
             consumerProguardFiles 'proguard-rules.pro'
         }
     }
-
     packagingOptions {
-        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+        resources {
+            excludes += ['META-INF/INDEX.LIST', '**/*.kotlin_metadata', 'META-INF/*.kotlin_module', 'licenses/**.TXT']
+        }
     }
 
 
