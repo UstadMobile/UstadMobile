@@ -19,9 +19,11 @@ import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
+import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
@@ -384,7 +386,8 @@ class ContentEntryEdit2Presenter(
 
     override fun onClickImportFile() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_FILE,
+                SelectFileView.ARG_MIMETYPE_SELECTED to
+                        pluginManager.supportedMimeTypeList.joinToString(";"),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
 
@@ -411,7 +414,7 @@ class ContentEntryEdit2Presenter(
 
     override fun onClickImportGallery() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_GALLERY,
+                SelectFileView.ARG_MIMETYPE_SELECTED to SelectFileView.SELECTION_MODE_GALLERY,
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
 

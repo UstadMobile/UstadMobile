@@ -214,7 +214,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
 
     fun handleAddFileClicked(){
         val modeSelected: String = when(entity?.caFileType){
-            ClazzAssignment.FILE_TYPE_DOC -> SelectFileView.SELECTION_MODE_FILE
+            ClazzAssignment.FILE_TYPE_DOC -> SelectFileView.SELECTION_MODE_DOC
             ClazzAssignment.FILE_TYPE_AUDIO -> SelectFileView.SELECTION_MODE_AUDIO
             ClazzAssignment.FILE_TYPE_VIDEO -> SelectFileView.SELECTION_MODE_VIDEO
             ClazzAssignment.FILE_TYPE_IMAGE -> SelectFileView.SELECTION_MODE_IMAGE
@@ -222,7 +222,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         }
 
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to modeSelected)
+                SelectFileView.ARG_MIMETYPE_SELECTED to modeSelected)
 
         navigateForResult(
                 NavigateForResultOptions(this,

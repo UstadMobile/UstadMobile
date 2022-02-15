@@ -7,15 +7,11 @@ import androidx.navigation.fragment.findNavController
 import com.google.gson.Gson
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
-import com.soywiz.klock.hours
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
-import com.ustadmobile.core.controller.ClazzEdit2Presenter
-import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
-import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
@@ -164,6 +160,7 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
             caTitle = "New ClazzAssignment"
             caStartDate = DateTime(2021, 1, 20).unixMillisLong
             caDeadlineDate = DateTime(2021, 2, 20).unixMillisLong
+            caRequireFileSubmission = false
             caUid = dbRule.repo.clazzAssignmentDao.insert(this)
         }
 

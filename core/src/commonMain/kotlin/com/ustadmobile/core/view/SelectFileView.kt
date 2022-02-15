@@ -1,14 +1,12 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.contentjob.SupportedContent
-
 interface SelectFileView : UstadView {
 
     companion object {
 
         const val VIEW_NAME = "SelectFileView"
 
-        const val ARG_SELECTION_MODE = "selectMimeTypeMode"
+        const val ARG_MIMETYPE_SELECTED = "selectMimeTypeMode"
 
         const val SELECTION_MODE_GALLERY = "video/*;audio/*"
 
@@ -20,12 +18,14 @@ interface SelectFileView : UstadView {
 
         const val SELECTION_MODE_ANY = "*/*"
 
-        val SELECTION_MODE_FILE =
-                (SupportedContent.EPUB_MIME_TYPES +
-                SupportedContent.XAPI_MIME_TYPES +
-                SupportedContent.H5P_EXTENSIONS +
-                        "application/octet-stream" +
-                        "application/pdf").joinToString(";")
+        val SELECTION_MODE_DOC = listOf(
+                "application/vnd.oasis.opendocument.text",
+                "application/vnd.oasis.opendocument.presentation",
+                "application/msword",
+                "application/vnd.ms-powerpoint",
+                "application/pdf",
+                "application/octet-stream",)
+                .joinToString(";")
 
     }
 }

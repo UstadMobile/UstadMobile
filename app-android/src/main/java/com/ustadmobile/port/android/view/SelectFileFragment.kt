@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +14,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
 import com.ustadmobile.core.view.SelectFileView
-import com.ustadmobile.core.view.SelectFileView.Companion.ARG_SELECTION_MODE
+import com.ustadmobile.core.view.SelectFileView.Companion.ARG_MIMETYPE_SELECTED
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 import org.kodein.di.instance
@@ -55,7 +54,7 @@ class SelectFileFragment(private val registry: ActivityResultRegistry? = null) :
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val mimeTypeList = arguments?.get(ARG_SELECTION_MODE)?.toString()?.split(";")?.toTypedArray()
+        val mimeTypeList = arguments?.get(ARG_MIMETYPE_SELECTED)?.toString()?.split(";")?.toTypedArray()
         activityResultLauncher?.launch(mimeTypeList)
 
         return null
