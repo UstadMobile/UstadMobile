@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 97,
-    "identityHash": "6c28f51b8adafbc6b9f0ad73f3242989",
+    "version": 98,
+    "identityHash": "978f556c3e8e0304c290267a8f485218",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -3118,7 +3118,7 @@
       },
       {
         "tableName": "XObjectEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xObjectUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `objectType` TEXT, `objectId` TEXT, `definitionType` TEXT, `interactionType` TEXT, `correctResponsePattern` TEXT, `objectContentEntryUid` INTEGER NOT NULL, `xObjectMasterChangeSeqNum` INTEGER NOT NULL, `xObjectocalChangeSeqNum` INTEGER NOT NULL, `xObjectLastChangedBy` INTEGER NOT NULL, `xObjectLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xObjectUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `objectType` TEXT, `objectId` TEXT, `definitionType` TEXT, `interactionType` TEXT, `correctResponsePattern` TEXT, `objectContentEntryUid` INTEGER NOT NULL, `objectStatementRefUid` INTEGER NOT NULL DEFAULT 0, `xObjectMasterChangeSeqNum` INTEGER NOT NULL, `xObjectocalChangeSeqNum` INTEGER NOT NULL, `xObjectLastChangedBy` INTEGER NOT NULL, `xObjectLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "xObjectUid",
@@ -3161,6 +3161,13 @@
             "columnName": "objectContentEntryUid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "objectStatementRefUid",
+            "columnName": "objectStatementRefUid",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "xObjectMasterChangeSeqNum",
@@ -5208,7 +5215,7 @@
       },
       {
         "tableName": "ClazzAssignment",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caDeadlineDate` INTEGER NOT NULL, `caStartDate` INTEGER NOT NULL, `caLateSubmissionType` INTEGER NOT NULL, `caLateSubmissionPenalty` INTEGER NOT NULL, `caGracePeriodDate` INTEGER NOT NULL, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caAssignmentType` INTEGER NOT NULL DEFAULT 0, `caDeadlineDate` INTEGER NOT NULL, `caStartDate` INTEGER NOT NULL, `caLateSubmissionType` INTEGER NOT NULL, `caLateSubmissionPenalty` INTEGER NOT NULL, `caGracePeriodDate` INTEGER NOT NULL, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caRequireFileSubmission` INTEGER NOT NULL DEFAULT 1, `caFileSubmissionWeight` INTEGER NOT NULL DEFAULT 0, `caFileType` INTEGER NOT NULL DEFAULT 0, `caSizeLimit` INTEGER NOT NULL DEFAULT 50, `caNumberOfFiles` INTEGER NOT NULL DEFAULT 1, `caEditAfterSubmissionType` INTEGER NOT NULL DEFAULT 0, `caMarkingType` INTEGER NOT NULL DEFAULT 1, `caMaxScore` INTEGER NOT NULL DEFAULT 0, `caXObjectUid` INTEGER NOT NULL DEFAULT 0, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "caUid",
@@ -5227,6 +5234,13 @@
             "columnName": "caDescription",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "caAssignmentType",
+            "columnName": "caAssignmentType",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "caDeadlineDate",
@@ -5275,6 +5289,69 @@
             "columnName": "caPrivateCommentsEnabled",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "caRequireFileSubmission",
+            "columnName": "caRequireFileSubmission",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "caFileSubmissionWeight",
+            "columnName": "caFileSubmissionWeight",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "caFileType",
+            "columnName": "caFileType",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "caSizeLimit",
+            "columnName": "caSizeLimit",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "50"
+          },
+          {
+            "fieldPath": "caNumberOfFiles",
+            "columnName": "caNumberOfFiles",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "caEditAfterSubmissionType",
+            "columnName": "caEditAfterSubmissionType",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "caMarkingType",
+            "columnName": "caMarkingType",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "caMaxScore",
+            "columnName": "caMaxScore",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "caXObjectUid",
+            "columnName": "caXObjectUid",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "caClazzUid",
@@ -5328,7 +5405,7 @@
       },
       {
         "tableName": "ClazzAssignmentContentJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cacjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cacjContentUid` INTEGER NOT NULL, `cacjAssignmentUid` INTEGER NOT NULL, `cacjActive` INTEGER NOT NULL, `cacjMCSN` INTEGER NOT NULL, `cacjLCSN` INTEGER NOT NULL, `cacjLCB` INTEGER NOT NULL, `cacjLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cacjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cacjContentUid` INTEGER NOT NULL, `cacjAssignmentUid` INTEGER NOT NULL, `cacjActive` INTEGER NOT NULL, `cacjWeight` INTEGER NOT NULL DEFAULT 0, `cacjMCSN` INTEGER NOT NULL, `cacjLCSN` INTEGER NOT NULL, `cacjLCB` INTEGER NOT NULL, `cacjLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cacjUid",
@@ -5353,6 +5430,13 @@
             "columnName": "cacjActive",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "cacjWeight",
+            "columnName": "cacjWeight",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "cacjMCSN",
@@ -5389,8 +5473,112 @@
         "foreignKeys": []
       },
       {
+        "tableName": "AssignmentFileSubmission",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`afsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `afsAssignmentUid` INTEGER NOT NULL, `afsStudentUid` INTEGER NOT NULL, `afsTimestamp` INTEGER NOT NULL, `afsMimeType` TEXT, `afsTitle` TEXT, `afsSubmitted` INTEGER NOT NULL, `afsActive` INTEGER NOT NULL, `afsUri` TEXT, `afsMd5` TEXT, `afsSize` INTEGER NOT NULL, `afsMasterCsn` INTEGER NOT NULL, `afsLocalCsn` INTEGER NOT NULL, `afsLastChangedBy` INTEGER NOT NULL, `afsLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "afsUid",
+            "columnName": "afsUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsAssignmentUid",
+            "columnName": "afsAssignmentUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsStudentUid",
+            "columnName": "afsStudentUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsTimestamp",
+            "columnName": "afsTimestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsMimeType",
+            "columnName": "afsMimeType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "afsTitle",
+            "columnName": "afsTitle",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "afsSubmitted",
+            "columnName": "afsSubmitted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsActive",
+            "columnName": "afsActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsUri",
+            "columnName": "afsUri",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "afsMd5",
+            "columnName": "afsMd5",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "afsSize",
+            "columnName": "afsSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsMasterCsn",
+            "columnName": "afsMasterCsn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsLocalCsn",
+            "columnName": "afsLocalCsn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsLastChangedBy",
+            "columnName": "afsLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsLct",
+            "columnName": "afsLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "afsUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "ClazzAssignmentRollUp",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cacheUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cachePersonUid` INTEGER NOT NULL, `cacheContentEntryUid` INTEGER NOT NULL, `cacheClazzAssignmentUid` INTEGER NOT NULL, `cacheStudentScore` INTEGER NOT NULL, `cacheMaxScore` INTEGER NOT NULL, `cacheProgress` INTEGER NOT NULL, `cacheContentComplete` INTEGER NOT NULL, `cacheSuccess` INTEGER NOT NULL, `cachePenalty` INTEGER NOT NULL, `lastCsnChecked` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cacheUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cachePersonUid` INTEGER NOT NULL, `cacheContentEntryUid` INTEGER NOT NULL, `cacheClazzAssignmentUid` INTEGER NOT NULL, `cacheStudentScore` INTEGER NOT NULL, `cacheMaxScore` INTEGER NOT NULL, `cacheFinalWeightScoreWithPenalty` REAL NOT NULL DEFAULT 0, `cacheWeight` INTEGER NOT NULL DEFAULT 0, `cacheProgress` INTEGER NOT NULL, `cacheContentComplete` INTEGER NOT NULL, `cacheSuccess` INTEGER NOT NULL, `cachePenalty` INTEGER NOT NULL, `lastCsnChecked` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cacheUid",
@@ -5427,6 +5615,20 @@
             "columnName": "cacheMaxScore",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "cacheFinalWeightScoreWithPenalty",
+            "columnName": "cacheFinalWeightScoreWithPenalty",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "cacheWeight",
+            "columnName": "cacheWeight",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "cacheProgress",
@@ -6267,6 +6469,69 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLogAttendanceRecordReplicate_clarDestination_clarPending` ON `${TABLE_NAME}` (`clarDestination`, `clarPending`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "AssignmentFileSubmissionReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`afsPk` INTEGER NOT NULL, `afsVersionId` INTEGER NOT NULL DEFAULT 0, `afsDestination` INTEGER NOT NULL, `afsPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`afsPk`, `afsDestination`))",
+        "fields": [
+          {
+            "fieldPath": "afsPk",
+            "columnName": "afsPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsVersionId",
+            "columnName": "afsVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "afsDestination",
+            "columnName": "afsDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "afsPending",
+            "columnName": "afsPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "afsPk",
+            "afsDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_AssignmentFileSubmissionReplicate_afsPk_afsVersionId_afsVersionId",
+            "unique": false,
+            "columnNames": [
+              "afsPk",
+              "afsVersionId",
+              "afsVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AssignmentFileSubmissionReplicate_afsPk_afsVersionId_afsVersionId` ON `${TABLE_NAME}` (`afsPk`, `afsVersionId`, `afsVersionId`)"
+          },
+          {
+            "name": "index_AssignmentFileSubmissionReplicate_afsDestination_afsPending",
+            "unique": false,
+            "columnNames": [
+              "afsDestination",
+              "afsPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AssignmentFileSubmissionReplicate_afsDestination_afsPending` ON `${TABLE_NAME}` (`afsDestination`, `afsPending`)"
           }
         ],
         "foreignKeys": []
@@ -9047,7 +9312,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6c28f51b8adafbc6b9f0ad73f3242989')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '978f556c3e8e0304c290267a8f485218')"
     ]
   }
 }

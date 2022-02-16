@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
+import kotlin.jvm.Volatile
 
 
 class ClazzLogEditAttendancePresenter(context: Any,
@@ -41,6 +42,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
             ListSerializer(ClazzLogAttendanceRecordWithPerson.serializer()), this,
             ClazzLogAttendanceRecordWithPerson::class) { clazzLogAttendanceRecordUid = it }
 
+    @Volatile
     private var currentClazzLogUid: Long = 0
 
     /**
@@ -57,11 +59,10 @@ class ClazzLogEditAttendancePresenter(context: Any,
      * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
      */
     override fun onCreate(savedState: Map<String, String>?) {
+        currentClazzLogUid = savedState?.get(STATE_CURRENT_UID)?.toLong()
+            ?: arguments[ARG_ENTITY_UID]?.toLong() ?: 0
         super.onCreate(savedState)
 
-        currentClazzLogUid = savedState?.get(STATE_CURRENT_UID)?.toLong() ?: arguments[ARG_ENTITY_UID]?.toLong() ?: 0
-
-        //TODO: Set any additional fields (e.g. joinlist) on the view
         view.clazzLogAttendanceRecordList = attendanceRecordOneToManyJoinHelper.liveList
     }
 
