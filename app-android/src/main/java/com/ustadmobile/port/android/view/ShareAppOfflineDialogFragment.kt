@@ -35,13 +35,13 @@ class ShareAppOfflineDialogFragment : UstadDialogFragment(){
     var zipIt: Boolean = true
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val inflater = Objects.requireNonNull<Context>(context)
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater = requireContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)
+            as LayoutInflater
         rootView = inflater.inflate(R.layout.fragment_share_app_dialog, null) as ViewGroup
         zipCheckbox = rootView.findViewById(R.id.fragment_share_app_zip_checkbox)
         zipCheckbox.setOnClickListener { zipIt = zipCheckbox.isChecked }
 
-        val builder = AlertDialog.Builder(context!!)
+        val builder = AlertDialog.Builder(requireContext())
                 .setView(rootView)
                 .setTitle(R.string.share_application)
                 .setPositiveButton(R.string.share) {dialog, which ->
@@ -73,18 +73,11 @@ class ShareAppOfflineDialogFragment : UstadDialogFragment(){
             var apkFileIn: InputStream? = null
             try {
                 apkFileIn = FileInputStream(apkFile)
-                if(zipIt) {
-                    outFile = File(outDir, "$baseName.zip")
-                    val zipOutputStream = ZipOutputStream(FileOutputStream(outFile))
-                    fileOutputStreamToClose = zipOutputStream
-                    zipOutputStream.putNextEntry(ZipEntry(baseName))
-                    apkFileIn.copyTo(zipOutputStream)
-                    zipOutputStream.closeEntry()
-                }else {
-                    outFile = File(outDir, baseName)
-                    fileOutputStreamToClose = FileOutputStream(outFile)
-                    apkFileIn.copyTo(fileOutputStreamToClose)
-                }
+
+                outFile = File(outDir, baseName)
+                fileOutputStreamToClose = FileOutputStream(outFile)
+                apkFileIn.copyTo(fileOutputStreamToClose)
+
                 fileOutputStreamToClose.flush()
                 fileOutputStreamToClose.close()
                 apkFileIn.close()
@@ -94,10 +87,9 @@ class ShareAppOfflineDialogFragment : UstadDialogFragment(){
                 val sharedUri = FileProvider.getUriForFile(ctx, "$applicationId.provider",
                         outFile)
                 val shareIntent = Intent(ACTION_SEND)
-                shareIntent.setType("*/*")
+                shareIntent.setType("application/vnd.android.package-archive")
                 shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri)
                 shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                shareIntent.setPackage("com.android.bluetooth")
 
                 if (shareIntent.resolveActivity(ctx.packageManager) != null) {
                     ctx.startActivity(shareIntent)

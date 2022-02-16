@@ -190,6 +190,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val currentFrag = navController.currentDestination?.id ?: 0
         val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
         menu.findItem(R.id.menu_main_settings).isVisible = (mainScreenItemsVisible && mIsAdmin == true)
+        menu.findItem(R.id.menu_share_offline).isVisible = mainScreenItemsVisible
 
         //Should be hidden when they are on the accounts page (only)
         val currentDestination = destinationProvider.lookupDestinationById(currentFrag)
@@ -206,6 +207,9 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_main_settings -> handleClickSettings()
+            R.id.menu_share_offline -> {
+                ShareAppOfflineDialogFragment().show(supportFragmentManager, "share_offline")
+            }
         }
         return item.onNavDestinationSelected(findNavController(R.id.activity_main_navhost_fragment))
                 || super.onOptionsItemSelected(item)
