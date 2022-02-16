@@ -81,7 +81,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 225
 
-    version_door = "0.0.53-alpha02"
+    version_door = "0.0.54"
     version_xmlpullparserkmp = '0.0.18'
 
     version_gradle_buildconfig_plugin = "1.1.7"
