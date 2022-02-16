@@ -114,7 +114,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 97)
+], version = 98)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
