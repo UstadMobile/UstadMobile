@@ -8,9 +8,11 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
@@ -45,14 +47,12 @@ import com.ustadmobile.port.android.view.binding.setImageForeignKey
 import com.ustadmobile.port.android.view.binding.setImageForeignKeyAdapter
 import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.kodein.di.DIAware
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import java.io.*
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
@@ -208,11 +208,66 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         when (item.itemId) {
             R.id.menu_main_settings -> handleClickSettings()
             R.id.menu_share_offline -> {
-                ShareAppOfflineDialogFragment().show(supportFragmentManager, "share_offline")
+                handleConfirmShareApp()
             }
         }
         return item.onNavDestinationSelected(findNavController(R.id.activity_main_navhost_fragment))
                 || super.onOptionsItemSelected(item)
+    }
+
+
+    private fun handleConfirmShareApp() {
+        GlobalScope.launch(Dispatchers.IO) {
+            val apkFile = File(applicationContext.applicationInfo.sourceDir)
+            val appName = applicationContext.getString(R.string.app_name).replace(" ", "_")
+            val baseName = "$appName.apk"
+
+            val outDir = File(applicationContext.filesDir, "external")
+            if (!outDir.isDirectory)
+                outDir.mkdirs()
+
+            val outFile: File
+
+            var fileOutputStreamToClose: OutputStream? = null
+            var apkFileIn: InputStream? = null
+            try {
+                apkFileIn = FileInputStream(apkFile)
+
+                outFile = File(outDir, baseName)
+                fileOutputStreamToClose = FileOutputStream(outFile)
+                apkFileIn.copyTo(fileOutputStreamToClose)
+
+                fileOutputStreamToClose.flush()
+                fileOutputStreamToClose.close()
+                apkFileIn.close()
+
+
+                val applicationId = applicationContext.packageName
+                val sharedUri = FileProvider.getUriForFile(applicationContext, "$applicationId.provider",
+                    outFile)
+                val shareIntent = Intent(Intent.ACTION_SEND)
+                shareIntent.setType("application/vnd.android.package-archive")
+                shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri)
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+                if (shareIntent.resolveActivity(applicationContext.packageManager) != null) {
+                    applicationContext.startActivity(shareIntent)
+                }else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(applicationContext, R.string.error_this_device_doesnt_support_bluetooth_sharing,
+                            Toast.LENGTH_LONG).show()
+                    }
+                }
+                
+            }catch(e: Exception) {
+                e.printStackTrace()
+            }finally {
+                fileOutputStreamToClose?.flush()
+                fileOutputStreamToClose?.close()
+            }
+
+
+        }
     }
 
     override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
