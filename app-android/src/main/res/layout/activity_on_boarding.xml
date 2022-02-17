@@ -18,6 +18,7 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/supported_by_logo"
+        android:visibility="invisible"
         android:layout_marginTop="@dimen/dimen_16dp"
         android:layout_width="@dimen/dimen_90dp"
         android:layout_height="@dimen/dimen_90dp"
@@ -104,6 +105,7 @@
         />
 
     <TextView
+        android:visibility="invisible"
         android:paddingTop="@dimen/dimen_10dp"
         android:id="@+id/in_partnership_with_text"
         android:layout_width="0dp"
@@ -118,6 +120,7 @@
         />
 
     <androidx.appcompat.widget.AppCompatImageView
+        android:visibility="invisible"
         android:id="@id/irc_logo"
         android:layout_marginBottom="@dimen/dimen_16dp"
         android:layout_width="53dp"
