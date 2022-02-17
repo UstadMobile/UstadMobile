@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
+import com.ustadmobile.lib.util.ext.fixTincan
 import com.ustadmobile.lib.util.randomString
 import kotlin.js.JsName
 import kotlin.jvm.JvmField
@@ -114,7 +115,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 98)
+], version = 99)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -2725,7 +2726,19 @@ abstract class UmAppDatabase : DoorDatabase() {
             }
         }
 
+        /***
+         *  added 16th Feb to remove special html characters from text - & > <
+         */
         val MIGRATION_97_98 = DoorMigrationStatementList(97, 98) { db ->
+            if(db.dbType() == DoorDbType.POSTGRES) {
+                db.fixTincan()
+                listOf()
+            }else {
+                listOf()
+            }
+        }
+
+        val MIGRATION_98_99 = DoorMigrationStatementList(98, 99) { db ->
 
             val finalList = mutableListOf("ALTER TABLE ClazzAssignment ADD COLUMN caAssignmentType INTEGER NOT NULL DEFAULT 0",
                     "ALTER TABLE ClazzAssignment ADD COLUMN caFileSubmissionWeight INTEGER NOT NULL DEFAULT 0",
@@ -2764,6 +2777,8 @@ abstract class UmAppDatabase : DoorDatabase() {
 
 
 
+
+
         fun migrationList(nodeId: Long) = listOf<DoorMigration>(
             MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
             MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
@@ -2778,7 +2793,7 @@ abstract class UmAppDatabase : DoorDatabase() {
             MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
             MIGRATION_88_89, MIGRATION_89_90, MIGRATION_90_91,
             UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
-            MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98
+            MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98, MIGRATION_98_99
         )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->
