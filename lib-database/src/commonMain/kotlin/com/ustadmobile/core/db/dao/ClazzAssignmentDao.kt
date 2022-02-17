@@ -190,9 +190,9 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                    
                    
            
-            $GET_ALL_ASSIGNMENTS_SCORE_FOR_CURRENT_USER_SQL AS resultScore,
+            0 AS resultScore,
                           
-            $GET_ALL_ASSIGNMENTS_GET_MAX_SCORE_FOR_CURRENT_USER AS resultMax,
+            0 AS resultMax,
                                 
             COALESCE((SELECT COUNT(cacheContentComplete)
                         FROM ClazzAssignmentRollUp
@@ -206,31 +206,20 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                           
             0 AS penalty,
                                                
-            COALESCE((SELECT COUNT(cacheContentComplete)
-                        FROM ClazzAssignmentRollUp
-                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
-                        AND cacheContentComplete
-                              AND cachePersonUid = :accountPersonUid), 0) AS totalCompletedContent,
+            $GET_TOTAL_COMPLETE_CONTENT_OF_ASSIGNMENT_FOR_USER AS totalCompletedContent,
             
-            COALESCE((SELECT COUNT(DISTINCT cacheContentEntryUid) 
-                              FROM ClazzAssignmentRollUp
-                             WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid), 0) AS totalContent,                    
+            $GET_TOTAL_CONTENT_OF_ASSIGNMENT AS totalContent,                    
                           
              0 as success,           
-             COALESCE((SELECT SUM(cacheFinalWeightScoreWithPenalty)
-                         FROM ClazzAssignmentRollUp 
-                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid 
-                          AND cacheContentComplete 
-                          AND cachePersonUid = :accountPersonUid), 0) AS resultScaled,
+             $GET_TOTAL_SCORE_WITH_PENALTY_FOR_USER_IN_ASSIGNMENT AS resultScaled,
                               
-             COALESCE((SELECT SUM(cacheWeight)
-                         FROM ClazzAssignmentRollUp 
-                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid 
-                          AND cacheContentComplete 
-                          AND cachePersonUid = :accountPersonUid), 0) AS resultWeight,                    
-                              
+             $GET_TOTAL_WEIGHT_OF_ASSIGNMENT AS resultWeight,                    
               
-              0 as progress
+              COALESCE((SELECT AVG(cacheProgress)
+                        FROM ClazzAssignmentRollUp
+                       WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
+                         AND cachePersonUid = :accountPersonUid), 0) AS progress
+             
              
              FROM ClazzAssignment
             WHERE ClazzAssignment.caActive
@@ -241,13 +230,13 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
          ORDER BY CASE(:sortOrder)
                 WHEN $SORT_START_DATE_ASC THEN ClazzAssignment.caStartDate
                 WHEN $SORT_DEADLINE_ASC THEN ClazzAssignment.caDeadlineDate
-                WHEN $SORT_SCORE_ASC THEN ($GET_ALL_ASSIGNMENTS_SCORE_FOR_CURRENT_USER_SQL/$GET_ALL_ASSIGNMENTS_GET_MAX_SCORE_FOR_CURRENT_USER)
+                WHEN $SORT_SCORE_ASC THEN (($GET_TOTAL_SCORE_WITH_PENALTY_FOR_USER_IN_ASSIGNMENT/$GET_TOTAL_WEIGHT_OF_ASSIGNMENT) * ($GET_TOTAL_COMPLETE_CONTENT_OF_ASSIGNMENT_FOR_USER/$GET_TOTAL_CONTENT_OF_ASSIGNMENT))
                 ELSE 0
             END ASC,
             CASE(:sortOrder)
                 WHEN $SORT_START_DATE_DESC THEN ClazzAssignment.caStartDate
                 WHEN $SORT_DEADLINE_DESC THEN ClazzAssignment.caDeadlineDate
-                WHEN $SORT_SCORE_DESC THEN ($GET_ALL_ASSIGNMENTS_SCORE_FOR_CURRENT_USER_SQL/$GET_ALL_ASSIGNMENTS_GET_MAX_SCORE_FOR_CURRENT_USER)
+                WHEN $SORT_SCORE_DESC THEN (($GET_TOTAL_SCORE_WITH_PENALTY_FOR_USER_IN_ASSIGNMENT/$GET_TOTAL_WEIGHT_OF_ASSIGNMENT) * ($GET_TOTAL_COMPLETE_CONTENT_OF_ASSIGNMENT_FOR_USER/$GET_TOTAL_CONTENT_OF_ASSIGNMENT))
                 ELSE 0
             END DESC,
             CASE(:sortOrder)
@@ -313,13 +302,11 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
               COALESCE((SELECT SUM(cacheFinalWeightScoreWithPenalty)
                          FROM ClazzAssignmentRollUp 
                         WHERE cacheClazzAssignmentUid = :assignmentUid
-                          AND cacheContentComplete 
                           AND cachePersonUid = ResultSource.personUid), 0) AS resultScaled,
                               
              COALESCE((SELECT SUM(cacheWeight)
                          FROM ClazzAssignmentRollUp 
                         WHERE cacheClazzAssignmentUid = :assignmentUid
-                          AND cacheContentComplete 
                           AND cachePersonUid = ResultSource.personUid), 0) AS resultWeight,       
                 
                 'FALSE' as contentComplete,
@@ -588,19 +575,36 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
 
     companion object{
 
-        private const val GET_ALL_ASSIGNMENTS_SCORE_FOR_CURRENT_USER_SQL = """
-        COALESCE((SELECT MAX(cacheStudentScore) 
-                        FROM ClazzAssignmentRollUp
-                       WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
-                         AND cachePersonUid = :accountPersonUid),0)
+        private const val GET_TOTAL_SCORE_WITH_PENALTY_FOR_USER_IN_ASSIGNMENT = """
+               COALESCE((SELECT SUM(cacheFinalWeightScoreWithPenalty)
+                          FROM ClazzAssignmentRollUp
+                         WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
+                          AND cachePersonUid = :accountPersonUid), 0)
+
         """
 
-        private const val GET_ALL_ASSIGNMENTS_GET_MAX_SCORE_FOR_CURRENT_USER = """
-            COALESCE((SELECT MAX(cacheMaxScore) 
-                        FROM ClazzAssignmentRollUp 
+        private const val GET_TOTAL_WEIGHT_OF_ASSIGNMENT = """
+            COALESCE((SELECT SUM(cacheWeight)
+                        FROM ClazzAssignmentRollUp
                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
-                         AND cachePersonUid = :accountPersonUid),0)
+                         AND cachePersonUid = :accountPersonUid), 0)
         """
+
+
+        private const val GET_TOTAL_CONTENT_OF_ASSIGNMENT = """
+            COALESCE((SELECT COUNT(DISTINCT cacheContentEntryUid)
+                        FROM ClazzAssignmentRollUp
+                       WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid), 0)
+        """
+
+        private const val GET_TOTAL_COMPLETE_CONTENT_OF_ASSIGNMENT_FOR_USER = """
+             COALESCE((SELECT COUNT(cacheContentComplete)
+                         FROM ClazzAssignmentRollUp
+                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
+                          AND cacheContentComplete
+                          AND cachePersonUid = :accountPersonUid), 0)
+        """
+
 
         const val SORT_DEADLINE_ASC = 1
 
