@@ -2,18 +2,23 @@ package com.ustadmobile.core.db
 
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
-import com.ustadmobile.door.*
+import com.ustadmobile.door.DoorDatabase
+import com.ustadmobile.door.DoorDbType
+import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.MinReplicationVersion
-import com.ustadmobile.door.migration.*
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.migration.DoorMigration
+import com.ustadmobile.door.migration.DoorMigrationStatementList
+import com.ustadmobile.door.migration.DoorMigrationSync
 import com.ustadmobile.door.util.DoorSqlGenerator
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
+import com.ustadmobile.lib.util.ext.fixTincan
 import com.ustadmobile.lib.util.randomString
 import kotlin.js.JsName
 import kotlin.jvm.JvmField
@@ -109,7 +114,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 97)
+], version = 98)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -2718,6 +2723,18 @@ abstract class UmAppDatabase : DoorDatabase() {
         }
 
 
+        /***
+         *  added 16th Feb to remove special html characters from text - & > <
+         */
+        val MIGRATION_97_98 = DoorMigrationStatementList(97, 98) { db ->
+            if(db.dbType() == DoorDbType.POSTGRES) {
+                db.fixTincan()
+                listOf()
+            }else {
+                listOf()
+            }
+        }
+
 
         fun migrationList(nodeId: Long) = listOf<DoorMigration>(
             MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
@@ -2733,7 +2750,7 @@ abstract class UmAppDatabase : DoorDatabase() {
             MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
             MIGRATION_88_89, MIGRATION_89_90, MIGRATION_90_91,
             UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
-            MIGRATION_95_96, MIGRATION_96_97
+            MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98
         )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->
