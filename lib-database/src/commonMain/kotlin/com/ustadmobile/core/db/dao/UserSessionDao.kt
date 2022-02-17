@@ -37,15 +37,20 @@ abstract class UserSessionDao {
                           ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
                      JOIN UserSession
                           ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
-                        
+          --notpsql              
           WHERE UserSessionSubject.usLct != COALESCE(
                 (SELECT usVersionId
                    FROM UserSessionReplicate
                   WHERE UserSessionReplicate.usPk = UserSessionSubject.usUid
-                    AND UserSessionReplicate.usDestination = UserSession.usClientNodeId), 0)             
-        /*psql ON CONFLICT(usPk, usDestination) DO UPDATE
-                SET usPending = true
-         */           
+                    AND UserSessionReplicate.usDestination = UserSession.usClientNodeId), 0)
+          --endnotpsql                       
+        /*psql ON CONFLICT(usPk, usDestination) 
+                DO UPDATE SET usPending = 
+                   (SELECT UserSession.usLct
+                      FROM UserSession
+                     WHERE UserSession.usUid = EXCLUDED.usPk ) 
+                        != UserSessionReplicate.usVersionId
+         */         
     """)
     @ReplicationRunOnChange(value = [UserSession::class])
     @ReplicationCheckPendingNotificationsFor([UserSession::class])
@@ -70,11 +75,20 @@ abstract class UserSessionDao {
                      ON UserSessionSubject.usPersonUid = Person.personUid
                         AND UserSessionSubject.usSessionType = ${UserSession.TYPE_STANDARD}
           WHERE UserSession.usClientNodeId = :newNodeId
+          --notpsql
             AND UserSessionSubject.usLct != COALESCE(
                 (SELECT usVersionId
                    FROM UserSessionReplicate
                   WHERE UserSessionReplicate.usPk = UserSessionSubject.usUid
                     AND UserSessionReplicate.usDestination = UserSession.usClientNodeId), 0)
+          --endnotpsql          
+         /*psql ON CONFLICT(usPk, usDestination) 
+                DO UPDATE SET usPending = 
+                   (SELECT UserSession.usLct
+                      FROM UserSession
+                     WHERE UserSession.usUid = EXCLUDED.usPk ) 
+                        != UserSessionReplicate.usVersionId
+         */
     """)
     @ReplicationRunOnNewNode
     @ReplicationCheckPendingNotificationsFor([UserSession::class])
