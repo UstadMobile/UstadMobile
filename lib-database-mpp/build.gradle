@@ -34,8 +34,8 @@ kotlin {
                 implementation "io.github.aakira:napier:$version_napier"
                 implementation project(":lib-database")
                 implementation project(":lib-database-entities")
-                implementation "com.ustadmobile.door:door-runtime:$version_door"
-                implementation "com.ustadmobile.door:room-annotations:$version_door"
+                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+                implementation "com.github.UstadMobile.door:room-annotations:$version_door"
             }
         }
 

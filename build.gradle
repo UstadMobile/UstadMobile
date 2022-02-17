@@ -7,6 +7,7 @@ buildscript {
     ext.version_gradle_versions_plugin = "0.28.0"
     ext.atomicfu_version = '0.17.0'
     ext.version_execfork = "0.1.15"
+    ext.version_android_adbscreenrecorder = "0.1-alpha11"
 
     repositories {
         google()
@@ -14,16 +15,20 @@ buildscript {
         maven {
             url 'https://plugins.gradle.org/m2/'
         }
+        maven {
+            url 'https://jitpack.io/'
+        }
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.0'
+        classpath 'com.android.tools.build:gradle:7.1.1'
         classpath 'com.google.gms:google-services:4.3.10'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
         classpath "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicfu_version"
         classpath "com.gradle:gradle-enterprise-gradle-plugin:3.7.2"
         classpath "com.github.ben-manes:gradle-versions-plugin:$version_gradle_versions_plugin"
+        classpath "com.github.UstadMobile.AdbScreenRecorder:lib-gradle-plugin:$version_android_adbscreenrecorder"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -63,18 +68,8 @@ allprojects {
     }
 }
 
-subprojects {
-    if(Arrays.asList("lib-database-runtime",
-            "lib-database-runtime-jdbc", "lib-database-jdbc", "lib-database-retrofitrepository",
-            "lib-core-fs", "app-rest-server",
-            "core-tests").contains(name)) {
-        apply plugin: "kotlin"
-    }
-}
-
-
 //Major.minor.database version
-version = "0.3.51a"
+version = "0.3.54"
 group = "com.ustadmobile.app"
 
 /**
@@ -84,9 +79,9 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 224
+    ustadVersionCode = 226
 
-    version_door = "0.0.46x"
+    version_door = "0.0.54"
     version_xmlpullparserkmp = '0.0.18'
 
     version_gradle_buildconfig_plugin = "1.1.7"
@@ -184,7 +179,6 @@ ext {
     version_android_leakcanary = "2.7"
     version_android_play_services_safetynet = "17.0.0"
     version_android_circleimageview = "3.1.0"
-    version_android_adbscreenrecorder = "0.1-alpha07"
     version_androidx_viewpager2 = "1.1.0-rc01"
     version_android_aztec = "v1.3.45"
     version_android_wordpress_utils = "2.0.0"

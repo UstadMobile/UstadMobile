@@ -26,6 +26,7 @@ import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
+import io.ktor.util.*
 import kotlinx.serialization.json.*
 import java.util.*
 import kotlinx.coroutines.*
@@ -173,15 +174,14 @@ class H5PTypePluginCommonJvm(
                             containerAddOptions, context)
                     h5pDistTmpFile.delete()
 
-
                     // generate tincan.xml
                     val tinCan = """
                 <?xml version="1.0" encoding="UTF-8"?>
                 <tincan xmlns="http://projecttincan.com/tincan.xsd">
                     <activities>
-                        <activity id="${entry?.entryId ?: ""}" type="http://adlnet.gov/expapi/activities/module">
-                            <name>${entry?.title ?: ""}</name>
-                            <description lang="en-US">${entry?.description ?: ""}</description>
+                        <activity id="${entry?.entryId?.escapeHTML()}" type="http://adlnet.gov/expapi/activities/module">
+                            <name>${entry?.title?.escapeHTML()}</name>
+                            <description lang="en-US">${entry?.description?.escapeHTML()}</description>
                             <launch lang="en-us">index.html</launch>
                         </activity>
                     </activities>

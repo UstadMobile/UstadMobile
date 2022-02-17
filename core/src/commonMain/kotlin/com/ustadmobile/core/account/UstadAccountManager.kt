@@ -354,6 +354,22 @@ class UstadAccountManager(
             }
         }
 
+        getSiteFromDbOrLoadFromHttp(endpointUrl, repo)
+
+        val newSession = addSession(personInDb, endpointUrl, password)
+
+        activeEndpoint = Endpoint(endpointUrl)
+        activeSession = newSession
+
+        //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
+        responseAccount
+    }
+
+    private suspend fun getSiteFromDbOrLoadFromHttp(
+        endpointUrl: String,
+        repo: UmAppDatabase
+    ) {
+        val db = (repo as DoorDatabaseRepository).db as UmAppDatabase
         val siteInDb = db.siteDao.getSiteAsync()
         if(siteInDb == null) {
             val siteResponse = httpClient.get<HttpResponse> {
@@ -367,14 +383,6 @@ class UstadAccountManager(
                 throw IllegalStateException("Internal error: no Site in database and could not fetch it from server")
             }
         }
-
-        val newSession = addSession(personInDb, endpointUrl, password)
-
-        activeEndpoint = Endpoint(endpointUrl)
-        activeSession = newSession
-
-        //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
-        responseAccount
     }
 
     suspend fun startGuestSession(endpointUrl: String) {
@@ -384,6 +392,8 @@ class UstadAccountManager(
             firstNames = "Guest"
             lastName = "User"
         }, groupFlag = PERSONGROUP_FLAG_PERSONGROUP or PERSONGROUP_FLAG_GUESTPERSON)
+
+        getSiteFromDbOrLoadFromHttp(endpointUrl, repo)
 
         activeSession = addSession(guestPerson, endpointUrl, null)
     }
