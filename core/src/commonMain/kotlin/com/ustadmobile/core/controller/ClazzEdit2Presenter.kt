@@ -5,18 +5,22 @@ import com.ustadmobile.core.controller.TimeZoneListPresenter.Companion.RESULT_TI
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
-import com.ustadmobile.core.schedule.*
-import com.ustadmobile.core.util.*
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager
+import com.ustadmobile.core.schedule.localEndOfDay
+import com.ustadmobile.core.schedule.localMidnight
+import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.core.util.LongWrapper
+import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
+import com.ustadmobile.core.util.ScopedGrantOneToManyHelper
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
-import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
@@ -24,7 +28,6 @@ import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_PARENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -53,6 +56,19 @@ class ClazzEdit2Presenter(context: Any,
     val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(repo, this,
         requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
 
+
+    private val courseBlockOneToManyJoinEditHelper
+            = OneToManyJoinEditHelperMp(CourseBlock::cbUid,
+            ARG_SAVEDSTATE_BLOCK,
+            ListSerializer(CourseBlock.serializer()),
+            ListSerializer(CourseBlock.serializer()),
+            this,
+            requireSavedStateHandle(),
+            CourseBlock::class) {cbUid = it}
+
+    val courseBlockOneToManyJoinListener = courseBlockOneToManyJoinEditHelper.createNavigateForResultListener(
+            ScheduleEditView.VIEW_NAME, CourseBlock.serializer())
+
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
@@ -60,6 +76,7 @@ class ClazzEdit2Presenter(context: Any,
         super.onCreate(savedState)
         view.clazzSchedules = scheduleOneToManyJoinEditHelper.liveList
         view.scopedGrants = scopedGrantOneToManyHelper.liveList
+        view.courseBlocks = courseBlockOneToManyJoinEditHelper.liveList
     }
 
     override fun onLoadDataComplete() {
@@ -118,6 +135,11 @@ class ClazzEdit2Presenter(context: Any,
         } ?: listOf()
         scheduleOneToManyJoinEditHelper.liveList.sendValue(schedules)
 
+        val courseBlocks: List<CourseBlock> = db.onRepoWithFallbackToDb(2000){
+            it.courseBlockDao.takeIf { clazzUid != 0L }?.findAllCourseBlockByClazzUidAsync(clazzUid)
+        } ?: listOf()
+        courseBlockOneToManyJoinEditHelper.liveList.sendValue(courseBlocks)
+
         if(clazzUid != 0L) {
             val scopedGrants = db.onRepoWithFallbackToDb(2000) {
                 it.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID, clazzUid)
@@ -174,6 +196,7 @@ class ClazzEdit2Presenter(context: Any,
         }
 
         scheduleOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
+        courseBlockOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
         return clazz
     }
 
@@ -286,6 +309,8 @@ class ClazzEdit2Presenter(context: Any,
     companion object {
 
         const val ARG_SAVEDSTATE_SCHEDULES = "schedules"
+
+        const val ARG_SAVEDSTATE_BLOCK = "courseBlocks"
 
         const val SAVEDSTATE_KEY_SCHOOL = "School"
 

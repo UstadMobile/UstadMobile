@@ -9,6 +9,7 @@
         <import type="com.ustadmobile.core.model.BitmaskFlag"/>
         <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
         <import type="com.ustadmobile.lib.db.entities.Schedule"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
         <import type="com.ustadmobile.core.controller.ClazzEdit2Presenter"/>
         <import type="com.ustadmobile.core.model.BitmaskMessageId"/>
         <import type="java.util.List"/>
@@ -50,6 +51,10 @@
         <variable
             name="scheduleOneToManyListener"
             type="OneToManyJoinEditListener&lt;Schedule&gt;" />
+
+        <variable
+            name="courseBlockOneToManyListener"
+            type="OneToManyJoinEditListener&lt;CourseBlock&gt;" />
 
         <variable
             name="mPresenter"
@@ -186,6 +191,63 @@
             </com.google.android.material.textfield.TextInputLayout>
 
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/activity_clazz_edit_timezone_text"
+                android:layout_width="@dimen/dimen_0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:hint="@string/timezone"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_start_date_edittext">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> mPresenter.handleClickTimezone()}"
+                    android:text="@{clazz.clazzTimeZone}"
+                    android:focusable="false"
+                    />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                android:id="@+id/activity_clazz_edit_course_block_heading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:layout_marginBottom="@dimen/dimen_8dp"
+                android:text="@string/course_blocks"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_timezone_text" />
+
+
+            <include layout="@layout/item_createnew"
+                android:id="@+id/ca_edit_course_add_new_block"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:onClickNew="@{() -> courseBlockOneToManyListener.onClickNew()}"
+                app:createNewText="@{@string/add_block}"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_course_block_heading"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/activity_clazz_edit_course_block_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_course_block"
+                tools:itemCount="2"
+                app:layout_constraintTop_toBottomOf="@+id/ca_edit_course_add_new_block"
+                app:layout_constraintStart_toStartOf="parent" />
+
+
+
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/activity_clazz_edit_schedule_heading"
@@ -196,10 +258,11 @@
                 android:layout_marginBottom="@dimen/dimen_8dp"
                 android:text="@string/schedule"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_start_date_edittext" />
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_course_block_recyclerview" />
 
 
             <include layout="@layout/item_createnew"
+                android:id="@+id/ca_edit_course_add_new_schedule"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:onClickNew="@{() -> scheduleOneToManyListener.onClickNew()}"
@@ -213,33 +276,8 @@
                 android:layout_height="wrap_content"
                 tools:listitem="@layout/item_schedule"
                 tools:itemCount="2"
-                app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
+                app:layout_constraintTop_toBottomOf="@+id/ca_edit_course_add_new_schedule"
                 app:layout_constraintStart_toStartOf="parent" />
-
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/activity_clazz_edit_timezone_text"
-                android:layout_width="@dimen/dimen_0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginVertical="@dimen/dimen_8dp"
-                android:hint="@string/timezone"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:hintEnabled="true"
-                android:enabled="@{fieldsEnabled}"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_schedule_recyclerview">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:onClick="@{() -> mPresenter.handleClickTimezone()}"
-                    android:text="@{clazz.clazzTimeZone}"
-                    android:focusable="false"
-                    />
-
-            </com.google.android.material.textfield.TextInputLayout>
 
 
             <com.google.android.material.textfield.TextInputLayout
@@ -249,7 +287,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_timezone_text"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_schedule_recyclerview"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/holiday_calendar">
 

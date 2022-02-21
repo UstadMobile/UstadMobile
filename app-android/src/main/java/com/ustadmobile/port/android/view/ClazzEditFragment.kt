@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzEditBinding
+import com.toughra.ustadmobile.databinding.ItemCourseBlockBinding
 import com.toughra.ustadmobile.databinding.ItemScheduleBinding
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
@@ -19,7 +20,6 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
@@ -40,6 +40,11 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     private var scheduleRecyclerView: RecyclerView? = null
 
+    private var courseBlockRecyclerAdapter: CourseBlockRecyclerAdapter? = null
+
+    private var courseBlockRecyclerView: RecyclerView? = null
+
+
     private val scheduleObserver = Observer<List<Schedule>?> {
         t -> scheduleRecyclerAdapter?.submitList(t)
     }
@@ -50,12 +55,25 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         t -> scopedGrantRecyclerAdapter?.submitList(t)
     }
 
+    private val courseBlockObserver = Observer<List<CourseBlock>?> {
+        t -> courseBlockRecyclerAdapter?.submitList(t)
+    }
+
     override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
         set(value) {
             field?.removeObserver(scheduleObserver)
             field = value
             value?.observe(this, scheduleObserver)
         }
+
+
+    override var courseBlocks: DoorMutableLiveData<List<CourseBlock>>? = null
+        set(value) {
+            field?.removeObserver(courseBlockObserver)
+            field = value
+            value?.observe(this, courseBlockObserver)
+        }
+
     override var clazzEndDateError: String? = null
         get() = field
         set(value) {
@@ -103,6 +121,31 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         }
     }
 
+    class CourseBlockRecyclerAdapter(var oneToManyEditListener: OneToManyJoinEditListener<CourseBlock>?,
+                                  var presenter: ClazzEdit2Presenter?): ListAdapter<CourseBlock,
+            CourseBlockRecyclerAdapter.CourseBlockViewHolder>(DIFF_CALLBACK_BLOCK) {
+
+        class CourseBlockViewHolder(val binding: ItemCourseBlockBinding): RecyclerView.ViewHolder(binding.root)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseBlockViewHolder {
+            val viewHolder = CourseBlockViewHolder(ItemCourseBlockBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false))
+            viewHolder.binding.mPresenter = presenter
+            viewHolder.binding.oneToManyJoinListener = oneToManyEditListener
+            return viewHolder
+        }
+
+        override fun onBindViewHolder(holder: CourseBlockViewHolder, position: Int) {
+            holder.binding.block = getItem(position)
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView)
+            oneToManyEditListener = null
+            presenter = null
+        }
+    }
+
     override var entity: ClazzWithHolidayCalendarAndSchool? = null
         get() = field
         set(value) {
@@ -131,6 +174,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         }
 
         scheduleRecyclerView = rootView.findViewById(R.id.activity_clazz_edit_schedule_recyclerview)
+        courseBlockRecyclerView = rootView.findViewById(R.id.activity_clazz_edit_course_block_recyclerview)
 
         return rootView
     }
@@ -148,6 +192,14 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             mPresenter?.scheduleOneToManyJoinListener, mPresenter)
 
         scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
+        scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+
+
+        mDataBinding?.courseBlockOneToManyListener = mPresenter?.courseBlockOneToManyJoinListener
+        courseBlockRecyclerAdapter = CourseBlockRecyclerAdapter(
+                mPresenter?.courseBlockOneToManyJoinListener, mPresenter)
+
+        scheduleRecyclerView?.adapter = courseBlockRecyclerAdapter
         scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         val permissionList = ScopedGrantEditPresenter.PERMISSION_LIST_MAP[Clazz.TABLE_ID]
@@ -169,6 +221,9 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         mDataBinding = null
         scheduleRecyclerView = null
         scheduleRecyclerAdapter = null
+        courseBlockRecyclerView = null
+        courseBlockRecyclerAdapter = null
+        courseBlocks = null
         clazzSchedules = null
     }
 
@@ -180,6 +235,16 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             }
 
             override fun areContentsTheSame(oldItem: Schedule, newItem: Schedule): Boolean {
+                return oldItem == newItem
+            }
+        }
+
+        val DIFF_CALLBACK_BLOCK: DiffUtil.ItemCallback<CourseBlock> = object: DiffUtil.ItemCallback<CourseBlock>() {
+            override fun areItemsTheSame(oldItem: CourseBlock, newItem: CourseBlock): Boolean {
+                return oldItem.cbUid == newItem.cbUid
+            }
+
+            override fun areContentsTheSame(oldItem: CourseBlock, newItem: CourseBlock): Boolean {
                 return oldItem == newItem
             }
         }
