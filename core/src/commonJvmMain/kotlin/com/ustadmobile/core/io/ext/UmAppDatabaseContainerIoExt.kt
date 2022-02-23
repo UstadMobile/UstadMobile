@@ -207,10 +207,18 @@ suspend fun UmAppDatabase.addContainerFromUri(containerUid: Long, uri: com.ustad
         containerUid, getSystemTimeInMillis())
 }
 
-suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
-                                                       zipInputStream: ZipInputStream, addOptions: ContainerAddOptions) {
+suspend fun UmAppDatabase.addEntriesToContainerFromZip(
+    containerUid: Long,
+    zipInputStream: ZipInputStream,
+    addOptions: ContainerAddOptions
+) {
 
-    val (db, repo) = requireDbAndRepo()
+    val db = if(this is DoorDatabaseRepository) {
+        this.db as UmAppDatabase
+    }else {
+        this
+    }
+
     withContext(Dispatchers.IO) {
         val containerEntriesToAdd = mutableListOf<ContainerEntry>()
         zipInputStream.use { zipIn ->
@@ -237,7 +245,7 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
 
         db.containerEntryDao.insertListAsync(containerEntriesToAdd)
 
-        repo.containerDao.takeIf { addOptions.updateContainer }
+        db.containerDao.takeIf { addOptions.updateContainer }
             ?.updateContainerSizeAndNumEntriesAsync(containerUid, getSystemTimeInMillis())
     }
 }

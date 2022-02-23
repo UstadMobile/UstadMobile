@@ -192,6 +192,10 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findByTitle")
     abstract fun findByTitle(title: String): DoorLiveData<ContentEntry?>
 
+    /**
+     * For new jobs, if the user is currently on Mobile Data, we will assume that they know what
+     * they want to do, and by default, allow the use of mobile data.
+     */
     @Query("""
        SELECT COALESCE((SELECT CAST(cjIsMeteredAllowed AS INTEGER) 
                 FROM ContentJobItem 
@@ -199,7 +203,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                     ON ContentJobItem.cjiJobUid = ContentJob.cjUid
                WHERE cjiContentEntryUid = :contentEntryUid
                 AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
-                AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX} LIMIT 1),0) AS Status
+                AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX} LIMIT 1),
+                CAST(((SELECT connectivityState
+                        FROM ConnectivityStatus
+                       LIMIT 1) = ${ConnectivityStatus.STATE_METERED}) AS INTEGER),
+                0) AS Status
     """)
     abstract suspend fun isMeteredAllowedForEntry(contentEntryUid: Long): Boolean
 
