@@ -199,9 +199,6 @@ abstract class UmAppDatabase : DoorDatabase() {
     @JsName("personAuthDao")
     abstract val personAuthDao: PersonAuthDao
 
-    @JsName("accessTokenDao")
-    abstract val accessTokenDao: AccessTokenDao
-
     @JsName("personGroupDao")
     abstract val personGroupDao: PersonGroupDao
 

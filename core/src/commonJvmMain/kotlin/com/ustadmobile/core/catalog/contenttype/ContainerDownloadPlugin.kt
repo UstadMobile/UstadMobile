@@ -104,6 +104,10 @@ class ContainerDownloadPlugin(
         }
 
         val containerSize = db.containerDao.findSizeByUid(contentJobItem.cjiContainerUid)
+        if(containerSize <= 0L) {
+            //if this is still 0, it means there is no recent container
+            return ProcessResult(JobStatus.FAILED, "Refusing to download an empty container")
+        }
 
         return withContext(Dispatchers.Default){
             val downloadFolderUri: String = jobItem.contentJob?.toUri

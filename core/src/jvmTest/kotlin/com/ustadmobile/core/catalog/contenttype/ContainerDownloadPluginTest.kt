@@ -24,6 +24,7 @@ import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
@@ -72,6 +73,10 @@ class ContainerDownloadPluginTest {
     private lateinit var downloadDestDir: File
 
     private lateinit var siteUrl: String
+
+    private lateinit var clientDb: UmAppDatabase
+
+    private lateinit var clientRepo: UmAppDatabase
 
     @JvmField
     @Rule
@@ -137,14 +142,18 @@ class ContainerDownloadPluginTest {
 
         siteEndpoint = Endpoint(mockWebServer.url("/").toString())
 
-        val clientRepo: UmAppDatabase by clientDi.on(siteEndpoint).instance(tag = DoorTag.TAG_REPO)
+        clientDb = clientDi.direct.on(siteEndpoint).instance(tag = DoorTag.TAG_DB)
+        clientRepo = clientDi.direct.on(siteEndpoint).instance(tag = DoorTag.TAG_REPO)
         clientRepo.contentEntryDao.insert(contentEntry)
+
+        //Get the updated size and number of entries
+        container = serverDb.containerDao.findByUid(container.containerUid)!!
         clientRepo.containerDao.insert(container)
     }
 
-    private fun makeDownloadJobAndJobItem() : ContentJobItemAndContentJob {
-        val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct.instance(tag = DoorTag.TAG_DB)
-
+    private fun makeDownloadJobAndJobItem(
+        setContainerInfo: Boolean = true
+    ) : ContentJobItemAndContentJob {
         return runBlocking {
             ContentJobItemAndContentJob().apply {
                 contentJob = ContentJob().apply {
@@ -154,9 +163,12 @@ class ContainerDownloadPluginTest {
                 }
                 contentJobItem = ContentJobItem().apply {
                     this.cjiContentEntryUid = contentEntry.contentEntryUid
-                    this.cjiContainerUid = container.containerUid
+                    if(setContainerInfo) {
+                        this.cjiContainerUid = container.containerUid
+                        this.cjiItemTotal = container.fileSize
+                    }
+
                     this.cjiJobUid = contentJob!!.cjUid
-                    this.cjiItemTotal = container.fileSize
                     this.cjiUid = clientDb.contentJobItemDao.insertJobItem(this)
                 }
             }
@@ -301,7 +313,6 @@ class ContainerDownloadPluginTest {
 
     @Test
     fun givenAllContainerEntryMd5sAlreadyPresent_whenDownloaded_thenShouldSucceed() {
-        val siteUrl = mockWebServer.url("/").toString()
         val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct
             .instance(tag = DoorTag.TAG_DB)
 
@@ -330,6 +341,62 @@ class ContainerDownloadPluginTest {
 
         serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
     }
+
+    @Test
+    fun givenContainerNotActive_whenDownloaded_thenWillFail() {
+        val inactiveContainer = Container().apply {
+            containerContentEntryUid = contentEntry.contentEntryUid
+            cntLastModified = systemTimeInMillis()
+            containerUid = container.containerUid
+        }
+        clientDb.containerDao.replaceList(listOf(inactiveContainer))
+        container = inactiveContainer
+        clientDb.containerEntryDao.deleteByContainerUid(container.containerUid)
+
+        val job = makeDownloadJobAndJobItem()
+
+        val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
+            temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
+            clientDi)
+
+
+        val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
+        val result = runBlocking {  downloadJob.processJob(job, processContext, mock { } ) }
+
+        Assert.assertEquals("Attempt to download inactive container fails",
+            JobStatus.FAILED, result.status)
+    }
+
+    @Test
+    fun givenNewContainerNotYetActive_whenDownloaded_thenWillDownloadOlderActiveContainer() {
+        //put in a more recent, but inactive container
+        Container().apply {
+            containerContentEntryUid = contentEntry.contentEntryUid
+            cntLastModified = systemTimeInMillis()
+            containerUid = clientDb.containerDao.insert(this)
+        }
+
+        val job = makeDownloadJobAndJobItem(setContainerInfo = false)
+
+        val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
+            temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
+            clientDi)
+
+        val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
+        val result = runBlocking {  downloadJob.processJob(job, processContext, mock { } ) }
+
+        Assert.assertEquals("Downloading when there is a more recent, but inactive container, reports success",
+            JobStatus.COMPLETE, result.status)
+
+        val downloadedContainerUid = clientDb.contentJobItemDao
+            .findByJobId(job.contentJobItem?.cjiJobUid ?: 0)?.cjiContainerUid ?: 0
+
+        Assert.assertEquals("Download used the previous active container uid, not the most recent inactive one",
+            container.containerUid, downloadedContainerUid)
+    }
+
+
+
 
 
 }

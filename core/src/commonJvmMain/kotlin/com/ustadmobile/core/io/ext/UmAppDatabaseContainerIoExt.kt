@@ -44,8 +44,14 @@ actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: D
         containerUid, getSystemTimeInMillis())
 }
 
-actual suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri: DoorUri,
-                                                    pathInContainer: String,  context: Any, di: org.kodein.di.DI, addOptions: ContainerAddOptions) {
+actual suspend fun UmAppDatabase.addFileToContainer(
+    containerUid: Long,
+    fileUri: DoorUri,
+    pathInContainer: String,
+    context: Any,
+    di: org.kodein.di.DI,
+    addOptions: ContainerAddOptions
+) {
     val repo = this as? DoorDatabaseRepository
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase
@@ -250,10 +256,12 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(
     }
 }
 
-actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
-                                                              zipUri: com.ustadmobile.door.DoorUri,
-                                                              addOptions: ContainerAddOptions,
-                                                              context: Any) {
+actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(
+    containerUid: Long,
+    zipUri: com.ustadmobile.door.DoorUri,
+    addOptions: ContainerAddOptions,
+    context: Any
+) {
     withContext(Dispatchers.IO) {
         val zipInputStream = ZipInputStream(zipUri.openInputStream(context))
         addEntriesToContainerFromZip(containerUid, zipInputStream, addOptions)
