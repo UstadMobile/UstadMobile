@@ -114,7 +114,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 98)
+], version = 99)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -2735,6 +2735,14 @@ abstract class UmAppDatabase : DoorDatabase() {
             }
         }
 
+        val MIGRATION_98_99 = DoorMigrationStatementList(98, 99) {db ->
+            if(db.dbType() == DoorDbType.POSTGRES) {
+                listOf("ALTER TABLE ContentJobItem ALTER COLUMN cjiFinishTime TYPE BIGINT")
+            }else {
+                listOf()
+            }
+        }
+
 
         fun migrationList(nodeId: Long) = listOf<DoorMigration>(
             MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
@@ -2750,7 +2758,7 @@ abstract class UmAppDatabase : DoorDatabase() {
             MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
             MIGRATION_88_89, MIGRATION_89_90, MIGRATION_90_91,
             UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
-            MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98
+            MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98, MIGRATION_98_99
         )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->
