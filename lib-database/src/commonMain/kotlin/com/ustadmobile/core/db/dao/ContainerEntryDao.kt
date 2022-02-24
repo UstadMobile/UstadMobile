@@ -63,4 +63,19 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
                       JOIN ContentJob ON ContentJobItem.cjiJobUid = ContentJob.cjUid
                      WHERE ContentJob.cjUid = :jobId)""")
     abstract fun deleteContainerEntriesCreatedByJobs(jobId: Long)
+
+    @Query("""
+        INSERT INTO ContainerEntry(ceContainerUid, cePath, ceCefUid) 
+        SELECT :containerUid AS ceContainerUid, :path AS cePath, 
+               (SELECT COALESCE(
+                      (SELECT cefUid 
+                         FROM ContainerEntryFile
+                        WHERE cefMd5 = :md5
+                        LIMIT 1), 0))  
+    """)
+    abstract suspend fun insertWithMd5SumsAsync(
+        containerUid: Long,
+        path: String,
+        md5: String
+    )
 }

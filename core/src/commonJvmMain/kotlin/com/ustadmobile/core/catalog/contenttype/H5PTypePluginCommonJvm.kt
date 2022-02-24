@@ -181,17 +181,17 @@ class H5PTypePluginCommonJvm(
 
                     // generate tincan.xml
                     val tinCan = """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <tincan xmlns="http://projecttincan.com/tincan.xsd">
-                    <activities>
-                        <activity id="${entry?.entryId?.escapeHTML()}" type="http://adlnet.gov/expapi/activities/module">
-                            <name>${entry?.title?.escapeHTML()}</name>
-                            <description lang="en-US">${entry?.description?.escapeHTML()}</description>
-                            <launch lang="en-us">index.html</launch>
-                        </activity>
-                    </activities>
-                </tincan>
-            """.trimIndent()
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <tincan xmlns="http://projecttincan.com/tincan.xsd">
+                            <activities>
+                                <activity id="${entry?.entryId?.escapeHTML()}" type="http://adlnet.gov/expapi/activities/module">
+                                    <name>${entry?.title?.escapeHTML()}</name>
+                                    <description lang="en-US">${entry?.description?.escapeHTML()}</description>
+                                    <launch lang="en-us">index.html</launch>
+                                </activity>
+                            </activities>
+                        </tincan>
+                        """.trimIndent()
 
                     val tmpTinCanFile = File.createTempFile("h5p-tincan", "xml")
                     tmpTinCanFile.writeText(tinCan)
@@ -205,22 +205,22 @@ class H5PTypePluginCommonJvm(
 
                     // generate index.html
                     val index = """
-                <html>
-                <head>
-                    <meta charset="utf-8" />
-                    <script type="text/javascript" src="dist/main.bundle.js"></script>
-                </head>
-                <body>
-                <div id="h5p-container" data-workspace="workspace"></div>
-                </body>
-                </html>
-            """.trimIndent()
+                        <html>
+                        <head>
+                            <meta charset="utf-8" />
+                            <script type="text/javascript" src="dist/main.bundle.js"></script>
+                        </head>
+                        <body>
+                        <div id="h5p-container" data-workspace="workspace"></div>
+                        </body>
+                        </html>
+                    """.trimIndent()
                     val tmpIndexHtmlFile = File.createTempFile("h5p-index", "html")
                     tmpIndexHtmlFile.writeText(index)
                     repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
                             "index.html", context, di,
                         ContainerAddOptions(storageDirUri = containerFolderUri,
-                            updateContainer = false))
+                            updateContainer = true)) //Last file, now update container
                     tmpIndexHtmlFile.delete()
 
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,

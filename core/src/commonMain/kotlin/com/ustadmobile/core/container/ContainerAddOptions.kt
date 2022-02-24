@@ -2,7 +2,7 @@ package com.ustadmobile.core.container
 
 import com.ustadmobile.door.DoorUri
 
-class ContainerAddOptions(
+data class ContainerAddOptions(
     val storageDirUri: DoorUri,
 
     val moveFiles: Boolean = false,
