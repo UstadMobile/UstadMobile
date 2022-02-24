@@ -11,4 +11,5 @@ data class UstadDestination(
     var component: KClass<out Component<UmProps, *>>,
     var showSearch: Boolean = false,
     var showNavigation: Boolean = true,
-    var divider: Boolean = false)
+    var divider: Boolean = false
+)
