@@ -26,6 +26,15 @@
         />
 
     <item
+        android:id="@+id/menu_share_offline"
+        android:orderInCategory="100"
+        android:title="@string/share_application"
+        android:contentDescription="@string/share_application"
+        app:showAsAction="never"
+        />
+
+
+    <item
         android:id="@+id/menu_main_profile"
         android:orderInCategory="100"
         android:title="@string/profile"

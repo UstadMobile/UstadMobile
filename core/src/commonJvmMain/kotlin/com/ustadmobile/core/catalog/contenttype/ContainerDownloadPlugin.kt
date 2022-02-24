@@ -3,6 +3,7 @@ package com.ustadmobile.core.catalog.contenttype
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_DOWNLOAD_PLUGIN
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherListener2
@@ -103,6 +104,10 @@ class ContainerDownloadPlugin(
         }
 
         val containerSize = db.containerDao.findSizeByUid(contentJobItem.cjiContainerUid)
+        if(containerSize <= 0L) {
+            //if this is still 0, it means there is no recent container
+            return ProcessResult(JobStatus.FAILED, "Refusing to download an empty container")
+        }
 
         return withContext(Dispatchers.Default){
             val downloadFolderUri: String = jobItem.contentJob?.toUri
@@ -135,8 +140,12 @@ class ContainerDownloadPlugin(
                 val containerFetchRequest = ContainerFetcherRequest2(
                     containerEntriesPartition.entriesWithoutMatchingFile, endpoint.url, endpoint.url,
                     downloadFolderUri)
-                val status = ContainerFetcherOkHttp(containerFetchRequest, progressAdapter,
-                    di).download()
+                val status = if(containerEntriesPartition.entriesWithoutMatchingFile.isNotEmpty()) {
+                    ContainerFetcherOkHttp(containerFetchRequest, progressAdapter,
+                        di).download()
+                }else {
+                    JobStatus.COMPLETE
+                }
 
                 //now everything is downloaded, link it
                 db.linkExistingContainerEntries(

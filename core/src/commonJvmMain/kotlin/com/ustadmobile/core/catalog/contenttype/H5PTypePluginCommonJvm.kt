@@ -163,15 +163,20 @@ class H5PTypePluginCommonJvm(
 
                     val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolderUri)
                     repo.addEntriesToContainerFromZip(container.containerUid, localUri,
-                            ContainerAddOptions(storageDirUri = containerFolderUri,
-                                    fileNamer = PrefixContainerFileNamer("workspace/")), context)
+                            ContainerAddOptions(
+                                storageDirUri = containerFolderUri,
+                                fileNamer = PrefixContainerFileNamer("workspace/"),
+                                updateContainer = false), context)
 
                     val h5pDistTmpFile = File.createTempFile("h5p-dist", "zip")
                     val h5pDistIn = getAssetFromResource("/com/ustadmobile/core/h5p/dist.zip", context, this::class)
                             ?: throw IllegalStateException("Could not find h5p dist file")
                     h5pDistIn.writeToFile(h5pDistTmpFile)
-                    repo.addEntriesToContainerFromZip(container.containerUid, h5pDistTmpFile.toDoorUri(),
-                            containerAddOptions, context)
+                    repo.addEntriesToContainerFromZip(
+                            container.containerUid, h5pDistTmpFile.toDoorUri(),
+                            ContainerAddOptions(storageDirUri = containerFolderUri,
+                                updateContainer = false),
+                            context)
                     h5pDistTmpFile.delete()
 
                     // generate tincan.xml
@@ -191,7 +196,10 @@ class H5PTypePluginCommonJvm(
                     val tmpTinCanFile = File.createTempFile("h5p-tincan", "xml")
                     tmpTinCanFile.writeText(tinCan)
                     repo.addFileToContainer(container.containerUid, tmpTinCanFile.toDoorUri(),
-                            "tincan.xml", context, di, containerAddOptions)
+                            "tincan.xml", context, di,
+                            ContainerAddOptions(storageDirUri = containerFolderUri,
+                                updateContainer = false)
+                    )
                     tmpTinCanFile.delete()
 
 
@@ -210,7 +218,9 @@ class H5PTypePluginCommonJvm(
                     val tmpIndexHtmlFile = File.createTempFile("h5p-index", "html")
                     tmpIndexHtmlFile.writeText(index)
                     repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
-                            "index.html", context, di, containerAddOptions)
+                            "index.html", context, di,
+                        ContainerAddOptions(storageDirUri = containerFolderUri,
+                            updateContainer = false))
                     tmpIndexHtmlFile.delete()
 
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,

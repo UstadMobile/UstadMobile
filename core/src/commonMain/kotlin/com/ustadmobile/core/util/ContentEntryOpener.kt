@@ -55,7 +55,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
         val containerToOpen = if (downloadRequired) {
             umAppDatabase.containerDao.findContainerWithMimeTypeWithFilesByContentEntryUid(contentEntryUid)
         } else {
-            umAppDatabase.containerDao.getMostRecentContaineUidAndMimeType(contentEntryUid)
+            umAppDatabase.containerDao.getMostRecentLocallyAvailableContainerUidAndMimeType(contentEntryUid)
         }
         val goToOptions = if(learnerGroupUid != 0L){
             UstadMobileSystemCommon.UstadGoOptions("", true)

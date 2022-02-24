@@ -13,7 +13,9 @@ import kotlinx.serialization.Serializable
                     "timestamp","statementLocalChangeSeqNum"])
 ])
 @Serializable
-@ReplicateEntity(tableId = StatementEntity.TABLE_ID, tracker = StatementEntityReplicate::class)
+//This must be replicated before entities that are joined to it e.g. ContextXObjectStatementJoin
+@ReplicateEntity(tableId = StatementEntity.TABLE_ID, tracker = StatementEntityReplicate::class,
+    ReplicateEntity.HIGHEST_PRIORITY + 1)
 @Triggers(arrayOf(
  Trigger(
      name = "statemententity_remote_insert",

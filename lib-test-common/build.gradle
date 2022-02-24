@@ -6,10 +6,12 @@ plugins {
 
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
-
     packagingOptions {
-        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+        resources {
+            excludes += ['META-INF/INDEX.LIST', '**/*.kotlin_metadata', 'META-INF/*.kotlin_module', 'licenses/**.TXT']
+        }
     }
+
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
