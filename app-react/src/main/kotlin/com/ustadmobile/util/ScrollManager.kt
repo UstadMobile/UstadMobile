@@ -6,7 +6,9 @@ import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 
 /**
- * Manages element scroll functionality
+ * Manages scroll behaviours with trigger events, currently is being used to mimic an endless
+ * scrolling behaviour on iframes where views are being paginated as root view scrolls.
+ *
  * @param viewToObserve Id of the view to be watched for scroll events (Div)
  * @param triggerOnDownScroll Flag to decide which scroll direction should trigger the event
  * @param triggerThreshold Percentage on which the event should be triggered

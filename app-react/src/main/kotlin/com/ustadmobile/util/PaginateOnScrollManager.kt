@@ -1,7 +1,7 @@
 package com.ustadmobile.util
 
 /**
- * Handle pagination on view scrolling
+ * Handle pagination on view scrolling, this mimics an endless scrolling behaviors on iframes
  * @param totalItemCount Number of items to be paginated
  * @param pageSize size of a page
  */

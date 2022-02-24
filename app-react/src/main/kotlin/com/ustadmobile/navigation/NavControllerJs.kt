@@ -40,7 +40,7 @@ class NavControllerJs: UstadNavController {
         }
 
         currentBackStackEntry?.let { entry ->
-            navigate(entry.viewName, entry.arguments, false)
+            navigateInternal(entry.viewName, entry.arguments, false)
         }
     }
 
@@ -59,10 +59,10 @@ class NavControllerJs: UstadNavController {
         if(popUpToViewName != null)
             popBackStack(popUpToViewName, goOptions.popUpToInclusive)
 
-        navigate(viewName, args, goOptions.popUpToViewName?.isNotEmpty() == true)
+        navigateInternal(viewName, args, goOptions.popUpToViewName?.isNotEmpty() == true)
     }
 
-    private fun navigate(viewName: String, args: Map<String, String>, hasOption: Boolean = false){
+    private fun navigateInternal(viewName: String, args: Map<String, String>, hasOption: Boolean = false){
         val params = when {
             args.isEmpty() -> ""
             else -> "?${UMFileUtil.mapToQueryString(args)}"

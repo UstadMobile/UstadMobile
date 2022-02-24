@@ -1,7 +1,16 @@
+/**
+ * Types from mui/styles/createBreakpoints
+ */
 @Suppress("EnumEntryName")
 enum class Breakpoint {
     xs, sm, md, lg, xl
 }
+
+/**
+ * The js up, down, etc calls all return a string beginning with "@media". We usually use these functions in
+ * css { media {...} } calls (e.g. media(currentTheme.breakpoints.up(Breakpoint.md)) ) as used in StyleManager,
+ * so we don't need the "@media" prefix as css { media {...} } adds the prefix as well.
+ */
 
 external interface Breakpoints {
     var keys: Array<Breakpoint>

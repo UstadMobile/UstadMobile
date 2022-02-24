@@ -2,11 +2,10 @@ package com.ustadmobile.navigation
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.ext.concurrentSafeMapOf
 
 class UstadSavedStateHandleJs: UstadSavedStateHandle {
 
-    internal val mLiveData: MutableMap<String, DoorMutableLiveData<*>?> = concurrentSafeMapOf()
+    internal val mLiveData: MutableMap<String, DoorMutableLiveData<*>?> = mutableMapOf()
 
     override fun <T> set(key: String, value: T?) {
         mLiveData[key] = DoorMutableLiveData(value)

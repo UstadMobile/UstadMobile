@@ -3,9 +3,14 @@ package com.ustadmobile.mui.ext
 import kotlinext.js.Object
 import kotlinx.css.CssBuilder
 
+/**
+ * This is only a simple jsObjectToCss converter. So far it can only handle
+ * a jsObject that is one layer deep, or two layers if the second layer is a
+ * media query (used initially just to convert the currentTheme.mixins.toolbar)
+ */
 fun CssBuilder.toolbarJsCssToPartialCss(jsObject: Object) {
-    // TODO: Pretty rude and crude for now, if it is a height or width, put px on the end of the value
-    fun addSuffix(key: String, value: String): String {
+
+    fun addPxSuffixIfNeeded(key: String, value: String): String {
         return if (key.contains("height", true) || key.contains("width", true)) {
             value + "px"
         } else {
@@ -23,14 +28,14 @@ fun CssBuilder.toolbarJsCssToPartialCss(jsObject: Object) {
                     val keys2 = Object.keys(value)
                     keys2.forEach {
                         val value2 = value[it]
-                        put(it, addSuffix(it, value2))
+                        put(it, addPxSuffixIfNeeded(it, value2))
                     }
                 }
             } else {
                 console.error("Don't know how to handle non query sub-object")
             }
         } else {
-            put(it, addSuffix(it, value))
+            put(it, addPxSuffixIfNeeded(it, value))
         }
     }
 }

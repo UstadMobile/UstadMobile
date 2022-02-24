@@ -1,5 +1,6 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.util.PaginateOnScrollManager
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -34,11 +35,11 @@ class  IframeComponent(mProps: IframeProps): RComponent<IframeProps, UmState>(mP
        styledDiv{
            css(contentContainer)
            sourcesUrlToLoad.forEach {
-               val iframeId = js("it.split('/').pop().split('#')[0].split('?')[0];").toString()
+               val iframeId = randomString(25)
                styledIframe{
                    css(StyleManager.iframeComponentResponsiveIframe)
                    attrs {
-                       src = it+if(props.contentTypeEpub) "?contentTypeEpub=${props.contentTypeEpub}" else ""
+                       src = it + if(props.contentTypeEpub) "?contentTypeEpub=${props.contentTypeEpub}" else ""
                        id = iframeId
                        onLoadFunction = { loadEvent ->
                            if(props.contentTypeEpub){
