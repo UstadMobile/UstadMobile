@@ -18,20 +18,17 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntry2DetailBinding
-import com.toughra.ustadmobile.databinding.ItemContentEntryListBinding
 import com.toughra.ustadmobile.databinding.ItemContentJobItemProgressBinding
 import com.toughra.ustadmobile.databinding.ItemEntryTranslationBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
-import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.direct
@@ -139,7 +136,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
     override fun handleOnClickDeleteButton() {
         MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.confirm)
-                .setPositiveButton(R.string.delete) { _, _ -> mPresenter?.handleOnClickDeleteButton() }
+                .setPositiveButton(R.string.delete) { _, _ -> mPresenter?.handleOnClickConfirmDelete() }
                 .setNegativeButton(R.string.cancel) { dialog, _ ->  dialog.cancel() }
                 .setMessage(R.string.confirm_delete_message)
                 .show()

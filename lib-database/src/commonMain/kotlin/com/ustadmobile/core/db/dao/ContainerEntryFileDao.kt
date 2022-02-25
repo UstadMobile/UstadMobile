@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContainerEntryFileUidAndPath
 
 @Dao
 abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
@@ -98,6 +99,24 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
                                     WHERE ContainerEntryFile.cefUid = ContainerEntry.ceCefUid) 
                      LIMIT 100""")
     abstract fun findZombieEntries(): List<ContainerEntryFile>
+
+    @Query("""
+        SELECT cefUid, cefPath
+          FROM ContainerEntryFile
+         WHERE NOT EXISTS 
+               (SELECT ContainerEntry.ceCefUid 
+                  FROM ContainerEntry 
+                 WHERE ContainerEntryFile.cefUid = ContainerEntry.ceCefUid
+                 LIMIT 1)
+         LIMIT :limit     
+    """)
+    abstract suspend fun findZombieUidsAndPath(limit: Int): List<ContainerEntryFileUidAndPath>
+
+    @Query("""
+        DELETE FROM ContainerEntryFile
+              WHERE cefUid IN (:uidList) 
+    """)
+    abstract suspend fun deleteByUidList(uidList: List<Long>)
 
     @Delete
     abstract fun deleteListOfEntryFiles(entriesToDelete: List<ContainerEntryFile>)

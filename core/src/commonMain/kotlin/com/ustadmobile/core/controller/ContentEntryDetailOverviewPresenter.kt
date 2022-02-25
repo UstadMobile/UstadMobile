@@ -3,6 +3,9 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeCompletedStatement
+import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentPluginIds
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -21,6 +24,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.*
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
 import org.kodein.di.*
@@ -189,8 +193,30 @@ class ContentEntryDetailOverviewPresenter(
                 arguments[ARG_ENTITY_UID]?.toLong() ?: 0, Role.PERMISSION_CONTENT_UPDATE)
     }
 
-    fun handleOnClickDeleteButton() {
-        handleOnClickManageDownload()
+    fun handleOnClickConfirmDelete() {
+        presenterScope.launch {
+            val job = db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                val job = ContentJob().apply {
+                    cjNotificationTitle = systemImpl.getString(MessageID.deleting_content, context)
+                        .replace("%1\$s",entity?.title ?: "")
+                    cjUid = txDb.contentJobDao.insertAsync(this)
+                }
+
+                txDb.contentJobItemDao.insertJobItem(ContentJobItem().apply {
+                    cjiJobUid = job.cjUid
+                    cjiContentEntryUid = entity?.contentEntryUid ?: 0L
+                    cjiPluginId = ContentPluginIds.DELETE_CONTENT_ENTRY_PLUGIN
+                    cjiIsLeaf = true
+                    cjiConnectivityNeeded = false
+                    cjiStatus = JobStatus.QUEUED
+                    sourceUri = entity?.toDeepLink(accountManager.activeEndpoint)
+                })
+
+                job
+            }
+            val contentJobManager : ContentJobManager = di.direct.instance()
+            contentJobManager.enqueueContentJob(accountManager.activeEndpoint, job.cjUid)
+        }
     }
 
     fun handleOnClickGroupActivityButton() {

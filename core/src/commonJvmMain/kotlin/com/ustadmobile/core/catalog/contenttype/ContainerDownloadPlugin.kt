@@ -21,6 +21,7 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.toFile
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -111,9 +112,15 @@ class ContainerDownloadPlugin(
 
         return withContext(Dispatchers.Default){
             val downloadFolderUri: String = jobItem.contentJob?.toUri
-                    ?: containerDir.toURI().toString()
-            val containerFolderDoorUri = DoorUri.parse(downloadFolderUri)
-            val containerFolderFile = containerFolderDoorUri.toFile()
+                    ?: containerDir.toDoorUri().toString()
+            val downloadFolderDir = DoorUri.parse(downloadFolderUri).toFile()
+
+            //This download will go into a subdirectory. This avoids any potential for concurrency
+            // issues if other downloads are running simultaneously.
+            val containerDownloadDir = File(downloadFolderDir,
+                contentJobItem.cjiContainerUid.toString())
+            containerDownloadDir.takeIf { !it.exists() }?.mkdirs()
+            val containerDownloadUri = containerDownloadDir.toDoorUri()
 
             val progressAdapter = ContainerFetcherProgressListenerAdapter(progress, contentJobItem)
 
@@ -139,7 +146,7 @@ class ContainerDownloadPlugin(
                 //be resumed as expected.
                 val containerFetchRequest = ContainerFetcherRequest2(
                     containerEntriesPartition.entriesWithoutMatchingFile, endpoint.url, endpoint.url,
-                    downloadFolderUri)
+                    containerDownloadUri.toString())
                 val status = if(containerEntriesPartition.entriesWithoutMatchingFile.isNotEmpty()) {
                     ContainerFetcherOkHttp(containerFetchRequest, progressAdapter,
                         di).download()
