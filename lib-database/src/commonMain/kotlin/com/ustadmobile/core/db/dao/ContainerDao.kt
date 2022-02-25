@@ -244,6 +244,14 @@ abstract class ContainerDao : BaseDao<Container> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertWithReplace(container : Container)
 
+    @Query("""
+        SELECT COALESCE(
+               (SELECT fileSize
+                  FROM Container
+                 WHERE containerUid = :containerUid), -1)
+    """)
+    abstract suspend fun getContainerSizeByUid(containerUid: Long) : Long
+
     companion object{
 
         //Containers in process will not have their filesize set.
