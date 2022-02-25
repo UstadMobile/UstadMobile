@@ -64,6 +64,12 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
                      WHERE ContentJob.cjUid = :jobId)""")
     abstract fun deleteContainerEntriesCreatedByJobs(jobId: Long)
 
+    /**
+     * This query can be used where we know that a ContainerEntryFile with the given md5 exists,
+     * but we don't have the container entry file uid.
+     *
+     * COALESCE has to be used because the query will otherwise fail compile-time query checks.
+     */
     @Query("""
         INSERT INTO ContainerEntry(ceContainerUid, cePath, ceCefUid) 
         SELECT :containerUid AS ceContainerUid, :path AS cePath, 
