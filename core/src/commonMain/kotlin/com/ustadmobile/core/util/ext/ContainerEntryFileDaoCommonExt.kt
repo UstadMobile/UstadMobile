@@ -3,7 +3,6 @@ package com.ustadmobile.core.util.ext
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.lib.db.entities.ContainerEntryFileUidAndPath
-import java.lang.Integer
 
 
 /**
@@ -23,7 +22,7 @@ suspend fun ContainerEntryFileDao.deleteZombieContainerEntryFiles(
         val maxChunkSize = if(dbType == DoorDbType.SQLITE) {
             100
         }else {
-            Integer.MAX_VALUE
+            Int.MAX_VALUE
         }
 
         val deletedZombies = deleteContainerEntryFilePaths(zombies)
