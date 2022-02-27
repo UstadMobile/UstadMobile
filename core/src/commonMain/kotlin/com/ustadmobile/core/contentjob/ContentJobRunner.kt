@@ -337,6 +337,17 @@ class ContentJobRunner(
             checkQueueSignalChannel.send(true)
         }
 
+        //Now remove any Zombies (e.g. where the same md5 was downloaded multiple times due when
+        // downloads were running concurrently
+        db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            //TODO here: for all downloaded containers, set the containerentry to use the first
+            // downloaded containerentryfile (in case multiple copies of the same md5 were downloaded)
+
+            txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
+        }
+
+
+
         return ContentJobResult(JobStatus.COMPLETE)
     }
 

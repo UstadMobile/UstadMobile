@@ -33,14 +33,12 @@ import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.*
 import org.junit.*
 import org.junit.rules.TemporaryFolder
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
+import org.kodein.di.*
 import java.io.File
 import kotlin.random.Random
 
@@ -131,6 +129,11 @@ class ContainerDownloadPluginTest {
         }
         clientDi = DI {
             import(ustadTestRule.diModule)
+            bind<Json>() with singleton {
+                Json {
+                    encodeDefaults = true
+                }
+            }
         }
 
         //Create a mock web server that will serve the concatenated data

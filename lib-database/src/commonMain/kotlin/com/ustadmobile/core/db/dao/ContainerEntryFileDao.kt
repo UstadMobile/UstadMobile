@@ -106,7 +106,7 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
          WHERE NOT EXISTS 
                (SELECT ContainerEntry.ceCefUid 
                   FROM ContainerEntry 
-                 WHERE ContainerEntryFile.cefUid = ContainerEntry.ceCefUid
+                 WHERE ContainerEntry.ceCefUid = ContainerEntryFile.cefUid 
                  LIMIT 1)
          LIMIT :limit     
     """)

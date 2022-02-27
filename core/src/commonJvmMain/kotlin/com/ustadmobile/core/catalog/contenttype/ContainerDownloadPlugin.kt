@@ -6,25 +6,22 @@ import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_DOWNLOAD_PLUGI
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.io.ext.FILE_EXTENSION_CE_JSON
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherListener2
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherOkHttp
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherRequest2
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.ext.linkExistingContainerEntries
-import com.ustadmobile.core.util.ext.partitionContainerEntriesWithMd5
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.sumByLong
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -36,6 +33,8 @@ import io.ktor.client.request.get
 import java.io.File
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
+import kotlinx.serialization.json.Json
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 
 class ContainerDownloadPlugin(
     context: Any,
@@ -61,6 +60,8 @@ class ContainerDownloadPlugin(
     private val containerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     private val httpClient: HttpClient = di.direct.instance()
+
+    private val json: Json by di.instance()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         return extractMetadata(ContentEntryDetailView.VIEW_NAME, uri)
@@ -136,6 +137,9 @@ class ContainerDownloadPlugin(
                 val containerEntriesPartition = db.partitionContainerEntriesWithMd5(
                     containerEntryListVal)
 
+                val entriesToDownload = containerEntriesPartition.entriesWithoutMatchingFile.
+                    filterNotInDirectory(containerDownloadDir)
+
                 contentJobItem.cjiItemProgress = containerEntriesPartition.existingFiles.sumByLong {
                     it.ceCompressedSize
                 }
@@ -145,18 +149,28 @@ class ContainerDownloadPlugin(
                 //We always download in md5sum (hex) alphabetical order, such that a partial download will
                 //be resumed as expected.
                 val containerFetchRequest = ContainerFetcherRequest2(
-                    containerEntriesPartition.entriesWithoutMatchingFile, endpoint.url, endpoint.url,
+                    entriesToDownload, endpoint.url, endpoint.url,
                     containerDownloadUri.toString())
-                val status = if(containerEntriesPartition.entriesWithoutMatchingFile.isNotEmpty()) {
+                val status = if(entriesToDownload.isNotEmpty()) {
                     ContainerFetcherOkHttp(containerFetchRequest, progressAdapter,
                         di).download()
                 }else {
                     JobStatus.COMPLETE
                 }
 
-                //now everything is downloaded, link it
-                db.linkExistingContainerEntries(
-                    contentJobItem.cjiContainerUid, containerEntryListVal)
+                val containerEntryFileEntities = containerDownloadDir
+                    .getContentEntryJsonFilesFromDir(json)
+
+                db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                    txDb.containerEntryFileDao.insertListAsync(containerEntryFileEntities)
+
+                    //now everything is downloaded, link it
+                    txDb.linkExistingContainerEntries(
+                        contentJobItem.cjiContainerUid, containerEntryListVal)
+                }
+
+                containerDownloadDir.deleteAllContentEntryJsonFiles()
+
                 ProcessResult(status)
             }finally {
                 contentJobItem.cjiItemTotal = totalDownloadSize.get()
