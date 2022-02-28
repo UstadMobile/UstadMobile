@@ -15,7 +15,7 @@ abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJ
     @Query("""
     REPLACE INTO ContextXObjectStatementJoinReplicate(cxosjPk, cxosjDestination)
     SELECT DISTINCT ContextXObjectStatementJoin.contextXObjectStatementJoinUid AS cxosjPk,
-         :newNodeId AS cxosjDestination
+         UserSession.usClientNodeId AS cxosjDestination
     FROM UserSession
              JOIN PersonGroupMember
                   ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
@@ -26,8 +26,9 @@ abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJ
                   ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
              JOIN ContextXObjectStatementJoin
                   ON ContextXObjectStatementJoin.contextStatementUid = StatementEntity.statementUid
-    --notpsql
-    WHERE ContextXObjectStatementJoin.contextXObjectLct != COALESCE(
+   WHERE UserSession.usClientNodeId = :newNodeId
+    --notpsql 
+     AND ContextXObjectStatementJoin.contextXObjectLct != COALESCE(
          (SELECT cxosjVersionId
             FROM ContextXObjectStatementJoinReplicate
            WHERE cxosjPk = ContextXObjectStatementJoin.contextXObjectStatementJoinUid
