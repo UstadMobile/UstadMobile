@@ -1,16 +1,17 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContainerEntryFileUidAndPath
 
 @Dao
 abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
+
+    @Insert
+    abstract suspend fun insertListAsync(list: List<ContainerEntryFile>)
 
     @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefMd5 IN (:md5Sums)")
     abstract fun findEntriesByMd5Sums(md5Sums: List<String>): List<ContainerEntryFile>
@@ -32,8 +33,11 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     open suspend fun findEntriesByMd5SumsSafeAsync(md5Sums: List<String>, maxListParamSize: Int) =
             findEntriesByMd5SumsSafeInternal(md5Sums, maxListParamSize) { findEntriesByMd5SumsAsync(it) }
 
-    private inline fun findEntriesByMd5SumsSafeInternal(md5Sums: List<String>, maxListParamSize: Int,
-                                                 queryFn: (List<String>) -> List<ContainerEntryFile>) : List<ContainerEntryFile>{
+    private inline fun findEntriesByMd5SumsSafeInternal(
+        md5Sums: List<String>,
+        maxListParamSize: Int,
+        queryFn: (List<String>) -> List<ContainerEntryFile>
+    ) : List<ContainerEntryFile>{
         return if (maxListParamSize > 0) {
             val chunkedList = md5Sums.chunked(maxListParamSize)
             val mutableList = mutableListOf<ContainerEntryFile>()
@@ -48,6 +52,19 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
 
     fun findEntriesByMd5SumsSafe(md5Sums: List<String>, db: UmAppDatabase) =
             findEntriesByMd5SumsSafe(md5Sums, if(db.dbType() == DoorDbType.SQLITE) { 90 } else { -1 })
+
+    @Transaction
+    open suspend fun findExistingMd5SumsByMd5SumsSafe(md5Sums: List<String>, maxListParamSize: Int = 90): List<String?> {
+        return if(maxListParamSize > 0) {
+            md5Sums.chunked(maxListParamSize).flatMap { findExistingMd5SumsByMd5SumsAsync(it) }
+        }else {
+            findExistingMd5SumsByMd5SumsAsync(md5Sums)
+        }
+    }
+
+    //language=RoomSql
+    @Query("SELECT ContainerEntryFile.cefMd5 FROM ContainerEntryFile WHERE cefMd5 IN (:md5Sums)")
+    abstract suspend fun findExistingMd5SumsByMd5SumsAsync(md5Sums: List<String>): List<String?>
 
 
     @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefUid IN (:uidList)")
@@ -82,6 +99,24 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
                                     WHERE ContainerEntryFile.cefUid = ContainerEntry.ceCefUid) 
                      LIMIT 100""")
     abstract fun findZombieEntries(): List<ContainerEntryFile>
+
+    @Query("""
+        SELECT cefUid, cefPath
+          FROM ContainerEntryFile
+         WHERE NOT EXISTS 
+               (SELECT ContainerEntry.ceCefUid 
+                  FROM ContainerEntry 
+                 WHERE ContainerEntry.ceCefUid = ContainerEntryFile.cefUid 
+                 LIMIT 1)
+         LIMIT :limit     
+    """)
+    abstract suspend fun findZombieUidsAndPath(limit: Int): List<ContainerEntryFileUidAndPath>
+
+    @Query("""
+        DELETE FROM ContainerEntryFile
+              WHERE cefUid IN (:uidList) 
+    """)
+    abstract suspend fun deleteByUidList(uidList: List<Long>)
 
     @Delete
     abstract fun deleteListOfEntryFiles(entriesToDelete: List<ContainerEntryFile>)

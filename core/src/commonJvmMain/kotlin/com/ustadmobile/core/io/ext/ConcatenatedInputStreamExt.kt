@@ -1,6 +1,5 @@
 package com.ustadmobile.core.io.ext
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ConcatenatedDataIntegrityException
 import com.ustadmobile.core.io.ConcatenatedInputStream2
 import com.ustadmobile.core.io.RangeOutputStream
@@ -10,19 +9,23 @@ import java.io.File
 import kotlin.coroutines.coroutineContext
 import java.util.concurrent.atomic.AtomicLong
 import com.ustadmobile.core.io.ConcatenatedEntry
-import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import io.github.aakira.napier.Napier
 import com.ustadmobile.door.ext.toHexString
 import java.io.*
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
+import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import kotlinx.serialization.json.Json
 
 data class ConcatenatedReadAndSaveResult(val totalBytesRead: Long)
 
+const val FILE_EXTENSION_CE_JSON = ".ce.json"
+
 /**
  * Read all the entries from the ConcatenatedInputStream and save them as they come to the given
- * destination directory. As the entries are read they will also be saved to the database. A
- * ContainerEntryFile will be inserted. ContainerEntry(s) will also be generated according
- * to entriesToLink
+ * destination directory. As the entries are read a json will also be saved into the same directory
+ * as md5sum.ce.json. These should be inserted after this function is finished in a transaction
+ * along with the ContainerEntry entities (to avoid a ContainerEntryFile being accidentally
+ * identified as a Zombie).
  *
  * This is used both when downloading files on the client and whilst
  * receiving uploads on the server.
@@ -41,10 +44,10 @@ data class ConcatenatedReadAndSaveResult(val totalBytesRead: Long)
 suspend fun ConcatenatedInputStream2.readAndSaveToDir(
     destDirFile: File,
     tmpDirFile: File,
-    db: UmAppDatabase,
     progressAtomicLong: AtomicLong,
     md5ExpectedList: MutableList<String>,
-    logPrefix: String
+    logPrefix: String,
+    json: Json,
 ) : ConcatenatedReadAndSaveResult {
     lateinit var concatenatedEntry: ConcatenatedEntry
     val buf = ByteArray(8192)
@@ -105,15 +108,18 @@ suspend fun ConcatenatedInputStream2.readAndSaveToDir(
 
         this.verifyCurrentEntryCompleted()
 
-        val finalDestFile = File(destDirFile, concatenatedEntry.md5.toHexString())
+        val md5Hex = concatenatedEntry.md5.toHexString()
+        val finalDestFile = File(destDirFile, md5Hex)
         if(!destFile.renameTo(finalDestFile))
             throw IOException("Could not rename ${destFileOut} to ${finalDestFile}")
         headerFile.delete()
 
-        concatenatedEntry.toContainerEntryFile().apply {
+        val ceJsonFile = File(destDirFile, "$md5Hex$FILE_EXTENSION_CE_JSON")
+        val containerEntryFile = concatenatedEntry.toContainerEntryFile().apply {
             cefPath = finalDestFile.absolutePath
-            cefUid = db.containerEntryFileDao.insertAsync(this)
         }
+        ceJsonFile.writeText(Json.encodeToString(
+            ContainerEntryFile.serializer(), containerEntryFile))
     }
 
     return ConcatenatedReadAndSaveResult(totalBytesRead)

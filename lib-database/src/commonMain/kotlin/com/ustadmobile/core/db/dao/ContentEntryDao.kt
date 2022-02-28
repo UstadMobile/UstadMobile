@@ -467,6 +467,27 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
         changedTime: Long
     )
 
+    @Query("""
+SELECT ContentEntry.*
+  FROM ContentEntry
+       JOIN Container ON Container.containerUid = 
+       (SELECT containerUid 
+          FROM Container
+         WHERE Container.containercontententryUid = ContentEntry.contentEntryUid
+           AND Container.cntLastModified = 
+               (SELECT MAX(ContainerInternal.cntLastModified)
+                  FROM Container ContainerInternal
+                 WHERE ContainerInternal.containercontententryUid = ContentEntry.contentEntryUid))
+ WHERE ContentEntry.leaf 
+   AND NOT ContentEntry.ceInactive
+   AND (NOT EXISTS 
+       (SELECT ContainerEntry.ceUid
+          FROM ContainerEntry
+         WHERE ContainerEntry.ceContainerUid = Container.containerUid)
+        OR Container.fileSize = 0)   
+    """)
+    abstract suspend fun findContentEntriesWhereIsLeafAndLatestContainerHasNoEntriesOrHasZeroFileSize(): List<ContentEntry>
+
     companion object {
 
         const val SORT_TITLE_ASC = 1

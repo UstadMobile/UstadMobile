@@ -27,7 +27,9 @@ actual suspend fun DoorUri.downloadUrlIfRemote(destination: DoorUri, di: DI) {
                 val okHttpClient: OkHttpClient = di.direct.instance()
                 val okRequest = okhttp3.Request.Builder().url(uri.toString()).build()
                 response = okHttpClient.newCall(okRequest).execute()
-                response.body?.byteStream()?.writeToFileAsync(destination.toFile())
+                response.body?.byteStream()?.use {
+                    it.writeToFileAsync(destination.toFile())
+                }
             }catch (io: IOException){
                 throw io
             }catch (e: Exception) {

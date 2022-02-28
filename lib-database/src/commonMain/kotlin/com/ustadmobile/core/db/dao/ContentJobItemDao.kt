@@ -248,4 +248,11 @@ abstract class ContentJobItemDao {
     """)
     abstract fun getJobItemByUidLive(uid: Long): DoorLiveData<ContentJobItem?>
 
+    @Query("""
+        SELECT cjiContainerUid
+          FROM ContentJobItem
+         WHERE cjiUid = :uid 
+    """)
+    abstract suspend fun getContainerUidByJobItemUid(uid: Long): Long
+
 }
