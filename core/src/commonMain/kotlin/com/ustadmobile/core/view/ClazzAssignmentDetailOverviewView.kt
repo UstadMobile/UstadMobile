@@ -1,17 +1,17 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.CommentsWithPerson
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
 
 
 interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignment> {
 
+    var submittedCourseAssignmentSubmission: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
 
-    var clazzMetrics: ContentEntryStatementScoreProgress?
-    var clazzAssignmentContent
-            : DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
-
-    var clazzAssignmentFileSubmission: DoorDataSourceFactory<Int, AssignmentFileSubmission>?
+    var addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment>?
 
     var timeZone: String?
 
@@ -20,13 +20,15 @@ interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignment> {
 
     var showPrivateComments: Boolean
 
-    var showFileSubmission: Boolean
+    var showSubmission: Boolean
 
     var hasPassedDeadline: Boolean
 
     var maxNumberOfFilesSubmission: Int
 
-    var fileSubmissionScore: ContentEntryStatementScoreProgress?
+    var submissionMark: CourseAssignmentMark?
+
+    var submissionStatus: Int
 
     companion object {
 

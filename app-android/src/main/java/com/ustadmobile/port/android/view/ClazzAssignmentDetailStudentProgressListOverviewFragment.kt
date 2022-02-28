@@ -116,12 +116,6 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
             value?.observe(viewLifecycleOwner, progressSummaryObserver)
         }
 
-    override var showMarked: Boolean = false
-        set(value) {
-            field = value
-            progressSummaryAdapter?.showMarked = value
-        }
-
     companion object {
         val DIFF_CALLBACK: DiffUtil.ItemCallback<PersonWithAttemptsSummary> = object
             : DiffUtil.ItemCallback<PersonWithAttemptsSummary>() {

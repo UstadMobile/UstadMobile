@@ -5,18 +5,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemAssignmentFileSubmissionHeaderBinding
 import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
-class FileSubmissionHeaderAdapter(heading: String): SingleItemRecyclerViewAdapter<
-        FileSubmissionHeaderAdapter.FileSubmissionHeaderViewHolder>() {
-
-    var headingText: String? = heading
-        set(value) {
-            field = value
-            viewHolder?.itemBinding?.headingText = value
-            viewHolder?.itemView?.tag = headingText
-        }
+class SubmissionStatusHeaderAdapter(): SingleItemRecyclerViewAdapter<
+        SubmissionStatusHeaderAdapter.FileSubmissionHeaderViewHolder>(false) {
 
     var assignment: ClazzAssignment? = null
         set(value){
@@ -26,12 +19,21 @@ class FileSubmissionHeaderAdapter(heading: String): SingleItemRecyclerViewAdapte
             viewHolder?.itemBinding?.assignment = value
         }
 
-    var fileSubmissionScore: ContentEntryStatementScoreProgress? = null
+    var courseAssignmentMark: CourseAssignmentMark? = null
         set(value){
             if(field == value)
                 return
             field = value
-            viewHolder?.itemBinding?.fileSubmissionScore = value
+            viewHolder?.itemBinding?.assignmentMark = value
+            viewHolder?.itemBinding?.showPoints = value != null
+        }
+
+    var assignmentStatus: Int = 0
+        set(value){
+            if(field == value)
+                return
+            field = value
+            viewHolder?.itemBinding?.assignmentStatus = value
         }
 
 
@@ -44,10 +46,10 @@ class FileSubmissionHeaderAdapter(heading: String): SingleItemRecyclerViewAdapte
         viewHolder = FileSubmissionHeaderViewHolder(
                 ItemAssignmentFileSubmissionHeaderBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
-                    it.headingText = headingText
                     it.assignment = assignment
-                    it.headingText = headingText
-                    it.fileSubmissionScore = fileSubmissionScore
+                    it.assignmentMark = courseAssignmentMark
+                    it.showPoints = courseAssignmentMark != null
+                    it.assignmentStatus = assignmentStatus
                 })
         return viewHolder as FileSubmissionHeaderViewHolder
     }

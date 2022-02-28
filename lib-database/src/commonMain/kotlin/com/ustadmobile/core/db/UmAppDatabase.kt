@@ -51,7 +51,8 @@ import kotlin.jvm.JvmField
     PersonParentJoin::class,
     ScopedGrant::class,
     ErrorReport::class,
-    ClazzAssignment::class, ClazzAssignmentContentJoin::class, AssignmentFileSubmission::class,
+    ClazzAssignment::class, ClazzAssignmentContentJoin::class, CourseAssignmentSubmission::class,
+    CourseAssignmentSubmissionAttachment::class, CourseAssignmentMark::class,
     ClazzAssignmentRollUp::class,
     PersonAuth2::class,
     UserSession::class,
@@ -67,7 +68,9 @@ import kotlin.jvm.JvmField
 
     ClazzLogReplicate::class,
     ClazzLogAttendanceRecordReplicate::class,
-    AssignmentFileSubmissionReplicate::class,
+    CourseAssignmentSubmissionReplicate::class,
+    CourseAssignmentSubmissionAttachmentReplicate::class,
+    CourseAssignmentMarkReplicate::class,
     ScheduleReplicate::class,
     HolidayCalendarReplicate::class,
     HolidayReplicate::class,
@@ -300,8 +303,14 @@ abstract class UmAppDatabase : DoorDatabase() {
     @JsName("cacheClazzAssignmentDao")
     abstract val clazzAssignmentRollUpDao: ClazzAssignmentRollUpDao
 
-    @JsName("assignmentFileSubmissionDao")
-    abstract val assignmentFileSubmissionDao: AssignmentFileSubmissionDao
+    @JsName("courseAssignmentSubmissionDao")
+    abstract val courseAssignmentSubmissionDao: CourseAssignmentSubmissionDao
+
+    @JsName("courseAssignmentSubmissionAttachmentDao")
+    abstract val courseAssignmentSubmissionAttachmentDao: CourseAssignmentSubmissionAttachmentDao
+
+    @JsName("courseAssignmentMarkDao")
+    abstract val courseAssignmentMarkDao: CourseAssignmentMarkDao
 
     @JsName("commentsDao")
     abstract val commentsDao: CommentsDao
@@ -2747,7 +2756,7 @@ abstract class UmAppDatabase : DoorDatabase() {
                     "ALTER TABLE ClazzAssignment ADD COLUMN caNumberOfFiles INTEGER NOT NULL DEFAULT 1",
                     "ALTER TABLE ClazzAssignment ADD COLUMN caEditAfterSubmissionType INTEGER NOT NULL DEFAULT 0",
                     "ALTER TABLE ClazzAssignment ADD COLUMN caMarkingType INTEGER NOT NULL DEFAULT 1",
-                    "ALTER TABLE ClazzAssignment ADD COLUMN caMaxScore INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caMaxPoints INTEGER NOT NULL DEFAULT 0",
                     "ALTER TABLE ClazzAssignmentContentJoin ADD COLUMN cacjWeight INTEGER NOT NULL DEFAULT 0",
                     "ALTER TABLE ClazzAssignmentRollUp ADD COLUMN cacheWeight INTEGER NOT NULL DEFAULT 0")
 

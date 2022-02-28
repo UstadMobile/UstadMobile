@@ -23,17 +23,10 @@ class AssignmentProgressSummaryRecyclerAdapter(progressSummary: AssignmentProgre
             viewHolder?.itemBinding?.assignmentProgressSummary = value
         }
 
-    var showMarked: Boolean = false
-        set(value){
-            field = value
-            viewHolder?.itemBinding?.showMarked = value
-        }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AssignmentProgressSummaryViewHolder {
         viewHolder = AssignmentProgressSummaryViewHolder(
                 ItemAssignmentProgressSummaryDetailBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
-                            it.showMarked = showMarked
                             it.assignmentProgressSummary = assignmentProgressSummaryVal
                 })
         return viewHolder as AssignmentProgressSummaryViewHolder

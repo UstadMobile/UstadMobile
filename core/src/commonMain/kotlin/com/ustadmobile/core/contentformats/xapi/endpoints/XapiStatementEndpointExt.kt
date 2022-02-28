@@ -162,8 +162,8 @@ fun XapiStatementEndpoint.storeMarkedStatement(
                 success = true
                 score = Score().apply {
                     raw = grade.toLong()
-                    max = assignment.caMaxScore.toLong()
-                    scaled = (grade.toFloat() / assignment.caMaxScore)
+                    max = assignment.caMaxPoints.toLong()
+                    scaled = (grade.toFloat() / assignment.caMaxPoints)
                 }
         }
         this.`object` = XObject().apply {

@@ -7,8 +7,8 @@ import com.toughra.ustadmobile.databinding.ItemAssignmentFileSubmissionBottomBin
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
-class FileSubmissionBottomAdapter(val eventHandler: ClazzAssignmentDetailOverviewFragmentEventHandler): SingleItemRecyclerViewAdapter<
-        FileSubmissionBottomAdapter.FileSubmissionBottomViewHolder>() {
+class AddSubmissionButtonsAdapter(val eventHandler: ClazzAssignmentDetailOverviewFragmentEventHandler): SingleItemRecyclerViewAdapter<
+        AddSubmissionButtonsAdapter.FileSubmissionBottomViewHolder>(false) {
 
 
     var maxFilesReached: Boolean = false
@@ -16,7 +16,7 @@ class FileSubmissionBottomAdapter(val eventHandler: ClazzAssignmentDetailOvervie
             if(field == value)
                 return
             field = value
-            viewHolder?.itemBinding?.maxFilesReached = value
+            viewHolder?.itemBinding?.showAddFile = checkCanAddFile()
         }
 
     var deadlinePassed: Boolean = false
@@ -25,14 +25,7 @@ class FileSubmissionBottomAdapter(val eventHandler: ClazzAssignmentDetailOvervie
                 return
             field = value
             viewHolder?.itemBinding?.deadlinePassed = value
-        }
-
-    var showSubmitButton: Boolean = false
-        set(value){
-            if(field == value)
-                return
-            field = value
-            viewHolder?.itemBinding?.showSubmitButton = value
+            viewHolder?.itemBinding?.showAddFile = checkCanAddFile()
         }
 
     var assignment: ClazzAssignment? = null
@@ -41,6 +34,7 @@ class FileSubmissionBottomAdapter(val eventHandler: ClazzAssignmentDetailOvervie
                 return
             field = value
             viewHolder?.itemBinding?.assignment = value
+            viewHolder?.itemBinding?.showAddFile = checkCanAddFile()
         }
 
 
@@ -49,6 +43,9 @@ class FileSubmissionBottomAdapter(val eventHandler: ClazzAssignmentDetailOvervie
 
     private var viewHolder: FileSubmissionBottomViewHolder? = null
 
+    private fun checkCanAddFile(): Boolean {
+        return (assignment?.caRequireFileSubmission ?: false) && !(maxFilesReached || deadlinePassed)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileSubmissionBottomViewHolder {
         viewHolder = FileSubmissionBottomViewHolder(
@@ -56,8 +53,7 @@ class FileSubmissionBottomAdapter(val eventHandler: ClazzAssignmentDetailOvervie
                         parent, false).also {
                     it.assignment = assignment
                     it.eventHandler = eventHandler
-                    it.maxFilesReached = maxFilesReached
-                    it.showSubmitButton = showSubmitButton
+                    it.showAddFile = checkCanAddFile()
                     it.deadlinePassed = deadlinePassed
                 })
         return viewHolder as FileSubmissionBottomViewHolder

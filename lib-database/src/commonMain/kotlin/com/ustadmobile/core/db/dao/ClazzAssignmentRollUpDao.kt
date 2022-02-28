@@ -2,12 +2,10 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.SqliteOnly
 import com.ustadmobile.lib.db.entities.ClazzAssignmentRollUp
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 
 @Dao
 @Repository
@@ -97,8 +95,8 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                 0 AS cacheContentEntryUid, 
                 caUid AS cacheClazzAssignmentUid, 
                 COALESCE(MarkingStatement.resultScoreRaw,0) AS cacheStudentScore, 
-                COALESCE(caMaxScore,0) AS cacheMaxScore,
-                COALESCE(caFileSubmissionWeight, 0) AS cacheWeight,
+                COALESCE(caMaxPoints,0) AS cacheMaxScore,
+                0 AS cacheWeight,
                 
                 COALESCE(MarkingStatement.extensionProgress,0) AS cacheProgress,
                 COALESCE(MarkingStatement.resultCompletion,'FALSE') AS cacheContentComplete, 
@@ -108,10 +106,10 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
                      ELSE 0 END) AS cachePenalty,
                      
               (CASE WHEN SubmissionStatement.timestamp > ClazzAssignment.caDeadlineDate 
-                     THEN (COALESCE(CAST(MarkingStatement.resultScoreRaw AS REAL),0) / COALESCE(caMaxScore,0) * 
-                            100 * caFileSubmissionWeight * (1 - (CAST(caLateSubmissionPenalty AS REAL)/100)))
-                     ELSE (COALESCE(CAST(MarkingStatement.resultScoreRaw AS REAL),0) / COALESCE(caMaxScore,0) * 
-                            100 * caFileSubmissionWeight)  END) AS cacheFinalWeightScoreWithPenalty, 
+                     THEN (COALESCE(CAST(MarkingStatement.resultScoreRaw AS REAL),0) / COALESCE(caMaxPoints,0) * 
+                            100 * (1 - (CAST(caLateSubmissionPenalty AS REAL)/100)))
+                     ELSE (COALESCE(CAST(MarkingStatement.resultScoreRaw AS REAL),0) / COALESCE(caMaxPoints,0) * 
+                            100)  END) AS cacheFinalWeightScoreWithPenalty, 
                      
                    
                0 AS lastCsnChecked
@@ -153,28 +151,6 @@ abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
     @SqliteOnly
     abstract suspend fun cacheBestStatements(clazzUid: Long, assignmentUid: Long, personUid: Long)
 
-
-    @Query("""
-        SELECT COALESCE(ClazzAssignmentRollUp.cacheMaxScore,0) AS resultMax, 
-               COALESCE(ClazzAssignmentRollUp.cacheStudentScore,0) AS resultScore, 
-               0 as resultScaled,
-               COALESCE(ClazzAssignmentRollUp.cacheContentComplete,'FALSE') AS contentComplete,
-               COALESCE(AVG(cacheProgress),0) as progress, 0 as success,
-               COALESCE(ClazzAssignmentRollUp.cachePenalty,0) AS penalty,
-               
-               COALESCE(SUM(cacheWeight),0) As resultWeight,
-               
-              COALESCE((CASE WHEN ClazzAssignmentRollUp.cacheContentComplete 
-                                            THEN 1 ELSE 0 END),0) AS totalCompletedContent,
-                        
-               1 AS totalContent
- 
-     	  FROM ClazzAssignmentRollUp
-         WHERE cachePersonUid = :personUid
-           AND cacheClazzAssignmentUid = :assignmentUid
-           AND cacheContentEntryUid = 0
-    """)
-    abstract fun getScoreForFileSubmission(assignmentUid: Long, personUid: Long): DoorLiveData<ContentEntryStatementScoreProgress?>
 
     @Query("""
         DELETE

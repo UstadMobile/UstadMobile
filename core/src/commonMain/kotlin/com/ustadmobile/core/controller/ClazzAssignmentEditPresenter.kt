@@ -7,24 +7,22 @@ import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.withDoorTransactionAsync
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzWithSchool
+import com.ustadmobile.lib.db.entities.XObjectEntity
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -34,24 +32,26 @@ class ClazzAssignmentEditPresenter(context: Any,
                                    di: DI)
     : UstadEditPresenter<ClazzAssignmentEditView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner) {
 
-    enum class LateSubmissionOptions(val optionVal: Int, val messageId: Int) {
-        REJECT(ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_REJECT,
-                MessageID.reject),
-        ACCEPT(ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT,
-                MessageID.accept),
-        MARK_PENALTY(ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY,
-                MessageID.mark_penalty)
+    enum class SubmissionTypeOptions(val optionVal: Int, val messageId: Int){
+        INDIVIDUAL(ClazzAssignment.SUBMISSION_TYPE_INDIVIDUAL, MessageID.individual),
+        GROUP(ClazzAssignment.SUBMISSION_TYPE_GROUP, MessageID.group)
     }
+    class SubmissionTypeOptionsMessageIdOption(day: SubmissionTypeOptions, context: Any)
+        : MessageIdOption(day.messageId, context, day.optionVal)
 
-    class LateSubmissionOptionsMessageIdOption(day: LateSubmissionOptions, context: Any)
+    enum class TextLimitTypeOptions(val optionVal: Int, val messageId: Int){
+        WORDS(ClazzAssignment.TEXT_WORD_LIMIT, MessageID.words),
+        CHARS(ClazzAssignment.TEXT_CHAR_LIMIT, MessageID.characters)
+    }
+    class TextLimitTypeOptionsMessageIdOption(day: TextLimitTypeOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
 
-    enum class AssignmentTypeOptions(val optionVal: Int, val messageId: Int){
-        INDIVIDUAL(ClazzAssignment.ASSIGNMENT_TYPE_INDIVIDUAL, MessageID.individual),
-        GROUP(ClazzAssignment.ASSIGNMENT_TYPE_GROUP, MessageID.group)
+    enum class CompletionCriteriaOptions(val optionVal: Int, val messageId: Int){
+        SUBMITTED(ClazzAssignment.COMPLETION_CRITERIA_SUBMIT, MessageID.submitted_cap),
+        GRADED(ClazzAssignment.COMPLETION_CRITERIA_GRADED, MessageID.graded)
     }
-    class AssignmentTypeOptionsMessageIdOption(day: AssignmentTypeOptions, context: Any)
+    class CompletionCriteriaOptionsMessageIdOption(day: CompletionCriteriaOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
 
@@ -86,8 +86,8 @@ class ClazzAssignmentEditPresenter(context: Any,
 
 
     enum class MarkingTypeOptions(val optionVal: Int, val messageId: Int){
-        TEACHER(ClazzAssignment.MARKING_TYPE_TEACHER, MessageID.teacher),
-        PEERS(ClazzAssignment.MARKING_TYPE_PEERS, MessageID.peers)
+        TEACHER(ClazzAssignment.MARKED_BY_COURSE_LEADER, MessageID.course_leader),
+        PEERS(ClazzAssignment.MARKED_BY_PEERS, MessageID.peers)
     }
     class MarkingTypeOptionsMessageIdOption(day: MarkingTypeOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
@@ -97,33 +97,14 @@ class ClazzAssignmentEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
 
-    private val contentOneToManyJoinEditHelper
-            = OneToManyJoinEditHelperMp(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::contentEntryUid,
-            ARG_SAVEDSTATE_CONTENT,
-            ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()),
-            ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()),
-            this,
-            requireSavedStateHandle(),
-            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class) {contentEntryUid = it}
-
-
-    val contentOneToManyJoinListener = contentOneToManyJoinEditHelper.createNavigateForResultListener(
-            ContentEntryList2View.VIEW_NAME,
-            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer(),
-            mutableMapOf(ContentEntryList2View.ARG_CLAZZ_ASSIGNMENT_FILTER to entity?.caUid.toString(),
-                    ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
-                    UstadView.ARG_PARENT_ENTRY_UID to  UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString(),
-                    ContentEntryList2View.ARG_SELECT_FOLDER_VISIBLE to false.toString()))
-
-
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.clazzAssignmentContent = contentOneToManyJoinEditHelper.liveList
-        view.lateSubmissionOptions = LateSubmissionOptions.values().map { LateSubmissionOptionsMessageIdOption(it, context) }
         view.markingTypeOptions = MarkingTypeOptions.values().map { MarkingTypeOptionsMessageIdOption(it, context) }
-        view.assignmentTypeOptions = AssignmentTypeOptions.values().map { AssignmentTypeOptionsMessageIdOption(it, context) }
+        view.submissionTypeOptions = SubmissionTypeOptions.values().map { SubmissionTypeOptionsMessageIdOption(it, context) }
+        view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaOptionsMessageIdOption(it, context) }
         view.editAfterSubmissionOptions = EditAfterSubmissionOptions.values().map { EditAfterSubmissionOptionsMessageIdOption(it, context) }
         view.fileTypeOptions = FileTypeOptions.values().map { FileTypeOptionsMessageIdOption(it, context) }
+        view.textLimitTypeOptions = TextLimitTypeOptions.values().map { TextLimitTypeOptionsMessageIdOption(it, context) }
     }
 
 
@@ -144,15 +125,6 @@ class ClazzAssignmentEditPresenter(context: Any,
         view.timeZone = timeZone
 
         loadEntityIntoDateTime(clazzAssignment)
-
-        val loggedInPersonUid = accountManager.activeAccount.personUid
-
-        val contentList = db.onRepoWithFallbackToDb(2000) {
-            it.clazzAssignmentContentJoinDao.findAllContentByClazzAssignmentUidAsync(
-                    clazzAssignment.caUid, loggedInPersonUid)
-        }
-
-        contentOneToManyJoinEditHelper.liveList.sendValue(contentList)
 
         return clazzAssignment
     }
@@ -180,9 +152,6 @@ class ClazzAssignmentEditPresenter(context: Any,
             view.timeZone = timeZone
             loadEntityIntoDateTime(editEntity)
         }
-
-
-        contentOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
 
         return editEntity
     }
@@ -256,38 +225,20 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             saveDateTimeIntoEntity(entity)
 
-            if (entity.caStartDate == 0L) {
-                view.caStartDateError = systemImpl.getString(MessageID.field_required_prompt, context)
-                return@launch
-            }
-
             if (entity.caDeadlineDate <= entity.caStartDate) {
                 view.caDeadlineError = systemImpl.getString(MessageID.end_is_before_start_error, context)
                 return@launch
             }
 
 
-            if (entity.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT ||
-                    entity.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY) {
-
-                if (entity.caDeadlineDate == Long.MAX_VALUE || view.deadlineTime == 0L) {
-                    view.caDeadlineError = systemImpl.getString(MessageID.field_required_prompt, context)
-                    return@launch
-                }
-
-                if(entity.caGracePeriodDate == Long.MAX_VALUE || view.gracePeriodTime == 0L){
-                    view.caGracePeriodError = systemImpl.getString(MessageID.field_required_prompt, context)
-                    return@launch
-                }
-
-                if (entity.caGracePeriodDate <= entity.caDeadlineDate) {
-                    view.caGracePeriodError = systemImpl.getString(MessageID.after_deadline_date_error, context)
-                    return@launch
-                }
+            if (entity.caGracePeriodDate < entity.caDeadlineDate) {
+                view.caGracePeriodError = systemImpl.getString(MessageID.after_deadline_date_error, context)
+                return@launch
             }
 
-            if(entity.caRequireFileSubmission && entity.caMaxScore == 0){
-                view.caMaxScoreError = systemImpl.getString(MessageID.field_required_prompt, context)
+
+            if(entity.caMaxPoints == 0){
+                view.caMaxPointsError = systemImpl.getString(MessageID.field_required_prompt, context)
                 return@launch
             }
             
@@ -295,13 +246,9 @@ class ClazzAssignmentEditPresenter(context: Any,
             view.loading = true
             view.fieldsEnabled = false
 
-            if(entity.caLateSubmissionType == 0 ||
-                    entity.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_REJECT) {
+            // if grace period is not set, set the date to equal the deadline
+            if(entity.caGracePeriodDate == Long.MAX_VALUE || view.gracePeriodTime == 0L){
                 entity.caGracePeriodDate = entity.caDeadlineDate
-            }
-
-            if(entity.caLateSubmissionType != ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
-                entity.caLateSubmissionPenalty = 0
             }
 
 
@@ -324,27 +271,6 @@ class ClazzAssignmentEditPresenter(context: Any,
             }
 
             repo.clazzAssignmentRollUpDao.invalidateCacheByAssignment(entity.caUid)
-
-            val contentToInsert = contentOneToManyJoinEditHelper.entitiesToInsert
-            val contentToDelete = contentOneToManyJoinEditHelper.primaryKeysToDeactivate
-            val contentToUpdate = contentOneToManyJoinEditHelper.entitiesToUpdate
-
-            // run in transaction
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
-                txRepo.clazzAssignmentContentJoinDao.insertListAsync(contentToInsert.map {
-                    ClazzAssignmentContentJoin().apply {
-                        cacjContentUid = it.contentEntryUid
-                        cacjAssignmentUid = entity.caUid
-                        cacjWeight = it.assignmentContentWeight
-                    }
-                })
-                contentToUpdate.forEach {
-                    txRepo.clazzAssignmentContentJoinDao.updateWeightForAssignmentAndContent(it.contentEntryUid, entity.caUid, it.assignmentContentWeight)
-                }
-                txRepo.clazzAssignmentContentJoinDao.deactivateByUids(contentToDelete, entity.caUid)
-                txRepo.clazzAssignmentRollUpDao.deleteCachedInactiveContent(entity.caUid)
-
-            }
 
             onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
 

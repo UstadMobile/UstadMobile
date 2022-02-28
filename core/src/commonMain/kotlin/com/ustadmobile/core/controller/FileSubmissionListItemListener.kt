@@ -1,11 +1,11 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.lib.db.entities.AssignmentFileSubmission
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
 
 interface FileSubmissionListItemListener {
 
-    fun onClickDeleteFileSubmission(fileSubmission: AssignmentFileSubmission)
+    fun onClickDeleteSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment)
 
-    fun onClickOpenFileSubmission(fileSubmission: AssignmentFileSubmission)
+    fun onClickOpenFileSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment)
 
 }

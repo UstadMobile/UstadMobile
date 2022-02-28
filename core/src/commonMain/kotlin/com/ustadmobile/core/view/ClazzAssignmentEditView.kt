@@ -1,9 +1,7 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 
 
 interface ClazzAssignmentEditView: UstadEditView<ClazzAssignment> {
@@ -12,7 +10,7 @@ interface ClazzAssignmentEditView: UstadEditView<ClazzAssignment> {
     var caDeadlineError: String?
     var caTitleError: String?
     var caStartDateError: String?
-    var caMaxScoreError: String?
+    var caMaxPointsError: String?
 
     var startDate: Long
     var startTime: Long
@@ -25,17 +23,17 @@ interface ClazzAssignmentEditView: UstadEditView<ClazzAssignment> {
 
     var timeZone: String?
 
-    var lateSubmissionOptions: List<ClazzAssignmentEditPresenter.LateSubmissionOptionsMessageIdOption>?
-
     var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>?
 
     var fileTypeOptions: List<ClazzAssignmentEditPresenter.FileTypeOptionsMessageIdOption>?
 
-    var assignmentTypeOptions: List<ClazzAssignmentEditPresenter.AssignmentTypeOptionsMessageIdOption>?
+    var textLimitTypeOptions: List<ClazzAssignmentEditPresenter.TextLimitTypeOptionsMessageIdOption>?
+
+    var submissionTypeOptions: List<ClazzAssignmentEditPresenter.SubmissionTypeOptionsMessageIdOption>?
+
+    var completionCriteriaOptions: List<ClazzAssignmentEditPresenter.CompletionCriteriaOptionsMessageIdOption>?
 
     var markingTypeOptions: List<ClazzAssignmentEditPresenter.MarkingTypeOptionsMessageIdOption>?
-
-    var clazzAssignmentContent: DoorMutableLiveData<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>?
 
     companion object {
 

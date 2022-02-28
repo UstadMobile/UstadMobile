@@ -17,10 +17,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.randomUuid
-import com.ustadmobile.lib.db.entities.AssignmentFileSubmission
-import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ContentWithAttemptSummary
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -65,7 +62,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
             repo.clazzAssignmentRollUpDao.cacheBestStatements(
                     selectedClazzUid, selectedClazzAssignmentUid,
                     selectedPersonUid)
-            nextStudentToMark = repo.statementDao.findNextStudentNotMarkedForAssignment(
+            nextStudentToMark = repo.courseAssignmentMarkDao.findNextStudentToMarkForAssignment(
                     selectedClazzAssignmentUid, selectedPersonUid)
             view.markNextStudentEnabled = nextStudentToMark != 0L
         }
@@ -83,34 +80,26 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
             it.personDao.findByUidAsync(selectedPersonUid)
         }
 
-        view.clazzAssignmentContent =
-                db.onRepoWithFallbackToDb(2000) {
-                    it.clazzAssignmentContentJoinDao.findAllContentWithAttemptsByClazzAssignmentUid(
-                            clazzAssignment.caUid, selectedPersonUid, mLoggedInPersonUid)
-                }
 
-
-        if(clazzAssignment.caRequireFileSubmission){
-
-            view.clazzAssignmentFileSubmission = db.onRepoWithFallbackToDb(2000){
-                it.assignmentFileSubmissionDao.getAllSubmittedFileSubmissionsFromStudent(
-                        clazzAssignment.caUid,
-                        selectedPersonUid
-                )
-            }
-
-            db.clazzAssignmentRollUpDao.getScoreForFileSubmission(clazzAssignment.caUid, selectedPersonUid)
-                    .observeWithLifecycleOwner(lifecycleOwner){
-                        view.fileSubmissionScore = it
-                    }
+        view.clazzCourseAssignmentSubmissionAttachment = db.onRepoWithFallbackToDb(2000){
+            it.courseAssignmentSubmissionDao.getAllFileSubmissionsFromStudent(
+                    clazzAssignment.caUid,
+                    selectedPersonUid
+            )
         }
-        view.hasFileSubmission = clazzAssignment.caRequireFileSubmission
 
-        db.clazzAssignmentDao.getStatementScoreProgressForAssignment(
-                clazzAssignment.caUid, selectedPersonUid)
+        db.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(clazzAssignment.caUid, selectedPersonUid)
+                    .observeWithLifecycleOwner(lifecycleOwner){
+                        view.submissionScore = it
+                    }
+
+        db.courseAssignmentSubmissionDao
+                .getStatusOfAssignmentForStudent(
+                        clazzAssignment.caUid, selectedPersonUid)
                 .observeWithLifecycleOwner(lifecycleOwner){
-                    view.studentScore = it
+                    view.submissionStatus = it ?: 0
                 }
+
 
         if(clazzAssignment.caPrivateCommentsEnabled){
             view.clazzAssignmentPrivateComments = db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
@@ -121,12 +110,13 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
         return clazzAssignment
     }
 
-    fun onClickOpenFileSubmission(fileSubmission: AssignmentFileSubmission){
+    fun onClickOpenFileSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment){
         presenterScope.launch {
-            val uri = fileSubmission.afsUri ?: return@launch
+            val attachment = submissionCourse.attachment ?: return@launch
+            val uri = attachment.casaUri ?: return@launch
             val doorUri = repo.retrieveAttachment(uri)
             try{
-                systemImpl.openFileInDefaultViewer(context, doorUri, fileSubmission.afsMimeType)
+                systemImpl.openFileInDefaultViewer(context, doorUri, attachment.casaMimeType)
             }catch (e: Exception){
                 if (e is NoAppFoundException) {
                     view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
@@ -142,7 +132,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
 
 
     fun onClickSubmitGrade(grade: Int): Boolean {
-        if(grade < 0 || (grade > entity?.caMaxScore ?: 0)){
+        if(grade < 0 || (grade > entity?.caMaxPoints ?: 0)){
            // to highlight the textfield to show error
             view.submitMarkError = " "
             return false
@@ -157,12 +147,17 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
                 view.submitMarkError = " "
                 return@launch
             }
+            db.courseAssignmentMarkDao.insertAsync(CourseAssignmentMark().apply {
+                camStudentUid = person.personUid
+                camAssignmentUid = assignment.caUid
+                camMark = grade
+                camPenalty = if(statement.timestamp > assignment.caDeadlineDate) assignment.caLateSubmissionPenalty else 0
+            })
             withContext(Dispatchers.Default) {
                 statementEndpoint.storeMarkedStatement(
                     accountManager.activeAccount,
                         person, randomUuid().toString(),
                         grade, assignment, statement)
-                repo.clazzAssignmentRollUpDao.cacheBestStatements(selectedClazzUid, selectedClazzAssignmentUid, selectedPersonUid)
                 view.showSnackBar(systemImpl.getString(MessageID.saved, context))
             }
         }

@@ -5,26 +5,17 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemAssignmentFileSubmissionBinding
-import com.ustadmobile.core.controller.ContentEntryListItemListener
 import com.ustadmobile.core.controller.FileSubmissionListItemListener
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.attachments.retrieveAttachment
-import com.ustadmobile.lib.db.entities.AssignmentFileSubmission
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.on
 
-class FileSubmissionAdapter(
+class SubmissionAdapter(
         var itemListener: FileSubmissionListItemListener?)
-    : SelectablePagedListAdapter<AssignmentFileSubmission,
-        FileSubmissionAdapter.FileSubmissionViewHolder>(DIFF_CALLBACK_FILE_SUBMISSION){
+    : SelectablePagedListAdapter<CourseAssignmentSubmissionWithAttachment,
+        SubmissionAdapter.FileSubmissionViewHolder>(DIFF_CALLBACK_FILE_SUBMISSION){
 
 
     var visible: Boolean = false
@@ -60,7 +51,6 @@ class FileSubmissionAdapter(
             viewHolder?.binding?.showDownload = value
         }
 
-
     class FileSubmissionViewHolder(val binding: ItemAssignmentFileSubmissionBinding)
         : RecyclerView.ViewHolder(binding.root)
 
@@ -84,6 +74,8 @@ class FileSubmissionAdapter(
     override fun onBindViewHolder(holder: FileSubmissionViewHolder, position: Int) {
         val item =  getItem(position)
         holder.binding.fileSubmission = item
+        // timestamp not modified until in the db when submitted
+        holder.binding.isSubmitted = item?.casTimestamp != 0L
         holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK_FILE_SUBMISSION)
     }
 
@@ -96,14 +88,14 @@ class FileSubmissionAdapter(
     companion object{
 
         val DIFF_CALLBACK_FILE_SUBMISSION =
-                object : DiffUtil.ItemCallback<AssignmentFileSubmission>() {
-                    override fun areItemsTheSame(oldItem: AssignmentFileSubmission,
-                                                 newItem: AssignmentFileSubmission): Boolean {
-                        return oldItem.afsUid == newItem.afsUid
+                object : DiffUtil.ItemCallback<CourseAssignmentSubmissionWithAttachment>() {
+                    override fun areItemsTheSame(oldItem: CourseAssignmentSubmissionWithAttachment,
+                                                 newItem: CourseAssignmentSubmissionWithAttachment): Boolean {
+                        return oldItem.casUid == newItem.casUid
                     }
 
-                    override fun areContentsTheSame(oldItem: AssignmentFileSubmission,
-                                                    newItem: AssignmentFileSubmission): Boolean {
+                    override fun areContentsTheSame(oldItem: CourseAssignmentSubmissionWithAttachment,
+                                                    newItem: CourseAssignmentSubmissionWithAttachment): Boolean {
                         return oldItem == newItem
                     }
                 }

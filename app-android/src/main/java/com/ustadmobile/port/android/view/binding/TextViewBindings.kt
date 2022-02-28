@@ -247,9 +247,9 @@ fun TextView.setFileSubmissionStatus(status: Int){
 
 
 val FILE_SUBMISSION_STATUS_TO_MESSAGEID_MAP = mapOf(
-        ClazzAssignment.FILE_NOT_SUBMITTED to MessageID.no_files_submitted,
-        ClazzAssignment.FILE_MARKED to MessageID.files_marked,
-        ClazzAssignment.FILE_SUBMITTED to MessageID.files_submitted
+        ClazzAssignment.FILE_NOT_SUBMITTED to MessageID.not_started,
+        ClazzAssignment.FILE_MARKED to MessageID.marked_cap,
+        ClazzAssignment.FILE_SUBMITTED to MessageID.submitted_cap
 )
 
 

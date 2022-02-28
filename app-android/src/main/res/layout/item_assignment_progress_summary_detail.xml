@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@{`` + assignmentProgressSummary.notStartedStudents}"
+            android:text="@{`` + assignmentProgressSummary.calculateNotSubmittedStudents()}"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -76,7 +76,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@id/item_layout_not_started"
-            app:layout_constraintEnd_toStartOf="@+id/item_layout_completed"
+            app:layout_constraintEnd_toStartOf="@+id/item_layout_marked"
             app:layout_constraintHorizontal_chainStyle="spread">
 
             <TextView
@@ -84,7 +84,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@{`` + assignmentProgressSummary.calculateStartedStudents()}"
+                android:text="@{`` + assignmentProgressSummary.submittedStudents}"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -94,7 +94,7 @@
                 android:id="@+id/item_clazz_assignment_progress_detail_started_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/started"
+                android:text="@string/submitted_cap"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/item_clazz_assignment_progress_detail_started_value" />
@@ -112,40 +112,8 @@
             android:background="@color/text"
             android:orientation="vertical"
             app:layout_constraintStart_toEndOf="@id/item_layout_started"
-            app:layout_constraintEnd_toStartOf="@+id/item_layout_completed"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/item_layout_completed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/item_layout_started"
             app:layout_constraintEnd_toStartOf="@+id/item_layout_marked"
-            app:layout_constraintHorizontal_chainStyle="spread">
-
-            <TextView
-                android:id="@+id/item_clazz_assignment_progress_detail_completed_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@{`` + assignmentProgressSummary.completedStudents}"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="3" />
-
-            <TextView
-                android:id="@+id/item_clazz_assignment_progress_detail_completed_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/completed"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/item_clazz_assignment_progress_detail_completed_value" />
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <View
             android:id="@+id/guideline4"
@@ -155,7 +123,7 @@
             android:background="@color/text"
             android:orientation="vertical"
             android:visibility="@{showMarked ? View.VISIBLE : View.GONE}"
-            app:layout_constraintStart_toEndOf="@id/item_layout_completed"
+            app:layout_constraintStart_toEndOf="@id/item_layout_started"
             app:layout_constraintEnd_toStartOf="@+id/item_layout_marked"
             app:layout_constraintTop_toTopOf="parent"/>
 
@@ -163,9 +131,8 @@
             android:id="@+id/item_layout_marked"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="@{showMarked ? View.VISIBLE : View.GONE}"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/item_layout_completed"
+            app:layout_constraintStart_toEndOf="@id/item_layout_started"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_chainStyle="spread">
 
@@ -191,8 +158,6 @@
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

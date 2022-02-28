@@ -98,95 +98,41 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                         AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                         AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
                         AS totalStudents, 
-        
-            (CASE WHEN (SELECT hasPermission 
+ 
+               0 AS notSubmittedStudents,
+                
+               (CASE WHEN (SELECT hasPermission 
                           FROM CtePermissionCheck)
-                 THEN (SELECT COUNT(DISTINCT clazzEnrolmentPersonUid)
+                     THEN (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casStudentUid)
                          FROM ClazzEnrolment
-                         
+                              JOIN CourseAssignmentSubmission
+                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentSubmission.casStudentUid
+                              AND ClazzAssignment.caUid = CourseAssignmentSubmission.casAssignmentUid
+                             
+                              LEFT JOIN CourseAssignmentMark
+                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
+                              AND ClazzAssignment.caUid = CourseAssignmentMark.camAssignmentUid
+                              
                         WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                           AND ClazzEnrolment.clazzEnrolmentActive
+                          AND CourseAssignmentMark.camUid IS NULL
                           AND ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-                          AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
-                          AND NOT EXISTS 
-                              (SELECT statementUid 
-                                 FROM StatementEntity 
-                                WHERE statementContentEntryUid 
-                                   IN (SELECT cacjContentUid 
-                                        FROM ClazzAssignmentContentJoin 
-                                       WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
-                                         AND cacjActive)
-                                  AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                                  AND StatementEntity.timestamp
-                                        BETWEEN ClazzAssignment.caStartDate
-                                        AND ClazzAssignment.caGracePeriodDate
-                                  )
-                         AND (NOT ClazzAssignment.caRequireFileSubmission 
-                              OR NOT EXISTS
-                              (SELECT statementUid
-                                 FROM StatementEntity
-                                WHERE StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                                  AND StatementEntity.xObjectUid = ClazzAssignment.caXObjectUid
-                                  AND StatementEntity.timestamp
-                                      BETWEEN ClazzAssignment.caStartDate
-                                      AND ClazzAssignment.caGracePeriodDate)))             
-                ELSE 0 END) AS notStartedStudents,
-                
-                  0 as startedStudents,
-        
-            (CASE WHEN (SELECT hasPermission 
-                         FROM CtePermissionCheck)
-                  THEN (SELECT COUNT(DISTINCT clazzEnrolmentPersonUid) 
-                          FROM ClazzEnrolment
-                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
-                           AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                           AND ClazzEnrolment.clazzEnrolmentActive
-                           AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
-                           AND (SELECT COUNT(DISTINCT statementContentEntryUid)
-                                  FROM StatementEntity
-                                 WHERE statementContentEntryUid 
-                                    IN (SELECT cacjContentUid 
-                                          FROM ClazzAssignmentContentJoin 
-                                         WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid)
-                           AND StatementEntity.contentEntryRoot 
-                           AND StatementEntity.resultCompletion
-                           AND StatementEntity.timestamp
-                                        BETWEEN ClazzAssignment.caStartDate
-                                        AND ClazzAssignment.caGracePeriodDate
-                           AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid) = 
-                                    (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
-                                       FROM ClazzAssignmentContentJoin 
-                                      WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid)
-                           AND (NOT ClazzAssignment.caRequireFileSubmission 
-                              OR EXISTS
-                              (SELECT statementUid
-                                 FROM StatementEntity
-                                WHERE StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                                  AND StatementEntity.xObjectUid = ClazzAssignment.caXObjectUid
-                                  AND StatementEntity.timestamp
-                                      BETWEEN ClazzAssignment.caStartDate
-                                      AND ClazzAssignment.caGracePeriodDate)))            
-                  ELSE 0 END) AS completedStudents,
-                   
-                    (CASE WHEN (SELECT hasPermission 
-                         FROM CtePermissionCheck)
-                  THEN (SELECT COUNT(DISTINCT(StatementEntity.statementPersonUid)) 
-                           FROM StatementEntity 
-                                JOIN XObjectEntity 
-                                ON XObjectEntity.xObjectUid = StatementEntity.xObjectUid 
-                                
-                                JOIN StatementEntity as SubmissionStatement 
-                                ON SubmissionStatement.statementId = XObjectEntity.objectId
-                                
+                          AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
+                ELSE 0 END) AS submittedStudents,         
+                            
+                 (CASE WHEN (SELECT hasPermission 
+                           FROM CtePermissionCheck)
+                   THEN (SELECT COUNT(DISTINCT(CourseAssignmentMark.camStudentUid)) 
+                           FROM CourseAssignmentMark 
                                 JOIN ClazzEnrolment
-                                ON ClazzEnrolment.clazzEnrolmentPersonUid = StatementEntity.statementPersonUid
-                               
-                          WHERE SubmissionStatement.xObjectUid = ClazzAssignment.caXObjectUid
+                                ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
+                                
+                          WHERE CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
                             AND ClazzEnrolment.clazzEnrolmentActive
                             AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                             AND ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
                             AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
-                    ELSE 0 END) AS markedStudents,          
+                   ELSE 0 END) AS markedStudents,
                    
                    
            
@@ -285,29 +231,19 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     
     @Query("""
          SELECT ResultSource.personUid, ResultSource.firstNames, ResultSource.lastName,
-            COALESCE(COUNT(DISTINCT(ResultSource.contextRegistration)),0) AS attempts, 
-            COALESCE(MIN(ResultSource.timestamp),0) AS startDate, 
-            COALESCE(MAX(ResultSource.timestamp),0) AS endDate, 
-            SUM(ResultSource.resultDuration) AS duration, 
+            0 AS attempts, 
+            0 AS startDate, 
+            0 AS endDate, 
+            0 AS duration, 
             
             
-             (SELECT AVG(cacheProgress) 
-               FROM ClazzAssignmentRollUp 
-              WHERE cacheClazzAssignmentUid = :assignmentUid
-                AND cachePersonUid = ResultSource.personUid
-                ) AS progress,
+            0 AS progress,
                 
                 0 as success, 
                 
-              COALESCE((SELECT SUM(cacheFinalWeightScoreWithPenalty)
-                         FROM ClazzAssignmentRollUp 
-                        WHERE cacheClazzAssignmentUid = :assignmentUid
-                          AND cachePersonUid = ResultSource.personUid), 0) AS resultScaled,
+              0 AS resultScaled,
                               
-             COALESCE((SELECT SUM(cacheWeight)
-                         FROM ClazzAssignmentRollUp 
-                        WHERE cacheClazzAssignmentUid = :assignmentUid
-                          AND cachePersonUid = ResultSource.personUid), 0) AS resultWeight,       
+             0 AS resultWeight,       
                 
                 'FALSE' as contentComplete,
                 
@@ -317,32 +253,23 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                         
                 0 AS penalty,   
                                                     
-                   COALESCE((SELECT COUNT(cacheContentComplete)
-                        FROM ClazzAssignmentRollUp
-                        WHERE cacheClazzAssignmentUid = :assignmentUid
-                        AND cacheContentComplete
-                              AND cachePersonUid = ResultSource.personUid), 0) AS totalCompletedContent,
+                  0 AS totalCompletedContent,
             
-            COALESCE((SELECT COUNT(DISTINCT cacheContentEntryUid) 
-                              FROM ClazzAssignmentRollUp
-                             WHERE cacheClazzAssignmentUid = :assignmentUid), 0) AS totalContent,                              
+           0 AS totalContent,                              
                                                    
-           COALESCE((CASE WHEN NOT ResultSource.caRequireFileSubmission 
-                          THEN ${ClazzAssignment.FILE_SUBMISSION_NOT_REQUIRED} 
-                          WHEN MarkedStatement.statementUid IS NOT NULL 
-                          THEN ${ClazzAssignment.FILE_MARKED} 
-                          WHEN SubmissionStatement.statementUid IS NOT NULL 
-                          THEN ${ClazzAssignment.FILE_SUBMITTED} 
-                          ELSE ${ClazzAssignment.FILE_NOT_SUBMITTED} END), 
-                               ${ClazzAssignment.FILE_SUBMISSION_NOT_REQUIRED} ) AS fileSubmissionStatus,
+           COALESCE((CASE WHEN ResultSource.camUid IS NOT NULL 
+                          THEN ${CourseAssignmentSubmission.MARKED} 
+                          WHEN ResultSource.casUid IS NOT NULL 
+                          THEN ${CourseAssignmentSubmission.SUBMITTED} 
+                          ELSE ${CourseAssignmentSubmission.NOT_SUBMITTED} END), 
+                               ${CourseAssignmentSubmission.NOT_SUBMITTED}) AS fileSubmissionStatus,
                                  
 
             cm.commentsText AS latestPrivateComment
         
          FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 
-            StatementEntity.contextRegistration, StatementEntity.timestamp, 
-            StatementEntity.resultDuration, ClazzAssignment.caXObjectUid, 
-            ClazzAssignment.caRequireFileSubmission
+            CourseAssignmentSubmission.casUid, 
+            CourseAssignmentMark.camUid
                 FROM PersonGroupMember
          ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
              LEFT JOIN ClazzEnrolment
@@ -352,25 +279,20 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
              LEFT JOIN ClazzAssignment 
              ON ClazzAssignment.caUid = :assignmentUid
              
-             LEFT JOIN ClazzAssignmentContentJoin 
-             ON ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid
-             AND ClazzAssignmentContentJoin.cacjActive
-		                   
-                          
-             LEFT JOIN StatementEntity 
-             ON StatementEntity.statementPersonUid = Person.personUid  
-                AND StatementEntity.statementContentEntryUid = ClazzAssignmentContentJoin.cacjContentUid  
-                AND StatementEntity.timestamp
-                BETWEEN ClazzAssignment.caStartDate
-                AND ClazzAssignment.caGracePeriodDate    
-                
+             LEFT JOIN CourseAssignmentSubmission
+             ON CourseAssignmentSubmission.casAssignmentUid = ClazzAssignment.caUid
+             AND CourseAssignmentSubmission.casStudentUid = Person.personUid
+             
+             LEFT JOIN CourseAssignmentMark
+             ON CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
+             AND CourseAssignmentMark.camStudentUid = Person.personUid
                 
                 WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
                 AND PersonGroupMember.groupMemberActive                      
                 AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
                 AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}     
                 AND ClazzEnrolment.clazzEnrolmentActive
-                GROUP BY Person.personUid, StatementEntity.statementUid) AS ResultSource 
+                GROUP BY Person.personUid) AS ResultSource 
              		LEFT JOIN Comments AS cm 
                     ON cm.commentsUid = (
                                  SELECT Comments.commentsUid 
@@ -381,26 +303,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                                     AND NOT commentsPublic
                                     AND Comments.commentsPersonUid = ResultSource.personUid
                                ORDER BY commentsDateTimeAdded DESC LIMIT 1)
-                   LEFT JOIN StatementEntity AS SubmissionStatement
-                   ON SubmissionStatement.statementUid = (SELECT statementUid 
-                                   FROM StatementEntity
-                                  WHERE StatementEntity.statementContentEntryUid = 0
-                                    AND xObjectUid = ResultSource.caXObjectUid
-                                    AND StatementEntity.statementPersonUid = ResultSource.personUid
-                               ORDER BY timestamp DESC LIMIT 1)
-                   
-                  
-                   LEFT JOIN XObjectEntity
-                   ON SubmissionStatement.statementId = XObjectEntity.objectId
-                   
-                   LEFT JOIN StatementEntity AS MarkedStatement
-                   ON MarkedStatement.statementPersonUid = ResultSource.personUid
-                   AND MarkedStatement.timestamp = (SELECT timestamp 
-                                                       FROM StatementEntity 
-                                                      WHERE StatementEntity.xObjectUid = XObjectEntity.xObjectUid 
-                                                   ORDER BY timestamp DESC 
-                                                      LIMIT 1)
-                   
+
          GROUP BY ResultSource.personUid 
          ORDER BY CASE(:sortOrder) 
                 WHEN $SORT_FIRST_NAME_ASC THEN ResultSource.firstNames
@@ -449,92 +352,36 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
                         AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
                         AS totalStudents, 
         
-            (CASE WHEN (SELECT hasPermission 
+               0 AS notSubmittedStudents,
+                
+               (CASE WHEN (SELECT hasPermission 
                           FROM CtePermissionCheck)
-                 THEN (SELECT COUNT(DISTINCT clazzEnrolmentPersonUid)
+                     THEN (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casStudentUid)
                          FROM ClazzEnrolment
-                         
+                              JOIN CourseAssignmentSubmission
+                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentSubmission.casStudentUid
+                              AND ClazzAssignment.caUid = CourseAssignmentSubmission.casAssignmentUid
+                             
+                              LEFT JOIN CourseAssignmentMark
+                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
+                              AND ClazzAssignment.caUid = CourseAssignmentMark.camAssignmentUid
+                              
                         WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                           AND ClazzEnrolment.clazzEnrolmentActive
+                          AND CourseAssignmentMark.camUid IS NULL
                           AND ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-                          AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
-                          AND NOT EXISTS 
-                              (SELECT statementUid 
-                                 FROM StatementEntity 
-                                WHERE statementContentEntryUid 
-                                   IN (SELECT cacjContentUid 
-                                        FROM ClazzAssignmentContentJoin 
-                                       WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
-                                         AND ClazzAssignmentContentJoin.cacjActive)
-                                  AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                                   AND StatementEntity.timestamp
-                                        BETWEEN ClazzAssignment.caStartDate
-                                        AND ClazzAssignment.caGracePeriodDate
-                                  )
-                         AND (NOT ClazzAssignment.caRequireFileSubmission 
-                              OR NOT EXISTS
-                              (SELECT statementUid
-                                 FROM StatementEntity
-                                WHERE StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                                  AND StatementEntity.xObjectUid = ClazzAssignment.caXObjectUid
-                                  AND StatementEntity.timestamp
-                                      BETWEEN ClazzAssignment.caStartDate
-                                      AND ClazzAssignment.caGracePeriodDate))) 
-                ELSE 0 END) AS notStartedStudents,
-                
-                0 as startedStudents,
-        
-            (CASE WHEN (SELECT hasPermission 
-                         FROM CtePermissionCheck)
-                  THEN (SELECT COUNT(DISTINCT clazzEnrolmentPersonUid) 
-                          FROM ClazzEnrolment
-                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
-                           AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                           AND ClazzEnrolment.clazzEnrolmentActive
-                           AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft 
-                           AND (SELECT COUNT(DISTINCT statementContentEntryUid)
-                                  FROM StatementEntity
-                                 WHERE statementContentEntryUid 
-                                    IN (SELECT cacjContentUid 
-                                          FROM ClazzAssignmentContentJoin 
-                                         WHERE ClazzAssignment.caUid = ClazzAssignmentContentJoin.cacjAssignmentUid
-                                           AND ClazzAssignmentContentJoin.cacjActive)
-                           AND StatementEntity.contentEntryRoot 
-                           AND StatementEntity.resultCompletion
-                           AND StatementEntity.timestamp
-                                        BETWEEN ClazzAssignment.caStartDate
-                                        AND ClazzAssignment.caGracePeriodDate
-                           AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid) = 
-                                    (SELECT COUNT(ClazzAssignmentContentJoin.cacjContentUid) 
-                                       FROM ClazzAssignmentContentJoin 
-                                      WHERE ClazzAssignmentContentJoin.cacjAssignmentUid = ClazzAssignment.caUid
-                                        AND cacjActive)
-                           AND (NOT ClazzAssignment.caRequireFileSubmission 
-                              OR EXISTS
-                              (SELECT statementUid
-                                 FROM StatementEntity
-                                WHERE StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                                  AND StatementEntity.xObjectUid = ClazzAssignment.caXObjectUid
-                                  AND StatementEntity.timestamp
-                                      BETWEEN ClazzAssignment.caStartDate
-                                      AND ClazzAssignment.caGracePeriodDate)))               
-                  ELSE 0 END) AS completedStudents,
-                  
+                          AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
+                ELSE 0 END) AS submittedStudents,      
+
                   
              (CASE WHEN (SELECT hasPermission 
                            FROM CtePermissionCheck)
-                   THEN (SELECT COUNT(DISTINCT(StatementEntity.statementPersonUid)) 
-                           FROM StatementEntity 
-                                JOIN XObjectEntity 
-                                ON XObjectEntity.xObjectUid = StatementEntity.xObjectUid 
-                                
-                                JOIN StatementEntity as SubmissionStatement 
-                                ON SubmissionStatement.statementId = XObjectEntity.objectId
-                                
+                   THEN (SELECT COUNT(DISTINCT(CourseAssignmentMark.camStudentUid)) 
+                           FROM CourseAssignmentMark 
                                 JOIN ClazzEnrolment
-                                ON ClazzEnrolment.clazzEnrolmentPersonUid = StatementEntity.statementPersonUid
-                               
-                          WHERE SubmissionStatement.xObjectUid = ClazzAssignment.caXObjectUid
+                                ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
+                                
+                          WHERE CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
                             AND ClazzEnrolment.clazzEnrolmentActive
                             AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                             AND ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
@@ -545,10 +392,10 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
         FROM ClazzAssignment
        WHERE caActive
          AND caClazzUid = :clazzUid 
-         AND caUid = :uid
+         AND caUid = :clazzAssignmentUid
     """)
     abstract fun getStudentsProgressOnAssignment(clazzUid: Long, accountPersonUid: Long,
-                                                 uid: Long, permission: Long): DoorLiveData<AssignmentProgressSummary?>
+                                                 clazzAssignmentUid: Long, permission: Long): DoorLiveData<AssignmentProgressSummary?>
 
 
 

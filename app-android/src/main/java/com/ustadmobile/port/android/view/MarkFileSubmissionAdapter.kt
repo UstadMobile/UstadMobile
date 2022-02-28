@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentProgressFragmentEventHandler): SingleItemRecyclerViewAdapter<
-        MarkFileSubmissionAdapter.MarkFileSubmissionViewHolder>() {
+        MarkFileSubmissionAdapter.MarkFileSubmissionViewHolder>(true) {
 
     class MarkFileSubmissionViewHolder(var itemBinding: ItemMarkFileSubmissionBinding)
         : RecyclerView.ViewHolder(itemBinding.root)

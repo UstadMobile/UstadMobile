@@ -36,8 +36,6 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
         mLoggedInPersonUid = accountManager.activeAccount.personUid
         updateListOnView()
         presenterScope.launch {
-            val entity = repo.clazzAssignmentDao.findByUidAsync(clazzAssignmentUid)
-            view.showMarked = entity?.caRequireFileSubmission ?: false
             repo.clazzAssignmentRollUpDao.cacheBestStatements(
                     clazzUid, clazzAssignmentUid,
                     0)

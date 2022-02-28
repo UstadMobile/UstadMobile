@@ -2,21 +2,18 @@
 package com.ustadmobile.core.controller
 
 
-import com.google.gson.Gson
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzAssignmentDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.activeDbInstance
-import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.util.test.waitUntilAsyncOrTimeout
-import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.ClazzAssignmentDetailView
+import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -29,7 +26,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
-import org.kodein.di.DIProperty
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.mockito.kotlin.*
@@ -114,7 +110,7 @@ class ClazzAssignmentEditPresenterTest {
 
         //TODO: Make some changes (e.g. as the user would do using data binding
         initialEntity.caTitle = "Test Clazz Assignment"
-        initialEntity.caMaxScore = 2
+        initialEntity.caMaxPoints = 2
         whenever(mockView.startDate).thenReturn(DateTime(2021,5,10).unixMillisLong)
         whenever(mockView.deadlineDate).thenReturn(Long.MAX_VALUE)
         whenever(mockView.gracePeriodDate).thenReturn(Long.MAX_VALUE)
@@ -144,7 +140,7 @@ class ClazzAssignmentEditPresenterTest {
             caTitle = "test Assignment"
             caStartDate = DateTime(2020, 10, 10).unixMillisLong
             caClazzUid = testClazz.clazzUid
-            caMaxScore = 2
+            caMaxPoints = 2
             caUid = repo.clazzAssignmentDao.insert(this)
         }
 

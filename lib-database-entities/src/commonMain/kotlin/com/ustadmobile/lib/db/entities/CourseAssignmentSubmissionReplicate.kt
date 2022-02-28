@@ -9,26 +9,26 @@ import com.ustadmobile.door.annotation.ReplicationPending
 import com.ustadmobile.door.annotation.ReplicationVersionId
 
 @Entity(
-        primaryKeys = arrayOf("afsPk", "afsDestination"),
-        indices = arrayOf(Index(value = arrayOf("afsPk", "afsVersionId", "afsVersionId")),
-                Index(value = arrayOf("afsDestination", "afsPending")))
+        primaryKeys = arrayOf("casPk", "casDestination"),
+        indices = arrayOf(Index(value = arrayOf("casPk", "casDestination", "casVersionId")),
+                Index(value = arrayOf("casDestination", "casPending")))
 
 )
-class AssignmentFileSubmissionReplicate {
+class CourseAssignmentSubmissionReplicate {
 
     @ReplicationEntityForeignKey
-    public var afsPk: Long = 0
+    public var casPk: Long = 0
 
     @ColumnInfo(defaultValue = "0")
     @ReplicationVersionId
-    public var afsVersionId: Long = 0
+    public var casVersionId: Long = 0
 
     @ReplicationDestinationNodeId
-    public var afsDestination: Long = 0
+    public var casDestination: Long = 0
 
     @ColumnInfo(defaultValue = "1")
     @ReplicationPending
-    public var afsPending: Boolean = true
+    public var casPending: Boolean = true
 
 
 }

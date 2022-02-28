@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 99,
-    "identityHash": "978f556c3e8e0304c290267a8f485218",
+    "identityHash": "5661caf7ab1484b681f18a3310c5ca5c",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5215,7 +5215,7 @@
       },
       {
         "tableName": "ClazzAssignment",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caAssignmentType` INTEGER NOT NULL DEFAULT 0, `caDeadlineDate` INTEGER NOT NULL, `caStartDate` INTEGER NOT NULL, `caLateSubmissionType` INTEGER NOT NULL, `caLateSubmissionPenalty` INTEGER NOT NULL, `caGracePeriodDate` INTEGER NOT NULL, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caRequireFileSubmission` INTEGER NOT NULL DEFAULT 1, `caFileSubmissionWeight` INTEGER NOT NULL DEFAULT 0, `caFileType` INTEGER NOT NULL DEFAULT 0, `caSizeLimit` INTEGER NOT NULL DEFAULT 50, `caNumberOfFiles` INTEGER NOT NULL DEFAULT 1, `caEditAfterSubmissionType` INTEGER NOT NULL DEFAULT 0, `caMarkingType` INTEGER NOT NULL DEFAULT 1, `caMaxScore` INTEGER NOT NULL DEFAULT 0, `caXObjectUid` INTEGER NOT NULL DEFAULT 0, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caSubmissionType` INTEGER NOT NULL DEFAULT 0, `caDeadlineDate` INTEGER NOT NULL, `caStartDate` INTEGER NOT NULL, `caLateSubmissionPenalty` INTEGER NOT NULL, `caGracePeriodDate` INTEGER NOT NULL, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caCompletionCriteria` INTEGER NOT NULL DEFAULT 1, `caRequireFileSubmission` INTEGER NOT NULL DEFAULT 1, `caFileType` INTEGER NOT NULL DEFAULT 0, `caSizeLimit` INTEGER NOT NULL DEFAULT 50, `caNumberOfFiles` INTEGER NOT NULL DEFAULT 1, `caEditAfterSubmissionType` INTEGER NOT NULL DEFAULT 0, `caMarkingType` INTEGER NOT NULL DEFAULT 1, `caMaxPoints` INTEGER NOT NULL DEFAULT 0, `caRequireTextSubmission` INTEGER NOT NULL DEFAULT 1, `caTextLimitType` INTEGER NOT NULL DEFAULT 1, `caTextLimit` INTEGER NOT NULL DEFAULT 500, `caXObjectUid` INTEGER NOT NULL DEFAULT 0, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "caUid",
@@ -5236,8 +5236,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "caAssignmentType",
-            "columnName": "caAssignmentType",
+            "fieldPath": "caSubmissionType",
+            "columnName": "caSubmissionType",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
@@ -5251,12 +5251,6 @@
           {
             "fieldPath": "caStartDate",
             "columnName": "caStartDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "caLateSubmissionType",
-            "columnName": "caLateSubmissionType",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -5291,18 +5285,18 @@
             "notNull": true
           },
           {
-            "fieldPath": "caRequireFileSubmission",
-            "columnName": "caRequireFileSubmission",
+            "fieldPath": "caCompletionCriteria",
+            "columnName": "caCompletionCriteria",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "1"
           },
           {
-            "fieldPath": "caFileSubmissionWeight",
-            "columnName": "caFileSubmissionWeight",
+            "fieldPath": "caRequireFileSubmission",
+            "columnName": "caRequireFileSubmission",
             "affinity": "INTEGER",
             "notNull": true,
-            "defaultValue": "0"
+            "defaultValue": "1"
           },
           {
             "fieldPath": "caFileType",
@@ -5340,11 +5334,32 @@
             "defaultValue": "1"
           },
           {
-            "fieldPath": "caMaxScore",
-            "columnName": "caMaxScore",
+            "fieldPath": "caMaxPoints",
+            "columnName": "caMaxPoints",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
+          },
+          {
+            "fieldPath": "caRequireTextSubmission",
+            "columnName": "caRequireTextSubmission",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "caTextLimitType",
+            "columnName": "caTextLimitType",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "caTextLimit",
+            "columnName": "caTextLimit",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "500"
           },
           {
             "fieldPath": "caXObjectUid",
@@ -5473,103 +5488,155 @@
         "foreignKeys": []
       },
       {
-        "tableName": "AssignmentFileSubmission",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`afsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `afsAssignmentUid` INTEGER NOT NULL, `afsStudentUid` INTEGER NOT NULL, `afsTimestamp` INTEGER NOT NULL, `afsMimeType` TEXT, `afsTitle` TEXT, `afsSubmitted` INTEGER NOT NULL, `afsActive` INTEGER NOT NULL, `afsUri` TEXT, `afsMd5` TEXT, `afsSize` INTEGER NOT NULL, `afsMasterCsn` INTEGER NOT NULL, `afsLocalCsn` INTEGER NOT NULL, `afsLastChangedBy` INTEGER NOT NULL, `afsLct` INTEGER NOT NULL)",
+        "tableName": "CourseAssignmentSubmission",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`casUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `casAssignmentUid` INTEGER NOT NULL, `casStudentUid` INTEGER NOT NULL, `casText` TEXT, `casType` INTEGER NOT NULL, `casTimestamp` INTEGER NOT NULL)",
         "fields": [
           {
-            "fieldPath": "afsUid",
-            "columnName": "afsUid",
+            "fieldPath": "casUid",
+            "columnName": "casUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "afsAssignmentUid",
-            "columnName": "afsAssignmentUid",
+            "fieldPath": "casAssignmentUid",
+            "columnName": "casAssignmentUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "afsStudentUid",
-            "columnName": "afsStudentUid",
+            "fieldPath": "casStudentUid",
+            "columnName": "casStudentUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "afsTimestamp",
-            "columnName": "afsTimestamp",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "afsMimeType",
-            "columnName": "afsMimeType",
+            "fieldPath": "casText",
+            "columnName": "casText",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "afsTitle",
-            "columnName": "afsTitle",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "afsSubmitted",
-            "columnName": "afsSubmitted",
+            "fieldPath": "casType",
+            "columnName": "casType",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "afsActive",
-            "columnName": "afsActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "afsUri",
-            "columnName": "afsUri",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "afsMd5",
-            "columnName": "afsMd5",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "afsSize",
-            "columnName": "afsSize",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "afsMasterCsn",
-            "columnName": "afsMasterCsn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "afsLocalCsn",
-            "columnName": "afsLocalCsn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "afsLastChangedBy",
-            "columnName": "afsLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "afsLct",
-            "columnName": "afsLct",
+            "fieldPath": "casTimestamp",
+            "columnName": "casTimestamp",
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-            "afsUid"
+            "casUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseAssignmentSubmissionAttachment",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`casaUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `casaSubmissionUid` INTEGER NOT NULL, `casaMimeType` TEXT, `casaUri` TEXT, `casaMd5` TEXT, `casaSize` INTEGER NOT NULL, `casaTimestamp` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "casaUid",
+            "columnName": "casaUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "casaSubmissionUid",
+            "columnName": "casaSubmissionUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "casaMimeType",
+            "columnName": "casaMimeType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "casaUri",
+            "columnName": "casaUri",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "casaMd5",
+            "columnName": "casaMd5",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "casaSize",
+            "columnName": "casaSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "casaTimestamp",
+            "columnName": "casaTimestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "casaUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseAssignmentMark",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`camUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `camAssignmentUid` INTEGER NOT NULL, `camStudentUid` INTEGER NOT NULL, `camMark` INTEGER NOT NULL, `camPenalty` INTEGER NOT NULL, `camLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "camUid",
+            "columnName": "camUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "camAssignmentUid",
+            "columnName": "camAssignmentUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "camStudentUid",
+            "columnName": "camStudentUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "camMark",
+            "columnName": "camMark",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "camPenalty",
+            "columnName": "camPenalty",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "camLct",
+            "columnName": "camLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "camUid"
           ],
           "autoGenerate": true
         },
@@ -6474,31 +6541,31 @@
         "foreignKeys": []
       },
       {
-        "tableName": "AssignmentFileSubmissionReplicate",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`afsPk` INTEGER NOT NULL, `afsVersionId` INTEGER NOT NULL DEFAULT 0, `afsDestination` INTEGER NOT NULL, `afsPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`afsPk`, `afsDestination`))",
+        "tableName": "CourseAssignmentSubmissionReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`casPk` INTEGER NOT NULL, `casVersionId` INTEGER NOT NULL DEFAULT 0, `casDestination` INTEGER NOT NULL, `casPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`casPk`, `casDestination`))",
         "fields": [
           {
-            "fieldPath": "afsPk",
-            "columnName": "afsPk",
+            "fieldPath": "casPk",
+            "columnName": "casPk",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "afsVersionId",
-            "columnName": "afsVersionId",
+            "fieldPath": "casVersionId",
+            "columnName": "casVersionId",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
           },
           {
-            "fieldPath": "afsDestination",
-            "columnName": "afsDestination",
+            "fieldPath": "casDestination",
+            "columnName": "casDestination",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "afsPending",
-            "columnName": "afsPending",
+            "fieldPath": "casPending",
+            "columnName": "casPending",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "1"
@@ -6506,32 +6573,158 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "afsPk",
-            "afsDestination"
+            "casPk",
+            "casDestination"
           ],
           "autoGenerate": false
         },
         "indices": [
           {
-            "name": "index_AssignmentFileSubmissionReplicate_afsPk_afsVersionId_afsVersionId",
+            "name": "index_CourseAssignmentSubmissionReplicate_casPk_casDestination_casVersionId",
             "unique": false,
             "columnNames": [
-              "afsPk",
-              "afsVersionId",
-              "afsVersionId"
+              "casPk",
+              "casDestination",
+              "casVersionId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_AssignmentFileSubmissionReplicate_afsPk_afsVersionId_afsVersionId` ON `${TABLE_NAME}` (`afsPk`, `afsVersionId`, `afsVersionId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseAssignmentSubmissionReplicate_casPk_casDestination_casVersionId` ON `${TABLE_NAME}` (`casPk`, `casDestination`, `casVersionId`)"
           },
           {
-            "name": "index_AssignmentFileSubmissionReplicate_afsDestination_afsPending",
+            "name": "index_CourseAssignmentSubmissionReplicate_casDestination_casPending",
             "unique": false,
             "columnNames": [
-              "afsDestination",
-              "afsPending"
+              "casDestination",
+              "casPending"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_AssignmentFileSubmissionReplicate_afsDestination_afsPending` ON `${TABLE_NAME}` (`afsDestination`, `afsPending`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseAssignmentSubmissionReplicate_casDestination_casPending` ON `${TABLE_NAME}` (`casDestination`, `casPending`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseAssignmentSubmissionAttachmentReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`casaPk` INTEGER NOT NULL, `casaVersionId` INTEGER NOT NULL DEFAULT 0, `casaDestination` INTEGER NOT NULL, `casaPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`casaPk`, `casaDestination`))",
+        "fields": [
+          {
+            "fieldPath": "casaPk",
+            "columnName": "casaPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "casaVersionId",
+            "columnName": "casaVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "casaDestination",
+            "columnName": "casaDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "casaPending",
+            "columnName": "casaPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "casaPk",
+            "casaDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_CourseAssignmentSubmissionAttachmentReplicate_casaPk_casaDestination_casaVersionId",
+            "unique": false,
+            "columnNames": [
+              "casaPk",
+              "casaDestination",
+              "casaVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseAssignmentSubmissionAttachmentReplicate_casaPk_casaDestination_casaVersionId` ON `${TABLE_NAME}` (`casaPk`, `casaDestination`, `casaVersionId`)"
+          },
+          {
+            "name": "index_CourseAssignmentSubmissionAttachmentReplicate_casaDestination_casaPending",
+            "unique": false,
+            "columnNames": [
+              "casaDestination",
+              "casaPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseAssignmentSubmissionAttachmentReplicate_casaDestination_casaPending` ON `${TABLE_NAME}` (`casaDestination`, `casaPending`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseAssignmentMarkReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`camPk` INTEGER NOT NULL, `camVersionId` INTEGER NOT NULL DEFAULT 0, `camDestination` INTEGER NOT NULL, `camPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`camPk`, `camDestination`))",
+        "fields": [
+          {
+            "fieldPath": "camPk",
+            "columnName": "camPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "camVersionId",
+            "columnName": "camVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "camDestination",
+            "columnName": "camDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "camPending",
+            "columnName": "camPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "camPk",
+            "camDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_CourseAssignmentMarkReplicate_camPk_camDestination_camVersionId",
+            "unique": false,
+            "columnNames": [
+              "camPk",
+              "camDestination",
+              "camVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseAssignmentMarkReplicate_camPk_camDestination_camVersionId` ON `${TABLE_NAME}` (`camPk`, `camDestination`, `camVersionId`)"
+          },
+          {
+            "name": "index_CourseAssignmentMarkReplicate_camDestination_camPending",
+            "unique": false,
+            "columnNames": [
+              "camDestination",
+              "camPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseAssignmentMarkReplicate_camDestination_camPending` ON `${TABLE_NAME}` (`camDestination`, `camPending`)"
           }
         ],
         "foreignKeys": []
@@ -9312,7 +9505,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '978f556c3e8e0304c290267a8f485218')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5661caf7ab1484b681f18a3310c5ca5c')"
     ]
   }
 }

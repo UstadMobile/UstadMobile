@@ -9,18 +9,14 @@ interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignm
     var submitMarkError: String?
 
     var person: Person?
-    var studentScore: ContentEntryStatementScoreProgress?
 
-    var clazzAssignmentContent
-            : DoorDataSourceFactory<Int, ContentWithAttemptSummary>?
-
-    var clazzAssignmentFileSubmission: DoorDataSourceFactory<Int, AssignmentFileSubmission>?
+    var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
 
     var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>?
 
-    var hasFileSubmission: Boolean
+    var submissionScore: CourseAssignmentMark?
 
-    var fileSubmissionScore: ContentEntryStatementScoreProgress?
+    var submissionStatus: Int
 
     var markNextStudentEnabled: Boolean
 

@@ -172,11 +172,11 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         //wait for the entity value to be set
         mockView.captureLastEntityValue()
 
-        verify(mockView, timeout(1000).times(2)).showFileSubmission = eq(true)
+        verify(mockView, timeout(1000).times(2)).showSubmission = eq(true)
         verify(mockView, timeout(1000).times(2)).maxNumberOfFilesSubmission = eq(3)
         verify(mockView, timeout(1000).times(2)).hasPassedDeadline = eq(false)
-        verify(mockView, timeout(5000).atLeastOnce()).clazzAssignmentFileSubmission = any()
-        verify(mockView, timeout(1000).atLeastOnce()).fileSubmissionScore = any()
+        verify(mockView, timeout(5000).atLeastOnce()).submittedCourseAssignmentSubmission = any()
+        verify(mockView, timeout(1000).atLeastOnce()).submissionMark = any()
         verify(mockView, timeout(5000).atLeastOnce()).clazzMetrics = any()
         verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(true)
         verify(mockView, timeout(1000).times(0)).clazzAssignmentClazzComments
@@ -207,12 +207,12 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         mockView.captureLastEntityValue()
 
         verify(mockView, timeout(1000)).showPrivateComments = eq(false)
-        verify(mockView, timeout(1000)).showFileSubmission = eq(false)
+        verify(mockView, timeout(1000)).showSubmission = eq(false)
         verify(mockView, timeout(1000).times(0)).maxNumberOfFilesSubmission
         verify(mockView, timeout(1000).times(0)).hasPassedDeadline
         verify(mockView, timeout(1000).times(0)).clazzMetrics
-        verify(mockView, timeout(1000).times(0)).clazzAssignmentFileSubmission
-        verify(mockView, timeout(1000).times(0)).fileSubmissionScore
+        verify(mockView, timeout(1000).times(0)).submittedCourseAssignmentSubmission
+        verify(mockView, timeout(1000).times(0)).submissionMark
         verify(mockView, timeout(1000).times(0)).clazzAssignmentClazzComments
 
     }
@@ -274,8 +274,8 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         mockView.captureLastEntityValue()
 
-        val fileSubmissionDaoSpy = spy(repo.assignmentFileSubmissionDao)
-        doReturn(fileSubmissionDaoSpy).`when`(repo).assignmentFileSubmissionDao
+        val fileSubmissionDaoSpy = spy(repo.courseAssignmentSubmissionAttachmentDao)
+        doReturn(fileSubmissionDaoSpy).`when`(repo).courseAssignmentSubmissionAttachmentDao
 
         presenter.handleSubmitButtonClicked()
 
@@ -318,14 +318,14 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         mockView.captureLastEntityValue()
 
-        val fileSubmission = AssignmentFileSubmission().apply {
-            afsUri = "dummy"
-            afsMimeType = "video/*"
+        val fileSubmission = CourseAssignmentSubmissionAttachment().apply {
+            casaUri = "dummy"
+            casaMimeType = "video/*"
         }
 
         presenter.handleOpenFileSubmission(fileSubmission)
         val systemImpl: UstadMobileSystemImpl by di.instance()
-        verify(systemImpl, timeout(1000)).openFileInDefaultViewer(any(), any(), eq(fileSubmission.afsMimeType))
+        verify(systemImpl, timeout(1000)).openFileInDefaultViewer(any(), any(), eq(fileSubmission.casaMimeType))
 
 
     }
@@ -355,21 +355,20 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         mockView.captureLastEntityValue()
 
-        val afs = AssignmentFileSubmission().apply {
-            afsUri = "dummyUri"
-            afsSubmitted = true
+        val afs = CourseAssignmentSubmissionWithAttachment().apply {
+            casaUri = "dummyUri"
         }
 
-        val fileSubmissionDaoSpy = spy(repo.assignmentFileSubmissionDao)
-        doReturn(fileSubmissionDaoSpy).`when`(repo).assignmentFileSubmissionDao
+        val fileSubmissionDaoSpy = spy(repo.courseAssignmentSubmissionAttachmentDao)
+        doReturn(fileSubmissionDaoSpy).`when`(repo).courseAssignmentSubmissionAttachmentDao
 
-        presenter.handleDeleteFileSubmission(afs)
+        presenter.handleDeleteSubmission(afs)
 
-        argumentCaptor<AssignmentFileSubmission>().apply {
+        argumentCaptor<CourseAssignmentSubmissionAttachment>().apply {
             verifyBlocking(fileSubmissionDaoSpy, timeout(1000)) {
                 updateAsync(capture())
             }
-            Assert.assertEquals("Got expected uri", null, firstValue.afsUri)
+            Assert.assertEquals("Got expected uri", null, firstValue.casaUri)
         }
 
 

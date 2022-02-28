@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzAssignmentDetailBinding
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class ClazzAssignmentBasicDetailRecyclerAdapter()
@@ -29,8 +30,17 @@ class ClazzAssignmentBasicDetailRecyclerAdapter()
             if(field == value)
                 return
             field = value
-            viewHolder?.itemBinding?.timeZone
+            viewHolder?.itemBinding?.timeZone = value
         }
+
+    var submissionMark: CourseAssignmentMark? = null
+        set(value){
+            if(field == value)
+                return
+            field = value
+            viewHolder?.itemBinding?.submissionStatus = value
+        }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzAssignmentDetailViewHolder {
         return ClazzAssignmentDetailViewHolder(
@@ -39,6 +49,7 @@ class ClazzAssignmentBasicDetailRecyclerAdapter()
                     it.clazzAssignment = clazzAssignment
                     viewHolder?.itemView?.tag = clazzAssignment?.caUid?:0L
                     it.timeZone = timeZone
+                    it.submissionStatus = submissionMark
                 })
     }
 
@@ -53,5 +64,6 @@ class ClazzAssignmentBasicDetailRecyclerAdapter()
         viewHolder?.itemBinding?.itemClazzAssignmetnDetailDescriptionCl?.tag =
                 clazzAssignment?.caUid?:0L
         viewHolder?.itemBinding?.timeZone = timeZone
+        viewHolder?.itemBinding?.submissionStatus = submissionMark
     }
 }

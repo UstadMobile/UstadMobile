@@ -4,31 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.CompoundButton
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
-import com.toughra.ustadmobile.databinding.ItemContentEntryBasicTitleListBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.port.android.view.binding.isSet
-import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 
 
-class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAssignmentEditView, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption> {
+class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAssignmentEditView {
 
     private var mBinding: FragmentClazzAssignmentEditBinding? = null
 
@@ -38,44 +27,12 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         get() = mPresenter
 
 
-    class ContentEntryListAdapterRA(
-            var oneToManyEditListener: OneToManyJoinEditListener<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?)
-        : ListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
-            ContentEntryListAdapterRA.ContentEntryListAdapterRAViewHolder>(ContentEntryList2Fragment.DIFF_CALLBACK) {
-
-        class ContentEntryListAdapterRAViewHolder(
-                val binding: ItemContentEntryBasicTitleListBinding)
-            : RecyclerView.ViewHolder(binding.root)
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
-                : ContentEntryListAdapterRAViewHolder {
-            val viewHolder = ContentEntryListAdapterRAViewHolder(
-                    ItemContentEntryBasicTitleListBinding.inflate(
-                            LayoutInflater.from(parent.context), parent, false)).apply{
-                                this.binding.oneToManyJoinListener = oneToManyEditListener
-            }
-            return viewHolder
-        }
-
-        override fun onBindViewHolder(holder: ContentEntryListAdapterRAViewHolder, position: Int) {
-            holder.binding.entry = getItem(position)
-        }
-    }
-
-    private var contentRecyclerAdapter: ContentEntryListAdapterRA? = null
-    private var contentRecyclerView: RecyclerView? = null
-    private val contentObserver = Observer<List<
-            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?>{
-        t -> contentRecyclerAdapter?.submitList(t)
-    }
-
     private var clearDeadlineListener: View.OnClickListener = View.OnClickListener {
         val entityVal = entity
         deadlineDate = Long.MAX_VALUE
         gracePeriodDate = Long.MAX_VALUE
         deadlineTime = 0
         gracePeriodTime = 0
-        entityVal?.caLateSubmissionType = 0
         entityVal?.caLateSubmissionPenalty = 0
         entity = entityVal
     }
@@ -86,25 +43,25 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         val rootView: View
         mBinding = FragmentClazzAssignmentEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.typeSelectionListener = this
             it.fileRequiredListener = onFileRequiredChanged
+            it.textRequiredListener = onTextRequiredChanged
             it.caDeadlineDateTextinput.setEndIconOnClickListener(clearDeadlineListener)
             it.caDeadlineDate.doAfterTextChanged{ editable ->
                 if(editable.isNullOrEmpty()){
                     return@doAfterTextChanged
                 }
                 if(editable.toString() == currentDeadlineDate){
-                    mBinding?.takeIf { bind -> bind.lateSubmissionVisibility == View.GONE }.also {
-                        mBinding?.lateSubmissionVisibility = View.VISIBLE
+                    mBinding?.takeIf { bind -> bind.gracePeriodVisibility == View.GONE }.also {
+                        mBinding?.gracePeriodVisibility = View.VISIBLE
                     }
                     return@doAfterTextChanged
                 }
-                mBinding?.lateSubmissionVisibility = View.VISIBLE
+                mBinding?.gracePeriodVisibility = View.VISIBLE
                 currentDeadlineDate = it.toString()
             }
         }
 
-        mBinding?.caEditContentTitle?.addTextChangedListener(ClearErrorTextWatcher {
+        mBinding?.caTitleText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.caTitleError = null
         })
 
@@ -120,8 +77,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             mBinding?.caGracePeriodError = null
         })
 
-        contentRecyclerView = rootView.findViewById(R.id.ca_recyclerview_content)
-
         return rootView
     }
 
@@ -132,11 +87,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         mPresenter = ClazzAssignmentEditPresenter(requireContext(), arguments.toStringMap(),
                 this, viewLifecycleOwner, di)
 
-        mBinding?.contentOneToManyListener = mPresenter?.contentOneToManyJoinListener
-        contentRecyclerAdapter = ContentEntryListAdapterRA(mPresenter?.contentOneToManyJoinListener)
-        contentRecyclerView?.adapter = contentRecyclerAdapter
-        contentRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
         mPresenter?.onCreate(backStackSavedState)
 
     }
@@ -146,9 +96,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         mBinding = null
         mPresenter = null
         entity = null
-        contentRecyclerView?.adapter = null
-        contentRecyclerAdapter = null
-        contentRecyclerView = null
     }
 
     override var entity: ClazzAssignment? = null
@@ -156,20 +103,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         set(value) {
             field = value
             mBinding?.clazzAssignment = value
-            mBinding?.lateSubmissionVisibility = if(deadlineDate.isSet){
-                View.VISIBLE
-            }else{
-                View.GONE
-            }
-            mBinding?.penaltyVisiblity = if(
-                    value?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
-                View.VISIBLE
-            }else{
-                View.GONE
-            }
-            mBinding?.gracePeriodVisibility = if(
-                    value?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY ||
-                    value?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT){
+            mBinding?.gracePeriodVisibility = if(deadlineDate.isSet){
                 View.VISIBLE
             }else{
                 View.GONE
@@ -212,11 +146,11 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             mBinding?.caStartDateError = value
         }
 
-    override var caMaxScoreError: String? = null
+    override var caMaxPointsError: String? = null
         get() = field
         set(value) {
             field = value
-            mBinding?.caMaxScoreError = value
+            mBinding?.caMaxPointsError = value
         }
 
     override var startDate: Long
@@ -261,12 +195,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             field = value
         }
 
-    override var lateSubmissionOptions: List<ClazzAssignmentEditPresenter.LateSubmissionOptionsMessageIdOption>? = null
-        get() = field
-        set(value) {
-            field = value
-            mBinding?.lateSubmissionOptions = value
-        }
     override var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>? = null
         get() = field
         set(value) {
@@ -279,11 +207,25 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
             field = value
             mBinding?.fileTypeOptions = value
         }
-    override var assignmentTypeOptions: List<ClazzAssignmentEditPresenter.AssignmentTypeOptionsMessageIdOption>? = null
+
+
+    override var textLimitTypeOptions: List<ClazzAssignmentEditPresenter.TextLimitTypeOptionsMessageIdOption>? = null
+        set(value) {
+            field = value
+            mBinding?.textLimitTypeOptions = textLimitTypeOptions
+        }
+    override var submissionTypeOptions: List<ClazzAssignmentEditPresenter.SubmissionTypeOptionsMessageIdOption>? = null
         get() = field
         set(value) {
             field = value
-            mBinding?.assignmentTypeOptions = value
+            mBinding?.submissionTypeOptions = value
+        }
+
+    override var completionCriteriaOptions: List<ClazzAssignmentEditPresenter.CompletionCriteriaOptionsMessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.completionCriteriaOptions = value
         }
 
     override var markingTypeOptions: List<ClazzAssignmentEditPresenter.MarkingTypeOptionsMessageIdOption>? = null
@@ -294,37 +236,12 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         }
 
 
-    override var clazzAssignmentContent: DoorMutableLiveData
-            <List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
-        set(value) {
-            field?.removeObserver(contentObserver)
-            field = value
-            value?.observeIfFragmentViewIsReady(this, contentObserver)
-        }
-
-
-    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
-        mBinding?.penaltyVisiblity = if(
-                selectedOption.optionId == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
-            View.VISIBLE
-        }else{
-            View.GONE
-        }
-        mBinding?.gracePeriodVisibility =if(
-                selectedOption.optionId == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY ||
-                selectedOption.optionId == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT){
-            View.VISIBLE
-        }else{
-            View.GONE
-        }
-    }
-
-    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
-
-    }
-
     private val onFileRequiredChanged: CompoundButton.OnCheckedChangeListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
         mBinding?.fileSubmissionVisibility = if(isChecked) View.VISIBLE else View.GONE
+    }
+
+    private val onTextRequiredChanged: CompoundButton.OnCheckedChangeListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        mBinding?.textSubmissionVisibility = if(isChecked) View.VISIBLE else View.GONE
     }
 
 }
