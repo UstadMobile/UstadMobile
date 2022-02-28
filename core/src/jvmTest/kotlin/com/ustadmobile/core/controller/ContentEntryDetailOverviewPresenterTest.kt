@@ -7,7 +7,6 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
@@ -53,8 +52,6 @@ class ContentEntryDetailOverviewPresenterTest {
 
     private var presenterArgs: Map<String, String>? = null
 
-    private lateinit var localAvailabilityManager: LocalAvailabilityManager
-
     private lateinit var di: DI
 
     @Before
@@ -63,12 +60,10 @@ class ContentEntryDetailOverviewPresenterTest {
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
-        localAvailabilityManager = mock {  }
         context = Any()
 
         di = DI {
             import(ustadTestRule.diModule)
-            bind<LocalAvailabilityManager>() with singleton { localAvailabilityManager }
         }
 
         val db: UmAppDatabase by di.activeDbInstance()
@@ -106,9 +101,6 @@ class ContentEntryDetailOverviewPresenterTest {
 
         presenter.onStart()
 
-        verify(localAvailabilityManager, timeout(5000)).addMonitoringRequest(argWhere {
-            entryContainer.containerUid in it.containerUidsToMonitor
-        })
     }
 
 

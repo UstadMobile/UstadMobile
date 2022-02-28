@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,19 +14,9 @@ import com.toughra.ustadmobile.databinding.FragmentXapiPackageContentBinding
 import com.ustadmobile.core.controller.XapiPackageContentPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.XapiPackageContentView
 
 class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
-
-    internal var networkManagerProvider: BleNetworkManagerProvider? = null
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if(context is BleNetworkManagerProvider){
-            networkManagerProvider = context
-        }
-    }
 
     override var contentTitle: String = ""
         set(value) {
@@ -100,15 +89,11 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
         mPresenter?.onStop()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         mPresenter?.onDestroy()
         mPresenter = null
         mBinding = null
     }
 
-    override fun onDetach() {
-        super.onDetach()
-        networkManagerProvider = null
-    }
 }

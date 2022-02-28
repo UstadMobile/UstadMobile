@@ -272,7 +272,7 @@ dependencies {
     implementation project(':core')
     implementation project(':sharedse')
 
-    implementation "com.ustadmobile.door:door-runtime:$version_door"
+    implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(':lib-database-android')
     implementation project(":lib-database-entities")
     implementation project(':lib-util')
@@ -436,7 +436,7 @@ dependencies {
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
-    androidTestImplementation "com.github.UstadMobile.AdbScreenRecorder.lib-client:$version_android_adbscreenrecorder"
+    androidTestImplementation "com.github.UstadMobile.AdbScreenRecorder:lib-client:$version_android_adbscreenrecorder"
 
     kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
 }

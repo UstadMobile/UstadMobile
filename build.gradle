@@ -21,7 +21,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.0'
+        classpath 'com.android.tools.build:gradle:7.1.1'
         classpath 'com.google.gms:google-services:4.3.10'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
@@ -68,18 +68,8 @@ allprojects {
     }
 }
 
-subprojects {
-    if(Arrays.asList("lib-database-runtime",
-            "lib-database-runtime-jdbc", "lib-database-jdbc", "lib-database-retrofitrepository",
-            "lib-core-fs", "app-rest-server",
-            "core-tests").contains(name)) {
-        apply plugin: "kotlin"
-    }
-}
-
-
 //Major.minor.database version
-version = "0.3.51a"
+version = "0.3.54"
 group = "com.ustadmobile.app"
 
 /**
@@ -89,9 +79,9 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 224
+    ustadVersionCode = 226
 
-    version_door = "0.0.46x"
+    version_door = "0.0.54"
     version_xmlpullparserkmp = '0.0.18'
 
     version_gradle_buildconfig_plugin = "1.1.7"

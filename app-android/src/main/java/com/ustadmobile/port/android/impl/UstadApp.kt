@@ -162,10 +162,6 @@ open class UstadApp : Application(), DIAware {
             }
         }
 
-        bind<BleGattServer>() with singleton {
-            BleGattServer(applicationContext, di)
-        }
-
         bind<ContainerMounter>() with singleton { instance<EmbeddedHTTPD>() }
 
         bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerAndroidImpl(applicationContext) }
@@ -173,10 +169,6 @@ open class UstadApp : Application(), DIAware {
         constant(TAG_DOWNLOAD_ENABLED) with true
 
         bind<CoroutineDispatcher>(tag = TAG_MAIN_COROUTINE_CONTEXT) with singleton { Dispatchers.Main }
-
-        bind<LocalAvailabilityManager>() with scoped(EndpointScope.Default).singleton {
-            LocalAvailabilityManagerImpl(di, context)
-        }
 
         bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
             ContentEntryOpener(di, context)
@@ -292,7 +284,6 @@ open class UstadApp : Application(), DIAware {
         registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound")}
 
         onReady {
-            instance<BleGattServer>()
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
             instance<ConnectionManager>().start()

@@ -11,13 +11,7 @@ actual open class NetworkManagerBle actual constructor(context: Any, di: DI, sin
 
     actual override val isWiFiEnabled: Boolean
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-    actual override val isBleCapable: Boolean
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
     actual override val isBluetoothEnabled: Boolean
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-    actual override val isVersionLollipopOrAbove: Boolean
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-    actual override val isVersionKitKatOrBelow: Boolean
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
 
     override val localHttpPort: Int
@@ -26,14 +20,6 @@ actual open class NetworkManagerBle actual constructor(context: Any, di: DI, sin
 
     override val localConnectionOpener: ConnectionOpener?
         get() = null
-
-    override suspend fun sendBleMessage(bleMessage: BleMessage, deviceAddr: String): BleMessage? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    actual override fun canDeviceAdvertise(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
     actual override fun openBluetoothSettings() {
     }
