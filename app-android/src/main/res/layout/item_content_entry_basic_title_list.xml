@@ -31,39 +31,13 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="@dimen/dimen_16dp"
-            app:layout_constraintEnd_toStartOf="@+id/content_entry_item_assignment_weight"
+            app:layout_constraintEnd_toStartOf="@+id/item_clazz_simple_secondary_menu_imageview"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginBottom="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_8dp"
             tools:text="Content 1"
             android:text="@{entry.title}" />
 
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/content_entry_item_assignment_weight"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/dimen_16dp"
-            android:layout_marginVertical="@dimen/dimen_8dp"
-            android:hint="@string/weight"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:hintEnabled="true"
-            android:minWidth="80dp"
-            tools:hint="@string/weight"
-            app:suffixText="%"
-            app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
-            app:layout_constraintEnd_toStartOf="@+id/item_clazz_simple_secondary_menu_imageview">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:text="@={`` + entry.assignmentContentWeight}"
-                android:id="@+id/ca_edit_file_submission_weight_desc"
-                android:digits="0123456789"
-                android:inputType="number"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </com.google.android.material.textfield.TextInputLayout>
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_clazz_simple_secondary_menu_imageview"
