@@ -235,7 +235,6 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             field = value
             submitButtonAdapter?.hasFilesToSubmit = value?.isNotEmpty() ?: false
             addSubmissionAdapter?.submitList(value)
-            addSubmissionAdapter?.notifyDataSetChanged()
         }
 
     override var timeZone: String? = null
@@ -328,6 +327,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     }
 
     override fun onAddTextClicked() {
+        mPresenter?.handleAddTextClicked()
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle(R.string.enter_link)
         val dialogView = ViewTextAssignmentLayoutBinding.inflate(layoutInflater).also {

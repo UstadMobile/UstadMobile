@@ -14,6 +14,7 @@ import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.SelectFileView
+import com.ustadmobile.core.view.TextAssignmentEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
@@ -193,7 +194,19 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 submissionList.add(submission)
                 view.addedCourseAssignmentSubmission = submissionList
             }
-            requireSavedStateHandle()[ContentEntryEdit2Presenter.SAVED_STATE_KEY_URI] = null
+            requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+        }
+
+        observeSavedStateResult(SAVED_STATE_KEY_TEXT, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
+            CourseAssignmentSubmissionWithAttachment::class){
+            val submission = it.firstOrNull() ?: return@observeSavedStateResult
+            submission.casAssignmentUid = entity?.caUid ?: 0
+            submission.casStudentUid = accountManager.activeAccount.personUid
+            submission.casType = CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT
+            submission.casUid = db.doorPrimaryKeyManager.nextId(CourseAssignmentSubmission.TABLE_ID)
+            submissionList.add(submission)
+            view.addedCourseAssignmentSubmission = submissionList
+            requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
         }
 
     }
@@ -275,10 +288,19 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         )
     }
 
+    fun handleAddTextClicked(){
+        navigateForResult(
+                NavigateForResultOptions(this,
+                        null, TextAssignmentEditView.VIEW_NAME, CourseAssignmentSubmission::class,
+                        CourseAssignmentSubmission.serializer(), SAVED_STATE_KEY_TEXT))
+    }
+
 
     companion object {
 
         const val SAVED_STATE_KEY_URI = "URI"
+
+        const val SAVED_STATE_KEY_TEXT = "TEXT"
 
         const val SAVED_STATE_ADD_SUBMISSION_LIST = "submissionList"
 

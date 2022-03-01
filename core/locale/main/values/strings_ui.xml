@@ -689,24 +689,18 @@
     %1$s% will be replaced with the date that they started.-->
     <string name="started_date" formatted="false">Started %1$s</string>
 
-
-    <string name="assignment_type">Assignment Type</string>
     <string name="individual">Individual</string>
     <string name="group">Group</string>
 
     <!-- Used by admin/teachers to hide content/assignment until a certain date-->
     <string name="dont_show_before">Don\'t show before</string>
 
-    <!-- used to display the weight percentage of an assignment in a class -->
-    <string name="weight">Weight</string>
 
     <string name="require_file_submission">Require file submission</string>
 
     <string name="require_text_submission">Require text submission</string>
 
     <string name="maximum">Maximum</string>
-
-    <string name="file_submission">File submissions</string>
 
     <!-- used to display the size limit of a file a user can upload -->
     <string name="size_limit">Size limit (MB)</string>
@@ -723,10 +717,6 @@
 
     <string name="marked_by">Marked by</string>
 
-    <string name="no_files_submitted">No files submitted</string>
-    <string name="files_submitted">Files submitted</string>
-    <string name="files_marked">Files marked</string>
-
     <string name="peers">Peers</string>
 
     <string name="file_type">File type</string>
@@ -742,15 +732,10 @@
 
     <string name="max_number_of_files">Maximum number of files: %1$s</string>
 
-    <!-- Used to show what marking percentage each content has in an assignment. The %1$s will be
-      replaced with the percentage  e.g. "75% complete"-->
-    <string name="weight_percentage">Weight: %1$s%%</string>
 
     <string name="submit_grade">Submit grade</string>
     <string name="submit_grade_and_mark_next">Submit grade and mark next</string>
     <string name="graded">Graded</string>
-
-    <string name="mark_for_file_submission">Mark for file submissions</string>
 
     <string name="course_leader">Course leader</string>
 
@@ -910,11 +895,12 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="after_deadline_date_error">Must be after deadline date</string>
 
     <!-- score points gained from content -->
-    <string name="points">Points</string>
+    <string name="points_cap">Points</string>
+    <string name="points">points</string>
 
     <string name="words">Words</string>
     <string name="characters">Characters</string>
-    
+
     <string name="minimum_score">Minimum score</string>
     <string name="automatic">Automatic</string>
     <string name="student_marks_content">Student marks themselves</string>

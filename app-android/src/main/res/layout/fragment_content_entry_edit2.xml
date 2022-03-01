@@ -267,7 +267,7 @@
                 android:layout_marginHorizontal="@dimen/dimen_20dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintEnabled="true"
-                app:suffixText="@string/points"
+                app:suffixText="@string/points_cap"
                 app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
                 android:enabled="@{fieldsEnabled}"
                 android:visibility="@{minScoreVisible ? View.VISIBLE : View.GONE}"

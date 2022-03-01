@@ -1,12 +1,12 @@
 package com.ustadmobile.port.android.impl
 
+import SelectFolderView
 import androidx.annotation.Keep
 import com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
-import com.ustadmobile.lib.db.entities.ClazzAssignment
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -97,6 +97,9 @@ class ViewNameToDestMap: DestinationProvider {
             SiteTermsEditView.VIEW_NAME to UstadDestination(R.id.site_terms_edit_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
                 hideAccountIcon = true),
+            TextAssignmentEditView.VIEW_NAME to UstadDestination(R.id.text_assignment_edit_dest,
+                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
+                    hideAccountIcon = true),
             SiteTermsDetailView.VIEW_NAME to UstadDestination(R.id.site_terms_detail_dest),
             SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS to UstadDestination(R.id.site_terms_detail_accept_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,

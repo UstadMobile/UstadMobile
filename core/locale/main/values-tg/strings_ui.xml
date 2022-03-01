@@ -1183,7 +1183,7 @@
     <string name="adult_account_required">Барои кушодани ин пайванд профили калонсолон лозим аст. Агар шумо волид бошед, шумо бояд ба профили мавҷудаи худ ворид шавед ё профили нав созед.</string>
     <string name="edit_assignment">Таҳрири супориш</string>
     <string name="mark_penalty">Ҷаримаро қайд кунед</string>
-    <string name="points">Холҳо</string>
+    <string name="points_cap">Холҳо</string>
     <string name="student_marks_content">Хонанда худро қайд мекунад</string>
     <string name="late_penalty">(%1$s%% ҷазо барои ҷавоби дер)</string>
     <string name="parental_consent">Розигии волидайн</string>

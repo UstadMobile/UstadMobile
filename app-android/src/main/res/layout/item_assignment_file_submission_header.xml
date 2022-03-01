@@ -104,7 +104,7 @@
             android:contentDescription="@string/school"
             android:textStyle="bold"
             android:visibility="@{showPoints ? View.VISIBLE : View.GONE}"
-            android:text="@{@string/points_value(assignmentMark.camMark, assignment.caMaxPoints)}"
+            android:text='@{assignmentMark.camMark + &quot;/&quot; + assignment.caMaxPoints + " " + @string/points}'
             app:layout_constraintStart_toEndOf="@+id/submission_status_score_icon"
             app:layout_constraintTop_toBottomOf="@id/submission_status_label"
             tools:text="8/10 points" />
