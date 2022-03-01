@@ -328,20 +328,6 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
     override fun onAddTextClicked() {
         mPresenter?.handleAddTextClicked()
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle(R.string.enter_link)
-        val dialogView = ViewTextAssignmentLayoutBinding.inflate(layoutInflater).also {
-            it.course = entity
-            it.viewTextAssignmentText.inputType = InputType.TYPE_TEXT_FLAG_CAP_SENTENCES + InputType.TYPE_TEXT_FLAG_MULTI_LINE
-        }
-        builder.setView(dialogView.root)
-        builder.setPositiveButton(R.string.ok) { dialogInterface, whichButton ->
-            mPresenter?.handleAddText(dialogView.viewTextAssignmentText.editableText.toString())
-            dialogInterface.cancel()
-        }
-        builder.setNegativeButton(R.string.cancel) { dialogInterface, i -> dialogInterface.cancel() }
-        val dialog = builder.create()
-        dialog.show()
     }
 
     override fun open(publicComment: Boolean) {
