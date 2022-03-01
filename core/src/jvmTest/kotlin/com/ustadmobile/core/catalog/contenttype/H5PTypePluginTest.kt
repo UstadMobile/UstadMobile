@@ -154,6 +154,8 @@ class H5PTypePluginTest {
             val indexEntry = db.containerEntryDao.findByPathInContainer(container.containerUid, launchHref!!)
             Assert.assertNotNull(indexEntry)
 
+            Assert.assertNotEquals("Container size is non-zero", 0L, container.fileSize)
+
             // walk through the zip entries and check all exists in containerEntry
             ZipFile(tempH5pFile).entries().toList()
                     .filter { !it.isDirectory }

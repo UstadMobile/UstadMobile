@@ -4,6 +4,8 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ContextXObjectStatementJoin
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.StatementEntity
 import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
@@ -13,16 +15,24 @@ abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJ
     @Query("""
     REPLACE INTO ContextXObjectStatementJoinReplicate(cxosjPk, cxosjDestination)
     SELECT DISTINCT ContextXObjectStatementJoin.contextXObjectStatementJoinUid AS cxosjPk,
-         :newNodeId AS cxosjDestination
-    FROM ContextXObjectStatementJoin
-         LEFT JOIN DoorNode 
-              ON DoorNode.nodeId = :newNodeId
-    --notpsql
-    WHERE ContextXObjectStatementJoin.contextXObjectLct != COALESCE(
+         UserSession.usClientNodeId AS cxosjDestination
+    FROM UserSession
+             JOIN PersonGroupMember
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             JOIN ScopedGrant
+                  ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                     AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+             JOIN StatementEntity
+                  ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
+             JOIN ContextXObjectStatementJoin
+                  ON ContextXObjectStatementJoin.contextStatementUid = StatementEntity.statementUid
+   WHERE UserSession.usClientNodeId = :newNodeId
+    --notpsql 
+     AND ContextXObjectStatementJoin.contextXObjectLct != COALESCE(
          (SELECT cxosjVersionId
             FROM ContextXObjectStatementJoinReplicate
            WHERE cxosjPk = ContextXObjectStatementJoin.contextXObjectStatementJoinUid
-             AND cxosjDestination = DoorNode.nodeId), 0) 
+             AND cxosjDestination = UserSession.usClientNodeId), 0) 
     --endnotpsql         
     /*psql ON CONFLICT(cxosjPk, cxosjDestination) DO UPDATE
      SET cxosjPending = (SELECT ContextXObjectStatementJoin.contextXObjectLct
@@ -43,7 +53,16 @@ abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJ
          JOIN ContextXObjectStatementJoin
              ON ChangeLog.chTableId = ${ContextXObjectStatementJoin.TABLE_ID}
                 AND ChangeLog.chEntityPk = ContextXObjectStatementJoin.contextXObjectStatementJoinUid
-         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+         JOIN StatementEntity
+               ON ContextXObjectStatementJoin.contextStatementUid = StatementEntity.statementUid
+         JOIN ScopedGrant
+              ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+                 AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+         JOIN PersonGroupMember
+              ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+         JOIN UserSession
+              ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                 AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
     WHERE UserSession.usClientNodeId != (
          SELECT nodeClientId 
            FROM SyncNode

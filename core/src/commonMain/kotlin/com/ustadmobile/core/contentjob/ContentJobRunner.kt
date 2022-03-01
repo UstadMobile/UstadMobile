@@ -7,18 +7,16 @@ import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.EventCollator
 import com.ustadmobile.core.util.createTemporaryDir
-import com.ustadmobile.core.util.ext.deleteFilesForContentJob
+import com.ustadmobile.core.util.ext.deleteZombieContainerEntryFiles
+import com.ustadmobile.core.util.ext.validateAndUpdateContainerSize
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.door.ext.doorIdentityHashCode
+import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.github.aakira.napier.Napier
-import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -67,7 +65,7 @@ class ContentJobRunner(
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
-        var done : Boolean
+        var done = false
         try {
             Napier.d("$logPrefix connectivity observer forever")
             withContext(doorMainDispatcher()) {
@@ -79,26 +77,34 @@ class ContentJobRunner(
                 checkQueueSignalChannel.receive()
                 val numProcessorsAvailable = numProcessors - activeJobItemIds.size
                 Napier.d("$logPrefix num process available :$numProcessorsAvailable")
-                if (numProcessorsAvailable > 0) {
-                    //Check queue and filter out any duplicates that are being actively processed
-                    val queueItems = db.contentJobItemDao.findNextItemsInQueue(jobId, numProcessors * 2).filter {
-                        (it.contentJobItem?.cjiUid ?: 0) !in activeJobItemIds
+                val queueItemsToSend = mutableListOf<ContentJobItemAndContentJob>()
+                val jobItemsToSend = db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                    if (numProcessorsAvailable > 0) {
+                        //Check queue and filter out any duplicates that are being actively processed
+                        val queueItems = txDb.contentJobItemDao.findNextItemsInQueue(jobId, numProcessors * 2).filter {
+                            (it.contentJobItem?.cjiUid ?: 0) !in activeJobItemIds
+                        }
+
+                        val numJobsToAdd = min(numProcessorsAvailable, queueItems.size)
+                        Napier.d("$logPrefix num of Jobs to add :$numJobsToAdd")
+
+                        for (i in 0 until numJobsToAdd) {
+                            val contentJobItemUid = queueItems[i].contentJobItem?.cjiUid ?: 0L
+                            activeJobItemIds += contentJobItemUid
+                            txDb.contentJobItemDao.updateItemStatus(contentJobItemUid,
+                                JobStatus.RUNNING)
+                            queueItemsToSend += queueItems[i]
+                        }
                     }
 
-                    val numJobsToAdd = min(numProcessorsAvailable, queueItems.size)
-                    Napier.d("$logPrefix num of Jobs to add :$numJobsToAdd")
-
-                    for (i in 0 until numJobsToAdd) {
-                        val contentJobItemUid = queueItems[i].contentJobItem?.cjiUid ?: 0L
-                        activeJobItemIds += contentJobItemUid
-                        db.contentJobItemDao.updateItemStatus(contentJobItemUid, JobStatus.RUNNING)
-                        send(queueItems[i])
-                    }
+                    done = txDb.contentJobItemDao.isJobDone(jobId)
+                    Napier.d("$logPrefix is job Done :$done")
+                    queueItemsToSend
                 }
 
-
-                done = db.contentJobItemDao.isJobDone(jobId)
-                Napier.d("$logPrefix is job Done :$done")
+                jobItemsToSend.forEach {
+                    send(it)
+                }
             } while (!done)
         }catch(e: Exception) {
             Napier.d(e.stackTraceToString(), e)
@@ -127,9 +133,9 @@ class ContentJobRunner(
             var processException: Throwable? = null
             var mediatorObserver: DoorObserver<Pair<Int, Boolean>>?= null
             val mediatorLiveData = JobConnectivityLiveData(connectivityLiveData,
-                    db.contentJobDao.findMeteredAllowedLiveData(
-                        item.contentJob?.cjUid ?: 0
-                    ))
+                db.contentJobDao.findMeteredAllowedLiveData(
+                    item.contentJob?.cjUid ?: 0
+                ))
 
             try {
 
@@ -140,17 +146,21 @@ class ContentJobRunner(
 
                 var metadataResult: MetadataResult? = null
                 if(item.contentJobItem?.cjiContentEntryUid == 0L) {
-                    metadataResult = contentPluginManager.extractMetadata(sourceUri, processContext)
-                    val contentEntryUid = repo.contentEntryDao.insertAsync(metadataResult.entry)
-                    item.contentJobItem?.cjiContentEntryUid = contentEntryUid
-                    db.contentJobItemDao.updateContentEntryUid(item.contentJobItem?.cjiUid ?: 0,
-                        contentEntryUid)
+                    metadataResult = contentPluginManager.extractMetadata(sourceUri,
+                        processContext)
+                    db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                        val contentEntryUid = txDb.contentEntryDao.insertAsync(metadataResult.entry)
+                        item.contentJobItem?.cjiContentEntryUid = contentEntryUid
+                        txDb.contentJobItemDao.updateContentEntryUid(
+                            item.contentJobItem?.cjiUid ?: 0, contentEntryUid)
 
-                    if(item.contentJobItem?.cjiParentContentEntryUid != 0L){
-                        ContentEntryParentChildJoin().apply {
-                            cepcjParentContentEntryUid = item.contentJobItem?.cjiParentContentEntryUid ?: 0L
-                            cepcjChildContentEntryUid = item.contentJobItem?.cjiContentEntryUid ?: 0L
-                            cepcjUid = repo.contentEntryParentChildJoinDao.insert(this)
+                        if(item.contentJobItem?.cjiParentContentEntryUid != 0L){
+                            txDb.contentEntryParentChildJoinDao.insert(ContentEntryParentChildJoin().apply {
+                                cepcjParentContentEntryUid =
+                                    item.contentJobItem?.cjiParentContentEntryUid ?: 0L
+                                cepcjChildContentEntryUid =
+                                    item.contentJobItem?.cjiContentEntryUid ?: 0L
+                                })
                         }
                     }
                 }
@@ -179,8 +189,8 @@ class ContentJobRunner(
                     val isMeteredAllowed = it.second
 
                     if(item.contentJobItem?.cjiConnectivityNeeded == true
-                            && (state == ConnectivityStatus.STATE_DISCONNECTED ||
-                                    !isMeteredAllowed && state == ConnectivityStatus.STATE_METERED)){
+                        && (state == ConnectivityStatus.STATE_DISCONNECTED ||
+                            !isMeteredAllowed && state == ConnectivityStatus.STATE_METERED)){
                         jobResult.cancel(ConnectivityCancellationException("connectivity not acceptable"))
                     }
 
@@ -192,16 +202,29 @@ class ContentJobRunner(
 
 
                 processResult = jobResult.await()
-                db.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0, processResult.status)
-                db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
-                Napier.d("$logPrefix Processor #$id completed job #${item.contentJobItem?.cjiUid}")
-                delay(1000)
 
+                val containerUid = db.contentJobItemDao.getContainerUidByJobItemUid(
+                    item.contentJobItem?.cjiUid ?: 0L)
+                if(containerUid != 0L && db.validateAndUpdateContainerSize(containerUid) == 0L) {
+                    val message = "BAD: $containerUid for jobItem ${item.contentJobItem?.cjiUid}" +
+                        " has a container, but size remains 0"
+                    Napier.e(message)
+                    throw IllegalStateException(message)
+                }
+
+                db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                    txDb.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0,
+                        processResult.status)
+                    txDb.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0,
+                        systemTimeInMillis())
+                }
+
+                Napier.d("$logPrefix Processor #$id completed job #${item.contentJobItem?.cjiUid}")
             }catch(e: Exception) {
                 //something went wrong
                 processException = e
-
                 e.printStackTrace()
+                delay(1000)
             }finally {
                 withContext(NonCancellable) {
                     val finalStatus: Int = when {
@@ -226,10 +249,13 @@ class ContentJobRunner(
                         }
                     }
 
-                    db.contentJobItemDao.updateJobItemAttemptCountAndStatus(
-                        item.contentJobItem?.cjiUid ?: 0,
-                        item.contentJobItem?.cjiAttemptCount?: 0, finalStatus)
-                    db.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
+                    db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                        txDb.contentJobItemDao.updateJobItemAttemptCountAndStatus(
+                            item.contentJobItem?.cjiUid ?: 0,
+                            item.contentJobItem?.cjiAttemptCount?: 0, finalStatus)
+                        txDb.contentJobItemDao.updateFinishTimeForJob(
+                            item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
+                    }
 
                     activeJobItemIds -= (item.contentJobItem?.cjiUid ?: 0)
                     try{
@@ -247,7 +273,7 @@ class ContentJobRunner(
 
 
                 if(processException is CancellationException &&
-                        processException !is ConnectivityCancellationException)
+                    processException !is ConnectivityCancellationException)
                     throw processException as CancellationException
 
                 checkQueueSignalChannel.send(true)
@@ -297,7 +323,12 @@ class ContentJobRunner(
                     jobList.forEach {
                         it.cancelAndJoin()
                     }
-                    deleteFilesForContentJob(jobId, di, endpoint)
+
+                    db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                        txDb.containerEntryDao.deleteContainerEntriesCreatedByJobs(jobId)
+                        txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
+                    }
+
                     throw e
                 }
             }
@@ -305,6 +336,17 @@ class ContentJobRunner(
             Napier.d("$logPrefix run Job, send queue signal")
             checkQueueSignalChannel.send(true)
         }
+
+        //Now remove any Zombies (e.g. where the same md5 was downloaded multiple times due when
+        // downloads were running concurrently
+        db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            //TODO here: for all downloaded containers, set the containerentry to use the first
+            // downloaded containerentryfile (in case multiple copies of the same md5 were downloaded)
+
+            txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
+        }
+
+
 
         return ContentJobResult(JobStatus.COMPLETE)
     }
@@ -322,6 +364,8 @@ class ContentJobRunner(
         const val DEFAULT_NUM_PROCESSORS = 10
 
         const val DEFAULT_NUM_RETRIES = 5
+
+        const val NUM_CONTAINER_SIZE_UPDATE_ATTEMPTS = 3
 
     }
 }

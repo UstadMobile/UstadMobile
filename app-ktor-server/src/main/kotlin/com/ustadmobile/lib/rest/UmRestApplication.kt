@@ -67,6 +67,7 @@ import com.ustadmobile.core.db.PermissionManagementIncomingReplicationListener
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 import io.ktor.response.*
 import kotlinx.coroutines.delay
+import kotlinx.serialization.json.Json
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -294,6 +295,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<ContentJobManager>() with singleton {
             ContentJobManagerJvm(di)
+        }
+
+        bind<Json>() with singleton {
+            Json { encodeDefaults = true }
         }
 
         try {

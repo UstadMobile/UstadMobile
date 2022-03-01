@@ -23,8 +23,8 @@ import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.jvm.javaio.toOutputStream
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.ktor.closestDI
 import java.io.File
-import org.kodein.di.ktor.di
 import org.kodein.di.on
 
 
@@ -36,7 +36,7 @@ fun Route.ContainerDownload() {
             it.hexStringToByteArray().encodeBase64()
         }
 
-        val db : UmAppDatabase = di().direct.on(call).instance(tag = DoorTag.TAG_DB)
+        val db : UmAppDatabase = closestDI().direct.on(call).instance(tag = DoorTag.TAG_DB)
 
         val concatenatedResponse = db.containerEntryFileDao.generateConcatenatedFilesResponse2(
                 entryMd5List, call.request.headers.toMap(), db)
@@ -79,8 +79,15 @@ fun Route.ContainerDownload() {
 
     route("ContainerEntryList") {
         get("findByContainerWithMd5") {
-            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
+            val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
             val containerUid = call.request.queryParameters["containerUid"]?.toLong() ?: 0L
+            val containerSize = db.containerDao.findSizeByUid(containerUid)
+            if(containerSize <= 0L) {
+                call.respond(HttpStatusCode.ServiceUnavailable,
+                    "Container size is 0, probably not ready yet")
+                return@get
+            }
+
             val entryList = db.containerEntryDao.findByContainerWithMd5(containerUid)
             if(entryList.isNotEmpty()) {
                 call.respond(entryList)
@@ -91,7 +98,7 @@ fun Route.ContainerDownload() {
     }
 
     get("ContainerEntryFile/{entryFileUid}") {
-        val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
+        val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
         val entryFileUid = call.parameters["entryFileUid"]?.toLong() ?: 0L
         val entryFile = db.containerEntryFileDao.findByUid(entryFileUid)
         val filePath = entryFile?.cefPath

@@ -31,7 +31,8 @@ import kotlinx.serialization.json.*
 import java.util.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.CancellationException
-
+import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 
 val licenseMap = mapOf(
         "CC-BY" to ContentEntry.LICENSE_TYPE_CC_BY,
@@ -127,7 +128,11 @@ class H5PTypePluginCommonJvm(
         }
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
+    override suspend fun processJob(
+        jobItem: ContentJobItemAndContentJob,
+        process: ContentJobProcessContext,
+        progress: ContentJobProgressListener
+    ): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
         val jobUri = contentJobItem.sourceUri ?: return ProcessResult(JobStatus.FAILED)
         return withContext(Dispatchers.Default) {
@@ -137,23 +142,24 @@ class H5PTypePluginCommonJvm(
                 val doorUri = DoorUri.parse(jobUri)
                 val localUri = process.getLocalOrCachedUri()
                 val contentNeedUpload = !doorUri.isRemote()
-                val progressSize = if(contentNeedUpload) 2 else 1
+                val progressSteps = if(contentNeedUpload) 2 else 1
 
                 contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
                     progress, context, di)
 
                 if(!contentJobItem.cjiContainerProcessed) {
+                    val containerFolder = jobItem.contentJob?.toUri
+                        ?: defaultContainerDir.toURI().toString()
 
                     val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
                             ?: Container().apply {
                                 containerContentEntryUid = contentJobItem.cjiContentEntryUid
                                 cntLastModified = System.currentTimeMillis()
                                 mimeType = supportedMimeTypes.first()
-                                containerUid = repo.containerDao.insertAsync(this)
+                                containerUid = db.containerDao.insertAsync(this)
                             }
 
-                    val containerFolder = jobItem.contentJob?.toUri
-                            ?: defaultContainerDir.toURI().toString()
+
                     val containerFolderUri = DoorUri.parse(containerFolder)
                     val entry = db.contentEntryDao.findByUid(contentJobItem.cjiContentEntryUid)
 
@@ -163,63 +169,80 @@ class H5PTypePluginCommonJvm(
 
                     val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolderUri)
                     repo.addEntriesToContainerFromZip(container.containerUid, localUri,
-                            ContainerAddOptions(storageDirUri = containerFolderUri,
-                                    fileNamer = PrefixContainerFileNamer("workspace/")), context)
+                            ContainerAddOptions(
+                                storageDirUri = containerFolderUri,
+                                fileNamer = PrefixContainerFileNamer("workspace/"),
+                                updateContainer = false), context)
 
                     val h5pDistTmpFile = File.createTempFile("h5p-dist", "zip")
                     val h5pDistIn = getAssetFromResource("/com/ustadmobile/core/h5p/dist.zip", context, this::class)
                             ?: throw IllegalStateException("Could not find h5p dist file")
                     h5pDistIn.writeToFile(h5pDistTmpFile)
-                    repo.addEntriesToContainerFromZip(container.containerUid, h5pDistTmpFile.toDoorUri(),
-                            containerAddOptions, context)
+                    repo.addEntriesToContainerFromZip(
+                            container.containerUid, h5pDistTmpFile.toDoorUri(),
+                            ContainerAddOptions(storageDirUri = containerFolderUri,
+                                updateContainer = false),
+                            context)
                     h5pDistTmpFile.delete()
 
                     // generate tincan.xml
                     val tinCan = """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <tincan xmlns="http://projecttincan.com/tincan.xsd">
-                    <activities>
-                        <activity id="${entry?.entryId?.escapeHTML()}" type="http://adlnet.gov/expapi/activities/module">
-                            <name>${entry?.title?.escapeHTML()}</name>
-                            <description lang="en-US">${entry?.description?.escapeHTML()}</description>
-                            <launch lang="en-us">index.html</launch>
-                        </activity>
-                    </activities>
-                </tincan>
-            """.trimIndent()
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <tincan xmlns="http://projecttincan.com/tincan.xsd">
+                            <activities>
+                                <activity id="${entry?.entryId?.escapeHTML()}" type="http://adlnet.gov/expapi/activities/module">
+                                    <name>${entry?.title?.escapeHTML()}</name>
+                                    <description lang="en-US">${entry?.description?.escapeHTML()}</description>
+                                    <launch lang="en-us">index.html</launch>
+                                </activity>
+                            </activities>
+                        </tincan>
+                        """.trimIndent()
 
                     val tmpTinCanFile = File.createTempFile("h5p-tincan", "xml")
                     tmpTinCanFile.writeText(tinCan)
                     repo.addFileToContainer(container.containerUid, tmpTinCanFile.toDoorUri(),
-                            "tincan.xml", context, di, containerAddOptions)
+                            "tincan.xml", context, di,
+                            ContainerAddOptions(storageDirUri = containerFolderUri,
+                                updateContainer = false)
+                    )
                     tmpTinCanFile.delete()
 
 
                     // generate index.html
                     val index = """
-                <html>
-                <head>
-                    <meta charset="utf-8" />
-                    <script type="text/javascript" src="dist/main.bundle.js"></script>
-                </head>
-                <body>
-                <div id="h5p-container" data-workspace="workspace"></div>
-                </body>
-                </html>
-            """.trimIndent()
+                        <html>
+                        <head>
+                            <meta charset="utf-8" />
+                            <script type="text/javascript" src="dist/main.bundle.js"></script>
+                        </head>
+                        <body>
+                        <div id="h5p-container" data-workspace="workspace"></div>
+                        </body>
+                        </html>
+                    """.trimIndent()
                     val tmpIndexHtmlFile = File.createTempFile("h5p-index", "html")
                     tmpIndexHtmlFile.writeText(index)
                     repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
-                            "index.html", context, di, containerAddOptions)
+                            "index.html", context, di,
+                        ContainerAddOptions(storageDirUri = containerFolderUri,
+                            updateContainer = false)) //Last file, now update container
                     tmpIndexHtmlFile.delete()
 
-                    contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
-                        progress)
+                    db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                        txDb.containerDao.updateContainerSizeAndNumEntries(
+                            container.containerUid, systemTimeInMillis())
+                        contentJobItem.updateTotalFromContainerSize(contentNeedUpload, txDb,
+                            progress)
 
-                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
+                        txDb.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid,
+                            true)
 
-                    contentJobItem.cjiConnectivityNeeded = true
-                    db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+                        contentJobItem.cjiConnectivityNeeded = true
+                        txDb.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid,
+                            true)
+                    }
+
 
                     val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
                             ?: 0)
@@ -228,7 +251,7 @@ class H5PTypePluginCommonJvm(
                     }
                 }
 
-                contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSize
+                contentJobItem.cjiItemProgress = contentJobItem.cjiItemTotal / progressSteps
                 progress.onProgress(contentJobItem)
 
 

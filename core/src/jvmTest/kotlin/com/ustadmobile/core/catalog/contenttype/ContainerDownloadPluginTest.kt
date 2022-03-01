@@ -24,6 +24,7 @@ import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
@@ -32,14 +33,13 @@ import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.*
 import org.junit.*
 import org.junit.rules.TemporaryFolder
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
+import org.kodein.di.*
+import java.io.File
 import kotlin.random.Random
 
 class ContainerDownloadPluginTest {
@@ -64,6 +64,18 @@ class ContainerDownloadPluginTest {
 
     private lateinit var siteEndpoint: Endpoint
 
+    private lateinit var epubFile: File
+
+    private lateinit var containerTmpFolder: File
+
+    private lateinit var downloadDestDir: File
+
+    private lateinit var siteUrl: String
+
+    private lateinit var clientDb: UmAppDatabase
+
+    private lateinit var clientRepo: UmAppDatabase
+
     @JvmField
     @Rule
     val temporaryFolder = TemporaryFolder()
@@ -74,6 +86,8 @@ class ContainerDownloadPluginTest {
 
     @Before
     fun setup() {
+        downloadDestDir = temporaryFolder.newFolder()
+
         Napier.baseDebugIfNotEnabled()
         serverOkHttpClient = OkHttpClient()
         serverHttpClient = HttpClient(OkHttp) {
@@ -103,10 +117,10 @@ class ContainerDownloadPluginTest {
             containerUid = serverRepo.containerDao.insert(this)
         }
 
-        val epubFile = temporaryFolder.newFile()
+        epubFile = temporaryFolder.newFile()
         this::class.java.getResourceAsStream("/com/ustadmobile/core/contentformats/epub/test.epub")!!
                 .writeToFile(epubFile)
-        val containerTmpFolder = temporaryFolder.newFolder()
+        containerTmpFolder = temporaryFolder.newFolder()
         runBlocking {
             serverRepo.addEntriesToContainerFromZip(
                     container.containerUid,
@@ -115,6 +129,11 @@ class ContainerDownloadPluginTest {
         }
         clientDi = DI {
             import(ustadTestRule.diModule)
+            bind<Json>() with singleton {
+                Json {
+                    encodeDefaults = true
+                }
+            }
         }
 
         //Create a mock web server that will serve the concatenated data
@@ -122,13 +141,43 @@ class ContainerDownloadPluginTest {
         dispatcher = ConcatenatedResponse2Dispatcher(serverDb, clientDi, container.containerUid)
         mockWebServer.dispatcher = dispatcher
         mockWebServer.start()
+        siteUrl = mockWebServer.url("/").toString()
 
         siteEndpoint = Endpoint(mockWebServer.url("/").toString())
 
-        val clientRepo: UmAppDatabase by clientDi.on(siteEndpoint).instance(tag = DoorTag.TAG_REPO)
+        clientDb = clientDi.direct.on(siteEndpoint).instance(tag = DoorTag.TAG_DB)
+        clientRepo = clientDi.direct.on(siteEndpoint).instance(tag = DoorTag.TAG_REPO)
         clientRepo.contentEntryDao.insert(contentEntry)
+
+        //Get the updated size and number of entries
+        container = serverDb.containerDao.findByUid(container.containerUid)!!
         clientRepo.containerDao.insert(container)
     }
+
+    private fun makeDownloadJobAndJobItem(
+        setContainerInfo: Boolean = true
+    ) : ContentJobItemAndContentJob {
+        return runBlocking {
+            ContentJobItemAndContentJob().apply {
+                contentJob = ContentJob().apply {
+                    this.toUri = downloadDestDir.toKmpUriString()
+                    this.cjIsMeteredAllowed = true
+                    this.cjUid = clientDb.contentJobDao.insertAsync(this)
+                }
+                contentJobItem = ContentJobItem().apply {
+                    this.cjiContentEntryUid = contentEntry.contentEntryUid
+                    if(setContainerInfo) {
+                        this.cjiContainerUid = container.containerUid
+                        this.cjiItemTotal = container.fileSize
+                    }
+
+                    this.cjiJobUid = contentJob!!.cjUid
+                    this.cjiUid = clientDb.contentJobItemDao.insertJobItem(this)
+                }
+            }
+        }
+    }
+
 
     @After
     fun shutdown() {
@@ -138,30 +187,12 @@ class ContainerDownloadPluginTest {
 
     @Test
     fun givenValidRequest_whenDownloadCalled_thenShouldDownloadContainerFiles() {
-        val downloadDestDir = temporaryFolder.newFolder()
-
-        val siteUrl = mockWebServer.url("/").toString()
-
-        val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct.instance(tag = DoorTag.TAG_DB)
+        val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct
+            .instance(tag = DoorTag.TAG_DB)
 
         val mockListener = mock<ContentJobProgressListener> { }
 
-        val job = runBlocking {
-            ContentJobItemAndContentJob().apply {
-                contentJob = ContentJob().apply {
-                    this.toUri = downloadDestDir.toKmpUriString()
-                    this.cjIsMeteredAllowed = true
-                    this.cjUid = clientDb.contentJobDao.insertAsync(this)
-                }
-                contentJobItem = ContentJobItem().apply {
-                    this.cjiContentEntryUid = contentEntry.contentEntryUid
-                    this.cjiContainerUid = container.containerUid
-                    this.cjiJobUid = contentJob!!.cjUid
-                    this.cjiItemTotal = container.fileSize
-                    this.cjiUid = clientDb.contentJobItemDao.insertJobItem(this)
-                }
-            }
-        }
+        val job = makeDownloadJobAndJobItem()
 
         val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
             temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
@@ -182,8 +213,6 @@ class ContainerDownloadPluginTest {
     fun givenDownloadIsInterrupted_whenNewRequestMade_thenDownloadShouldResume() {
         dispatcher.numTimesToFail.set(1)
 
-        val downloadDestDir = temporaryFolder.newFolder()
-
         val siteUrl = mockWebServer.url("/").toString()
 
         val mockListener = mock<ContentJobProgressListener> { }
@@ -191,22 +220,7 @@ class ContainerDownloadPluginTest {
         val results = mutableListOf<Int>()
         val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct.instance(tag = DoorTag.TAG_DB)
 
-        val job = runBlocking {
-            ContentJobItemAndContentJob().apply {
-                contentJob = ContentJob().apply {
-                    this.toUri = downloadDestDir.toKmpUriString()
-                    this.cjIsMeteredAllowed = true
-                    this.cjUid = clientDb.contentJobDao.insertAsync(this)
-                }
-                contentJobItem = ContentJobItem().apply {
-                    this.cjiContainerUid = container.containerUid
-                    this.cjiContentEntryUid = contentEntry.contentEntryUid
-                    this.cjiJobUid = contentJob!!.cjUid
-                    this.cjiItemTotal = container.fileSize
-                    this.cjiUid = clientDb.contentJobItemDao.insertJobItem(this)
-                }
-            }
-        }
+        val job = makeDownloadJobAndJobItem()
 
 
         val exceptions = mutableListOf<Exception>()
@@ -271,28 +285,13 @@ class ContainerDownloadPluginTest {
     //expected
     @Test
     fun givenValidSourceUri_whenProcessJobCalled_thenShouldSetContentEntryUidAndContainerUid() {
-        val downloadDestDir = temporaryFolder.newFolder()
-
         val siteUrl = mockWebServer.url("/").toString()
 
         val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct.instance(tag = DoorTag.TAG_DB)
 
         val mockListener = mock<ContentJobProgressListener> { }
 
-        val job = runBlocking {
-            ContentJobItemAndContentJob().apply {
-                contentJob = ContentJob().apply {
-                    this.toUri = downloadDestDir.toKmpUriString()
-                    this.cjIsMeteredAllowed = true
-                    this.cjUid = clientDb.contentJobDao.insertAsync(this)
-                }
-                contentJobItem = ContentJobItem().apply {
-                    this.sourceUri = contentEntry.toDeepLink(siteEndpoint)
-                    this.cjiJobUid = contentJob!!.cjUid
-                    this.cjiUid = clientDb.contentJobItemDao.insertJobItem(this)
-                }
-            }
-        }
+        val job = makeDownloadJobAndJobItem()
 
         val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
             temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
@@ -314,5 +313,93 @@ class ContainerDownloadPluginTest {
         Assert.assertEquals("ContainerUid was set to most recent container after looking up content entry",
             container.containerUid, contentJobItemInDb?.cjiContainerUid)
     }
+
+    @Test
+    fun givenAllContainerEntryMd5sAlreadyPresent_whenDownloaded_thenShouldSucceed() {
+        val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct
+            .instance(tag = DoorTag.TAG_DB)
+
+        val localContainerAlreadyDownloaded = Container().apply {
+            containerUid = clientDb.containerDao.insert(this)
+        }
+
+        runBlocking {
+            clientDb.addEntriesToContainerFromZip(localContainerAlreadyDownloaded.containerUid,
+                epubFile.toDoorUri(), ContainerAddOptions(containerTmpFolder.toDoorUri()), Any())
+        }
+
+        val job = makeDownloadJobAndJobItem()
+
+        val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
+            temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
+            clientDi)
+
+
+        val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
+        val result = runBlocking {  downloadJob.processJob(job, processContext, mock { }) }
+
+
+        Assert.assertEquals("Result is reported as successful", JobStatus.COMPLETE,
+            result.status)
+
+        serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
+    }
+
+    @Test
+    fun givenContainerNotActive_whenDownloaded_thenWillFail() {
+        val inactiveContainer = Container().apply {
+            containerContentEntryUid = contentEntry.contentEntryUid
+            cntLastModified = systemTimeInMillis()
+            containerUid = container.containerUid
+        }
+        clientDb.containerDao.replaceList(listOf(inactiveContainer))
+        container = inactiveContainer
+        clientDb.containerEntryDao.deleteByContainerUid(container.containerUid)
+
+        val job = makeDownloadJobAndJobItem()
+
+        val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
+            temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
+            clientDi)
+
+
+        val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
+        val result = runBlocking {  downloadJob.processJob(job, processContext, mock { } ) }
+
+        Assert.assertEquals("Attempt to download inactive container fails",
+            JobStatus.FAILED, result.status)
+    }
+
+    @Test
+    fun givenNewContainerNotYetActive_whenDownloaded_thenWillDownloadOlderActiveContainer() {
+        //put in a more recent, but inactive container
+        Container().apply {
+            containerContentEntryUid = contentEntry.contentEntryUid
+            cntLastModified = systemTimeInMillis()
+            containerUid = clientDb.containerDao.insert(this)
+        }
+
+        val job = makeDownloadJobAndJobItem(setContainerInfo = false)
+
+        val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
+            temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
+            clientDi)
+
+        val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
+        val result = runBlocking {  downloadJob.processJob(job, processContext, mock { } ) }
+
+        Assert.assertEquals("Downloading when there is a more recent, but inactive container, reports success",
+            JobStatus.COMPLETE, result.status)
+
+        val downloadedContainerUid = clientDb.contentJobItemDao
+            .findByJobId(job.contentJobItem?.cjiJobUid ?: 0)?.cjiContainerUid ?: 0
+
+        Assert.assertEquals("Download used the previous active container uid, not the most recent inactive one",
+            container.containerUid, downloadedContainerUid)
+    }
+
+
+
+
 
 }

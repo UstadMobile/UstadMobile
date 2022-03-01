@@ -127,6 +127,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                     view.errorMessage = impl.getString(MessageID.your_account_needs_approved,
                         context)
                 }catch(e: Exception) {
+                    Napier.e("Error logging in", e)
                     view.errorMessage = impl.getString(MessageID.login_network_error, context)
                 }finally {
                     view.inProgress = false
