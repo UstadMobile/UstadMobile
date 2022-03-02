@@ -1,11 +1,9 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -16,7 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailOverviewBinding
-import com.toughra.ustadmobile.databinding.ViewTextAssignmentLayoutBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzAssignmentDetailOverviewPresenter
 import com.ustadmobile.core.controller.FileSubmissionListItemListener
@@ -88,7 +85,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     private var submissionAttachmentLiveDataCourse: LiveData<PagedList<CourseAssignmentSubmissionWithAttachment>>? = null
     private val courseSubmissionWithAttachmentObserver = Observer<PagedList<CourseAssignmentSubmissionWithAttachment>?> {
         t -> run{
-            addSubmissionButtonsAdapter?.maxFilesReached = t.size == maxNumberOfFilesSubmission
+            addSubmissionButtonsAdapter?.maxFilesReached = t.size >= maxNumberOfFilesSubmission
             submissionHeaderAdapter?.visible = t.isNotEmpty()
             submittedSubmissionAdapter?.submitList(t)
         }
@@ -234,7 +231,11 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         set(value) {
             field = value
             submitButtonAdapter?.hasFilesToSubmit = value?.isNotEmpty() ?: false
+            val sizeOfSubmitted = submittedSubmissionAdapter?.currentList?.filter { it.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE }?.size ?: 0
+            val sizeOfAddedList = value?.filter { it.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE }?.size ?: 0
+            addSubmissionButtonsAdapter?.maxFilesReached = (sizeOfAddedList + sizeOfSubmitted) >= maxNumberOfFilesSubmission
             addSubmissionAdapter?.submitList(value)
+            addSubmissionAdapter?.notifyDataSetChanged()
         }
 
     override var timeZone: String? = null
@@ -319,7 +320,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
     override fun onSubmitButtonClicked() {
         mPresenter?.handleSubmitButtonClicked()
-        submitButtonAdapter?.visible = false
+        submitButtonAdapter?.hasFilesToSubmit = false
     }
 
     override fun onAddFileClicked() {

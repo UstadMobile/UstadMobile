@@ -36,6 +36,8 @@ class SubmitButtonAdapter(val eventHandler: ClazzAssignmentDetailOverviewFragmen
                 ItemAssignmentSubmitButtonBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
                     it.eventHandler = eventHandler
+                    it.deadlinePassed = deadlinePassed
+                    it.hasFilesToSubmit = hasFilesToSubmit
                 })
         return viewHolder as SubmitButtonViewHolder
     }

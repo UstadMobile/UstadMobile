@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.TextAssignmentEditView
@@ -28,13 +27,10 @@ class TextAssignmentEditPresenter(context: Any,
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: CourseAssignmentSubmission? = null
-        if(entityJsonStr != null) {
-            editEntity = safeParse(di, CourseAssignmentSubmission.serializer(), entityJsonStr)
+        val editEntity: CourseAssignmentSubmission = if(entityJsonStr != null) {
+            safeParse(di, CourseAssignmentSubmission.serializer(), entityJsonStr)
         }else {
-            editEntity = CourseAssignmentSubmission().apply {
-                casText = systemImpl.getString(MessageID.terms_and_policies_text, context)
-            }
+            CourseAssignmentSubmission()
         }
 
         return editEntity

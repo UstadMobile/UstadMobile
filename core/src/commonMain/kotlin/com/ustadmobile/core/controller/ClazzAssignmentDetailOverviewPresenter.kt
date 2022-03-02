@@ -10,11 +10,9 @@ import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
-import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
-import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.core.view.SelectFileView
-import com.ustadmobile.core.view.TextAssignmentEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
@@ -74,13 +72,18 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        val loggedInPersonUid = accountManager.activeAccount.personUid
-
 
         val clazzAssignment = db.onRepoWithFallbackToDb(2000){
             it.clazzAssignmentDao.findByUidAsync(entityUid)
         } ?: ClazzAssignment()
 
+        loadAssignment(clazzAssignment, db)
+
+        return clazzAssignment
+    }
+
+    private suspend fun loadAssignment(clazzAssignment: ClazzAssignment, db: UmAppDatabase) {
+        val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
             it.clazzDao.getClazzWithSchool(clazzAssignment.caClazzUid)
@@ -100,9 +103,9 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             view.maxNumberOfFilesSubmission = clazzAssignment.caNumberOfFiles
             view.hasPassedDeadline = hasPassedDeadline(clazzAssignment)
             view.submittedCourseAssignmentSubmission = db.onRepoWithFallbackToDb(2000){
-                    it.courseAssignmentSubmissionDao.getAllFileSubmissionsFromStudent(
-                            clazzAssignment.caUid, loggedInPersonUid)
-                }
+                it.courseAssignmentSubmissionDao.getAllFileSubmissionsFromStudent(
+                        clazzAssignment.caUid, loggedInPersonUid)
+            }
             db.courseAssignmentSubmissionDao
                     .getStatusOfAssignmentForStudent(
                             clazzAssignment.caUid, loggedInPersonUid)
@@ -134,12 +137,15 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             view.clazzAssignmentClazzComments = db.commentsDao.findPublicByEntityTypeAndUidLive(
                     ClazzAssignment.TABLE_ID, clazzAssignment.caUid)
         }
-
-        return clazzAssignment
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ClazzAssignment? {
         super.onLoadFromJson(bundle)
+
+        val entity = safeParse(di, ClazzAssignment.serializer(), bundle[UstadEditView.ARG_ENTITY_JSON].toString())
+        presenterScope.launch {
+            loadAssignment(entity, db)
+        }
         submissionList.addAll(
                 safeParseList(di, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
                 CourseAssignmentSubmissionWithAttachment::class, bundle[SAVED_STATE_ADD_SUBMISSION_LIST]
@@ -150,6 +156,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
+        savedState.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, ClazzAssignment.serializer(), entity)
         savedState.putEntityAsJson(SAVED_STATE_ADD_SUBMISSION_LIST,
                 ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
                 submissionList)
@@ -188,6 +195,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                     casaUid =  db.doorPrimaryKeyManager.nextIdAsync(CourseAssignmentSubmissionAttachment.TABLE_ID)
                     casaSubmissionUid = submission.casUid
                     casaUri = uri
+                    casaMd5
                     casaMimeType = doorUri.guessMimeType(context, di)
                 }
                 submission.attachment = attachment
@@ -220,7 +228,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         presenterScope.launch {
             val fileSubmission = courseSubmission.attachment ?: return@launch
             val uri = fileSubmission.casaUri ?: return@launch
-            val doorUri = repo.retrieveAttachment(uri)
+            val doorUri = if(uri.startsWith("door-attachment://")) repo.retrieveAttachment(uri) else DoorUri.parse(uri)
             try{
                 systemImpl.openFileInDefaultViewer(context, doorUri, fileSubmission.casaMimeType)
             }catch (e: Exception){

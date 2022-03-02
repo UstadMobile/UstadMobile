@@ -26,7 +26,7 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/fragment_workspace_terms_edit_edit_clx"
+        android:id="@+id/fragment_assignment_text_edit_clx"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

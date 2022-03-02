@@ -449,25 +449,30 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         val ctx = context as Context
         val intent = Intent(Intent.ACTION_VIEW)
         intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-        var file = doorUri.toFile()
+        val uri: Uri
+        if(doorUri.uri.toString().startsWith("content://")){
+            uri = doorUri.uri
+        }else{
+            var file = doorUri.toFile()
 
-        if (file.isGzipped()) {
+            if (file.isGzipped()) {
 
-            var gzipIn: GZIPInputStream? = null
-            var destOut: FileOutputStream? = null
-            try {
-                gzipIn = GZIPInputStream(FileInputStream(file))
-                val destFile = File(file.parentFile, file.name + "unzip")
-                destOut = FileOutputStream(destFile)
-                gzipIn.copyTo(destOut)
-                file = destFile
-            } finally {
-                gzipIn?.close()
-                destOut?.flush()
-                destOut?.close()
+                var gzipIn: GZIPInputStream? = null
+                var destOut: FileOutputStream? = null
+                try {
+                    gzipIn = GZIPInputStream(FileInputStream(file))
+                    val destFile = File(file.parentFile, file.name + "unzip")
+                    destOut = FileOutputStream(destFile)
+                    gzipIn.copyTo(destOut)
+                    file = destFile
+                } finally {
+                    gzipIn?.close()
+                    destOut?.flush()
+                    destOut?.close()
+                }
             }
+            uri = FileProvider.getUriForFile(ctx, "${context.packageName}.provider", file)
         }
-        val uri = FileProvider.getUriForFile(ctx, "${context.packageName}.provider", file)
         if (mMimeType.isNullOrEmpty()) {
             mMimeType = "*/*"
         }
