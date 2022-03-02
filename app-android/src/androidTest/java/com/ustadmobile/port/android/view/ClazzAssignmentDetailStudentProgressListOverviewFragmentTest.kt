@@ -87,27 +87,6 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragmentTest : TestCase() 
             caUid = dbRule.repo.clazzAssignmentDao.insert(this)
         }
 
-        ClazzAssignmentContentJoin().apply {
-            cacjContentUid = contentEntry.contentEntryUid
-            cacjAssignmentUid = clazzAssignment.caUid
-            cacjWeight = 100
-            cacjUid = dbRule.repo.clazzAssignmentContentJoinDao.insert(this)
-        }
-
-        ClazzAssignmentRollUp().apply {
-            this.cacheClazzAssignmentUid = clazzAssignment.caUid
-            this.cacheContentEntryUid = contentEntry.contentEntryUid
-            this.cacheContentComplete = true
-            this.cacheMaxScore = 15
-            this.cachePersonUid = student.personUid
-            this.cacheStudentScore = 5
-            this.cacheFinalWeightScoreWithPenalty = 3300f
-            this.cacheWeight = 100
-            this.cacheProgress = 100
-            this.cacheUid = dbRule.repo.clazzAssignmentRollUpDao.insert(this)
-        }
-
-
         StatementEntity().apply {
             statementContentEntryUid = contentEntry.contentEntryUid
             contentEntryRoot = true
@@ -139,20 +118,16 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragmentTest : TestCase() 
                 recycler{
 
                     childWith<ClazzAssignmentDetailStudentProgressListScreen.ClazzAssignmentWithMetrics> {
-                        withDescendant {  withText("Completed") }
+                        withDescendant {  withText("Marked") }
                     } perform {
 
 
                         notStartedText{
-                            hasText("0")
+                            hasText("1")
                         }
 
                         startedText{
                             hasText("0")
-                        }
-
-                        completedText{
-                            hasText("1")
                         }
 
                     }
@@ -161,19 +136,8 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragmentTest : TestCase() 
                         withTag(student.personUid)
                     } perform {
 
-                        this.attemptCount{
-                            hasText("1 attempt")
-                        }
-
                         this.personName{
                             hasText("Student A")
-                        }
-                        this.progressText{
-                            containsText("100%")
-                        }
-
-                        this.scoreText{
-                            containsText("33%")
                         }
 
                         click()

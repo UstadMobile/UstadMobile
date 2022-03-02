@@ -14,7 +14,10 @@ import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.port.android.screen.ClazzAssignmentEditScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
@@ -164,12 +167,6 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
             caUid = dbRule.repo.clazzAssignmentDao.insert(this)
         }
 
-        ClazzAssignmentContentJoin().apply {
-            cacjAssignmentUid = existingClazzAssignment.caUid
-            cacjContentUid = entry.contentEntryUid
-            cacjUid = dbRule.repo.clazzAssignmentContentJoinDao.insert(this)
-        }
-
 
         init {
 
@@ -201,11 +198,6 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
                 }
 
                 this.nestedScroll.swipeUp()
-
-                contentList {
-                    isDisplayed()
-                    hasSize(1)
-                }
 
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
