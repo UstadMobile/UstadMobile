@@ -21,6 +21,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
+import com.ustadmobile.util.test.rules.bindPresenterCoroutineRule
 import junit.framework.Assert
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -175,9 +177,9 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         verify(mockView, timeout(1000).times(2)).showSubmission = eq(true)
         verify(mockView, timeout(1000).times(2)).maxNumberOfFilesSubmission = eq(3)
         verify(mockView, timeout(1000).times(2)).hasPassedDeadline = eq(false)
-        verify(mockView, timeout(5000).atLeastOnce()).submittedCourseAssignmentSubmission = any()
-        verify(mockView, timeout(1000).atLeastOnce()).submissionMark = any()
-        verify(mockView, timeout(5000).atLeastOnce()).clazzMetrics = any()
+        verify(mockView, timeout(5000).times(2)).submittedCourseAssignmentSubmission = any()
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(0)
+        verify(mockView, timeout(1000).times(2)).submissionMark = eq(null)
         verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(true)
         verify(mockView, timeout(1000).times(0)).clazzAssignmentClazzComments
 
@@ -210,7 +212,6 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         verify(mockView, timeout(1000)).showSubmission = eq(false)
         verify(mockView, timeout(1000).times(0)).maxNumberOfFilesSubmission
         verify(mockView, timeout(1000).times(0)).hasPassedDeadline
-        verify(mockView, timeout(1000).times(0)).clazzMetrics
         verify(mockView, timeout(1000).times(0)).submittedCourseAssignmentSubmission
         verify(mockView, timeout(1000).times(0)).submissionMark
         verify(mockView, timeout(1000).times(0)).clazzAssignmentClazzComments
@@ -280,8 +281,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         presenter.handleSubmitButtonClicked()
 
         verifyBlocking(fileSubmissionDaoSpy, timeout(1000)){
-            setFilesAsSubmittedForStudent(eq(testEntity.caUid),
-                any(), eq(true), any())
+            insertListAsync(any())
         }
 
         runBlocking {
@@ -318,14 +318,16 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         mockView.captureLastEntityValue()
 
-        val fileSubmission = CourseAssignmentSubmissionAttachment().apply {
-            casaUri = "dummy"
-            casaMimeType = "video/*"
+        val fileSubmission = CourseAssignmentSubmissionWithAttachment().apply {
+            attachment = CourseAssignmentSubmissionAttachment().apply {
+                casaUri = "dummy"
+                casaMimeType = "video/*"
+            }
         }
 
         presenter.handleOpenFileSubmission(fileSubmission)
         val systemImpl: UstadMobileSystemImpl by di.instance()
-        verify(systemImpl, timeout(1000)).openFileInDefaultViewer(any(), any(), eq(fileSubmission.casaMimeType))
+        verify(systemImpl, timeout(5000)).openFileInDefaultViewer(any(), any(), eq(fileSubmission.attachment!!.casaMimeType))
 
 
     }
@@ -356,7 +358,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         mockView.captureLastEntityValue()
 
         val afs = CourseAssignmentSubmissionWithAttachment().apply {
-            casaUri = "dummyUri"
+            attachment?.casaUri = "dummyUri"
         }
 
         val fileSubmissionDaoSpy = spy(repo.courseAssignmentSubmissionAttachmentDao)
@@ -364,12 +366,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         presenter.handleDeleteSubmission(afs)
 
-        argumentCaptor<CourseAssignmentSubmissionAttachment>().apply {
-            verifyBlocking(fileSubmissionDaoSpy, timeout(1000)) {
-                updateAsync(capture())
-            }
-            Assert.assertEquals("Got expected uri", null, firstValue.casaUri)
-        }
+        verify(mockView).addedCourseAssignmentSubmission = eq(listOf())
 
 
     }
