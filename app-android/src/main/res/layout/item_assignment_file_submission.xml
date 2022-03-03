@@ -15,10 +15,6 @@
             type="Boolean" />
 
         <variable
-            name="showDownload"
-            type="Boolean" />
-
-        <variable
             name="fileSubmission"
             type="com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment" />
 
@@ -30,7 +26,8 @@
             name="hasPassedDeadline"
             type="Boolean" />
 
-        <variable name="dateTimeMode"
+        <variable
+            name="dateTimeMode"
             type="Integer"/>
 
         <variable
@@ -38,12 +35,12 @@
             type="String" />
 
         <variable
-            name="selectablePagedListAdapter"
-            type="SubmissionAdapter" />
+            name="notSubmitted"
+            type="Boolean" />
 
         <variable
-            name="isSubmitted"
-            type="Boolean" />
+            name="selectablePagedListAdapter"
+            type="SubmissionAdapter" />
 
         <variable
             name="eventHandler"
@@ -58,7 +55,7 @@
         android:padding="@dimen/dimen_10dp"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, fileSubmission)}"
-        app:onSelectableItemClicked="@{() -> eventHandler.onClickOpenFileSubmission(fileSubmission)}"
+        app:onSelectableItemClicked="@{() -> eventHandler.onClickOpenSubmission(fileSubmission, notSubmitted)}"
         android:visibility="@{showFiles ? View.VISIBLE : View.GONE}"
         android:tag="@{fileSubmission.casUid}">
 
@@ -101,7 +98,7 @@
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
-            android:visibility="@{showDownload ? View.VISIBLE : View.GONE}"
+            android:visibility="@{!notSubmitted ? View.VISIBLE : View.GONE}"
             android:text="@{@string/submitted_cap + ':'}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             app:layout_constraintStart_toEndOf="@id/file_thumbnail"
@@ -116,7 +113,7 @@
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
-            android:visibility="@{showDownload ? View.VISIBLE : View.GONE}"
+            android:visibility="@{!notSubmitted ? View.VISIBLE : View.GONE}"
             app:dateTimeInMillis="@{fileSubmission.casTimestamp}"
             app:timeZoneId="@{timeZoneId}"
             app:dateTimeInMillisMode="@{dateTimeMode}"
@@ -147,7 +144,7 @@
             android:padding="@dimen/dimen_8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:srcCompat="@drawable/ic_delete_black_24dp"
-            android:visibility="@{!showDownload &amp; !hasPassedDeadline &amp; !isSubmitted ? View.VISIBLE : View.GONE}"
+            android:visibility="@{notSubmitted &amp; !hasPassedDeadline ? View.VISIBLE : View.GONE}"
             android:contentDescription="@string/delete"
             android:onClick="@{() -> eventHandler.onClickDeleteSubmission(fileSubmission)}"/>
 

@@ -114,7 +114,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
         // 4
         addSubmissionAdapter = AddSubmissionListAdapter(this).also {
-            it.showDownload = false
+            it.isSubmitted = false
         }
 
         // 5 submit button adapter
@@ -127,7 +127,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
         // 7 file submissions
         submittedSubmissionAdapter = SubmissionAdapter(this).also {
-            it.showDownload = false
+            it.isSubmitted = true
         }
 
         // 8 class
@@ -344,8 +344,8 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         mPresenter?.handleDeleteSubmission(submissionCourse)
     }
 
-    override fun onClickOpenFileSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment){
-        mPresenter?.handleOpenSubmission(submissionCourse)
+    override fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment, isEditable: Boolean){
+        mPresenter?.handleOpenSubmission(submissionCourse, isEditable)
     }
 
     companion object {

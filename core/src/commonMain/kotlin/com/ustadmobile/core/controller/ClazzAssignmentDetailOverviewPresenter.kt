@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.TextAssignmentEditView.Companion.EDIT_ENABLED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
@@ -227,13 +228,14 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         view.addedCourseAssignmentSubmission = submissionList
     }
 
-    fun handleOpenSubmission(courseSubmission: CourseAssignmentSubmissionWithAttachment){
+    fun handleOpenSubmission(courseSubmission: CourseAssignmentSubmissionWithAttachment, canEdit: Boolean){
         presenterScope.launch {
             if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
 
                 val args = mutableMapOf<String, String>()
                 args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON,
                         CourseAssignmentSubmissionWithAttachment.serializer(), courseSubmission)
+                args[EDIT_ENABLED] = canEdit.toString()
                 systemImpl.go(TextAssignmentEditView.VIEW_NAME, args, context)
 
             }else if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE){
@@ -298,6 +300,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
 
     fun handleAddTextClicked(){
         val args = mutableMapOf(TextAssignmentEditView.ASSIGNMENT_ID to entity?.caUid.toString())
+        args[EDIT_ENABLED] = true.toString()
         navigateForResult(
                 NavigateForResultOptions(this,
                         null, TextAssignmentEditView.VIEW_NAME, CourseAssignmentSubmission::class,

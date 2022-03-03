@@ -43,12 +43,12 @@ class SubmissionAdapter(
             viewHolder?.binding?.hasPassedDeadline = value
         }
 
-    var showDownload: Boolean = false
+    var isSubmitted: Boolean = false
         set(value){
             if(field == value)
                 return
             field = value
-            viewHolder?.binding?.showDownload = value
+            viewHolder?.binding?.notSubmitted = !value
         }
 
     class FileSubmissionViewHolder(val binding: ItemAssignmentFileSubmissionBinding)
@@ -63,7 +63,7 @@ class SubmissionAdapter(
                     it.assignment = assignment
                     it.eventHandler = itemListener
                     it.showFiles = visible
-                    it.showDownload = showDownload
+                    it.notSubmitted = !isSubmitted
                     it.hasPassedDeadline = hasPassedDeadline
                     it.dateTimeMode = MODE_START_OF_DAY
                     it.timeZoneId = "UTC"
@@ -74,8 +74,6 @@ class SubmissionAdapter(
     override fun onBindViewHolder(holder: FileSubmissionViewHolder, position: Int) {
         val item =  getItem(position)
         holder.binding.fileSubmission = item
-        // timestamp not modified until in the db when submitted
-        holder.binding.isSubmitted = item?.casTimestamp != 0L
         holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK_FILE_SUBMISSION)
     }
 

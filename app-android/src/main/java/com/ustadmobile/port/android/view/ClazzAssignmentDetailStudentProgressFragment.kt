@@ -108,7 +108,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
 
         // 3 file submission for student
         submissionAdapter = SubmissionAdapter(this).also{
-            it.showDownload = true
+            it.isSubmitted = true
             it.visible = true
         }
 
@@ -250,8 +250,8 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         // cant delete here
     }
 
-    override fun onClickOpenFileSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment) {
-        mPresenter?.onClickOpenFileSubmission(submissionCourse)
+    override fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment, isEditable: Boolean) {
+        mPresenter?.onClickOpenSubmission(submissionCourse, isEditable)
     }
 
 }

@@ -42,12 +42,12 @@ class AddSubmissionListAdapter(
             viewHolder?.binding?.hasPassedDeadline = value
         }
 
-    var showDownload: Boolean = false
+    var isSubmitted: Boolean = false
         set(value){
             if(field == value)
                 return
             field = value
-            viewHolder?.binding?.showDownload = value
+            viewHolder?.binding?.notSubmitted = !value
         }
 
     private var viewHolder: AddSubmissionViewHolder? = null
@@ -62,7 +62,7 @@ class AddSubmissionListAdapter(
                     it.assignment = assignment
                     it.eventHandler = itemListener
                     it.showFiles = visible
-                    it.showDownload = showDownload
+                    it.notSubmitted = !isSubmitted
                     it.hasPassedDeadline = hasPassedDeadline
                     it.dateTimeMode = MODE_START_OF_DAY
                     it.timeZoneId = "UTC"

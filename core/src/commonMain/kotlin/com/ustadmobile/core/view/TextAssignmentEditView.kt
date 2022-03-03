@@ -14,6 +14,8 @@ interface TextAssignmentEditView: UstadEditView<CourseAssignmentSubmission> {
 
         const val ASSIGNMENT_ID = "assignment"
 
+        const val EDIT_ENABLED = "editEnabled"
+
     }
 
 }

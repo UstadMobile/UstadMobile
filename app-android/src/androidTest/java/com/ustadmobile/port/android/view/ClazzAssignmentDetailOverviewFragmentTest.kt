@@ -80,26 +80,6 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
             caUid = dbRule.repo.clazzAssignmentDao.insert(this)
         }
 
-        ClazzAssignmentContentJoin().apply {
-            cacjContentUid = contentEntry.contentEntryUid
-            cacjAssignmentUid = clazzAssignment.caUid
-            cacjWeight = 100
-            cacjUid = dbRule.repo.clazzAssignmentContentJoinDao.insert(this)
-        }
-
-        ClazzAssignmentRollUp().apply {
-            this.cacheClazzAssignmentUid = clazzAssignment.caUid
-            this.cacheContentEntryUid = contentEntry.contentEntryUid
-            this.cacheContentComplete = true
-            this.cacheMaxScore = 15
-            this.cachePersonUid = 42
-            this.cacheStudentScore = 5
-            this.cacheWeight = 100
-            this.cacheFinalWeightScoreWithPenalty = 3300f
-            this.cacheProgress = 100
-            this.cacheUid = dbRule.repo.clazzAssignmentRollUpDao.insert(this)
-        }
-
         StatementEntity().apply {
             statementContentEntryUid = contentEntry.contentEntryUid
             contentEntryRoot = true
@@ -134,33 +114,6 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
                             containsText("May")
                             containsText("5")
                         }
-                    }
-
-                    childWith<ClazzAssignmentDetailOverviewScreen.Content> {
-                        withDescendant { withText(contentEntry.title!!) }
-                    } perform {
-
-                        this.contentTitle{
-                            hasText(contentEntry.title!!)
-                        }
-
-                        this.score{
-                            hasText("33%")
-                        }
-                        this.scoreResults{
-                            hasText("(5/15)")
-                        }
-
-                    }
-
-                    childWith<ClazzAssignmentDetailOverviewScreen.TotalScore> {
-                        withDescendant { withText("Total score") }
-                    } perform {
-
-                        this.score{
-                            hasText("33%")
-                        }
-
                     }
 
                 }

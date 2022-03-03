@@ -7,8 +7,11 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
+import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.SessionListView
+import com.ustadmobile.core.view.TextAssignmentEditView
+import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
@@ -110,20 +113,30 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
         return clazzAssignment
     }
 
-    fun onClickOpenFileSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment){
+    fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment, isEditable: Boolean){
         presenterScope.launch {
-            val attachment = submissionCourse.attachment ?: return@launch
-            val uri = attachment.casaUri ?: return@launch
-            val doorUri = repo.retrieveAttachment(uri)
-            try{
-                systemImpl.openFileInDefaultViewer(context, doorUri, attachment.casaMimeType)
-            }catch (e: Exception){
-                if (e is NoAppFoundException) {
-                    view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
-                }else{
-                    val message = e.message
-                    if (message != null) {
-                        view.showSnackBar(message)
+            if(submissionCourse.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
+
+                val args = mutableMapOf<String, String>()
+                args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON,
+                        CourseAssignmentSubmissionWithAttachment.serializer(), submissionCourse)
+                args[TextAssignmentEditView.EDIT_ENABLED] = isEditable.toString()
+                systemImpl.go(TextAssignmentEditView.VIEW_NAME, args, context)
+
+            }else if(submissionCourse.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE) {
+                val attachment = submissionCourse.attachment ?: return@launch
+                val uri = attachment.casaUri ?: return@launch
+                val doorUri = repo.retrieveAttachment(uri)
+                try {
+                    systemImpl.openFileInDefaultViewer(context, doorUri, attachment.casaMimeType)
+                } catch (e: Exception) {
+                    if (e is NoAppFoundException) {
+                        view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
+                    } else {
+                        val message = e.message
+                        if (message != null) {
+                            view.showSnackBar(message)
+                        }
                     }
                 }
             }

@@ -44,6 +44,7 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
                 it.visualEditor.setCalypsoMode(false)
                 it.addPlugin(CssUnderlinePlugin())
                 it.initSourceEditorHistory()
+                it.visualEditor.isEnabled = (arguments?.get(TextAssignmentEditView.EDIT_ENABLED).toString().toBoolean())
             }
         }
 
@@ -53,7 +54,7 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
                 val wordsLength = countWords(s.toString())
                 // count == 0 means a new word is going to start
                 if (count == 0 && wordsLength >= charWordLimit) {
-                    setCharLimit(editText, editText.text.length ?: 0)
+                    setCharLimit(editText, editText.text.length)
                 } else {
                     removeFilter(editText);
                 }
@@ -86,6 +87,11 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
             limitTypeText = if(limitType == ClazzAssignment.TEXT_CHAR_LIMIT)
                     requireContext().getString(R.string.characters)
                     else requireContext().getString(R.string.words)
+
+            val wordsLength = countWords(entity?.casText.toString())
+            // count == 0 means a new word is going to start
+            mBinding?.wordLimit?.text = "$wordsLength/$charWordLimit $limitTypeText"
+
         }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -164,6 +170,9 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
             if(termsHtmlVal != null)
                 aztec?.visualEditor?.fromHtml(termsHtmlVal)
 
+            val wordsLength = countWords(value?.casText.toString())
+            // count == 0 means a new word is going to start
+            mBinding?.wordLimit?.text = "$wordsLength/$charWordLimit $limitTypeText"
         }
 
     override var fieldsEnabled: Boolean = false
