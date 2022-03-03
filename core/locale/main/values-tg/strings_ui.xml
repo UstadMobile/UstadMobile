@@ -103,8 +103,8 @@
     <string name="also_available_in">Инчунин дастрас аст дар</string>
     <string name="onboarding_get_started_label">Оғоз намоед</string>
     <string name="onboarding_no_internet_headline">Интернет нест\? Душворие ҳам нест.</string>
-    <string name="onboarding_offline_sharing">Дар офлайн мубодила кунед</string>
-    <string name="onboarding_offline_sharing_subheading">Маводҳоро бо суръати баланд бо ягон корбари дигари наздик мубодила кунед.</string>
+    <string name="onboarding_offline_sharing">Офлайн мубодила кунед</string>
+    <string name="onboarding_offline_sharing_subheading">Бо мубодилаи фаврии офлайн вақт ва маълумотро сарфа кунед</string>
     <string name="download_continue_stacked_label">Ба боргирӣ идома диҳед</string>
     <string name="download_continue_btn_label">Идома диҳед</string>
     <string name="download_wifi_only">Танҳо WiFi</string>
@@ -594,7 +594,7 @@
 \n1. Танзимот &gt; Танзимоти Bluetooth -ро кушоед. 
 \n2. Боварӣ ҳосил кунед, ки дастгоҳ намоён аст.</string>
     <string name="dialog_download_from_playstore_cancel">Дар сомона истед</string>
-    <string name="onboarding_no_internet_subheadline">Видеоҳо, мақолаҳо ва машқҳои интерактивии таълимиро барои истифодаи баъдӣ боргирӣ кунед.</string>
+    <string name="onboarding_no_internet_subheadline">Ҳама чиз офлайн кор мекунад</string>
     <string name="location_permission_title">Иҷозати дарёфти макон лозим аст</string>
     <string name="location_permission_message">Ин барнома иҷозати ҷойгиршавиро тақозо мекунад, то мубодилаи фаврӣ бо корбарони наздик фаъол карда шавад.</string>
     <string name="xapi_custom_date" value="303">Танзими рӯз</string>
@@ -1049,7 +1049,7 @@
     <string name="undo">Бекор кунед</string>
     <string name="manage_download">Боркуниро идора кунед</string>
     <string name="what_is_your_date_of_birth">Санаи таваллуди шумо\?</string>
-    <string name="we_sent_a_message_to_your_parent">Мо ба волидайни шумо паём фиристодем (% 1 $ s), то онҳо бақайдгирии шуморо тасдиқ кунанд. Шумо метавонед бо истифода аз логин ва парол, ки пас аз тасдиқи падару модари худ гузоштаед, ворид шавед.</string>
+    <string name="we_sent_a_message_to_your_parent">Мо ба волидайни шумо паём фиристодем (%1$s), то онҳо бақайдгирии шуморо тасдиқ кунанд. Шумо метавонед бо истифода аз логин ва парол, ки пас аз тасдиқи падару модари худ гузоштаед, ворид шавед.</string>
     <string name="strings_not_allowed">Аломатҳои махсус дар ин ҷой иҷозат дода намешавад</string>
     <string name="invalid_email">Лутфан, суроғаи почтаи электронӣро ворид кунед</string>
     <string name="select_account">Профилро интихоб кунед</string>
@@ -1074,7 +1074,7 @@
     <string name="content_pieces_completed">Мазмуни мундариҷа анҷом ёфт</string>
     <string name="content_usage_duration">Давомнокии истифодаи мундариҷа</string>
     <string name="ignore_the_link">Истинодро нодида гиред ва ба воридшавӣ тариқи автоматики идома диҳед</string>
-    <string name="toggle_visibility">Намоишро иваз кунед</string>
+    <string name="toggle_visibility">Гузаронидани намоён</string>
     <string name="parent_child_register_message_subject">Волидайн - лутфан сабти номи фарзанди худро бо %1$s тасдиқ кунед ё рад кунед</string>
     <string name="relationship">Муносибат</string>
     <string name="restore_consent">Розигиро барқарор кунед</string>
@@ -1188,16 +1188,111 @@
     <string name="late_penalty">(%1$s%% ҷазо барои ҷавоби дер)</string>
     <string name="parental_consent">Розигии волидайн</string>
     <string name="parent_child_register_message">Падару модари азиз, фарзанди шумо (%1$s) дархост кардааст, ки бо %2$s сабти ном шавад. Лутфан дархостро бо истиноди дар поён тасдиқ ё рад кунед. %3$s Агар дархост дар давоми 30 рӯз қабул карда нашавад, он гоҳ дархост (ва ҳама гуна маълумоти шахсӣ) нест карда мешавад. Шумо метавонед тасдиқро ҳар вақт бо истифода аз ҳамон истинод бозпас гиред. Ташаккур, %2$s</string>
-    <string name="parent_consent_explanation">"Ман тасдиқ мекунам, ки ман волид ё васии қонунии фарзанди зерин ҳастам:
+    <string name="parent_consent_explanation">Ман тасдиқ мекунам, ки ман волид ё васии қонунии фарзанди зерин ҳастам:
 \n
-\n  Ном: %1$s
-\n  Санаи таваллуд: %2$s
+\nНом: %1$s
+\nСанаи таваллуд: %2$s
 \n
-\n  Агар ман ба фарзанди худ бо истифодаи %3$s розӣ бошам, он гоҳ ҷамъоварӣ ва коркарди маълумоти шахсӣ бо риояи сиёсати махфият ва шартҳои дар поён овардашуда анҷом дода мешавад.
+\nАгар ман ба фарзанди худ бо истифодаи %3$s розӣ бошам, он гоҳ ҷамъоварӣ ва коркарди маълумоти шахсӣ бо риояи сиёсати махфият ва шартҳои дар поён овардашуда анҷом дода мешавад.
 \n
-\n  Ризоиятро ҳар вақт бо истифода аз истиноди почтаи электронӣ бекор кардан мумкин аст. Агар шумо розӣ нашуданро интихоб кунед, ягон маълумоти пешниҳодкардаи фарзандатон дар давоми 24 соат нест карда мешавад."</string>
+\nРизоиятро ҳар вақт бо истифода аз истиноди почтаи электронӣ бекор кардан мумкин аст. Агар шумо розӣ нашуданро интихоб кунед, ягон маълумоти пешниҳодкардаи фарзандатон дар давоми 24 соат нест карда мешавад.</string>
     <string name="add_educational_content_to_new_learning_env">Мундариҷаи таълимии худро (китобҳои электронӣ, видео, машқҳои интерактивӣ ва ғайра) илова кунед ё бо истифода аз истинод аз вебсайтҳои дигар ворид кунед. Мактабҳо, синфҳо ва гурӯҳҳоро созед. Пас хонандагон, омӯзгорон ва кормандони худро барои дастрасӣ ба он даъват кунед: онлайн ё офлайн.</string>
     <string name="added_to_class_content">%1$s ба мундариҷаи синф илова карда шуд</string>
     <string name="your_account_needs_approved">Профили шумо бояд аз ҷониби волидайни шумо бо истифода аз истиноди фиристода тасдиқ карда шавад. Агар шумо волид бошед, шумо бояд ба профили мавҷудаи худ ворид шавед ё профили нав эҷод кунед.</string>
     <string name="sorry_something_went_wrong">Бубахшед, чизе хато шуд! Мо онро ворид кардем ва мо кӯшиш мекунем онро ислоҳ кунем. Лутфан боварӣ ҳосил кунед, ки ID ҳодисаро мубодила кунед, агар ба шумо лозим ояд, ки бо маъмури системаи шумо дар ин бора тамос гиред.</string>
+    <string name="blank_report">Ҳисоботи холӣ</string>
+    <string name="attendance_over_time_by_class">Давомнокии дарс дар синфҳо</string>
+    <string name="percentage_of_students_attending_over_time">Фоизи иштирокчиён, ки дар тӯли вақт иштирок мекунанд</string>
+    <string name="content_usage_by_class">Истифодаи мундариҷа дар курсҳо</string>
+    <string name="onboarding_stay_organized_subheading">Мазмуни таълим, супоришҳо, дарсҳо ва давомот ҳама дар як ҷо</string>
+    <string name="downloading_content">Боргирӣ %1$s</string>
+    <string name="deleting_content">Нобудкунӣ %1$s</string>
+    <string name="add_folder_description">Ҳама мундариҷаи таълимиро аз папка илова кунед</string>
+    <string name="total_content_usage_duration_class">Давомнокии умумии истифодаи мундариҷа аз рӯи зергурӯҳҳо</string>
+    <string name="content_usage_over_time">Истифодаи мундариҷа дар тӯли вақт</string>
+    <string name="unique_content_users_over_time">Истифодабарандагони мундариҷаи беназир бо мурури замон</string>
+    <string name="number_of_active_users_over_time">Шумораи корбарони фаъол бо мурури замон</string>
+    <string name="parent">Волидайн</string>
+    <string name="saved">Захира карда шуд</string>
+    <string name="individual">Индивидуалӣ</string>
+    <string name="group">Гурӯҳ</string>
+    <string name="require_file_submission">Пешниҳоди файлро талаб кардан</string>
+    <string name="require_text_submission">Пешниҳоди матнро талаб кардан</string>
+    <string name="size_limit">Маҳдудияти андоза (МБ)</string>
+    <string name="limit">Лимит</string>
+    <string name="number_of_files">Шумораи максималии файлҳо</string>
+    <string name="allowed_till_deadline">То мӯҳлат иҷозат дода мешавад</string>
+    <string name="allowed_till_grace">То охири давраи имтиёзӣ иҷозат дода мешавад</string>
+    <string name="not_allowed">Иҷозат дода намешавад</string>
+    <string name="marked_by">Баҳо дода шуд аз ҷониби</string>
+    <string name="peers">Ҳамсолон</string>
+    <string name="file_type">Навъи файл</string>
+    <string name="file_type_chosen">Навъи файл:</string>
+    <string name="file_type_any">Ҳар кадоме</string>
+    <string name="file_document">Ҳуҷҷат (pdf, docx, odt)</string>
+    <string name="file_image">Акс</string>
+    <string name="submit_grade">Баҳо пешниҳод кардан</string>
+    <string name="submit_grade_and_mark_next">Баҳо гузоред ва ояндаро қайд кунед</string>
+    <string name="graded">Баҳо дода шудааст</string>
+    <string name="score_greater_than_zero">Бояд аз 0 зиёд бошад</string>
+    <string name="words">Калимаҳо</string>
+    <string name="characters">Аломатҳо</string>
+    <string name="class_timezone_set">Минтақаи вақти синф: %1$s</string>
+    <string name="maximum_points">Балҳои максималӣ</string>
+    <string name="submissions">Пешниҳодҳо</string>
+    <string name="add_text">Матн илова кардан</string>
+    <string name="course_blocks">Блокҳои курс</string>
+    <string name="edit_block">Блокро таҳрир кардан</string>
+    <string name="module">Модул</string>
+    <string name="course_module">Модули курс</string>
+    <string name="formatted_text_to_show_to_course_participants">Блоке, ки матни форматшударо намоиш медиҳад</string>
+    <string name="add_course_block_content_desc">Аз файлҳои аудио, видео, китобҳои электронӣ ё мундариҷаи интерактивиро (H5P, xAPI ва ғайра) илова кунед</string>
+    <string name="add_assignment_block_content_desc">Супориш барои иштирокчиёни курс барои анҷом додан</string>
+    <string name="new_module">Модули нав</string>
+    <string name="edit_module">Таҳрири модул</string>
+    <string name="indent">Интент</string>
+    <string name="unindent">Нобуд</string>
+    <string name="student_enrolment_policy">Сиёсати бақайдгирии иштирокчиён</string>
+    <string name="teacher_enrolment_policy">Сиёсати бақайдгирии омӯзгорон</string>
+    <string name="open_enrolment">Кушодни бақайдгири</string>
+    <string name="accept_enrolment_requests_automatically">Дархостҳои бақайдгирӣ ба таври худкор қабул карда шаванд</string>
+    <string name="visibility">Аёният</string>
+    <string name="visible_for_all">Ба ҳама намоён</string>
+    <string name="terminology">Терминология</string>
+    <string name="select_terminology">Терминологияро интихоб кунед</string>
+    <string name="add_new_terminology">Илова кардани истилоҳоти нав</string>
+    <string name="edit_terminology">Таҳрири истилоҳот</string>
+    <string name="your_words_for">Терминҳои шумо барои</string>
+    <string name="course_setup">Танзими курс</string>
+    <string name="number_of_groups">Шумораи гурӯҳҳо</string>
+    <string name="assign_to_random_groups">Ба гурӯҳҳои тасодуфӣ таъин кунед</string>
+    <string name="add_new_groups">Илова кардани гурӯҳҳои нав</string>
+    <string name="num_replies">%1$d ҷавоб</string>
+    <string name="topics">Мавзӯъҳо</string>
+    <string name="add_topic">Илова кардани мавзӯъ</string>
+    <string name="add_a_reply">Иловаи ҷавоб</string>
+    <string name="messages">Паёмҳо</string>
+    <string name="message">Паём</string>
+    <string name="courses">Курсҳо</string>
+    <string name="reports_and_analytics">Ҳисоботҳо ва таҳлилҳо</string>
+    <string name="waiting_for_connection">Интизори пайвастшавӣ</string>
+    <string name="add_folder">Ҳама чизро аз папка илова кунед</string>
+    <string name="importing">Воридшавӣ %1$s</string>
+    <string name="content_completion">Анҷоми мундариҷа</string>
+    <string name="number_of_students_completed_time">Шумораи иштирокчиёне, ки мундариҷаи интихобшударо анҷом додаанд</string>
+    <string name="total_content_duration_gender">Давомнокии умумии истифодаи мундариҷа бо мурури замон (аз рӯи ҷинс тақсим карда шудааст)</string>
+    <string name="dont_show_before">Пештар нишон надодан</string>
+    <string name="maximum">Максимум</string>
+    <string name="edit_after_submission">Таҳрир пас аз пешниҳод</string>
+    <string name="max_number_of_files">Шумораи максималии файлҳо: %1$s</string>
+    <string name="penalty_label">Агар пас аз мӯҳлат анҷом дода шуда бошад, аммо то ба охир расидани давраи имтиёзнок</string>
+    <string name="add_block">Илова кардани блок</string>
+    <string name="discussion_board">Шӯрои муҳокима</string>
+    <string name="add_discussion_board_desc">Муҳокимаи мавзӯъҳо ва мавзӯъҳо ташкил карда шуд</string>
+    <string name="institution">Муассиса</string>
+    <string name="enrolment_requests_must_be_approved">Дархостҳои бақайдгирӣ бояд тасдиқ карда шаванд</string>
+    <string name="hidden_enrolment_via_links_code_or_invitation">Пинҳонӣ (бақайдгирӣ тавассути истинодҳо, рамз ё даъватнома)</string>
+    <string name="library">Китобхона</string>
+    <string name="course_comments">Шарҳҳои курс</string>
+    <string name="onboarding_stay_organized_headline">Муташаккил мондан</string>
 </resources>

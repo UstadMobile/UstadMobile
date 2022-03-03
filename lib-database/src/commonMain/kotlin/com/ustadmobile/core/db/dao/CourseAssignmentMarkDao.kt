@@ -90,9 +90,10 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
               FROM ClazzEnrolment
                    LEFT JOIN CourseAssignmentMark
                    ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
-             WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
-               AND ClazzEnrolment.clazzEnrolmentActive
+                   AND CourseAssignmentMark.camAssignmentUid = :assignmentUid
+               WHERE ClazzEnrolment.clazzEnrolmentActive
                AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+               AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
                AND ClazzEnrolment.clazzEnrolmentPersonUid != :studentUid
                AND CourseAssignmentMark.camUid IS NULL
          LIMIT 1),0)

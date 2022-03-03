@@ -85,7 +85,6 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     private var submissionAttachmentLiveDataCourse: LiveData<PagedList<CourseAssignmentSubmissionWithAttachment>>? = null
     private val courseSubmissionWithAttachmentObserver = Observer<PagedList<CourseAssignmentSubmissionWithAttachment>?> {
         t -> run{
-            addSubmissionButtonsAdapter?.maxFilesReached = t.size >= maxNumberOfFilesSubmission
             submissionHeaderAdapter?.visible = t.isNotEmpty()
             submittedSubmissionAdapter?.submitList(t)
         }
