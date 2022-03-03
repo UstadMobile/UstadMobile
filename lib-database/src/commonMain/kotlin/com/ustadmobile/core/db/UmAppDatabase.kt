@@ -56,7 +56,7 @@ import kotlin.jvm.JvmField
     ClazzAssignmentRollUp::class,
     PersonAuth2::class,
     UserSession::class,
-    ContentJob::class, ContentJobItem::class,
+    ContentJob::class, ContentJobItem::class, CourseBlock::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -160,6 +160,9 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     @JsName("clazzDao")
     abstract val clazzDao: ClazzDao
+
+    @JsName("courseBlockDao")
+    abstract val courseBlockDao: CourseBlockDao
 
     @JsName("clazzEnrolmentDao")
     abstract val clazzEnrolmentDao: ClazzEnrolmentDao
