@@ -236,7 +236,15 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON,
                         CourseAssignmentSubmissionWithAttachment.serializer(), courseSubmission)
                 args[EDIT_ENABLED] = canEdit.toString()
-                systemImpl.go(TextAssignmentEditView.VIEW_NAME, args, context)
+                if(canEdit){
+                    navigateForResult(
+                            NavigateForResultOptions(this@ClazzAssignmentDetailOverviewPresenter,
+                                    courseSubmission, TextAssignmentEditView.VIEW_NAME, CourseAssignmentSubmission::class,
+                                    CourseAssignmentSubmission.serializer(), SAVED_STATE_KEY_TEXT,
+                                    arguments = args))
+                }else{
+                    systemImpl.go(TextAssignmentEditView.VIEW_NAME, args, context)
+                }
 
             }else if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE){
                 val fileSubmission = courseSubmission.attachment ?: return@launch

@@ -589,6 +589,7 @@
                 android:hint="@string/limit"
                 android:layout_marginVertical="@dimen/dimen_8dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:visibility="@{textSubmissionVisibility}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/ca_edit_number_of_words"

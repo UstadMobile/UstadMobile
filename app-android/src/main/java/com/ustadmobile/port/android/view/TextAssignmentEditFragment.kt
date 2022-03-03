@@ -50,15 +50,16 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
 
         aztec?.visualEditor?.addTextChangedListener(object: TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // this is kept in beforeTextChanged to stop user from typing more words
                 val editText = aztec?.visualEditor ?: return
-                val wordsLength = countWords(s.toString())
-                // count == 0 means a new word is going to start
-                if (count == 0 && wordsLength >= charWordLimit) {
+                val length = if(limitType == ClazzAssignment.TEXT_WORD_LIMIT) countWords(s.toString()) else s.toString().length
+
+                if (length > charWordLimit) {
                     setCharLimit(editText, editText.text.length)
                 } else {
                     removeFilter(editText);
                 }
-                mBinding?.wordLimit?.text = "$wordsLength/$charWordLimit $limitTypeText"
+                mBinding?.wordLimit?.text = "$length/$charWordLimit $limitTypeText"
             }
             override fun onTextChanged(url: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
@@ -88,7 +89,8 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
                     requireContext().getString(R.string.characters)
                     else requireContext().getString(R.string.words)
 
-            val wordsLength = countWords(entity?.casText.toString())
+            val text = entity?.casText ?: ""
+            val wordsLength = if(limitType == ClazzAssignment.TEXT_WORD_LIMIT) countWords(text) else text.length
             // count == 0 means a new word is going to start
             mBinding?.wordLimit?.text = "$wordsLength/$charWordLimit $limitTypeText"
 
@@ -170,7 +172,8 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
             if(termsHtmlVal != null)
                 aztec?.visualEditor?.fromHtml(termsHtmlVal)
 
-            val wordsLength = countWords(value?.casText.toString())
+            val text = value?.casText ?: ""
+            val wordsLength = if(limitType == ClazzAssignment.TEXT_WORD_LIMIT) countWords(text) else text.length
             // count == 0 means a new word is going to start
             mBinding?.wordLimit?.text = "$wordsLength/$charWordLimit $limitTypeText"
         }
