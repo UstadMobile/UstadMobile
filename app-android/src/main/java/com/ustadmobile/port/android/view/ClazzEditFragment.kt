@@ -30,8 +30,9 @@ interface ClazzEditFragmentEventHandler {
 
     fun onAddCourseBlockClicked()
 }
-class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(), ClazzEdit2View, ClazzEditFragmentEventHandler {
+class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(), ClazzEdit2View, ClazzEditFragmentEventHandler, TitleDescBottomSheetOptionSelectedListener {
 
+    private var bottomSheetOptionList: List<TitleDescBottomSheetOption> = listOf()
     private var mDataBinding: FragmentClazzEditBinding? = null
 
     private var mPresenter: ClazzEdit2Presenter? = null
@@ -215,8 +216,28 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             layoutManager = LinearLayoutManager(requireContext())
         }
 
-        val bottomSheetOptionList = listOf(
-                TitleDescBottomSheetOption(requireContext().getString(R.string.module))
+        bottomSheetOptionList = listOf(
+                TitleDescBottomSheetOption(
+                        requireContext().getString(R.string.module),
+                        requireContext().getString(R.string.course_module),
+                        CourseBlock.BLOCK_MODULE_TYPE),
+                TitleDescBottomSheetOption(
+                        requireContext().getString(R.string.text),
+                        requireContext().getString(R.string.formatted_text_to_show_to_course_participants),
+                        CourseBlock.BLOCK_TEXT_TYPE),
+                TitleDescBottomSheetOption(
+                        requireContext().getString(R.string.content),
+                        requireContext().getString(R.string.add_course_block_content_desc),
+                        CourseBlock.BLOCK_CONTENT_TYPE),
+                TitleDescBottomSheetOption(
+                        requireContext().getString(R.string.assignment),
+                        requireContext().getString(R.string.add_assignment_block_content_desc),
+                        CourseBlock.BLOCK_ASSIGNMENT_TYPE),
+                TitleDescBottomSheetOption(
+                        requireContext().getString(R.string.discussion_board),
+                        requireContext().getString(R.string.add_discussion_board_desc),
+                        CourseBlock.BLOCK_DISCUSSION_TYPE),
+
         )
 
         mPresenter?.onCreate(backStackSavedState)
@@ -224,7 +245,15 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
     }
 
     override fun onAddCourseBlockClicked() {
-        // TODO bottomSheet
+        val sheet = TitleDescBottomSheetOptionFragment(bottomSheetOptionList, this)
+        sheet.show(childFragmentManager, sheet.tag)
+    }
+
+    override fun onBottomSheetOptionSelected(optionSelected: TitleDescBottomSheetOption) {
+        when(optionSelected.optionCode) {
+            CourseBlock.BLOCK_ASSIGNMENT_TYPE -> mPresenter?.handleClickAddAssignment()
+            CourseBlock.BLOCK_MODULE_TYPE -> mPresenter?.handleClickAddModule()
+        }
     }
 
     override fun onDestroyView() {
@@ -260,6 +289,8 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             }
         }
     }
+
+
 
 
 }

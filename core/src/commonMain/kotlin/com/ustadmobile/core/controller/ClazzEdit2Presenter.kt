@@ -306,6 +306,14 @@ class ClazzEdit2Presenter(context: Any,
         }
     }
 
+    fun handleClickAddAssignment() {
+
+    }
+
+    fun handleClickAddModule() {
+
+    }
+
     companion object {
 
         const val ARG_SAVEDSTATE_SCHEDULES = "schedules"
