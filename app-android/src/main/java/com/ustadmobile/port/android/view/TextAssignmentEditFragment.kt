@@ -33,8 +33,7 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
 
     override val mEditPresenter: UstadEditPresenter<*, CourseAssignmentSubmission>?
         get() = mPresenter
-
-
+    
     private var aztec: Aztec? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -45,23 +44,26 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
                 it.visualEditor.setCalypsoMode(false)
                 it.addPlugin(CssUnderlinePlugin())
                 it.initSourceEditorHistory()
-                it.sourceEditor?.addTextChangedListener(object: TextWatcher {
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                        val editText = aztec?.sourceEditor ?: return
-                        val wordsLength = countWords(s.toString())
-                        // count == 0 means a new word is going to start
-                        if (count == 0 && wordsLength >= charWordLimit) {
-                            setCharLimit(editText, editText.text?.length ?: 0)
-                        } else {
-                            removeFilter(editText);
-                        }
-                        mBinding?.wordLimit?.text = "$wordsLength/$charWordLimit $limitTypeText"
-                    }
-                    override fun onTextChanged(url: CharSequence?, start: Int, before: Int, count: Int) {}
-                    override fun afterTextChanged(s: Editable?) {}
-                })
             }
         }
+
+        aztec?.visualEditor?.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                val editText = aztec?.visualEditor ?: return
+                val wordsLength = countWords(s.toString())
+                // count == 0 means a new word is going to start
+                if (count == 0 && wordsLength >= charWordLimit) {
+                    setCharLimit(editText, editText.text.length ?: 0)
+                } else {
+                    removeFilter(editText);
+                }
+                mBinding?.wordLimit?.text = "$wordsLength/$charWordLimit $limitTypeText"
+            }
+            override fun onTextChanged(url: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+
+            }
+        })
 
         mPresenter = TextAssignmentEditPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di).withViewLifecycle()
@@ -83,7 +85,7 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
             limitType = value?.caTextLimitType ?: ClazzAssignment.TEXT_CHAR_LIMIT
             limitTypeText = if(limitType == ClazzAssignment.TEXT_CHAR_LIMIT)
                     requireContext().getString(R.string.characters)
-                    else getString(R.string.words)
+                    else requireContext().getString(R.string.words)
         }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -104,8 +106,8 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
     }
 
     private fun countWords(s: String): Int {
-        val trim = s.trim { it <= ' ' }
-        return if (trim.isEmpty()) 0 else trim.split("\\s+").size
+        val trim = s.trim()
+        return if (trim.isEmpty()) 0 else trim.split(" ").size
         // separate string around spaces
     }
 
