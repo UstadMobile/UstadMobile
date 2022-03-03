@@ -71,6 +71,7 @@ import kotlin.jvm.JvmField
     CourseAssignmentSubmissionReplicate::class,
     CourseAssignmentSubmissionAttachmentReplicate::class,
     CourseAssignmentMarkReplicate::class,
+    CourseBlockReplicate::class,
     ScheduleReplicate::class,
     HolidayCalendarReplicate::class,
     HolidayReplicate::class,

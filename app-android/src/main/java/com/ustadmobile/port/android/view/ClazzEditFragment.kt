@@ -26,8 +26,11 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 
+interface ClazzEditFragmentEventHandler {
 
-class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(), ClazzEdit2View {
+    fun onAddCourseBlockClicked()
+}
+class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(), ClazzEdit2View, ClazzEditFragmentEventHandler {
 
     private var mDataBinding: FragmentClazzEditBinding? = null
 
@@ -43,7 +46,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
     private var courseBlockRecyclerAdapter: CourseBlockRecyclerAdapter? = null
 
     private var courseBlockRecyclerView: RecyclerView? = null
-
 
     private val scheduleObserver = Observer<List<Schedule>?> {
         t -> scheduleRecyclerAdapter?.submitList(t)
@@ -171,6 +173,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         mDataBinding = FragmentClazzEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.featuresBitmaskFlags = BitmaskEditPresenter.FLAGS_AVAILABLE
+            it.activityEventHandler = this
         }
 
         scheduleRecyclerView = rootView.findViewById(R.id.activity_clazz_edit_schedule_recyclerview)
@@ -212,8 +215,16 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             layoutManager = LinearLayoutManager(requireContext())
         }
 
+        val bottomSheetOptionList = listOf(
+                TitleDescBottomSheetOption(requireContext().getString(R.string.module))
+        )
+
         mPresenter?.onCreate(backStackSavedState)
 
+    }
+
+    override fun onAddCourseBlockClicked() {
+        // TODO bottomSheet
     }
 
     override fun onDestroyView() {
@@ -249,4 +260,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             }
         }
     }
+
+
 }

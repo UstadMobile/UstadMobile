@@ -18,6 +18,10 @@
             name="clazz"
             type="com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool" />
 
+        <variable
+            name="activityEventHandler"
+            type="com.ustadmobile.port.android.view.ClazzEditFragmentEventHandler" />
+
         <variable name="dateTimeMode"
             type="Integer"/>
 
@@ -232,7 +236,7 @@
                 android:id="@+id/ca_edit_course_add_new_block"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:onClickNew="@{() -> courseBlockOneToManyListener.onClickNew()}"
+                app:onClickNew="@{() -> activityEventHandler.onAddCourseBlockClicked()}"
                 app:createNewText="@{@string/add_block}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_course_block_heading"
                 app:layout_constraintStart_toStartOf="parent" />

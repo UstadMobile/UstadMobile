@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 101,
-    "identityHash": "5661caf7ab1484b681f18a3310c5ca5c",
+    "identityHash": "601d4cca3b9eccda68c0662322f14c0a",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6140,6 +6140,74 @@
         "foreignKeys": []
       },
       {
+        "tableName": "CourseBlock",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "cbUid",
+            "columnName": "cbUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbType",
+            "columnName": "cbType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbIndentLevel",
+            "columnName": "cbIndentLevel",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbTitle",
+            "columnName": "cbTitle",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cbDescription",
+            "columnName": "cbDescription",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cbIndex",
+            "columnName": "cbIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbClazzUid",
+            "columnName": "cbClazzUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbActive",
+            "columnName": "cbActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbLct",
+            "columnName": "cbLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "cbUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "SqliteChangeSeqNums",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sCsnTableId` INTEGER NOT NULL, `sCsnNextLocal` INTEGER NOT NULL, `sCsnNextPrimary` INTEGER NOT NULL, PRIMARY KEY(`sCsnTableId`))",
         "fields": [
@@ -6725,6 +6793,69 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseAssignmentMarkReplicate_camDestination_camPending` ON `${TABLE_NAME}` (`camDestination`, `camPending`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseBlockReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbPk` INTEGER NOT NULL, `cbVersionId` INTEGER NOT NULL DEFAULT 0, `cbDestination` INTEGER NOT NULL, `cbPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`cbPk`, `cbDestination`))",
+        "fields": [
+          {
+            "fieldPath": "cbPk",
+            "columnName": "cbPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbVersionId",
+            "columnName": "cbVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "cbDestination",
+            "columnName": "cbDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbPending",
+            "columnName": "cbPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "cbPk",
+            "cbDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_CourseBlockReplicate_cbPk_cbDestination_cbVersionId",
+            "unique": false,
+            "columnNames": [
+              "cbPk",
+              "cbDestination",
+              "cbVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseBlockReplicate_cbPk_cbDestination_cbVersionId` ON `${TABLE_NAME}` (`cbPk`, `cbDestination`, `cbVersionId`)"
+          },
+          {
+            "name": "index_CourseBlockReplicate_cbDestination_cbPending",
+            "unique": false,
+            "columnNames": [
+              "cbDestination",
+              "cbPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseBlockReplicate_cbDestination_cbPending` ON `${TABLE_NAME}` (`cbDestination`, `cbPending`)"
           }
         ],
         "foreignKeys": []
@@ -9505,7 +9636,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5661caf7ab1484b681f18a3310c5ca5c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '601d4cca3b9eccda68c0662322f14c0a')"
     ]
   }
 }
