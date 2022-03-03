@@ -323,7 +323,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
             }
         }
 
-        presenter.handleOpenSubmission(fileSubmission)
+        presenter.handleOpenSubmission(fileSubmission, true)
         val systemImpl: UstadMobileSystemImpl by di.instance()
         verify(systemImpl, timeout(5000)).openFileInDefaultViewer(any(), any(), eq(fileSubmission.attachment!!.casaMimeType))
 
