@@ -1757,10 +1757,18 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="courses">Courses</string>
 
+    <string name="course">Course</string>
+
     <string name="reports_and_analytics">Reports and analytics</string>
 
     <!--
     Comments for an assignment that are visible for everyone in the course to see.
     -->
     <string name="course_comments">Course comments</string>
+
+    <string name="currently_enroled">Currently enroled</string>
+
+    <string name="past_enrolments">Past enrolments</string>
+
+
 </resources>
