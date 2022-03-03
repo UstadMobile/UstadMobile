@@ -30,9 +30,9 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     private val fullWidth = 100.pct
 
-    const val drawerWidth = 240
+    private const val drawerWidth = 240
 
-    val tabletAndHighEnd = Breakpoint.sm
+    private val tabletAndHighEnd = Breakpoint.sm
 
     val alignTextToStart by css {
         textAlign = TextAlign.start
@@ -420,7 +420,6 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         display = Display.flex
         justifyContent = JustifyContent.center
         height = 70.vh
-        width = 100.vw
         alignItems = Align.center
     }
 
@@ -546,6 +545,12 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         display = Display.table
         margin = "0 auto"
         fontSize = 7.em
+    }
+
+    val tabWarningIconClass by css {
+        display = Display.table
+        margin = "0 auto"
+        fontSize = 10.em
     }
 
     val entryItemImageContainer by css {

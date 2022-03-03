@@ -209,7 +209,6 @@ ext {
     version_npm_picker_ui = "^3.3.10"
     version_npm_mui_lab = "5.0.0-alpha.58"
     version_npm_timezones = "^1.5.2"
-    version_npm_tabtracker = "^2.2.3"
     version_npm_buffer = "^6.0.3"
     version_npm_asmcrypto = "^2.3.2"
     version_npm_emotion = "11.6.0"

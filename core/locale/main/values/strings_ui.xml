@@ -1469,6 +1469,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="drag_and_drop_or_click_to_add_file">Drag and drop a file here or click</string>
 
-
+    <string name="extra_active_tab_warning">We do not support multiple tabs running at the same time, close this tab.</string>
 
 </resources>

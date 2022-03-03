@@ -1,51 +1,43 @@
 package com.ustadmobile.util
 
 import com.ustadmobile.navigation.UstadBackStackEntryJs
-import com.ustadmobile.redux.ReduxAppStateManager
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
+import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxNavStackState
 import kotlinx.browser.localStorage
+import kotlinx.browser.window
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import kotlin.js.Date
-import kotlin.js.json
-
-@JsModule("browser-session-tabs-tracker")
-@JsNonModule
-external val browserTabTrackerModule: dynamic
-
-interface Tracker {
-    val newSessionCreated: Boolean
-    val tabId: Int
-    val sessionInfo: Any?
-}
 
 @Serializable
-data class TabState(var viewName: String = "",
-                    var arguments: Map<String, String> = mapOf(),
-                    var id: Int = 1)
+data class TabState(
+    var viewName: String = "",
+    var arguments: Map<String, String> = mapOf(),
+    var id: Int = 1)
 
-object BrowserTabTracker: Tracker {
+/**
+ * This will handle and track active browsers tabs running the app,
+ * it will also make sure there is one tab opened at a time since we
+ * do not support multiple tabs running at the same time.
+ */
+object BrowserTabTracker {
 
-    private const val STATE_STORAGE_KEY = "key_tab_state_tracker"
+    private const val KEY_STATE_STORAGE = "key_tab_state_tracker"
+
+    private const val KEY_ACTIVE_TAB = "key_active"
 
     private val serializer = ListSerializer(TabState.serializer())
 
-    private var instance: Tracker = browserTabTrackerModule.BrowserTabTracker.unsafeCast<Tracker>()
-
-    override val newSessionCreated: Boolean
-        get() = instance.newSessionCreated
-
-    override val tabId: Int
-        get() = if(instance.sessionInfo == null) 1 else instance.tabId
-
-    override val sessionInfo: Any?
-        get() = instance.sessionInfo
+    var activeTabRunning: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+        }
 
     var navStackState: ReduxNavStackState
         get() {
-            val tabStateList = getStoredTabStateList().filter { it.id == tabId }
+            val tabStateList = getStoredTabStateList()
             val navState = ReduxNavStackState()
             tabStateList.map {
                 navState.stack.add(UstadBackStackEntryJs(it.viewName, it.arguments))
@@ -56,51 +48,37 @@ object BrowserTabTracker: Tracker {
         set(value) {
             val storedStateList = getStoredTabStateList()
             if(storedStateList.isNullOrEmpty()){
-                localStorage.setItem(STATE_STORAGE_KEY,  "")
+                localStorage.setItem(KEY_STATE_STORAGE,  "")
             }
 
-            storedStateList.removeAll { it.id == tabId  && value.stack.isNotEmpty()}
+            storedStateList.removeAll { value.stack.isNotEmpty()}
             value.stack.forEach {
-                storedStateList.add(TabState(it.viewName, it.arguments, tabId))
+                storedStateList.add(TabState(it.viewName, it.arguments))
             }
 
-            localStorage.setItem(STATE_STORAGE_KEY, Json.encodeToString(
+            localStorage.setItem(KEY_STATE_STORAGE, Json.encodeToString(
                 serializer, storedStateList))
         }
 
 
-    //sessionIdGenerator, sessionStartedCallback, args is used by js code
     @Suppress("UNUSED_VARIABLE")
-    fun init() {
-
-        val sessionIdGenerator: () -> dynamic = {
-            Date().getTime()
+    fun init(onExtraTabDetected: ((Boolean) -> Unit)) {
+        activeTabRunning = localStorage.getItem(KEY_ACTIVE_TAB)?.toBoolean() ?: false
+        if(!activeTabRunning){
+            localStorage.setItem(KEY_ACTIVE_TAB, true.toString())
+            activeTabRunning = true
+            onExtraTabDetected(false)
+        }else {
+            onExtraTabDetected(true)
         }
-
-        val sessionStartedCallback: (Any,Int) -> Unit = { _, _ ->
-            localStorage.removeItem(STATE_STORAGE_KEY)
-            updateState()
+        dispatch(getCurrentState().navStack)
+        window.onunload = {
+            localStorage.removeItem(KEY_ACTIVE_TAB)
         }
-
-        val newTabOpenedCallback: (Int) -> Unit = { _ ->
-           updateState()
-        }
-
-        val args = json(
-            "storageKey" to STATE_STORAGE_KEY,
-            "sessionStartedCallback" to sessionStartedCallback,
-            "sessionIdGenerator" to sessionIdGenerator,
-            "newTabOpenedCallback" to newTabOpenedCallback
-        )
-        instance.asDynamic().initialize(args)
-    }
-
-    private fun updateState(){
-        dispatch(ReduxAppStateManager.getCurrentState().navStack)
     }
 
     private fun getStoredTabStateList(): MutableList<TabState>{
-        val storedStateList = localStorage.getItem(STATE_STORAGE_KEY)
+        val storedStateList = localStorage.getItem(KEY_STATE_STORAGE)
         return if(storedStateList.isNullOrEmpty()){
             mutableListOf()
         }else{

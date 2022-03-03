@@ -360,7 +360,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
 
                             createTopMainAction("delete",getString(MessageID.delete), GridSize.cells4, GridSize.cells4,
                                 markCompleteVisible, TypographyVariant.body2){
-                                mPresenter?.handleOnClickDeleteButton()
+                                mPresenter?.handleOnClickConfirmDelete()
                             }
 
                             createTopMainAction("download",getString(MessageID.manage_download), GridSize.cells4, GridSize.cells4,

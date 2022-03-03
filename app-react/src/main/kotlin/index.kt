@@ -1,7 +1,11 @@
 
 import com.ustadmobile.core.account.*
+import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
+import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
@@ -11,20 +15,27 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.defaultJsonSerializer
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DatabaseBuilderOptions
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.mui.components.themeContext
+import com.ustadmobile.mui.components.umCssBaseline
 import com.ustadmobile.mui.components.umThemeProvider
 import com.ustadmobile.navigation.NavControllerJs
 import com.ustadmobile.redux.ReduxAppStateManager.createStore
+import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxDiState
 import com.ustadmobile.redux.ReduxThemeState
-import com.ustadmobile.util.BrowserTabTracker
-import com.ustadmobile.util.ContainerMounterJs
+import com.ustadmobile.util.*
 import com.ustadmobile.util.ThemeManager.createAppTheme
+import com.ustadmobile.view.SplashView
+import com.ustadmobile.view.renderExtraActiveTabWarningComponent
+import com.ustadmobile.view.renderMainComponent
 import com.ustadmobile.view.renderSplashComponent
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
@@ -36,28 +47,139 @@ import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.browser.document
 import kotlinx.browser.window
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import org.kodein.di.*
+import org.w3c.dom.Element
+import react.RBuilder
+import react.RComponent
 import react.dom.render
 import react.redux.provider
+import react.setState
 
 fun main() {
     defaultJsonSerializer()
-    BrowserTabTracker.init()
     Napier.base(DebugAntilog())
+
     window.onload = {
-    render(document.getElementById("root")) {
-            val diState = ReduxDiState(
-                DI.lazy { import(diModule) }
-            )
+        render(document.getElementById("root")){
             val theme = createAppTheme()
-            provider(createStore(diState, ReduxThemeState(theme))){
-                umThemeProvider(theme) {
-                    renderSplashComponent()
+            provider(createStore(ReduxThemeState(theme))){
+                umThemeProvider(theme){
+                    //Update DI state ready to be used by StyleManager
+                    val di = DI { import(diModule) }
+                    dispatch(ReduxDiState(di))
+
+                    BrowserTabTracker.init { activeTabRunning ->
+                        child(IndexComponent::class){
+                            attrs.di = di
+                            attrs.activeTabRunning = activeTabRunning
+                        }
+                    }
                 }
+            }
+        }
+    }
+}
+
+interface IndexProps: UmProps {
+    var di: DI
+    var activeTabRunning: Boolean
+}
+
+/**
+ * Setup Database and locales, needed for app to start
+ */
+fun setUpDbAndLocales(di: DI, rootElement: Element?, showMainComponent: (Boolean) -> Unit){
+    val impl : UstadMobileSystemImpl by di.instance()
+    val directionAttributeValue = if(impl.isRtlActive()) "rtl" else "ltr"
+    rootElement?.setAttribute("dir",directionAttributeValue)
+    showMainComponent(false) //start by showing splash screen
+    val navController: UstadNavController by di.instance()
+    impl.navController = navController
+
+    val url = window.location.href
+    val apiUrl = urlSearchParamsToMap()[AppConfig.KEY_API_URL]
+        ?: impl.getAppPref(AppConfig.KEY_API_URL, window)
+        ?: url.substringBefore(if(url.indexOf("umapp/") != -1) "umapp/" else "#/")
+
+    val dbName = sanitizeDbNameFromUrl(window.location.origin)
+
+    val builderOptions = DatabaseBuilderOptions(
+        UmAppDatabase::class,
+        UmAppDatabaseJsImplementations, dbName,"./worker.sql-wasm.js")
+
+    val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
+
+    val nodeIdAndAuth:NodeIdAndAuth by di.on(Endpoint(apiUrl)).instance()
+    dbBuilder.addCallback(ContentJobItemTriggersCallback())
+        .addSyncCallback(nodeIdAndAuth)
+        .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+
+    GlobalScope.launch(Dispatchers.Main) {
+        val umAppDatabase =  dbBuilder.build()
+
+        val diState = DI {
+            import(diModule)
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(EndpointScope.Default).singleton {
+                umAppDatabase
+            }
+        }
+
+        val localeCode = impl.getDisplayedLocale(this)
+        val defaultLocale = impl.getAppPref(AppConfig.KEY_DEFAULT_LANGUAGE, this)
+
+        val appConfigs = Util.loadFileContentAsMap<HashMap<String, String>>("appconfig.json")
+        appConfigs.forEach {
+            val value = when(it.key){
+                AppConfig.KEY_API_URL -> apiUrl
+                else -> it.value
+            }
+            impl.setAppPref(it.key, value, this)
+        }
+
+        val defaultAssetPath = "locales/$defaultLocale.xml"
+        val defaultStrings = Util.loadAssetsAsText(defaultAssetPath)
+        impl.defaultTranslations = Pair(defaultAssetPath , defaultStrings)
+        impl.currentTranslations = Pair(defaultAssetPath , defaultStrings)
+
+        if(localeCode != defaultLocale){
+            val currentAssetPath = "locales/$localeCode.xml"
+            val currentStrings = Util.loadAssetsAsText(currentAssetPath)
+            impl.currentTranslations = Pair(currentAssetPath, currentStrings)
+        }
+        document.title = impl.getString(MessageID.app_name,this)
+        impl.setAppPref(SplashView.TAG_LOADED,"true", this)
+        dispatch(ReduxDiState(diState))
+        showMainComponent(true) //Show main component
+    }
+}
+
+/**
+ * UI changes can't be done on different thread, we need state to be able to update
+ * UI that's where this component comes in. It will handle all UI changes during DB and
+ * Locale setups process triggered by state change
+ */
+class IndexComponent (props: IndexProps): RComponent<IndexProps, UmState>(props){
+
+    private var showMainComponent: Boolean = false
+
+    override fun componentDidMount() {
+        setUpDbAndLocales(props.di, document.getElementById("root")){
+            setState {
+                showMainComponent = it
+            }
+        }
+    }
+
+    override fun RBuilder.render() {
+        umCssBaseline()
+        themeContext.Consumer { _ ->
+            if(showMainComponent && !props.activeTabRunning){
+                renderMainComponent()
+            } else if(showMainComponent && props.activeTabRunning){
+                renderExtraActiveTabWarningComponent(props.di)
+            }else {
+                renderSplashComponent()
             }
         }
     }
@@ -78,14 +200,6 @@ private val diModule = DI.Module("UstadApp-React"){
         systemImpl.getOrGenerateNodeIdAndAuth(contextPrefix = contextIdentifier, this)
     }
 
-    bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(EndpointScope.Default).singleton {
-        /***
-         * Database is being built from PlashPresenter due to the fact that it has to be built asynchronously
-         * After building the database, Redux takes care of updating the app's state.
-         */
-        getCurrentState().db.instance ?:
-        throw IllegalStateException("Database was not built, make sure it is built before proceeding")
-    }
 
     bind<CoroutineScope>(DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with provider {
         GlobalScope

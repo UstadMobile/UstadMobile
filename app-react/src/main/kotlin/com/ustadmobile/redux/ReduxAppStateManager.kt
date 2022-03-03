@@ -68,14 +68,14 @@ object ReduxAppStateManager {
     /**
      * Create a redux app store where the states will be managed
      */
-    fun createStore(diState: ReduxDiState, theme: ReduxThemeState) : Store<ReduxStore, RAction, WrapperAction> {
+    fun createStore(theme: ReduxThemeState) : Store<ReduxStore, RAction, WrapperAction> {
         storeState = createStore(
           combineReducersInferred(
               mapOf(ReduxStore::appState to ReduxAppStateManager::reducer)
           ),
           ReduxStore(),
           rEnhancer())
-        dispatch(diState)
+        //dispatch(diState)
         dispatch(theme)
         return storeState.unsafeCast<Store<ReduxStore, RAction, WrapperAction>>()
     }
