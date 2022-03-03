@@ -21,6 +21,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -62,6 +64,12 @@ class ContentJobRunner(
     private val logPrefix: String
         get() = "ContentJobRunner@$doorIdentityHashCode Job#${jobId} :"
 
+    /**
+     * Concurrent updates to ContentJobItem can cause a transaction deadlock on postgres. Therefor
+     * all updates to ContentJobItem need to be done in a Mutex (e.g. progress, etc).
+     */
+    private val contentJobItemUpdateMutex = Mutex()
+
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
@@ -78,28 +86,31 @@ class ContentJobRunner(
                 val numProcessorsAvailable = numProcessors - activeJobItemIds.size
                 Napier.d("$logPrefix num process available :$numProcessorsAvailable")
                 val queueItemsToSend = mutableListOf<ContentJobItemAndContentJob>()
-                val jobItemsToSend = db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
-                    if (numProcessorsAvailable > 0) {
-                        //Check queue and filter out any duplicates that are being actively processed
-                        val queueItems = txDb.contentJobItemDao.findNextItemsInQueue(jobId, numProcessors * 2).filter {
-                            (it.contentJobItem?.cjiUid ?: 0) !in activeJobItemIds
+
+                val jobItemsToSend = contentJobItemUpdateMutex.withLock {
+                    db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                        if (numProcessorsAvailable > 0) {
+                            //Check queue and filter out any duplicates that are being actively processed
+                            val queueItems = txDb.contentJobItemDao.findNextItemsInQueue(jobId, numProcessors * 2).filter {
+                                (it.contentJobItem?.cjiUid ?: 0) !in activeJobItemIds
+                            }
+
+                            val numJobsToAdd = min(numProcessorsAvailable, queueItems.size)
+                            Napier.d("$logPrefix num of Jobs to add :$numJobsToAdd")
+
+                            for (i in 0 until numJobsToAdd) {
+                                val contentJobItemUid = queueItems[i].contentJobItem?.cjiUid ?: 0L
+                                activeJobItemIds += contentJobItemUid
+                                txDb.contentJobItemDao.updateItemStatus(contentJobItemUid,
+                                    JobStatus.RUNNING)
+                                queueItemsToSend += queueItems[i]
+                            }
                         }
 
-                        val numJobsToAdd = min(numProcessorsAvailable, queueItems.size)
-                        Napier.d("$logPrefix num of Jobs to add :$numJobsToAdd")
-
-                        for (i in 0 until numJobsToAdd) {
-                            val contentJobItemUid = queueItems[i].contentJobItem?.cjiUid ?: 0L
-                            activeJobItemIds += contentJobItemUid
-                            txDb.contentJobItemDao.updateItemStatus(contentJobItemUid,
-                                JobStatus.RUNNING)
-                            queueItemsToSend += queueItems[i]
-                        }
+                        done = txDb.contentJobItemDao.isJobDone(jobId)
+                        Napier.d("$logPrefix is job Done :$done")
+                        queueItemsToSend
                     }
-
-                    done = txDb.contentJobItemDao.isJobDone(jobId)
-                    Napier.d("$logPrefix is job Done :$done")
-                    queueItemsToSend
                 }
 
                 jobItemsToSend.forEach {
@@ -138,8 +149,11 @@ class ContentJobRunner(
                 ))
 
             try {
-
-                item.contentJobItem?.cjiUid?.let { db.contentJobItemDao.updateStartTimeForJob(it, getSystemTimeInMillis()) }
+                val cjiUid = item.contentJobItem?.cjiUid
+                    ?: throw IllegalArgumentException("no content job item uid")
+                contentJobItemUpdateMutex.withLock {
+                    db.contentJobItemDao.updateStartTimeForJob(cjiUid, getSystemTimeInMillis())
+                }
 
                 val sourceUri = item.contentJobItem?.sourceUri?.let { DoorUri.parse(it) }
                     ?: throw IllegalArgumentException("ContentJobItem #${item.contentJobItem?.cjiUid} has no source uri!")
@@ -148,19 +162,23 @@ class ContentJobRunner(
                 if(item.contentJobItem?.cjiContentEntryUid == 0L) {
                     metadataResult = contentPluginManager.extractMetadata(sourceUri,
                         processContext)
-                    db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
-                        val contentEntryUid = txDb.contentEntryDao.insertAsync(metadataResult.entry)
-                        item.contentJobItem?.cjiContentEntryUid = contentEntryUid
-                        txDb.contentJobItemDao.updateContentEntryUid(
-                            item.contentJobItem?.cjiUid ?: 0, contentEntryUid)
+                    contentJobItemUpdateMutex.withLock {
+                        db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                            val contentEntryUid = txDb.contentEntryDao.insertAsync(
+                                metadataResult.entry)
+                            item.contentJobItem?.cjiContentEntryUid = contentEntryUid
+                            txDb.contentJobItemDao.updateContentEntryUid(
+                                item.contentJobItem?.cjiUid ?: 0, contentEntryUid)
 
-                        if(item.contentJobItem?.cjiParentContentEntryUid != 0L){
-                            txDb.contentEntryParentChildJoinDao.insert(ContentEntryParentChildJoin().apply {
-                                cepcjParentContentEntryUid =
-                                    item.contentJobItem?.cjiParentContentEntryUid ?: 0L
-                                cepcjChildContentEntryUid =
-                                    item.contentJobItem?.cjiContentEntryUid ?: 0L
-                                })
+                            if(item.contentJobItem?.cjiParentContentEntryUid != 0L){
+                                txDb.contentEntryParentChildJoinDao.insert(
+                                    ContentEntryParentChildJoin().apply {
+                                    cepcjParentContentEntryUid =
+                                        item.contentJobItem?.cjiParentContentEntryUid ?: 0L
+                                    cepcjChildContentEntryUid =
+                                        item.contentJobItem?.cjiContentEntryUid ?: 0L
+                                    })
+                            }
                         }
                     }
                 }
@@ -203,20 +221,13 @@ class ContentJobRunner(
 
                 processResult = jobResult.await()
 
-                val containerUid = db.contentJobItemDao.getContainerUidByJobItemUid(
-                    item.contentJobItem?.cjiUid ?: 0L)
-                if(containerUid != 0L && db.validateAndUpdateContainerSize(containerUid) == 0L) {
-                    val message = "BAD: $containerUid for jobItem ${item.contentJobItem?.cjiUid}" +
-                        " has a container, but size remains 0"
-                    Napier.e(message)
-                    throw IllegalStateException(message)
-                }
-
-                db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
-                    txDb.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0,
-                        processResult.status)
-                    txDb.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0,
-                        systemTimeInMillis())
+                contentJobItemUpdateMutex.withLock {
+                    db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                        txDb.contentJobItemDao.updateItemStatus(item.contentJobItem?.cjiUid ?: 0,
+                            processResult.status)
+                        txDb.contentJobItemDao.updateFinishTimeForJob(item.contentJobItem?.cjiUid ?: 0,
+                            systemTimeInMillis())
+                    }
                 }
 
                 Napier.d("$logPrefix Processor #$id completed job #${item.contentJobItem?.cjiUid}")
@@ -249,13 +260,16 @@ class ContentJobRunner(
                         }
                     }
 
-                    db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
-                        txDb.contentJobItemDao.updateJobItemAttemptCountAndStatus(
-                            item.contentJobItem?.cjiUid ?: 0,
-                            item.contentJobItem?.cjiAttemptCount?: 0, finalStatus)
-                        txDb.contentJobItemDao.updateFinishTimeForJob(
-                            item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
+                    contentJobItemUpdateMutex.withLock {
+                        db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                            txDb.contentJobItemDao.updateJobItemAttemptCountAndStatus(
+                                item.contentJobItem?.cjiUid ?: 0,
+                                item.contentJobItem?.cjiAttemptCount?: 0, finalStatus)
+                            txDb.contentJobItemDao.updateFinishTimeForJob(
+                                item.contentJobItem?.cjiUid ?: 0, systemTimeInMillis())
+                        }
                     }
+
 
                     activeJobItemIds -= (item.contentJobItem?.cjiUid ?: 0)
                     try{
@@ -292,7 +306,11 @@ class ContentJobRunner(
     }
 
     private suspend fun commitProgressUpdates(updates: List<ContentJobItemProgressUpdate>) {
-        db.contentJobItemDao.commitProgressUpdates(updates)
+        contentJobItemUpdateMutex.withLock {
+            db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                txDb.contentJobItemDao.commitProgressUpdates(updates)
+            }
+        }
     }
 
 
@@ -324,9 +342,11 @@ class ContentJobRunner(
                         it.cancelAndJoin()
                     }
 
-                    db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
-                        txDb.containerEntryDao.deleteContainerEntriesCreatedByJobs(jobId)
-                        txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
+                    contentJobItemUpdateMutex.withLock {
+                        db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                            txDb.containerEntryDao.deleteContainerEntriesCreatedByJobs(jobId)
+                            txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
+                        }
                     }
 
                     throw e
