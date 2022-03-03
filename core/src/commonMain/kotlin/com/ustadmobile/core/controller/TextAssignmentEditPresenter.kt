@@ -5,6 +5,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.TextAssignmentEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -30,8 +31,17 @@ class TextAssignmentEditPresenter(context: Any,
         val editEntity: CourseAssignmentSubmission = if(entityJsonStr != null) {
             safeParse(di, CourseAssignmentSubmission.serializer(), entityJsonStr)
         }else {
-            CourseAssignmentSubmission()
+            CourseAssignmentSubmission().apply {
+                casAssignmentUid = bundle[TextAssignmentEditView.ASSIGNMENT_ID]?.toLongOrNull() ?: 0L
+                casType = CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT
+                casUid = db.doorPrimaryKeyManager.nextId(CourseAssignmentSubmission.TABLE_ID)
+            }
         }
+
+        presenterScope.launch {
+            view.clazzAssignment = db.clazzAssignmentDao.findByUidAsync(editEntity.casAssignmentUid)
+        }
+
 
         return editEntity
     }

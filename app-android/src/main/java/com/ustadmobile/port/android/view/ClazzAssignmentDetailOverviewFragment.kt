@@ -345,7 +345,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     }
 
     override fun onClickOpenFileSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment){
-        mPresenter?.handleOpenFileSubmission(submissionCourse)
+        mPresenter?.handleOpenSubmission(submissionCourse)
     }
 
     companion object {

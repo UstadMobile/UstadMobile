@@ -21,9 +21,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
-import com.ustadmobile.util.test.rules.bindPresenterCoroutineRule
-import junit.framework.Assert
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -325,7 +322,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
             }
         }
 
-        presenter.handleOpenFileSubmission(fileSubmission)
+        presenter.handleOpenSubmission(fileSubmission)
         val systemImpl: UstadMobileSystemImpl by di.instance()
         verify(systemImpl, timeout(5000)).openFileInDefaultViewer(any(), any(), eq(fileSubmission.attachment!!.casaMimeType))
 

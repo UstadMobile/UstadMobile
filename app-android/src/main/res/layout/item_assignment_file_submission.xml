@@ -71,6 +71,7 @@
             app:fallbackDrawable="@{@drawable/book_24px}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             tools:src="@drawable/book_24px" />
 
 
@@ -82,6 +83,8 @@
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:text="@{fileSubmission.casText}"
+            android:maxLines="3"
+            android:ellipsize="end"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@id/file_thumbnail"

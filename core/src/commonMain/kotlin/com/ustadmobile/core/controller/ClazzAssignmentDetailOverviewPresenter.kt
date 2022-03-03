@@ -208,10 +208,13 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         observeSavedStateResult(SAVED_STATE_KEY_TEXT, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
             CourseAssignmentSubmissionWithAttachment::class){
             val submission = it.firstOrNull() ?: return@observeSavedStateResult
+
+            // find existing and remove it
+            val existingSubmission = submissionList.find { subList -> subList.casUid == submission.casUid }
+            submissionList.remove(existingSubmission)
+
             submission.casAssignmentUid = entity?.caUid ?: 0
             submission.casStudentUid = accountManager.activeAccount.personUid
-            submission.casType = CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT
-            submission.casUid = db.doorPrimaryKeyManager.nextId(CourseAssignmentSubmission.TABLE_ID)
             submissionList.add(submission)
             view.addedCourseAssignmentSubmission = submissionList
             requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
@@ -224,20 +227,29 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         view.addedCourseAssignmentSubmission = submissionList
     }
 
-    fun handleOpenFileSubmission(courseSubmission: CourseAssignmentSubmissionWithAttachment){
+    fun handleOpenSubmission(courseSubmission: CourseAssignmentSubmissionWithAttachment){
         presenterScope.launch {
-            val fileSubmission = courseSubmission.attachment ?: return@launch
-            val uri = fileSubmission.casaUri ?: return@launch
-            val doorUri = if(uri.startsWith("door-attachment://")) repo.retrieveAttachment(uri) else DoorUri.parse(uri)
-            try{
-                systemImpl.openFileInDefaultViewer(context, doorUri, fileSubmission.casaMimeType)
-            }catch (e: Exception){
-                if (e is NoAppFoundException) {
-                    view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
-                }else{
-                    val message = e.message
-                    if (message != null) {
-                        view.showSnackBar(message)
+            if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
+
+                val args = mutableMapOf<String, String>()
+                args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON,
+                        CourseAssignmentSubmissionWithAttachment.serializer(), courseSubmission)
+                systemImpl.go(TextAssignmentEditView.VIEW_NAME, args, context)
+
+            }else if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE){
+                val fileSubmission = courseSubmission.attachment ?: return@launch
+                val uri = fileSubmission.casaUri ?: return@launch
+                val doorUri = if(uri.startsWith("door-attachment://")) repo.retrieveAttachment(uri) else DoorUri.parse(uri)
+                try{
+                    systemImpl.openFileInDefaultViewer(context, doorUri, fileSubmission.casaMimeType)
+                }catch (e: Exception){
+                    if (e is NoAppFoundException) {
+                        view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
+                    }else{
+                        val message = e.message
+                        if (message != null) {
+                            view.showSnackBar(message)
+                        }
                     }
                 }
             }
@@ -264,18 +276,6 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         }
     }
 
-    fun handleAddText(text: String){
-        val submission = CourseAssignmentSubmissionWithAttachment().apply {
-            casStudentUid = accountManager.activeAccount.personUid
-            casAssignmentUid = entity?.caUid ?: 0
-            casText = text
-            casType = CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT
-            casUid = db.doorPrimaryKeyManager.nextId(CourseAssignmentSubmission.TABLE_ID)
-        }
-        submissionList.add(submission)
-        view.addedCourseAssignmentSubmission = submissionList
-    }
-
     fun handleAddFileClicked(){
         val modeSelected: String = when(entity?.caFileType){
             ClazzAssignment.FILE_TYPE_DOC -> SelectFileView.SELECTION_MODE_DOC
@@ -297,10 +297,12 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
     }
 
     fun handleAddTextClicked(){
+        val args = mutableMapOf(TextAssignmentEditView.ASSIGNMENT_ID to entity?.caUid.toString())
         navigateForResult(
                 NavigateForResultOptions(this,
                         null, TextAssignmentEditView.VIEW_NAME, CourseAssignmentSubmission::class,
-                        CourseAssignmentSubmission.serializer(), SAVED_STATE_KEY_TEXT))
+                        CourseAssignmentSubmission.serializer(), SAVED_STATE_KEY_TEXT,
+                            arguments = args))
     }
 
 

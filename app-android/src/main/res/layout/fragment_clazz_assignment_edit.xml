@@ -621,13 +621,11 @@
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_require_text_submission">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:text="@={`` + clazzAssignment.caTextLimit}"
                     android:id="@+id/ca_edit_number_of_words_desc"
+                    android:text="@={`` + clazzAssignment.caTextLimit}"
                     android:enabled="@{fieldsEnabled}"
                     android:digits="0123456789"
                     android:inputType="number"
-                    app:minValue="@{0}"
-                    app:maxValue="@{100}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
