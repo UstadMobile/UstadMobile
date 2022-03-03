@@ -316,6 +316,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         mockView.captureLastEntityValue()
 
         val fileSubmission = CourseAssignmentSubmissionWithAttachment().apply {
+            casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
             attachment = CourseAssignmentSubmissionAttachment().apply {
                 casaUri = "dummy"
                 casaMimeType = "video/*"
