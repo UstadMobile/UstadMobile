@@ -123,7 +123,6 @@
     <string name="compress">Compress</string>
     <string name="and">and</string>
     <string name="added">Added</string>
-    <string name="saved">Saved</string>
     <string name="attempts">Attempts</string>
 
     <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
@@ -689,60 +688,7 @@
     %1$s% will be replaced with the date that they started.-->
     <string name="started_date" formatted="false">Started %1$s</string>
 
-    <string name="individual">Individual</string>
-    <string name="group">Group</string>
-
-    <!-- Used by admin/teachers to hide content/assignment until a certain date-->
-    <string name="dont_show_before">Don\'t show before</string>
-
-
-    <string name="require_file_submission">Require file submission</string>
-
-    <string name="require_text_submission">Require text submission</string>
-
-    <string name="maximum">Maximum</string>
-
-    <!-- used to display the size limit of a file a user can upload -->
-    <string name="size_limit">Size limit (MB)</string>
-
-    <string name="limit">Limit</string>
-
-    <!-- used to display the number of files a user can attach -->
-    <string name="number_of_files">Maximum number of files</string>
-
-    <string name="edit_after_submission">Editing after submission</string>
-    <string name="allowed_till_deadline">Allowed till deadline</string>
-    <string name="allowed_till_grace">Allowed till end of grace period</string>
-    <string name="not_allowed">Not allowed</string>
-
-    <string name="marked_by">Marked by</string>
-
-    <string name="peers">Peers</string>
-
-    <string name="file_type">File type</string>
-
-    <!-- used to display what type of file a user can upload, options would be Doc, Video, Audio, Document
-        Type: Document (pdf, docx, odt)
-     -->
-    <string name="file_type_chosen">Type:</string>
-
-    <string name="file_type_any">Any</string>
-    <string name="file_document">Document (pdf, docx, odt)</string>
-    <string name="file_image">Image</string>
-
-    <string name="max_number_of_files">Maximum number of files: %1$s</string>
-
-
-    <string name="submit_grade">Submit grade</string>
-    <string name="submit_grade_and_mark_next">Submit grade and mark next</string>
-    <string name="graded">Graded</string>
-
     <string name="course_leader">Course leader</string>
-
-    <!-- used to display as an error if the maximum score for an assignment = 0
-        when creating a new assignment-->
-    <string name="score_greater_than_zero">Must be greater than 0</string>
-
 
     <!-- plurals are used to handle different languages that require special treatment
     e.g number 0 in arabic
@@ -898,9 +844,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="points_cap">Points</string>
     <string name="points">points</string>
 
-    <string name="words">Words</string>
-    <string name="characters">Characters</string>
-
     <string name="minimum_score">Minimum score</string>
     <string name="automatic">Automatic</string>
     <string name="student_marks_content">Student marks themselves</string>
@@ -923,16 +866,10 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="allow_private_comments_from_students">Allow private comments from students</string>
     <string name="deadline">Deadline</string>
     <string name="class_timezone">Class timezone</string>
-    <!--- Used to show the timezone a clazz is set in -->
-    <string name="class_timezone_set">Class timezone: %1$s</string>
     <string name="maximum_score">Maximum score</string>
-    <string name="maximum_points">Maximum points</string>
-
-    <string name="penalty_label">If completed after deadline but before end of grace period</string>
     <string name="quiz_questions">Quiz questions</string>
     <string name="time">Time</string>
     <string name="submission">Submission</string>
-    <string name="submissions">Submissions</string>
     <string name="public_comments">Public comments</string>
     <string name="private_comments">Private comments</string>
     <string name="submit_your_answer">Submit your answer</string>
@@ -1313,7 +1250,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="add_video_or_audio_from_the_device_gallery">Add video or audio from the device gallery</string>
 
     <string name="add_file">Add file</string>
-    <string name="add_text">Add text</string>
     <string name="add_folder">Add all from folder</string>
 
     <!-- Used to show a notification when user is importing a file or folder
