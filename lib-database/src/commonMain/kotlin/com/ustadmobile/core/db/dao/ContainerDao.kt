@@ -69,16 +69,8 @@ abstract class ContainerDao : BaseDao<Container> {
             "ORDER BY Container.cntLastModified DESC LIMIT 1")
     abstract suspend fun getMostRecentDownloadedContainerForContentEntryAsync(contentEntry: Long): Container?
 
-    @Query(SELECT_ACTIVE_RECENT_CONTAINER)
-    abstract fun getMostRecentContainerForContentEntry(contentEntry: Long): Container?
-
-    @Query(SELECT_ACTIVE_RECENT_CONTAINER)
-    abstract fun getMostRecentContainerForContentEntryLive(contentEntry: Long) : DoorLiveData<Container?>
-
-    @Query("SELECT Container.fileSize FROM Container " +
-            "WHERE Container.containerContentEntryUid = :contentEntryUid " +
-            "ORDER BY Container.cntLastModified DESC LIMIT 1")
-    abstract fun getFileSizeOfMostRecentContainerForContentEntry(contentEntryUid: Long): Long
+    @Query(SELECT_MOST_RECENT_READY_CONTAINER)
+    abstract fun getMostRecentContainerForContentEntry(contentEntryUid: Long): Container?
 
 
     @Query("SELECT * FROM Container WHERE containerUid = :uid")
@@ -88,7 +80,7 @@ abstract class ContainerDao : BaseDao<Container> {
         SELECT(COALESCE((
                SELECT fileSize
                  FROM Container
-                WHERE containerUid = :uid), 1))
+                WHERE containerUid = :uid), 0))
     """)
     abstract suspend fun findSizeByUid(uid: Long): Long
 
@@ -215,21 +207,36 @@ abstract class ContainerDao : BaseDao<Container> {
     @Query("UPDATE Container SET mimeType = :mimeType WHERE Container.containerUid = :containerUid")
     abstract fun updateMimeType(mimeType: String, containerUid: Long)
 
-    @Query(SELECT_ACTIVE_RECENT_CONTAINER)
-    abstract suspend fun getMostRecentContainerForContentEntryAsync(contentEntry: Long): Container?
+    @Query(SELECT_MOST_RECENT_READY_CONTAINER)
+    abstract suspend fun getMostRecentContainerForContentEntryAsync(contentEntryUid: Long): Container?
 
+    /**
+     * Used by the ContainerDownloadPlugin to find the most recent container to try and download.
+     *
+     */
     @Query("""
         SELECT COALESCE((
                 SELECT containerUid 
-                  FROM Container
-                 WHERE containerContentEntryUid = :contentEntryUid), 0)
+                 $FROM_CONTAINER_WHERE_MOST_RECENT_AND_READY), 0)
     """)
     abstract suspend fun getMostRecentContainerUidForContentEntryAsync(contentEntryUid: Long): Long
 
-    @Query("Select Container.containerUid, Container.mimeType FROM Container " +
-            "WHERE Container.containerContentEntryUid = :contentEntry " +
-            "ORDER BY Container.cntLastModified DESC LIMIT 1")
-    abstract suspend fun getMostRecentContaineUidAndMimeType(contentEntry: Long): ContainerUidAndMimeType?
+    /**
+     * Used by the ContentEntryOpener to find the most recent container for which the download has
+     * been completed.
+     */
+    @Query("""
+        SELECT Container.containerUid, Container.mimeType 
+          FROM Container
+         WHERE Container.containerContentEntryUid = :contentEntryUid
+           AND $CONTAINER_READY_WHERE_CLAUSE
+           AND EXISTS (SELECT ContainerEntry.ceUid 
+                         FROM ContainerEntry
+                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)
+      ORDER BY Container.cntLastModified DESC 
+         LIMIT 1
+    """)
+    abstract suspend fun getMostRecentLocallyAvailableContainerUidAndMimeType(contentEntryUid: Long): ContainerUidAndMimeType?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<Container>)
@@ -237,10 +244,33 @@ abstract class ContainerDao : BaseDao<Container> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertWithReplace(container : Container)
 
+    @Query("""
+        SELECT COALESCE(
+               (SELECT fileSize
+                  FROM Container
+                 WHERE containerUid = :containerUid), -1)
+    """)
+    abstract suspend fun getContainerSizeByUid(containerUid: Long) : Long
+
     companion object{
-        private const val SELECT_ACTIVE_RECENT_CONTAINER = "Select Container.* FROM Container " +
-                "WHERE Container.containerContentEntryUid = :contentEntry " +
-                "ORDER BY Container.cntLastModified DESC LIMIT 1"
+
+        //Containers in process will not have their filesize set.
+        private const val CONTAINER_READY_WHERE_CLAUSE = """
+            Container.fileSize > 0
+        """
+
+        private const val FROM_CONTAINER_WHERE_MOST_RECENT_AND_READY = """
+            FROM Container
+             WHERE Container.containerContentEntryUid = :contentEntryUid
+               AND $CONTAINER_READY_WHERE_CLAUSE     
+          ORDER BY Container.cntLastModified DESC 
+          LIMIT 1
+        """
+
+        private const val SELECT_MOST_RECENT_READY_CONTAINER = """
+            SELECT Container.*
+            $FROM_CONTAINER_WHERE_MOST_RECENT_AND_READY
+        """
 
         private const val UPDATE_SIZE_AND_NUM_ENTRIES_SQL = """
             UPDATE Container 

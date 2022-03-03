@@ -17,9 +17,11 @@ import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
+import kotlinx.coroutines.delay
 
 fun UmAppDatabase.runPreload() {
     preload()
@@ -594,4 +596,38 @@ suspend fun UmAppDatabase.insertPersonAuthCredentials2(personUid: Long,
         pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
         pauthLcb = lastChangedBy
     })
+}
+
+/**
+ * 25/Feb/2022
+ *
+ * This should NOT be needed, but content imports (maybe 4% of the time) have been observed that end
+ * with the container size not being updated in spite of the fact that the process completed. This
+ * happens for no apparent reason. All container entries were present. The fileSize on the container
+ * should be 0 until the container is ready (to avoid any possibility of a client downloading a
+ * container that is not ready).
+ */
+suspend fun UmAppDatabase.validateAndUpdateContainerSize(
+    containerUid: Long,
+    attempts: Int = 3,
+    waitInterval: Long = 200
+) : Long{
+    var containerSize: Long = 0
+    for(i in 0 until attempts) {
+        containerSize = withDoorTransactionAsync(UmAppDatabase::class) {
+            val currentSize = containerDao.getContainerSizeByUid(containerUid)
+            if(currentSize != 0L)
+                return@withDoorTransactionAsync currentSize
+
+            containerDao.updateContainerSizeAndNumEntriesAsync(containerUid, systemTimeInMillis())
+            containerDao.getContainerSizeByUid(containerUid)
+        }
+
+        if(containerSize != 0L)
+            return containerSize
+
+        delay(waitInterval)
+    }
+
+    return containerSize
 }

@@ -9,17 +9,16 @@ import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
 import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.*
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
-import org.kodein.di.on
+import org.kodein.di.*
 import java.io.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
+import com.ustadmobile.core.util.ext.getContentEntryJsonFilesFromDir
 
 
 /**
@@ -42,10 +41,12 @@ import java.util.concurrent.atomic.AtomicLong
  * @param siteUrl Endpoint Site URL (used for retrieving dependencies)
  * @param di the dependency injection object
  */
-class UploadSession(val sessionUuid: String,
-                    val containerEntryPaths: List<ContainerEntryWithMd5>,
-                    val siteUrl: String,
-                    override val di: DI) : DIAware, Closeable {
+class UploadSession(
+    val sessionUuid: String,
+    val containerEntryPaths: List<ContainerEntryWithMd5>,
+    val siteUrl: String,
+    override val di: DI
+) : DIAware, Closeable {
 
     val lastActive = AtomicLong(systemTimeInMillis())
 
@@ -83,6 +84,8 @@ class UploadSession(val sessionUuid: String,
 
     private var readJob: Job? = null
 
+    val containerUidFolder: File
+
     init {
         UUID.fromString(sessionUuid) //validate this is a real uuid, does not contain nasty characters
 
@@ -90,6 +93,8 @@ class UploadSession(val sessionUuid: String,
         entriesRequired = runBlocking {
             db.linkExistingContainerEntries(containerUid, containerEntryPaths).entriesWithoutMatchingFile
         }
+        containerUidFolder = File(containerDir, "${entriesRequired.first().ceContainerUid}")
+        containerUidFolder.mkdirs()
 
         md5sExpected = entriesRequired.distinctMds5sSorted()
 
@@ -110,13 +115,15 @@ class UploadSession(val sessionUuid: String,
             readJob = GlobalScope.launch(Dispatchers.IO) {
                 var concatIn: ConcatenatedInputStream2? = null
                 try {
-
-                    val containerUidFolder = File(containerDir, "${entriesRequired.first().ceContainerUid}")
-                    containerUidFolder.mkdirs()
-                    //TODO: this call to readAndSaveToDir must be updated as it no longer links entries etc.
                     concatIn = ConcatenatedInputStream2(pipeIn)
-                    concatIn.readAndSaveToDir(containerUidFolder, uploadWorkDir, db, AtomicLong(0L),
-                            md5sExpected.toMutableList(), "UploadSession")
+                    concatIn.readAndSaveToDir(
+                        containerUidFolder,
+                        uploadWorkDir,
+                        AtomicLong(0L),
+                        md5sExpected.toMutableList(),
+                        "UploadSession",
+                        di.direct.instance()
+                    )
                 } catch (e: Exception) {
                     Napier.e("UploadSession;Exception reading, closing pipeOut to ")
                     pipeOut.close()
@@ -157,8 +164,15 @@ class UploadSession(val sessionUuid: String,
         pipeOut.close()
         runBlocking {
             readJob?.join()
-            db.linkExistingContainerEntries(containerEntryPaths.first().ceContainerUid,
-                entriesRequired)
+
+            val containerEntryFiles = containerUidFolder.getContentEntryJsonFilesFromDir(
+                di.direct.instance())
+            db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                txDb.containerEntryFileDao.insertListAsync(containerEntryFiles)
+                txDb.linkExistingContainerEntries(containerEntryPaths.first().ceContainerUid,
+                    entriesRequired)
+            }
+
         }
 
         uploadWorkDir.takeIf { it.listFiles().isEmpty() }?.delete()
