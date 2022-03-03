@@ -79,6 +79,7 @@
                 android:scrollbars="vertical"
                 app:historyEnable="true"
                 app:historySize="10"
+                app:textColor="?colorOnBackground"
                 app:layout_constraintBottom_toTopOf="@+id/formatting_toolbar"
                 app:layout_constraintTop_toBottomOf="@+id/languageselection_til"
                 tools:text="hello World" />
