@@ -400,10 +400,6 @@
     <!-- Schedule generally refers to the schedule for a class e.g. every monday at 2pm -->
     <string name="schedule">Schedule</string>
 
-    <!-- -->
-    <string name="course_blocks">Course blocks</string>
-    <string name="add_block">Add block</string>
-    <string name="edit_block">Edit block</string>
     <string name="add_a_schedule">Add a schedule</string>
     <string name="edit_schedule">Edit schedule</string>
     <string name="first">first</string>
