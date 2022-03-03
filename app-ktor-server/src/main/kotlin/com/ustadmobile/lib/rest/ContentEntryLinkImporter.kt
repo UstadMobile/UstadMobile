@@ -44,7 +44,7 @@ fun Route.ContentEntryLinkImporter() {
             val pluginManager: ContentPluginManager by di.on(call).instance()
 
             ContentJobProcessContext(DoorUri.parse(url),
-                    createTemporaryDir("content"), mutableMapOf(), di).use { processContext ->
+                    createTemporaryDir("content"), mutableMapOf(), null, di).use { processContext ->
                 val metadata: MetadataResult?
                 try{
                     metadata = withTimeout(IMPORT_LINK_TIMEOUT_DEFAULT) {

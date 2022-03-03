@@ -4,9 +4,13 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
+import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ShrinkUtils
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.onActiveAccountDirect
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
@@ -36,6 +40,8 @@ class VideoTypePluginTest {
 
     private lateinit var mockWebServer: MockWebServer
 
+    private lateinit var db: UmAppDatabase
+
     @Before
     fun setup(){
 
@@ -48,6 +54,7 @@ class VideoTypePluginTest {
         mockWebServer.dispatcher = ContentDispatcher()
         mockWebServer.start()
 
+        db = di.onActiveAccountDirect().instance(tag = DoorTag.TAG_DB)
     }
 
     @Test
@@ -58,8 +65,8 @@ class VideoTypePluginTest {
         val tempVideoFile = tmpFolder.newFile("BigBuckBunny.mp4")
         tempVideoFile.copyInputStreamToFile(inputStream)
         val videoUri = DoorUri.parse(tempVideoFile.toURI().toString())
-        val processContext = ContentJobProcessContext(videoUri, tmpFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-                di)
+        val processContext = ContentJobProcessContext(videoUri, tmpFolder.newFolder().toDoorUri(),
+            params = mutableMapOf(), DummyContentJobItemTransactionRunner(db), di)
 
         val videoPlugin = VideoTypePluginJvm(Any(), Endpoint("http://localhost/dummy"), di)
 
@@ -76,8 +83,8 @@ class VideoTypePluginTest {
 
         val accountManager: UstadAccountManager by di.instance()
         val videoUri = DoorUri.parse(mockWebServer.url("/com/ustadmobile/core/container/BigBuckBunny.mp4").toString())
-        val processContext = ContentJobProcessContext(videoUri, tmpFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-                di)
+        val processContext = ContentJobProcessContext(videoUri, tmpFolder.newFolder().toDoorUri(),
+            mutableMapOf(), DummyContentJobItemTransactionRunner(db), di)
 
         val videoPlugin = VideoTypePluginJvm(Any(), accountManager.activeEndpoint, di)
 

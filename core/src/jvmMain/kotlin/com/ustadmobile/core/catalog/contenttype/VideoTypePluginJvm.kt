@@ -102,8 +102,10 @@ class VideoTypePluginJvm(
                             }
 
                     contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                    process.withContentJobItemTransactionMutex { txDb ->
+                        txDb.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
                             container.containerUid)
+                    }
 
                     val containerFolder = jobItem.contentJob?.toUri
                             ?: defaultContainerDir.toURI().toString()
@@ -119,13 +121,16 @@ class VideoTypePluginJvm(
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         progress)
 
-                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
+                    val haveConnectivityToContinueJob = process.withContentJobItemTransactionMutex { txDb ->
+                        txDb.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
 
-                    contentJobItem.cjiConnectivityNeeded = true
-                    db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+                        contentJobItem.cjiConnectivityNeeded = true
+                        txDb.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
 
-                    val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
+                        txDb.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
                             ?: 0)
+                    }
+
                     if (!haveConnectivityToContinueJob) {
                         return@withContext ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
                     }
@@ -135,7 +140,7 @@ class VideoTypePluginJvm(
                 if(contentNeedUpload) {
                     return@withContext ProcessResult(uploader.upload(contentJobItem,
                         NetworkProgressListenerAdapter(progress, contentJobItem), httpClient,
-                        endpoint
+                        endpoint, process
                     ))
                 }
 
