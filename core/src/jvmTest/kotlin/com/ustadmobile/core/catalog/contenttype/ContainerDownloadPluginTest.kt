@@ -6,6 +6,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
+import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -196,7 +197,7 @@ class ContainerDownloadPluginTest {
 
         val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
             temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            clientDi)
+            DummyContentJobItemTransactionRunner(clientDb), clientDi)
 
 
         val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
@@ -227,8 +228,10 @@ class ContainerDownloadPluginTest {
         for(i in 0..1) {
             Napier.d("============ ATTEMPT $i ============")
             try {
-                val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(), temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-                        clientDi)
+                val processContext = ContentJobProcessContext(
+                    temporaryFolder.newFolder().toDoorUri(),
+                    temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
+                    DummyContentJobItemTransactionRunner(clientDb), clientDi)
 
                 val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
                 val result = runBlocking {  downloadJob.processJob(job, processContext, mockListener) }
@@ -295,7 +298,7 @@ class ContainerDownloadPluginTest {
 
         val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
             temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            clientDi)
+            DummyContentJobItemTransactionRunner(clientDb), clientDi)
 
 
         val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
@@ -332,7 +335,7 @@ class ContainerDownloadPluginTest {
 
         val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
             temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            clientDi)
+            DummyContentJobItemTransactionRunner(clientDb), clientDi)
 
 
         val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
@@ -360,7 +363,7 @@ class ContainerDownloadPluginTest {
 
         val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
             temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            clientDi)
+            DummyContentJobItemTransactionRunner(clientDb), clientDi)
 
 
         val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
@@ -383,7 +386,7 @@ class ContainerDownloadPluginTest {
 
         val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
             temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            clientDi)
+            DummyContentJobItemTransactionRunner(clientDb), clientDi)
 
         val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
         val result = runBlocking {  downloadJob.processJob(job, processContext, mock { } ) }

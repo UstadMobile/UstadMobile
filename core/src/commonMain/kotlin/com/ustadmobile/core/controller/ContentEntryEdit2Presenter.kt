@@ -1,10 +1,7 @@
 package com.ustadmobile.core.controller
 
 import SelectFolderView
-import com.ustadmobile.core.contentjob.ContentJobManager
-import com.ustadmobile.core.contentjob.ContentJobProcessContext
-import com.ustadmobile.core.contentjob.ContentPluginManager
-import com.ustadmobile.core.contentjob.MetadataResult
+import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -352,7 +349,7 @@ class ContentEntryEdit2Presenter(
         try {
             val doorUri = DoorUri.parse(uri)
             ContentJobProcessContext(doorUri, createTemporaryDir("content"),
-                    mutableMapOf(), di).use { processContext ->
+                    mutableMapOf(), null, di).use { processContext ->
                 val metadata = pluginManager.extractMetadata(DoorUri.parse(uri), processContext)
                 view.metadataResult = metadata
                 val plugin = pluginManager.getPluginById(metadata.pluginId)

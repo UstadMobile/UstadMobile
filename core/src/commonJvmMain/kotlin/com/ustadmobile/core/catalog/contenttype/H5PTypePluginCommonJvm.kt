@@ -79,7 +79,10 @@ class H5PTypePluginCommonJvm(
     override val pluginId: Int
         get() = PLUGIN_ID
 
-    override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
+    override suspend fun extractMetadata(
+        uri: DoorUri,
+        process: ContentJobProcessContext
+    ): MetadataResult? {
         val size = uri.getSize(context, di)
         if(size > MAX_SIZE_LIMIT){
             return null
@@ -164,10 +167,11 @@ class H5PTypePluginCommonJvm(
                     val entry = db.contentEntryDao.findByUid(contentJobItem.cjiContentEntryUid)
 
                     contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                    process.withContentJobItemTransactionMutex { txDb ->
+                        txDb.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
                             container.containerUid)
+                    }
 
-                    val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolderUri)
                     repo.addEntriesToContainerFromZip(container.containerUid, localUri,
                             ContainerAddOptions(
                                 storageDirUri = containerFolderUri,
@@ -229,7 +233,7 @@ class H5PTypePluginCommonJvm(
                             updateContainer = false)) //Last file, now update container
                     tmpIndexHtmlFile.delete()
 
-                    db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                    process.withContentJobItemTransactionMutex { txDb ->
                         txDb.containerDao.updateContainerSizeAndNumEntries(
                             container.containerUid, systemTimeInMillis())
                         contentJobItem.updateTotalFromContainerSize(contentNeedUpload, txDb,
@@ -244,8 +248,8 @@ class H5PTypePluginCommonJvm(
                     }
 
 
-                    val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
-                            ?: 0)
+                    val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(
+                        jobItem.contentJob?.cjUid ?: 0)
                     if (!haveConnectivityToContinueJob) {
                         return@withContext ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
                     }
@@ -258,7 +262,7 @@ class H5PTypePluginCommonJvm(
                 if(contentNeedUpload) {
                     return@withContext ProcessResult(uploader.upload(contentJobItem,
                         NetworkProgressListenerAdapter(progress, contentJobItem),
-                        httpClient, endpoint))
+                        httpClient, endpoint, process))
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)

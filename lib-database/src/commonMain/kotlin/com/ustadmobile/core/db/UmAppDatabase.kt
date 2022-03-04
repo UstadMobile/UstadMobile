@@ -119,7 +119,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 101)
+], version = 102)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -2785,7 +2785,20 @@ DELETE FROM ContainerEntryFile
             """)
         }
 
-        val MIGRATION_100_101 = DoorMigrationStatementList(100, 101) { db ->
+        val MIGRATION_100_101 = DoorMigrationStatementList(99, 100) { db ->
+            if(db.dbType() == DoorDbType.SQLITE) {
+                listOf(
+                    "DROP TRIGGER IF EXISTS container_remote_insert_ins",
+                    "CREATE TRIGGER container_remote_insert_ins INSTEAD OF INSERT ON Container_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Container(containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, cntLct, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries) SELECT NEW.containerUid, NEW.cntLocalCsn, NEW.cntMasterCsn, NEW.cntLastModBy, NEW.cntLct, NEW.fileSize, NEW.containerContentEntryUid, NEW.cntLastModified, NEW.mimeType, NEW.remarks, NEW.mobileOptimized, NEW.cntNumEntries WHERE NEW.cntLct > (SELECT COALESCE( (SELECT ContainerInt.cntLct FROM Container ContainerInt WHERE ContainerInt.containerUid = NEW.containerUid), 0)) /*psql ON CONFLICT (containerUid) DO UPDATE SET cntLocalCsn = EXCLUDED.cntLocalCsn, cntMasterCsn = EXCLUDED.cntMasterCsn, cntLastModBy = EXCLUDED.cntLastModBy, cntLct = EXCLUDED.cntLct, fileSize = EXCLUDED.fileSize, containerContentEntryUid = EXCLUDED.containerContentEntryUid, cntLastModified = EXCLUDED.cntLastModified, mimeType = EXCLUDED.mimeType, remarks = EXCLUDED.remarks, mobileOptimized = EXCLUDED.mobileOptimized, cntNumEntries = EXCLUDED.cntNumEntries */; END "
+                )
+            }else {
+                listOf(
+                    "CREATE OR REPLACE FUNCTION container_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO Container(containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, cntLct, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries) SELECT NEW.containerUid, NEW.cntLocalCsn, NEW.cntMasterCsn, NEW.cntLastModBy, NEW.cntLct, NEW.fileSize, NEW.containerContentEntryUid, NEW.cntLastModified, NEW.mimeType, NEW.remarks, NEW.mobileOptimized, NEW.cntNumEntries WHERE NEW.cntLct > (SELECT COALESCE( (SELECT ContainerInt.cntLct FROM Container ContainerInt WHERE ContainerInt.containerUid = NEW.containerUid), 0)) ON CONFLICT (containerUid) DO UPDATE SET cntLocalCsn = EXCLUDED.cntLocalCsn, cntMasterCsn = EXCLUDED.cntMasterCsn, cntLastModBy = EXCLUDED.cntLastModBy, cntLct = EXCLUDED.cntLct, fileSize = EXCLUDED.fileSize, containerContentEntryUid = EXCLUDED.containerContentEntryUid, cntLastModified = EXCLUDED.cntLastModified, mimeType = EXCLUDED.mimeType, remarks = EXCLUDED.remarks, mobileOptimized = EXCLUDED.mobileOptimized, cntNumEntries = EXCLUDED.cntNumEntries ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                )
+            }
+        }
+
+        val MIGRATION_101_102 = DoorMigrationStatementList(101, 102) { db ->
 
             val finalList = mutableListOf("ALTER TABLE ClazzAssignment ADD COLUMN caAssignmentType INTEGER NOT NULL DEFAULT 0",
                     "ALTER TABLE ClazzAssignment ADD COLUMN caFileSubmissionWeight INTEGER NOT NULL DEFAULT 0",
@@ -2841,7 +2854,7 @@ DELETE FROM ContainerEntryFile
             MIGRATION_88_89, MIGRATION_89_90, MIGRATION_90_91,
             UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
             MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98, MIGRATION_98_99,
-            MIGRATION_99_100, MIGRATION_100_101
+            MIGRATION_99_100, MIGRATION_100_101, MIGRATION_101_102
         )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->

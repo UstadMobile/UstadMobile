@@ -149,7 +149,7 @@ class XapiTypePluginCommonJvm(
                     val progressListenerAdapter = NetworkProgressListenerAdapter(progress,
                         contentJobItem)
                     return@withContext ProcessResult(uploader.upload(
-                            contentJobItem, progressListenerAdapter, httpClient, endpoint
+                            contentJobItem, progressListenerAdapter, httpClient, endpoint, process
                     ))
                 }
 

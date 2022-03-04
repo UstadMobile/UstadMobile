@@ -6,6 +6,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
+import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getSize
@@ -117,7 +118,7 @@ class TestApacheIndexer {
             jobAndItem.contentJobItem = item
 
             val processContext = ContentJobProcessContext(DoorUri(sourceURL.toURI()),
-                tmpDir.toDoorUri(), mutableMapOf(), di)
+                tmpDir.toDoorUri(), mutableMapOf(), DummyContentJobItemTransactionRunner(db), di)
             apacheIndexer.processJob(jobAndItem, processContext){
 
             }
