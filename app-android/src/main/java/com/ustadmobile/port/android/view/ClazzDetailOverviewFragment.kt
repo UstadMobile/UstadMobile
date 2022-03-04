@@ -28,6 +28,8 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
+import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.Schedule
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -50,9 +52,17 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
     private var currentLiveData: LiveData<PagedList<Schedule>>? = null
 
+    private var courseBlockLiveData: LiveData<PagedList<CourseBlock>>? = null
+
     private var repo: UmAppDatabase? = null
 
     private var mScheduleListRecyclerAdapter: ScheduleRecyclerViewAdapter? = null
+
+    private var courseBlockDetailRecyclerAdapter: CourseBlockDetailRecyclerViewAdapter? = null
+
+    private val courseBlockObserver = Observer<PagedList<CourseBlock>?> {
+        t -> courseBlockDetailRecyclerAdapter?.submitList(t)
+    }
 
     class ScheduleRecyclerViewAdapter: PagedListAdapter<Schedule,
             ScheduleRecyclerViewAdapter.ScheduleViewHolder>(SCHEDULE_DIFF_UTIL) {
@@ -69,6 +79,21 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         }
     }
 
+    class CourseBlockDetailRecyclerViewAdapter: PagedListAdapter<CourseBlock,
+            CourseBlockDetailRecyclerViewAdapter.CourseBlockViewHolder>(COURSE_BLOCK_DIFF_UTIL) {
+
+        class CourseBlockViewHolder(val binding: ItemScheduleSimpleBinding): RecyclerView.ViewHolder(binding.root)
+
+        override fun onBindViewHolder(holder: CourseBlockViewHolder, position: Int) {
+            //holder.binding.schedule = getItem(position)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseBlockViewHolder {
+            return CourseBlockViewHolder(ItemScheduleSimpleBinding.inflate(LayoutInflater.from(parent.context),
+                    parent, false))
+        }
+    }
+
     override var scheduleList: DataSource.Factory<Int, Schedule>? = null
         set(value) {
             currentLiveData?.removeObserver(this)
@@ -76,6 +101,16 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
             val scheduleDao = repo?.scheduleDao ?: return
             currentLiveData = value?.asRepositoryLiveData(scheduleDao)
             currentLiveData?.observe(this, this)
+        }
+
+
+    override var courseBlockList: DataSource.Factory<Int, CourseBlock>? = null
+        set(value) {
+            courseBlockLiveData?.removeObserver(courseBlockObserver)
+            field = value
+            val blockDao = repo?.courseBlockDao ?: return
+            courseBlockLiveData = value?.asRepositoryLiveData(blockDao)
+            courseBlockLiveData?.observe(this, courseBlockObserver)
         }
 
     override fun onChanged(t: PagedList<Schedule>?) {
@@ -144,6 +179,16 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
             }
 
             override fun areContentsTheSame(oldItem: Schedule, newItem: Schedule): Boolean {
+                return oldItem == newItem
+            }
+        }
+
+        val COURSE_BLOCK_DIFF_UTIL = object: DiffUtil.ItemCallback<CourseBlock>() {
+            override fun areItemsTheSame(oldItem: CourseBlock, newItem: CourseBlock): Boolean {
+                return oldItem.cbUid == newItem.cbUid
+            }
+
+            override fun areContentsTheSame(oldItem: CourseBlock, newItem: CourseBlock): Boolean {
                 return oldItem == newItem
             }
         }

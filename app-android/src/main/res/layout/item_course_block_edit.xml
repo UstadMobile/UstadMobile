@@ -1,83 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="android.view.View"/>
+        <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseBlockWithEntity"/>
 
         <variable
             name="block"
-            type="com.ustadmobile.lib.db.entities.CourseBlock" />
-
-        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+            type="CourseBlockWithEntity" />
 
         <variable
-            name="fieldsEnabled"
-            type="boolean" />
+            name="mPresenter"
+            type="com.ustadmobile.core.controller.ClazzEdit2Presenter" />
 
         <variable
-            name="blockTitleError"
-            type="String" />
+            name="oneToManyJoinListener"
+            type="OneToManyJoinEditListener&lt;CourseBlockWithEntity&gt;" />
+
+        <variable
+            name="mActivity"
+            type="com.ustadmobile.port.android.view.HolidayCalendarEditActivityEventHandler" />
 
     </data>
 
-
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/fragment_leaving_reason_edit_edit_scroll"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:background="?attr/selectableItemBackground">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/fragment_course_block_edit_edit_clx"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/course_block_edit_title_textinput"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_8dp"
-                android:layout_marginTop="@dimen/dimen_8dp"
-                app:errorEnabled="true"
-                app:errorText="@{blockTitleError}"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_course_block_reorder"
+            app:srcCompat="@drawable/ic_menu_white_24dp"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:layout_margin="@dimen/dimen_16dp"
+            app:tint="?colorOnIconTint"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/course_block_edit_title_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@={block.cbTitle}"
-                    android:hint="@string/title" />
-            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/course_block_edit_desc_textinput"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_8dp"
-                android:layout_marginTop="@dimen/dimen_8dp"
-                app:layout_constraintTop_toBottomOf="@id/course_block_edit_title_textinput"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/course_block_edit_desc_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@={block.cbDescription}"
-                    android:hint="@{StringExtKt.optional(context, @string/description)}" />
-            </com.google.android.material.textfield.TextInputLayout>
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_course_block_icon"
+            app:srcCompat="@drawable/ic_menu_white_24dp"
+            android:layout_width="@dimen/dimen_24dp"
+            android:layout_height="@dimen/dimen_24dp"
+            android:layout_margin="@dimen/dimen_16dp"
+            app:tint="?colorOnIconTint"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_course_block_reorder"
+            />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Line 1-->
+        <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:id="@+id/item_schedule_line1_text"
+            android:text="@{block.cbTitle}"
+            tools:text="Module"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_course_block_icon"
+            app:layout_constraintEnd_toStartOf="@+id/item_course_block_more_option"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_margin="@dimen/dimen_16dp" />
 
-    </androidx.core.widget.NestedScrollView>
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_course_block_more_option"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingEnd="@dimen/dimen_16dp"
+            android:paddingStart="0dp"
+            android:tint="?colorOnIconTint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:srcCompat="@drawable/ic_more_vert_black_24dp"
+            android:contentDescription="@string/edit"
+            app:onClickEditPopupMenu="@{() -> oneToManyJoinListener.onClickEdit(block)}"
+            app:onClickDeletePopupMenu="@{() -> oneToManyJoinListener.onClickDelete(block)}"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

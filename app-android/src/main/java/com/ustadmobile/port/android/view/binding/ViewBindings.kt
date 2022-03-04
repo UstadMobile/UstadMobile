@@ -42,6 +42,11 @@ fun View.setOnLongPress(onLongClick: View.OnClickListener) {
     }
 }
 
+@BindingAdapter("courseBlockIndent")
+fun View.setIndentLevel(indentLevel: Int){
+    setMarginStartValue(indentLevel * context.resources.getDimension(R.dimen.dimen_32dp))
+}
+
 /**
  * Binder Adapter that will trigger dialing a number when clicked. Can be useful for binding on
  * detail views.

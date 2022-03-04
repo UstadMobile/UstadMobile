@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.ItemCourseBlockEditBinding
+import com.toughra.ustadmobile.databinding.FragmentCourseBlockEditBinding
 import com.ustadmobile.core.controller.CourseBlockEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
@@ -15,7 +15,7 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 
 class CourseBlockEditFragment: UstadEditFragment<CourseBlock>(), CourseBlockEditView {
 
-    private var mBinding: ItemCourseBlockEditBinding? = null
+    private var mBinding: FragmentCourseBlockEditBinding? = null
 
     private var mPresenter: CourseBlockEditPresenter? = null
 
@@ -24,7 +24,7 @@ class CourseBlockEditFragment: UstadEditFragment<CourseBlock>(), CourseBlockEdit
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = ItemCourseBlockEditBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentCourseBlockEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
         }
 

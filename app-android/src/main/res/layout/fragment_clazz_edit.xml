@@ -9,7 +9,7 @@
         <import type="com.ustadmobile.core.model.BitmaskFlag"/>
         <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
         <import type="com.ustadmobile.lib.db.entities.Schedule"/>
-        <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseBlockWithEntity"/>
         <import type="com.ustadmobile.core.controller.ClazzEdit2Presenter"/>
         <import type="com.ustadmobile.core.model.BitmaskMessageId"/>
         <import type="java.util.List"/>
@@ -58,7 +58,7 @@
 
         <variable
             name="courseBlockOneToManyListener"
-            type="OneToManyJoinEditListener&lt;CourseBlock&gt;" />
+            type="OneToManyJoinEditListener&lt;CourseBlockWithEntity&gt;" />
 
         <variable
             name="mPresenter"
@@ -245,7 +245,7 @@
                 android:id="@+id/activity_clazz_edit_course_block_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:listitem="@layout/item_course_block"
+                tools:listitem="@layout/item_course_block_edit"
                 tools:itemCount="2"
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_course_add_new_block"
                 app:layout_constraintStart_toStartOf="parent" />

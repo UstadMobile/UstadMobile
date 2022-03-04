@@ -85,6 +85,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     private var submissionAttachmentLiveDataCourse: LiveData<PagedList<CourseAssignmentSubmissionWithAttachment>>? = null
     private val courseSubmissionWithAttachmentObserver = Observer<PagedList<CourseAssignmentSubmissionWithAttachment>?> {
         t -> run{
+            checkMaxFilesReached(t, addedCourseAssignmentSubmission)
             submissionHeaderAdapter?.visible = t.isNotEmpty()
             submittedSubmissionAdapter?.submitList(t)
         }
@@ -230,12 +231,16 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         set(value) {
             field = value
             submitButtonAdapter?.hasFilesToSubmit = value?.isNotEmpty() ?: false
-            val sizeOfSubmitted = submittedSubmissionAdapter?.currentList?.filter { it.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE }?.size ?: 0
-            val sizeOfAddedList = value?.filter { it.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE }?.size ?: 0
-            addSubmissionButtonsAdapter?.maxFilesReached = (sizeOfAddedList + sizeOfSubmitted) >= maxNumberOfFilesSubmission
+            checkMaxFilesReached(submittedSubmissionAdapter?.currentList, value)
             addSubmissionAdapter?.submitList(value)
             addSubmissionAdapter?.notifyDataSetChanged()
         }
+
+    fun checkMaxFilesReached(submittedList: List<CourseAssignmentSubmissionWithAttachment>?, addedList: List<CourseAssignmentSubmissionWithAttachment>?){
+        val sizeOfSubmitted = submittedList?.filter { it.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE }?.size ?: 0
+        val sizeOfAddedList = addedList?.filter { it.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE }?.size ?: 0
+        addSubmissionButtonsAdapter?.maxFilesReached = (sizeOfAddedList + sizeOfSubmitted) >= maxNumberOfFilesSubmission
+    }
 
     override var timeZone: String? = null
         get() = field
