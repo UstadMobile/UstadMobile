@@ -12,8 +12,11 @@ import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
+import com.ustadmobile.core.view.SelectFileView
+import com.ustadmobile.core.view.TextAssignmentEditView
 import com.ustadmobile.core.view.TextAssignmentEditView.Companion.EDIT_ENABLED
+import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
@@ -27,7 +30,6 @@ import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
@@ -57,18 +59,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
           get() = PersistenceMode.DB
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        val clazzAssignment = withTimeoutOrNull(2000) {
-            repo.clazzAssignmentDao.findByUidAsync(arguments[ARG_ENTITY_UID]?.toLong()
-                    ?: 0)
-        }
-
-        return db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid,
-                clazzAssignment?.caClazzUid ?: 0, Role.PERMISSION_ASSIGNMENT_UPDATE)
-    }
-
-    override fun handleClickEdit() {
-        systemImpl.go(ClazzAssignmentEditView.VIEW_NAME,
-                mapOf(ARG_ENTITY_UID to entity?.caUid.toString()), context)
+        return false
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {

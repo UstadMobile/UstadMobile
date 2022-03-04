@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzDetailOverviewBinding
+import com.toughra.ustadmobile.databinding.ItemCourseBlockBinding
 import com.toughra.ustadmobile.databinding.ItemScheduleSimpleBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
@@ -82,14 +83,14 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
     class CourseBlockDetailRecyclerViewAdapter: PagedListAdapter<CourseBlock,
             CourseBlockDetailRecyclerViewAdapter.CourseBlockViewHolder>(COURSE_BLOCK_DIFF_UTIL) {
 
-        class CourseBlockViewHolder(val binding: ItemScheduleSimpleBinding): RecyclerView.ViewHolder(binding.root)
+        class CourseBlockViewHolder(val binding: ItemCourseBlockBinding): RecyclerView.ViewHolder(binding.root)
 
         override fun onBindViewHolder(holder: CourseBlockViewHolder, position: Int) {
-            //holder.binding.schedule = getItem(position)
+            holder.binding.block = getItem(position)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseBlockViewHolder {
-            return CourseBlockViewHolder(ItemScheduleSimpleBinding.inflate(LayoutInflater.from(parent.context),
+            return CourseBlockViewHolder(ItemCourseBlockBinding.inflate(LayoutInflater.from(parent.context),
                     parent, false))
         }
     }
@@ -121,11 +122,16 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                               savedInstanceState: Bundle?): View? {
         val rootView: View
         mScheduleListRecyclerAdapter = ScheduleRecyclerViewAdapter()
+        courseBlockDetailRecyclerAdapter = CourseBlockDetailRecyclerViewAdapter()
         mBinding = FragmentClazzDetailOverviewBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
             it.fragmentClazzDetailOverviewScheduleRecyclerview.apply {
                 adapter = mScheduleListRecyclerAdapter
+                layoutManager = LinearLayoutManager(requireContext())
+            }
+            it.fragmentClazzDetailOverviewBlockRecyclerview.apply {
+                adapter = courseBlockDetailRecyclerAdapter
                 layoutManager = LinearLayoutManager(requireContext())
             }
         }
@@ -144,6 +150,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding?.fragmentClazzDetailOverviewScheduleRecyclerview?.adapter = null
+        mBinding?.fragmentClazzDetailOverviewBlockRecyclerview?.adapter = null
         mScheduleListRecyclerAdapter = null
         mBinding = null
         mPresenter = null

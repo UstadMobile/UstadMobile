@@ -180,8 +180,8 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
                 mPresenter?.courseBlockOneToManyJoinListener,
                 mPresenter, mDataBinding?.activityClazzEditCourseBlockRecyclerview)
 
-        scheduleRecyclerView?.adapter = courseBlockRecyclerAdapter
-        scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+        courseBlockRecyclerView?.adapter = courseBlockRecyclerAdapter
+        courseBlockRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         val permissionList = ScopedGrantEditPresenter.PERMISSION_LIST_MAP[Clazz.TABLE_ID]
             ?: throw IllegalStateException("ScopedGrantEdit permission list not found!")

@@ -14,16 +14,16 @@ import kotlinx.serialization.Serializable
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
                 sqlStatements = [
-                    """REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbTitle, cbDescription, cbIndex, cbClazzUid, cbActive, cbLct) 
-         VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbTitle, NEW.cbDescription, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbLct ) 
+                    """REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbParentBlock, cbTitle, cbDescription, cbIndex, cbClazzUid, cbActive,cbTableId, cbTableUid, cbLct) 
+         VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbParentBlock, NEW.cbTitle, NEW.cbDescription, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive,  NEW.cbTableId,  NEW.cbTableUid, NEW.cbLct) 
          /*psql ON CONFLICT (cbUid) DO UPDATE 
-         SET cbUid = EXCLUDED.cbUid, cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbLct = EXCLUDED.cbLct
+         SET cbUid = EXCLUDED.cbUid, cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbTableId = EXCLUDED.cbTableId, cbTableUid = EXCLUDED.cbTableUid, cbLct = EXCLUDED.cbLct
          */"""
                 ]
         )
 ))
 @Serializable
-class CourseBlock {
+open class CourseBlock {
 
     @PrimaryKey(autoGenerate = true)
     var cbUid: Long = 0
@@ -31,6 +31,8 @@ class CourseBlock {
     var cbType: Int = 0
 
     var cbIndentLevel: Int = 0
+
+    var cbParentBlock: Long = 0
 
     var cbTitle: String? = null
 
@@ -41,6 +43,10 @@ class CourseBlock {
     var cbClazzUid: Long = 0
 
     var cbActive: Boolean = true
+
+    var cbTableId: Int = 0
+
+    var cbTableUid: Long = 0
 
     @LastChangedTime
     @ReplicationVersionId

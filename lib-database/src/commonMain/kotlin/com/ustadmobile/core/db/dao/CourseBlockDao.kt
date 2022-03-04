@@ -3,11 +3,9 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UserSession
+import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
 @Repository
@@ -81,11 +79,29 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
     abstract suspend fun updateAsync(entity: CourseBlock): Int
 
 
-    @Query("""SELECT * 
-                     FROM CourseBlock 
-                    WHERE cbClazzUid = :clazzUid
-                      AND cbActive""")
-    abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlock>
+    @Query("""
+        SELECT * 
+          FROM CourseBlock 
+               LEFT JOIN ClazzAssignment as assignment
+               ON assignment.caUid = CourseBlock.cbTableUid
+               AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+               LEFT JOIN ContentEntry as entry
+               ON entry.contentEntryUid = CourseBlock.cbTableUid
+               AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+         WHERE cbClazzUid = :clazzUid
+           AND cbActive
+      ORDER BY cbIndex, cbParentBlock
+          """)
+    abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntity>
+
+    @Query("""
+        SELECT * 
+          FROM CourseBlock 
+         WHERE cbClazzUid = :clazzUid
+           AND cbActive
+      ORDER BY cbIndex, cbParentBlock
+    """)
+    abstract fun findAllCourseBlockByClazzUidLive(clazzUid: Long): DoorDataSourceFactory<Int, CourseBlock>
 
 
     override suspend fun deactivateByUids(uidList: List<Long>){

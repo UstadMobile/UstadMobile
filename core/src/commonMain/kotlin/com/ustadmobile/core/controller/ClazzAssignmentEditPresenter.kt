@@ -7,22 +7,21 @@ import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.ClazzAssignmentDetailView
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ClazzWithSchool
-import com.ustadmobile.lib.db.entities.XObjectEntity
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -253,26 +252,12 @@ class ClazzAssignmentEditPresenter(context: Any,
 
 
             if (entity.caUid == 0L) {
-                repo.withDoorTransactionAsync(UmAppDatabase::class) { db ->
-                    entity.caUid = db.clazzAssignmentDao.insertAsync(entity)
-
-                    val clazzAssignmentObjectId = UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
-                            "/clazzAssignment/${entity.caUid}")
-                    val xobject = XObjectEntity().apply {
-                        this.objectId = clazzAssignmentObjectId
-                        this.objectType = "Activity"
-                    }
-                    xobject.xObjectUid = db.xObjectDao.insertAsync(xobject)
-                    entity.caXObjectUid = xobject.xObjectUid
-                    db.clazzAssignmentDao.updateAsync(entity)
-                }
-            } else {
-                repo.clazzAssignmentDao.updateAsync(entity)
+                entity.caUid = db.doorPrimaryKeyManager.nextIdAsync(ClazzAssignment.TABLE_ID)
             }
 
-            repo.clazzAssignmentRollUpDao.invalidateCacheByAssignment(entity.caUid)
-
-            onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
+            finishWithResult(safeStringify(di,
+                            ListSerializer(ClazzAssignment.serializer()),
+                            listOf(entity)))
 
             view.loading = false
             view.fieldsEnabled = true

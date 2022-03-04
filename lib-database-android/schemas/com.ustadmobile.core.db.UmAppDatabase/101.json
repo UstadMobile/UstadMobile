@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 101,
-    "identityHash": "601d4cca3b9eccda68c0662322f14c0a",
+    "identityHash": "df2384404ac55404ae7ae6c5daefcbd9",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6141,7 +6141,7 @@
       },
       {
         "tableName": "CourseBlock",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbParentBlock` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbTableId` INTEGER NOT NULL, `cbTableUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cbUid",
@@ -6158,6 +6158,12 @@
           {
             "fieldPath": "cbIndentLevel",
             "columnName": "cbIndentLevel",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbParentBlock",
+            "columnName": "cbParentBlock",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6188,6 +6194,18 @@
           {
             "fieldPath": "cbActive",
             "columnName": "cbActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbTableId",
+            "columnName": "cbTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbTableUid",
+            "columnName": "cbTableUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -9636,7 +9654,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '601d4cca3b9eccda68c0662322f14c0a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'df2384404ac55404ae7ae6c5daefcbd9')"
     ]
   }
 }

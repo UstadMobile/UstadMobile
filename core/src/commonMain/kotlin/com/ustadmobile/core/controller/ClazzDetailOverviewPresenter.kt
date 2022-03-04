@@ -3,18 +3,13 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.core.view.InviteViaLinkView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
@@ -37,10 +32,11 @@ class ClazzDetailOverviewPresenter(context: Any,
     override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<ClazzWithDisplayDetails?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         view.scheduleList = repo.scheduleDao.findAllSchedulesByClazzUid(entityUid)
-        GlobalScope.launch {
+        presenterScope.launch {
             view.clazzCodeVisible = repo.clazzDao.personHasPermissionWithClazz(
                     accountManager.activeAccount.personUid, entityUid,
                     Role.PERMISSION_CLAZZ_ADD_STUDENT)
+            view.courseBlockList = repo.courseBlockDao.findAllCourseBlockByClazzUidLive(entityUid)
         }
 
         return repo.clazzDao.getClazzWithDisplayDetails(entityUid, systemTimeInMillis())
