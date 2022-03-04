@@ -68,6 +68,7 @@ import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 import io.ktor.response.*
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
+import com.ustadmobile.core.util.SysPathUtil
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -76,6 +77,11 @@ const val CONF_DBMODE_VIRTUALHOST = "virtualhost"
 const val CONF_DBMODE_SINGLETON = "singleton"
 
 const val CONF_GOOGLE_API = "secret"
+
+/**
+ * List of external commands (e.g. media converters) that must be found or have locations specified
+ */
+val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
 
 /**
  * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
@@ -87,8 +93,25 @@ private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBM
     sanitizeDbNameFromUrl(url)
 }
 
-fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: String? = null,
-                                  singletonDbName: String = "UmAppDatabase") {
+fun Application.umRestApplication(
+    devMode: Boolean = false,
+    dbModeOverride: String? = null,
+    singletonDbName: String = "UmAppDatabase"
+) {
+    val appConfig = environment.config
+
+    //Check for required external commands
+    REQUIRED_EXTERNAL_COMMANDS.forEach { command ->
+        if(!SysPathUtil.commandExists(command,
+            appConfig.propertyOrNull("ktor.ustad.paths.$command")?.getString()?.let { File(it) }
+        )) {
+            val message = "FATAL ERROR: Required external command \"$command\" not found in path or " +
+                   "manually specified location does not exist. Please set it in application.conf"
+            Napier.e(message)
+            throw IllegalStateException(message)
+        }
+    }
+
 
     if (devMode) {
         install(CORS) {
@@ -115,7 +138,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     }
 
     val tmpRootDir = Files.createTempDirectory("upload").toFile()
-    val appConfig = environment.config
 
     val dbMode = dbModeOverride ?:
         appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
