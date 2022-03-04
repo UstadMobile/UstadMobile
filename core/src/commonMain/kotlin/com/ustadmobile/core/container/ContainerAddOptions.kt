@@ -33,7 +33,7 @@ data class ContainerAddOptions(
                 ".mp3", ".ogg", ".wav", ".au", ".3gp", ".m4a", ".m4v")
 
             override fun shouldCompress(pathInContainer: String, mimeType: String?) : Boolean{
-                val isVideoExtension = pathInContainer.toLowerCase().let { pathLowerCase ->
+                val isVideoExtension = pathInContainer.lowercase().let { pathLowerCase ->
                     mediaExtensions.any { pathLowerCase.endsWith(it) }
                 }
                 return !isVideoExtension && mimeType?.startsWith("video/") != true
