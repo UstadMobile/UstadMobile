@@ -128,9 +128,6 @@
     <fragment
         android:id="@+id/schoolmember_list_dest"
         android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment" />
-    <fragment
-        android:id="@+id/clazz_assignment_list"
-        android:name="com.ustadmobile.port.android.view.ClazzAssignmentListFragment" />
 
     <fragment
         android:id="@+id/clazz_assignment_edit_dest"

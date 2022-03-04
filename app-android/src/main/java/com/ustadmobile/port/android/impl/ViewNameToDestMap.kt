@@ -33,7 +33,6 @@ class ViewNameToDestMap: DestinationProvider {
             PersonDetailView.VIEW_NAME to UstadDestination(R.id.person_detail_dest),
             PersonListView.VIEW_NAME to UstadDestination(R.id.person_list_dest),
             SchoolMemberListView.VIEW_NAME to UstadDestination(R.id.schoolmember_list_dest),
-            ClazzAssignmentListView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_list),
             ClazzAssignmentEditView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_edit_dest),
             ClazzAssignmentDetailView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_detail_dest),
             ClazzAssignmentDetailStudentProgressView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_detail_student_progress),
