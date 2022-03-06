@@ -20,14 +20,14 @@ class TestSysPathUtil {
 
 
         Assert.assertEquals(existingCmd,
-            SysPathUtil.findCommandInPath("command_name",
-                "/usr/bin:${tmpPath.absolutePath}", "linux", ":"))
+            SysPathUtil.findCommandInPath("command_name", null,
+                "/usr/bin:${tmpPath.absolutePath}", osName = "linux", fileSeparator = ":"))
     }
 
     @Test
     fun givenCommandNotInPathOnUnix_whenFindCommandInPathCalled_thenReturnNull() {
-        Assert.assertNull(SysPathUtil.findCommandInPath("command_name",
-            "/usr/bin:${temporaryFolder.newFolder()}", "linux", ":"))
+        Assert.assertNull(SysPathUtil.findCommandInPath("command_name", null,
+            "/usr/bin:${temporaryFolder.newFolder()}", osName = "linux", fileSeparator = ":"))
     }
 
     @Test
@@ -37,16 +37,17 @@ class TestSysPathUtil {
         existingCmd.writeText("a")
 
         Assert.assertEquals(existingCmd,
-            SysPathUtil.findCommandInPath("command_name",
-                "C:\\Windows\\System32;${tmpPath.absolutePath}", "win", ";"))
+            SysPathUtil.findCommandInPath("command_name", null,
+                "C:\\Windows\\System32;${tmpPath.absolutePath}",
+                osName= "win", fileSeparator = ";"))
     }
 
     @Test
     fun givenCommandNotInPathOnWindows_whenCommandInPathCalled_thenReturnsNull() {
         val tmpPath = temporaryFolder.newFolder()
         Assert.assertNull(
-            SysPathUtil.findCommandInPath("command_name",
-                "C:\\Windows\\System32;${tmpPath.absolutePath}", "win", ";"))
+            SysPathUtil.findCommandInPath("command_name", null,
+                "C:\\Windows\\System32;${tmpPath.absolutePath}", osName= "win", fileSeparator = ";"))
     }
 
 

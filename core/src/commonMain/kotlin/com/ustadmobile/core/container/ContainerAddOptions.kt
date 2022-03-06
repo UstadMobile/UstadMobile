@@ -28,6 +28,10 @@ data class ContainerAddOptions(
 
     companion object {
 
+        val NEVER_COMPRESS_FILTER = object: CompressionFilter {
+            override fun shouldCompress(pathInContainer: String, mimeType: String?) = false
+        }
+
         val DEFAULT_COMPRESSION_FILTER = object: CompressionFilter {
             private val mediaExtensions = listOf(".mp4", ".mkv", ".webm", ".mov", ".avi", ".flv",
                 ".mp3", ".ogg", ".wav", ".au", ".3gp", ".m4a", ".m4v")

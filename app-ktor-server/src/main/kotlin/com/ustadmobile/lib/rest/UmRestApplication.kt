@@ -103,8 +103,8 @@ fun Application.umRestApplication(
     //Check for required external commands
     REQUIRED_EXTERNAL_COMMANDS.forEach { command ->
         if(!SysPathUtil.commandExists(command,
-            appConfig.propertyOrNull("ktor.ustad.paths.$command")?.getString()?.let { File(it) }
-        )) {
+                manuallySpecifiedLocation = appConfig.commandFileProperty(command))
+        ) {
             val message = "FATAL ERROR: Required external command \"$command\" not found in path or " +
                    "manually specified location does not exist. Please set it in application.conf"
             Napier.e(message)
@@ -321,6 +321,18 @@ fun Application.umRestApplication(
 
         bind<Json>() with singleton {
             Json { encodeDefaults = true }
+        }
+
+        bind<File>(tag = DiTag.TAG_FILE_FFMPEG) with singleton {
+            //The availability of ffmpeg is checked on startup
+            SysPathUtil.findCommandInPath("ffmpeg",
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"))!!
+        }
+
+        bind<File>(tag = DiTag.TAG_FILE_FFPROBE) with singleton {
+            //The availability of ffmpeg is checked on startup
+            SysPathUtil.findCommandInPath("ffprobe",
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))!!
         }
 
         try {
