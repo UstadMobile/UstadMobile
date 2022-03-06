@@ -68,7 +68,7 @@ class ContentEntryImportLinkPresenterTest {
 
         presenter.handleClickDone(mockWebServer.url("/").toString())
 
-        verify(mockView, timeout(5000)).showHideProgress(false)
+        verify(mockView, timeout(5000)).inProgress = true
         verify(mockView, timeout(5000)).finishWithResult(metadataResult)
     }
 
@@ -80,9 +80,9 @@ class ContentEntryImportLinkPresenterTest {
 
         presenter.handleClickDone(mockWebServer.url("/").toString())
 
-        verify(mockView, timeout(5000)).showHideProgress(false)
+        verify(mockView, timeout(5000)).inProgress = true
         verify(mockView, timeout(5000)).validLink = false
-        verify(mockView, timeout(5000)).showHideProgress(true)
+        verify(mockView, timeout(5000)).inProgress = false
     }
 
     @After

@@ -33,6 +33,8 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var videoUri: String?
 
+    var showUpdateContentButton: Boolean
+
     companion object {
 
         const val VIEW_NAME = "ContentEntryEdit2EditView"

@@ -56,7 +56,8 @@ class ContentEntryEdit2Presenter(
     lifecycleOwner: DoorLifecycleOwner,
     di: DI
 ) : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view,
-        di, lifecycleOwner), ContentEntryAddOptionsListener {
+        di, lifecycleOwner), ContentEntryAddOptionsListener
+{
 
     private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
 
@@ -120,6 +121,10 @@ class ContentEntryEdit2Presenter(
         view.showCompletionCriteria = isLeaf ?: false
         val metaData = arguments[ARG_IMPORTED_METADATA]
         val uri = arguments[ARG_URI]
+
+        //Show the update button only when an existing leaf entity is being edited
+        view.showUpdateContentButton = entityUid != 0L && isLeaf == true
+
         if (db is DoorDatabaseRepository) {
             if (uri != null) {
                 return handleFileSelection(uri)
