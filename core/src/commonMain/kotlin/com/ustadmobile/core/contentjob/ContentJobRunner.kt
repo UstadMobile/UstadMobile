@@ -7,8 +7,8 @@ import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.EventCollator
 import com.ustadmobile.core.util.createTemporaryDir
+import com.ustadmobile.core.util.ext.decodeStringMapFromString
 import com.ustadmobile.core.util.ext.deleteZombieContainerEntryFiles
-import com.ustadmobile.core.util.ext.validateAndUpdateContainerSize
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
@@ -23,6 +23,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -67,6 +68,7 @@ class ContentJobRunner(
 
     private val contentJobItemUpdateMutex = Mutex()
 
+    private val json: Json by instance()
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
@@ -124,14 +126,19 @@ class ContentJobRunner(
         }
     }
 
-    private fun CoroutineScope.launchProcessor(id: Int, channel: ReceiveChannel<ContentJobItemAndContentJob>) = launch {
+    private fun CoroutineScope.launchProcessor(
+        id: Int,
+        channel: ReceiveChannel<ContentJobItemAndContentJob>
+    ) = launch {
         val tmpDir = createTemporaryDir("job-$id")
         Napier.d("$logPrefix created tempDir job-$id")
 
         for(item in channel) {
             val itemUri = item.contentJobItem?.sourceUri?.let { DoorUri.parse(it) } ?: continue
-
-            val processContext = ContentJobProcessContext(itemUri, tmpDir, mutableMapOf(),
+            val processParams = item.contentJob?.params?.let {
+                json.decodeStringMapFromString(it)
+            }?.toMutableMap() ?: mutableMapOf()
+            val processContext = ContentJobProcessContext(itemUri, tmpDir, processParams,
                 this@ContentJobRunner, di)
             Napier.d("$logPrefix : " +
                 "Proessor #$id processing job #${item.contentJobItem?.cjiUid} " +

@@ -15,6 +15,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -25,6 +26,7 @@ import org.mockito.kotlin.stub
 import java.io.File
 import java.io.IOException
 import kotlin.test.Test
+import com.ustadmobile.core.util.ext.encodeStringMapToString
 
 class TestContentJobRunner {
 
@@ -46,6 +48,10 @@ class TestContentJobRunner {
     var jobCompleted = false
     var connectivityCancelledExceptionCalled = false
     var cancellationExceptionCalled = false
+
+    private lateinit var json: Json
+
+    private var jobContentParmas: Map<String, String>? = null
 
     inner class DummyPlugin(override val di: DI, endpoint: Endpoint) : ContentPlugin{
         override val pluginId: Int
@@ -75,6 +81,7 @@ class TestContentJobRunner {
             process: ContentJobProcessContext,
             progress: ContentJobProgressListener
         ): ProcessResult {
+            jobContentParmas = process.params
             return withContext(Dispatchers.Default) {
                 processJobCalled = true
                 println("processJobCalled")
@@ -111,9 +118,16 @@ class TestContentJobRunner {
         processJobCalled = false
         connectivityCancelledExceptionCalled = false
         cancellationExceptionCalled = false
+        jobContentParmas = null
         jobCompleted = false
         di = DI {
             import(ustadTestRule.diModule)
+            bind<Json>() with singleton {
+                Json {
+                    encodeDefaults = true
+                }
+            }
+
             bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
                 mock{
                     on { getPluginById(any()) }.thenAnswer {
@@ -133,6 +147,7 @@ class TestContentJobRunner {
                 ConnectivityLiveData(db.connectivityStatusDao.statusLive())
             }
         }
+        json = di.direct.instance()
 
         val accountManager: UstadAccountManager = di.direct.instance()
         endpoint = accountManager.activeEndpoint
@@ -154,7 +169,8 @@ class TestContentJobRunner {
 
         runBlocking {
             db.contentJobItemDao.insertJobItems(jobItems)
-            db.contentJobDao.insertAsync(ContentJob(cjUid = 2L))
+            db.contentJobDao.insertAsync(ContentJob(cjUid = 2L,
+                params = json.encodeStringMapToString(mapOf("compress" to "true"))))
         }
 
         val runner = ContentJobRunner(2, endpoint, di, 5)
@@ -175,6 +191,9 @@ class TestContentJobRunner {
                 db.contentEntryDao.findByUid(it.cjiContentEntryUid))
             Assert.assertEquals("jobStatus complete", JobStatus.COMPLETE, it.cjiStatus)
         }
+
+        Assert.assertEquals("Content job params were provided as inserted on db",
+            mapOf("compress" to "true"), jobContentParmas)
     }
 
     @Test

@@ -9,9 +9,11 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.io.ext.getSize
+import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.createTemporaryDir
+import com.ustadmobile.core.util.ext.encodeStringMapToString
 import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
@@ -99,6 +101,8 @@ class ContentEntryEdit2Presenter(
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
+
+    private val json: Json by instance()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -197,12 +201,11 @@ class ContentEntryEdit2Presenter(
         view.titleErrorEnabled = false
         view.fileImportErrorVisible = false
         presenterScope.launch(doorMainDispatcher()) {
-
-            val canCreate = isImportValid(entity)
-
-            if (canCreate) {
-                entity.licenseName = view.licenceOptions?.firstOrNull { it.code == entity.licenseType }.toString()
-                val isImport = entity.contentEntryUid == 0L
+            if (isImportValid(entity)) {
+                entity.licenseName = view.licenceOptions?.firstOrNull {
+                    it.code == entity.licenseType
+                }.toString()
+                val isNewEntry = entity.contentEntryUid == 0L
                 if (entity.contentEntryUid == 0L) {
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
 
@@ -234,13 +237,11 @@ class ContentEntryEdit2Presenter(
 
                 if (metaData != null && fromUri != null) {
 
-                    if (fromUri?.startsWith("content://") == true) {
+                    if (fromUri?.let { DoorUri.parse(it) }?.isRemote() == false) {
 
                         val job = ContentJob().apply {
                             toUri = view.storageOptions?.get(view.selectedStorageIndex)?.dirUri
-                            params = Json.encodeToString(
-                                    MapSerializer(String.serializer(), String.serializer()),
-                                        conversionParams)
+                            params = json.encodeStringMapToString(conversionParams)
                             cjIsMeteredAllowed = false
                             cjNotificationTitle = systemImpl.getString(MessageID.importing, context)
                                     .replace("%1\$s",entity.title ?: "")
@@ -256,7 +257,7 @@ class ContentEntryEdit2Presenter(
                             cjiParentContentEntryUid = parentEntryUid
                             cjiConnectivityNeeded = false
                             cjiStatus = JobStatus.QUEUED
-                            cjiContentDeletedOnCancellation = isImport
+                            cjiContentDeletedOnCancellation = isNewEntry
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
                         }
 
@@ -269,17 +270,14 @@ class ContentEntryEdit2Presenter(
 
 
                     } else {
-
-                        var client: HttpResponse?
                         try {
-
-                            client = httpClient.post<HttpStatement>() {
+                            httpClient.post<HttpStatement>() {
                                 url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
                                         "/import/downloadLink"))
                                 parameter("parentUid", parentEntryUid)
                                 parameter("pluginId", view.metadataResult?.pluginId)
                                 parameter("url", fromUri)
-                                parameter("conversionParams",
+                                parameter(HTTP_PARAM_CONVERSION_PARAMS,
                                         Json.encodeToString(MapSerializer(String.serializer(),
                                                 String.serializer()),
                                                 conversionParams))
@@ -292,14 +290,6 @@ class ContentEntryEdit2Presenter(
                                 systemImpl.getString(MessageID.error,
                                         context)
                             }: ${e.message ?: ""}", {})
-                            view.loading = false
-                            view.fieldsEnabled = true
-                            return@launch
-                        }
-
-                        if (client.status.value != 200) {
-                            view.showSnackBar(systemImpl.getString(MessageID.error,
-                                    context), {})
                             view.loading = false
                             view.fieldsEnabled = true
                             return@launch
@@ -437,6 +427,8 @@ class ContentEntryEdit2Presenter(
         const val SAVED_STATE_KEY_URI = "URI"
 
         const val SAVED_STATE_KEY_METADATA = "importedMetadata"
+
+        const val HTTP_PARAM_CONVERSION_PARAMS = "conversionParams"
 
 
     }
