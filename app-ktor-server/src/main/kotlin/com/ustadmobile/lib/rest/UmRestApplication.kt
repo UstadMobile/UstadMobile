@@ -87,7 +87,10 @@ val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
  * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
  * containers, etc).
  */
-private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBMODE_SINGLETON) = if(dbMode == CONF_DBMODE_SINGLETON) {
+private fun Endpoint.identifier(
+    dbMode: String,
+    singletonName: String = CONF_DBMODE_SINGLETON
+) = if(dbMode == CONF_DBMODE_SINGLETON) {
     singletonName
 }else {
     sanitizeDbNameFromUrl(url)

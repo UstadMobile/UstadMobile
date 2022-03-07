@@ -9,7 +9,7 @@ object SysPathUtil {
         commandName: String,
         manuallySpecifiedLocation: File? = null,
         pathVar: String = System.getenv("PATH") ?: "",
-        extraSearchPaths: String = File(".").absolutePath,
+        extraSearchPaths: String = System.getProperty("user.dir") ?: "",
         osName: String = System.getProperty("os.name") ?: "",
         fileSeparator: String = File.pathSeparator,
     ): File? {
@@ -31,12 +31,13 @@ object SysPathUtil {
         commandName: String,
         manuallySpecifiedLocation: File? = null,
         pathVar: String = System.getenv("PATH") ?: "",
+        extraSearchPaths: String = System.getProperty("user.dir") ?: "",
         osName: String = System.getProperty("os.name") ?: "",
         fileSeparator: String = File.pathSeparator
     ) : Boolean {
         return (manuallySpecifiedLocation?.exists() ?: false) ||
-                findCommandInPath(commandName, manuallySpecifiedLocation, pathVar, osName,
-                    fileSeparator) != null
+                findCommandInPath(commandName, manuallySpecifiedLocation, pathVar, extraSearchPaths,
+                    osName, fileSeparator) != null
     }
 
 }
