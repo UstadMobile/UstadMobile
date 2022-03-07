@@ -36,6 +36,8 @@ abstract class ContentJobItemDao {
     abstract suspend fun findNextItemsInQueue(contentJobUid: Long, limit: Int) : List<ContentJobItemAndContentJob>
 
 
+    //ContentPluginId 14 is the Content Delete Plugin. This cannot be referenced directly
+    // (would be a circular dependency)
     @Query("""
             SELECT COALESCE((
                  SELECT CASE 
@@ -271,5 +273,18 @@ abstract class ContentJobItemDao {
     """)
     abstract suspend fun findAllContainersByJobUid(jobUid: Long): List<Long>
 
+
+    //ContainerDownload plugin id = 10
+    @Query("""
+        SELECT EXISTS(
+               SELECT 1 
+                 FROM ContentJobItem
+                WHERE cjiContentEntryUid = :contentEntryUid
+                  AND cjiPluginId = 10
+                  AND cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.RUNNING_MAX})
+    """)
+    abstract suspend fun isActiveContainerDownloadJobRunningForContentEntryUid(
+        contentEntryUid: Long
+    ): Boolean
 
 }

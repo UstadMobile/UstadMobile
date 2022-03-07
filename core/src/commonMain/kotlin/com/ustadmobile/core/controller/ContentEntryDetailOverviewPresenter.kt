@@ -89,37 +89,52 @@ class ContentEntryDetailOverviewPresenter(
         if (db !is DoorDatabaseRepository) {
             db.containerDao.hasContainerWithFilesToDelete(entityUid)
                     .observeWithLifecycleOwner(lifecycleOwner) {
-                        view.canDelete = it ?: false
+                        view.showDeleteButton = it ?: false
                     }
 
             db.containerDao.hasContainerWithFilesToOpen(entityUid)
                     .observeWithLifecycleOwner(lifecycleOwner){
-                        view.canOpen = it ?: false
+                        view.showOpenButton = it ?: false
                     }
 
             db.containerDao.hasContainerWithFilesToDownload(entityUid)
                     .observeWithLifecycleOwner(lifecycleOwner){
-                        view.canDownload = it ?: false
+                        view.showDownloadButton = it ?: false
                     }
 
             db.containerDao.hasContainerWithFilesToUpdate(entityUid)
                     .observeWithLifecycleOwner(lifecycleOwner){
-                        view.canUpdate = it ?: false
+                        view.showUpdateButton = it ?: false
                     }
 
-            val contentJobItemStatusLiveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
+            RateLimitedLiveData(db, CONTENT_JOB_ITEM_TABLE_LIST) {
+                db.contentJobItemDao.isActiveContainerDownloadJobRunningForContentEntryUid(entityUid)
+            }.observeWithLifecycleOwner(lifecycleOwner) {
+                view.showManageDownloadButton = it ?: false
+            }
+
+            val contentJobItemStatusLiveData = RateLimitedLiveData(db, CONTENT_JOB_ITEM_TABLE_LIST,
+                1000
+            ) {
                 db.contentJobItemDao.findStatusForActiveContentJobItem(contentEntryUid)
             }
 
-            val contentJobItemProgressLiveData = RateLimitedLiveData(db, listOf("ContentJobItem") , 1000){
+            val contentJobItemProgressLiveData = RateLimitedLiveData(db, CONTENT_JOB_ITEM_TABLE_LIST,
+                1000
+            ) {
                 db.contentJobItemDao.findProgressForActiveContentJobItem(contentEntryUid)
             }
 
             withContext(doorMainDispatcher()){
                 contentJobItemStatusLiveData.observeWithLifecycleOwner(lifecycleOwner){
                     val status = it ?: return@observeWithLifecycleOwner
-                    view.contentJobItemStatus = status
+                    if(view.contentJobItemStatus != status) {
+                        view.contentJobItemStatus = status
+                    }
+
+                    view.takeIf { it.contentJobItemStatus != status }?.contentJobItemStatus = status
                 }
+
                 contentJobItemProgressLiveData.observeWithLifecycleOwner(lifecycleOwner){
                     val progress = it ?: return@observeWithLifecycleOwner
                     view.contentJobItemProgress = progress
@@ -257,6 +272,10 @@ class ContentEntryDetailOverviewPresenter(
         scoreProgress?.contentComplete = true
         scoreProgress?.progress = 100
         view.scoreProgress = scoreProgress
+    }
+
+    companion object {
+        private val CONTENT_JOB_ITEM_TABLE_LIST = listOf("ContentJobItem")
     }
 
 }

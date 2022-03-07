@@ -1,7 +1,8 @@
 
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.catalog.contenttype.ContainerDownloadPlugin
+import com.ustadmobile.core.contentjob.ContentPluginIds
 import com.ustadmobile.core.db.JobStatus
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
@@ -16,7 +17,6 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.runBlocking
@@ -25,9 +25,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
-import org.kodein.di.bind
 import org.kodein.di.instance
-import org.kodein.di.singleton
 import java.lang.Thread.sleep
 
 class ContentEntryDetailOverviewPresenterTest {
@@ -161,5 +159,49 @@ class ContentEntryDetailOverviewPresenterTest {
         }
 
     }
+
+    @Test
+    fun givenEntryNotYetDownloaded_whenOnCreatedCalled_thenShouldShowDownloadButtonNotOthers() {
+        val presenter = ContentEntryDetailOverviewPresenter(context,
+            presenterArgs!!, mockView, di, mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(5000)).showDownloadButton = true
+        verify(mockView, timeout(5000)).showUpdateButton = false
+        verify(mockView, timeout(5000)).showDeleteButton = false
+        verify(mockView, timeout(5000)).showManageDownloadButton = false
+    }
+
+    @Test
+    fun givenEntryDownloadInProgress_whenOnCreatedCalled_thenShouldShowManageDownloadButtonNotOthers() {
+        val db: UmAppDatabase by di.activeDbInstance()
+
+        runBlocking {
+            db.contentJobItemDao.insertJobItem(ContentJobItem().apply {
+                cjiContentEntryUid = createdEntry?.contentEntryUid ?: 0
+                cjiPluginId = ContentPluginIds.CONTAINER_DOWNLOAD_PLUGIN
+                cjiItemProgress = 50
+                cjiItemTotal = 100
+            })
+        }
+
+        verify(mockView, timeout(5000)).showDownloadButton = false
+        verify(mockView, timeout(5000)).showUpdateButton = false
+        verify(mockView, timeout(5000)).showDeleteButton = false
+        verify(mockView, timeout(5000)).showManageDownloadButton = true
+    }
+
+
+    fun givenEntryDownloadedNoUpdateAvailable_whenOnCreatedCalled_thenShouldShowOpenAndDeleteButton() {
+
+    }
+
+    fun givenEntryDownloadedWithUpdateAvailable_whenOnCreateCalled_thenShouldShowOpenUpdateAndDeleteButton() {
+
+    }
+
+
+
 
 }

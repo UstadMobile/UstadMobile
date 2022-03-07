@@ -88,24 +88,24 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
             mBinding?.markCompleteVisible = value
         }
 
-    override var canDownload: Boolean = false
+    override var showDownloadButton: Boolean = false
         set(value) {
             field = value
             mBinding?.canDownload = value
         }
-    override var canUpdate: Boolean = false
+    override var showUpdateButton: Boolean = false
         set(value) {
             field =value
             mBinding?.canUpdate = value
         }
 
-    override var canDelete: Boolean = false
+    override var showDeleteButton: Boolean = false
         set(value) {
             field = value
             mBinding?.canDelete = value
         }
 
-    override var canOpen: Boolean = false
+    override var showOpenButton: Boolean = false
         set(value) {
             field = value
             mBinding?.canOpen = value

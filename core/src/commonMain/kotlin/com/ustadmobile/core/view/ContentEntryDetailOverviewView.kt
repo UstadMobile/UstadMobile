@@ -22,13 +22,15 @@ interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRe
 
     var markCompleteVisible: Boolean
 
-    var canDownload: Boolean
+    var showDownloadButton: Boolean
 
-    var canUpdate: Boolean
+    var showUpdateButton: Boolean
 
-    var canDelete: Boolean
+    var showDeleteButton: Boolean
 
-    var canOpen: Boolean
+    var showManageDownloadButton: Boolean
+
+    var showOpenButton: Boolean
 
     var contentJobItemStatus: Int
 
