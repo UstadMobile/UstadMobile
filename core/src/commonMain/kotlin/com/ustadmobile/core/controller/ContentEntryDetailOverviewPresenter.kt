@@ -11,7 +11,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
-import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
@@ -45,7 +44,8 @@ class ContentEntryDetailOverviewPresenter(
             return arguments.toDeepLink(activeEndpoint, ContentEntryDetailView.VIEW_NAME)
         }
 
-    private val isDownloadEnabled: Boolean by di.instance(tag = TAG_DOWNLOAD_ENABLED)
+    //True on Android, false on the web
+    private val isPlatformDownloadEnabled: Boolean by di.instance(tag = TAG_DOWNLOAD_ENABLED)
 
     private val contentEntryOpener: ContentEntryOpener by di.on(accountManager.activeAccount).instance()
 
@@ -67,7 +67,7 @@ class ContentEntryDetailOverviewPresenter(
     }
 
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithMostRecentContainer? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithMostRecentContainer {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         val entity = withTimeoutOrNull(2000) {
@@ -141,7 +141,7 @@ class ContentEntryDetailOverviewPresenter(
     fun handleOnClickOpenDownloadButton() {
         presenterScope.launch {
             val containerWithFiles = db.containerDao.findContainerWithFilesByContentEntryUid(contentEntryUid)
-            val canOpen = !isDownloadEnabled || (containerWithFiles != null && containerWithFiles.containerUid != 0L)
+            val canOpen = !isPlatformDownloadEnabled || (containerWithFiles != null && containerWithFiles.containerUid != 0L)
             if (canOpen) {
                 val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
                         "false", context)!!.toBoolean()
@@ -151,7 +151,7 @@ class ContentEntryDetailOverviewPresenter(
                 } else {
                     openContentEntry()
                 }
-            } else if (isDownloadEnabled) {
+            } else if (isPlatformDownloadEnabled) {
                 view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString()
                         ?: "0")))
             }
@@ -167,7 +167,7 @@ class ContentEntryDetailOverviewPresenter(
         presenterScope.launch(doorMainDispatcher()) {
             try {
                 entity?.contentEntryUid?.also {
-                    contentEntryOpener.openEntry(context, it, isDownloadEnabled, false,
+                    contentEntryOpener.openEntry(context, it, isPlatformDownloadEnabled, false,
                             arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false, clazzUid = clazzUid)
                 }
             } catch (e: Exception) {

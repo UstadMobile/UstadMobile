@@ -349,6 +349,7 @@ class ContentJobRunner(
                     }
 
                     withContentJobItemTransaction { txDb ->
+                        txDb.contentJobItemDao.updateAllStatusesByJobUid(jobId, JobStatus.CANCELED)
                         txDb.containerEntryDao.deleteContainerEntriesCreatedByJobs(jobId)
                         txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
                     }

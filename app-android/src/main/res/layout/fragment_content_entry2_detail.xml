@@ -10,6 +10,8 @@
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
         <import  type="com.ustadmobile.lib.db.entities.ContentJobItem" />
+
+        <import type="com.ustadmobile.core.util.ext.ContentJobItemExtKt" />
         <variable
             name="contentEntry"
             type="com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer" />
@@ -350,7 +352,7 @@
                     android:layout_weight="1"
                     android:maxWidth="128dp"
                     android:onClick="@{()-> fragmentEventHandler.handleOnClickManageDownloadButton()}"
-                    android:visibility="@{contentJobItemStatus == ContentJobItem.STATUS_RUNNING ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{ContentJobItemExtKt.isStatusActiveOrQueued(contentJobItemStatus) ? View.VISIBLE : View.GONE}"
                     android:text="@string/manage_download"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>

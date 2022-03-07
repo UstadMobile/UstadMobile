@@ -20,7 +20,6 @@ import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STA
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.util.UstadTestRule
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
@@ -265,7 +264,7 @@ class DownloadDialogPresenterTest {
             verifyBlocking(contentJobManager, timeout(5000)) {
                 enqueueContentJob(any(), capture())
             }
-            val contentJobItem = db.contentJobItemDao.findByJobId(this.firstValue)!!
+            val contentJobItem = db.contentJobItemDao.findRootJobItemByJobId(this.firstValue)!!
             assertEquals("Download Job created with status = NEEDS_PREPARED",
                     JobStatus.QUEUED, contentJobItem.cjiRecursiveStatus)
             assertEquals("Download job root content entry uid is the same as presenter arg",

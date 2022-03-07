@@ -310,7 +310,7 @@ class ContainerDownloadPluginTest {
 
         serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
 
-        val contentJobItemInDb = clientDb.contentJobItemDao.findByJobId(job.contentJobItem?.cjiUid ?: 0L)
+        val contentJobItemInDb = clientDb.contentJobItemDao.findRootJobItemByJobId(job.contentJobItem?.cjiUid ?: 0L)
         Assert.assertEquals("ContentEntryUid was set from sourceUri", contentEntry.contentEntryUid,
             contentJobItemInDb?.cjiContentEntryUid)
         Assert.assertEquals("ContainerUid was set to most recent container after looking up content entry",
@@ -395,7 +395,7 @@ class ContainerDownloadPluginTest {
             JobStatus.COMPLETE, result.status)
 
         val downloadedContainerUid = clientDb.contentJobItemDao
-            .findByJobId(job.contentJobItem?.cjiJobUid ?: 0)?.cjiContainerUid ?: 0
+            .findRootJobItemByJobId(job.contentJobItem?.cjiJobUid ?: 0)?.cjiContainerUid ?: 0
 
         Assert.assertEquals("Download used the previous active container uid, not the most recent inactive one",
             container.containerUid, downloadedContainerUid)

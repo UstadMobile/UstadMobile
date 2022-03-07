@@ -64,7 +64,7 @@ class ContentJobRunnerWorker(
         val notification = createNotification(job)
 
         val liveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
-                 db.contentJobItemDao.findByJobId(jobId)
+                 db.contentJobItemDao.findRootJobItemByJobId(jobId)
         }
 
         val jobObserver = DoorObserver<ContentJobItem?> {

@@ -131,9 +131,10 @@ abstract class ContentJobItemDao {
         SELECT * 
           FROM ContentJobItem
          WHERE cjiJobUid = :jobUid 
-           AND cjiParentCjiUid = 0 LIMIT 1
+           AND cjiParentCjiUid = 0 
+         LIMIT 1
     """)
-    abstract fun findByJobId(jobUid: Long): ContentJobItem?
+    abstract fun findRootJobItemByJobId(jobUid: Long): ContentJobItem?
 
     @Query("""
         UPDATE ContentJobItem
@@ -254,5 +255,13 @@ abstract class ContentJobItemDao {
          WHERE cjiUid = :uid 
     """)
     abstract suspend fun getContainerUidByJobItemUid(uid: Long): Long
+
+    @Query("""
+        UPDATE ContentJobItem
+           SET cjiStatus = :newStatus
+         WHERE cjiJobUid = :jobUid
+           AND cjiStatus != :newStatus
+    """)
+    abstract suspend fun updateAllStatusesByJobUid(jobUid: Long, newStatus: Int)
 
 }

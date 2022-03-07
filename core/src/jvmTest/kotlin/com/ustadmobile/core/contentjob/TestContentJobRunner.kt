@@ -5,9 +5,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
-import com.ustadmobile.core.io.ext.addEntryToContainerFromResource
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorUri
@@ -377,7 +375,7 @@ class TestContentJobRunner {
 
             delay(5000)
 
-            val job = db.contentJobItemDao.findByJobId(2)!!
+            val job = db.contentJobItemDao.findRootJobItemByJobId(2)!!
             Assert.assertTrue("connectivity exception called from plugin", connectivityCancelledExceptionCalled)
             Assert.assertFalse("job not completed", jobCompleted)
             Assert.assertTrue("content Entry got created from extract metadata", job.cjiContentEntryUid != 0L)
@@ -388,10 +386,9 @@ class TestContentJobRunner {
         }
     }
 
-    //Temporarily disabled 25/Feb - need to allow this through to check other fixes whilst delete job
-    // is being tested
-    //@Test
+    @Test
     fun givenJobCreated_whenJobCancelled_thenContentEntryShouldBeInvalidAndContainerDeleted(){
+        val contentJobId = 2L
         runBlocking {
             ContentEntry().apply {
                 contentEntryUid = 3
@@ -402,7 +399,7 @@ class TestContentJobRunner {
                 containerContentEntryUid = 3
                 repo.containerDao.insert(this)
             }
-            db.contentJobDao.insertAsync(ContentJob(cjUid = 2))
+            db.contentJobDao.insertAsync(ContentJob(cjUid = contentJobId))
             db.contentJobItemDao.insertJobItem(ContentJobItem().apply {
                 this.cjiJobUid = 2
                 cjiContentEntryUid = 3
@@ -430,17 +427,33 @@ class TestContentJobRunner {
             println("job cancelled")
 
 
-            Assert.assertTrue("cancellation exception called from plugin", cancellationExceptionCalled)
+            Assert.assertTrue("cancellation exception called from plugin",
+                cancellationExceptionCalled)
             Assert.assertFalse("job not completed", jobCompleted)
+            val contentJobItemFromDb = db.contentJobItemDao.findRootJobItemByJobId(contentJobId)
+
+            Assert.assertEquals("Root ContentJobItem status is canceled", JobStatus.CANCELED,
+                contentJobItemFromDb?.cjiStatus ?: -1)
+
+            Assert.assertEquals("Root ContentJobItem recursive status is canceled", JobStatus.CANCELED,
+                contentJobItemFromDb?.cjiRecursiveStatus ?: -1)
+
             val containerFolder: File = di.onActiveAccount().direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
             val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
             allJobItems.forEach {
-                Assert.assertEquals("job is cancelled", JobStatus.CANCELED, it.cjiStatus)
+                Assert.assertEquals("job is cancelled", JobStatus.CANCELED,
+                    it.cjiStatus)
                 val entry = db.contentEntryDao.findByUid(it.cjiContentEntryUid)
                 Assert.assertEquals("entry is inActive", true, entry!!.ceInactive)
                 val listOfEntryAndFile = db.containerEntryDao.findByContainer(it.cjiContainerUid)
-                Assert.assertEquals("no files and containerEntry remain", 0, listOfEntryAndFile.size)
-                Assert.assertTrue("container folder doesnt exist", !File(containerFolder, "${it.cjiContainerUid}").exists())
+                Assert.assertEquals("no files and containerEntry remain", 0,
+                    listOfEntryAndFile.size)
+                Assert.assertTrue("container folder doesnt exist", !File(containerFolder,
+                    "${it.cjiContainerUid}").exists())
+                Assert.assertEquals("ContentJobItem recursive status is canceled",
+                    JobStatus.CANCELED, it.cjiRecursiveStatus)
+                Assert.assertEquals("ContentJobItem status is canceled",
+                    JobStatus.CANCELED, it.cjiStatus)
             }
 
         }
