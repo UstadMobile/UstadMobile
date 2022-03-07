@@ -3,9 +3,12 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.ContainerStorageManager
+import com.ustadmobile.core.io.ext.deleteRecursively
 import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.EventCollator
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.util.ext.decodeStringMapFromString
 import com.ustadmobile.core.util.ext.deleteZombieContainerEntryFiles
@@ -69,6 +72,8 @@ class ContentJobRunner(
     private val contentJobItemUpdateMutex = Mutex()
 
     private val json: Json by instance()
+
+    private val containerStorageManager: ContainerStorageManager by on(endpoint).instance()
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
@@ -349,6 +354,18 @@ class ContentJobRunner(
                     }
 
                     withContentJobItemTransaction { txDb ->
+                        txDb.contentEntryDao.updateContentEntryActiveByContentJobUid(jobId,
+                            true, systemTimeInMillis())
+
+                        //Delete all containers
+                        val jobDestDir = txDb.contentJobDao.findByUid(jobId)?.toUri
+                            ?: containerStorageManager.storageList.first().dirUri
+
+                        txDb.contentJobItemDao.findAllContainersByJobUid(jobId).forEach { containerUid ->
+                            val dirUriToDelete = DoorUri.parse(UMFileUtil.joinPaths(jobDestDir,
+                                containerUid.toString()))
+                            dirUriToDelete.deleteRecursively()
+                        }
                         txDb.contentJobItemDao.updateAllStatusesByJobUid(jobId, JobStatus.CANCELED)
                         txDb.containerEntryDao.deleteContainerEntriesCreatedByJobs(jobId)
                         txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
@@ -389,8 +406,6 @@ class ContentJobRunner(
         const val DEFAULT_NUM_PROCESSORS = 10
 
         const val DEFAULT_NUM_RETRIES = 5
-
-        const val NUM_CONTAINER_SIZE_UPDATE_ATTEMPTS = 3
 
     }
 }

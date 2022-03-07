@@ -3,6 +3,12 @@ package com.ustadmobile.core.container
 import com.ustadmobile.door.DoorUri
 
 data class ContainerAddOptions(
+
+    /**
+     * Where the files will actually be stored. Typically selected by the user at download time from
+     * options provided by ContainerStorageManager. The files will be placed in a subdirectory e.g
+     * storageDirUri/containerUid
+     */
     val storageDirUri: DoorUri,
 
     val moveFiles: Boolean = false,

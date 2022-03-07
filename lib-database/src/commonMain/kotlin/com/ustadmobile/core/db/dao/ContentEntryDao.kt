@@ -443,12 +443,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
         UPDATE ContentEntry
            SET ceInactive = :inactive,
                contentEntryLct = :changedTime
-         WHERE contentEntryUid IN (SELECT cjiContentEntryUid 
-                                     FROM ContentJobItem
-                                    WHERE cjiJobUid = :jobId
-                                      AND CAST(ContentJobItem.cjiContentDeletedOnCancellation AS INTEGER) = 1)
+         WHERE contentEntryUid IN 
+               (SELECT cjiContentEntryUid 
+                  FROM ContentJobItem
+                 WHERE cjiJobUid = :jobId
+                   AND CAST(ContentJobItem.cjiContentDeletedOnCancellation AS INTEGER) = 1)
     """)
-    abstract fun invalidateContentEntryCreatedByJob(
+    abstract fun updateContentEntryActiveByContentJobUid(
         jobId: Long,
         inactive: Boolean,
         changedTime: Long

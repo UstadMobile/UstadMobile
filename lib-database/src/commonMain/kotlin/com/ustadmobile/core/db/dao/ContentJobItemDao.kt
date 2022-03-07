@@ -264,4 +264,12 @@ abstract class ContentJobItemDao {
     """)
     abstract suspend fun updateAllStatusesByJobUid(jobUid: Long, newStatus: Int)
 
+    @Query("""
+        SELECT ContentJobItem.cjiContainerUid
+          FROM ContentJobItem
+         WHERE cjiJobUid = :jobUid 
+    """)
+    abstract suspend fun findAllContainersByJobUid(jobUid: Long): List<Long>
+
+
 }

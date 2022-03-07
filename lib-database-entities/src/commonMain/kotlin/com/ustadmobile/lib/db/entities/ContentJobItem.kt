@@ -118,9 +118,12 @@ data class ContentJobItem(
      */
     var cjiUploadSessionUid: String? = null,
 
-        /**
-         *  If contentJobItem is cancelled, then contentEntry needs to be deleted
-          */
+    /**
+     *  If true, if this ContentJobItem is cancelled, then any associated contentEntry should be set
+     *  as inactive (e.g. if something is being imported as new content, but the job is canceled,
+     *  the ContentEntry itself must be removed. If this is an update or something else, then we
+     *  don't make the contententry inactive
+     */
     var cjiContentDeletedOnCancellation:  Boolean = false,
 
     /**

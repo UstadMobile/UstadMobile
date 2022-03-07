@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.*
@@ -17,6 +18,7 @@ import kotlinx.serialization.json.Json
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -25,6 +27,7 @@ import java.io.File
 import java.io.IOException
 import kotlin.test.Test
 import com.ustadmobile.core.util.ext.encodeStringMapToString
+import com.ustadmobile.door.ext.toFile
 
 class TestContentJobRunner {
 
@@ -51,6 +54,10 @@ class TestContentJobRunner {
 
     private var jobContentParmas: Map<String, String>? = null
 
+    @JvmField
+    @Rule
+    var temporaryFolder = TemporaryFolder()
+
     inner class DummyPlugin(override val di: DI, endpoint: Endpoint) : ContentPlugin{
         override val pluginId: Int
             get() = TEST_PLUGIN_ID
@@ -62,7 +69,7 @@ class TestContentJobRunner {
 
         private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-        private val containerFolder: File by on(endpoint).instance(tag =  DiTag.TAG_DEFAULT_CONTAINER_DIR)
+        private val containerStorageManager: ContainerStorageManager by on(endpoint).instance()
 
         override suspend fun extractMetadata(
             uri: DoorUri,
@@ -88,7 +95,8 @@ class TestContentJobRunner {
                     repo.addEntriesToContainerFromZipResource(
                             jobItem.contentJobItem!!.cjiContainerUid, this::class.java,
                             "/com/ustadmobile/core/contentformats/epub/test.epub",
-                            ContainerAddOptions(containerFolder.toDoorUri()))
+                            ContainerAddOptions(
+                                DoorUri.parse(containerStorageManager.storageList.first().dirUri)))
 
                     delay(100)
                 } catch (c: CancellationException) {
@@ -124,6 +132,10 @@ class TestContentJobRunner {
                 Json {
                     encodeDefaults = true
                 }
+            }
+
+            bind<ContainerStorageManager>() with scoped(ustadTestRule.endpointScope).singleton {
+                ContainerStorageManager(listOf(temporaryFolder.newFolder()))
             }
 
             bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
@@ -435,10 +447,13 @@ class TestContentJobRunner {
             Assert.assertEquals("Root ContentJobItem status is canceled", JobStatus.CANCELED,
                 contentJobItemFromDb?.cjiStatus ?: -1)
 
-            Assert.assertEquals("Root ContentJobItem recursive status is canceled", JobStatus.CANCELED,
-                contentJobItemFromDb?.cjiRecursiveStatus ?: -1)
+            Assert.assertEquals("Root ContentJobItem recursive status is canceled",
+                JobStatus.CANCELED,contentJobItemFromDb?.cjiRecursiveStatus ?: -1)
 
-            val containerFolder: File = di.onActiveAccount().direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+            val containerStorageManager: ContainerStorageManager = di.onActiveAccountDirect()
+                .instance()
+            val containerFolder = DoorUri.parse(containerStorageManager.storageList.first().dirUri)
+                .toFile()
             val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
             allJobItems.forEach {
                 Assert.assertEquals("job is cancelled", JobStatus.CANCELED,
