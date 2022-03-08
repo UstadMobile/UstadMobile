@@ -168,7 +168,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         systemImpl.go("DownloadDialog", args, requireContext())
     }
 
-    override var contentJobItemProgress: List<ContentJobItemProgress>? = null
+    override var activeContentJobItems: List<ContentJobItemProgress>? = null
         set(value){
             field = value
             mBinding?.contentJobItemProgressList?.visibility = if(value != null && value.isNotEmpty())

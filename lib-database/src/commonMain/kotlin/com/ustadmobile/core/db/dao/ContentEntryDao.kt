@@ -488,7 +488,73 @@ SELECT ContentEntry.*
     """)
     abstract suspend fun findContentEntriesWhereIsLeafAndLatestContainerHasNoEntriesOrHasZeroFileSize(): List<ContentEntry>
 
+    //langauge=RoomSql
+    @Query("""
+        WITH ContentEntryContainerUids AS 
+             (SELECT Container.containerUid
+                FROM Container
+               WHERE Container.containerContentEntryUid = :contentEntryUid
+                   AND Container.fileSize > 0),
+                   
+             LatestDownloadedContainer(containerUid) AS
+             (SELECT COALESCE(
+                     (SELECT containerUid
+                        FROM Container
+                       WHERE Container.containerContentEntryUid = :contentEntryUid 
+                         AND EXISTS(
+                             SELECT 1
+                               FROM ContainerEntry
+                              WHERE ContainerEntry.ceContainerUid = Container.containerUid)
+                    ORDER BY cntLastModified DESC
+                       LIMIT 1), 0)),
+                            
+             ActiveContentJobItems(cjiRecursiveStatus, cjiPluginId) AS
+             (SELECT cjiRecursiveStatus, cjiPluginId
+                FROM ContentJobItem
+               WHERE cjiContentEntryUid = :contentEntryUid
+                 AND cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.RUNNING_MAX}),
+                  
+            ShowDownload(showDownload) AS 
+            (SELECT (SELECT containerUid FROM LatestDownloadedContainer) = 0
+                AND (SELECT COUNT(*) FROM ActiveContentJobItems) = 0
+                AND (SELECT COUNT(*) FROM ContentEntryContainerUids) > 0)
+                   
+        SELECT (SELECT showDownload FROM ShowDownload)
+               AS showDownloadButton,
+        
+               (SELECT containerUid FROM LatestDownloadedContainer) != 0          
+               AS showOpenButton,
+       
+               (SELECT NOT showDownload FROM ShowDownload)
+           AND (SELECT COUNT(*) FROM ActiveContentJobItems) = 0    
+           AND (SELECT COALESCE(
+                       (SELECT cntLastModified
+                          FROM Container
+                         WHERE containerContentEntryUid = :contentEntryUid
+                           AND fileSize > 0
+                      ORDER BY cntLastModified DESC), 0)) 
+               > (SELECT COALESCE(
+                         (SELECT cntLastModified
+                            FROM Container
+                           WHERE Container.containerUid = 
+                                 (SELECT LatestDownloadedContainer.containerUid
+                                    FROM LatestDownloadedContainer)), 0)) 
+               AS showUpdateButton,
+               
+               (SELECT containerUid FROM LatestDownloadedContainer) != 0
+           AND (SELECT COUNT(*) FROM ActiveContentJobItems) = 0    
+               AS showDeleteButton,
+               
+               (SELECT COUNT(*) 
+                  FROM ActiveContentJobItems 
+                 WHERE cjiPluginId = $PLUGIN_ID_DOWNLOAD) > 0
+               AS showManageDownloadButton
+    """)
+    abstract suspend fun buttonsToShowForContentEntry(contentEntryUid: Long): ContentEntryButtonModel?
+
     companion object {
+
+        const val PLUGIN_ID_DOWNLOAD = 10
 
         const val SORT_TITLE_ASC = 1
 
