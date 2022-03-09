@@ -199,7 +199,7 @@ class DownloadDialogPresenterTest {
 
     @Test
     fun givenExistingDownloadJobNotStarted_whenViewCreated_shouldGetSizeFromDatabase() {
-        val mockExistingDownloadJob = setupMockDownloadJob(ContentJobItem.STATUS_DOWNLOAD)
+        val mockExistingDownloadJob = setupMockDownloadJob(JobStatus.NOT_QUEUED)
 
         runBlocking {
             presenter = DownloadDialogPresenter(context,
@@ -293,7 +293,7 @@ class DownloadDialogPresenterTest {
 
 
             val downloadJobDaoSpy = spy(db.contentJobItemDao) {
-                onBlocking { findStatusForActiveContentJobItem(any()) }.doReturn(ContentJobItem.STATUS_RUNNING)
+                onBlocking { findStatusForActiveContentJobItem(any()) }.doReturn(JobStatus.RUNNING)
             }
             whenever(db.contentJobItemDao).thenReturn(downloadJobDaoSpy)
 

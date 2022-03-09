@@ -38,7 +38,9 @@ import org.kodein.di.on
 
 interface ContentEntryDetailFragmentEventHandler {
 
-    fun handleOnClickOpenDownloadButton()
+    fun handleOnClickOpen()
+
+    fun handleOnClickDownload()
 
     fun handleOnClickDeleteButton()
 
@@ -47,7 +49,8 @@ interface ContentEntryDetailFragmentEventHandler {
     fun handleOnClickMarkComplete()
 }
 
-class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMostRecentContainer>(), ContentEntryDetailOverviewView, ContentEntryDetailFragmentEventHandler{
+class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMostRecentContainer>(
+), ContentEntryDetailOverviewView, ContentEntryDetailFragmentEventHandler{
 
     private var mBinding: FragmentContentEntry2DetailBinding? = null
 
@@ -88,27 +91,14 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
             mBinding?.markCompleteVisible = value
         }
 
-    override var showDownloadButton: Boolean = false
-        set(value) {
-            field = value
-            mBinding?.canDownload = value
-        }
-    override var showUpdateButton: Boolean = false
-        set(value) {
-            field =value
-            mBinding?.canUpdate = value
-        }
 
-    override var showDeleteButton: Boolean = false
+    override var contentEntryButtons: ContentEntryButtonModel?
+        get() = mBinding?.contentEntryButtons
         set(value) {
-            field = value
-            mBinding?.canDelete = value
-        }
+            if(mBinding?.contentEntryButtons?.showOpenButton != value?.showOpenButton)
+                activity?.invalidateOptionsMenu()
 
-    override var showOpenButton: Boolean = false
-        set(value) {
-            field = value
-            mBinding?.canOpen = value
+            mBinding?.contentEntryButtons = value
         }
 
     private inner class PresenterViewLifecycleObserver: DefaultLifecycleObserver {
@@ -127,11 +117,13 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         get() = mPresenter
 
 
-
-    override fun handleOnClickOpenDownloadButton() {
-        mPresenter?.handleOnClickOpenDownloadButton()
+    override fun handleOnClickOpen() {
+        mPresenter?.handleClickOpenButton()
     }
 
+    override fun handleOnClickDownload() {
+        mPresenter?.handleClickDownloadButton()
+    }
 
     override fun handleOnClickDeleteButton() {
         MaterialAlertDialogBuilder(requireContext())
@@ -176,29 +168,6 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
             progressListAdapter?.submitList(value)
         }
 
-    override var contentJobItemStatus: Int = 0
-        set(value) {
-            if((field == ContentJobItem.STATUS_COMPLETE) != (value == ContentJobItem.STATUS_COMPLETE))
-                activity?.invalidateOptionsMenu()
-
-            mBinding?.contentJobItemStatus = value
-            if(currentDownloadJobItemStatus != value) {
-                when {
-                    value == ContentJobItem.STATUS_COMPLETE -> {
-                        mBinding?.entryDownloadOpenBtn?.visibility = View.VISIBLE
-                    }
-
-                    value == ContentJobItem.STATUS_RUNNING -> {
-                        mBinding?.entryDownloadOpenBtn?.visibility = View.GONE
-                    }
-                    else -> {
-                        mBinding?.entryDownloadOpenBtn?.visibility = View.VISIBLE
-                    }
-                }
-                currentDownloadJobItemStatus = value
-            }
-            field = value
-        }
     override var scoreProgress: ContentEntryStatementScoreProgress? = null
         get() = field
         set(value) {
@@ -296,7 +265,8 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_content_entry, menu)
-        menu.findItem(R.id.content_entry_group_activity).isVisible = currentDownloadJobItemStatus == ContentJobItem.STATUS_COMPLETE
+        menu.findItem(R.id.content_entry_group_activity).isVisible =
+            (contentEntryButtons?.showOpenButton == true)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -345,13 +315,20 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
         val DIFF_CALLBACK_CONTENT_JOB_PROGRESS: DiffUtil.ItemCallback<ContentJobItemProgress> =
                 object: DiffUtil.ItemCallback<ContentJobItemProgress>(){
-                    override fun areItemsTheSame(oldItem: ContentJobItemProgress,
-                                                 newItem: ContentJobItemProgress): Boolean {
+                    override fun areItemsTheSame(
+                        oldItem: ContentJobItemProgress,
+                        newItem: ContentJobItemProgress
+                    ): Boolean {
                       return oldItem.cjiUid == newItem.cjiUid
                     }
 
-                    override fun areContentsTheSame(oldItem: ContentJobItemProgress, newItem: ContentJobItemProgress): Boolean {
-                        return oldItem == newItem
+                    override fun areContentsTheSame(
+                        oldItem: ContentJobItemProgress,
+                        newItem: ContentJobItemProgress
+                    ): Boolean {
+                        return (oldItem.progress == newItem.progress
+                                && oldItem.total == newItem.total
+                                && oldItem.progressTitle == newItem.progressTitle)
                     }
 
                 }

@@ -43,7 +43,7 @@ class ContentJobRunner(
     override val di: DI,
     val numProcessors: Int = DEFAULT_NUM_PROCESSORS,
     val maxItemAttempts: Int = DEFAULT_NUM_RETRIES
-) : DIAware, ContentJobProgressListener, DoorObserver<ConnectivityStatus?>,
+) : DIAware, ContentJobProgressListener, DoorObserver<Pair<Int, Boolean>?>,
     ContentJobItemTransactionRunner {
 
     data class ContentJobResult(val status: Int)
@@ -57,8 +57,6 @@ class ContentJobRunner(
     private val activeJobItemIds = concurrentSafeListOf<Long>()
 
     private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
-
-    private val repo: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     private val contentPluginManager: ContentPluginManager by on(endpoint).instance()
 
@@ -75,13 +73,16 @@ class ContentJobRunner(
 
     private val containerStorageManager: ContainerStorageManager by on(endpoint).instance()
 
+    private val jobConnectivityLiveData = JobConnectivityLiveData(connectivityLiveData,
+        db.contentJobDao.findMeteredAllowedLiveData(jobId))
+
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
         var done = false
         try {
             Napier.d("$logPrefix connectivity observer forever")
             withContext(doorMainDispatcher()) {
-                connectivityLiveData.liveData.observeForever(this@ContentJobRunner)
+                jobConnectivityLiveData.observeForever(this@ContentJobRunner)
             }
 
             do {
@@ -124,7 +125,7 @@ class ContentJobRunner(
             Napier.d(e.stackTraceToString(), e)
         }finally {
             withContext(NonCancellable + doorMainDispatcher()) {
-                connectivityLiveData.liveData.removeObserver(this@ContentJobRunner)
+                jobConnectivityLiveData.removeObserver(this@ContentJobRunner)
             }
             Napier.d("$logPrefix close produce job")
             close()
@@ -152,10 +153,6 @@ class ContentJobRunner(
             var processResult: ProcessResult? = null
             var processException: Throwable? = null
             var mediatorObserver: DoorObserver<Pair<Int, Boolean>>?= null
-            val mediatorLiveData = JobConnectivityLiveData(connectivityLiveData,
-                db.contentJobDao.findMeteredAllowedLiveData(
-                    item.contentJob?.cjUid ?: 0
-                ))
 
             try {
                 val cjiUid = item.contentJobItem?.cjiUid
@@ -222,7 +219,7 @@ class ContentJobRunner(
                 }
 
                 withContext(doorMainDispatcher()){
-                    mediatorLiveData.observeForever(mediatorObserver)
+                    jobConnectivityLiveData.observeForever(mediatorObserver)
                 }
 
 
@@ -285,7 +282,7 @@ class ContentJobRunner(
                 }
 
                 withContext(NonCancellable + doorMainDispatcher()) {
-                    mediatorObserver?.let { mediatorLiveData.removeObserver(it) }
+                    mediatorObserver?.let { jobConnectivityLiveData.removeObserver(it) }
                 }
 
 
@@ -393,7 +390,9 @@ class ContentJobRunner(
         return ContentJobResult(JobStatus.COMPLETE)
     }
 
-    override fun onChanged(t: ConnectivityStatus?) {
+    //Connectivity and/or the setting for metered data allowed has been changed, so we should check
+    //the queue
+    override fun onChanged(t: Pair<Int, Boolean>?) {
         GlobalScope.launch {
             if(t != null){
                 checkQueueSignalChannel.send(true)

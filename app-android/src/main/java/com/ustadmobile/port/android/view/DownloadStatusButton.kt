@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.util.ext.isStatusPaused
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import com.ustadmobile.lib.db.entities.ContentJobItemProgress
@@ -48,7 +49,7 @@ class DownloadStatusButton : RelativeLayout {
                     contentDescription = context.getString(R.string.download_entry_state_paused)
                 }
 
-                statusChanged && currentDownloadStatus == ContentJobItem.STATUS_COMPLETE -> {
+                statusChanged && currentDownloadStatus == JobStatus.COMPLETE -> {
                     setImageResource(R.drawable.ic_baseline_offline_pin_24)
                     contentDescription = context.getString(R.string.downloaded)
                 }
@@ -59,7 +60,8 @@ class DownloadStatusButton : RelativeLayout {
                 }
             }
 
-            takeIf { statusChanged }?.progressVisibility = if(currentDownloadStatus != ContentJobItem.STATUS_COMPLETE) {
+            takeIf { statusChanged }?.progressVisibility =
+                if(currentDownloadStatus != JobStatus.COMPLETE) {
                 View.VISIBLE
             }else {
                 View.INVISIBLE

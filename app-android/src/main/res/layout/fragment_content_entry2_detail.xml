@@ -12,9 +12,16 @@
         <import  type="com.ustadmobile.lib.db.entities.ContentJobItem" />
 
         <import type="com.ustadmobile.core.util.ext.ContentJobItemExtKt" />
+
+        <import type="com.ustadmobile.lib.db.entities.ContentEntryButtonModel" />
+
         <variable
             name="contentEntry"
             type="com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer" />
+
+        <variable
+            name="contentEntryButtons"
+            type="ContentEntryButtonModel" />
 
         <variable
             name="scoreProgress"
@@ -45,27 +52,7 @@
             type="com.ustadmobile.port.android.view.ContentEntryDetailFragmentEventHandler" />
 
         <variable
-            name="contentJobItemStatus"
-            type="Integer" />
-
-        <variable
             name="locallyAvailable"
-            type="boolean" />
-
-        <variable
-            name="canDownload"
-            type="boolean" />
-
-        <variable
-            name="canDelete"
-            type="boolean" />
-
-        <variable
-            name="canOpen"
-            type="boolean" />
-
-        <variable
-            name="canUpdate"
             type="boolean" />
 
     </data>
@@ -239,17 +226,43 @@
                 app:constraint_referenced_ids="entry_detail_content_size,content_progress_fail_correct" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/entryDownloadOpenBtn"
+                android:id="@+id/entry_download_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@id/labelBarrier"
-                android:enabled="@{canDownload || canOpen}"
-                android:onClick="@{()-> fragmentEventHandler.handleOnClickOpenDownloadButton()}"
+                android:visibility="@{contentEntryButtons.showDownloadButton ? View.VISIBLE : View.GONE}"
+                android:onClick="@{()-> fragmentEventHandler.handleOnClickDownload()}"
                 android:padding="@dimen/dimen_16dp"
                 android:layout_margin="@dimen/dimen_8dp"
-                android:text="@{canOpen ? @string/open : @string/download}"
+                android:text="@string/download"
                 android:textStyle="bold" />
 
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/download_button_barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="entry_download_button,labelBarrier" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/entry_open_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/download_button_barrier"
+                android:visibility="@{contentEntryButtons.showOpenButton ? View.VISIBLE : View.GONE}"
+                android:onClick="@{()-> fragmentEventHandler.handleOnClickOpen()}"
+                android:padding="@dimen/dimen_16dp"
+                android:layout_margin="@dimen/dimen_8dp"
+                android:text="@string/open"
+                android:textStyle="bold" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/main_buttons_barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="entry_open_button,entry_download_button,labelBarrier"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/contentJobItemProgressList"
@@ -257,7 +270,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_8dp"
                 android:nestedScrollingEnabled="false"
-                app:layout_constraintTop_toBottomOf="@+id/entryDownloadOpenBtn"
+                app:layout_constraintTop_toBottomOf="@+id/main_buttons_barrier"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -328,7 +341,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/entry_detail_delete_button"
-                    android:visibility="@{canDelete ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{contentEntryButtons.showDeleteButton ? View.VISIBLE : View.GONE}"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -352,7 +365,7 @@
                     android:layout_weight="1"
                     android:maxWidth="128dp"
                     android:onClick="@{()-> fragmentEventHandler.handleOnClickManageDownloadButton()}"
-                    android:visibility="@{ContentJobItemExtKt.isStatusActiveOrQueued(contentJobItemStatus) ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{contentEntryButtons.showManageDownloadButton ? View.VISIBLE : View.GONE}"
                     android:text="@string/manage_download"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>

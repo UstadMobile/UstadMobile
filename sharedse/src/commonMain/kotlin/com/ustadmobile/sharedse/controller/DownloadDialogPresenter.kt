@@ -77,12 +77,14 @@ class DownloadDialogPresenter(
         Napier.i("Starting download presenter for $contentEntryUid")
         view.setWifiOnlyOptionVisible(false)
         GlobalScope.launch(doorMainDispatcher()) {
-            contentJobItemStatusLiveData = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
-                appDatabase.contentJobItemDao.findStatusForActiveContentJobItem(contentEntryUid)
+            contentJobItemStatusLiveData = RateLimitedLiveData(appDatabase,
+                listOf("ContentJobItem"), 1000
+            ) {
+                appDatabase.contentEntryDao.statusForDownloadDialog(contentEntryUid)
             }
-            val activeJobItem = appDatabase.contentJobItemDao.getActiveContentJobItem()
 
-            currentJobId = activeJobItem?.cjiJobUid ?: 0
+            currentJobId = appDatabase.contentJobItemDao
+                .getActiveContentJobIdByContentEntryUid(contentEntryUid)
             contentJobCompletable.complete(true)
 
             val status = contentJobItemStatusLiveData.getValue() ?: 0
@@ -104,7 +106,7 @@ class DownloadDialogPresenter(
         currentContentJobItemStatus = t ?: 0
         when{
 
-            currentContentJobItemStatus == ContentJobItem.STATUS_COMPLETE -> {
+            currentContentJobItemStatus == JobStatus.COMPLETE -> {
                 deleteFileOptions = true
                 view.setCalculatingViewVisible(false)
                 view.setStackOptionsVisible(false)
@@ -117,7 +119,7 @@ class DownloadDialogPresenter(
                         MessageID.cancel, context))
                 view.setWifiOnlyOptionVisible(false)
             }
-            currentContentJobItemStatus == ContentJobItem.STATUS_RUNNING -> {
+            currentContentJobItemStatus == JobStatus.RUNNING -> {
                 view.setCalculatingViewVisible(false)
                 deleteFileOptions = false
                 view.setStackOptionsVisible(true)
@@ -143,7 +145,7 @@ class DownloadDialogPresenter(
         }
 
         val currentJobSizeTotals = jobSizeTotals.value
-        if(currentContentJobItemStatus != ContentJobItem.STATUS_RUNNING && currentJobSizeTotals == null
+        if(currentContentJobItemStatus != JobStatus.RUNNING && currentJobSizeTotals == null
                 && !jobSizeLoading.compareAndSet(expect = true, update = true)) {
             view.setBottomPositiveButtonEnabled(false)
             GlobalScope.launch {
@@ -243,7 +245,7 @@ class DownloadDialogPresenter(
      */
     fun handleClickPositive() {
         when (currentContentJobItemStatus) {
-            ContentJobItem.STATUS_COMPLETE -> GlobalScope.launch {
+            JobStatus.COMPLETE -> GlobalScope.launch {
                 createDeleteJob()
             }
             else -> GlobalScope.launch {

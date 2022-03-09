@@ -48,7 +48,7 @@ abstract class ContentJobItemDao {
                                          FROM ContainerEntry
                                         WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
                       ORDER BY cntLastModified DESC LIMIT 1))
-                 THEN ${ContentJobItem.STATUS_COMPLETE}
+                 THEN ${JobStatus.COMPLETE}
                  WHEN 
                        (SELECT cjiFinishTime 
                           FROM ContentJobItem 
@@ -61,17 +61,18 @@ abstract class ContentJobItemDao {
 						  WHERE cjiPluginId = 14 
 							AND cjiContentEntryUid = :contentEntryUid
 					   ORDER BY cjiFinishTime DESC LIMIT 1),0)
-                 THEN ${ContentJobItem.STATUS_COMPLETE}
+                 THEN ${JobStatus.COMPLETE}
                  WHEN EXISTS (SELECT 1 FROM ContentJobItem 
 								  WHERE cjiContentEntryUid = :contentEntryUid
 								  AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
                                   AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX})
-			     THEN ${ContentJobItem.STATUS_RUNNING} 				
-		         ELSE ${ContentJobItem.STATUS_DOWNLOAD}  
+			     THEN ${JobStatus.RUNNING} 				
+		         ELSE ${JobStatus.COMPLETE}  
 	             END
 		    FROM ContentJobItem
-            WHERE cjiContentEntryUid = :contentEntryUid),${ContentJobItem.STATUS_DOWNLOAD}) as status
+            WHERE cjiContentEntryUid = :contentEntryUid),${JobStatus.RUNNING}) as status
     """)
+    @Deprecated("This is not accurate")
     abstract suspend fun findStatusForActiveContentJobItem(contentEntryUid: Long): Int
 
 
@@ -88,7 +89,7 @@ abstract class ContentJobItemDao {
            AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX}
       ORDER BY cjiStartTime DESC
     """)
-    abstract fun findProgressForActiveContentJobItem(contentEntryUid: Long): List<ContentJobItemProgress>
+    abstract fun findActiveContentJobItems(contentEntryUid: Long): List<ContentJobItemProgress>
 
 
     @Query("""
@@ -104,7 +105,9 @@ abstract class ContentJobItemDao {
            AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX}
       ORDER BY cjiStartTime DESC LIMIT 1
     """)
-    abstract suspend fun findLatestProgressForActiveContentJobItem(contentEntryUid: Long): ContentJobItemProgress?
+    abstract suspend fun findLatestProgressForActiveContentJobItem(
+        contentEntryUid: Long
+    ): ContentJobItemProgress?
 
     @Insert
     abstract suspend fun insertJobItem(jobItem: ContentJobItem) : Long
@@ -222,12 +225,15 @@ abstract class ContentJobItemDao {
 
 
     @Query("""
-        SELECT ContentJobItem.*
-          FROM ContentJobItem
-         WHERE cjiFinishTime = 0
-      ORDER BY cjiStartTime DESC LIMIT 1
-        """)
-    abstract suspend fun getActiveContentJobItem(): ContentJobItem?
+        SELECT COALESCE(
+               (SELECT ContentJobItem.cjiJobUid
+                  FROM ContentJobItem
+                 WHERE cjiContentEntryUid = :contentEntryUid
+                   AND cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.RUNNING_MAX}
+              ORDER BY cjiFinishTime DESC), 0)
+    """)
+    abstract suspend fun getActiveContentJobIdByContentEntryUid(contentEntryUid: Long): Long
+
 
     @Query("""
         UPDATE ContentJobItem

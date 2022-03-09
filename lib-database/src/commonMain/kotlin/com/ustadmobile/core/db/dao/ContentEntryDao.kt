@@ -202,7 +202,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                 JOIN ContentJob
                     ON ContentJobItem.cjiJobUid = ContentJob.cjUid
                WHERE cjiContentEntryUid = :contentEntryUid
-                AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
+                AND cjiRecursiveStatus >= ${JobStatus.QUEUED}
                 AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX} LIMIT 1),
                 CAST(((SELECT connectivityState
                         FROM ConnectivityStatus
@@ -496,23 +496,9 @@ SELECT ContentEntry.*
                WHERE Container.containerContentEntryUid = :contentEntryUid
                    AND Container.fileSize > 0),
                    
-             LatestDownloadedContainer(containerUid) AS
-             (SELECT COALESCE(
-                     (SELECT containerUid
-                        FROM Container
-                       WHERE Container.containerContentEntryUid = :contentEntryUid 
-                         AND EXISTS(
-                             SELECT 1
-                               FROM ContainerEntry
-                              WHERE ContainerEntry.ceContainerUid = Container.containerUid)
-                    ORDER BY cntLastModified DESC
-                       LIMIT 1), 0)),
+             $LATEST_DOWNLOADED_CONTAINER_CTE_SQL,
                             
-             ActiveContentJobItems(cjiRecursiveStatus, cjiPluginId) AS
-             (SELECT cjiRecursiveStatus, cjiPluginId
-                FROM ContentJobItem
-               WHERE cjiContentEntryUid = :contentEntryUid
-                 AND cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.RUNNING_MAX}),
+             $ACTIVE_CONTENT_JOB_ITEMS_CTE_SQL,
                   
             ShowDownload(showDownload) AS 
             (SELECT (SELECT containerUid FROM LatestDownloadedContainer) = 0
@@ -550,7 +536,28 @@ SELECT ContentEntry.*
                  WHERE cjiPluginId = $PLUGIN_ID_DOWNLOAD) > 0
                AS showManageDownloadButton
     """)
-    abstract suspend fun buttonsToShowForContentEntry(contentEntryUid: Long): ContentEntryButtonModel?
+    abstract suspend fun buttonsToShowForContentEntry(
+        contentEntryUid: Long
+    ): ContentEntryButtonModel?
+
+    @Query("""
+        WITH $LATEST_DOWNLOADED_CONTAINER_CTE_SQL,
+        ActiveContentJobItems(cjiRecursiveStatus, cjiPluginId) AS
+             (SELECT cjiRecursiveStatus, cjiPluginId
+                FROM ContentJobItem
+               WHERE cjiContentEntryUid = :contentEntryUid
+                 AND cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.RUNNING_MAX}
+                 AND cjiPluginId = $PLUGIN_ID_DOWNLOAD )
+        
+        SELECT CASE 
+               WHEN (SELECT containerUid FROM LatestDownloadedContainer) != 0 THEN ${JobStatus.COMPLETE}
+               WHEN (SELECT COUNT(*) FROM ActiveContentJobItems) != 0 THEN ${JobStatus.RUNNING}
+               ELSE 0 
+               END AS status
+    """)
+    abstract suspend fun statusForDownloadDialog(
+        contentEntryUid: Long
+    ): Int
 
     companion object {
 
@@ -559,6 +566,29 @@ SELECT ContentEntry.*
         const val SORT_TITLE_ASC = 1
 
         const val SORT_TITLE_DESC = 2
+
+        private const val LATEST_DOWNLOADED_CONTAINER_CTE_SQL = """
+            LatestDownloadedContainer(containerUid) AS
+             (SELECT COALESCE(
+                     (SELECT containerUid
+                        FROM Container
+                       WHERE Container.containerContentEntryUid = :contentEntryUid 
+                         AND EXISTS(
+                             SELECT 1
+                               FROM ContainerEntry
+                              WHERE ContainerEntry.ceContainerUid = Container.containerUid)
+                    ORDER BY cntLastModified DESC
+                       LIMIT 1), 0))
+        """
+
+        private const val ACTIVE_CONTENT_JOB_ITEMS_CTE_SQL = """
+            ActiveContentJobItems(cjiRecursiveStatus, cjiPluginId) AS
+             (SELECT cjiRecursiveStatus, cjiPluginId
+                FROM ContentJobItem
+               WHERE cjiContentEntryUid = :contentEntryUid
+                 AND cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.RUNNING_MAX})
+        """
+
 
         const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
             SELECT DISTINCT Person.PersonUid FROM Person

@@ -96,27 +96,12 @@ class ContentEntryDetailOverviewPresenter(
                 view.contentEntryButtons = it
             }
 
-            val contentJobItemStatusLiveData = RateLimitedLiveData(db, CONTENT_JOB_ITEM_TABLE_LIST,
+
+            RateLimitedLiveData(db, CONTENT_JOB_ITEM_TABLE_LIST,
                 1000
             ) {
-                db.contentJobItemDao.findStatusForActiveContentJobItem(contentEntryUid)
-            }
-
-            val activeContentJobItems = RateLimitedLiveData(db, CONTENT_JOB_ITEM_TABLE_LIST,
-                1000
-            ) {
-                db.contentJobItemDao.findProgressForActiveContentJobItem(contentEntryUid)
-            }
-
-
-            contentJobItemStatusLiveData.observeWithLifecycleOwner(lifecycleOwner){
-                val status = it ?: return@observeWithLifecycleOwner
-                if(view.contentJobItemStatus != status) {
-                    view.contentJobItemStatus = status
-                }
-            }
-
-            activeContentJobItems.observeWithLifecycleOwner(lifecycleOwner){
+                db.contentJobItemDao.findActiveContentJobItems(contentEntryUid)
+            }.observeWithLifecycleOwner(lifecycleOwner){
                 val progress = it ?: return@observeWithLifecycleOwner
                 view.activeContentJobItems = progress
             }
@@ -129,6 +114,15 @@ class ContentEntryDetailOverviewPresenter(
         systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
                 mapOf(ARG_ENTITY_UID to entity?.contentEntryUid.toString(),
                         ARG_LEAF to true.toString()), context)
+    }
+
+    fun handleClickOpenButton() {
+        openContentEntry()
+    }
+
+    fun handleClickDownloadButton() {
+        view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString()
+            ?: "0")))
     }
 
     fun handleOnClickOpenDownloadButton() {

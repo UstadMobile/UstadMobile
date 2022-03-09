@@ -21,8 +21,6 @@ interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRe
 
     var contentEntryButtons: ContentEntryButtonModel?
 
-    var contentJobItemStatus: Int
-
     var activeContentJobItems: List<ContentJobItemProgress>?
 
     companion object {
