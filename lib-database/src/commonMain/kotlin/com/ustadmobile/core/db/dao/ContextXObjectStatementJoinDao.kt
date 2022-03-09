@@ -27,6 +27,16 @@ abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJ
              JOIN ContextXObjectStatementJoin
                   ON ContextXObjectStatementJoin.contextStatementUid = StatementEntity.statementUid
    WHERE UserSession.usClientNodeId = :newNodeId
+     -- Temporary measure to prevent admin user getting clogged up
+     -- Restrict to the last 30 days of data
+     AND StatementEntity.timestamp > ( 
+   --notpsql
+   strftime('%s', 'now') * 1000
+   --endnotpsql
+   /*psql
+   ROUND(EXTRACT(epoch from NOW())*1000)
+   */
+   - (30 * CAST(86400000 AS BIGINT)))   
     --notpsql 
      AND ContextXObjectStatementJoin.contextXObjectLct != COALESCE(
          (SELECT cxosjVersionId
