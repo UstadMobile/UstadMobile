@@ -21,7 +21,9 @@ object ContentEntryDetailScreen : KScreen<ContentEntryDetailScreen>() {
 
     val entryTitleTextView = KTextView { withId(R.id.entry_detail_title)}
 
-    val downloadOpenButton = KButton { withId(R.id.entry_download_button)}
+    val downloadButton = KButton { withId(R.id.entry_download_button)}
+
+    val openButton = KButton { withId(R.id.entry_open_button) }
 
     val progress = KProgressBar { withId(R.id.entry_detail_progress_bar)}
 

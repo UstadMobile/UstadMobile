@@ -13,33 +13,28 @@ import kotlin.math.roundToInt
 /**
  * Created by mike on 9/22/17.
  */
-class DownloadProgressView : LinearLayout, View.OnClickListener {
+class DownloadProgressView : LinearLayout {
 
-    private var progressBar: ProgressBar? = null
+    private lateinit var progressBar: ProgressBar
 
-    private var downloadPercentageTextView: TextView? = null
+    private lateinit var downloadPercentageTextView: TextView
 
-    private var downloadStatusTextView: TextView? = null
-
-    private var downloadStopListener: OnStopDownloadListener? = null
+    private lateinit var downloadStatusTextView: TextView
 
     var progress: Float = 0f
         set(progress) {
             val progressPercentage = (progress * 100).roundToInt()
             field = progressPercentage.toFloat()
-            progressBar?.progress = progressPercentage
-            downloadPercentageTextView?.text = "$progressPercentage%"
+            progressBar.progress = progressPercentage
+            downloadPercentageTextView.text = "$progressPercentage%"
         }
 
     var statusText: String
-        get() = downloadStatusTextView!!.text.toString()
+        get() = downloadStatusTextView.text.toString()
         set(statusText) {
-            downloadStatusTextView!!.text = statusText
+            if(downloadPercentageTextView.text != statusText)
+                downloadStatusTextView.text = statusText
         }
-
-    interface OnStopDownloadListener {
-        fun onClickStopDownload(view: DownloadProgressView)
-    }
 
     constructor(context: Context) : super(context) {
         init()
@@ -60,11 +55,4 @@ class DownloadProgressView : LinearLayout, View.OnClickListener {
         downloadStatusTextView = findViewById(R.id.view_download_progress_status_text)
     }
 
-    override fun onClick(view: View) {
-        downloadStopListener?.onClickStopDownload(this)
-    }
-
-    fun setOnStopDownloadListener(listener: OnStopDownloadListener) {
-        this.downloadStopListener = listener
-    }
 }

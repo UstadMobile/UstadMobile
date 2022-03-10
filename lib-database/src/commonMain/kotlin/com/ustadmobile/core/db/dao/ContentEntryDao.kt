@@ -541,27 +541,50 @@ SELECT ContentEntry.*
     ): ContentEntryButtonModel?
 
     @Query("""
-        WITH $LATEST_DOWNLOADED_CONTAINER_CTE_SQL,
-        ActiveContentJobItems(cjiRecursiveStatus, cjiPluginId) AS
-             (SELECT cjiRecursiveStatus, cjiPluginId
-                FROM ContentJobItem
-               WHERE cjiContentEntryUid = :contentEntryUid
-                 AND cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.RUNNING_MAX}
-                 AND cjiPluginId = $PLUGIN_ID_DOWNLOAD )
-        
-        SELECT CASE 
-               WHEN (SELECT containerUid FROM LatestDownloadedContainer) != 0 THEN ${JobStatus.COMPLETE}
-               WHEN (SELECT COUNT(*) FROM ActiveContentJobItems) != 0 THEN ${JobStatus.RUNNING}
-               ELSE 0 
-               END AS status
+        SELECT ContentJobItem.cjiRecursiveStatus AS status
+         FROM ContentJobItem
+        WHERE ContentJobItem.cjiContentEntryUid = :contentEntryUid
+          AND ContentJobItem.cjiPluginId != $PLUGIN_ID_DELETE
+          AND ContentJobItem.cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.FAILED}
+          AND NOT EXISTS(
+              SELECT 1
+                FROM ContentJobItem ContentJobItemInternal
+               WHERE ContentJobItemInternal.cjiContentEntryUid = :contentEntryUid
+                 AND ContentJobItemInternal.cjiPluginId = $PLUGIN_ID_DELETE
+                 AND ContentJobItemInternal.cjiFinishTime > ContentJobItem.cjiStartTime)
+     ORDER BY ContentJobItem.cjiFinishTime DESC
+        LIMIT 1
     """)
     abstract suspend fun statusForDownloadDialog(
         contentEntryUid: Long
     ): Int
 
+    @Query("""
+        SELECT ContentJobItem.cjiRecursiveStatus AS status, 
+               ContentJobItem.cjiRecursiveProgress AS progress,
+               ContentJobItem.cjiRecursiveTotal AS total
+         FROM ContentJobItem
+        WHERE ContentJobItem.cjiContentEntryUid = :contentEntryUid
+          AND ContentJobItem.cjiPluginId != $PLUGIN_ID_DELETE
+          AND ContentJobItem.cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.FAILED}
+          AND NOT EXISTS(
+              SELECT 1
+                FROM ContentJobItem ContentJobItemInternal
+               WHERE ContentJobItemInternal.cjiContentEntryUid = :contentEntryUid
+                 AND ContentJobItemInternal.cjiPluginId = $PLUGIN_ID_DELETE
+                 AND ContentJobItemInternal.cjiFinishTime > ContentJobItem.cjiStartTime)
+     ORDER BY ContentJobItem.cjiFinishTime DESC
+        LIMIT 1
+    """)
+    abstract suspend fun statusForContentEntryList(
+        contentEntryUid: Long
+    ): ContentJobItemProgressAndStatus?
+
     companion object {
 
         const val PLUGIN_ID_DOWNLOAD = 10
+
+        const val PLUGIN_ID_DELETE = 14
 
         const val SORT_TITLE_ASC = 1
 

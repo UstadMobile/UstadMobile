@@ -36,46 +36,6 @@ abstract class ContentJobItemDao {
     abstract suspend fun findNextItemsInQueue(contentJobUid: Long, limit: Int) : List<ContentJobItemAndContentJob>
 
 
-    //ContentPluginId 14 is the Content Delete Plugin. This cannot be referenced directly
-    // (would be a circular dependency)
-    @Query("""
-            SELECT COALESCE((
-                 SELECT CASE 
-                 WHEN (EXISTS(SELECT 1
-                          FROM Container 
-                         WHERE Container.containerContentEntryUid = :contentEntryUid
-                           AND EXISTS (SELECT ContainerEntry.ceUid 
-                                         FROM ContainerEntry
-                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
-                      ORDER BY cntLastModified DESC LIMIT 1))
-                 THEN ${JobStatus.COMPLETE}
-                 WHEN 
-                       (SELECT cjiFinishTime 
-                          FROM ContentJobItem 
-                         WHERE cjiPluginId != 14 
-                           AND cjiRecursiveStatus = ${JobStatus.COMPLETE}
-                           AND cjiContentEntryUid = :contentEntryUid
-					  ORDER BY cjiFinishTime DESC LIMIT 1) > 
-						COALESCE((SELECT cjiFinishTime 
-					       FROM ContentJobItem 
-						  WHERE cjiPluginId = 14 
-							AND cjiContentEntryUid = :contentEntryUid
-					   ORDER BY cjiFinishTime DESC LIMIT 1),0)
-                 THEN ${JobStatus.COMPLETE}
-                 WHEN EXISTS (SELECT 1 FROM ContentJobItem 
-								  WHERE cjiContentEntryUid = :contentEntryUid
-								  AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
-                                  AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX})
-			     THEN ${JobStatus.RUNNING} 				
-		         ELSE ${JobStatus.COMPLETE}  
-	             END
-		    FROM ContentJobItem
-            WHERE cjiContentEntryUid = :contentEntryUid),${JobStatus.RUNNING}) as status
-    """)
-    @Deprecated("This is not accurate")
-    abstract suspend fun findStatusForActiveContentJobItem(contentEntryUid: Long): Int
-
-
     @Query("""
         SELECT cjiRecursiveProgress AS progress, 
                cjiRecursiveTotal AS total, 
@@ -91,23 +51,6 @@ abstract class ContentJobItemDao {
     """)
     abstract fun findActiveContentJobItems(contentEntryUid: Long): List<ContentJobItemProgress>
 
-
-    @Query("""
-        SELECT cjiRecursiveProgress AS progress, 
-               cjiRecursiveTotal AS total, 
-               cjNotificationTitle as progressTitle,
-               ContentJobItem.cjiUid
-          FROM ContentJobItem
-          JOIN ContentJob
-            ON ContentJob.cjUid = ContentJobItem.cjiJobUid
-         WHERE cjiContentEntryUid = :contentEntryUid
-           AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
-           AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX}
-      ORDER BY cjiStartTime DESC LIMIT 1
-    """)
-    abstract suspend fun findLatestProgressForActiveContentJobItem(
-        contentEntryUid: Long
-    ): ContentJobItemProgress?
 
     @Insert
     abstract suspend fun insertJobItem(jobItem: ContentJobItem) : Long
