@@ -63,6 +63,9 @@ fun Route.ContainerUploadRoute2() {
             val db: UmAppDatabase = closestDI().on(call).direct.instance(tag = DoorTag.TAG_DB)
             val gson: Gson = closestDI().direct.instance()
             try {
+                val sessionUuid = UUID.fromString(call.parameters["uploadId"])
+                sessionManager.closeSession(sessionUuid)
+
                 val containerEntryListStr = call.receive<String>()
                 val clientContainerEntryWithMd5: List<ContainerEntryWithMd5> = gson.fromJson(containerEntryListStr,
                         object: com.google.gson.reflect.TypeToken<List<ContainerEntryWithMd5>>() { }.type)
@@ -76,9 +79,6 @@ fun Route.ContainerUploadRoute2() {
                         }
 
                 val differenceList = clientPathAndMd5PairList.minus(serverPathAndMd5PairList.toSet())
-
-                val sessionUuid = UUID.fromString(call.parameters["uploadId"])
-                sessionManager.closeSession(sessionUuid)
 
                 if(differenceList.isEmpty()){
                     call.respond(HttpStatusCode.NoContent, "")
