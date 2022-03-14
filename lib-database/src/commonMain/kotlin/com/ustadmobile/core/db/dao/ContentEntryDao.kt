@@ -501,14 +501,16 @@ SELECT ContentEntry.*
              $ACTIVE_CONTENT_JOB_ITEMS_CTE_SQL,
                   
             ShowDownload(showDownload) AS 
-            (SELECT (SELECT containerUid FROM LatestDownloadedContainer) = 0
+            (SELECT CAST(:platformDownloadEnabled AS INTEGER) = 1
+                AND (SELECT containerUid FROM LatestDownloadedContainer) = 0
                 AND (SELECT COUNT(*) FROM ActiveContentJobItems) = 0
                 AND (SELECT COUNT(*) FROM ContentEntryContainerUids) > 0)
                    
         SELECT (SELECT showDownload FROM ShowDownload)
                AS showDownloadButton,
         
-               (SELECT containerUid FROM LatestDownloadedContainer) != 0          
+               CAST(:platformDownloadEnabled AS INTEGER) = 0
+               OR (SELECT containerUid FROM LatestDownloadedContainer) != 0          
                AS showOpenButton,
        
                (SELECT NOT showDownload FROM ShowDownload)
@@ -527,7 +529,8 @@ SELECT ContentEntry.*
                                     FROM LatestDownloadedContainer)), 0)) 
                AS showUpdateButton,
                
-               (SELECT containerUid FROM LatestDownloadedContainer) != 0
+               CAST(:platformDownloadEnabled AS INTEGER) = 1
+           AND (SELECT containerUid FROM LatestDownloadedContainer) != 0
            AND (SELECT COUNT(*) FROM ActiveContentJobItems) = 0    
                AS showDeleteButton,
                
@@ -537,7 +540,8 @@ SELECT ContentEntry.*
                AS showManageDownloadButton
     """)
     abstract suspend fun buttonsToShowForContentEntry(
-        contentEntryUid: Long
+        contentEntryUid: Long,
+        platformDownloadEnabled: Boolean,
     ): ContentEntryButtonModel?
 
     @Query("""

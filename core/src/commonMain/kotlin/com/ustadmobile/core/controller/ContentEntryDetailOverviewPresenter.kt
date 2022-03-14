@@ -88,7 +88,7 @@ class ContentEntryDetailOverviewPresenter(
 
         if (db !is DoorDatabaseRepository) {
             RateLimitedLiveData(db, listOf("Container", "ContentEntry", "ContentJobItem")) {
-                db.contentEntryDao.buttonsToShowForContentEntry(entityUid)
+                db.contentEntryDao.buttonsToShowForContentEntry(entityUid, isPlatformDownloadEnabled)
             }.observeWithLifecycleOwner(lifecycleOwner) {
                 if(it == null)
                     return@observeWithLifecycleOwner
@@ -123,26 +123,6 @@ class ContentEntryDetailOverviewPresenter(
     fun handleClickDownloadButton() {
         view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString()
             ?: "0")))
-    }
-
-    fun handleOnClickOpenDownloadButton() {
-        presenterScope.launch {
-            val containerWithFiles = db.containerDao.findContainerWithFilesByContentEntryUid(contentEntryUid)
-            val canOpen = !isPlatformDownloadEnabled || (containerWithFiles != null && containerWithFiles.containerUid != 0L)
-            if (canOpen) {
-                val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
-                        "false", context)!!.toBoolean()
-                val account = accountManager.activeAccount
-                if (loginFirst && account.personUid == 0L) {
-                    systemImpl.go(Login2View.VIEW_NAME, arguments, context)
-                } else {
-                    openContentEntry()
-                }
-            } else if (isPlatformDownloadEnabled) {
-                view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString()
-                        ?: "0")))
-            }
-        }
     }
 
     fun handleOnClickManageDownload() {
