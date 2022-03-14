@@ -64,6 +64,19 @@
             name="mPresenter"
             type="ClazzEdit2Presenter" />
 
+        <variable
+            name="coursePicture"
+            type="com.ustadmobile.lib.db.entities.CoursePicture"/>
+
+        <variable
+            name="coursePictureUri"
+            type="String" />
+
+        <variable
+            name="imageViewLifecycleObserver"
+            type="com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2" />
+
+
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -78,6 +91,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/fragment_clazz_edit_image_view"
+                android:layout_width="@dimen/dimen_48dp"
+                android:layout_height="@dimen/dimen_48dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:civ_circle_background_color="?colorSecondary"
+                app:imageUri="@={coursePicture.coursePictureUri}"
+                app:imageViewLifecycleObserver="@{imageViewLifecycleObserver}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/activity_clazz_edit_basic_details_heading"
@@ -87,7 +113,8 @@
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:text="@string/basic_details"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_edit_image_view"
+                />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:enabled="@{fieldsEnabled}"

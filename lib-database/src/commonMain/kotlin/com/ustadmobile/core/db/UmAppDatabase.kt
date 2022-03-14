@@ -115,11 +115,13 @@ import kotlin.jvm.JvmField
     ClazzAssignmentReplicate::class,
     ClazzAssignmentContentJoinReplicate::class,
     PersonAuth2Replicate::class,
-    UserSessionReplicate::class
+    UserSessionReplicate::class,
+    CoursePicture::class,
+    CoursePictureReplicate::class
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 102)
+], version = 103)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -336,6 +338,10 @@ abstract class UmAppDatabase : DoorDatabase() {
     abstract val contentJobItemDao: ContentJobItemDao
 
     abstract val contentJobDao: ContentJobDao
+
+
+    @JsName("coursePictureDao")
+    abstract val coursePictureDao: CoursePictureDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

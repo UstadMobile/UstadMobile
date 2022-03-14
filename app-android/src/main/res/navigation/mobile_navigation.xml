@@ -7,7 +7,7 @@
     <fragment
         android:id="@+id/home_clazzlist_dest"
         android:name="com.ustadmobile.port.android.view.ClazzListFragment"
-        android:label="@string/classes" />
+        android:label="@string/courses" />
 
     <fragment
         android:id="@+id/home_personlist_dest"
@@ -150,7 +150,7 @@
     <fragment
         android:id="@+id/content_entry_list_home_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
-        android:label="@string/content"/>
+        android:label="@string/library"/>
 
     <fragment
         android:id="@+id/content_entry_list_select_folder"

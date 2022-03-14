@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
+import com.google.android.material.chip.Chip
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
@@ -223,6 +224,12 @@ fun TextView.setResponseTextFilled(responseText: String?){
         text = responseText
     }
 }
+
+@BindingAdapter("chipMemberRoleName")
+fun Chip.setChipMemberRoleName(clazzEnrolment: ClazzEnrolment?) {
+    text = clazzEnrolment?.roleToString(context, systemImpl) ?: ""
+}
+
 
 @BindingAdapter("memberRoleName")
 fun TextView.setMemberRoleName(clazzEnrolment: ClazzEnrolment?) {

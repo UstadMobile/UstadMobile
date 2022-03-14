@@ -19,6 +19,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.*
@@ -148,6 +149,10 @@ class ClazzEdit2Presenter(context: Any,
             newClazz.clazzSchoolUid = arguments[ARG_SCHOOL_UID]?.toLong() ?: 0L
             newClazz.school = db.schoolDao.takeIf { newClazz.clazzSchoolUid != 0L }?.findByUidAsync(newClazz.clazzSchoolUid)
         }
+
+        view.coursePicture = db.onDbThenRepoWithTimeout(2000) { dbToUse, _ ->
+            dbToUse.takeIf { clazzUid != 0L }?.coursePictureDao?.findByClazzUidAsync(clazzUid)
+        } ?: CoursePicture()
 
         val schedules = db.onRepoWithFallbackToDb(2000) {
             it.scheduleDao.takeIf { clazzUid != 0L }?.findAllSchedulesByClazzUidAsync(clazzUid)
@@ -327,6 +332,17 @@ class ClazzEdit2Presenter(context: Any,
 
                 courseBlockOneToManyJoinEditHelper.commitToDatabase(txDb.courseBlockDao){
                     it.cbClazzUid = entity.clazzUid
+                }
+            }
+
+            val coursePictureVal = view.coursePicture
+            if(coursePictureVal != null) {
+                coursePictureVal.coursePictureClazzUid = entity.clazzUid
+
+                if(coursePictureVal.coursePictureUid == 0L) {
+                    repo.coursePictureDao.insertAsync(coursePictureVal)
+                }else {
+                    repo.coursePictureDao.updateAsync(coursePictureVal)
                 }
             }
 

@@ -1779,5 +1779,11 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="past_enrolments">Past enrolments</string>
 
+    <string name="add_a_new_course">Add a new course</string>
+    <string name="join_existing_course">Join existing course</string>
+    <string name="edit_course">Edit course</string>
+    <string name="currently_enrolled">Currently enrolled</string>
+    <string name="past_enrollments">Past enrollments</string>
+
 
 </resources>

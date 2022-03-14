@@ -297,6 +297,10 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
         const val FILTER_ACTIVE_ONLY = 1
 
+        const val FILTER_CURRENTLY_ENROLLED = 5
+
+        const val FILTER_PAST_ENROLLMENTS = 6
+
         private const val SELECT_ACTIVE_CLAZZES = "SELECT * FROM Clazz WHERE CAST(isClazzActive AS INTEGER) = 1"
     }
 
