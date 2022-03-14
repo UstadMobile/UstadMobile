@@ -5,8 +5,6 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ContentPluginIds.CONTAINER_DOWNLOAD_PLUGIN
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.io.ext.FILE_EXTENSION_CE_JSON
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherListener2
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherOkHttp
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherRequest2
@@ -35,6 +33,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.serialization.json.Json
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.core.impl.ContainerStorageManager
 
 class ContainerDownloadPlugin(
     context: Any,
@@ -57,7 +56,7 @@ class ContainerDownloadPlugin(
         "ContainerDownloaderJobOkHttp @${this.doorIdentityHashCode}"
     }
 
-    private val containerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+    private val containerStorageManager: ContainerStorageManager by di.on(endpoint).instance()
 
     private val httpClient: HttpClient = di.direct.instance()
 
@@ -113,7 +112,8 @@ class ContainerDownloadPlugin(
 
         return withContext(Dispatchers.Default){
             val downloadFolderUri: String = jobItem.contentJob?.toUri
-                    ?: containerDir.toDoorUri().toString()
+                    ?: containerStorageManager.storageList.first().dirUri
+
             val downloadFolderDir = DoorUri.parse(downloadFolderUri).toFile()
 
             //This download will go into a subdirectory. This avoids any potential for concurrency

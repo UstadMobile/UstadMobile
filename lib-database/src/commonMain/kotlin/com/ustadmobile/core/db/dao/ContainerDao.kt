@@ -109,49 +109,6 @@ abstract class ContainerDao : BaseDao<Container> {
     abstract fun hasContainerWithFilesToDownload(contentEntryUid: Long): DoorLiveData<Boolean>
 
     @Query("""
-          SELECT EXISTS(SELECT 1
-                          FROM Container
-                     LEFT JOIN ContentJobItem
-                               ON ContentJobItem.cjiContainerUid = Container.containerUid  
-                         WHERE Container.containerContentEntryUid = :contentEntryUid
-                           AND ContentJobItem.cjiRecursiveStatus = ${JobStatus.COMPLETE}
-                           AND EXISTS (SELECT ContainerEntry.ceUid 
-                                         FROM ContainerEntry
-                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
-                      ORDER BY cntLastModified DESC LIMIT 1)
-    """)
-    abstract fun hasContainerWithFilesToDelete(contentEntryUid: Long): DoorLiveData<Boolean>
-
-
-    @Query("""
-          SELECT EXISTS(SELECT 1
-                          FROM Container
-                     LEFT JOIN ContentJobItem
-                               ON ContentJobItem.cjiContainerUid = Container.containerUid  
-                         WHERE Container.containerContentEntryUid = :contentEntryUid
-                           AND EXISTS (SELECT ContainerEntry.ceUid 
-                                         FROM ContainerEntry
-                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
-                      ORDER BY cntLastModified DESC LIMIT 1)
-    """)
-    abstract fun hasContainerWithFilesToOpen(contentEntryUid: Long): DoorLiveData<Boolean>
-
-    @Query("""
-         SELECT (SELECT MAX(cntLastModified) 
-                   FROM Container 
-                  WHERE containerContentEntryUid = :contentEntryUid) > (COALESCE((
-                  
-                        SELECT cntLastModified 
-                          FROM Container 
-                         WHERE Container.containerContentEntryUid = :contentEntryUid
-                           AND EXISTS (SELECT ContainerEntry.ceUid 
-                                         FROM ContainerEntry
-                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid) 
-                      ORDER BY cntLastModified DESC), 9223372036854775807))
-    """)
-    abstract fun hasContainerWithFilesToUpdate(contentEntryUid: Long): DoorLiveData<Boolean>
-
-    @Query("""
             SELECT Container.*
               FROM Container
              WHERE Container.containerContentEntryUid = :contentEntryUid

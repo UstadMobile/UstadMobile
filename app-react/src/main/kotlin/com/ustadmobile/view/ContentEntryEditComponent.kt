@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
@@ -11,6 +10,7 @@ import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultMarginTop
@@ -142,8 +142,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
     var showVideoPreview = false
 
-    var showWebPreview = false
-
+    private var showWebPreview = false
 
     override var videoUri: String? = null
         get() = field
@@ -153,6 +152,13 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                 field = value
                 showVideoPreview = !value.startsWith("http")
                 showWebPreview = value.startsWith("http")
+            }
+        }
+    override var showUpdateContentButton: Boolean = false
+        get() = field
+        set(value) {
+            setState {
+                field = value
             }
         }
 
@@ -206,7 +212,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                             }
                         }
 
-                        if((entity?.leaf == true || (entity?.contentEntryUid ?: 0L) != 0L)){
+                        if(showUpdateContentButton){
                             umButton(getString(MessageID.update_content),
                                 size = ButtonSize.large,
                                 color = UMColor.secondary,

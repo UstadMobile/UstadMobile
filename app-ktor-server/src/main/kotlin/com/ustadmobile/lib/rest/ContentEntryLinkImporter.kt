@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.core.account.Endpoint
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentPluginManager
@@ -44,7 +43,7 @@ fun Route.ContentEntryLinkImporter() {
             val pluginManager: ContentPluginManager by di.on(call).instance()
 
             ContentJobProcessContext(DoorUri.parse(url),
-                    createTemporaryDir("content"), mutableMapOf(), di).use { processContext ->
+                    createTemporaryDir("content"), mutableMapOf(), null, di).use { processContext ->
                 val metadata: MetadataResult?
                 try{
                     metadata = withTimeout(IMPORT_LINK_TIMEOUT_DEFAULT) {

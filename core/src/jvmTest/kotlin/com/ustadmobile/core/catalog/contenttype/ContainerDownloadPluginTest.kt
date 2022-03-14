@@ -6,6 +6,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.ContentJobProgressListener
+import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
@@ -196,7 +197,7 @@ class ContainerDownloadPluginTest {
 
         val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
             temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            clientDi)
+            DummyContentJobItemTransactionRunner(clientDb), clientDi)
 
 
         val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
@@ -227,8 +228,10 @@ class ContainerDownloadPluginTest {
         for(i in 0..1) {
             Napier.d("============ ATTEMPT $i ============")
             try {
-                val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(), temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-                        clientDi)
+                val processContext = ContentJobProcessContext(
+                    temporaryFolder.newFolder().toDoorUri(),
+                    temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
+                    DummyContentJobItemTransactionRunner(clientDb), clientDi)
 
                 val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
                 val result = runBlocking {  downloadJob.processJob(job, processContext, mockListener) }
@@ -295,7 +298,7 @@ class ContainerDownloadPluginTest {
 
         val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
             temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            clientDi)
+            DummyContentJobItemTransactionRunner(clientDb), clientDi)
 
 
         val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
@@ -307,7 +310,7 @@ class ContainerDownloadPluginTest {
 
         serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
 
-        val contentJobItemInDb = clientDb.contentJobItemDao.findByJobId(job.contentJobItem?.cjiUid ?: 0L)
+        val contentJobItemInDb = clientDb.contentJobItemDao.findRootJobItemByJobId(job.contentJobItem?.cjiUid ?: 0L)
         Assert.assertEquals("ContentEntryUid was set from sourceUri", contentEntry.contentEntryUid,
             contentJobItemInDb?.cjiContentEntryUid)
         Assert.assertEquals("ContainerUid was set to most recent container after looking up content entry",
@@ -332,7 +335,7 @@ class ContainerDownloadPluginTest {
 
         val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
             temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            clientDi)
+            DummyContentJobItemTransactionRunner(clientDb), clientDi)
 
 
         val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
@@ -360,7 +363,7 @@ class ContainerDownloadPluginTest {
 
         val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
             temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            clientDi)
+            DummyContentJobItemTransactionRunner(clientDb), clientDi)
 
 
         val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
@@ -383,7 +386,7 @@ class ContainerDownloadPluginTest {
 
         val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
             temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            clientDi)
+            DummyContentJobItemTransactionRunner(clientDb), clientDi)
 
         val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
         val result = runBlocking {  downloadJob.processJob(job, processContext, mock { } ) }
@@ -392,7 +395,7 @@ class ContainerDownloadPluginTest {
             JobStatus.COMPLETE, result.status)
 
         val downloadedContainerUid = clientDb.contentJobItemDao
-            .findByJobId(job.contentJobItem?.cjiJobUid ?: 0)?.cjiContainerUid ?: 0
+            .findRootJobItemByJobId(job.contentJobItem?.cjiJobUid ?: 0)?.cjiContainerUid ?: 0
 
         Assert.assertEquals("Download used the previous active container uid, not the most recent inactive one",
             container.containerUid, downloadedContainerUid)

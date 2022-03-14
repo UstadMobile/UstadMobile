@@ -17,9 +17,26 @@ $ mkdir /home/ustad/server
 $ cp /my/Download/ustad-server-all.jar /home/ustad/ustad-server-all.jar
 
 # Install java (on Ubuntu)
-$ apt-get install openjdk-8-jre ffmpeg
+$ apt-get install openjdk-11-jre ffmpeg
 ```
-Note: FFMPEG is optional, but is recommended. It is used by the server to compress video.
+
+# Install FFMPEG (required)
+
+FFMPEG is required for media conversion purposes. If ffmpeg and ffprobe are in the path, they
+will be found automatically.
+
+On Ubuntu:
+```
+apt-get install ffmpeg
+```
+
+On Windows:
+* Download [FFMPEG Windows Build](https://www.gyan.dev/ffmpeg/builds/)
+* Copy the binaries to the working directory (e.g. the same directory where ustad-server-all.jar is)
+* Alternatively, place the ffmpeg binaries anywhere you wish, then set the path in application.conf
+  (see section below)
+
+
 
 ## Install HTTPS Certificate (recommended)
 
@@ -76,6 +93,17 @@ ktor {
         # The app download link for Android users. Users will be redirected here if they select
         # to download the app
         androidDownloadHref = "https://play.google.com/store/apps/details?id=com.toughra.ustadmobile"
+
+        paths {
+            # These are external commands that are required. Normally they will be automatically
+            # detected in the path, and there is no need to specify them manually
+
+            # If they are not in the path or default location, then specify them below
+
+            # FFMPEG is used for media compression
+            # ffmpeg = /usr/bin/ffmpeg
+            # ffprobe = /usr/bin/ffprobe
+        }
     }
 
     database {

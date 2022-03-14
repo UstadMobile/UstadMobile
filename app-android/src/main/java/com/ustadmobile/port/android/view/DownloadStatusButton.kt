@@ -8,9 +8,8 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.util.ext.isStatusPaused
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.lib.db.entities.ContentJobItemProgress
 
 /**
  * A button that shows the download status of an item. It consists of an icon (a download icon or
@@ -22,18 +21,6 @@ class DownloadStatusButton : RelativeLayout {
     private var mProgressBar: ProgressBar? = null
 
     private var currentDownloadStatus: Int = -1
-
-    var contentJobItemProgress: ContentJobItemProgress? = null
-        set(value){
-            field = value
-            val downloadLength = value?.total ?: 0
-            val downloadedSoFar = value?.progress ?: 0
-            progress = if(downloadLength > 0) {
-                ((downloadedSoFar.toFloat() / downloadLength) * 100).toInt()
-            }else {
-                0
-            }
-        }
 
     var contentJobItemStatus: Int? = null
         set(value) {
@@ -48,7 +35,7 @@ class DownloadStatusButton : RelativeLayout {
                     contentDescription = context.getString(R.string.download_entry_state_paused)
                 }
 
-                statusChanged && currentDownloadStatus == ContentJobItem.STATUS_COMPLETE -> {
+                statusChanged && currentDownloadStatus == JobStatus.COMPLETE -> {
                     setImageResource(R.drawable.ic_baseline_offline_pin_24)
                     contentDescription = context.getString(R.string.downloaded)
                 }
@@ -59,7 +46,8 @@ class DownloadStatusButton : RelativeLayout {
                 }
             }
 
-            takeIf { statusChanged }?.progressVisibility = if(currentDownloadStatus != ContentJobItem.STATUS_COMPLETE) {
+            takeIf { statusChanged }?.progressVisibility =
+                if(currentDownloadStatus != JobStatus.COMPLETE) {
                 View.VISIBLE
             }else {
                 View.INVISIBLE

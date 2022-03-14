@@ -1,10 +1,10 @@
 package com.ustadmobile.core.view
 
-interface ContentEntryImportLinkView : UstadEditView<String> {
-
-    var showProgress: Boolean
+interface ContentEntryImportLinkView : UstadView {
 
     var validLink: Boolean
+
+    var inProgress: Boolean
 
     companion object {
 

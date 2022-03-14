@@ -45,15 +45,6 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
     override val viewNames: List<String>
         get() = listOf(ContentEntryDetailOverviewView.VIEW_NAME)
 
-    private var currentDownloadJobItemStatus: Int = -1
-
-    private var showEntryDownloadOpenBtn = true
-
-    private var showEntryDetailProgress = true
-
-    private var downloadProgress: kotlin.Float = 0f
-
-    private var downloadStatusText = ""
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
@@ -95,7 +86,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                 field = value
             }
         }
-    override var canDownload: Boolean = false
+    override var contentEntryButtons: ContentEntryButtonModel? = null
         get() = field
         set(value) {
             setState {
@@ -103,14 +94,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
             }
         }
 
-    override var canUpdate: Boolean = false
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
-    override var canDelete: Boolean = false
+    override var activeContentJobItems: List<ContentJobItemProgress>? = null
         get() = field
         set(value) {
             setState {
@@ -118,71 +102,6 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
             }
         }
 
-    override var canOpen: Boolean = false
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
-
-
-    override var contentJobItemStatus: Int = 0
-        get() = field
-        set(value) {
-            if(currentDownloadJobItemStatus != value) {
-                when {
-                    value == ContentJobItem.STATUS_COMPLETE -> {
-                        setState {
-                            showEntryDetailProgress = false
-                            showEntryDownloadOpenBtn = true
-                        }
-                    }
-
-                    value == ContentJobItem.STATUS_RUNNING -> {
-                        setState {
-                            showEntryDetailProgress = true
-                            showEntryDownloadOpenBtn = false
-                        }
-                    }
-
-                    else -> {
-                        setState {
-                            showEntryDetailProgress = true
-                            showEntryDownloadOpenBtn = false
-                        }
-                    }
-                }
-
-                currentDownloadJobItemStatus = value
-            }
-            setState {
-                field = value
-            }
-        }
-
-    override var contentJobItemProgress: List<ContentJobItemProgress>? = null
-        get() = field
-        set(value) {
-
-            /*setState {
-                if(value != null) {
-
-                    if(value.progressTitle != null){
-                        downloadStatusText = value.progressTitle.toString()
-                    }
-
-                    downloadProgress = if (value.total > 0) {
-                        (value.progress.toFloat()) / (value.total.toFloat())
-                    } else {
-                        0f
-                    }
-                }else{
-                    downloadProgress = 0f
-                }
-                field = value
-            }*/
-        }
 
     override var entity: ContentEntryWithMostRecentContainer? = null
         get() = field
@@ -197,6 +116,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
         mPresenter = ContentEntryDetailOverviewPresenter(this,arguments, this,di,this)
         mPresenter?.onCreate(mapOf())
     }
+
 
     override fun RBuilder.render() {
         styledDiv {
@@ -221,18 +141,19 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                         }
                     }
 
-                  /*
-                  Handle this when we have local download on web
-                  if((canDownload || canOpen) && showEntryDownloadOpenBtn){
-                       if(canDownload) MessageID.download else MessageID.open
-                   }*/
+                    val buttonLabelId = if(contentEntryButtons?.showDownloadButton == true)
+                        MessageID.download else MessageID.open
 
-                    umButton(getString(MessageID.open),
+                    umButton(getString(buttonLabelId),
                         size = ButtonSize.large,
                         color = UMColor.secondary,
                         variant = ButtonVariant.contained,
                         onClick = {
-                            mPresenter?.handleOnClickOpenDownloadButton()
+                           if(contentEntryButtons?.showDownloadButton == true){
+                               mPresenter?.handleClickDownloadButton()
+                           }else {
+                               mPresenter?.handleClickOpenButton()
+                           }
                         }){
                         css (contentEntryDetailOverviewComponentOpenBtn)
                     }

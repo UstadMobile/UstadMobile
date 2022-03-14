@@ -28,6 +28,16 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                  ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
        WHERE UserSession.usClientNodeId = :newNodeId
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+         -- Temporary measure to prevent admin user getting clogged up
+         -- Restrict to the last 30 days of data
+         AND StatementEntity.timestamp > ( 
+       --notpsql
+       strftime('%s', 'now') * 1000
+       --endnotpsql
+       /*psql
+       ROUND(EXTRACT(epoch from NOW())*1000)
+       */
+       - (30 * CAST(86400000 AS BIGINT)))
        --notpsql
          AND StatementEntity.statementLct != COALESCE(
              (SELECT seVersionId

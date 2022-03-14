@@ -1,36 +1,42 @@
 package com.ustadmobile.core.controller
 
-import com.google.gson.Gson
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
+import com.ustadmobile.core.contentjob.MetadataResult
+import com.ustadmobile.core.impl.nav.UstadBackStackEntry
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.UmAccount
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import com.ustadmobile.lib.db.entities.Schedule
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
 import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.singleton
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.timeout
-import org.mockito.kotlin.verify
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.mockito.kotlin.*
 
 class ContentEntryImportLinkPresenterTest {
 
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ContentEntryImportLinkView
-
-    private lateinit var accountManager: UstadAccountManager
 
     private lateinit var context: Any
 
@@ -38,60 +44,63 @@ class ContentEntryImportLinkPresenterTest {
 
     private lateinit var presenter: ContentEntryImportLinkPresenter
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
-
     private lateinit var mockWebServer: MockWebServer
+
+    private lateinit var savedStateHandle: UstadSavedStateHandle
+
+    private lateinit var ustadBackStackEntry: UstadBackStackEntry
+
+    private val resultKey = "MetaData"
 
     @Before
     fun setUp() {
+        mockView = mock { }
         context = Any()
 
-        mockView = mock { }
+        savedStateHandle = mock{}
 
-        mockLifecycleOwner = mock { }
+        ustadBackStackEntry = mock{
+            on{savedStateHandle}.thenReturn(savedStateHandle)
+        }
 
         mockWebServer = MockWebServer()
         mockWebServer.start()
 
-        accountManager = mock{
-            on{activeAccount}.thenReturn(UmAccount(0,"","",mockWebServer.url("/").toString()))
-        }
-
         di = DI {
-            bind<UstadAccountManager>() with singleton { accountManager }
-            bind<Gson>() with singleton { Gson() }
-            bind<HttpClient>() with singleton {
-                HttpClient(OkHttp) {
-                    install(JsonFeature)
-                    install(HttpTimeout)
-                }
-            }
+            import(ustadTestRule.diModule)
         }
+        val accountManager: UstadAccountManager by di.instance()
+        accountManager.activeEndpoint = Endpoint(mockWebServer.url("/").toString())
 
-
-        presenter = ContentEntryImportLinkPresenter(context, mapOf(UstadView.ARG_RESULT_DEST_KEY to ""), mockView, mockLifecycleOwner, di)
-
-
-
+        presenter = ContentEntryImportLinkPresenter(context,
+            mapOf(UstadView.ARG_RESULT_DEST_KEY to resultKey,
+                UstadView.ARG_RESULT_DEST_VIEWNAME to ContentEntryImportLinkView.VIEW_NAME),
+            mockView, di)
     }
 
     @Test
     fun givenPresenterCreated_whenUserEntersLinkAndIsValid_thenReturnToPreviousScreen() {
+        val navController: UstadNavController = di.direct.instance()
 
-        var importedContentEntryMetaData = ImportedContentEntryMetaData(
-                ContentEntryWithLanguage(), "application/epub+zip",
-                "content://abc.zip", "googleDriveScraper")
+        whenever(navController.getBackStackEntry(eq(ContentEntryImportLinkView.VIEW_NAME)))
+            .thenReturn(ustadBackStackEntry)
 
-        var response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json")
+        val metadataResult = MetadataResult(ContentEntryWithLanguage(),EpubTypePluginCommonJvm.PLUGIN_ID)
+
+        val response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json")
             .setBody(Buffer().write(
-                safeStringify(di, ImportedContentEntryMetaData.serializer(), importedContentEntryMetaData).toByteArray()))
+                safeStringify(di, MetadataResult.serializer(), metadataResult).toByteArray()))
 
         mockWebServer.enqueue(response)
 
-        presenter.handleClickSave(mockWebServer.url("/").toString())
+        presenter.handleClickDone(mockWebServer.url("/").toString())
 
-        verify(mockView, timeout(5000)).showProgress = false
-        //verify(mockView, timeout(5000)).finishWithResult(importedContentEntryMetaData)
+        verify(mockView, timeout(5000)).inProgress = true
+
+        verify(savedStateHandle, timeout(5000))[eq(resultKey)] = argWhere<String> {
+            safeParseList(di, ListSerializer(MetadataResult.serializer()),
+                MetadataResult::class, it).first() == metadataResult
+        }
     }
 
     @Test
@@ -100,11 +109,16 @@ class ContentEntryImportLinkPresenterTest {
         var response = MockResponse().setResponseCode(400)
         mockWebServer.enqueue(response)
 
-        presenter.handleClickSave(mockWebServer.url("/").toString())
+        presenter.handleClickDone(mockWebServer.url("/").toString())
 
-        verify(mockView, timeout(5000)).showProgress = false
+        verify(mockView, timeout(5000)).inProgress = true
         verify(mockView, timeout(5000)).validLink = false
-        verify(mockView, timeout(5000)).showProgress = true
+        verify(mockView, timeout(5000)).inProgress = false
+    }
+
+    @After
+    fun after(){
+        mockWebServer.shutdown()
     }
 
 }

@@ -66,12 +66,14 @@ afterEvaluate {
 }
 
 //Start the test server that Espresso tests can use when we need to test communicating with a real server
+/* Disabled 10/Mar/22 as this is not in use, but will be restored in the near future
 tasks.whenTaskAdded { task ->
     if (task.name.toLowerCase().startsWith("connected") && task.name.toLowerCase().endsWith("androidtest")) {
         task.dependsOn(":lib-http-testserver:startServer")
         task.finalizedBy(":lib-http-testserver:stopServer")
     }
 }
+*/
 
 android {
     buildFeatures {
