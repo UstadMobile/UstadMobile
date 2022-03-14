@@ -12,20 +12,28 @@ import com.toughra.ustadmobile.databinding.ItemCourseBlockBinding
 import com.toughra.ustadmobile.databinding.ItemCourseBlockEditBinding
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.util.OneToManyJoinEditListener
+import com.ustadmobile.core.util.TreeOneToManyJoinEditListener
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import java.util.*
 
-class CourseBlockRecyclerAdapter(var oneToManyEditListener: OneToManyJoinEditListener<CourseBlockWithEntity>?,
+class CourseBlockRecyclerAdapter(var oneToManyEditListener: TreeOneToManyJoinEditListener<CourseBlockWithEntity>?,
                                  var presenter: ClazzEdit2Presenter?,
-                                 recylerView: RecyclerView?): ListAdapter<CourseBlockWithEntity,
-        CourseBlockRecyclerAdapter.CourseBlockViewHolder>(DIFF_CALLBACK_BLOCK), ItemTouchHelperAdapter, OnStartDragListener{
+                                 recylerView: RecyclerView?): RecyclerView.Adapter<
+        CourseBlockRecyclerAdapter.CourseBlockViewHolder>(), ItemTouchHelperAdapter, OnStartDragListener{
 
     private var itemTouchHelper: ItemTouchHelper
+
+    var arrayItems : ArrayList<CourseBlockWithEntity> = ArrayList()
 
     init{
         val callback = ReorderHelperCallback(this)
         itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(recylerView)
+    }
+
+    fun setData(array : ArrayList<CourseBlockWithEntity>){
+        arrayItems = array
+        notifyDataSetChanged()
     }
 
     class CourseBlockViewHolder(val binding: ItemCourseBlockEditBinding): RecyclerView.ViewHolder(binding.root)
@@ -52,7 +60,7 @@ class CourseBlockRecyclerAdapter(var oneToManyEditListener: OneToManyJoinEditLis
     }
 
     override fun onBindViewHolder(holder: CourseBlockViewHolder, position: Int) {
-        holder.binding.block = getItem(position)
+        holder.binding.block = arrayItems[position]
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -62,7 +70,7 @@ class CourseBlockRecyclerAdapter(var oneToManyEditListener: OneToManyJoinEditLis
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
-        Collections.swap(currentList, fromPosition, toPosition)
+        Collections.swap(arrayItems, fromPosition, toPosition)
         notifyItemMoved(fromPosition, toPosition)
         return true
     }
@@ -122,6 +130,10 @@ class CourseBlockRecyclerAdapter(var oneToManyEditListener: OneToManyJoinEditLis
         }
 
 
+    }
+
+    override fun getItemCount(): Int {
+        return arrayItems.size
     }
 
 

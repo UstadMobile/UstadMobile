@@ -8,6 +8,7 @@
         <import type="android.text.InputType" />
         <import type="com.ustadmobile.core.model.BitmaskFlag"/>
         <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
+        <import type="com.ustadmobile.core.util.TreeOneToManyJoinEditListener"/>
         <import type="com.ustadmobile.lib.db.entities.Schedule"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlockWithEntity"/>
         <import type="com.ustadmobile.core.controller.ClazzEdit2Presenter"/>
@@ -58,7 +59,7 @@
 
         <variable
             name="courseBlockOneToManyListener"
-            type="OneToManyJoinEditListener&lt;CourseBlockWithEntity&gt;" />
+            type="TreeOneToManyJoinEditListener&lt;CourseBlockWithEntity&gt;" />
 
         <variable
             name="mPresenter"

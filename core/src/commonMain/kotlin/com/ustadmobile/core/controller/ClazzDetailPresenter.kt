@@ -152,7 +152,7 @@ class ClazzDetailPresenter(context: Any,
 
     companion object {
 
-        val CLAZZ_FEATURES = listOf(Clazz.CLAZZ_FEATURE_ATTENDANCE, Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT)
+        val CLAZZ_FEATURES = listOf(Clazz.CLAZZ_FEATURE_ATTENDANCE)
 
         //Map of the feature flag to the permission flag required for that tab to be visible
         val FEATURE_PERMISSION_MAP = mapOf(

@@ -39,7 +39,7 @@ class ClazzEdit2Presenter(context: Any,
                           arguments: Map<String, String>, view: ClazzEdit2View,  di : DI,
                           lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendarAndSchool>(context, arguments, view,
-         di, lifecycleOwner) {
+         di, lifecycleOwner), TreeOneToManyJoinEditListener<CourseBlockWithEntity> {
 
     private val scheduleOneToManyJoinEditHelper
             = OneToManyJoinEditHelperMp(Schedule::scheduleUid,
@@ -57,16 +57,12 @@ class ClazzEdit2Presenter(context: Any,
         requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
 
     private val courseBlockOneToManyJoinEditHelper
-            = OneToManyJoinEditHelperMp(CourseBlockWithEntity::cbUid,
+            = DefaultOneToManyJoinEditHelper(CourseBlockWithEntity::cbUid,
             ARG_SAVEDSTATE_BLOCK,
             ListSerializer(CourseBlockWithEntity.serializer()),
             ListSerializer(CourseBlockWithEntity.serializer()),
             this,
-            requireSavedStateHandle(),
             CourseBlockWithEntity::class) {cbUid = it}
-
-    val courseBlockOneToManyJoinListener = courseBlockOneToManyJoinEditHelper.createNavigateForResultListener(
-            CourseBlockEditView.VIEW_NAME, CourseBlockWithEntity.serializer())
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -205,7 +201,7 @@ class ClazzEdit2Presenter(context: Any,
                 }
             })
         }
-        
+
         return clazz
     }
 
@@ -294,7 +290,7 @@ class ClazzEdit2Presenter(context: Any,
 
             repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
 
-                if(arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() != 0L) {
+                if(arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() == 0L) {
                     txDb.createNewClazzAndGroups(entity, systemImpl, context)
                 }else {
                     txDb.clazzDao.updateAsync(entity)
@@ -400,6 +396,51 @@ class ClazzEdit2Presenter(context: Any,
 
         const val SAVEDSTATE_KEY_FEATURES = "ClazzFeatures"
 
+    }
+
+    override fun onClickNew() {
+    }
+
+    override fun onClickEdit(joinedEntity: CourseBlockWithEntity) {
+
+        val navigateForResultOptions = when(joinedEntity.cbType){
+            CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
+                val args = mutableMapOf<String, String>()
+                args[UstadView.ARG_CLAZZUID] = entity?.clazzUid.toString()
+
+                NavigateForResultOptions(
+                        this,
+                        currentEntityValue = joinedEntity.assignment,
+                        destinationViewName = ClazzAssignmentEditView.VIEW_NAME,
+                        entityClass = ClazzAssignment::class,
+                        serializationStrategy = ClazzAssignment.serializer(),
+                        destinationResultKey = SAVEDSTATE_KEY_ASSIGNMENT,
+                        arguments = args)
+            }
+            else -> return
+        }
+
+
+        navigateForResult(navigateForResultOptions)
+    }
+
+    override fun onClickDelete(joinedEntity: CourseBlockWithEntity) {
+        courseBlockOneToManyJoinEditHelper.onDeactivateEntity(joinedEntity)
+    }
+
+    override fun onClickIndent(joinedEntity: CourseBlockWithEntity) {
+        joinedEntity.cbIndentLevel++
+        courseBlockOneToManyJoinEditHelper.onEditResult(joinedEntity)
+    }
+
+    override fun onClickUnIndent(joinedEntity: CourseBlockWithEntity) {
+        joinedEntity.cbIndentLevel--
+        courseBlockOneToManyJoinEditHelper.onEditResult(joinedEntity)
+    }
+
+    override fun onClickHide(joinedEntity: CourseBlockWithEntity) {
+        joinedEntity.cbActive = false
+        courseBlockOneToManyJoinEditHelper.onDeactivateEntity(joinedEntity)
     }
 
 }

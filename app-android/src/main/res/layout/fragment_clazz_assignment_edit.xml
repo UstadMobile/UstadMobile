@@ -8,7 +8,6 @@
         <import type="android.text.InputType" />
         <import type="android.content.Context" />
         <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
-        <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>

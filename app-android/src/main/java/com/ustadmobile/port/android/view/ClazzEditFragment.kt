@@ -36,7 +36,9 @@ interface ClazzEditFragmentEventHandler {
 
     fun onAddCourseBlockClicked()
 }
-class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(), ClazzEdit2View, ClazzEditFragmentEventHandler, TitleDescBottomSheetOptionSelectedListener {
+class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(),
+        ClazzEdit2View, ClazzEditFragmentEventHandler,
+        TitleDescBottomSheetOptionSelectedListener {
 
     private var bottomSheetOptionList: List<TitleDescBottomSheetOption> = listOf()
     private var mDataBinding: FragmentClazzEditBinding? = null
@@ -65,7 +67,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
     }
 
     private val courseBlockObserver = Observer<List<CourseBlockWithEntity>?> {
-        t -> courseBlockRecyclerAdapter?.submitList(t)
+        t -> courseBlockRecyclerAdapter?.setData(ArrayList(t))
     }
 
     override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
@@ -239,10 +241,9 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
 
-        mDataBinding?.courseBlockOneToManyListener = mPresenter?.courseBlockOneToManyJoinListener
+        mDataBinding?.courseBlockOneToManyListener = mPresenter
         courseBlockRecyclerAdapter = CourseBlockRecyclerAdapter(
-                mPresenter?.courseBlockOneToManyJoinListener,
-                mPresenter, mDataBinding?.activityClazzEditCourseBlockRecyclerview)
+                mPresenter, mPresenter, mDataBinding?.activityClazzEditCourseBlockRecyclerview)
 
         courseBlockRecyclerView?.adapter = courseBlockRecyclerAdapter
         courseBlockRecyclerView?.layoutManager = LinearLayoutManager(requireContext())

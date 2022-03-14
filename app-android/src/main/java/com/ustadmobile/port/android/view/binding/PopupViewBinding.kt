@@ -21,3 +21,27 @@ fun View.setOnPopupMenuItemClickListener(onClickEditPopupMenu: View.OnClickListe
         popupMenu.show()
     }
 }
+
+
+@BindingAdapter(value = ["onClickHideBlockPopupMenu","onClickIndentBlockPopupMenu",
+    "onClickUnIndentBlockPopupMenu", "onClickDeleteBlockPopupMenu"], requireAll = false)
+fun View.setOnBlockPopupMenuItemClickListener(
+        onClickHideBlockPopupMenu: View.OnClickListener?,
+        onClickIndentBlockPopupMenu: View.OnClickListener?,
+        onClickUnIndentBlockPopupMenu: View.OnClickListener?,
+        onClickDeleteBlockPopupMenu: View.OnClickListener?){
+    setOnClickListener{
+        val popupMenu = PopupMenu(this.context, this)
+        popupMenu.setOnMenuItemClickListener { item ->
+            when(item.itemId) {
+                R.id.block_hide -> onClickHideBlockPopupMenu?.onClick(this)
+                R.id.block_indent -> onClickIndentBlockPopupMenu?.onClick(this)
+                R.id.block_unindent -> onClickUnIndentBlockPopupMenu?.onClick(this)
+                R.id.block_delete -> onClickDeleteBlockPopupMenu?.onClick(this)
+            }
+            true
+        }
+        popupMenu.inflate(R.menu.menu_course_block_options)
+        popupMenu.show()
+    }
+}
