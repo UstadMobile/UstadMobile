@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.JobStatus
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
@@ -25,7 +26,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
+import org.kodein.di.bind
 import org.kodein.di.instance
+import org.kodein.di.singleton
 import java.lang.Thread.sleep
 
 class ContentEntryDetailOverviewPresenterTest {
@@ -62,6 +65,9 @@ class ContentEntryDetailOverviewPresenterTest {
 
         di = DI {
             import(ustadTestRule.diModule)
+            bind<Boolean>(tag = UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with singleton {
+                true
+            }
         }
 
         val db: UmAppDatabase by di.activeDbInstance()

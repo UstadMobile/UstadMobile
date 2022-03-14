@@ -95,7 +95,7 @@ class ContentEntryDetailOverviewPresenter(
 
         if (db !is DoorDatabaseRepository) {
             RateLimitedLiveData(db, listOf("Container", "ContentEntry", "ContentJobItem")) {
-                db.contentEntryDao.buttonsToShowForContentEntry(entityUid)
+                db.contentEntryDao.buttonsToShowForContentEntry(entityUid, isPlatformDownloadEnabled)
             }.observeWithLifecycleOwner(lifecycleOwner) {
                 if(it == null)
                     return@observeWithLifecycleOwner
