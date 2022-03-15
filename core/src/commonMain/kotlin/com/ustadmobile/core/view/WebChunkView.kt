@@ -6,12 +6,12 @@ interface WebChunkView : UstadView {
 
     var entry: ContentEntry?
 
-    var containerUid: Long?
+    var url: String
 
     fun showNoAppFoundError(message: String, actionMessageId: Int, mimeType: String)
 
     companion object {
 
-        const val VIEW_NAME = "WebChunk"
+        const val VIEW_NAME = "WebChunkView"
     }
 }

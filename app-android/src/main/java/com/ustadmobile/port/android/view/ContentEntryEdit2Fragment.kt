@@ -26,14 +26,15 @@ import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.ext.toBundle
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.port.android.util.ext.*
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
-import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -218,8 +219,7 @@ class ContentEntryEdit2Fragment(
     }
 
     override fun handleClickLanguage() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
+        mPresenter?.handleClickLanguage()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

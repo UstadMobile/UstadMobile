@@ -6,7 +6,6 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
-import com.ustadmobile.lib.db.entities.ClazzAssignment
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -16,6 +15,7 @@ class ViewNameToDestMap: DestinationProvider {
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             ClazzList2View.VIEW_NAME to UstadDestination(R.id.home_clazzlist_dest),
             ClazzDetailView.VIEW_NAME to UstadDestination(R.id.clazz_detail_dest),
+            HolidayEditView.VIEW_NAME to UstadDestination(R.id.holiday_edit_dest),
             HolidayCalendarListView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_list_dest),
             HolidayCalendarEditView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
@@ -57,9 +57,8 @@ class ViewNameToDestMap: DestinationProvider {
                     hideAccountIcon = true),
             SelectFileView.VIEW_NAME to UstadDestination(R.id.select_file_view),
             SelectFolderView.VIEW_NAME to UstadDestination(R.id.select_folder_view),
-            ContentEntryImportLinkView.VIEW_NAME to UstadDestination(R.id.import_link_view,
-                hideAccountIcon = true),
-            VideoPlayerView.VIEW_NAME to UstadDestination(R.id.video_content),
+            ContentEntryImportLinkView.VIEW_NAME to UstadDestination(R.id.import_link_view),
+            VideoContentView.VIEW_NAME to UstadDestination(R.id.video_content),
             WebChunkView.VIEW_NAME to UstadDestination(R.id.webchunk_view,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
             // If ActionBarScrollBehavior is collapsing/scroll, then the WebView for Xapi content

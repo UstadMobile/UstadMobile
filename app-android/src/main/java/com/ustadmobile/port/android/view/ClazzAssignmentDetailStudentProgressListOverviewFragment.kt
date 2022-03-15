@@ -10,9 +10,8 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
-import com.ustadmobile.lib.db.entities.ScopedGrantAndName
+import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 

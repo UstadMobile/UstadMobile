@@ -5,9 +5,9 @@ import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.LearnerGroupMember
@@ -53,6 +53,8 @@ class LearnerGroupMemberListPresenter(context: Any, arguments: Map<String, Strin
     override fun handleClickCreateNewFab() {
 
     }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
 
     fun handleNewMemberToGroup(student: Person) {
         GlobalScope.launch(doorMainDispatcher()) {

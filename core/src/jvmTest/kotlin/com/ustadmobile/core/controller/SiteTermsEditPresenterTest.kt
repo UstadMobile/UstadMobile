@@ -2,21 +2,27 @@
 package com.ustadmobile.core.controller
 
 
+import com.ustadmobile.core.impl.nav.UstadBackStackEntry
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import org.mockito.kotlin.*
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.SiteTermsEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
+import kotlinx.serialization.builtins.ListSerializer
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
+import org.kodein.di.*
 
 
 /**
@@ -38,16 +44,33 @@ class SiteTermsEditPresenterTest {
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
+    private lateinit var testNavController: UstadNavController
+
+    private lateinit var ustadBackStackEntry: UstadBackStackEntry
+
+    private lateinit var savedStateHandle: UstadSavedStateHandle
+
     @Before
     fun setup() {
         mockView = mock { }
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
+
+        savedStateHandle = mock{}
+        ustadBackStackEntry = mock{
+            on{savedStateHandle}.thenReturn(savedStateHandle)
+        }
+
+        testNavController = mock{
+            on { getBackStackEntry(any()) }.thenReturn(ustadBackStackEntry)
+        }
         context = Any()
 
         di = DI {
             import(ustadTestRule.diModule)
+            bind<UstadNavController>(overrides = true) with singleton { testNavController }
+
         }
 
         //TODO: insert any entities required for all tests
@@ -66,7 +89,11 @@ class SiteTermsEditPresenterTest {
 
         val testEntitySerialized = safeStringify(di, SiteTermsWithLanguage.serializer(), testEntity)
 
-        val presenterArgs = mapOf(UstadEditView.ARG_ENTITY_JSON to testEntitySerialized)
+        val presenterArgs = mapOf(
+            UstadEditView.ARG_ENTITY_JSON to testEntitySerialized,
+            UstadView.ARG_RESULT_DEST_VIEWNAME to "view",
+            UstadView.ARG_RESULT_DEST_KEY to "key"
+        )
 
         val presenter = SiteTermsEditPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
@@ -79,9 +106,10 @@ class SiteTermsEditPresenterTest {
 
         presenter.handleClickSave(initialEntity)
 
-        verify(mockView, timeout(2000)).finishWithResult(argWhere {
-            it.first().termsHtml == "<h1>All your base are belong to us</h1>"
-        })
+        verify(savedStateHandle, timeout(2000))[any()] = argWhere<String> {
+            safeParseList(di, ListSerializer(SiteTermsWithLanguage.serializer()),
+                SiteTermsWithLanguage::class, it).first().termsHtml == "<h1>All your base are belong to us</h1>"
+        }
     }
 
 

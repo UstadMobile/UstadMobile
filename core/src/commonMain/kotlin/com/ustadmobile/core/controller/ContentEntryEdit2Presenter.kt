@@ -1,7 +1,10 @@
 package com.ustadmobile.core.controller
 
 import SelectFolderView
-import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -10,17 +13,17 @@ import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.io.ext.isRemote
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.createTemporaryDir
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.encodeStringMapToString
 import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
-import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
+import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.view.LanguageListView
+import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
@@ -169,7 +172,9 @@ class ContentEntryEdit2Presenter(
             presenterScope.launch(doorMainDispatcher()){
                 view.entity = handleFileSelection(uri)
             }
-            requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+            }
         }
 
         observeSavedStateResult(SAVED_STATE_KEY_METADATA, ListSerializer(MetadataResult.serializer()),
@@ -188,6 +193,18 @@ class ContentEntryEdit2Presenter(
             view.loading = false
 
             requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
+        }
+
+        observeSavedStateResult(
+            SAVEDSTATE_KEY_LANGUAGE, ListSerializer(Language.serializer()),
+            Language::class) {
+            val language = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.language = language
+            entity?.primaryLanguageUid = language.langUid
+            view.entity = entity
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_LANGUAGE] = null
+            }
         }
 
 
@@ -273,7 +290,6 @@ class ContentEntryEdit2Presenter(
                         view.fieldsEnabled = true
                         systemImpl.popBack(popUpTo, popUpInclusive = true, context)
                         return@launch
-
 
                     } else {
                         try {
@@ -395,11 +411,14 @@ class ContentEntryEdit2Presenter(
         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
 
         navigateForResult(
-                NavigateForResultOptions(this,
-                        null, ContentEntryImportLinkView.VIEW_NAME,
-                        MetadataResult::class,
-                        MetadataResult.serializer(), SAVED_STATE_KEY_METADATA,
-                        arguments = args)
+                NavigateForResultOptions(
+                    this,
+                    null,
+                    ContentEntryImportLinkView.VIEW_NAME,
+                    MetadataResult::class,
+                    MetadataResult.serializer(), SAVED_STATE_KEY_METADATA,
+                    arguments = args
+                )
         )
     }
 
@@ -417,6 +436,15 @@ class ContentEntryEdit2Presenter(
         )
     }
 
+    fun handleClickLanguage(){
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null,
+                LanguageListView.VIEW_NAME, Language::class,
+                Language.serializer(),
+                SAVEDSTATE_KEY_LANGUAGE))
+    }
+
     override fun onClickAddFolder() {
         val args = mutableMapOf(ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
@@ -432,6 +460,8 @@ class ContentEntryEdit2Presenter(
     companion object {
 
         const val SAVED_STATE_KEY_URI = "URI"
+
+        const val SAVEDSTATE_KEY_LANGUAGE = "Language"
 
         const val SAVED_STATE_KEY_METADATA = "importedMetadata"
 

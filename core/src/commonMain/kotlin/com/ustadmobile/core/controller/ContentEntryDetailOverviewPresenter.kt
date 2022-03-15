@@ -22,11 +22,18 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
-import com.ustadmobile.door.*
+import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.*
-import org.kodein.di.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
 class ContentEntryDetailOverviewPresenter(

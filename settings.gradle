@@ -18,6 +18,7 @@ pluginManagement {
 
 include ':app-android',
         ':app-ktor-server',
+        ':app-react',
         ':lib-test-common',
         ':core',
         ':sharedse',
@@ -28,7 +29,8 @@ include ':app-android',
         ':lib-http-testserver',
         ':lib-database',
         ':lib-database-android',
-        ':lib-content-scrapers'
+        ':lib-content-scrapers',
+        ':app-react-e2e-test'
 
 rootProject.name = "UstadMobile"
 

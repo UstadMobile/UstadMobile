@@ -12,7 +12,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.SchoolListView
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -106,7 +105,7 @@ class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAn
      */
     override fun onClick(v: View?) {
         if(v?.id == R.id.item_createnew_layout) {
-            navigateToEditEntity(null, R.id.school_edit_dest, School::class.java)
+           mPresenter?.handleClickAddNewItem()
         }else{
             super.onClick(v)
         }

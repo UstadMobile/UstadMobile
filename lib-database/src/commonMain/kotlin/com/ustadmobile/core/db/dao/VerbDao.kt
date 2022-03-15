@@ -64,13 +64,13 @@ abstract class VerbDao : BaseDao<VerbEntity> {
 
     @JsName("findByUidList")
     @Query("SELECT verbUid FROM VerbEntity WHERE verbUid IN (:uidList)")
-    abstract fun findByUidList(uidList: List<Long>): List<Long>
+    abstract suspend fun findByUidList(uidList: List<Long>): List<Long>
 
     @JsName("replaceList")
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun replaceList(entityList: List<VerbEntity>)
+    abstract suspend fun replaceList(entityList: List<VerbEntity>)
 
-    fun initPreloadedVerbs() {
+    suspend fun initPreloadedVerbs() {
         val uidsInserted = findByUidList(VerbEntity.FIXED_UIDS.values.toList())
         val uidsToInsert = VerbEntity.FIXED_UIDS.filter { it.value !in uidsInserted }
         val verbListToInsert = uidsToInsert.map { verbEntry ->

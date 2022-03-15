@@ -50,6 +50,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
     : UstadBaseController<WebChunkView>(context, arguments, view, di) {
 
     private var clazzUid: Long = 0L
+
     internal var containerUid: Long? = null
 
     private val contentEntryOpener: ContentEntryOpener by di.instance()

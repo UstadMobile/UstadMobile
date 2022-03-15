@@ -18,7 +18,7 @@ interface ClazzEdit2View: UstadEditView<ClazzWithHolidayCalendarAndSchool> {
 
     companion object {
 
-        const val VIEW_NAME = "ClazzEdit2"
+        const val VIEW_NAME = "ClassEditView"
 
     }
 

@@ -9,7 +9,7 @@ interface StatementListView: UstadListView<StatementWithSessionDetailDisplay, St
 
     companion object {
 
-        const val VIEW_NAME = "SessionDetailListView"
+        const val VIEW_NAME = "StatementListView"
 
     }
 

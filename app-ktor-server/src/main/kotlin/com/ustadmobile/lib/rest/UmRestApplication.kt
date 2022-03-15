@@ -97,11 +97,12 @@ private fun Endpoint.identifier(
 }
 
 fun Application.umRestApplication(
-    devMode: Boolean = false,
     dbModeOverride: String? = null,
     singletonDbName: String = "UmAppDatabase"
 ) {
     val appConfig = environment.config
+
+    val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
 
     //Check for required external commands
     REQUIRED_EXTERNAL_COMMANDS.forEach { command ->
@@ -123,6 +124,10 @@ fun Application.umRestApplication(
             method(HttpMethod.Put)
             method(HttpMethod.Options)
             header(HttpHeaders.ContentType)
+            header(HttpHeaders.AccessControlAllowOrigin)
+            header("X-nid")
+            header("door-dbversion")
+            header("door-node")
             anyHost()
         }
     }
@@ -259,11 +264,11 @@ fun Application.umRestApplication(
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             val doorNode = instance<NodeIdAndAuth>()
             val repo: UmAppDatabase = db.asRepository(repositoryConfig(Any(), "http://localhost/",
-                    doorNode.nodeId, doorNode.auth, instance(), instance()) {
+                doorNode.nodeId, doorNode.auth, instance(), instance()) {
                 useReplicationSubscription = false
             })
 
-            repo.preload()
+            runBlocking { repo.preload() }
             repo.ktorInitRepo()
             runBlocking {
                 repo.initAdminUser(context, di)
@@ -413,13 +418,30 @@ fun Application.umRestApplication(
 
           The static route will redirect /umapp/#ViewName?args to
           /getapp/?uri=(encoded full uri including #ViewName?args)
-         */
+
         static("umapp") {
             resource("/", "/static/getappredirect/index.html")
         }
+        */
+
         GetAppRoute()
+
         if (devMode) {
             DevModeRoute()
+        }
+
+        static("umapp") {
+            resources("umapp")
+            static("/") {
+                defaultResource("umapp/index.html")
+            }
+        }
+
+        //Handle default route when running behind proxy
+        route("/"){
+            get{
+                call.respondRedirect("umapp/")
+            }
         }
     }
 }

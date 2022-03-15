@@ -5,14 +5,18 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.toQueryLikeParam
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.view.ClazzAssignmentListView
+import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -21,7 +25,7 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
                                    di: DI, lifecycleOwner: DoorLifecycleOwner,
                                    private val assignmentItemListener: DefaultClazzAssignmentListItemListener
                                    = DefaultClazzAssignmentListItemListener(view, ListViewMode.BROWSER,
-                                           di.direct.instance(), context))
+                                           di.direct.instance(), context, di))
     : UstadListPresenter<ClazzAssignmentListView, ClazzAssignmentWithMetrics>(
         context, arguments, view, di, lifecycleOwner),
         ClazzAssignmentListItemListener by assignmentItemListener {
@@ -37,6 +41,7 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+        assignmentItemListener.presenter = this
         clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
         assignmentItemListener.listViewMode = mListMode
         selectedSortOption = SORT_OPTIONS[0]
@@ -58,9 +63,6 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     private fun updateListOnView() {
-
-
-
         view.list = repo.clazzAssignmentDao.getAllAssignments(clazzUid, systemTimeInMillis(),
                 mLoggedInPersonUid, selectedSortOption?.flag ?: 0,
                 searchText.toQueryLikeParam(), Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
@@ -71,6 +73,8 @@ class ClazzAssignmentListPresenter(context: Any, arguments: Map<String, String>,
         systemImpl.go(ClazzAssignmentEditView.VIEW_NAME,
                 mapOf(UstadView.ARG_CLAZZUID to clazzUid.toString()), context)
     }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
 
     override fun onClickSort(sortOption: SortOrderOption) {
         super.onClickSort(sortOption)

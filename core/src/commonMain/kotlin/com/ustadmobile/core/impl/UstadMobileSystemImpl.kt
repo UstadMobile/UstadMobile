@@ -40,7 +40,7 @@ import kotlin.jvm.JvmStatic
  *
  * @author mike, kileha3
  */
-expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
+expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
 
 
     /**
@@ -83,9 +83,8 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
      *
      * @param context System context
      * @param zip if true, the app setup file should be delivered within a zip.
-     * @param callback callback to call when complete or if any error occurs.
      */
-    override fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>)
+    override suspend fun getAppSetupFile(context: Any, zip: Boolean): String
 
 
     /**

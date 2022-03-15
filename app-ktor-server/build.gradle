@@ -121,6 +121,27 @@ shadowJar {
     archiveBaseName = "ustad-server"
 }
 
+task deleteAppResources{
+    doLast{
+        def webAppDir = project.file("src/main/resources/umapp")
+        def serverJarDir = project.file("${buildDir.path}/libs")
+        if(webAppDir.exists()){
+            println("Deleteting web resource directory ${webAppDir.path}")
+            delete webAppDir
+        }
+
+        if(serverJarDir.exists()){
+            println("Deleteting web resource directory ${serverJarDir.path}")
+            delete serverJarDir
+        }
+    }
+}
+
+
 
 sourceCompatibility = "8"
 targetCompatibility = "8"
+
+if(findProperty("skipreactproductionbundle") != "true") {
+    shadowJar.dependsOn(":app-react:generateProductionBundle")
+}

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
@@ -10,8 +9,14 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
-import com.google.android.exoplayer2.*
-import com.google.android.exoplayer2.source.*
+import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.MergingMediaSource
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.source.SingleSampleMediaSource
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.ByteArrayDataSource
@@ -31,7 +36,7 @@ import com.ustadmobile.core.io.ext.openEntryInputStream
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -40,7 +45,6 @@ import kotlinx.coroutines.launch
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.io.BufferedInputStream
 import java.io.IOException
 
 
@@ -49,7 +53,7 @@ interface VideoContentFragmentEventHandler {
 }
 
 
-class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentFragmentEventHandler {
+class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContentFragmentEventHandler {
 
     private var mBinding: FragmentVideoContentBinding? = null
 

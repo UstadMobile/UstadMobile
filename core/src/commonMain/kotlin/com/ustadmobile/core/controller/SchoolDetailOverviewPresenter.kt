@@ -1,12 +1,14 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -55,7 +57,12 @@ class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>
     }
 
     override fun handleClickEdit() {
-        systemImpl.go(SchoolEditView.VIEW_NAME, arguments, context)
+       navigateForResult(
+            NavigateForResultOptions(this,
+                null, SchoolEditView.VIEW_NAME, SchoolWithHolidayCalendar::class,
+                SchoolWithHolidayCalendar.serializer(), SAVEDSTATE_KEY_SCHOOL,
+                arguments = arguments.toMutableMap())
+        )
     }
 
     fun handleClickClazz(clazz: Clazz) {
@@ -64,8 +71,13 @@ class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
+        Napier.d(account?.personUid.toString())
         return db.schoolDao.personHasPermissionWithSchool(account?.personUid ?: 0L,
                 arguments[ARG_ENTITY_UID]?.toLong() ?: 0L, Role.PERMISSION_SCHOOL_UPDATE)
+    }
+
+    companion object {
+        const val SAVEDSTATE_KEY_SCHOOL = "School"
     }
 
 }

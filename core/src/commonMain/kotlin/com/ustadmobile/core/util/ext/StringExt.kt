@@ -88,3 +88,8 @@ fun String.appendQueryArgs(vararg pairs: Pair<String, String>): String {
 fun String.appendQueryArgs(args: Map<String, String>): String {
     return appendQueryArgs(args.toQueryString())
 }
+
+/**
+ * Validate email address using regular expressions
+ */
+expect fun String?.validEmail(): Boolean

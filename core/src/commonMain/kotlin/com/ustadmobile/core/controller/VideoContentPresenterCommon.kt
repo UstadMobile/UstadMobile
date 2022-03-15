@@ -5,7 +5,7 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -17,9 +17,9 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
 
-abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, String>, view: VideoPlayerView,
+abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, String>, view: VideoContentView,
                                            di: DI)
-    : UstadBaseController<VideoPlayerView>(context, arguments, view, di) {
+    : UstadBaseController<VideoContentView>(context, arguments, view, di) {
 
 
     private var entry: ContentEntry? = null

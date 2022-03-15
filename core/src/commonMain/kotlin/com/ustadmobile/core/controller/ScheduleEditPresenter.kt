@@ -9,7 +9,6 @@ import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Schedule
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: ScheduleEditView,
@@ -64,21 +63,26 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
         view.fromTimeError = null
         view.toTimeError = null
 
-        if(entity.sceduleStartTime == 0L) {
-            view.fromTimeError = systemImpl.getString(MessageID.field_required_prompt,
-                context)
-            return
-        }else if(entity.scheduleEndTime == 0L) {
-            view.toTimeError = systemImpl.getString(MessageID.field_required_prompt,
-                context)
-            return
-        }else if(entity.scheduleEndTime <= entity.sceduleStartTime) {
-            view.toTimeError = systemImpl.getString(MessageID.end_is_before_start_error,
-                context)
-            return
+        when {
+            entity.sceduleStartTime == 0L -> {
+                view.fromTimeError = systemImpl.getString(MessageID.field_required_prompt,
+                    context)
+                return
+            }
+            entity.scheduleEndTime == 0L -> {
+                view.toTimeError = systemImpl.getString(MessageID.field_required_prompt,
+                    context)
+                return
+            }
+            entity.scheduleEndTime <= entity.sceduleStartTime -> {
+                view.toTimeError = systemImpl.getString(MessageID.end_is_before_start_error,
+                    context)
+                return
+            }
+            else -> finishWithResult(
+                safeStringify(di, ListSerializer(Schedule.serializer()), listOf(entity))
+            )
         }
 
-        finishWithResult(
-            safeStringify(di, ListSerializer(Schedule.serializer()), listOf(entity)))
     }
 }

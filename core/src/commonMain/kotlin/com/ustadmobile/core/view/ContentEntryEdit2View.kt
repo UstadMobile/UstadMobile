@@ -37,7 +37,7 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     companion object {
 
-        const val VIEW_NAME = "ContentEntryEdit2EditView"
+        const val VIEW_NAME = "ContentEntryEditView"
 
         const val ARG_IMPORTED_METADATA = "metadata"
 

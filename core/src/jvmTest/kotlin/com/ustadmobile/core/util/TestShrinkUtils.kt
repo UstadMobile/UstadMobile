@@ -1,7 +1,7 @@
+/*
 package com.ustadmobile.core.util
-
-import com.ustadmobile.core.util.ext.fitWithin
 import com.ustadmobile.door.ext.writeToFile
+import com.ustadmobile.core.util.ext.fitWithin
 import com.ustadmobile.sharedse.io.extractResourceToFile
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -53,4 +53,4 @@ class TestShrinkUtils {
 
 
 
-}
+}*/

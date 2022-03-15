@@ -20,7 +20,7 @@ interface ClazzEnrolmentListView: UstadListView<ClazzEnrolment, ClazzEnrolmentWi
     var isTeacherEnrolmentEditVisible: Boolean
 
     companion object {
-        const val VIEW_NAME = "ClazzEnrolmentListView"
+        const val VIEW_NAME = "ClassEnrolmentListView"
     }
 
 }

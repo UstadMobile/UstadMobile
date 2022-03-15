@@ -35,9 +35,7 @@ import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.ContainerMounter
-import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.NanoHttpdCall
+import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
@@ -96,9 +94,9 @@ open class UstadApp : Application(), DIAware {
                 UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
             val attachmentFilters = listOf(ImageResizeAttachmentFilter("PersonPicture", 1280, 1280))
             DatabaseBuilder.databaseBuilder(applicationContext, UmAppDatabase::class, dbName,
-                    attachmentsDir, attachmentFilters)
+                attachmentsDir, attachmentFilters)
                 .addSyncCallback(nodeIdAndAuth)
-                    .addCallback(ContentJobItemTriggersCallback())
+                .addCallback(ContentJobItemTriggersCallback())
                 .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                 .build()
                 .also {

@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.IdOption
@@ -11,9 +12,7 @@ import com.ustadmobile.core.util.ext.attendancePercentage
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.latePercentage
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.door.*
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -130,8 +129,16 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     }
 
     override fun handleClickEntry(entry: ClazzLog) {
-        systemImpl.go(ClazzLogEditAttendanceView.VIEW_NAME,
-            mapOf(UstadView.ARG_ENTITY_UID to entry.clazzLogUid.toString()), context)
+        navigateForResult(
+            NavigateForResultOptions(
+                this, null,
+                ClazzLogEditAttendanceView.VIEW_NAME,
+                ClazzLog::class,
+                ClazzLog.serializer(),
+                arguments = mutableMapOf(
+                    UstadView.ARG_ENTITY_UID to entry.clazzLogUid.toString())
+            )
+        )
     }
 
     fun handleClickRecordAttendance(option: RecordAttendanceOption) {
@@ -150,10 +157,15 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
                 it.logDate = systemTimeInMillis()
             }
 
-            systemImpl.go(ClazzLogEditView.VIEW_NAME,
-                    mapOf(ARG_ENTITY_JSON to safeStringify(di, ClazzLog.serializer(), newClazzLog),
-                        ARG_NEXT to ClazzLogEditAttendanceView.VIEW_NAME),
-                    context)
+            navigateForResult(
+                NavigateForResultOptions(
+                    this, newClazzLog,
+                    ClazzLogEditView.VIEW_NAME,
+                    ClazzLog::class,
+                    ClazzLog.serializer(),
+                    arguments = mutableMapOf(ARG_NEXT to ClazzLogEditAttendanceView.VIEW_NAME)
+                )
+            )
         }
     }
 
@@ -167,6 +179,8 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
             }
         }
     }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
 
     fun handleClickGraphDuration(days: Int) {
         val endOfDay = DateTime.now().toOffsetByTimezone(clazzTimeZone ?: "UTC")

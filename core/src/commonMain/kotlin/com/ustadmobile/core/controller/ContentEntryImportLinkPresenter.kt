@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
@@ -20,8 +21,8 @@ import io.ktor.client.call.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -58,7 +59,8 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                     view.inProgress = false
 
                     if (arguments.containsKey(ARG_RESULT_DEST_KEY)) {
-                        view.finishWithResult(data)
+                        finishWithResult(safeStringify(di, ListSerializer(MetadataResult.serializer()),
+                            listOf(data)))
                     } else {
                         val args = mutableMapOf<String, String>()
                         args.putEntityAsJson(ContentEntryEdit2View.ARG_IMPORTED_METADATA,

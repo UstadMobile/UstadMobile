@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
-import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
@@ -13,14 +12,18 @@ import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_VIA_LINK
+import com.ustadmobile.core.view.RegisterAgeRedirectView
+import com.ustadmobile.core.view.SiteTermsDetailView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.lib.db.entities.Site
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

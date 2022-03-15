@@ -90,7 +90,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                 }
 
                 val personToEnrol = dbRepo.takeIf { clazzToJoin != null }?.personDao
-                        ?.findByUid(accountManager.activeAccount.personUid)
+                        ?.findByUidAsync(accountManager.activeAccount.personUid)
                 try {
                     if(clazzToJoin  != null && personToEnrol != null) {
                         dbRepo.enrolPersonIntoClazzAtLocalTimezone(personToEnrol,
@@ -122,7 +122,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                     }
                 }
                 val personToEnrol = dbRepo.takeIf { schoolToJoin != null }?.personDao
-                        ?.findByUid(accountManager.activeAccount.personUid)
+                        ?.findByUidAsync(accountManager.activeAccount.personUid)
                 try {
                     if(schoolToJoin  != null && personToEnrol != null) {
                         dbRepo.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol,

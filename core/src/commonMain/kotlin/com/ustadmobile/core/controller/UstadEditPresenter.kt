@@ -1,12 +1,16 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_ID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.util.copyOnWriteListOf
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(
@@ -48,15 +52,16 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(
 
     protected val isExistingEntityOrPickerMode
         get() = (arguments[ARG_ENTITY_UID]?.toLong() ?: 0L) != 0L ||
-                arguments[ARG_RESULT_DEST_ID] != null
+                arguments[ARG_RESULT_DEST_ID] != null ||
+                arguments[ARG_RESULT_DEST_VIEWNAME] != null
 
-    fun onFinish(detailViewName: String, entityUid: Long, entity: RT) {
+    fun onFinish(detailViewName: String, entityUid: Long, entity: RT, serializer: KSerializer<RT>) {
 
         if(!isExistingEntityOrPickerMode) {
             systemImpl.go(detailViewName, mapOf(ARG_ENTITY_UID to entityUid.toString()), context,
                     UstadMobileSystemCommon.UstadGoOptions(CURRENT_DEST, popUpToInclusive = true))
         }  else {
-            view.finishWithResult(listOf(entity))
+            finishWithResult(safeStringify(di, ListSerializer(serializer), listOf(entity)))
         }
     }
 }

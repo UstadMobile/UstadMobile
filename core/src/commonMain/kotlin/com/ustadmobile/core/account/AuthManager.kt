@@ -5,7 +5,10 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.schedule.age
-import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.ext.base64StringToByteArray
+import com.ustadmobile.core.util.ext.doublePbkdf2Hash
+import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.core.util.ext.insertPersonAuthCredentials2
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.STATUS_APPROVED
@@ -67,11 +70,11 @@ class AuthManager(
         if(authorizedPerson == null && fallbackToOldPersonAuth) {
             val person = db.personDao.findUidAndPasswordHashAsync(username)
             if(person != null
-                && ((person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
-                        && person.passwordHash.substring(2) == password)
-                        ||(person.passwordHash.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) &&
-                        authenticateEncryptedPassword(password, person.passwordHash.substring(2))))) {
-                authorizedPerson = db.personDao.findByUid(person.personUid)
+                && ((person.passwordHash?.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX) == true
+                        && person.passwordHash?.substring(2) == password)
+                        ||(person.passwordHash?.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) == true &&
+                        authenticateEncryptedPassword(password, person.passwordHash?.substring(2) ?: "")))) {
+                authorizedPerson = db.personDao.findByUidAsync(person.personUid)
 
                 //Create the auth object
                 repo.personAuth2Dao.insertAsync(PersonAuth2().apply {

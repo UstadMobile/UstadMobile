@@ -14,7 +14,6 @@ import com.ustadmobile.core.controller.TimeZoneListPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.TimeZoneListView
-import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -90,10 +89,6 @@ class TimeZoneListFragment : UstadBaseFragment() , TimeZoneListView, OnSearchSub
         super.onCreateOptionsMenu(menu, inflater)
         menu.findItem(R.id.menu_search).isVisible = true
         searchManager?.searchListener = this
-    }
-
-    override fun finishWithResult(timeZoneId: String) {
-        saveResultToBackStackSavedStateHandle(timeZoneId)
     }
 
     override fun onDestroyView() {
