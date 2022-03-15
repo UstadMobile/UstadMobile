@@ -1,6 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
@@ -9,6 +10,7 @@ import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.navigation.NavControllerJs
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
@@ -19,9 +21,7 @@ import com.ustadmobile.util.*
 import kotlinx.atomicfu.atomic
 import kotlinx.browser.window
 import kotlinx.coroutines.Runnable
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
+import org.kodein.di.*
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -35,6 +35,8 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     protected val systemImpl : UstadMobileSystemImpl by instance()
 
     val accountManager: UstadAccountManager by instance()
+
+    var database: UmAppDatabase? = null
 
     lateinit var navController: NavControllerJs
 
@@ -91,6 +93,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         lifecycleStatus.value = DoorLifecycleObserver.STARTED
         val umController: UstadNavController by instance()
         navController = umController as NavControllerJs
+        database = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
     }
 
     open fun onDestroyView(){}
@@ -197,6 +200,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         searchManager = null
         fabManager?.onDestroy()
         fabManager = null
+        database = null
         onDestroyView()
     }
 
