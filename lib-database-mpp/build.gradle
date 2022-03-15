@@ -23,6 +23,17 @@ kotlin {
         }
     }
 
+    js(LEGACY) {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless() //change to useChrome to run the actual browser
+                    webpackConfig.cssSupport.enabled = true
+                }
+            }
+        }
+    }
+
     sourceSets {
         commonMain {
             dependencies {
@@ -49,6 +60,10 @@ kotlin {
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
                 implementation "io.github.aakira:napier-jvm:$version_napier"
             }
+        }
+
+        jsMain {
+            kotlin.srcDir("$buildDir/generated/source/door-js")
         }
 
     }

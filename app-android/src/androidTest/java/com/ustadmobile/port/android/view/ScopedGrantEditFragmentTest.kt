@@ -66,7 +66,7 @@ class ScopedGrantEditFragmentTest : TestCase(){
         val argBundle = bundleOf(
             ScopedGrantEditView.ARG_PERMISSION_LIST to Clazz.TABLE_ID.toString(),
             UstadView.ARG_RESULT_DEST_VIEWNAME to ClazzEdit2View.VIEW_NAME,
-            UstadBaseFragment.ARG_RESULT_DEST_KEY to "ScopedGrant"
+            UstadView.ARG_RESULT_DEST_KEY to "ScopedGrant"
         )
 
         if(initalEntity != null) {

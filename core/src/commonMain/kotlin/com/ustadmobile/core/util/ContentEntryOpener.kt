@@ -21,12 +21,12 @@ import org.kodein.di.on
 
 private val mimeTypeToViewNameMap = mapOf(
         "application/tincan+zip" to XapiPackageContentView.VIEW_NAME,
-        "application/khan-video+zip" to VideoPlayerView.VIEW_NAME,
+        "application/khan-video+zip" to VideoContentView.VIEW_NAME,
         "application/webchunk+zip" to WebChunkView.VIEW_NAME,
         "application/epub+zip" to EpubContentView.VIEW_NAME,
         "application/har+zip" to HarView.VIEW_NAME,
         "application/h5p-tincan+zip" to XapiPackageContentView.VIEW_NAME
-) + VideoContentPresenterCommon.VIDEO_MIME_MAP.keys.map { it to VideoPlayerView.VIEW_NAME }.toMap()
+) + VideoContentPresenterCommon.VIDEO_MIME_MAP.keys.map { it to VideoContentView.VIEW_NAME }.toMap()
 
 
 val mimeTypeToPlayStoreIdMap = mapOf(
@@ -50,14 +50,20 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
      * Opens the given ContentEntry. If the entry is available, then open the relevant view and show the latest container
      *
      */
-    suspend fun openEntry(context: Any, contentEntryUid: Long, downloadRequired: Boolean,
-                          goToContentEntryDetailViewIfNotDownloaded: Boolean, noIframe: Boolean, learnerGroupUid: Long = 0, clazzUid: Long = 0) {
+    suspend fun openEntry(
+        context: Any,
+        contentEntryUid: Long,
+        downloadRequired: Boolean,
+        goToContentEntryDetailViewIfNotDownloaded: Boolean,
+        noIframe: Boolean,
+        learnerGroupUid: Long = 0,
+        clazzUid: Long = 0
+    ) {
 
-        val containerToOpen = if (downloadRequired) {
-            umAppDatabase.containerDao.findContainerWithMimeTypeWithFilesByContentEntryUid(contentEntryUid)
-        } else {
-            umAppDatabase.containerDao.getMostRecentLocallyAvailableContainerUidAndMimeType(contentEntryUid)
-        }
+        val containerToOpen = umAppDatabase.containerDao
+            .getMostRecentAvailableContainerUidAndMimeType(contentEntryUid,
+                downloadRequired)
+
         val goToOptions = if(learnerGroupUid != 0L){
             UstadMobileSystemCommon.UstadGoOptions("", true)
         }else{

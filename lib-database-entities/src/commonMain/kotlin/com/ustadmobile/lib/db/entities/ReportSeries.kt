@@ -17,6 +17,8 @@ class ReportSeries{
 
     var reportSeriesFilters: List<ReportFilter>? = null
 
+
+
     companion object {
 
         const val BAR_CHART = 100
@@ -59,6 +61,32 @@ class ReportSeries{
 
         const val NONE = 0
 
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as ReportSeries
+
+        if (reportSeriesUid != other.reportSeriesUid) return false
+        if (reportSeriesName != other.reportSeriesName) return false
+        if (reportSeriesYAxis != other.reportSeriesYAxis) return false
+        if (reportSeriesVisualType != other.reportSeriesVisualType) return false
+        if (reportSeriesSubGroup != other.reportSeriesSubGroup) return false
+        if (reportSeriesFilters != other.reportSeriesFilters) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = reportSeriesUid
+        result = 31 * result + (reportSeriesName?.hashCode() ?: 0)
+        result = 31 * result + reportSeriesYAxis
+        result = 31 * result + reportSeriesVisualType
+        result = 31 * result + reportSeriesSubGroup
+        result = 31 * result + (reportSeriesFilters?.hashCode() ?: 0)
+        return result
     }
 
 }

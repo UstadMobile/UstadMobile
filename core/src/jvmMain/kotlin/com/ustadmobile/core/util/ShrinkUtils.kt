@@ -12,42 +12,12 @@ import java.io.InputStreamReader
 
 object ShrinkUtils {
 
-    fun findInPath(commandName: String, systemPropName: String? = null): String? {
+    fun getVideoResolutionMetadata(
+        srcFile: File,
+        ffprobePath: File
+    ): Triple<Int, Int, String?> {
 
-        if (systemPropName != null) {
-            return if (File(systemPropName).commandExists()) {
-                systemPropName
-            } else {
-                null
-            }
-        }
-
-        return System.getenv("PATH").split(File.pathSeparator).firstOrNull() {
-            File(it, commandName).commandExists()
-        }?.let {
-
-            val osName = System.getProperty("os.name")
-            // checks linux
-            val commonPath = File(it, commandName)
-            if(commonPath.exists()){
-                return commonPath.path
-                // checks windows
-            } else if (osName.contains("win")) {
-                if (File(it, "$commandName.exe").exists()) {
-                    File(it, "$commandName.exe").path
-                } else if (File(it, "$commandName.bat").exists()) {
-                    File(it, "$commandName.bat").path
-                }
-            }
-            null
-        }
-    }
-
-    fun getVideoResolutionMetadata(srcFile: File): Triple<Int, Int, String?> {
-
-        val ffprobePath = findInPath("ffprobe")
-
-        val builder = ProcessBuilder(ffprobePath, "-v",
+        val builder = ProcessBuilder(ffprobePath.absolutePath, "-v",
                 "error", "-select_streams", "v:0",
                 "-show_entries", "stream=width,height,display_aspect_ratio",
                 "-of", "default=nw=1:nk=1", srcFile.path)
@@ -103,12 +73,14 @@ object ShrinkUtils {
     }
 
 
-    fun optimiseVideo(srcVideo: File, destFile: File,
-                      resolution: Pair<Int, Int>, aspectRatio: String?) {
-
-        val ffmpegPath = findInPath("ffmpeg")
-
-        val ffmpegCommand = mutableListOf(ffmpegPath, "-i",
+    fun optimiseVideo(
+        srcVideo: File,
+        destFile: File,
+        ffmpegPath: File,
+        resolution: Pair<Int, Int>,
+        aspectRatio: String?,
+    ) {
+        val ffmpegCommand = mutableListOf(ffmpegPath.absolutePath, "-i",
                 srcVideo.path, "-vf", "scale=${resolution.first}x${resolution.second}")
 
         if(aspectRatio != null) {

@@ -104,10 +104,18 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                     Json.encodeToString(UmAccountGroupActor.serializer(),
                             accountManager.activeAccount.toXapiGroupJsonObject(memberList))
                 }
+
+                val endpointPart = "xapi/$contentEntryUid/$clazzUid/"
+                val xapiEndPoint = if(UmPlatformUtil.isWeb){
+                    UMFileUtil.resolveLink(UMURLEncoder.encodeUTF8(activeEndpoint),endpointPart)
+                }else {
+                    UMFileUtil.resolveLink(mountedPath,
+                        "/${UMURLEncoder.encodeUTF8(activeEndpoint)}/$endpointPart")
+                }
+
                 val launchMethodParams = mapOf(
                         "actor" to actorJsonStr,
-                        "endpoint" to UMFileUtil.resolveLink(mountedPath,
-                                "/${UMURLEncoder.encodeUTF8(activeEndpoint)}/xapi/$contentEntryUid/$clazzUid/"),
+                        "endpoint" to xapiEndPoint,
                         "auth" to "OjFjMGY4NTYxNzUwOGI4YWY0NjFkNzU5MWUxMzE1ZGQ1",
                         "registration" to contextRegistration,
                         "activity_id" to (tinCanXml?.launchActivity?.id ?: "xapi_id"))

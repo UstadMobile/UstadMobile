@@ -173,11 +173,6 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     companion object {
 
-        /**
-         * The key to use in the SavedStateHandle to save the result
-         */
-        const val ARG_RESULT_DEST_KEY = "result_key"
-
         const val KEY_ARG_SNACKBAR_SHOWN = "argSnackbarShown"
 
     }

@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.LanguageEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -12,6 +13,7 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.Language
 import kotlinx.coroutines.*
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -65,7 +67,8 @@ class LanguageEditPresenter(context: Any,
                 repo.languageDao.updateAsync(entity)
             }
 
-            view.finishWithResult(listOf(entity))
+            finishWithResult(safeStringify(di, ListSerializer(Language.serializer()),
+                listOf(entity)))
         }
     }
 

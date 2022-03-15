@@ -88,8 +88,9 @@ class ClazzEdit2Presenter(context: Any,
             entity?.school = school
             entity?.clazzSchoolUid = school.schoolUid
             view.entity = entity
-
-            requireSavedStateHandle()[SAVEDSTATE_KEY_SCHOOL] = null
+            UmPlatformUtil.run{
+                requireSavedStateHandle()[SAVEDSTATE_KEY_SCHOOL] = null
+            }
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_HOLIDAYCALENDAR,
@@ -98,17 +99,30 @@ class ClazzEdit2Presenter(context: Any,
             entity?.holidayCalendar = calendar
             entity?.clazzHolidayUMCalendarUid = calendar.umCalendarUid
             view.entity = entity
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
+            }
+        }
 
-            requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
+        observeSavedStateResult(
+            RESULT_TIMEZONE_KEY,
+            ListSerializer(String.serializer()), String::class) {
+            val timeZone = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.clazzTimeZone = timeZone
+            view.entity = entity
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
+            }
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_FEATURES,
             ListSerializer(LongWrapper.serializer()), LongWrapper::class) {
             val wrapper = it.firstOrNull() ?: return@observeSavedStateResult
-
             entity?.clazzFeatures = wrapper.longValue
             view.entity = entity
-            requireSavedStateHandle()[SAVEDSTATE_KEY_FEATURES] = null
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_FEATURES] = null
+            }
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_ASSIGNMENT,
@@ -134,7 +148,9 @@ class ClazzEdit2Presenter(context: Any,
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
-            requireSavedStateHandle()[SAVEDSTATE_KEY_ASSIGNMENT] = null
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_ASSIGNMENT] = null
+            }
         }
     }
 
@@ -215,10 +231,10 @@ class ClazzEdit2Presenter(context: Any,
         super.onLoadFromJson(bundle)
         val clazzJsonStr = bundle[ARG_ENTITY_JSON]
         var clazz: ClazzWithHolidayCalendarAndSchool? = null
-        if(clazzJsonStr != null) {
-            clazz = safeParse(di, ClazzWithHolidayCalendarAndSchool.serializer(), clazzJsonStr)
+        clazz = if(clazzJsonStr != null) {
+            safeParse(di, ClazzWithHolidayCalendarAndSchool.serializer(), clazzJsonStr)
         }else {
-            clazz = ClazzWithHolidayCalendarAndSchool()
+            ClazzWithHolidayCalendarAndSchool()
         }
 
         scheduleOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
@@ -234,20 +250,23 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     fun handleClickTimezone() {
-        navigateForResult(NavigateForResultOptions<String>(
+        navigateForResult(NavigateForResultOptions(
             this,
-            currentEntityValue = entity?.clazzTimeZone,
-            destinationViewName = TimeZoneListView.VIEW_NAME,
-            entityClass = String::class,
-            serializationStrategy = String.serializer(),
-            destinationResultKey = RESULT_TIMEZONE_KEY))
+            entity?.clazzTimeZone,
+            TimeZoneListView.VIEW_NAME,
+            String::class,
+            String.serializer(),
+            RESULT_TIMEZONE_KEY))
     }
 
-    fun handleClickHolidayCalendar() {
+    fun handleHolidayCalendarClicked() {
         navigateForResult(
             NavigateForResultOptions(this,
-            null, HolidayCalendarListView.VIEW_NAME, HolidayCalendar::class,
-            HolidayCalendar.serializer(), SAVEDSTATE_KEY_HOLIDAYCALENDAR)
+            null,
+                HolidayCalendarListView.VIEW_NAME,
+                HolidayCalendar::class,
+            HolidayCalendar.serializer(),
+                SAVEDSTATE_KEY_HOLIDAYCALENDAR)
         )
     }
 
@@ -365,7 +384,7 @@ class ClazzEdit2Presenter(context: Any,
                         arguments.plus(UstadView.ARG_CLAZZUID to entity.clazzUid.toString()),
                         context)
             }else{
-                onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
+                onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity, ClazzWithHolidayCalendarAndSchool.serializer())
             }
         }
     }
@@ -398,7 +417,7 @@ class ClazzEdit2Presenter(context: Any,
 
         const val SAVEDSTATE_KEY_ASSIGNMENT = "Assignment"
 
-        const val SAVEDSTATE_KEY_HOLIDAYCALENDAR = "HolidayCalendar"
+        const val SAVEDSTATE_KEY_HOLIDAYCALENDAR = "ClazzHolidayCalendar"
 
         const val SAVEDSTATE_KEY_FEATURES = "ClazzFeatures"
 

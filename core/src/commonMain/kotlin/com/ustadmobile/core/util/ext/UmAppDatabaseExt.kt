@@ -1,6 +1,5 @@
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
@@ -11,7 +10,11 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
-import com.ustadmobile.core.util.graph.*
+import com.ustadmobile.core.util.graph.LabelValueFormatter
+import com.ustadmobile.core.util.graph.MessageIdFormatter
+import com.ustadmobile.core.util.graph.TimeFormatter
+import com.ustadmobile.core.util.graph.UidAndLabelFormatter
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
@@ -21,10 +24,12 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 
 fun UmAppDatabase.runPreload() {
-    preload()
+    GlobalScope.launch { preload() }
 }
 
 /**
@@ -137,7 +142,7 @@ suspend fun UmAppDatabase.processEnrolmentIntoClass(
 
     parentsToEnrol.forEach { parentJoin ->
         onRepoWithFallbackToDb(2500) {
-            it.personDao.findByUid(parentJoin.parentPersonUid)
+            it.personDao.findByUidAsync(parentJoin.parentPersonUid)
         }?.also { parentPerson ->
             enrolPersonIntoClazzAtLocalTimezone(parentPerson, enrolment.clazzEnrolmentClazzUid,
                 ClazzEnrolment.ROLE_PARENT, clazzWithSchoolVal)
@@ -450,14 +455,15 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
     val matches = schoolMemberDao.findBySchoolAndPersonAndRole(schoolUid, personUid,  role)
     if(matches.isEmpty()) {
 
-        val schoolMember = SchoolMember()
-        schoolMember.schoolMemberActive = true
-        schoolMember.schoolMemberPersonUid = personUid
-        schoolMember.schoolMemberSchoolUid = schoolUid
-        schoolMember.schoolMemberRole = role
-        schoolMember.schoolMemberJoinDate = systemTimeInMillis()
+        val schoolMember = SchoolMember().apply {
+            schoolMemberActive = true
+            schoolMemberPersonUid = personUid
+            schoolMemberSchoolUid = schoolUid
+            schoolMemberRole = role
+            schoolMemberJoinDate = systemTimeInMillis()
+            schoolMemberUid = schoolMemberDao.insertAsync(this)
+        }
 
-        schoolMember.schoolMemberUid = schoolMemberDao.insert(schoolMember)
 
         val personGroupUid = when(role) {
             Role.ROLE_SCHOOL_STAFF_UID -> school.schoolTeachersPersonGroupUid
@@ -580,10 +586,11 @@ suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: L
  * Insert authentication credentials for the given person uid with the given password. This is fine
  * to use in tests etc, but for performance it is better to use AuthManager.setAuth
  */
-suspend fun UmAppDatabase.insertPersonAuthCredentials2(personUid: Long,
-                                            password: String,
-                                            pbkdf2Params: Pbkdf2Params,
-                                            site: Site? = null
+suspend fun UmAppDatabase.insertPersonAuthCredentials2(
+    personUid: Long,
+    password: String,
+    pbkdf2Params: Pbkdf2Params,
+    site: Site? = null
 ) {
     val db = (this as DoorDatabaseRepository).db as UmAppDatabase
     val effectiveSite = site ?: db.siteDao.getSite()

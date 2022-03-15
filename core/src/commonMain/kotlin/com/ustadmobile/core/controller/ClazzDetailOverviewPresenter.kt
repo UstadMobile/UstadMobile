@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -8,6 +9,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
+import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.launch
@@ -44,8 +46,17 @@ class ClazzDetailOverviewPresenter(context: Any,
 
     override fun handleClickEdit() {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        systemImpl.go(ClazzEdit2View.VIEW_NAME, mapOf(ARG_ENTITY_UID to entityUid.toString()),
-            context)
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null, ClazzEdit2View.VIEW_NAME, ClazzWithHolidayCalendarAndSchool::class,
+                ClazzWithHolidayCalendarAndSchool.serializer(), SAVEDSTATE_KEY_CLAZZ,
+                arguments = mutableMapOf(ARG_ENTITY_UID to entityUid.toString())
+            )
+        )
+    }
+
+    companion object {
+        const val SAVEDSTATE_KEY_CLAZZ = "Clazz"
     }
 
 

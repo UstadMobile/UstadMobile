@@ -316,6 +316,8 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
 
         const val SAVED_STATE_ADD_SUBMISSION_LIST = "submissionList"
 
+        //TODO: Add constants for keys that would be used for any One To Many Join helpers
+        const val  SAVEDSTATE_KEY_CLAZZ_ASSIGNMENT = "ClassAssignment"
     }
 
 }

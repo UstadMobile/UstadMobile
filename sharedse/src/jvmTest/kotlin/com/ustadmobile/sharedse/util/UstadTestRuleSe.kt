@@ -46,6 +46,7 @@ import java.nio.file.Files
 import javax.naming.InitialContext
 import kotlin.random.Random
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import kotlinx.coroutines.runBlocking
 
 fun DI.onActiveAccount(): DI {
     val accountManager: UstadAccountManager by instance()
@@ -113,7 +114,7 @@ class UstadTestRule: TestWatcher() {
                     .addSyncCallback(nodeIdAndAuth)
                     .build()
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
-                    .also { it.preload() })
+                    .also { runBlocking { it.preload() } })
             }
 
             bind<HttpClient>() with singleton{

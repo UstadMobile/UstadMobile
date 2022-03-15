@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.core.account.Endpoint
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentPluginManager

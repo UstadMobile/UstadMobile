@@ -1,7 +1,10 @@
 package com.ustadmobile.core.controller
 
 import SelectFolderView
-import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -9,16 +12,20 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.io.ext.getSize
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.createTemporaryDir
+import com.ustadmobile.core.io.ext.isRemote
+import com.ustadmobile.core.util.*
+import com.ustadmobile.core.util.ext.encodeStringMapToString
 import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
+import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.view.LanguageListView
+import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -32,6 +39,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
@@ -56,7 +64,8 @@ class ContentEntryEdit2Presenter(
     lifecycleOwner: DoorLifecycleOwner,
     di: DI
 ) : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view,
-        di, lifecycleOwner), ContentEntryAddOptionsListener {
+        di, lifecycleOwner), ContentEntryAddOptionsListener
+{
 
     private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
 
@@ -102,6 +111,8 @@ class ContentEntryEdit2Presenter(
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
+    private val json: Json by instance()
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
@@ -118,6 +129,10 @@ class ContentEntryEdit2Presenter(
         view.showCompletionCriteria = isLeaf ?: false
         val metaData = arguments[ARG_IMPORTED_METADATA]
         val uri = arguments[ARG_URI]
+
+        //Show the update button only when an existing leaf entity is being edited
+        view.showUpdateContentButton = entityUid != 0L && isLeaf == true
+
         if (db is DoorDatabaseRepository) {
             if (uri != null) {
                 return handleFileSelection(uri)
@@ -161,7 +176,9 @@ class ContentEntryEdit2Presenter(
             presenterScope.launch(doorMainDispatcher()){
                 view.entity = handleFileSelection(uri)
             }
-            requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+            }
         }
 
         observeSavedStateResult(SAVED_STATE_KEY_METADATA, ListSerializer(MetadataResult.serializer()),
@@ -182,6 +199,18 @@ class ContentEntryEdit2Presenter(
             requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
         }
 
+        observeSavedStateResult(
+            SAVEDSTATE_KEY_LANGUAGE, ListSerializer(Language.serializer()),
+            Language::class) {
+            val language = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.language = language
+            entity?.primaryLanguageUid = language.langUid
+            view.entity = entity
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_LANGUAGE] = null
+            }
+        }
+
 
     }
 
@@ -199,12 +228,11 @@ class ContentEntryEdit2Presenter(
         view.titleErrorEnabled = false
         view.fileImportErrorVisible = false
         presenterScope.launch(doorMainDispatcher()) {
-
-            val canCreate = isImportValid(entity)
-
-            if (canCreate) {
-                entity.licenseName = view.licenceOptions?.firstOrNull { it.code == entity.licenseType }.toString()
-                val isImport = entity.contentEntryUid == 0L
+            if (isImportValid(entity)) {
+                entity.licenseName = view.licenceOptions?.firstOrNull {
+                    it.code == entity.licenseType
+                }.toString()
+                val isNewEntry = entity.contentEntryUid == 0L
                 if (entity.contentEntryUid == 0L) {
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
 
@@ -236,13 +264,11 @@ class ContentEntryEdit2Presenter(
 
                 if (metaData != null && fromUri != null) {
 
-                    if (fromUri?.startsWith("content://") == true) {
+                    if (fromUri?.let { DoorUri.parse(it) }?.isRemote() == false) {
 
                         val job = ContentJob().apply {
                             toUri = view.storageOptions?.get(view.selectedStorageIndex)?.dirUri
-                            params = Json.encodeToString(
-                                    MapSerializer(String.serializer(), String.serializer()),
-                                        conversionParams)
+                            params = json.encodeStringMapToString(conversionParams)
                             cjIsMeteredAllowed = false
                             cjNotificationTitle = systemImpl.getString(MessageID.importing, context)
                                     .replace("%1\$s",entity.title ?: "")
@@ -258,7 +284,7 @@ class ContentEntryEdit2Presenter(
                             cjiParentContentEntryUid = parentEntryUid
                             cjiConnectivityNeeded = false
                             cjiStatus = JobStatus.QUEUED
-                            cjiContentDeletedOnCancellation = isImport
+                            cjiContentDeletedOnCancellation = isNewEntry
                             cjiUid = db.contentJobItemDao.insertJobItem(this)
                         }
 
@@ -269,19 +295,15 @@ class ContentEntryEdit2Presenter(
                         systemImpl.popBack(popUpTo, popUpInclusive = true, context)
                         return@launch
 
-
                     } else {
-
-                        var client: HttpResponse?
                         try {
-
-                            client = httpClient.post<HttpStatement>() {
+                            httpClient.post<HttpStatement>() {
                                 url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
                                         "/import/downloadLink"))
                                 parameter("parentUid", parentEntryUid)
                                 parameter("pluginId", view.metadataResult?.pluginId)
                                 parameter("url", fromUri)
-                                parameter("conversionParams",
+                                parameter(HTTP_PARAM_CONVERSION_PARAMS,
                                         Json.encodeToString(MapSerializer(String.serializer(),
                                                 String.serializer()),
                                                 conversionParams))
@@ -299,14 +321,6 @@ class ContentEntryEdit2Presenter(
                             return@launch
                         }
 
-                        if (client.status.value != 200) {
-                            view.showSnackBar(systemImpl.getString(MessageID.error,
-                                    context), {})
-                            view.loading = false
-                            view.fieldsEnabled = true
-                            return@launch
-                        }
-
                         view.loading = false
                         view.fieldsEnabled = true
                         systemImpl.popBack(popUpTo, popUpInclusive = true, context)
@@ -316,9 +330,10 @@ class ContentEntryEdit2Presenter(
                 } else {
                     // its a folder, check if there is any selected items from previous screen
                     if (arguments.containsKey(KEY_SELECTED_ITEMS)) {
-                        val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")?.map { it.trim().toLong() }
-                                ?: listOf()
-                        repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(entity.contentEntryUid, selectedItems)
+                        val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")
+                            ?.map { it.trim().toLong() } ?: listOf()
+                        repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
+                            entity.contentEntryUid, selectedItems, systemTimeInMillis())
                     }
                 }
 
@@ -401,11 +416,14 @@ class ContentEntryEdit2Presenter(
         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
 
         navigateForResult(
-                NavigateForResultOptions(this,
-                        null, ContentEntryImportLinkView.VIEW_NAME,
-                        MetadataResult::class,
-                        MetadataResult.serializer(), SAVED_STATE_KEY_METADATA,
-                        arguments = args)
+                NavigateForResultOptions(
+                    this,
+                    null,
+                    ContentEntryImportLinkView.VIEW_NAME,
+                    MetadataResult::class,
+                    MetadataResult.serializer(), SAVED_STATE_KEY_METADATA,
+                    arguments = args
+                )
         )
     }
 
@@ -421,6 +439,15 @@ class ContentEntryEdit2Presenter(
                         String.serializer(), SAVED_STATE_KEY_URI,
                         arguments = args)
         )
+    }
+
+    fun handleClickLanguage(){
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null,
+                LanguageListView.VIEW_NAME, Language::class,
+                Language.serializer(),
+                SAVEDSTATE_KEY_LANGUAGE))
     }
 
     override fun onClickAddFolder() {
@@ -439,7 +466,11 @@ class ContentEntryEdit2Presenter(
 
         const val SAVED_STATE_KEY_URI = "URI"
 
+        const val SAVEDSTATE_KEY_LANGUAGE = "Language"
+
         const val SAVED_STATE_KEY_METADATA = "importedMetadata"
+
+        const val HTTP_PARAM_CONVERSION_PARAMS = "conversionParams"
 
 
     }

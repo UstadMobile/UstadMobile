@@ -230,3 +230,7 @@ app-ktor-server/data
 #Resources copied for production app-ktor-server
 app-ktor-server/src/main/resources/umapp
 
+#app-react-e2e-test data and copied resources
+app-react-e2e-test/data
+app-react-e2e-test/src/test/resources/admin.txt
+

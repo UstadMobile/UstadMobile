@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
@@ -18,7 +19,7 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzLog
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -92,6 +93,8 @@ class ClazzLogEditPresenter(context: Any,
         if(hasError)
             return
 
+        val presenter = this
+
 
         GlobalScope.launch(doorMainDispatcher()) {
             val effectiveTimeZone = db.clazzDao.getClazzWithSchool(entity.clazzLogClazzUid)
@@ -99,13 +102,18 @@ class ClazzLogEditPresenter(context: Any,
 
             entity.logDate = DateTime(view.date).toOffsetByTimezone(effectiveTimeZone)
                     .localMidnight.utc.unixMillisLong + view.time
-
             if(arguments[ARG_NEXT]?.startsWith(ClazzLogEditAttendanceView.VIEW_NAME) == true) {
-                systemImpl.go(ClazzLogEditAttendanceView.VIEW_NAME,
-                        mapOf(ClazzLogEditAttendanceView.ARG_NEW_CLAZZLOG to
-                                safeStringify(di, ClazzLog.serializer(), entity)), context)
+                navigateForResult(
+                    NavigateForResultOptions(
+                        presenter, null,
+                        ClazzLogEditAttendanceView.VIEW_NAME,
+                        ClazzLog::class,
+                        ClazzLog.serializer(),
+                        arguments = mutableMapOf(ClazzLogEditAttendanceView.ARG_NEW_CLAZZLOG to
+                                safeStringify(di, ClazzLog.serializer(), entity)))
+                )
             }else {
-                view.finishWithResult(listOf(entity))
+                finishWithResult(safeStringify(di, ListSerializer(ClazzLog.serializer()), listOf(entity)))
             }
         }
 

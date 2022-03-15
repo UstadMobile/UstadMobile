@@ -5,21 +5,28 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.impl.nav.UstadBackStackEntry
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ReportFilter
+import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
+import org.kodein.di.bind
 import org.kodein.di.instance
+import org.kodein.di.singleton
 
 class ReportFilterEditPresenterTest {
 
@@ -37,6 +44,12 @@ class ReportFilterEditPresenterTest {
 
     private lateinit var di: DI
 
+    private lateinit var testNavController: UstadNavController
+
+    private lateinit var ustadBackStackEntry: UstadBackStackEntry
+
+    private lateinit var savedStateHandle: UstadSavedStateHandle
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -45,8 +58,20 @@ class ReportFilterEditPresenterTest {
         }
         context = Any()
 
+        savedStateHandle = mock{}
+
+        ustadBackStackEntry = mock{
+            on{savedStateHandle}.thenReturn(savedStateHandle)
+        }
+
+        testNavController = mock{
+            on { currentBackStackEntry }.thenReturn(ustadBackStackEntry)
+            on { getBackStackEntry(any()) }.thenReturn(ustadBackStackEntry)
+        }
+
         di = DI {
             import(ustadTestRule.diModule)
+            bind<UstadNavController>(overrides = true) with singleton { testNavController }
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -75,9 +100,6 @@ class ReportFilterEditPresenterTest {
         presenter.handleClickSave(initialEntity)
 
         verify(systemImpl, timeout(5000)).getString(eq(MessageID.field_required_prompt), any())
-
-        verify(mockView, never()).finishWithResult(any())
-
     }
 
     @Test
@@ -89,7 +111,10 @@ class ReportFilterEditPresenterTest {
         }
 
         val presenterArgs = mapOf(UstadEditView.ARG_ENTITY_JSON to
-                Json.encodeToString(ReportFilter.serializer(), reportFilter))
+                Json.encodeToString(ReportFilter.serializer(), reportFilter),
+                UstadView.ARG_RESULT_DEST_VIEWNAME to "view",
+            UstadView.ARG_RESULT_DEST_KEY to "key"
+        )
         val presenter = ReportFilterEditPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
@@ -102,8 +127,10 @@ class ReportFilterEditPresenterTest {
 
         presenter.handleClickSave(initialEntity)
 
-        verify(mockView, timeout(5000)).finishWithResult(eq(listOf(initialEntity)))
-
+        verify(savedStateHandle, timeout(2000))[any()] = argWhere<String> {
+            safeParseList(di, ListSerializer(ReportFilter.serializer()),
+                ReportFilter::class, it).first().reportFilterUid == initialEntity.reportFilterUid
+        }
 
     }
 

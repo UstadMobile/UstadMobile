@@ -14,12 +14,7 @@ import com.ustadmobile.core.view.LanguageEditView
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
-
-interface LanguageEditFragmentEventHandler {
-
-}
-
-class LanguageEditFragment: UstadEditFragment<Language>(), LanguageEditView, LanguageEditFragmentEventHandler {
+class LanguageEditFragment: UstadEditFragment<Language>(), LanguageEditView {
 
     private var mBinding: FragmentLanguageEditBinding? = null
 

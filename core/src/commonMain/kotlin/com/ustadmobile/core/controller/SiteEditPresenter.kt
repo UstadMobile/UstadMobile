@@ -3,20 +3,21 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.SiteEditView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.Site
-
-import kotlinx.coroutines.*
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import org.kodein.di.DI
-import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
+import org.kodein.di.DI
 
 
 class SiteEditPresenter(context: Any,
@@ -97,8 +98,7 @@ class SiteEditPresenter(context: Any,
             siteTermsOneToManyJoinEditHelper.commitToDatabase(repo.siteTermsDao) {
                 //no need to set the foreign key
             }
-
-            view.finishWithResult(listOf(entity))
+            finishWithResult(safeStringify(di, ListSerializer(Site.serializer()), listOf(entity)))
         }
     }
 

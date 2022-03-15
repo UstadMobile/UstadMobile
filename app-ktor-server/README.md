@@ -10,7 +10,7 @@ in both production and development environment. It is built as KTOR server.
 ```
 ./gradlew app-ktor-server:shadowJar
 ```
-Ths builds the server jar which can be found in app-ktor-server/build/libs/ustad-server-all.jar .
+This builds the server jar which can be found in app-ktor-server/build/libs/ustad-server-all.jar .
 
 2. Copy the default configuration file and adjust it for your database and/or https certificate (optional)
 

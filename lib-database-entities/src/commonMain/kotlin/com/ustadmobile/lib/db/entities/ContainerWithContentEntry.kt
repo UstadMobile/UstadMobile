@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class ContainerWithContentEntry() : Container() {
 
-    var entryId = ""
+    var entryId: String? = null
 
-    var sourceUrl = ""
+    var sourceUrl: String ? = null
 }

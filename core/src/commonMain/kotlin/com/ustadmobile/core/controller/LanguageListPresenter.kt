@@ -1,18 +1,19 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.LanguageDao
-import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: LanguageListView,
@@ -57,14 +58,26 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
 
     override fun handleClickEntry(entry: Language) {
         when(mListMode) {
-            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
+            ListViewMode.PICKER -> finishWithResult(safeStringify(di,
+                ListSerializer(Language.serializer()), listOf(entry)))
             ListViewMode.BROWSER -> systemImpl.go(LanguageEditView.VIEW_NAME,
                     mapOf(UstadView.ARG_ENTITY_UID to entry.langUid.toString()), context)
         }
     }
 
     override fun handleClickCreateNewFab() {
-        systemImpl.go(LanguageEditView.VIEW_NAME, mapOf(), context)
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null,
+                LanguageEditView.VIEW_NAME, Language::class,
+                Language.serializer(),
+                SAVEDSTATE_KEY_LANGUAGE
+            )
+        )
+    }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
+        handleClickCreateNewFab()
     }
 
     override suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
@@ -98,6 +111,8 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
                 SortOrderOption(MessageID.two_letter_code, LanguageDao.SORT_TWO_LETTER_DESC, false),
                 SortOrderOption(MessageID.three_letter_code, LanguageDao.SORT_THREE_LETTER_ASC, true),
                 SortOrderOption(MessageID.three_letter_code, LanguageDao.SORT_THREE_LETTER_DESC, false))
+
+        const val SAVEDSTATE_KEY_LANGUAGE = "Language"
     }
 
 }

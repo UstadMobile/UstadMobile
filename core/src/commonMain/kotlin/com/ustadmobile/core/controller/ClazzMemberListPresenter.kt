@@ -1,8 +1,8 @@
 package com.ustadmobile.core.controller
 
-import io.github.aakira.napier.Napier
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.approvePendingClazzEnrolment
@@ -11,17 +11,17 @@ import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.ClazzMemberListView
+import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.GlobalScope
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
@@ -115,6 +115,8 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
         //there really isn't a fab here. There are buttons for add teacher and add student in the list itself
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
+
     override fun onClickSort(sortOption: SortOrderOption) {
         super.onClickSort(sortOption)
         updateListOnView()
@@ -128,6 +130,20 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {
         super.onListFilterOptionSelected(filterOptionId)
         updateListOnView()
+    }
+
+    fun handlePickNewMemberClicked(args: Map<String,String>){
+        navigateForResult(
+            NavigateForResultOptions(
+            this, null,
+                PersonListView.VIEW_NAME,
+                ClazzEnrolment::class,
+                ClazzEnrolment.serializer(),
+                RESULT_PERSON_KEY,
+                overwriteDestination = true,
+                arguments = args.toMutableMap()
+            )
+        )
     }
 
     companion object {
@@ -147,5 +163,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
         val FILTER_OPTIONS = listOf(MessageID.active to ClazzEnrolmentDao.FILTER_ACTIVE_ONLY,
                 MessageID.all to 0)
+
+        const val RESULT_PERSON_KEY = "person"
     }
 }

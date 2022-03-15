@@ -63,6 +63,8 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
 
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
+
     override fun onClickPersonWithStatementDisplay(personWithAttemptsSummary: PersonWithAttemptsSummary) {
             systemImpl.go(SessionListView.VIEW_NAME,
                     mapOf(UstadView.ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),

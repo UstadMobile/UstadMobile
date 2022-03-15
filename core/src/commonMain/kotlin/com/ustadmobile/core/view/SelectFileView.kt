@@ -1,6 +1,12 @@
 package com.ustadmobile.core.view
 
-interface SelectFileView : UstadView {
+interface SelectFileView : UstadEditView<Any> {
+
+    var acceptedMimeTypes: List<String>
+
+    var noFileSelectedError: String?
+
+    var unSupportedFileError: String?
 
     companion object {
 

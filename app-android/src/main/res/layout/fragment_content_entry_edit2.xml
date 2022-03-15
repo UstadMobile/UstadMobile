@@ -39,9 +39,6 @@
             name="selectedStorageIndex"
             type="Integer" />
 
-        <variable
-            name="fileImportInfoVisibility"
-            type="Integer" />
 
         <variable
             name="videoPreviewVisibility"
@@ -89,6 +86,9 @@
             name="completionCriteriaListener"
             type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
+        <variable
+            name="showUpdateContentButton"
+            type="boolean" />
 
     </data>
 
@@ -119,7 +119,7 @@
                 android:onClick="@{()-> activityEventHandler.onClickUpdateContent()}"
                 android:padding="@dimen/dimen_20dp"
                 android:text="@string/update_content"
-                android:visibility="@{(contentEntry.leaf || contentEntry.contentEntryUid != 0) ? View.VISIBLE: View.GONE}"
+                android:visibility="@{showUpdateContentButton ? View.VISIBLE: View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -127,7 +127,7 @@
 
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-                android:visibility="@{fileImportInfoVisibility}"
+                android:visibility="@{showUpdateContentButton ? View.VISIBLE : View.GONE}"
                 android:layout_margin="@dimen/dimen_20dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

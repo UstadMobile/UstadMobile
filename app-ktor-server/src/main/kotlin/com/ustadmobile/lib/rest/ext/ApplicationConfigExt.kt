@@ -6,6 +6,7 @@ import io.ktor.request.*
 import java.util.*
 import com.ustadmobile.core.account.Endpoint
 import io.ktor.application.*
+import java.io.File
 
 /**
  * Create a Properties object from a HOCON config section.
@@ -50,4 +51,11 @@ fun ApplicationConfig.dbModeToEndpoint(call: ApplicationCall, dbModeOverride: St
     }else {
         Endpoint(call.request.header("Host") ?: "localhost")
     }
+}
+
+/**
+ * Get a file for an external command e.g. ffmpeg etc specified in the paths section
+ */
+fun ApplicationConfig.commandFileProperty(command: String) : File? {
+    return propertyOrNull("ktor.ustad.paths.$command")?.getString()?.let { File(it) }
 }

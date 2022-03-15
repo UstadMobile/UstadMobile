@@ -4,13 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
@@ -109,49 +107,6 @@ abstract class ContainerDao : BaseDao<Container> {
     abstract fun hasContainerWithFilesToDownload(contentEntryUid: Long): DoorLiveData<Boolean>
 
     @Query("""
-          SELECT EXISTS(SELECT 1
-                          FROM Container
-                     LEFT JOIN ContentJobItem
-                               ON ContentJobItem.cjiContainerUid = Container.containerUid  
-                         WHERE Container.containerContentEntryUid = :contentEntryUid
-                           AND ContentJobItem.cjiRecursiveStatus = ${JobStatus.COMPLETE}
-                           AND EXISTS (SELECT ContainerEntry.ceUid 
-                                         FROM ContainerEntry
-                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
-                      ORDER BY cntLastModified DESC LIMIT 1)
-    """)
-    abstract fun hasContainerWithFilesToDelete(contentEntryUid: Long): DoorLiveData<Boolean>
-
-
-    @Query("""
-          SELECT EXISTS(SELECT 1
-                          FROM Container
-                     LEFT JOIN ContentJobItem
-                               ON ContentJobItem.cjiContainerUid = Container.containerUid  
-                         WHERE Container.containerContentEntryUid = :contentEntryUid
-                           AND EXISTS (SELECT ContainerEntry.ceUid 
-                                         FROM ContainerEntry
-                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
-                      ORDER BY cntLastModified DESC LIMIT 1)
-    """)
-    abstract fun hasContainerWithFilesToOpen(contentEntryUid: Long): DoorLiveData<Boolean>
-
-    @Query("""
-         SELECT (SELECT MAX(cntLastModified) 
-                   FROM Container 
-                  WHERE containerContentEntryUid = :contentEntryUid) > (COALESCE((
-                  
-                        SELECT cntLastModified 
-                          FROM Container 
-                         WHERE Container.containerContentEntryUid = :contentEntryUid
-                           AND EXISTS (SELECT ContainerEntry.ceUid 
-                                         FROM ContainerEntry
-                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid) 
-                      ORDER BY cntLastModified DESC), 9223372036854775807))
-    """)
-    abstract fun hasContainerWithFilesToUpdate(contentEntryUid: Long): DoorLiveData<Boolean>
-
-    @Query("""
             SELECT Container.*
               FROM Container
              WHERE Container.containerContentEntryUid = :contentEntryUid
@@ -162,17 +117,6 @@ abstract class ContainerDao : BaseDao<Container> {
     """)
     abstract suspend fun findContainerWithFilesByContentEntryUid(contentEntryUid: Long): Container?
 
-
-    @Query("""
-            SELECT Container.containerUid, Container.mimeType
-              FROM Container
-             WHERE Container.containerContentEntryUid = :contentEntryUid
-               AND EXISTS (SELECT ContainerEntry.ceUid 
-                             FROM ContainerEntry
-                            WHERE ContainerEntry.ceContainerUid = Container.containerUid)     
-          ORDER BY Container.cntLastModified DESC LIMIT 1
-    """)
-    abstract suspend fun findContainerWithMimeTypeWithFilesByContentEntryUid(contentEntryUid: Long): ContainerUidAndMimeType?
 
     @Query("SELECT Container.* FROM Container " +
             "LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = containerContentEntryUid " +
@@ -230,13 +174,17 @@ abstract class ContainerDao : BaseDao<Container> {
           FROM Container
          WHERE Container.containerContentEntryUid = :contentEntryUid
            AND $CONTAINER_READY_WHERE_CLAUSE
-           AND EXISTS (SELECT ContainerEntry.ceUid 
-                         FROM ContainerEntry
-                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)
+           AND (CAST(:downloadRequired AS INTEGER) = 0
+                OR EXISTS (SELECT ContainerEntry.ceUid 
+                             FROM ContainerEntry
+                            WHERE ContainerEntry.ceContainerUid = Container.containerUid))
       ORDER BY Container.cntLastModified DESC 
          LIMIT 1
     """)
-    abstract suspend fun getMostRecentLocallyAvailableContainerUidAndMimeType(contentEntryUid: Long): ContainerUidAndMimeType?
+    abstract suspend fun getMostRecentAvailableContainerUidAndMimeType(
+        contentEntryUid: Long,
+        downloadRequired: Boolean,
+    ): ContainerUidAndMimeType?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<Container>)

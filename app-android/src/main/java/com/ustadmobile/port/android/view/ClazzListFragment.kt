@@ -12,9 +12,11 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toListFilterOptions
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.ClazzList2View
+import com.ustadmobile.core.view.PersonListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
@@ -104,8 +106,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
                 args = bundleOf(UstadView.ARG_SCHOOL_UID to filterExcludeMembersOfSchool.toString())
             }
             args.putAll(arguments)
-            navigateToEditEntity(null, R.id.clazz_edit_dest, Clazz::class.java,
-                    argBundle = args)
+            mPresenter?.handleClickAddNewItem(args.toStringMap())
         } else {
             super.onClick(v)
         }

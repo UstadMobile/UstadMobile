@@ -3,12 +3,15 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.ContainerStorageManager
+import com.ustadmobile.core.io.ext.deleteRecursively
 import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.EventCollator
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.createTemporaryDir
+import com.ustadmobile.core.util.ext.decodeStringMapFromString
 import com.ustadmobile.core.util.ext.deleteZombieContainerEntryFiles
-import com.ustadmobile.core.util.ext.validateAndUpdateContainerSize
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
@@ -23,6 +26,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -39,7 +43,7 @@ class ContentJobRunner(
     override val di: DI,
     val numProcessors: Int = DEFAULT_NUM_PROCESSORS,
     val maxItemAttempts: Int = DEFAULT_NUM_RETRIES
-) : DIAware, ContentJobProgressListener, DoorObserver<ConnectivityStatus?>,
+) : DIAware, ContentJobProgressListener, DoorObserver<Pair<Int, Boolean>?>,
     ContentJobItemTransactionRunner {
 
     data class ContentJobResult(val status: Int)
@@ -54,8 +58,6 @@ class ContentJobRunner(
 
     private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val repo: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_REPO)
-
     private val contentPluginManager: ContentPluginManager by on(endpoint).instance()
 
     private val eventCollator = EventCollator(500, this::commitProgressUpdates)
@@ -67,6 +69,12 @@ class ContentJobRunner(
 
     private val contentJobItemUpdateMutex = Mutex()
 
+    private val json: Json by instance()
+
+    private val containerStorageManager: ContainerStorageManager by on(endpoint).instance()
+
+    private val jobConnectivityLiveData = JobConnectivityLiveData(connectivityLiveData,
+        db.contentJobDao.findMeteredAllowedLiveData(jobId))
 
     @ExperimentalCoroutinesApi
     private fun CoroutineScope.produceJobs() = produce<ContentJobItemAndContentJob> {
@@ -74,7 +82,7 @@ class ContentJobRunner(
         try {
             Napier.d("$logPrefix connectivity observer forever")
             withContext(doorMainDispatcher()) {
-                connectivityLiveData.liveData.observeForever(this@ContentJobRunner)
+                jobConnectivityLiveData.observeForever(this@ContentJobRunner)
             }
 
             do {
@@ -117,21 +125,26 @@ class ContentJobRunner(
             Napier.d(e.stackTraceToString(), e)
         }finally {
             withContext(NonCancellable + doorMainDispatcher()) {
-                connectivityLiveData.liveData.removeObserver(this@ContentJobRunner)
+                jobConnectivityLiveData.removeObserver(this@ContentJobRunner)
             }
             Napier.d("$logPrefix close produce job")
             close()
         }
     }
 
-    private fun CoroutineScope.launchProcessor(id: Int, channel: ReceiveChannel<ContentJobItemAndContentJob>) = launch {
+    private fun CoroutineScope.launchProcessor(
+        id: Int,
+        channel: ReceiveChannel<ContentJobItemAndContentJob>
+    ) = launch {
         val tmpDir = createTemporaryDir("job-$id")
         Napier.d("$logPrefix created tempDir job-$id")
 
         for(item in channel) {
             val itemUri = item.contentJobItem?.sourceUri?.let { DoorUri.parse(it) } ?: continue
-
-            val processContext = ContentJobProcessContext(itemUri, tmpDir, mutableMapOf(),
+            val processParams = item.contentJob?.params?.let {
+                json.decodeStringMapFromString(it)
+            }?.toMutableMap() ?: mutableMapOf()
+            val processContext = ContentJobProcessContext(itemUri, tmpDir, processParams,
                 this@ContentJobRunner, di)
             Napier.d("$logPrefix : " +
                 "Proessor #$id processing job #${item.contentJobItem?.cjiUid} " +
@@ -140,10 +153,6 @@ class ContentJobRunner(
             var processResult: ProcessResult? = null
             var processException: Throwable? = null
             var mediatorObserver: DoorObserver<Pair<Int, Boolean>>?= null
-            val mediatorLiveData = JobConnectivityLiveData(connectivityLiveData,
-                db.contentJobDao.findMeteredAllowedLiveData(
-                    item.contentJob?.cjUid ?: 0
-                ))
 
             try {
                 val cjiUid = item.contentJobItem?.cjiUid
@@ -210,7 +219,7 @@ class ContentJobRunner(
                 }
 
                 withContext(doorMainDispatcher()){
-                    mediatorLiveData.observeForever(mediatorObserver)
+                    jobConnectivityLiveData.observeForever(mediatorObserver)
                 }
 
 
@@ -273,7 +282,7 @@ class ContentJobRunner(
                 }
 
                 withContext(NonCancellable + doorMainDispatcher()) {
-                    mediatorObserver?.let { mediatorLiveData.removeObserver(it) }
+                    mediatorObserver?.let { jobConnectivityLiveData.removeObserver(it) }
                 }
 
 
@@ -342,6 +351,19 @@ class ContentJobRunner(
                     }
 
                     withContentJobItemTransaction { txDb ->
+                        txDb.contentEntryDao.updateContentEntryActiveByContentJobUid(jobId,
+                            true, systemTimeInMillis())
+
+                        //Delete all containers
+                        val jobDestDir = txDb.contentJobDao.findByUid(jobId)?.toUri
+                            ?: containerStorageManager.storageList.first().dirUri
+
+                        txDb.contentJobItemDao.findAllContainersByJobUid(jobId).forEach { containerUid ->
+                            val dirUriToDelete = DoorUri.parse(UMFileUtil.joinPaths(jobDestDir,
+                                containerUid.toString()))
+                            dirUriToDelete.deleteRecursively()
+                        }
+                        txDb.contentJobItemDao.updateAllStatusesByJobUid(jobId, JobStatus.CANCELED)
                         txDb.containerEntryDao.deleteContainerEntriesCreatedByJobs(jobId)
                         txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
                     }
@@ -368,7 +390,9 @@ class ContentJobRunner(
         return ContentJobResult(JobStatus.COMPLETE)
     }
 
-    override fun onChanged(t: ConnectivityStatus?) {
+    //Connectivity and/or the setting for metered data allowed has been changed, so we should check
+    //the queue
+    override fun onChanged(t: Pair<Int, Boolean>?) {
         GlobalScope.launch {
             if(t != null){
                 checkQueueSignalChannel.send(true)
@@ -381,8 +405,6 @@ class ContentJobRunner(
         const val DEFAULT_NUM_PROCESSORS = 10
 
         const val DEFAULT_NUM_RETRIES = 5
-
-        const val NUM_CONTAINER_SIZE_UPDATE_ATTEMPTS = 3
 
     }
 }

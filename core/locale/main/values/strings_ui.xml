@@ -1018,13 +1018,11 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="site_link">Site link</string>
 
-    <string name="please_enter_the_linK">Please enter the link for your site provided by your teacher or administrator:</string>
+    <string name="please_enter_the_linK">Please enter the link for your learning environment provided by your teacher or administrator:</string>
 
     <string name="or">OR</string>
 
-    <string name="sites_can_be_help_text">Sites can be created for schools, projects, and organizations, etc. Each site can have its\' own users, administrators, content, classes, schools, and more.</string>
-
-    <string name="connect_to_site">Connect to site</string>
+    <string name="connect">Connect</string>
 
     <string name="terms_and_policies_text">Terms and policies text</string>
 
@@ -1472,6 +1470,13 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="parent">Parent</string>
 
+    <string name="upload">Upload</string>
+
+    <string name="selected_file_summary">Selected %1$s (%2$s)</string>
+
+    <string name="drag_and_drop_or_click_to_add_file">Drag and drop a file here or click</string>
+
+    <string name="extra_active_tab_warning">We do not support multiple tabs running at the same time, close this tab.</string>
 
     <string name="saved">Saved</string>
 

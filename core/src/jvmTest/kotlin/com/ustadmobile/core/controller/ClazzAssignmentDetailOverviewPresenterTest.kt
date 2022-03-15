@@ -59,6 +59,8 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
     private lateinit var xapiStatementEndpointImpl: XapiStatementEndpoint
 
+    private lateinit var mockNavController: UstadNavController
+
     @Before
     fun setup() {
         mockView = mock {
@@ -90,6 +92,8 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         }
 
         repo = di.directActiveRepoInstance()
+        mockNavController = di.direct.instance()
+
 
         repoClazzAssignmentDaoSpy = spy(repo.clazzAssignmentDao)
         whenever(repo.clazzAssignmentDao).thenReturn(repoClazzAssignmentDaoSpy)

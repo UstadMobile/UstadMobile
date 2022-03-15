@@ -9,7 +9,7 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
@@ -89,7 +89,7 @@ ContentEntryOpenerTest {
         runBlocking {
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                 true, false, false)
-            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any(), any())
+            verify(impl).go(eq(VideoContentView.VIEW_NAME), any(), any(), any())
         }
     }
 
@@ -125,7 +125,7 @@ ContentEntryOpenerTest {
         runBlocking {
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)
-            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any(), any())
+            verify(impl).go(eq(VideoContentView.VIEW_NAME), any(), any(), any())
         }
     }
 
@@ -134,7 +134,7 @@ ContentEntryOpenerTest {
         runBlocking {
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)
-            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any(), any())
+            verify(impl).go(eq(VideoContentView.VIEW_NAME), any(), any(), any())
         }
     }
 

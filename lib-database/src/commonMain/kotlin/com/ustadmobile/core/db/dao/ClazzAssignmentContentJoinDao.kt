@@ -92,8 +92,6 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
         COALESCE(ClazzAssignmentRollUp.cacheProgress,0) AS progress,                   
                  
         0 as resultScaled,
-        
-        COALESCE(ClazzAssignmentContentJoin.cacjWeight, 0) AS resultWeight,
                             
         COALESCE(ClazzAssignmentRollUp.cacheContentComplete,'FALSE') AS contentComplete,
         
@@ -162,17 +160,6 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
     abstract suspend fun updateInActiveByClazzAssignmentContentJoinUid(contentUid: Long, active : Boolean,
                                                                        clazzAssignmentUid: Long)
 
-
-    @Query("""
-        UPDATE ClazzAssignmentContentJoin
-           SET cacjWeight = :weight,
-               cacjLCB = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL}
-         WHERE cacjContentUid = :contentUid 
-           AND cacjAssignmentUid = :clazzAssignmentUid
-    """)
-    abstract suspend fun updateWeightForAssignmentAndContent(contentUid: Long,
-                                                             clazzAssignmentUid: Long, weight: Int)
-
     suspend fun deactivateByUids(uidList: List<Long>, clazzAssignmentUid: Long) {
         uidList.forEach {
             updateInActiveByClazzAssignmentContentJoinUid(it, false, clazzAssignmentUid)
@@ -203,9 +190,9 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                                
                              COALESCE((CASE WHEN ClazzAssignmentRollUp.cacheContentComplete 
                                             THEN 1 ELSE 0 END),0) AS totalCompletedContent,
-                             cacjWeight AS assignmentContentWeight,
+                        
                              1 as totalContent
-                             
+                           
                              
                       FROM ClazzAssignmentContentJoin
                             LEFT JOIN ContentEntry 

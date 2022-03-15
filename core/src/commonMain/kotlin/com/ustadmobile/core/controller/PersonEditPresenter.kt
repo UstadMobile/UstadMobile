@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
@@ -175,7 +176,7 @@ class PersonEditPresenter(
 
             //Email validation
             val email = entity.emailAddr?:""
-            if(email.isNotEmpty() && !EMAIL_VALIDATION_REGEX.matches(email)){
+            if(email.isNotEmpty() && !email.validEmail()){
                 view.emailError = formatError
             }
 
@@ -199,7 +200,7 @@ class PersonEditPresenter(
                     mPersonParentJoin?.ppjEmail.isNullOrBlank() -> {
                         MessageID.field_required_prompt
                     }
-                    mPersonParentJoin?.ppjEmail?.let { EMAIL_VALIDATION_REGEX.matches(it) } != true ->
+                    mPersonParentJoin?.ppjEmail?.let { it.validEmail() } != true ->
                         MessageID.invalid_email
                     else -> 0
                 }
@@ -265,14 +266,16 @@ class PersonEditPresenter(
                     repo.personDao.updateAsync(entity)
                 }
 
-                val personPictureVal = view.personPicture
-                if(personPictureVal != null) {
-                    personPictureVal.personPicturePersonUid = entity.personUid
+                UmPlatformUtil.runAsync {
+                    val personPictureVal = view.personPicture
+                    if(personPictureVal != null) {
+                        personPictureVal.personPicturePersonUid = entity.personUid
 
-                    if(personPictureVal.personPictureUid == 0L) {
-                        repo.personPictureDao.insertAsync(personPictureVal)
-                    }else {
-                        repo.personPictureDao.updateAsync(personPictureVal)
+                        if(personPictureVal.personPictureUid == 0L) {
+                            repo.personPictureDao.insertAsync(personPictureVal)
+                        }else {
+                            repo.personPictureDao.updateAsync(personPictureVal)
+                        }
                     }
                 }
 
@@ -283,17 +286,9 @@ class PersonEditPresenter(
                             arguments.plus(UstadView.ARG_PERSON_UID to entity.personUid.toString()),
                             context)
                 }else{
-                    onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)
+                    onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity, PersonWithAccount.serializer())
                 }
             }
-        }
-    }
-
-    companion object {
-
-        @Suppress("RegExpRedundantEscape")
-        val EMAIL_VALIDATION_REGEX: Regex by lazy(LazyThreadSafetyMode.NONE) {
-            Regex("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$")
         }
     }
 }

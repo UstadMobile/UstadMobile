@@ -326,7 +326,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/activity_clazz_edit_holiday_calendar_text"
                     android:text="@{clazz.holidayCalendar.umCalendarName}"
-                    android:onClick="@{() -> mPresenter.handleClickHolidayCalendar()}"
+                    android:onClick="@{() -> mPresenter.handleHolidayCalendarClicked()}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     android:layout_width="match_parent"

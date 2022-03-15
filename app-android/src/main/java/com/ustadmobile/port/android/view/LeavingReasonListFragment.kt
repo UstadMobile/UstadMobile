@@ -9,10 +9,8 @@ import com.toughra.ustadmobile.databinding.ItemLeavingReasonListBinding
 import com.ustadmobile.core.controller.LeavingReasonListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.lib.db.entities.LeavingReason
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -86,7 +84,7 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.leaving_reason_edit, LeavingReason::class.java)
+            mPresenter?.handleClickCreateNewFab()
         else
             super.onClick(view)
     }
