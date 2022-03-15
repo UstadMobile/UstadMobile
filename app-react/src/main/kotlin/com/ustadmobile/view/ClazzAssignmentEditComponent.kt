@@ -1,15 +1,14 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
 import com.ustadmobile.util.UmProps
@@ -90,6 +89,27 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                 startDateLabel = startDateLabel.copy(errorText = value)
             }
         }
+    override var caMaxPointsError: String?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var startDate: Long
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var startTime: Long
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var deadlineDate: Long
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var deadlineTime: Long
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var gracePeriodDate: Long
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var gracePeriodTime: Long
+        get() = TODO("Not yet implemented")
+        set(value) {}
 
     override var timeZone: String? = null
         get() = field
@@ -99,28 +119,30 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                 field = newText
             }
         }
-
-    override var lateSubmissionOptions: List<ClazzAssignmentEditPresenter.LateSubmissionOptionsMessageIdOption>? = null
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
+    override var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var fileTypeOptions: List<ClazzAssignmentEditPresenter.FileTypeOptionsMessageIdOption>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var textLimitTypeOptions: List<ClazzAssignmentEditPresenter.TextLimitTypeOptionsMessageIdOption>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var submissionTypeOptions: List<ClazzAssignmentEditPresenter.SubmissionTypeOptionsMessageIdOption>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var completionCriteriaOptions: List<ClazzAssignmentEditPresenter.CompletionCriteriaOptionsMessageIdOption>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var markingTypeOptions: List<ClazzAssignmentEditPresenter.MarkingTypeOptionsMessageIdOption>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
 
     private val contentListObserver = ObserverFnWrapper<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
         setState {
             contentList = it
         }
     }
-
-    override var clazzAssignmentContent: DoorMutableLiveData<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
-        get() = field
-        set(value) {
-            field?.removeObserver(contentListObserver)
-            field = value
-            value?.observe(this, contentListObserver)
-        }
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -250,7 +272,8 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         createListSectionTitle(timeZone ?: "", TypographyVariant.h6)
                     }
 
-                    umTextFieldSelect(
+                    // TODO design changed
+                   /* umTextFieldSelect(
                         "${lateSubLabel.text}",
                         entity?.caLateSubmissionType.toString(),
                         lateSubLabel.errorText ?: "",
@@ -263,10 +286,9 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 entity?.caLateSubmissionType = it.toInt()
                             }
                         }
-                    )
+                    )*/
 
-                    if(entity?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY ||
-                        entity?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_ACCEPT){
+                    // TODO design changed
 
                             umGridContainer(spacing = GridSpacing.spacing4) {
 
@@ -300,10 +322,8 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                     })
                             }
                         }
-                    }
 
-
-                    if(entity?.caLateSubmissionType == ClazzAssignment.ASSIGNMENT_LATE_SUBMISSION_PENALTY){
+                    // TODO need to change
                         umFormControl(variant = FormControlVariant.outlined) {
                             css{
                                 +defaultMarginTop
@@ -329,22 +349,23 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                             attrs.endAdornment = umTypography("%")
                         }
                         }
-                    }
 
                     umSpacer()
 
                     createListSectionTitle(getString(MessageID.content), TypographyVariant.h6)
 
-                    val createNewItem = CreateNewItem(true, MessageID.add_content){
-                        mPresenter?.contentOneToManyJoinListener?.onClickNew()
-                    }
+                    // TODO no more entries
+                    /*
+                 val createNewItem = CreateNewItem(true, MessageID.add_content){
+                     mPresenter?.contentOneToManyJoinListener?.onClickNew()
+                 }
 
-                    mPresenter?.let { presenter ->
-                        renderContentEntries(presenter.contentOneToManyJoinListener,
-                            contentList.toSet().toList(), createNewItem = createNewItem){
-                            mPresenter?.contentOneToManyJoinListener?.onClickEdit(it)
-                        }
-                    }
+              mPresenter?.let { presenter ->
+                     renderContentEntries(presenter.contentOneToManyJoinListener,
+                         contentList.toSet().toList(), createNewItem = createNewItem){
+                         mPresenter?.contentOneToManyJoinListener?.onClickEdit(it)
+                     }
+                 }*/
 
                     umItem {
                         css(defaultMarginTop)

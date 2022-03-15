@@ -59,6 +59,9 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
             contents = it
         }
     }
+    override var submitMarkError: String?
+        get() = TODO("Not yet implemented")
+        set(value) {}
 
     override var person: Person? = null
         get() = field
@@ -68,14 +71,9 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                 ustadComponentTitle = value?.fullName()
             }
         }
-
-    override var clazzAssignmentContent: DoorDataSourceFactory<Int, ContentWithAttemptSummary>? = null
-        set(value) {
-            field = value
-            val liveData = value?.getData(0,Int.MAX_VALUE)
-            liveData?.removeObserver(contentsObserver)
-            liveData?.observe(this, contentsObserver)
-        }
+    override var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
 
     override var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>? = null
         set(value) {
@@ -85,15 +83,17 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
             liveData?.observe(this, privateCommentsObserver)
         }
 
-    override var entity: ClazzAssignment? = null
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
+    override var submissionScore: CourseAssignmentMark?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var submissionStatus: Int
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var markNextStudentEnabled: Boolean
+        get() = TODO("Not yet implemented")
+        set(value) {}
 
-    override var studentScore: ContentEntryStatementScoreProgress? = null
+    override var entity: ClazzAssignment? = null
         get() = field
         set(value) {
             setState {
@@ -277,13 +277,13 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                     }
                 }
 
-                if(studentScore != null){
+            /*    if(studentScore != null){
                     umItem(GridSize.cells12) {
                         createSummaryCard("${studentScore?.calculateScoreWithPenalty()}%  " +
                                 "(${studentScore?.resultScore}/${studentScore?.resultMax})",
                             getString(MessageID.total_score))
                     }
-                }
+                }*/
 
                 if(entity?.caPrivateCommentsEnabled == true){
                     umItem(GridSize.cells12){

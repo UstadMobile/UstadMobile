@@ -17,7 +17,6 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI

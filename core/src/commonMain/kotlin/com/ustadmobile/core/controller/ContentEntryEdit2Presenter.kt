@@ -20,13 +20,10 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.LanguageListView
-import com.ustadmobile.core.view.SelectFileView
-import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID

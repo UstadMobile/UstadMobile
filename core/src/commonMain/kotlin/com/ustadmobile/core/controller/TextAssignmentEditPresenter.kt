@@ -2,12 +2,14 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.TextAssignmentEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -55,7 +57,9 @@ class TextAssignmentEditPresenter(context: Any,
 
     override fun handleClickSave(entity: CourseAssignmentSubmission) {
         presenterScope.launch {
-            view.finishWithResult(listOf(entity))
+            finishWithResult(safeStringify(di,
+                    ListSerializer(CourseAssignmentSubmission.serializer()),
+                    listOf(entity)))
         }
     }
 

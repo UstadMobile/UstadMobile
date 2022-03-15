@@ -5,7 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.SelectFileView
-import com.ustadmobile.core.view.SelectFileView.Companion.ARG_SELECTION_MODE
+import com.ustadmobile.core.view.SelectFileView.Companion.ARG_MIMETYPE_SELECTED
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
@@ -35,7 +35,7 @@ class SelectFilePresenter(
 
     override fun onCreate(savedState: Map<String, String>?){
         parentEntryUid = arguments[UstadView.ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
-        view.acceptedMimeTypes = urlSearchParamsToMap()[ARG_SELECTION_MODE].toString().split(";").map{
+        view.acceptedMimeTypes = urlSearchParamsToMap()[ARG_MIMETYPE_SELECTED].toString().split(";").map{
             //Add .(dot) to file extensions and format for JS
             if(it.indexOf("/") == -1) ".${it}" else it.replace(" ","+")
         }.toList()

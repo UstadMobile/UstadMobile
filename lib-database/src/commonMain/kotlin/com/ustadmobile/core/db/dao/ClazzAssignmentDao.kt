@@ -96,7 +96,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
                COALESCE(AVG(ResultSource.cacheProgress),0) as progress, 0 as success,
                0 AS penalty,
                
-               COALESCE(SUM(ResultSource.cacheWeight),0) As resultWeight,
+               0 As resultWeight,
                
               COALESCE((SUM(CASE 
                         WHEN CAST(ResultSource.cacheContentComplete AS INTEGER) > 0 

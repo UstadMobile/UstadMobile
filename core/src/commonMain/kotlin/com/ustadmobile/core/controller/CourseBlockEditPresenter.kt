@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.CourseBlockEditView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
@@ -10,6 +11,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.CourseBlock
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class CourseBlockEditPresenter(context: Any, args: Map<String, String>, view: CourseBlockEditView,
@@ -53,7 +55,9 @@ class CourseBlockEditPresenter(context: Any, args: Map<String, String>, view: Co
                 repo.courseBlockDao.updateAsync(entity)
             }
 
-            view.finishWithResult(listOf(entity))
+            finishWithResult(safeStringify(di,
+                    ListSerializer(CourseBlock.serializer()),
+                    listOf(entity)))
         }
 
     }

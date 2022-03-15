@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -8,10 +7,9 @@ import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
-import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.lib.db.entities.ScopedGrantAndName
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
@@ -66,6 +64,9 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
             field = value
             value?.observe(this, scheduleObserver)
         }
+    override var courseBlocks: DoorMutableLiveData<List<CourseBlockWithEntity>>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
 
     override var clazzEndDateError: String? = null
         set(value) {
@@ -95,6 +96,12 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
             field = value
             field?.observe(this, scopedGrantListObserver)
         }
+    override var coursePicturePath: String?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var coursePicture: CoursePicture?
+        get() = TODO("Not yet implemented")
+        set(value) {}
 
     override var fieldsEnabled: Boolean = false
         get() = field

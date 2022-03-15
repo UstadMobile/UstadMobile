@@ -72,8 +72,7 @@ class ClazzDetailComponent(mProps: UmProps): UstadDetailComponent<Clazz>(mProps)
             ClazzDetailOverviewView.VIEW_NAME to MessageID.overview,
             ContentEntryList2View.VIEW_NAME to MessageID.content,
             ClazzMemberListView.VIEW_NAME to MessageID.members,
-            ClazzLogListAttendanceView.VIEW_NAME to MessageID.attendance,
-            ClazzAssignmentListView.VIEW_NAME to MessageID.assignments
+            ClazzLogListAttendanceView.VIEW_NAME to MessageID.attendance
         )
 
     }

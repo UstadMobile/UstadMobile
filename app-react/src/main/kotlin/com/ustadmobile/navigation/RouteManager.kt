@@ -60,7 +60,6 @@ object RouteManager {
         UstadDestination(view = ClazzEnrolmentListView.VIEW_NAME, component = ClazzEnrolmentListComponent::class),
         UstadDestination(view = LeavingReasonListView.VIEW_NAME, component = LeavingReasonListComponent::class),
         UstadDestination(view = LeavingReasonEditView.VIEW_NAME, component = LeavingReasonEditComponent::class),
-        UstadDestination(view = ClazzAssignmentListView.VIEW_NAME, component = ClazzAssignmentListComponent::class),
         UstadDestination(view = ClazzAssignmentEditView.VIEW_NAME, component = ClazzAssignmentEditComponent::class),
         UstadDestination(view = ClazzAssignmentDetailView.VIEW_NAME, component = ClazzAssignmentDetailComponent::class),
         UstadDestination(view = ClazzAssignmentDetailOverviewView.VIEW_NAME, component = ClazzAssignmentOverviewComponent::class),

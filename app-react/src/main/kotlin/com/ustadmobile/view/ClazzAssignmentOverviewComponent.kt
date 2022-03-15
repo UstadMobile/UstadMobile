@@ -4,7 +4,6 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailOverviewPresenter
 import com.ustadmobile.core.controller.DefaultContentEntryListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadView
@@ -74,21 +73,12 @@ class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<Cl
         }
     }
 
-    override var clazzMetrics: ContentEntryStatementScoreProgress? = null
-        set(value) {
-            setState {
-                field = value
-                showScoreMetrics = value?.resultMax ?: 0 > 0
-            }
-        }
-
-    override var clazzAssignmentContent: DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
-        set(value) {
-            field = value
-            val liveData = value?.getData(0,Int.MAX_VALUE)
-            liveData?.removeObserver(contentsObserver)
-            liveData?.observe(this, contentsObserver)
-        }
+    override var submittedCourseAssignmentSubmission: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
 
     override var timeZone: String? = null
         get() = field
@@ -121,6 +111,21 @@ class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<Cl
                 field = value
             }
         }
+    override var showSubmission: Boolean
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var hasPassedDeadline: Boolean
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var maxNumberOfFilesSubmission: Int
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var submissionMark: CourseAssignmentMark?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var submissionStatus: Int
+        get() = TODO("Not yet implemented")
+        set(value) {}
 
     override var entity: ClazzAssignment? = null
         get() = field
@@ -176,13 +181,14 @@ class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<Cl
                         }
                     }
 
-                    if(showScoreMetrics){
+                    // TODO
+                  /*  if(showScoreMetrics){
                         umItem(GridSize.cells12){
                             umTypography("${clazzMetrics?.calculateScoreWithPenalty()}%")
                             umTypography(getString(MessageID.total_score))
                         }
                     }
-
+*/
                 }
 
                 if(contents.isNotEmpty()){

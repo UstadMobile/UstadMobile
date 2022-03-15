@@ -63,9 +63,9 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
 
     override fun RBuilder.renderListHeaderView() {
         umGridContainer(GridSpacing.spacing4) {
-            createSummaryCard(summary?.notStartedStudents, getString(MessageID.not_started))
-            createSummaryCard(summary?.startedStudents, getString(MessageID.started))
-            createSummaryCard(summary?.completedStudents, getString(MessageID.completed))
+            createSummaryCard(summary?.notSubmittedStudents, getString(MessageID.not_submitted_cap))
+            createSummaryCard(summary?.submittedStudents, getString(MessageID.submitted))
+            createSummaryCard(summary?.markedStudents, getString(MessageID.marked_cap))
             umItem(GridSize.cells12){
                 umDivider {
                     css{

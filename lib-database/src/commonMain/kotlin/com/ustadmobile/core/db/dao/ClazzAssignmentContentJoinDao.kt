@@ -191,6 +191,7 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
                              COALESCE((CASE WHEN ClazzAssignmentRollUp.cacheContentComplete 
                                             THEN 1 ELSE 0 END),0) AS totalCompletedContent,
                         
+                             0 as assignmentContentWeight,
                              1 as totalContent
                            
                              
