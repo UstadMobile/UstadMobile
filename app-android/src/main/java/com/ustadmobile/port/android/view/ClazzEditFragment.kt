@@ -67,7 +67,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
     }
 
     private val courseBlockObserver = Observer<List<CourseBlockWithEntity>?> {
-        t -> courseBlockRecyclerAdapter?.setData(ArrayList(t))
+        t -> courseBlockRecyclerAdapter?.submitList(t)
     }
 
     override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
@@ -243,7 +243,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
         mDataBinding?.courseBlockOneToManyListener = mPresenter
         courseBlockRecyclerAdapter = CourseBlockRecyclerAdapter(
-                mPresenter, mPresenter, mDataBinding?.activityClazzEditCourseBlockRecyclerview)
+                mPresenter, mDataBinding?.activityClazzEditCourseBlockRecyclerview)
 
         courseBlockRecyclerView?.adapter = courseBlockRecyclerAdapter
         courseBlockRecyclerView?.layoutManager = LinearLayoutManager(requireContext())

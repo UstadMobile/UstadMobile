@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "604325c7d59082b4980ab58db3649d77",
+    "identityHash": "4aec589af9cbdc8fa16daab9283687ce",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6141,7 +6141,7 @@
       },
       {
         "tableName": "CourseBlock",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbParentBlock` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbTableId` INTEGER NOT NULL, `cbTableUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbModuleParentBlock` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbHidden` INTEGER NOT NULL, `cbTableId` INTEGER NOT NULL, `cbTableUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cbUid",
@@ -6162,8 +6162,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "cbParentBlock",
-            "columnName": "cbParentBlock",
+            "fieldPath": "cbModuleParentBlock",
+            "columnName": "cbModuleParentBlock",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6194,6 +6194,12 @@
           {
             "fieldPath": "cbActive",
             "columnName": "cbActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbHidden",
+            "columnName": "cbHidden",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -9803,7 +9809,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '604325c7d59082b4980ab58db3649d77')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4aec589af9cbdc8fa16daab9283687ce')"
     ]
   }
 }

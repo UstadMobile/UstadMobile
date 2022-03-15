@@ -90,7 +90,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
          WHERE cbClazzUid = :clazzUid
            AND cbActive
-      ORDER BY cbIndex, cbParentBlock
+      ORDER BY cbIndex
           """)
     abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntity>
 
@@ -99,7 +99,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
           FROM CourseBlock 
          WHERE cbClazzUid = :clazzUid
            AND cbActive
-      ORDER BY cbIndex, cbParentBlock
+      ORDER BY cbIndex
     """)
     abstract fun findAllCourseBlockByClazzUidLive(clazzUid: Long): DoorDataSourceFactory<Int, CourseBlock>
 

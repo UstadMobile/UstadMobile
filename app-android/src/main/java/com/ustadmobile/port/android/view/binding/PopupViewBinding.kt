@@ -4,6 +4,8 @@ import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.databinding.BindingAdapter
 import com.toughra.ustadmobile.R
+import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 
 @BindingAdapter(value = ["onClickEditPopupMenu", "onClickDeletePopupMenu"], requireAll = false)
 fun View.setOnPopupMenuItemClickListener(onClickEditPopupMenu: View.OnClickListener?, onClickDeletePopupMenu: View.OnClickListener?) {
@@ -24,12 +26,13 @@ fun View.setOnPopupMenuItemClickListener(onClickEditPopupMenu: View.OnClickListe
 
 
 @BindingAdapter(value = ["onClickHideBlockPopupMenu","onClickIndentBlockPopupMenu",
-    "onClickUnIndentBlockPopupMenu", "onClickDeleteBlockPopupMenu"], requireAll = false)
+    "onClickUnIndentBlockPopupMenu", "onClickDeleteBlockPopupMenu","blockPopupMenu"], requireAll = false)
 fun View.setOnBlockPopupMenuItemClickListener(
         onClickHideBlockPopupMenu: View.OnClickListener?,
         onClickIndentBlockPopupMenu: View.OnClickListener?,
         onClickUnIndentBlockPopupMenu: View.OnClickListener?,
-        onClickDeleteBlockPopupMenu: View.OnClickListener?){
+        onClickDeleteBlockPopupMenu: View.OnClickListener?,
+        block: CourseBlockWithEntity?){
     setOnClickListener{
         val popupMenu = PopupMenu(this.context, this)
         popupMenu.setOnMenuItemClickListener { item ->
@@ -42,6 +45,19 @@ fun View.setOnBlockPopupMenuItemClickListener(
             true
         }
         popupMenu.inflate(R.menu.menu_course_block_options)
+        if(block?.cbType == CourseBlock.BLOCK_MODULE_TYPE){
+            popupMenu.menu.findItem(R.id.block_indent).isVisible = false
+            popupMenu.menu.findItem(R.id.block_unindent).isVisible = false
+        }
+        if(block?.cbIndentLevel == 2){
+            popupMenu.menu.findItem(R.id.block_indent).isVisible = false
+        }
+        if(block?.cbIndentLevel == 0){
+            popupMenu.menu.findItem(R.id.block_unindent).isVisible = false
+        }
+        if(block?.cbHidden == true){
+            popupMenu.menu.findItem(R.id.block_hide).setTitle(R.string.unhide)
+        }
         popupMenu.show()
     }
 }

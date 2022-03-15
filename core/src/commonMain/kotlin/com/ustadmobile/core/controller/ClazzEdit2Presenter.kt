@@ -39,7 +39,7 @@ class ClazzEdit2Presenter(context: Any,
                           arguments: Map<String, String>, view: ClazzEdit2View,  di : DI,
                           lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendarAndSchool>(context, arguments, view,
-         di, lifecycleOwner), TreeOneToManyJoinEditListener<CourseBlockWithEntity> {
+         di, lifecycleOwner), TreeOneToManyJoinEditListener<CourseBlockWithEntity>, ItemTouchHelperListener {
 
     private val scheduleOneToManyJoinEditHelper
             = OneToManyJoinEditHelperMp(Schedule::scheduleUid,
@@ -113,20 +113,26 @@ class ClazzEdit2Presenter(context: Any,
 
         observeSavedStateResult(SAVEDSTATE_KEY_ASSIGNMENT,
             ListSerializer(ClazzAssignment.serializer()), ClazzAssignment::class){
-            val assignment = it.firstOrNull() ?: return@observeSavedStateResult
+            val newAssignment = it.firstOrNull() ?: return@observeSavedStateResult
 
-            val block = CourseBlockWithEntity().apply {
-                cbClazzUid = assignment.caClazzUid
+            val foundBlock: CourseBlockWithEntity = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.find {
+                assignment -> assignment.assignment?.caUid == newAssignment.caUid
+            } ?: CourseBlockWithEntity().apply {
+                cbClazzUid = newAssignment.caClazzUid
                 cbTableId = ClazzAssignment.TABLE_ID
-                cbTableUid = assignment.caUid
-                cbTitle = assignment.caTitle
+                cbTableUid = newAssignment.caUid
+                cbTitle = newAssignment.caTitle
                 cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                cbDescription = assignment.caDescription
+                cbDescription = newAssignment.caDescription
                 cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
-                this.assignment = assignment
+                assignment = newAssignment
             }
 
-            courseBlockOneToManyJoinEditHelper.onEditResult(block)
+            foundBlock.assignment = newAssignment
+            foundBlock.cbTitle = newAssignment.caTitle
+            foundBlock.cbDescription = newAssignment.caDescription
+
+            courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
             requireSavedStateHandle()[SAVEDSTATE_KEY_ASSIGNMENT] = null
         }
@@ -406,7 +412,8 @@ class ClazzEdit2Presenter(context: Any,
         val navigateForResultOptions = when(joinedEntity.cbType){
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                 val args = mutableMapOf<String, String>()
-                args[UstadView.ARG_CLAZZUID] = entity?.clazzUid.toString()
+                args[UstadView.ARG_CLAZZUID] = (joinedEntity.assignment?.caClazzUid ?: entity?.clazzUid ?: 0L).toString()
+                args[UstadView.ARG_ENTITY_UID] = (joinedEntity.assignment?.caUid ?: 0L).toString()
 
                 NavigateForResultOptions(
                         this,
@@ -439,8 +446,20 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     override fun onClickHide(joinedEntity: CourseBlockWithEntity) {
-        joinedEntity.cbActive = false
-        courseBlockOneToManyJoinEditHelper.onDeactivateEntity(joinedEntity)
+        joinedEntity.cbHidden = !joinedEntity.cbHidden
+        courseBlockOneToManyJoinEditHelper.onEditResult(joinedEntity)
+    }
+
+    override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
+        val currentList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: mutableListOf()
+        // Collections.swap (android only)
+        currentList[fromPosition] = currentList.set(toPosition, currentList[fromPosition])
+        courseBlockOneToManyJoinEditHelper.liveList.sendValue(currentList.toList())
+        return true
+    }
+
+    override fun onItemDismiss(position: Int) {
+
     }
 
 }

@@ -8,32 +8,22 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_DRAG
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.ItemCourseBlockBinding
 import com.toughra.ustadmobile.databinding.ItemCourseBlockEditBinding
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
-import com.ustadmobile.core.util.OneToManyJoinEditListener
-import com.ustadmobile.core.util.TreeOneToManyJoinEditListener
+import com.ustadmobile.core.view.ItemTouchHelperListener
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
-import java.util.*
 
-class CourseBlockRecyclerAdapter(var oneToManyEditListener: TreeOneToManyJoinEditListener<CourseBlockWithEntity>?,
-                                 var presenter: ClazzEdit2Presenter?,
-                                 recylerView: RecyclerView?): RecyclerView.Adapter<
-        CourseBlockRecyclerAdapter.CourseBlockViewHolder>(), ItemTouchHelperAdapter, OnStartDragListener{
+class CourseBlockRecyclerAdapter(var presenter: ClazzEdit2Presenter?,
+                                 recylerView: RecyclerView?): ListAdapter<CourseBlockWithEntity,
+        CourseBlockRecyclerAdapter.CourseBlockViewHolder>(DIFF_CALLBACK_BLOCK), OnStartDragListener{
 
     private var itemTouchHelper: ItemTouchHelper
 
-    var arrayItems : ArrayList<CourseBlockWithEntity> = ArrayList()
-
     init{
-        val callback = ReorderHelperCallback(this)
-        itemTouchHelper = ItemTouchHelper(callback)
-        itemTouchHelper.attachToRecyclerView(recylerView)
-    }
 
-    fun setData(array : ArrayList<CourseBlockWithEntity>){
-        arrayItems = array
-        notifyDataSetChanged()
+        val callback = presenter?.let { ReorderHelperCallback(it) }
+        itemTouchHelper = callback?.let { ItemTouchHelper(it) }!!
+        itemTouchHelper.attachToRecyclerView(recylerView)
     }
 
     class CourseBlockViewHolder(val binding: ItemCourseBlockEditBinding): RecyclerView.ViewHolder(binding.root)
@@ -42,7 +32,7 @@ class CourseBlockRecyclerAdapter(var oneToManyEditListener: TreeOneToManyJoinEdi
         val viewHolder = CourseBlockViewHolder(ItemCourseBlockEditBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false))
         viewHolder.binding.mPresenter = presenter
-        viewHolder.binding.oneToManyJoinListener = oneToManyEditListener
+        viewHolder.binding.oneToManyJoinListener = presenter
         viewHolder.binding.itemCourseBlockReorder.setOnTouchListener { view, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
                 onStartDrag(viewHolder)
@@ -60,26 +50,15 @@ class CourseBlockRecyclerAdapter(var oneToManyEditListener: TreeOneToManyJoinEdi
     }
 
     override fun onBindViewHolder(holder: CourseBlockViewHolder, position: Int) {
-        holder.binding.block = arrayItems[position]
+        holder.binding.block = getItem(position)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        oneToManyEditListener = null
         presenter = null
     }
 
-    override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
-        Collections.swap(arrayItems, fromPosition, toPosition)
-        notifyItemMoved(fromPosition, toPosition)
-        return true
-    }
-
-    override fun onItemDismiss(position: Int) {
-
-    }
-
-    class ReorderHelperCallback(val adapter : ItemTouchHelperAdapter) : ItemTouchHelper.Callback() {
+    class ReorderHelperCallback(val presenter : ItemTouchHelperListener) : ItemTouchHelper.Callback() {
         override fun getMovementFlags(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder
@@ -94,7 +73,7 @@ class CourseBlockRecyclerAdapter(var oneToManyEditListener: TreeOneToManyJoinEdi
                 source: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
         ): Boolean {
-            adapter.onItemMove(source.absoluteAdapterPosition,
+            presenter.onItemMove(source.absoluteAdapterPosition,
                     target.absoluteAdapterPosition)
             return true
         }
@@ -114,7 +93,6 @@ class CourseBlockRecyclerAdapter(var oneToManyEditListener: TreeOneToManyJoinEdi
             viewHolder.itemView.alpha = 1.0f
         }
 
-
     }
 
     companion object {
@@ -130,10 +108,6 @@ class CourseBlockRecyclerAdapter(var oneToManyEditListener: TreeOneToManyJoinEdi
         }
 
 
-    }
-
-    override fun getItemCount(): Int {
-        return arrayItems.size
     }
 
 
