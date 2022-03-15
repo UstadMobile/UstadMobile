@@ -1,8 +1,7 @@
 package com.ustadmobile.port.android.view
 
-import android.R.attr
 import android.os.Bundle
-import android.text.InputFilter
+import android.text.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -156,14 +155,27 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 
         val USERNAME_FILTER = InputFilter { source, start, end, _, _, _ ->
 
-            val sb = StringBuilder(attr.end - start)
+            val sb = StringBuilder()
 
+            var changed = false
             for (i in start until end) {
                 val c = source[i]
-                if(!BLOCK_CHARACTER_SET.contains(c))
+                if(!BLOCK_CHARACTER_SET.contains(c)) {
                     sb.append(c.toString().lowercase())
+                }else {
+                    changed = true
+                }
             }
-            sb.toString()
+
+            if(!changed) {
+                null
+            } else if(source is Spanned) {
+                SpannableString(sb).also {
+                    TextUtils.copySpansFrom(source, start, end, null, it, 0)
+                }
+            }else {
+                sb
+            }
         }
     }
 }

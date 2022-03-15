@@ -30,7 +30,6 @@ class  PaginateOnScrollManager(private val totalItemCount: Int, private val page
             var pages = totalPages
             pages = js("Math.ceil(pages)").toString().toDouble()
             if(pageNumber.toDouble() == pages) pageNumber else pageNumber++
-            console.log(pageNumber, startIndex, endIndex)
             onScrollPageChanged?.invoke(pageNumber,startIndex(), endIndex())
         }
     }

@@ -4,13 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
@@ -120,17 +118,6 @@ abstract class ContainerDao : BaseDao<Container> {
     abstract suspend fun findContainerWithFilesByContentEntryUid(contentEntryUid: Long): Container?
 
 
-    @Query("""
-            SELECT Container.containerUid, Container.mimeType
-              FROM Container
-             WHERE Container.containerContentEntryUid = :contentEntryUid
-               AND EXISTS (SELECT ContainerEntry.ceUid 
-                             FROM ContainerEntry
-                            WHERE ContainerEntry.ceContainerUid = Container.containerUid)     
-          ORDER BY Container.cntLastModified DESC LIMIT 1
-    """)
-    abstract suspend fun findContainerWithMimeTypeWithFilesByContentEntryUid(contentEntryUid: Long): ContainerUidAndMimeType?
-
     @Query("SELECT Container.* FROM Container " +
             "LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = containerContentEntryUid " +
             "WHERE ContentEntry.publik")
@@ -187,13 +174,17 @@ abstract class ContainerDao : BaseDao<Container> {
           FROM Container
          WHERE Container.containerContentEntryUid = :contentEntryUid
            AND $CONTAINER_READY_WHERE_CLAUSE
-           AND EXISTS (SELECT ContainerEntry.ceUid 
-                         FROM ContainerEntry
-                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)
+           AND (CAST(:downloadRequired AS INTEGER) = 0
+                OR EXISTS (SELECT ContainerEntry.ceUid 
+                             FROM ContainerEntry
+                            WHERE ContainerEntry.ceContainerUid = Container.containerUid))
       ORDER BY Container.cntLastModified DESC 
          LIMIT 1
     """)
-    abstract suspend fun getMostRecentLocallyAvailableContainerUidAndMimeType(contentEntryUid: Long): ContainerUidAndMimeType?
+    abstract suspend fun getMostRecentAvailableContainerUidAndMimeType(
+        contentEntryUid: Long,
+        downloadRequired: Boolean,
+    ): ContainerUidAndMimeType?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<Container>)

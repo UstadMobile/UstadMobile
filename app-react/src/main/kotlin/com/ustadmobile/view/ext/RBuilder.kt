@@ -991,18 +991,6 @@ fun RBuilder.createContentEntryListItem(
     mainList: Boolean = true,
     onSecondaryAction: (() -> Unit)? = null){
 
-    /*
-    var downloadStatus: ContentJobItemProgress? = null
-
-    val statusObserver = ObserverFnWrapper<ContentJobItemProgress?>{
-        (component as Component<*,*>).setState {
-            downloadStatus = ContentJobItemProgress().apply {
-                total = 1000
-                progress = 100
-            }
-        }
-    }*/
-
     umGridContainer(columnSpacing = GridSpacing.spacing4) {
         if(onClick != null){
             attrs.onClick = {
@@ -1067,14 +1055,6 @@ fun RBuilder.createContentEntryListItem(
                             }
                         }
 
-                        /* val downloadLength = downloadStatus?.total ?: 0
-                            val downloadedSoFar = downloadStatus?.progress ?: 0
-                            val progress = if(downloadLength > 0) {
-                                ((downloadedSoFar.toFloat() / downloadLength) * 100).toInt()
-                            }else {
-                                0
-                            }*/
-
                         umItem(GridSize.cells2) {
                             umGridContainer {
                                 if(showStatus){
@@ -1114,13 +1094,6 @@ fun RBuilder.createContentEntryListItem(
             }
         }
     }
-
-    /*GlobalScope.launch {
-        val downloadStatus: RateLimitedLiveData<ContentJobItemProgress?> = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
-            appDatabase.contentJobItemDao.findProgressForActiveContentJobItem(item.contentEntryUid)
-        }
-        downloadStatus.observe(component as DoorLifecycleOwner, statusObserver)
-    }*/
 }
 
 
@@ -1198,7 +1171,6 @@ fun setStatementQuestionAnswer(statementEntity: StatementEntity): String{
             val targetMap = statement.`object`?.definition?.target
             statementText += "\n"
             responses.forEachIndexed { i, it ->
-                console.log(choiceMap?.find { choice -> choice.id == it }?.description)
                 var description = choiceMap?.find { choice -> choice.id == it }?.description?.get("en-US")
                 if(it.contains("[.]")){
                     val dragResponse = it.split("[.]")

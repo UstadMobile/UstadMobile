@@ -90,7 +90,6 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
         set(value) {
             setState {
                 field = value
-                console.log(value)
             }
         }
 

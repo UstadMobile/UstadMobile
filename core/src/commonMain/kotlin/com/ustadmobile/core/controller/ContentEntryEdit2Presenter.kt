@@ -35,6 +35,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
@@ -325,9 +326,10 @@ class ContentEntryEdit2Presenter(
                 } else {
                     // its a folder, check if there is any selected items from previous screen
                     if (arguments.containsKey(KEY_SELECTED_ITEMS)) {
-                        val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")?.map { it.trim().toLong() }
-                                ?: listOf()
-                        repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(entity.contentEntryUid, selectedItems)
+                        val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")
+                            ?.map { it.trim().toLong() } ?: listOf()
+                        repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
+                            entity.contentEntryUid, selectedItems, systemTimeInMillis())
                     }
                 }
 

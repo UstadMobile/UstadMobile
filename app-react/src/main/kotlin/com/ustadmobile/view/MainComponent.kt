@@ -1,6 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -38,8 +39,6 @@ import com.ustadmobile.view.ext.umTopBar
 import kotlinext.js.jsObject
 import kotlinx.browser.document
 import kotlinx.browser.window
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.padding
@@ -124,11 +123,12 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                                 "${getString(MessageID.search)} " +
                                 if(systemImpl.isRtlActive()) "" else "...",
                         activeAccount?.firstName){
-                        //systemImpl.go(AccountListView.VIEW_NAME, mapOf(), this)
+                        systemImpl.go(AccountListView.VIEW_NAME, mapOf(), this)
+                        /*
+                        Db export for debugging purpose
                         GlobalScope.launch {
-                            console.log("kileha", database == null)
                             database?.exportDatabase()
-                        }
+                        }*/
                     }
 
                     if(currentDestination.showNavigation){

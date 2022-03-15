@@ -8,7 +8,5 @@ class ContainerMounterJs: ContainerMounter {
         return UMFileUtil.joinPaths(endpointUrl,"ContainerMount",containerUid.toString())
     }
 
-    override suspend fun unMountContainer(endpointUrl: String, mountPath: String) {
-        console.log("Unmount container ", mountPath)
-    }
+    override suspend fun unMountContainer(endpointUrl: String, mountPath: String) {}
 }

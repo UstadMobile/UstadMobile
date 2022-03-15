@@ -9,10 +9,14 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
-import com.google.android.exoplayer2.*
-import com.google.android.exoplayer2.source.*
+import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.MergingMediaSource
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.source.SingleSampleMediaSource
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.ByteArrayDataSource
@@ -36,13 +40,11 @@ import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.port.android.impl.audio.Codec2Player
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.io.BufferedInputStream
 import java.io.IOException
 
 
@@ -66,8 +68,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContent
     private var currentWindow = 0
 
     private var playbackPosition: Long = 0
-
-    private var audioPlayer: Codec2Player? = null
 
     private var subtitleSelection = 1
 
@@ -127,7 +127,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContent
         mPresenter = null
         playerView = null
         player = null
-        audioPlayer = null
         rootView = null
         controlsView = null
     }
@@ -159,10 +158,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContent
 
 
     fun setVideoParams(videoPath: String?, audioPath: ContainerEntryWithContainerEntryFile?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
-        if (audioPath != null) {
-            player?.addListener(audioListener)
-        }
-
         if (!videoPath.isNullOrEmpty()) {
             val uri = Uri.parse(videoPath)
             val mediaSource = buildMediaSource(uri)
@@ -227,10 +222,10 @@ class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContent
 
                 val mergedSource = MergingMediaSource(mediaSource, subTitleSource)
 
-                runOnUiThread {
+                runOnUiThread(Runnable {
                     player?.setMediaSource(mergedSource)
                     player?.prepare()
-                }
+                })
             } catch (ignored: IOException) {
                 loading = false
             }
@@ -262,36 +257,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContent
 
     }
 
-    private var audioListener = object : Player.EventListener {
-        override fun onPlaybackStateChanged(state: Int) {
-            runOnUiThread {
-                if (state == Player.STATE_READY && player?.playWhenReady == true) {
-                    playbackPosition = player?.contentPosition ?: 0L
-                    releaseAudio()
-                    playAudio(playbackPosition)
-                } else {
-                    releaseAudio()
-                }
-                super.onPlaybackStateChanged(state)
-            }
-        }
-    }
-
-
-    fun playAudio(fromMs: Long) {
-        val audioInput = videoParams?.audioPath?.cePath?.let { audioPath ->
-            db?.containerEntryDao?.openEntryInputStream(containerUid, audioPath)
-        }
-
-        if (audioInput == null) {
-            showError()
-            return
-        }
-
-        audioPlayer = Codec2Player(BufferedInputStream(audioInput), fromMs)
-        audioPlayer?.play()
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putLong(PLAYBACK, playbackPosition)
         outState.putBoolean(PLAY_WHEN_READY, playWhenReady)
@@ -309,9 +274,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContent
         player = null
     }
 
-    private fun releaseAudio() {
-        audioPlayer?.stop()
-    }
 
     override fun onStart() {
         super.onStart()
@@ -331,7 +293,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContent
         super.onPause()
         if (Util.SDK_INT <= 23) {
             releasePlayer()
-            releaseAudio()
         }
     }
 
@@ -339,7 +300,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContent
         super.onStop()
         if (Util.SDK_INT > 23) {
             releasePlayer()
-            releaseAudio()
         }
     }
 

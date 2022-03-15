@@ -213,7 +213,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         if (!parentChildJoinUids.isNullOrEmpty()) {
             GlobalScope.launch(doorMainDispatcher()) {
 
-                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(destContentEntryUid, parentChildJoinUids)
+                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
+                    destContentEntryUid, parentChildJoinUids, systemTimeInMillis())
 
                 view.showSnackBar(systemImpl.getString(MessageID.moved_x_entries, context).replace("%1\$s",
                         parentChildJoinUids.size.toString()), actionMessageId = MessageID.open_folder,
@@ -339,9 +340,10 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
         GlobalScope.launch(doorMainDispatcher()) {
             if (arguments.containsKey(KEY_SELECTED_ITEMS)) {
-                val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")?.map { it.trim().toLong() }
-                        ?: listOf()
-                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(entry.contentEntryUid, selectedItems)
+                val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")
+                    ?.map { it.trim().toLong() } ?: listOf()
+                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
+                    entry.contentEntryUid, selectedItems, systemTimeInMillis())
             }
         }
     }

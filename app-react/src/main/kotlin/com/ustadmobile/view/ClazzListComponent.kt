@@ -147,7 +147,6 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
             args = mutableMapOf(UstadView.ARG_SCHOOL_UID to filterExcludeMembersOfSchool.toString())
         }
         args.putAll(arguments)
-        console.log(arguments)
         mPresenter?.handleClickAddNewItem(args)
     }
 

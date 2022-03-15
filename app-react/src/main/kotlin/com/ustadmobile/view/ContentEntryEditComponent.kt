@@ -226,18 +226,18 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                                     +StyleManager.defaultFullWidth
                                 }
                             }
-                        }
 
 
-                        if(entity?.leaf == true){
-                            umItem(GridSize.cells12){
-                                css{
-                                    display = displayProperty(entity?.leaf == true)
-                                    +defaultMarginTop
-                                }
-                                umTypography(getString(MessageID.supported_files),
-                                    variant = TypographyVariant.body2){
-                                    css (StyleManager.alignTextToStart)
+                            if(entity?.leaf == true){
+                                umItem(GridSize.cells12){
+                                    css{
+                                        display = displayProperty(entity?.leaf == true)
+                                        +defaultMarginTop
+                                    }
+                                    umTypography(getString(MessageID.supported_files),
+                                        variant = TypographyVariant.body2){
+                                        css (StyleManager.alignTextToStart)
+                                    }
                                 }
                             }
                         }
