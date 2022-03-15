@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -257,9 +258,16 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
                 return oldItem.uid == newItem.uid
             }
 
-            override fun areContentsTheSame(oldItem: UidAndLabel, newItem: UidAndLabel): Boolean {
-                return oldItem.uid == newItem.uid
-                        && oldItem.labelName == newItem.labelName
+            /**
+             * When using two-way binding we need to be sure that we are saving to the same
+             * object in memory
+             */
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(
+                oldItem: UidAndLabel,
+                newItem: UidAndLabel
+            ): Boolean {
+                return oldItem === newItem
             }
         }
 

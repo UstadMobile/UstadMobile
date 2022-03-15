@@ -21,15 +21,16 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
-class ReportFilterEditPresenter(context: Any,
-                                arguments: Map<String, String>, view: ReportFilterEditView,
-                                di: DI,
-                                lifecycleOwner: DoorLifecycleOwner)
-    : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
+class ReportFilterEditPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: ReportFilterEditView,
+    di: DI,
+    lifecycleOwner: DoorLifecycleOwner
+) : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
+    private val fieldRequiredText = systemImpl.getString(MessageID.field_required_prompt, context)
 
-    val fieldRequiredText = systemImpl.getString(MessageID.field_required_prompt, context)
-
-    val uidhelperDeferred = CompletableDeferred<Boolean>()
+    private val uidhelperDeferred = CompletableDeferred<Boolean>()
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON

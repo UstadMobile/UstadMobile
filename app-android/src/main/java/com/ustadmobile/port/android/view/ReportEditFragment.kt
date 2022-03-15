@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -64,9 +65,10 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
             }
     }
 
-    class RecyclerViewSeriesAdapter(val activityEventHandler: ReportEditFragmentEventHandler,
-                                    var presenter: ReportEditPresenter?)
-        : ListAdapter<ReportSeries, SeriesViewHolder>(DIFF_CALLBACK_SERIES) {
+    class RecyclerViewSeriesAdapter(
+        val activityEventHandler: ReportEditFragmentEventHandler,
+        var presenter: ReportEditPresenter?
+    ) : ListAdapter<ReportSeries, SeriesViewHolder>(DIFF_CALLBACK_SERIES) {
 
         var visualOptions: List<ReportEditPresenter.VisualTypeMessageIdOption>? = null
         var yAxisOptions: List<ReportEditPresenter.YAxisMessageIdOption>? = null
@@ -311,9 +313,16 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
                 return oldItem.reportSeriesUid == newItem.reportSeriesUid
             }
 
-            override fun areContentsTheSame(oldItem: ReportSeries,
-                                            newItem: ReportSeries): Boolean {
-                return oldItem == newItem
+            /* We are using a two-way binding within a recycler view. We must ensure that the
+             * we rebind the exact same object, otherwise the changes will be saved into a different
+             * object in memory
+             */
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(
+                oldItem: ReportSeries,
+                newItem: ReportSeries
+            ): Boolean {
+                return oldItem === newItem
             }
         }
 
@@ -322,9 +331,16 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
                 return oldItem.reportFilterUid == newItem.reportFilterUid
             }
 
-            override fun areContentsTheSame(oldItem: ReportFilter,
-                                            newItem: ReportFilter): Boolean {
-                return oldItem == newItem
+            /* We are using a two-way binding within a recycler view. We must ensure that the
+             * we rebind the exact same object, otherwise the changes will be saved into a different
+             * object in memory
+             */
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(
+                oldItem: ReportFilter,
+                newItem: ReportFilter
+            ): Boolean {
+                return oldItem === newItem
             }
         }
     }
