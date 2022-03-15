@@ -19,10 +19,6 @@
             name="oneToManyJoinListener"
             type="TreeOneToManyJoinEditListener&lt;CourseBlockWithEntity&gt;" />
 
-        <variable
-            name="mActivity"
-            type="com.ustadmobile.port.android.view.HolidayCalendarEditActivityEventHandler" />
-
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

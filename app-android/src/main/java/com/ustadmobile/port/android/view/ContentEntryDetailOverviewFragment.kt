@@ -214,7 +214,6 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
             val viewHolder = TranslationViewHolder(ItemEntryTranslationBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false))
             viewHolder.binding.mPresenter = presenter
-            viewHolder.binding.mActivity = activityEventHandler
             return viewHolder
         }
 
