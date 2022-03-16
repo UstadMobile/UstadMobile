@@ -116,6 +116,7 @@ class ViewNameToDestMap: DestinationProvider {
             ScopedGrantEditView.VIEW_NAME to UstadDestination(R.id.scoped_grant_edit_dest,
                 hideAccountIcon = true),
             ErrorReportView.VIEW_NAME to UstadDestination(R.id.error_report_dest),
+            RedirectView.VIEW_NAME to UstadDestination(R.id.redirect_dest),
     )
 
     override val navControllerViewId: Int

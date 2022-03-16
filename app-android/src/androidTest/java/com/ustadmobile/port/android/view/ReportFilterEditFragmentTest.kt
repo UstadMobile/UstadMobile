@@ -18,13 +18,17 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.port.android.screen.ReportFilterEditScreen
 import com.ustadmobile.test.port.android.util.clickOptionMenu
+import com.ustadmobile.test.port.android.util.getApplicationDi
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.setMessageIdOption
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 
 @AdbScreenRecord("Report filter edit screen tests")
@@ -43,7 +47,14 @@ class ReportFilterEditFragmentTest: TestCase()  {
     var systemImplNavRule = SystemImplTestNavHostRule()
 
     lateinit var fragmentScenario: FragmentScenario<ReportFilterEditFragment>
+    
+    lateinit var gson: Gson
 
+    @Before
+    fun setup() {
+        gson = getApplicationDi().direct.instance()
+    }
+    
     @AdbScreenRecord("with no report present, fill all the fields and navigate to detail")
     @Test
     fun givenNoReportFilterPresentYet_whenPersonGenderFilledIn_thenShouldNavigateBackToReportEditScreen() {
@@ -53,7 +64,7 @@ class ReportFilterEditFragmentTest: TestCase()  {
             val defaultFilter = ReportFilter().apply {
                 reportFilterUid = 1
             }
-            val jsonStr = Gson().toJson(defaultFilter)
+            val jsonStr = gson.toJson(defaultFilter)
 
             fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                     fragmentArgs = bundleOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)) {
@@ -306,7 +317,8 @@ class ReportFilterEditFragmentTest: TestCase()  {
 
                     fragmentScenario.onFragment {
                         it.findNavController().currentBackStackEntry?.savedStateHandle
-                                ?.set("ContentEntry", defaultGson().toJson(listOf(ContentEntry().apply{
+                                ?.set(ReportFilterEditPresenter.RESULT_CONTENT_KEY,
+                                    gson.toJson(listOf(ContentEntry().apply{
                                     contentEntryUid = 2
                                     title = "Ustad Mobile"
                                 })))

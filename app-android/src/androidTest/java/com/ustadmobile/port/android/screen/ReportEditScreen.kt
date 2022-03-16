@@ -79,7 +79,9 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
         val filterName = KTextView(parent) { withId(R.id.item_clazz_simple_line1_text) }
 
-        val filterDeleteButton = KImageView(parent) { withId(R.id.item_clazz_simple_secondary_menu_imageview) }
+        val filterDeleteButton = KImageView(parent) {
+            withId(R.id.item_clazz_simple_secondary_menu_imageview)
+        }
     }
 
 
