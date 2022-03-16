@@ -114,6 +114,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             it.clazzAssignmentDao.findByUidAsync(entityUid)
         } ?: ClazzAssignment().apply {
             caClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: throw IllegalArgumentException("clazzUid was not given")
+            caUid = db.doorPrimaryKeyManager.nextIdAsync(ClazzAssignment.TABLE_ID)
         }
 
         val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
@@ -138,6 +139,7 @@ class ClazzAssignmentEditPresenter(context: Any,
         }else{
             ClazzAssignment().apply {
                 caClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
+                caUid = db.doorPrimaryKeyManager.nextId(ClazzAssignment.TABLE_ID)
             }
         }
 
@@ -250,10 +252,6 @@ class ClazzAssignmentEditPresenter(context: Any,
                 entity.caGracePeriodDate = entity.caDeadlineDate
             }
 
-
-            if (entity.caUid == 0L) {
-                entity.caUid = db.doorPrimaryKeyManager.nextIdAsync(ClazzAssignment.TABLE_ID)
-            }
 
             finishWithResult(safeStringify(di,
                             ListSerializer(ClazzAssignment.serializer()),

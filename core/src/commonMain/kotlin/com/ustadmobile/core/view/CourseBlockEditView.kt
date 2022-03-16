@@ -6,6 +6,11 @@ interface CourseBlockEditView: UstadEditView<CourseBlock> {
 
     var blockTitleError: String?
 
+    var startDate: Long
+    var startTime: Long
+
+    var timeZone: String?
+
     companion object {
 
         const val VIEW_NAME = "CourseBlockEdit"

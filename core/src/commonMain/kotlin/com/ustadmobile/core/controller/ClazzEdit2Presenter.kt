@@ -14,6 +14,7 @@ import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.CourseBlockEditView.Companion.VIEW_NAME
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
 import com.ustadmobile.door.DoorDatabaseRepository
@@ -150,6 +151,61 @@ class ClazzEdit2Presenter(context: Any,
 
             UmPlatformUtil.run {
                 requireSavedStateHandle()[SAVEDSTATE_KEY_ASSIGNMENT] = null
+            }
+        }
+
+        observeSavedStateResult(
+            SAVEDSTATE_KEY_CONTENT,
+            ListSerializer(ContentEntry.serializer()), ContentEntry::class) {
+            val newContent = it.firstOrNull() ?: return@observeSavedStateResult
+
+            val foundBlock: CourseBlockWithEntity =
+                courseBlockOneToManyJoinEditHelper.liveList.getValue()?.find { assignment ->
+                    assignment.entry?.contentEntryUid == newContent.contentEntryUid
+                } ?: CourseBlockWithEntity().apply {
+                    cbClazzUid = entity?.clazzUid ?: 0L
+                    cbTableId = ClazzAssignment.TABLE_ID
+                    cbTableUid = newContent.contentEntryUid
+                    cbTitle = newContent.title
+                    cbType = CourseBlock.BLOCK_CONTENT_TYPE
+                    cbDescription = newContent.description
+                    cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
+                    entry = newContent
+                }
+
+            courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
+
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_CONTENT] = null
+            }
+
+        }
+
+        observeSavedStateResult(ARG_SAVEDSTATE_BLOCK,
+                ListSerializer(CourseBlock.serializer()), CourseBlock::class){
+            val moduleBlock = it.firstOrNull() ?: return@observeSavedStateResult
+
+            val foundBlock: CourseBlockWithEntity = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.find {
+                    block -> block.cbUid == moduleBlock.cbUid
+            } ?: CourseBlockWithEntity().apply {
+                cbClazzUid = moduleBlock.cbClazzUid
+                cbTableId = CourseBlock.TABLE_ID
+                cbTableUid = moduleBlock.cbUid
+                cbTitle = moduleBlock.cbTitle
+                cbType = CourseBlock.BLOCK_MODULE_TYPE
+                cbDescription = moduleBlock.cbDescription
+                cbStartDate = moduleBlock.cbStartDate
+                cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
+            }
+
+            foundBlock.cbTitle = moduleBlock.cbTitle
+            foundBlock.cbDescription = moduleBlock.cbDescription
+            foundBlock.cbStartDate = moduleBlock.cbStartDate
+
+            courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
+
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[ARG_SAVEDSTATE_BLOCK] = null
             }
         }
     }
@@ -403,8 +459,31 @@ class ClazzEdit2Presenter(context: Any,
                 arguments = args))
     }
 
-    fun handleClickAddModule() {
+    fun handleClickAddContent(){
+        NavigateForResultOptions(
+            this, null,
+            ContentEntryList2View.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            SAVEDSTATE_KEY_CONTENT,
+            arguments = mutableMapOf(ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
+                    ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
+                UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString())
+        )
+    }
 
+    fun handleClickAddModule() {
+        val args = mutableMapOf<String, String>()
+        args[UstadView.ARG_CLAZZUID] = entity?.clazzUid.toString()
+
+        navigateForResult(NavigateForResultOptions(
+            this,
+            currentEntityValue = null,
+            destinationViewName = VIEW_NAME,
+            entityClass = CourseBlock::class,
+            serializationStrategy = CourseBlock.serializer(),
+            destinationResultKey = ARG_SAVEDSTATE_BLOCK,
+            arguments = args))
     }
 
     companion object {
@@ -416,6 +495,8 @@ class ClazzEdit2Presenter(context: Any,
         const val SAVEDSTATE_KEY_SCHOOL = "School"
 
         const val SAVEDSTATE_KEY_ASSIGNMENT = "Assignment"
+
+        const val SAVEDSTATE_KEY_CONTENT = "courseContent"
 
         const val SAVEDSTATE_KEY_HOLIDAYCALENDAR = "ClazzHolidayCalendar"
 
@@ -442,6 +523,32 @@ class ClazzEdit2Presenter(context: Any,
                         serializationStrategy = ClazzAssignment.serializer(),
                         destinationResultKey = SAVEDSTATE_KEY_ASSIGNMENT,
                         arguments = args)
+            }
+            CourseBlock.BLOCK_CONTENT_TYPE -> {
+                NavigateForResultOptions(
+                    this, joinedEntity.entry,
+                    ContentEntryList2View.VIEW_NAME,
+                    ContentEntry::class,
+                    ContentEntry.serializer(),
+                    SAVEDSTATE_KEY_CONTENT,
+                    arguments = mutableMapOf(ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
+                            ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
+                        UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString())
+                )
+            }
+            CourseBlock.BLOCK_MODULE_TYPE -> {
+                val args = mutableMapOf<String, String>()
+                args[UstadView.ARG_CLAZZUID] = joinedEntity.cbClazzUid.toString()
+                args[UstadView.ARG_ENTITY_UID] = joinedEntity.cbUid.toString()
+
+                NavigateForResultOptions(
+                    this,
+                    currentEntityValue = joinedEntity,
+                    destinationViewName = VIEW_NAME,
+                    entityClass = CourseBlock::class,
+                    serializationStrategy = CourseBlock.serializer(),
+                    destinationResultKey = ARG_SAVEDSTATE_BLOCK,
+                    arguments = args)
             }
             else -> return
         }

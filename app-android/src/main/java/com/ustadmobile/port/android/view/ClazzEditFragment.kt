@@ -295,6 +295,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         when(optionSelected.optionCode) {
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> mPresenter?.handleClickAddAssignment()
             CourseBlock.BLOCK_MODULE_TYPE -> mPresenter?.handleClickAddModule()
+            CourseBlock.BLOCK_CONTENT_TYPE -> mPresenter?.handleClickAddContent()
         }
     }
 

@@ -1,14 +1,21 @@
 package com.ustadmobile.core.controller
 
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.schedule.localMidnight
+import com.ustadmobile.core.schedule.toLocalMidnight
+import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.CourseBlockEditView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.lib.db.entities.ClazzWithSchool
 import com.ustadmobile.lib.db.entities.CourseBlock
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
@@ -22,23 +29,68 @@ class CourseBlockEditPresenter(context: Any, args: Map<String, String>, view: Co
         get() = PersistenceMode.DB
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): CourseBlock {
-        val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
+        val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() ?: 0L
+        val clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLongOrNull() ?: 0L
 
-        return db.onRepoWithFallbackToDb(2000) {
+        val entity = db.onRepoWithFallbackToDb(2000) {
             it.takeIf { entityUid != 0L }?.courseBlockDao?.findByUidAsync(entityUid)
-        }?: CourseBlock()
+        }?: CourseBlock().apply {
+            cbUid = db.doorPrimaryKeyManager.nextIdAsync(CourseBlock.TABLE_ID)
+            cbClazzUid = clazzUid
+            cbType = CourseBlock.BLOCK_MODULE_TYPE
+            cbTableUid = cbUid
+            cbTableId = CourseBlock.TABLE_ID
+        }
+
+        val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
+            it.clazzDao.getClazzWithSchool(entity.cbClazzUid)
+        } ?: ClazzWithSchool()
+
+        val timeZone = clazzWithSchool.effectiveTimeZone()
+        view.timeZone = timeZone
+
+        if(entity.cbStartDate != 0L){
+            val startDateTimeMidnight = DateTime(entity.cbStartDate)
+                .toLocalMidnight(timeZone).unixMillisLong
+            view.startDate = startDateTimeMidnight
+            view.startTime = entity.cbStartDate - startDateTimeMidnight
+        }else{
+            view.startDate = 0L
+        }
+
+
+        return entity
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): CourseBlock? {
         super.onLoadFromJson(bundle)
-
         val entityJsonStr = bundle[UstadEditView.ARG_ENTITY_JSON]
 
-        return if(entityJsonStr != null) {
+        val entity =  if(entityJsonStr != null) {
             safeParse(di, CourseBlock.serializer(), entityJsonStr)
         }else {
             CourseBlock()
         }
+        presenterScope.launch {
+            val caClazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: entity.cbClazzUid
+            val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
+                it.clazzDao.getClazzWithSchool(caClazzUid)
+            } ?: ClazzWithSchool()
+
+            val timeZone = clazzWithSchool.effectiveTimeZone()
+            view.timeZone = timeZone
+
+            if(entity.cbStartDate != 0L){
+                val startDateTimeMidnight = DateTime(entity.cbStartDate)
+                    .toLocalMidnight(timeZone).unixMillisLong
+                view.startDate = startDateTimeMidnight
+                view.startTime = entity.cbStartDate - startDateTimeMidnight
+            }else{
+                view.startDate = 0L
+            }
+        }
+
+        return entity
     }
 
     override fun handleClickSave(entity: CourseBlock) {
@@ -49,15 +101,16 @@ class CourseBlockEditPresenter(context: Any, args: Map<String, String>, view: Co
                 return@launch
             }
 
-            if(entity.cbUid == 0L) {
-                entity.cbUid = repo.courseBlockDao.insertAsync(entity)
-            }else {
-                repo.courseBlockDao.updateAsync(entity)
-            }
+            val timeZone = view.timeZone ?: "UTC"
+            entity.cbStartDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+                .localMidnight.utc.unixMillisLong + view.startTime
 
             finishWithResult(safeStringify(di,
                     ListSerializer(CourseBlock.serializer()),
                     listOf(entity)))
+
+            view.loading = false
+            view.fieldsEnabled = true
         }
 
     }

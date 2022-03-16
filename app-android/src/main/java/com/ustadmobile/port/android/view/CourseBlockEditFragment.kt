@@ -37,8 +37,7 @@ class CourseBlockEditFragment: UstadEditFragment<CourseBlock>(), CourseBlockEdit
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        setEditFragmentTitle(R.string.add_block, R.string.edit_block)
+        setEditFragmentTitle(R.string.add_module, R.string.edit_module)
     }
 
     override fun onDestroyView() {
@@ -68,6 +67,24 @@ class CourseBlockEditFragment: UstadEditFragment<CourseBlock>(), CourseBlockEdit
             super.fieldsEnabled = value
             field = value
             mBinding?.fieldsEnabled = value
+        }
+
+    override var startDate: Long
+        get() = mBinding?.startDate ?: 0
+        set(value) {
+            mBinding?.startDate = value
+        }
+
+    override var startTime: Long
+        get() = mBinding?.startTime ?: 0
+        set(value) {
+            mBinding?.startTime = value
+        }
+
+    override var timeZone: String? = null
+        set(value) {
+            mBinding?.timeZone = value
+            field = value
         }
 
 }

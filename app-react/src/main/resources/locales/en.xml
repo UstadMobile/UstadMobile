@@ -1627,6 +1627,9 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!--Module is a subunit of a course -->
     <string name="edit_module">Edit module</string>
 
+    <!--Module is a subunit of a course -->
+    <string name="add_module">Add module</string>
+
     <string name="indent">Indent</string>
 
     <string name="unindent">Unindent</string>

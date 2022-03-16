@@ -8,7 +8,7 @@ import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
-import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.GridSpacing
@@ -55,7 +55,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
             liveData?.removeObserver(observer)
             liveData?.observe(this, observer)
         }
-    override var courseBlockList: DoorDataSourceFactory<Int, CourseBlock>?
+    override var courseBlockList: DoorDataSourceFactory<Int, CourseBlockWithEntity>?
         get() = TODO("Not yet implemented")
         set(value) {}
 

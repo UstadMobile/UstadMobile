@@ -5,6 +5,7 @@
 
     <data>
         <import type="android.view.View"/>
+        <import type="android.text.InputType" />
 
         <variable
             name="block"
@@ -19,6 +20,19 @@
         <variable
             name="blockTitleError"
             type="String" />
+
+        <variable
+            name="timeZone"
+            type="String" />
+
+        <variable
+            name="startDate"
+            type="long" />
+
+        <variable
+            name="startTime"
+            type="long" />
+
 
     </data>
 
@@ -72,8 +86,60 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@={block.cbDescription}"
+                    tools:hint="@string/description"
                     android:hint="@{StringExtKt.optional(context, @string/description)}" />
             </com.google.android.material.textfield.TextInputLayout>
+
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/ca_start_date_textinput"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/dimen_8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:hint="@string/dont_show_before"
+            android:hint="@{StringExtKt.optional(context, @string/dont_show_before)}"
+            app:layout_constraintTop_toBottomOf="@+id/course_block_edit_desc_textinput"
+            app:layout_constraintEnd_toStartOf="@+id/ca_start_datetime_textinput">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ca_start_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:cursorVisible="false"
+                android:inputType="@{InputType.TYPE_NULL}"
+                app:dateTimeInMillis="@={startDate}"
+                app:timeZoneId="@{timeZone}"
+                app:dateTimeInMillisMode="@{0}"
+                app:runOnClickWhenFocused="@{true}" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/ca_start_datetime_textinput"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/dimen_8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/ca_start_date_textinput"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:hint="@string/time"
+            app:layout_constraintStart_toEndOf="@+id/ca_start_date_textinput"
+            app:layout_constraintTop_toTopOf="@+id/ca_start_date_textinput">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:cursorVisible="false"
+                android:inputType="@{InputType.TYPE_NULL}"
+                app:timeValue="@={startTime}"
+                app:runOnClickWhenFocused="@{true}" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
