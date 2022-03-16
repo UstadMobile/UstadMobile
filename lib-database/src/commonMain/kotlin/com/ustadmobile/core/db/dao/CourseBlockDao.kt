@@ -97,11 +97,18 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
     @Query("""
         SELECT * 
           FROM CourseBlock 
+               LEFT JOIN ClazzAssignment as assignment
+               ON assignment.caUid = CourseBlock.cbTableUid
+               AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+               LEFT JOIN ContentEntry as entry
+               ON entry.contentEntryUid = CourseBlock.cbTableUid
+               AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
          WHERE cbClazzUid = :clazzUid
            AND cbActive
+           AND NOT cbHidden
       ORDER BY cbIndex
     """)
-    abstract fun findAllCourseBlockByClazzUidLive(clazzUid: Long): DoorDataSourceFactory<Int, CourseBlock>
+    abstract fun findAllCourseBlockByClazzUidLive(clazzUid: Long): DoorDataSourceFactory<Int, CourseBlockWithEntity>
 
 
     override suspend fun deactivateByUids(uidList: List<Long>){

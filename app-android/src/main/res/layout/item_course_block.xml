@@ -4,12 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="com.ustadmobile.lib.db.entities.CourseBlockWithEntity"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
         <import type="android.view.View"/>
 
         <variable
             name="block"
-            type="CourseBlock" />
+            type="CourseBlockWithEntity" />
 
     </data>
 

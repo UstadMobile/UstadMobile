@@ -14,10 +14,10 @@ import kotlinx.serialization.Serializable
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
                 sqlStatements = [
-                    """REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbModuleParentBlock, cbTitle, cbDescription, cbIndex, cbClazzUid, cbActive,cbHidden, cbTableId, cbTableUid, cbLct) 
-         VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbModuleParentBlock, NEW.cbTitle, NEW.cbDescription, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbHidden, NEW.cbTableId,  NEW.cbTableUid, NEW.cbLct) 
+                    """REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbIndex, cbClazzUid, cbActive,cbHidden, cbTableId, cbTableUid, cbLct) 
+         VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbModuleParentBlockUid, NEW.cbTitle, NEW.cbDescription, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbHidden, NEW.cbTableId,  NEW.cbTableUid, NEW.cbLct) 
          /*psql ON CONFLICT (cbUid) DO UPDATE 
-         SET cbUid = EXCLUDED.cbUid, cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbModuleParentBlock = EXCLUDED.cbModuleParentBlock, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbHidden = EXCLUDED.cbHidden, cbTableId = EXCLUDED.cbTableId, cbTableUid = EXCLUDED.cbTableUid, cbLct = EXCLUDED.cbLct
+         SET cbUid = EXCLUDED.cbUid, cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbModuleParentBlockUid = EXCLUDED.cbModuleParentBlockUid, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbHidden = EXCLUDED.cbHidden, cbTableId = EXCLUDED.cbTableId, cbTableUid = EXCLUDED.cbTableUid, cbLct = EXCLUDED.cbLct
          */"""
                 ]
         )
@@ -32,7 +32,7 @@ open class CourseBlock {
 
     var cbIndentLevel: Int = 0
 
-    var cbModuleParentBlock: Long = 0
+    var cbModuleParentBlockUid: Long = 0
 
     var cbTitle: String? = null
 
@@ -81,7 +81,7 @@ open class CourseBlock {
         if (cbUid != other.cbUid) return false
         if (cbType != other.cbType) return false
         if (cbIndentLevel != other.cbIndentLevel) return false
-        if (cbModuleParentBlock != other.cbModuleParentBlock) return false
+        if (cbModuleParentBlockUid != other.cbModuleParentBlockUid) return false
         if (cbTitle != other.cbTitle) return false
         if (cbDescription != other.cbDescription) return false
         if (cbIndex != other.cbIndex) return false
@@ -99,7 +99,7 @@ open class CourseBlock {
         var result = cbUid.hashCode()
         result = 31 * result + cbType
         result = 31 * result + cbIndentLevel
-        result = 31 * result + cbModuleParentBlock.hashCode()
+        result = 31 * result + cbModuleParentBlockUid.hashCode()
         result = 31 * result + (cbTitle?.hashCode() ?: 0)
         result = 31 * result + (cbDescription?.hashCode() ?: 0)
         result = 31 * result + cbIndex

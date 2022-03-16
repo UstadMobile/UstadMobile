@@ -45,6 +45,7 @@ fun View.setOnLongPress(onLongClick: View.OnClickListener) {
 @BindingAdapter("courseBlockIndent")
 fun View.setIndentLevel(indentLevel: Int){
     setMarginStartValue(indentLevel * context.resources.getDimension(R.dimen.dimen_32dp))
+    // required to update thew view
     requestLayout()
 }
 

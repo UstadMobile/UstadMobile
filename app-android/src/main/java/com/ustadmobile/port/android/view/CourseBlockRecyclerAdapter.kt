@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewGroup
@@ -21,8 +22,8 @@ class CourseBlockRecyclerAdapter(var presenter: ClazzEdit2Presenter?,
 
     init{
 
-        val callback = presenter?.let { ReorderHelperCallback(it) }
-        itemTouchHelper = callback?.let { ItemTouchHelper(it) }!!
+        val callback = ReorderHelperCallback(presenter)
+        itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(recylerView)
     }
 
@@ -58,7 +59,7 @@ class CourseBlockRecyclerAdapter(var presenter: ClazzEdit2Presenter?,
         presenter = null
     }
 
-    class ReorderHelperCallback(val presenter : ItemTouchHelperListener) : ItemTouchHelper.Callback() {
+    class ReorderHelperCallback(val presenter : ItemTouchHelperListener?) : ItemTouchHelper.Callback() {
         override fun getMovementFlags(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder
@@ -73,7 +74,7 @@ class CourseBlockRecyclerAdapter(var presenter: ClazzEdit2Presenter?,
                 source: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
         ): Boolean {
-            presenter.onItemMove(source.absoluteAdapterPosition,
+            presenter?.onItemMove(source.absoluteAdapterPosition,
                     target.absoluteAdapterPosition)
             return true
         }
@@ -90,7 +91,8 @@ class CourseBlockRecyclerAdapter(var presenter: ClazzEdit2Presenter?,
         }
 
         override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-            viewHolder.itemView.alpha = 1.0f
+            val block = (viewHolder as CourseBlockViewHolder).binding.block
+            viewHolder.itemView.alpha = if(block?.cbHidden == true) 0.5f else 1f
         }
 
     }
@@ -102,8 +104,12 @@ class CourseBlockRecyclerAdapter(var presenter: ClazzEdit2Presenter?,
                 return oldItem.cbUid == newItem.cbUid
             }
 
+            /*
+             * added due to two-way databind conflict when updating the list for indenting or hiding
+             */
+            @SuppressLint("DiffUtilEquals")
             override fun areContentsTheSame(oldItem: CourseBlockWithEntity, newItem: CourseBlockWithEntity): Boolean {
-                return oldItem == newItem
+                return oldItem === newItem
             }
         }
 

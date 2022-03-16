@@ -24,6 +24,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:alpha="@{block.cbHidden ? 0.5f : 1f}"
         android:background="?attr/selectableItemBackground">
 
 

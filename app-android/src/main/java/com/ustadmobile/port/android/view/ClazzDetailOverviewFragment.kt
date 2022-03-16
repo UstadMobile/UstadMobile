@@ -29,7 +29,6 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
-import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.Schedule
 import org.kodein.di.direct
@@ -53,7 +52,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
     private var currentLiveData: LiveData<PagedList<Schedule>>? = null
 
-    private var courseBlockLiveData: LiveData<PagedList<CourseBlock>>? = null
+    private var courseBlockLiveData: LiveData<PagedList<CourseBlockWithEntity>>? = null
 
     private var repo: UmAppDatabase? = null
 
@@ -61,7 +60,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
     private var courseBlockDetailRecyclerAdapter: CourseBlockDetailRecyclerViewAdapter? = null
 
-    private val courseBlockObserver = Observer<PagedList<CourseBlock>?> {
+    private val courseBlockObserver = Observer<PagedList<CourseBlockWithEntity>?> {
         t -> courseBlockDetailRecyclerAdapter?.submitList(t)
     }
 
@@ -80,7 +79,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         }
     }
 
-    class CourseBlockDetailRecyclerViewAdapter: PagedListAdapter<CourseBlock,
+    class CourseBlockDetailRecyclerViewAdapter: PagedListAdapter<CourseBlockWithEntity,
             CourseBlockDetailRecyclerViewAdapter.CourseBlockViewHolder>(COURSE_BLOCK_DIFF_UTIL) {
 
         class CourseBlockViewHolder(val binding: ItemCourseBlockBinding): RecyclerView.ViewHolder(binding.root)
@@ -105,7 +104,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         }
 
 
-    override var courseBlockList: DataSource.Factory<Int, CourseBlock>? = null
+    override var courseBlockList: DataSource.Factory<Int, CourseBlockWithEntity>? = null
         set(value) {
             courseBlockLiveData?.removeObserver(courseBlockObserver)
             field = value
@@ -190,12 +189,12 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
             }
         }
 
-        val COURSE_BLOCK_DIFF_UTIL = object: DiffUtil.ItemCallback<CourseBlock>() {
-            override fun areItemsTheSame(oldItem: CourseBlock, newItem: CourseBlock): Boolean {
+        val COURSE_BLOCK_DIFF_UTIL = object: DiffUtil.ItemCallback<CourseBlockWithEntity>() {
+            override fun areItemsTheSame(oldItem: CourseBlockWithEntity, newItem: CourseBlockWithEntity): Boolean {
                 return oldItem.cbUid == newItem.cbUid
             }
 
-            override fun areContentsTheSame(oldItem: CourseBlock, newItem: CourseBlock): Boolean {
+            override fun areContentsTheSame(oldItem: CourseBlockWithEntity, newItem: CourseBlockWithEntity): Boolean {
                 return oldItem == newItem
             }
         }

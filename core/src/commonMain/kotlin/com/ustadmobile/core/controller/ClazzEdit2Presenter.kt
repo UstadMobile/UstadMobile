@@ -315,7 +315,7 @@ class ClazzEdit2Presenter(context: Any,
 
             repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
 
-                if(arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() == 0L) {
+                if((arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() ?: 0L) == 0L) {
                     txDb.createNewClazzAndGroups(entity, systemImpl, context)
                 }else {
                     txDb.clazzDao.updateAsync(entity)
@@ -455,12 +455,25 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     override fun onClickIndent(joinedEntity: CourseBlockWithEntity) {
+        if(joinedEntity.cbModuleParentBlockUid == 0L){
+            val currentList = courseBlockOneToManyJoinEditHelper.liveList.getValue() ?: listOf()
+            val index = currentList.indexOf(joinedEntity)
+            for(n in index downTo 0){
+                if(currentList[n].cbType == CourseBlock.BLOCK_MODULE_TYPE){
+                    joinedEntity.cbModuleParentBlockUid = currentList[n].cbUid
+                    break
+                }
+            }
+        }
         joinedEntity.cbIndentLevel++
         courseBlockOneToManyJoinEditHelper.onEditResult(joinedEntity)
     }
 
     override fun onClickUnIndent(joinedEntity: CourseBlockWithEntity) {
         joinedEntity.cbIndentLevel--
+        if(joinedEntity.cbIndentLevel == 0){
+            joinedEntity.cbModuleParentBlockUid = 0L
+        }
         courseBlockOneToManyJoinEditHelper.onEditResult(joinedEntity)
     }
 
@@ -473,6 +486,17 @@ class ClazzEdit2Presenter(context: Any,
         val currentList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: mutableListOf()
         // Collections.swap (android only)
         currentList[fromPosition] = currentList.set(toPosition, currentList[fromPosition])
+
+        //if module moves, move all children to new index
+        //if child moves out of module, update child to have parentBlock = 0
+
+
+        // finally update the list with new index values
+        currentList.forEachIndexed{ index , item ->
+            item.cbIndex = index
+        }
+
+
         courseBlockOneToManyJoinEditHelper.liveList.sendValue(currentList.toList())
         return true
     }
