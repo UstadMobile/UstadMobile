@@ -14,10 +14,10 @@ import kotlinx.serialization.Serializable
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
                 sqlStatements = [
-                    """REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbIndex, cbClazzUid, cbActive,cbHidden, cbTableId, cbTableUid, cbLct) 
-         VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbModuleParentBlockUid, NEW.cbTitle, NEW.cbDescription, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbHidden, NEW.cbTableId,  NEW.cbTableUid, NEW.cbLct) 
+                    """REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbStartDate, cbIndex, cbClazzUid, cbActive,cbHidden, cbTableId, cbTableUid, cbLct) 
+         VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbModuleParentBlockUid, NEW.cbTitle, NEW.cbDescription, NEW.cbStartDate, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbHidden, NEW.cbTableId,  NEW.cbTableUid, NEW.cbLct) 
          /*psql ON CONFLICT (cbUid) DO UPDATE 
-         SET cbUid = EXCLUDED.cbUid, cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbModuleParentBlockUid = EXCLUDED.cbModuleParentBlockUid, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbHidden = EXCLUDED.cbHidden, cbTableId = EXCLUDED.cbTableId, cbTableUid = EXCLUDED.cbTableUid, cbLct = EXCLUDED.cbLct
+         SET cbUid = EXCLUDED.cbUid, cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbModuleParentBlockUid = EXCLUDED.cbModuleParentBlockUid, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbStartDate = EXCLUDED.cbStartDate, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbHidden = EXCLUDED.cbHidden, cbTableId = EXCLUDED.cbTableId, cbTableUid = EXCLUDED.cbTableUid, cbLct = EXCLUDED.cbLct
          */"""
                 ]
         )
@@ -38,6 +38,8 @@ open class CourseBlock {
 
     var cbDescription: String? = null
 
+    var cbStartDate: Long = 0
+
     var cbIndex: Int = 0
 
     var cbClazzUid: Long = 0
@@ -53,8 +55,6 @@ open class CourseBlock {
     @LastChangedTime
     @ReplicationVersionId
     var cbLct: Long = 0
-
-
 
     companion object {
 
