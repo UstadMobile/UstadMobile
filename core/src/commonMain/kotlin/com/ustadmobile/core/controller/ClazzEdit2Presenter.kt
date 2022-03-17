@@ -175,6 +175,10 @@ class ClazzEdit2Presenter(context: Any,
                     entry = newContent
                 }
 
+            foundBlock.entry = newContent
+            foundBlock.cbTitle = newContent.title
+            foundBlock.cbDescription = newContent.description
+
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
             UmPlatformUtil.run {
@@ -532,11 +536,14 @@ class ClazzEdit2Presenter(context: Any,
             }
             CourseBlock.BLOCK_CONTENT_TYPE -> {
                 NavigateForResultOptions(
-                    this, joinedEntity.entry,
+                    this, null,
                     ContentEntryEdit2View.VIEW_NAME,
                     ContentEntry::class,
                     ContentEntry.serializer(),
-                    SAVEDSTATE_KEY_CONTENT)
+                    SAVEDSTATE_KEY_CONTENT,
+                    arguments = mutableMapOf(
+                        UstadView.ARG_ENTITY_UID to joinedEntity.entry?.contentEntryUid.toString(),
+                        UstadView.ARG_LEAF to true.toString()))
             }
             CourseBlock.BLOCK_MODULE_TYPE -> {
                 val args = mutableMapOf<String, String>()

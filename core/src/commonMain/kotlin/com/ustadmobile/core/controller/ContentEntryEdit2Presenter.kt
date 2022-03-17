@@ -19,7 +19,6 @@ import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
 import com.ustadmobile.core.view.ContentEntryImportLinkView
@@ -30,6 +29,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -289,7 +289,15 @@ class ContentEntryEdit2Presenter(
 
                         view.loading = false
                         view.fieldsEnabled = true
-                        systemImpl.popBack(popUpTo, popUpInclusive = true, context)
+
+                        if(arguments.containsKey(ARG_RESULT_DEST_KEY)){
+                            finishWithResult(safeStringify(di,
+                                ListSerializer(ContentEntry.serializer()),
+                                listOf(entity)))
+                        }else{
+                            systemImpl.popBack(popUpTo, popUpInclusive = true, context)
+                        }
+
                         return@launch
 
                     } else {
@@ -320,7 +328,15 @@ class ContentEntryEdit2Presenter(
 
                         view.loading = false
                         view.fieldsEnabled = true
-                        systemImpl.popBack(popUpTo, popUpInclusive = true, context)
+
+                        if(arguments.containsKey(ARG_RESULT_DEST_KEY)){
+                            finishWithResult(safeStringify(di,
+                                ListSerializer(ContentEntry.serializer()),
+                                listOf(entity)))
+                        }else{
+                            systemImpl.popBack(popUpTo, popUpInclusive = true, context)
+                        }
+
                         return@launch
 
                     }
@@ -336,8 +352,14 @@ class ContentEntryEdit2Presenter(
 
                 view.loading = false
                 view.fieldsEnabled = true
-                systemImpl.popBack(popUpTo, popUpInclusive = true, context)
 
+                if(arguments.containsKey(ARG_RESULT_DEST_KEY)){
+                    finishWithResult(safeStringify(di,
+                        ListSerializer(ContentEntry.serializer()),
+                        listOf(entity)))
+                }else{
+                    systemImpl.popBack(popUpTo, popUpInclusive = true, context)
+                }
             } else {
                 view.titleErrorEnabled = entity.title == null
                 view.fileImportErrorVisible = entity.title != null && entity.leaf
