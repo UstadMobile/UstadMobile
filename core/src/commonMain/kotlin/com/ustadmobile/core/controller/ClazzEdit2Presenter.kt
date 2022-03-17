@@ -181,7 +181,7 @@ class ClazzEdit2Presenter(context: Any,
 
         }
 
-        observeSavedStateResult(ARG_SAVEDSTATE_BLOCK,
+        observeSavedStateResult(ARG_SAVEDSTATE_MODULE,
                 ListSerializer(CourseBlock.serializer()), CourseBlock::class){
             val moduleBlock = it.firstOrNull() ?: return@observeSavedStateResult
 
@@ -482,7 +482,7 @@ class ClazzEdit2Presenter(context: Any,
             destinationViewName = VIEW_NAME,
             entityClass = CourseBlock::class,
             serializationStrategy = CourseBlock.serializer(),
-            destinationResultKey = ARG_SAVEDSTATE_BLOCK,
+            destinationResultKey = ARG_SAVEDSTATE_MODULE,
             arguments = args))
     }
 
@@ -491,6 +491,8 @@ class ClazzEdit2Presenter(context: Any,
         const val ARG_SAVEDSTATE_SCHEDULES = "schedules"
 
         const val ARG_SAVEDSTATE_BLOCK = "courseBlocks"
+
+        const val ARG_SAVEDSTATE_MODULE = "courseModule"
 
         const val SAVEDSTATE_KEY_SCHOOL = "School"
 
@@ -543,7 +545,7 @@ class ClazzEdit2Presenter(context: Any,
                     destinationViewName = VIEW_NAME,
                     entityClass = CourseBlock::class,
                     serializationStrategy = CourseBlock.serializer(),
-                    destinationResultKey = ARG_SAVEDSTATE_BLOCK,
+                    destinationResultKey = ARG_SAVEDSTATE_MODULE,
                     arguments = args)
             }
             else -> return
