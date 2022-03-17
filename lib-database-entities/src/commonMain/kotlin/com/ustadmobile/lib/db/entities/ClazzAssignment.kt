@@ -72,8 +72,8 @@ open class ClazzAssignment {
     @ColumnInfo(defaultValue = "1")
     var caMarkingType: Int = MARKED_BY_COURSE_LEADER
 
-    @ColumnInfo(defaultValue = "0")
-    var caMaxPoints: Int = 0
+    @ColumnInfo(defaultValue = "10")
+    var caMaxPoints: Int = 10
 
     @ColumnInfo(defaultValue = "1")
     var caRequireTextSubmission: Boolean = true

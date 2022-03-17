@@ -140,6 +140,7 @@ class ClazzEdit2Presenter(context: Any,
                 cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                 cbDescription = newAssignment.caDescription
                 cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
+                cbUid = db.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
                 assignment = newAssignment
             }
 
@@ -170,6 +171,7 @@ class ClazzEdit2Presenter(context: Any,
                     cbType = CourseBlock.BLOCK_CONTENT_TYPE
                     cbDescription = newContent.description
                     cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
+                    cbUid = db.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
                     entry = newContent
                 }
 
@@ -196,6 +198,7 @@ class ClazzEdit2Presenter(context: Any,
                 cbDescription = moduleBlock.cbDescription
                 cbStartDate = moduleBlock.cbStartDate
                 cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
+                cbUid = moduleBlock.cbUid
             }
 
             foundBlock.cbTitle = moduleBlock.cbTitle
@@ -468,7 +471,8 @@ class ClazzEdit2Presenter(context: Any,
             SAVEDSTATE_KEY_CONTENT,
             arguments = mutableMapOf(ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
                     ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
-                UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()))
+                UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+                ContentEntryList2View.ARG_SELECT_FOLDER_VISIBLE to false.toString()))
         )
     }
 
@@ -575,24 +579,43 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     override fun onClickUnIndent(joinedEntity: CourseBlockWithEntity) {
-        joinedEntity.cbIndentLevel--
-        if(joinedEntity.cbIndentLevel == 0){
-            joinedEntity.cbModuleParentBlockUid = 0L
+        val newList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: mutableListOf()
+        val foundBlock = newList.find { it.cbUid == joinedEntity.cbUid } ?: return
+        foundBlock.cbIndentLevel--
+        if(foundBlock.cbIndentLevel == 0){
+            foundBlock.cbModuleParentBlockUid = 0L
         }
-        courseBlockOneToManyJoinEditHelper.onEditResult(joinedEntity)
+        newList[foundBlock.cbIndex] = foundBlock
+        courseBlockOneToManyJoinEditHelper.liveList.sendValue(newList)
+        view.courseBlocks = courseBlockOneToManyJoinEditHelper.liveList
     }
 
     override fun onClickHide(joinedEntity: CourseBlockWithEntity) {
-        joinedEntity.cbHidden = !joinedEntity.cbHidden
-        courseBlockOneToManyJoinEditHelper.onEditResult(joinedEntity)
+        val newList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: return
+        val foundBlock = newList.find { it.cbUid == joinedEntity.cbUid } ?: return
+        foundBlock.cbHidden = !foundBlock.cbHidden
+        newList[foundBlock.cbIndex] = foundBlock
+        courseBlockOneToManyJoinEditHelper.liveList.sendValue(newList)
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
         val currentList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: mutableListOf()
-        // Collections.swap (android only)
-        currentList[fromPosition] = currentList.set(toPosition, currentList[fromPosition])
+
+        val fromLocation = currentList[fromPosition]
+        currentList.removeAt(fromPosition)
+        if (toPosition < fromPosition) {
+            currentList.add(toPosition + 1, fromLocation)
+        } else {
+            currentList.add(toPosition - 1, fromLocation)
+        }
 
         //if module moves, move all children to new index
+        val movedBlock = currentList[fromPosition]
+        if(movedBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE){
+            val childBlocks = currentList.filter { it.cbModuleParentBlockUid == movedBlock.cbUid }
+
+        }
+
         //if child moves out of module, update child to have parentBlock = 0
 
 

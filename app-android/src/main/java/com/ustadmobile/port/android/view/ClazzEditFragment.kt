@@ -227,7 +227,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.add_a_new_course, R.string.edit_clazz)
+        setEditFragmentTitle(R.string.add_a_new_course, R.string.edit_course)
 
         mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
             di, viewLifecycleOwner).withViewLifecycle()

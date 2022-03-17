@@ -18,13 +18,13 @@ class CourseBlockRecyclerAdapter(var presenter: ClazzEdit2Presenter?,
                                  recylerView: RecyclerView?): ListAdapter<CourseBlockWithEntity,
         CourseBlockRecyclerAdapter.CourseBlockViewHolder>(DIFF_CALLBACK_BLOCK), OnStartDragListener{
 
-    private var itemTouchHelper: ItemTouchHelper
+    private var itemTouchHelper: ItemTouchHelper?
 
     init{
 
         val callback = ReorderHelperCallback(presenter)
         itemTouchHelper = ItemTouchHelper(callback)
-        itemTouchHelper.attachToRecyclerView(recylerView)
+        itemTouchHelper?.attachToRecyclerView(recylerView)
     }
 
     class CourseBlockViewHolder(val binding: ItemCourseBlockEditBinding): RecyclerView.ViewHolder(binding.root)
@@ -46,7 +46,7 @@ class CourseBlockRecyclerAdapter(var presenter: ClazzEdit2Presenter?,
 
     override fun onStartDrag(viewHolder: RecyclerView.ViewHolder?) {
         viewHolder?.let {
-            itemTouchHelper.startDrag(it)
+            itemTouchHelper?.startDrag(it)
         }
     }
 
@@ -57,6 +57,7 @@ class CourseBlockRecyclerAdapter(var presenter: ClazzEdit2Presenter?,
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         presenter = null
+        itemTouchHelper = null
     }
 
     class ReorderHelperCallback(val presenter : ItemTouchHelperListener?) : ItemTouchHelper.Callback() {
@@ -73,8 +74,11 @@ class CourseBlockRecyclerAdapter(var presenter: ClazzEdit2Presenter?,
                 source: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
         ): Boolean {
-            presenter?.onItemMove(source.absoluteAdapterPosition,
-                    target.absoluteAdapterPosition)
+            val adapter = recyclerView.adapter as CourseBlockRecyclerAdapter
+            val from = source.bindingAdapterPosition
+            val to = target.bindingAdapterPosition
+            presenter?.onItemMove(from, to)
+            adapter.notifyItemMoved(from, to)
             return true
         }
 
