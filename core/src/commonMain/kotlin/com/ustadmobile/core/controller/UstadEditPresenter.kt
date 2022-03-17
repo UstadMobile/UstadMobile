@@ -56,10 +56,10 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(
                 arguments[ARG_RESULT_DEST_VIEWNAME] != null
 
     fun onFinish(detailViewName: String, entityUid: Long, entity: RT, serializer: KSerializer<RT>) {
-
         if(!isExistingEntityOrPickerMode) {
-            systemImpl.go(detailViewName, mapOf(ARG_ENTITY_UID to entityUid.toString()), context,
-                    UstadMobileSystemCommon.UstadGoOptions(CURRENT_DEST, popUpToInclusive = true))
+            systemImpl.go(detailViewName,
+                mapOf(ARG_ENTITY_UID to entityUid.toString()), context,
+                UstadMobileSystemCommon.UstadGoOptions(CURRENT_DEST, popUpToInclusive = true))
         }  else {
             finishWithResult(safeStringify(di, ListSerializer(serializer), listOf(entity)))
         }
