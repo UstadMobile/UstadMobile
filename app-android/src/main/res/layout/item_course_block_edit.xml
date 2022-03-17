@@ -6,6 +6,7 @@
     <data>
         <import type="com.ustadmobile.core.util.TreeOneToManyJoinEditListener"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlockWithEntity"/>
+        <import type="com.ustadmobile.port.android.view.ClazzEditFragment"/>
 
         <variable
             name="block"
@@ -47,6 +48,8 @@
             android:layout_height="@dimen/dimen_24dp"
             app:tint="?colorOnIconTint"
             app:courseBlockIndent="@{block.cbIndentLevel}"
+            app:imageLookupKey="@{block.cbType}"
+            app:imageLookupMap="@{ClazzEditFragment.BLOCK_ICON_MAP}"
             app:layout_constraintStart_toEndOf="@id/item_course_block_reorder"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

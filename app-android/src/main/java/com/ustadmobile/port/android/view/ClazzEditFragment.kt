@@ -312,6 +312,14 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     companion object {
 
+        @JvmField
+        val BLOCK_ICON_MAP = mapOf(
+            CourseBlock.BLOCK_MODULE_TYPE to R.drawable.ic_baseline_folder_open_24,
+            CourseBlock.BLOCK_ASSIGNMENT_TYPE to R.drawable.baseline_assignment_turned_in_24,
+            CourseBlock.BLOCK_CONTENT_TYPE to R.drawable.video_youtube,
+            CourseBlock.BLOCK_TEXT_TYPE to R.drawable.ic_baseline_title_24
+        )
+
         val DIFF_CALLBACK_SCHEDULE: DiffUtil.ItemCallback<Schedule> = object: DiffUtil.ItemCallback<Schedule>() {
             override fun areItemsTheSame(oldItem: Schedule, newItem: Schedule): Boolean {
                 return oldItem.scheduleUid == newItem.scheduleUid
