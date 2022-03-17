@@ -65,8 +65,7 @@ class CourseBlockRecyclerAdapter(var presenter: ClazzEdit2Presenter?,
                 viewHolder: RecyclerView.ViewHolder
         ): Int {
             val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
-            val swipeFlags = ItemTouchHelper.START or ItemTouchHelper.END
-            return makeMovementFlags( dragFlags, swipeFlags)
+            return makeMovementFlags(dragFlags,0)
         }
 
         override fun onMove(

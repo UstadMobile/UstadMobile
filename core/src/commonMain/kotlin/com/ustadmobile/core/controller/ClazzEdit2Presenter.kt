@@ -460,7 +460,7 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     fun handleClickAddContent(){
-        NavigateForResultOptions(
+        navigateForResult(NavigateForResultOptions(
             this, null,
             ContentEntryList2View.VIEW_NAME,
             ContentEntry::class,
@@ -468,7 +468,7 @@ class ClazzEdit2Presenter(context: Any,
             SAVEDSTATE_KEY_CONTENT,
             arguments = mutableMapOf(ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
                     ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
-                UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString())
+                UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()))
         )
     }
 
@@ -527,14 +527,10 @@ class ClazzEdit2Presenter(context: Any,
             CourseBlock.BLOCK_CONTENT_TYPE -> {
                 NavigateForResultOptions(
                     this, joinedEntity.entry,
-                    ContentEntryList2View.VIEW_NAME,
+                    ContentEntryEdit2View.VIEW_NAME,
                     ContentEntry::class,
                     ContentEntry.serializer(),
-                    SAVEDSTATE_KEY_CONTENT,
-                    arguments = mutableMapOf(ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
-                            ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
-                        UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString())
-                )
+                    SAVEDSTATE_KEY_CONTENT)
             }
             CourseBlock.BLOCK_MODULE_TYPE -> {
                 val args = mutableMapOf<String, String>()
