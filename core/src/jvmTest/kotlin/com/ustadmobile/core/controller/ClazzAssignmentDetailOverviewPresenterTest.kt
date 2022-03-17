@@ -128,31 +128,6 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     }
 
     @Test
-    fun givenClazzAssignmentExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
-        createPerson(true)
-
-        val testEntity = ClazzAssignment().apply {
-            //set variables here
-            caUid = repo.clazzAssignmentDao.insert(this)
-        }
-
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
-
-        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
-                mockLifecycleOwner, di)
-
-        presenter.onCreate(null)
-
-        //wait for the entity value to be set
-        mockView.captureLastEntityValue()
-
-        presenter.handleClickEdit()
-        val systemImpl: UstadMobileSystemImpl by di.instance()
-        verify(systemImpl, timeout(5000)).go(eq(ClazzAssignmentEditView.VIEW_NAME),
-            eq(mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())), any())
-    }
-
-    @Test
     fun givenClazzAssignment_whenStudentViews_thenShowScoreWithPrivateComments(){
         createPerson(false)
 
@@ -285,10 +260,10 @@ class ClazzAssignmentDetailOverviewPresenterTest {
             insertListAsync(any())
         }
 
-        runBlocking {
-            verify(xapiStatementEndpointImpl, timeout(1000))
-                    .storeStatements(any(),
-                            any(), any(), any())
+
+        verifyBlocking(xapiStatementEndpointImpl, timeout(1000)){
+            storeStatements(any(),
+                any(), any(), any())
         }
 
 
