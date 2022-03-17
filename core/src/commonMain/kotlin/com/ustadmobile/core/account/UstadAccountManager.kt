@@ -174,8 +174,11 @@ class UstadAccountManager(
     }
 
 
-    suspend fun register(person: PersonWithAccount, endpointUrl: String,
-                         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()): PersonWithAccount = withContext(Dispatchers.Default){
+    suspend fun register(
+        person: PersonWithAccount,
+        endpointUrl: String,
+        accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()
+    ): PersonWithAccount = withContext(Dispatchers.Default){
         val parentVal = accountRegisterOptions.parentJoin
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
