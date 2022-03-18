@@ -5,17 +5,12 @@ import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.ProcessResult
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_EXT_LIST
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.view.VideoPlayerView
-import com.ustadmobile.door.DoorUri
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.core.view.VideoContentView
 
 abstract class VideoTypePlugin : ContentPlugin {
 
     val viewName: String
-        get() = VideoPlayerView.VIEW_NAME
+        get() = VideoContentView.VIEW_NAME
 
     override val supportedMimeTypes: List<String>
         get() = VIDEO_MIME_MAP.keys.toList()

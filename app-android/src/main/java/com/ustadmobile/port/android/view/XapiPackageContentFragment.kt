@@ -35,8 +35,11 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
     private var mPresenter: XapiPackageContentPresenter? = null
 
     @SuppressLint("SetJavaScriptEnabled")
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         val rootView: View
 
         mBinding = FragmentXapiPackageContentBinding.inflate(inflater, container, false).also {

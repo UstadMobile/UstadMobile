@@ -18,6 +18,9 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.zip.*
 
 class UmAppDatabaseContainerIoExtTest {
 
@@ -82,6 +85,26 @@ class UmAppDatabaseContainerIoExtTest {
     }
 
 
+    private fun assertZipAndContainerContentsAreEqual(zip: File, db: UmAppDatabase, containerUid: Long) {
+        lateinit var entry: ZipEntry
+        ZipInputStream(FileInputStream(zip)).use { zipIn ->
+            while(zipIn.nextEntry?.also { entry = it } != null) {
+                val containerEntryBytes = db.containerEntryDao
+                    .openEntryInputStream(containerUid, entry.name)?.readBytes()
+                val containerEntryWithFile = db.containerEntryDao.findByPathInContainer(
+                    containerUid, entry.name)
+                val entryFile = File(containerEntryWithFile!!.containerEntryFile!!.cefPath!!)
+                Assert.assertEquals("Compressed size is the size of actual file for ${entry.name}",
+                    entryFile.length(), containerEntryWithFile!!.containerEntryFile!!.ceCompressedSize)
+                Assert.assertEquals("Uncompressed size matches for ${entry.name}",
+                    containerEntryBytes!!.size.toLong(),
+                    containerEntryWithFile!!.containerEntryFile!!.ceTotalSize)
+                Assert.assertArrayEquals("Entry bytes are the same for ${entry.name}",
+                    zipIn.readBytes(), containerEntryBytes)
+            }
+        }
+    }
+
     @Test
     fun givenEmptyContainer_whenAddFilesFromZipCalled_thenFilesShouldBeAdded() {
         val db: UmAppDatabase by di.activeDbInstance()
@@ -102,6 +125,55 @@ class UmAppDatabaseContainerIoExtTest {
                     ContainerAddOptions(containerFilesDir.toDoorUri()), Any()
             )
         }
+
+        assertZipAndContainerContentsAreEqual(epubTmp, db, container.containerUid)
+    }
+
+    @Test
+    fun givenEmptyContainer_whenAddFilesFromZipContainingDuplicateMd5sCalled_thenShouldBeAdded() {
+        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        val container = Container().apply {
+            containerUid = repo.containerDao.insert(this)
+        }
+
+        val zipTmpFile = temporaryFolder.newFile()
+        val zipOutStream = ZipOutputStream(FileOutputStream(zipTmpFile))
+        zipOutStream.setMethod(ZipEntry.STORED)
+        val crc32 = CRC32()
+
+        (0..1).forEach { index ->
+            crc32.update(tmpFile1.readBytes())
+            zipOutStream.putNextEntry(ZipEntry("file1-$index.jpg").apply {
+                size = tmpFile1.length()
+                compressedSize = tmpFile1.length()
+                crc = crc32.value
+            })
+            zipOutStream.write(tmpFile1.readBytes())
+            crc32.reset()
+        }
+
+        crc32.update(tmpFile2.readBytes())
+        zipOutStream.putNextEntry(ZipEntry("file.jpg").apply {
+            size = tmpFile2.length()
+            compressedSize = tmpFile2.length()
+            crc = crc32.value
+        })
+        zipOutStream.write(tmpFile2.readBytes())
+        zipOutStream.closeEntry()
+        zipOutStream.flush()
+        zipOutStream.close()
+
+        runBlocking {
+            repo.addEntriesToContainerFromZip(
+                container.containerUid, zipTmpFile.toDoorUri(),
+                ContainerAddOptions(containerFilesDir.toDoorUri()), Any()
+            )
+        }
+
+        assertZipAndContainerContentsAreEqual(zipTmpFile, db, container.containerUid)
+
     }
 
     //TODO: Test overwriting existing files

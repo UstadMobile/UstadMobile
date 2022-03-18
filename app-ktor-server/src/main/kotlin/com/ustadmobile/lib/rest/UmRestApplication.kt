@@ -67,6 +67,8 @@ import com.ustadmobile.core.db.PermissionManagementIncomingReplicationListener
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 import io.ktor.response.*
 import kotlinx.coroutines.delay
+import kotlinx.serialization.json.Json
+import com.ustadmobile.core.util.SysPathUtil
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -77,17 +79,43 @@ const val CONF_DBMODE_SINGLETON = "singleton"
 const val CONF_GOOGLE_API = "secret"
 
 /**
+ * List of external commands (e.g. media converters) that must be found or have locations specified
+ */
+val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
+
+/**
  * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
  * containers, etc).
  */
-private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBMODE_SINGLETON) = if(dbMode == CONF_DBMODE_SINGLETON) {
+private fun Endpoint.identifier(
+    dbMode: String,
+    singletonName: String = CONF_DBMODE_SINGLETON
+) = if(dbMode == CONF_DBMODE_SINGLETON) {
     singletonName
 }else {
     sanitizeDbNameFromUrl(url)
 }
 
-fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: String? = null,
-                                  singletonDbName: String = "UmAppDatabase") {
+fun Application.umRestApplication(
+    dbModeOverride: String? = null,
+    singletonDbName: String = "UmAppDatabase"
+) {
+    val appConfig = environment.config
+
+    val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
+
+    //Check for required external commands
+    REQUIRED_EXTERNAL_COMMANDS.forEach { command ->
+        if(!SysPathUtil.commandExists(command,
+                manuallySpecifiedLocation = appConfig.commandFileProperty(command))
+        ) {
+            val message = "FATAL ERROR: Required external command \"$command\" not found in path or " +
+                   "manually specified location does not exist. Please set it in application.conf"
+            Napier.e(message)
+            throw IllegalStateException(message)
+        }
+    }
+
 
     if (devMode) {
         install(CORS) {
@@ -96,6 +124,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             method(HttpMethod.Put)
             method(HttpMethod.Options)
             header(HttpHeaders.ContentType)
+            header(HttpHeaders.AccessControlAllowOrigin)
+            header("X-nid")
+            header("door-dbversion")
+            header("door-node")
             anyHost()
         }
     }
@@ -114,7 +146,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     }
 
     val tmpRootDir = Files.createTempDirectory("upload").toFile()
-    val appConfig = environment.config
 
     val dbMode = dbModeOverride ?:
         appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
@@ -233,11 +264,11 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             val doorNode = instance<NodeIdAndAuth>()
             val repo: UmAppDatabase = db.asRepository(repositoryConfig(Any(), "http://localhost/",
-                    doorNode.nodeId, doorNode.auth, instance(), instance()) {
+                doorNode.nodeId, doorNode.auth, instance(), instance()) {
                 useReplicationSubscription = false
             })
 
-            repo.preload()
+            runBlocking { repo.preload() }
             repo.ktorInitRepo()
             runBlocking {
                 repo.initAdminUser(context, di)
@@ -294,6 +325,22 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<ContentJobManager>() with singleton {
             ContentJobManagerJvm(di)
+        }
+
+        bind<Json>() with singleton {
+            Json { encodeDefaults = true }
+        }
+
+        bind<File>(tag = DiTag.TAG_FILE_FFMPEG) with singleton {
+            //The availability of ffmpeg is checked on startup
+            SysPathUtil.findCommandInPath("ffmpeg",
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"))!!
+        }
+
+        bind<File>(tag = DiTag.TAG_FILE_FFPROBE) with singleton {
+            //The availability of ffmpeg is checked on startup
+            SysPathUtil.findCommandInPath("ffprobe",
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))!!
         }
 
         try {
@@ -371,13 +418,30 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
           The static route will redirect /umapp/#ViewName?args to
           /getapp/?uri=(encoded full uri including #ViewName?args)
-         */
+
         static("umapp") {
             resource("/", "/static/getappredirect/index.html")
         }
+        */
+
         GetAppRoute()
+
         if (devMode) {
             DevModeRoute()
+        }
+
+        static("umapp") {
+            resources("umapp")
+            static("/") {
+                defaultResource("umapp/index.html")
+            }
+        }
+
+        //Handle default route when running behind proxy
+        route("/"){
+            get{
+                call.respondRedirect("umapp/")
+            }
         }
     }
 }

@@ -17,6 +17,10 @@
             type="ClazzEnrolmentWithLeavingReason" />
 
         <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ClazzEnrolmentEditPresenter" />
+
+        <variable
             name="loading"
             type="boolean" />
 
@@ -48,11 +52,7 @@
             name="statusSelectorListener"
             type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
-        <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.ClazzEnrolmentFragmentEventHandler" />
-
-        <variable name="dateTimeMode"
+       <variable name="dateTimeMode"
             type="Integer"/>
 
         <variable name="dateTimeModeEnd"
@@ -190,7 +190,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/clazz_enrolment_edit_reason_text"
-                    android:onClick="@{() -> activityEventHandler.handleReasonLeavingClicked()}"
+                    android:onClick="@{() -> presenter.handleReasonLeavingClicked()}"
                     android:text="@{clazzEnrolment.leavingReason.leavingReasonTitle}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"

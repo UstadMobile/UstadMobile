@@ -139,9 +139,9 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
     @Query("""UPDATE ClazzLog 
         SET clazzLogStatusFlag = :newStatus,
-        clazzLogLCB = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL}
+        clazzLogLastChangedTime = :timeChanged
         WHERE clazzLogUid = :clazzLogUid""")
-    abstract fun updateStatusByClazzLogUid(clazzLogUid: Long, newStatus: Int)
+    abstract fun updateStatusByClazzLogUid(clazzLogUid: Long, newStatus: Int, timeChanged: Long)
 
     @Update
     abstract suspend fun updateAsync(clazzLog: ClazzLog)

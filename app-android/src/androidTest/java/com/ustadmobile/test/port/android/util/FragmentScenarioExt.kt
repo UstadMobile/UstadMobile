@@ -48,8 +48,11 @@ fun <F: Fragment, R> FragmentScenario<F>.waitUntilLetOnFragment(block: (F) -> R)
     return retVal as R
 }
 
-suspend fun <F: Fragment, R> FragmentScenario<F>.waitUntilOnFragment(timeout: Long, getter: (F) -> R?,
-    checker: (R?) -> Boolean) : R? {
+suspend fun <F: Fragment, R> FragmentScenario<F>.waitUntilOnFragment(
+    timeout: Long,
+    getter: (F) -> R?,
+    checker: (R?) -> Boolean
+) : R? {
 
     val retVal: AtomicReference<R?> = AtomicReference()
     withTimeout(timeout) {
@@ -67,11 +70,18 @@ suspend fun <F: Fragment, R> FragmentScenario<F>.waitUntilOnFragment(timeout: Lo
 
     return retVal.get()
 }
-suspend fun <F: Fragment, R> FragmentScenario<F>.waitUntilNotNullOnFragment(timeout: Long, getter: (F) -> R?) : R {
-    return waitUntilOnFragment(timeout, getter) { it != null} ?: throw IllegalStateException("Waituntilnotnull was null")
+suspend fun <F: Fragment, R> FragmentScenario<F>.waitUntilNotNullOnFragment(
+    timeout: Long,
+    getter: (F) -> R?
+) : R {
+    return waitUntilOnFragment(timeout, getter) { it != null}
+        ?: throw IllegalStateException("Waituntilnotnull was null")
 }
 
-fun <F: Fragment, R> FragmentScenario<F>.waitUntilNotNullOnFragmentBlocking(timeout: Long, getter: (F) -> R?) : R {
+fun <F: Fragment, R> FragmentScenario<F>.waitUntilNotNullOnFragmentBlocking(
+    timeout: Long,
+    getter: (F) -> R?
+) : R {
     return runBlocking {
         waitUntilOnFragment(timeout, getter) { it != null }
             ?: throw IllegalStateException("Waituntilnotnull was null")

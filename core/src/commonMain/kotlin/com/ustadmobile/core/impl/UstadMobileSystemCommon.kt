@@ -14,6 +14,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.door.doorMainDispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationStrategy
 import kotlin.js.JsName
 
 /**
@@ -46,7 +48,12 @@ abstract class UstadMobileSystemCommon {
             /**
              * If true, then popup include popUpToViewName.
              */
-            val popUpToInclusive: Boolean = false) {
+            val popUpToInclusive: Boolean = false,
+
+            /**
+             * Serialization strategy, i.e On JS there is no way to serialize without a strategy
+             */
+            val serializer: KSerializer<*>? = null) {
 
         companion object {
             val Default = UstadGoOptions(null, false)
@@ -64,11 +71,10 @@ abstract class UstadMobileSystemCommon {
      *
      * @param context System context
      * @param zip if true, the app setup file should be delivered within a zip.
-     * @param callback callback to call when complete or if any error occurs.
      */
 
     @JsName("getAppSetupFile")
-    abstract fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>)
+    abstract suspend fun getAppSetupFile(context: Any, zip: Boolean): String
 
 
     /**
@@ -227,6 +233,16 @@ abstract class UstadMobileSystemCommon {
      */
     @JsName("getSystemLocale")
     abstract fun getSystemLocale(context: Any): String
+
+    /**
+     * Provide language UI directionality
+     * @return TRUE if the UI direction is RTL otherwise it's FALSE
+     */
+    open fun isRtlActive(): Boolean {
+        val languages = getAppPref(AppConfig.KEY_RTL_LANGUAGES, this)
+        return languages?.split(",")?.firstOrNull{it == getDisplayedLocale(this)} != null
+    }
+
 
 
     /**
@@ -439,6 +455,8 @@ abstract class UstadMobileSystemCommon {
          * The RedirectFragment will remove itself from the view stack.
          */
         const val PREF_ROOT_VIEWNAME = "rootViewName"
+
+        const val TAG_CLIENT_ID = "client_id"
 
     }
 }

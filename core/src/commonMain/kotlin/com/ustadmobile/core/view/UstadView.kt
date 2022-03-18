@@ -59,7 +59,6 @@ interface UstadView {
      *
      * @param r Runnable to run on system's UI thread
      */
-    @JsName("runOnUiThread")
     fun runOnUiThread(r: Runnable?)
     companion object {
 
@@ -126,6 +125,8 @@ interface UstadView {
 
         const val ROOT_DEST = "root"
 
+        const val ARG_CURRENT = "current"
+
         /**
          * if after selecting from a list, need to open an edit page
          */
@@ -191,16 +192,19 @@ interface UstadView {
         const val ARG_NAV_CHILD = "navChild"
 
         /**
+         * Indicates currently active tab index (Start at 0 as first tab)
+         */
+        const val ARG_ACTIVE_TAB_INDEX = "activeTabIndex"
+
+        /**
          * Used to 'enforce' a minimum age policy for certain screens (e.g. parent - child consent
          * management). This can be used on AccountList to show only adult accounts (e.g.
          * date of birth < MAX DATE OF BIRTH), or LoginPresenter where an adult account is required.
          */
         const val ARG_MAX_DATE_OF_BIRTH = "maxDob"
 
-
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
-
 
     }
 

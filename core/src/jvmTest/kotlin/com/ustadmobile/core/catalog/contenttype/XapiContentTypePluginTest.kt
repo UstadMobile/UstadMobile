@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
+import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
@@ -35,6 +36,8 @@ class XapiContentTypePluginTest {
 
     private lateinit var mockWebServer: MockWebServer
 
+    private lateinit var db: UmAppDatabase
+
     @Before
     fun setup(){
         endpointScope = EndpointScope()
@@ -43,9 +46,9 @@ class XapiContentTypePluginTest {
         }
 
         val accountManager: UstadAccountManager by di.instance()
-        val umAppDatabase: UmAppDatabase = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
+        db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
         val connectivityStatus = ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "NetworkSSID")
-        umAppDatabase.connectivityStatusDao.insert(connectivityStatus)
+        db.connectivityStatusDao.insert(connectivityStatus)
 
         mockWebServer = MockWebServer()
         mockWebServer.dispatcher = ContentDispatcher()
@@ -66,7 +69,7 @@ class XapiContentTypePluginTest {
         val metadata = runBlocking {
             val xapiFileUri = DoorUri.parse(tempFile.toURI().toString())
             val processContext = ContentJobProcessContext(xapiFileUri, tempUri, mutableMapOf(),
-                    di)
+                DummyContentJobItemTransactionRunner(db), di)
             xapiPlugin.extractMetadata(xapiFileUri, processContext)
         }!!
 
@@ -91,7 +94,7 @@ class XapiContentTypePluginTest {
 
             val doorUri = DoorUri.parse(mockWebServer.url("/com/ustadmobile/core/contenttype/ustad-tincan.zip").toString())
             val processContext = ContentJobProcessContext(doorUri, tempUri, mutableMapOf(),
-                    di)
+                DummyContentJobItemTransactionRunner(db), di)
 
             val uid = repo.contentEntryDao.insert(ContentEntry().apply{
                 title = "hello"

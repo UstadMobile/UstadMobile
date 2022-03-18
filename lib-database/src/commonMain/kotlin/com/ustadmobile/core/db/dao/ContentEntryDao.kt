@@ -66,10 +66,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findEntryWithLanguageByEntryId")
     abstract suspend fun findEntryWithLanguageByEntryIdAsync(entryUuid: Long): ContentEntryWithLanguage?
 
-    @Query("SELECT ContentEntry.*, Container.* FROM ContentEntry LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container "+
-            "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE ContentEntry.contentEntryUid=:entryUuid")
-    @JsName("findByEntryIdWithContainer")
+    @Query(ENTRY_WITH_CONTAINER_QUERY)
     abstract suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer?
+
+    @Query(ENTRY_WITH_CONTAINER_QUERY)
+    abstract fun findEntryWithContainerByEntryIdLive(entryUuid: Long): DoorLiveData<ContentEntryWithMostRecentContainer?>
 
     @Query("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl LIMIT 1")
     @JsName("findBySourceUrl")
@@ -192,14 +193,22 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findByTitle")
     abstract fun findByTitle(title: String): DoorLiveData<ContentEntry?>
 
+    /**
+     * For new jobs, if the user is currently on Mobile Data, we will assume that they know what
+     * they want to do, and by default, allow the use of mobile data.
+     */
     @Query("""
        SELECT COALESCE((SELECT CAST(cjIsMeteredAllowed AS INTEGER) 
                 FROM ContentJobItem 
                 JOIN ContentJob
                     ON ContentJobItem.cjiJobUid = ContentJob.cjUid
                WHERE cjiContentEntryUid = :contentEntryUid
-                AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
-                AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX} LIMIT 1),0) AS Status
+                AND cjiRecursiveStatus >= ${JobStatus.QUEUED}
+                AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX} LIMIT 1),
+                CAST(((SELECT connectivityState
+                        FROM ConnectivityStatus
+                       LIMIT 1) = ${ConnectivityStatus.STATE_METERED}) AS INTEGER),
+                0) AS Status
     """)
     abstract suspend fun isMeteredAllowedForEntry(contentEntryUid: Long): Boolean
 
@@ -435,12 +444,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
         UPDATE ContentEntry
            SET ceInactive = :inactive,
                contentEntryLct = :changedTime
-         WHERE contentEntryUid IN (SELECT cjiContentEntryUid 
-                                     FROM ContentJobItem
-                                    WHERE cjiJobUid = :jobId
-                                      AND CAST(ContentJobItem.cjiContentDeletedOnCancellation AS INTEGER) = 1)
+         WHERE contentEntryUid IN 
+               (SELECT cjiContentEntryUid 
+                  FROM ContentJobItem
+                 WHERE cjiJobUid = :jobId
+                   AND CAST(ContentJobItem.cjiContentDeletedOnCancellation AS INTEGER) = 1)
     """)
-    abstract fun invalidateContentEntryCreatedByJob(
+    abstract fun updateContentEntryActiveByContentJobUid(
         jobId: Long,
         inactive: Boolean,
         changedTime: Long
@@ -458,11 +468,155 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
         changedTime: Long
     )
 
+    @Query("""
+SELECT ContentEntry.*
+  FROM ContentEntry
+       JOIN Container ON Container.containerUid = 
+       (SELECT containerUid 
+          FROM Container
+         WHERE Container.containercontententryUid = ContentEntry.contentEntryUid
+           AND Container.cntLastModified = 
+               (SELECT MAX(ContainerInternal.cntLastModified)
+                  FROM Container ContainerInternal
+                 WHERE ContainerInternal.containercontententryUid = ContentEntry.contentEntryUid))
+ WHERE ContentEntry.leaf 
+   AND NOT ContentEntry.ceInactive
+   AND (NOT EXISTS 
+       (SELECT ContainerEntry.ceUid
+          FROM ContainerEntry
+         WHERE ContainerEntry.ceContainerUid = Container.containerUid)
+        OR Container.fileSize = 0)   
+    """)
+    abstract suspend fun findContentEntriesWhereIsLeafAndLatestContainerHasNoEntriesOrHasZeroFileSize(): List<ContentEntry>
+
+    //langauge=RoomSql
+    @Query("""
+        WITH ContentEntryContainerUids AS 
+             (SELECT Container.containerUid
+                FROM Container
+               WHERE Container.containerContentEntryUid = :contentEntryUid
+                   AND Container.fileSize > 0),
+                   
+             $LATEST_DOWNLOADED_CONTAINER_CTE_SQL,
+                            
+             $ACTIVE_CONTENT_JOB_ITEMS_CTE_SQL,
+                  
+            ShowDownload(showDownload) AS 
+            (SELECT CAST(:platformDownloadEnabled AS INTEGER) = 1
+                AND (SELECT containerUid FROM LatestDownloadedContainer) = 0
+                AND (SELECT COUNT(*) FROM ActiveContentJobItems) = 0
+                AND (SELECT COUNT(*) FROM ContentEntryContainerUids) > 0)
+                   
+        SELECT (SELECT showDownload FROM ShowDownload)
+               AS showDownloadButton,
+        
+               CAST(:platformDownloadEnabled AS INTEGER) = 0
+               OR (SELECT containerUid FROM LatestDownloadedContainer) != 0          
+               AS showOpenButton,
+       
+               (SELECT NOT showDownload FROM ShowDownload)
+           AND (SELECT COUNT(*) FROM ActiveContentJobItems) = 0    
+           AND (SELECT COALESCE(
+                       (SELECT cntLastModified
+                          FROM Container
+                         WHERE containerContentEntryUid = :contentEntryUid
+                           AND fileSize > 0
+                      ORDER BY cntLastModified DESC), 0)) 
+               > (SELECT COALESCE(
+                         (SELECT cntLastModified
+                            FROM Container
+                           WHERE Container.containerUid = 
+                                 (SELECT LatestDownloadedContainer.containerUid
+                                    FROM LatestDownloadedContainer)), 0)) 
+               AS showUpdateButton,
+               
+               CAST(:platformDownloadEnabled AS INTEGER) = 1
+           AND (SELECT containerUid FROM LatestDownloadedContainer) != 0
+           AND (SELECT COUNT(*) FROM ActiveContentJobItems) = 0    
+               AS showDeleteButton,
+               
+               (SELECT COUNT(*) 
+                  FROM ActiveContentJobItems 
+                 WHERE cjiPluginId = $PLUGIN_ID_DOWNLOAD) > 0
+               AS showManageDownloadButton
+    """)
+    abstract suspend fun buttonsToShowForContentEntry(
+        contentEntryUid: Long,
+        platformDownloadEnabled: Boolean,
+    ): ContentEntryButtonModel?
+
+    @Query("""
+        SELECT ContentJobItem.cjiRecursiveStatus AS status
+         FROM ContentJobItem
+        WHERE ContentJobItem.cjiContentEntryUid = :contentEntryUid
+          AND ContentJobItem.cjiPluginId != $PLUGIN_ID_DELETE
+          AND ContentJobItem.cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.FAILED}
+          AND NOT EXISTS(
+              SELECT 1
+                FROM ContentJobItem ContentJobItemInternal
+               WHERE ContentJobItemInternal.cjiContentEntryUid = :contentEntryUid
+                 AND ContentJobItemInternal.cjiPluginId = $PLUGIN_ID_DELETE
+                 AND ContentJobItemInternal.cjiFinishTime > ContentJobItem.cjiStartTime)
+     ORDER BY ContentJobItem.cjiFinishTime DESC
+        LIMIT 1
+    """)
+    abstract suspend fun statusForDownloadDialog(
+        contentEntryUid: Long
+    ): Int
+
+    @Query("""
+        SELECT ContentJobItem.cjiRecursiveStatus AS status, 
+               ContentJobItem.cjiRecursiveProgress AS progress,
+               ContentJobItem.cjiRecursiveTotal AS total
+         FROM ContentJobItem
+        WHERE ContentJobItem.cjiContentEntryUid = :contentEntryUid
+          AND ContentJobItem.cjiPluginId != $PLUGIN_ID_DELETE
+          AND ContentJobItem.cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.FAILED}
+          AND NOT EXISTS(
+              SELECT 1
+                FROM ContentJobItem ContentJobItemInternal
+               WHERE ContentJobItemInternal.cjiContentEntryUid = :contentEntryUid
+                 AND ContentJobItemInternal.cjiPluginId = $PLUGIN_ID_DELETE
+                 AND ContentJobItemInternal.cjiFinishTime > ContentJobItem.cjiStartTime)
+     ORDER BY ContentJobItem.cjiFinishTime DESC
+        LIMIT 1
+    """)
+    abstract suspend fun statusForContentEntryList(
+        contentEntryUid: Long
+    ): ContentJobItemProgressAndStatus?
+
     companion object {
+
+        const val PLUGIN_ID_DOWNLOAD = 10
+
+        const val PLUGIN_ID_DELETE = 14
 
         const val SORT_TITLE_ASC = 1
 
         const val SORT_TITLE_DESC = 2
+
+        private const val LATEST_DOWNLOADED_CONTAINER_CTE_SQL = """
+            LatestDownloadedContainer(containerUid) AS
+             (SELECT COALESCE(
+                     (SELECT containerUid
+                        FROM Container
+                       WHERE Container.containerContentEntryUid = :contentEntryUid 
+                         AND EXISTS(
+                             SELECT 1
+                               FROM ContainerEntry
+                              WHERE ContainerEntry.ceContainerUid = Container.containerUid)
+                    ORDER BY cntLastModified DESC
+                       LIMIT 1), 0))
+        """
+
+        private const val ACTIVE_CONTENT_JOB_ITEMS_CTE_SQL = """
+            ActiveContentJobItems(cjiRecursiveStatus, cjiPluginId) AS
+             (SELECT cjiRecursiveStatus, cjiPluginId
+                FROM ContentJobItem
+               WHERE cjiContentEntryUid = :contentEntryUid
+                 AND cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.RUNNING_MAX})
+        """
+
 
         const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
             SELECT DISTINCT Person.PersonUid FROM Person
@@ -507,6 +661,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             ContentEntry_recursive
             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid)
             SELECT * FROM ContentEntry_recursive"""
+
+        const val ENTRY_WITH_CONTAINER_QUERY = """
+            SELECT ContentEntry.*, Container.* FROM ContentEntry LEFT 
+                JOIN Container ON Container.containerUid = (
+                    SELECT containerUid FROM Container WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) 
+            WHERE ContentEntry.contentEntryUid=:entryUuid
+            """
 
     }
 }

@@ -114,7 +114,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 98)
+], version = 102)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -141,7 +141,7 @@ abstract class UmAppDatabase : DoorDatabase() {
     /**
      * Preload a few entities where we have fixed UIDs for fixed items (e.g. Xapi Verbs)
      */
-    fun preload() {
+    suspend fun preload() {
         verbDao.initPreloadedVerbs()
         reportDao.initPreloadedTemplates()
         leavingReasonDao.initPreloadedLeavingReasons()
@@ -198,9 +198,6 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     @JsName("personAuthDao")
     abstract val personAuthDao: PersonAuthDao
-
-    @JsName("accessTokenDao")
-    abstract val accessTokenDao: AccessTokenDao
 
     @JsName("personGroupDao")
     abstract val personGroupDao: PersonGroupDao
@@ -2571,11 +2568,17 @@ abstract class UmAppDatabase : DoorDatabase() {
             }
         }
 
+        /**
+         * Previously, this contained the migration that added triggers for ContentJobItem. These
+         * were linked to the live function, so they were at risk of changing if the core code changed
+         * (not ideal for a migration). This section has been removed from this migration, and is
+         * now found in 101_102.
+         */
         val MIGRATION_90_91 = DoorMigrationStatementList(90, 91) { db ->
             if(db.dbType() == DoorDbType.SQLITE) {
-                DatabaseTriggers.sqliteContentJobItemTriggers.toList()
+                listOf()
             }else {
-                DatabaseTriggers.postgresContentJobItemTriggers.toList() + listOf(
+                listOf(
                     "ALTER TABLE Language ALTER COLUMN languageactive DROP DEFAULT",
                     "ALTER TABLE Language ALTER COLUMN languageActive TYPE BOOL " +
                         "USING CASE WHEN CAST(LanguageActive AS INTEGER) = 0 THEN FALSE ELSE TRUE END"
@@ -2724,7 +2727,7 @@ abstract class UmAppDatabase : DoorDatabase() {
 
 
         /***
-         *  added 16th Feb to remove special html characters from text - & > <
+         *  added 16/Feb/2022 to remove special html characters from text - & > <
          */
         val MIGRATION_97_98 = DoorMigrationStatementList(97, 98) { db ->
             if(db.dbType() == DoorDbType.POSTGRES) {
@@ -2732,6 +2735,93 @@ abstract class UmAppDatabase : DoorDatabase() {
                 listOf()
             }else {
                 listOf()
+            }
+        }
+
+        val MIGRATION_98_99 = DoorMigrationStatementList(98, 99) {db ->
+            if(db.dbType() == DoorDbType.POSTGRES) {
+                listOf("ALTER TABLE ContentJobItem ALTER COLUMN cjiFinishTime TYPE BIGINT")
+            }else {
+                listOf()
+            }
+        }
+
+        /**
+         * 27/Feb/2022 - Fixes an issue where there could be multiple ContainerEntryFile entities
+         * for the same file (particularly if downloading was done simultaneously). This could lead
+         * to problems identifying actual Zombie files, and then deleting real data.
+         */
+        val MIGRATION_99_100 = DoorMigrationStatementList(99, 100) {db ->
+            listOf("""
+  UPDATE ContainerEntry
+     SET ceCefUid = 
+         (SELECT CefOuter.cefUid
+            FROM ContainerEntryFile CefOuter
+           WHERE CefOuter.cefMd5 = 
+		         (SELECT CefInner.cefMd5
+				    FROM ContainerEntryFile CefInner
+				   WHERE CefInner.cefUid = ContainerEntry.ceCefUid)
+		ORDER BY CefOuter.cefUid
+           LIMIT 1)
+            """,
+                """
+DELETE FROM ContainerEntryFile 
+      WHERE ContainerEntryFile.cefUid != 
+            (SELECT CefInner.cefUid 
+               FROM ContainerEntryFile CefInner
+              WHERE CefInner.cefMd5 = ContainerEntryFile.cefMd5
+           ORDER BY CefInner.cefUid
+              LIMIT 1)
+            """)
+        }
+
+        val MIGRATION_100_101 = DoorMigrationStatementList(100, 101) { db ->
+            if(db.dbType() == DoorDbType.SQLITE) {
+                listOf(
+                    "CREATE VIEW IF NOT EXISTS Container_ReceiveView AS  SELECT Container.*, ContainerReplicate.* FROM Container LEFT JOIN ContainerReplicate ON ContainerReplicate.containerPk = Container.containerUid ",
+                    "DROP TRIGGER IF EXISTS container_remote_insert_ins",
+                    "CREATE TRIGGER container_remote_insert_ins INSTEAD OF INSERT ON Container_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Container(containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, cntLct, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries) SELECT NEW.containerUid, NEW.cntLocalCsn, NEW.cntMasterCsn, NEW.cntLastModBy, NEW.cntLct, NEW.fileSize, NEW.containerContentEntryUid, NEW.cntLastModified, NEW.mimeType, NEW.remarks, NEW.mobileOptimized, NEW.cntNumEntries WHERE NEW.cntLct > (SELECT COALESCE( (SELECT ContainerInt.cntLct FROM Container ContainerInt WHERE ContainerInt.containerUid = NEW.containerUid), 0)) /*psql ON CONFLICT (containerUid) DO UPDATE SET cntLocalCsn = EXCLUDED.cntLocalCsn, cntMasterCsn = EXCLUDED.cntMasterCsn, cntLastModBy = EXCLUDED.cntLastModBy, cntLct = EXCLUDED.cntLct, fileSize = EXCLUDED.fileSize, containerContentEntryUid = EXCLUDED.containerContentEntryUid, cntLastModified = EXCLUDED.cntLastModified, mimeType = EXCLUDED.mimeType, remarks = EXCLUDED.remarks, mobileOptimized = EXCLUDED.mobileOptimized, cntNumEntries = EXCLUDED.cntNumEntries */; END "
+                )
+            }else {
+                listOf(
+                    "CREATE OR REPLACE FUNCTION container_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO Container(containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, cntLct, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries) SELECT NEW.containerUid, NEW.cntLocalCsn, NEW.cntMasterCsn, NEW.cntLastModBy, NEW.cntLct, NEW.fileSize, NEW.containerContentEntryUid, NEW.cntLastModified, NEW.mimeType, NEW.remarks, NEW.mobileOptimized, NEW.cntNumEntries WHERE NEW.cntLct > (SELECT COALESCE( (SELECT ContainerInt.cntLct FROM Container ContainerInt WHERE ContainerInt.containerUid = NEW.containerUid), 0)) ON CONFLICT (containerUid) DO UPDATE SET cntLocalCsn = EXCLUDED.cntLocalCsn, cntMasterCsn = EXCLUDED.cntMasterCsn, cntLastModBy = EXCLUDED.cntLastModBy, cntLct = EXCLUDED.cntLct, fileSize = EXCLUDED.fileSize, containerContentEntryUid = EXCLUDED.containerContentEntryUid, cntLastModified = EXCLUDED.cntLastModified, mimeType = EXCLUDED.mimeType, remarks = EXCLUDED.remarks, mobileOptimized = EXCLUDED.mobileOptimized, cntNumEntries = EXCLUDED.cntNumEntries ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                )
+            }
+        }
+
+        /**
+         * 07/March/2022: Fix ContentJobItem triggers to handle canceled status
+         */
+        val MIGRATION_101_102 = DoorMigrationStatementList(101, 102) { db ->
+            if(db.dbType() == DoorDbType.SQLITE) {
+                val triggerNames = listOf("ContentJobItem_InsertTrigger",
+                    "ContentJobItem_UpdateRecursiveTotals",
+                    "ContentJobItem_UpdateRecursiveStatus",
+                    "ContentJobItem_UpdateParents",
+                    "ContentJobItem_UpdateStatusParent")
+                triggerNames.map { "DROP TRIGGER IF EXISTS $it" } + listOf(
+                    " CREATE TRIGGER ContentJobItem_InsertTrigger AFTER INSERT ON ContentJobItem BEGIN UPDATE ContentJobItem SET cjiRecursiveProgress = NEW.cjiItemProgress, cjiRecursiveTotal = NEW.cjiItemTotal WHERE ContentJobItem.cjiUid = NEW.cjiUid; END; ",
+                    " CREATE TRIGGER ContentJobItem_UpdateRecursiveTotals AFTER UPDATE ON ContentJobItem FOR EACH ROW WHEN ( NEW.cjiItemProgress != OLD.cjiItemProgress OR NEW.cjiItemTotal != OLD.cjiItemTotal) BEGIN UPDATE ContentJobItem SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiItemProgress - OLD.cjiItemProgress)), cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiItemTotal - OLD.cjiItemTotal)) WHERE ContentJobItem.cjiUid = NEW.cjiUid; END; ",
+                    " CREATE TRIGGER ContentJobItem_UpdateRecursiveStatus AFTER UPDATE ON ContentJobItem FOR EACH ROW WHEN (NEW.cjiStatus != OLD.cjiStatus) BEGIN UPDATE ContentJobItem SET cjiRecursiveStatus = (CASE WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 24) THEN 24 WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 25) THEN 25 WHEN(SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus ) = (SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 28) THEN 28 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 12) THEN 12 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE (status = 25 OR status = 23)) THEN 23 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 5) THEN 5 ELSE 4 END) WHERE contentJobItem.cjiUid = NEW.cjiUid; END; ",
+                    " CREATE TRIGGER ContentJobItem_UpdateParents AFTER UPDATE ON ContentJobItem FOR EACH ROW WHEN ( NEW.cjiParentCjiUid != 0 AND (NEW.cjiRecursiveProgress != OLD.cjiRecursiveProgress OR NEW.cjiRecursiveTotal != OLD.cjiRecursiveTotal)) BEGIN UPDATE ContentJobItem SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiRecursiveProgress - OLD.cjiRecursiveProgress)), cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiRecursiveTotal - OLD.cjiRecursiveTotal)) WHERE ContentJobItem.cjiUid = NEW.cjiParentCjiUid; END; ",
+                    " CREATE TRIGGER ContentJobItem_UpdateStatusParent AFTER UPDATE ON ContentJobItem FOR EACH ROW WHEN ( NEW.cjiParentCjiUid != 0 AND (New.cjiRecursiveStatus != OLD.cjiRecursiveStatus)) BEGIN UPDATE ContentJobItem SET cjiRecursiveStatus = (CASE WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 24) THEN 24 WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 25) THEN 25 WHEN(SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus ) = (SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 28) THEN 28 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 12) THEN 12 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE (status = 25 OR status = 23)) THEN 23 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 5) THEN 5 ELSE 4 END) WHERE ContentJobItem.cjiUid = NEW.cjiParentCjiUid; END; "
+                )
+            }else {
+                val triggerNames = listOf("contentjobiteminsert_trig",
+                    "contentjobitem_updaterecursivetotals_trig", "contentjobitem_updateparents_trig",
+                    "contentjobitem_updatestatus_trig", "contentjobitem_updatestatusparents_trig")
+                triggerNames.map { "DROP TRIGGER IF EXISTS $it ON ContentJobItem" } +  listOf(
+                    " CREATE OR REPLACE FUNCTION contentjobiteminsert_fn() RETURNS TRIGGER AS $$ BEGIN UPDATE ContentJobItem SET cjiRecursiveProgress = NEW.cjiItemProgress, cjiRecursiveTotal = NEW.cjiItemTotal WHERE ContentJobItem.cjiUid = NEW.cjiUid; RETURN NEW; END $$ LANGUAGE plpgsql ",
+                    " CREATE TRIGGER contentjobiteminsert_trig AFTER INSERT ON ContentJobItem FOR EACH ROW EXECUTE PROCEDURE contentjobiteminsert_fn() ",
+                    " CREATE OR REPLACE FUNCTION contentjobitem_updaterecursivetotals_fn() RETURNS TRIGGER AS $$ BEGIN UPDATE ContentJobItem SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiItemProgress - OLD.cjiItemProgress)), cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiItemTotal - OLD.cjiItemTotal)) WHERE (NEW.cjiItemProgress != OLD.cjiItemProgress OR NEW.cjiItemTotal != OLD.cjiItemTotal) AND ContentJobItem.cjiUid = NEW.cjiUid; RETURN NEW; END $$ LANGUAGE plpgsql ",
+                    " CREATE TRIGGER contentjobitem_updaterecursivetotals_trig AFTER UPDATE ON ContentJobItem FOR EACH ROW EXECUTE PROCEDURE contentjobitem_updaterecursivetotals_fn(); ",
+                    " CREATE OR REPLACE FUNCTION contentjobitem_updateparents_fn() RETURNS TRIGGER AS $$ BEGIN UPDATE ContentJobItem SET cjiRecursiveProgress = (cjiRecursiveProgress + (NEW.cjiRecursiveProgress - OLD.cjiRecursiveProgress)), cjiRecursiveTotal = (cjiRecursiveTotal + (NEW.cjiRecursiveTotal - OLD.cjiRecursiveTotal)) WHERE (NEW.cjiRecursiveProgress != OLD.cjiRecursiveProgress OR NEW.cjiRecursiveTotal != OLD.cjiRecursiveTotal) AND ContentJobItem.cjiUid = NEW.cjiParentCjiUid AND NEW.cjiParentCjiUid != 0; RETURN NEW; END $$ LANGUAGE plpgsql ",
+                    " CREATE TRIGGER contentjobitem_updateparents_trig AFTER UPDATE ON ContentJobItem FOR EACH ROW EXECUTE PROCEDURE contentjobitem_updateparents_fn(); ",
+                    " CREATE OR REPLACE FUNCTION contentjobitem_updatestatus_fn() RETURNS TRIGGER AS $$ BEGIN UPDATE ContentJobItem SET cjiRecursiveStatus = (CASE WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 24) THEN 24 WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 25) THEN 25 WHEN(SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus ) = (SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 28) THEN 28 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 12) THEN 12 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE (status = 25 OR status = 23)) THEN 23 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiUid) AS JobStatus WHERE status = 5) THEN 5 ELSE 4 END) WHERE contentJobItem.cjiUid = NEW.cjiUid AND NEW.cjiStatus != OLD.cjiStatus; RETURN NEW; END $$ LANGUAGE plpgsql ",
+                    " CREATE TRIGGER contentjobitem_updatestatus_trig AFTER UPDATE ON ContentJobItem FOR EACH ROW EXECUTE PROCEDURE contentjobitem_updatestatus_fn(); ",
+                    " CREATE OR REPLACE FUNCTION contentjobitem_updatestatusparents_fn() RETURNS TRIGGER AS $$ BEGIN UPDATE ContentJobItem SET cjiRecursiveStatus = (CASE WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 24) THEN 24 WHEN (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus ) = (SELECT Count(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 25) THEN 25 WHEN(SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus ) = (SELECT COUNT(*) FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 28) THEN 28 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 12) THEN 12 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE (status = 25 OR status = 23)) THEN 23 WHEN EXISTS (SELECT status FROM (SELECT cjiRecursiveStatus AS status FROM ContentJobItem WHERE cjiParentCjiUid = NEW.cjiParentCjiUid UNION SELECT cjiStatus AS status FROM ContentJobItem WHERE cjiUid = NEW.cjiParentCjiUid) AS JobStatus WHERE status = 5) THEN 5 ELSE 4 END) WHERE NEW.cjiParentCjiUid != 0 AND NEW.cjiRecursiveStatus != OLD.cjiRecursiveStatus AND ContentJobItem.cjiUid = NEW.cjiParentCjiUid; RETURN NEW; END $$ LANGUAGE plpgsql ",
+                    " CREATE TRIGGER contentjobitem_updatestatusparents_trig AFTER UPDATE ON ContentJobItem FOR EACH ROW EXECUTE PROCEDURE contentjobitem_updatestatusparents_fn(); "
+                )
             }
         }
 
@@ -2750,7 +2840,8 @@ abstract class UmAppDatabase : DoorDatabase() {
             MIGRATION_84_85, MIGRATION_85_86, MIGRATION_86_87, MIGRATION_87_88,
             MIGRATION_88_89, MIGRATION_89_90, MIGRATION_90_91,
             UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
-            MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98
+            MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98, MIGRATION_98_99,
+            MIGRATION_99_100, MIGRATION_100_101, MIGRATION_101_102
         )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->

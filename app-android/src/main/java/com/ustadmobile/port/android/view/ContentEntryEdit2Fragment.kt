@@ -26,14 +26,15 @@ import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.ext.toBundle
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.port.android.util.ext.*
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
-import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -44,8 +45,11 @@ interface ContentEntryEdit2FragmentEventHandler {
 
 }
 
-class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(),
-        ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption> {
+class ContentEntryEdit2Fragment(
+) : UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View,
+    ContentEntryEdit2FragmentEventHandler,
+    DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>
+{
 
     private var mBinding: FragmentContentEntryEdit2Binding? = null
 
@@ -77,8 +81,6 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
     override var entryMetaData: ImportedContentEntryMetaData? = null
         get() = field
         set(value) {
-            mBinding?.fileImportInfoVisibility = if (value?.uri != null)
-                View.VISIBLE else View.GONE
             field = value
         }
 
@@ -183,7 +185,6 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
             val typedVal = TypedValue()
             requireActivity().theme.resolveAttribute(if (value) R.attr.colorError
             else R.attr.colorOnSurface, typedVal, true)
-            mBinding?.fileImportInfoVisibility = if (value) View.VISIBLE else View.GONE
             mBinding?.importErrorColor = typedVal.data
             mBinding?.isImportError = value
             field = value
@@ -203,6 +204,12 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
             field = value
         }
 
+    override var showUpdateContentButton: Boolean
+        get() = mBinding?.showUpdateContentButton ?: false
+        set(value) {
+            mBinding?.showUpdateContentButton = value
+        }
+
     override fun onClickUpdateContent() {
         onSaveStateToBackStackStateHandle()
         val entryAddOption = ContentEntryAddOptionsBottomSheetFragment(mPresenter)
@@ -212,15 +219,13 @@ class ContentEntryEdit2Fragment() : UstadEditFragment<ContentEntryWithLanguage>(
     }
 
     override fun handleClickLanguage() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
+        mPresenter?.handleClickLanguage()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentContentEntryEdit2Binding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.fileImportInfoVisibility = View.GONE
             it.activityEventHandler = this
             it.compressionEnabled = true
             it.showVideoPreview = false

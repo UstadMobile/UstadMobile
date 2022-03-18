@@ -23,5 +23,9 @@ object DiTag {
 
     const val XPP_FACTORY_NSUNAWARE = 0
 
+    const val TAG_FILE_FFMPEG = 30
+
+    const val TAG_FILE_FFPROBE = 31
+
 
 }

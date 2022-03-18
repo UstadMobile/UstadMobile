@@ -20,15 +20,8 @@ import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
-interface SchoolEditFragmentEventHandler {
-    fun handleClickTimeZone()
-    fun showHolidayCalendarPicker()
-}
-
-class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), SchoolEditView,
-        SchoolEditFragmentEventHandler{
+class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), SchoolEditView{
 
     private var mBinding: FragmentSchoolEditBinding? = null
 
@@ -55,8 +48,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         val rootView: View
         mBinding = FragmentSchoolEditBinding.inflate(inflater, container,false).also {
                         rootView = it.root
-                        it.activityEventHandler = this
-                    }
+        }
 
         return rootView
     }
@@ -68,6 +60,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
         mPresenter = SchoolEditPresenter(requireContext(), arguments.toStringMap(), this,
             di, viewLifecycleOwner).withViewLifecycle()
+        mBinding?.mPresenter = mPresenter
 
         val permissionList = ScopedGrantEditPresenter.PERMISSION_LIST_MAP[School.TABLE_ID]
             ?: throw IllegalStateException("ScopedGrantEdit permission list not found!")
@@ -79,23 +72,8 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
             layoutManager = LinearLayoutManager(requireContext())
         }
 
-
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                HolidayCalendar::class.java) {
-            val holidayCalendar = it.firstOrNull() ?: return@observeResult
-            entity?.holidayCalendar = holidayCalendar
-            entity?.schoolHolidayCalendarUid = holidayCalendar.umCalendarUid
-            mBinding?.school = entity
-        }
-
-
-        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>(RESULT_TIMEZONE_KEY)
-                ?.observe(viewLifecycleOwner) {
-                    entity?.schoolTimeZone = it
-                    mBinding?.school = entity
-                }
     }
 
     override fun onDestroyView() {
@@ -134,16 +112,5 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
                 return oldItem == newItem
             }
         }
-    }
-
-    override fun handleClickTimeZone() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(String::class.java, R.id.time_zone_list_dest,
-                destinationResultKey = RESULT_TIMEZONE_KEY)
-    }
-
-    override fun showHolidayCalendarPicker() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(HolidayCalendar::class.java, R.id.holidaycalendar_list_dest)
     }
 }

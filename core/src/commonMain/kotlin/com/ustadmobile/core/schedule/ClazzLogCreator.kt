@@ -87,7 +87,8 @@ fun UmAppDatabase.createClazzLogs(fromTime: Long, toTime: Long, clazzFilter: Lon
             }
 
             logsToReschedule.forEach {
-                clazzLogDao.updateStatusByClazzLogUid(it.clazzLogUid, ClazzLog.STATUS_RESCHEDULED)
+                clazzLogDao.updateStatusByClazzLogUid(it.clazzLogUid, ClazzLog.STATUS_RESCHEDULED,
+                    systemTimeInMillis())
                 clazzLogAttendanceRecordDao.updateRescheduledClazzLogUids(it.clazzLogUid,
                         clazzLog.clazzLogUid, systemTimeInMillis())
             }

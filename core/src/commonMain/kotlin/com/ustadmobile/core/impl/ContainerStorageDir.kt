@@ -2,6 +2,9 @@ package com.ustadmobile.core.impl
 
 class ContainerStorageDir(
 
+    /**
+     * The DoorUri of the directory where content should be stored
+     */
     var dirUri: String,
 
     /**

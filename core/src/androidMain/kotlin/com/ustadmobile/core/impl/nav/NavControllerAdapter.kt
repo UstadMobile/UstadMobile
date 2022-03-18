@@ -5,13 +5,16 @@ import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 
-class NavControllerAdapter(val droidNavController: NavController,
-                           val destinationProvider: DestinationProvider) : UstadNavController{
+class NavControllerAdapter(
+    private val droidNavController: NavController,
+    private val destinationProvider: DestinationProvider
+) : UstadNavController{
 
     override val currentBackStackEntry: UstadBackStackEntry?
         get() = droidNavController.currentBackStackEntry?.let {
             val viewName = destinationProvider.lookupViewNameById(it.destination.id)
-                ?: throw IllegalArgumentException("Current backstack viewname not found for ${it.destination.id}!")
+                ?: throw IllegalArgumentException("Current backstack viewname not found for " +
+                        "${it.destination}!")
             BackStackEntryAdapter(it, viewName)
         }
 

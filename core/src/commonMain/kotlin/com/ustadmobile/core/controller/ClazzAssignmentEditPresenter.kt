@@ -10,7 +10,6 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
@@ -185,7 +184,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             repo.clazzAssignmentRollUpDao.deleteCachedInactiveContent()
 
-            onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity)
+            onFinish(ClazzAssignmentDetailView.VIEW_NAME, entity.caUid, entity, ClazzAssignment.serializer())
 
             view.loading = false
             view.fieldsEnabled = true

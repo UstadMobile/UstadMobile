@@ -1,6 +1,7 @@
 package com.ustadmobile.core.util
 
 import com.google.gson.Gson
+import com.ustadmobile.core.account.*
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
@@ -13,10 +14,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -132,6 +135,7 @@ class UstadTestRule(
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId))
             }
 
+
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope).singleton {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(
@@ -148,6 +152,13 @@ class UstadTestRule(
                         authSalt = randomString(16)
                     })
                 }
+            }
+
+            bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(EndpointScope.Default).singleton {
+                val repo: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = TAG_REPO)
+                val nodeId = (repo as? DoorDatabaseRepository)?.config?.nodeId
+                    ?: throw IllegalStateException("Could not open repo for endpoint ${context.url}")
+                ClientId(nodeId.toInt())
             }
 
             bind<NetworkManagerBle>() with singleton {

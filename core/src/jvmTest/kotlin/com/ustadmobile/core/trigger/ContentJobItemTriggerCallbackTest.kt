@@ -223,5 +223,23 @@ class ContentJobItemTriggerCallbackTest {
 
 
 
+    @Test
+    fun givenAllChildItemsCanceled_whenRecursiveStatusUpdated_thenStatusShouldBeCanceled(){
+
+        runBlocking {
+            db.contentJobItemDao.updateItemStatus(parentJobItem.cjiUid, JobStatus.CANCELED)
+            db.contentJobItemDao.updateItemStatus(childJobItem.cjiUid, JobStatus.CANCELED)
+            val jobItem = db.contentJobItemDao.findByUidAsync(parentJobItem.cjiUid)!!
+            Assert.assertEquals("parent job status is canceled", JobStatus.CANCELED,
+                jobItem.cjiRecursiveStatus)
+        }
+
+    }
+
+
+    @Test
+    fun dumpSqlStatements() {
+        ContentJobItemTriggersCallback.dumpSqlStatements()
+    }
 
 }

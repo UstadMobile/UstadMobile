@@ -5,6 +5,7 @@ import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView.Companion.ARG_NEW_CLAZZLOG
 import com.ustadmobile.core.view.ClazzLogEditView
@@ -239,7 +240,8 @@ class ClazzLogEditAttendancePresenter(context: Any,
             if(arguments[ARG_NEW_CLAZZLOG] != null) {
                 systemImpl.popBack(ClazzLogEditView.VIEW_NAME, true, context)
             }else {
-                view.finishWithResult(listOf(entity))
+                finishWithResult(safeStringify(di,
+                    ListSerializer(ClazzLog.serializer()), listOf(entity)))
             }
 
         }

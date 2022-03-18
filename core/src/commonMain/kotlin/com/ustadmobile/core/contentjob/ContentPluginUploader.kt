@@ -15,6 +15,7 @@ fun interface ContentPluginUploader {
             contentJobItem: ContentJobItem,
             progress: NetworkProgressListener?,
             httpClient: HttpClient,
-            endpoint: Endpoint
+            endpoint: Endpoint,
+            processContext: ContentJobProcessContext,
     ): Int
 }

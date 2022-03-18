@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import com.toughra.ustadmobile.databinding.FragmentSettingsBinding
 import com.ustadmobile.core.controller.SettingsPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SettingsView
 
@@ -39,7 +40,7 @@ class SettingsFragment : UstadBaseFragment(), SettingsView {
             mBinding?.langListVisible = value
         }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super.onCreateView(inflater, container, savedInstanceState)
         val view:View
         mBinding = FragmentSettingsBinding.inflate(inflater, container, false).also {
@@ -48,7 +49,7 @@ class SettingsFragment : UstadBaseFragment(), SettingsView {
 
         mPresenter = SettingsPresenter(requireContext(), arguments.toStringMap(),
                 this, di).withViewLifecycle()
-        mPresenter?.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState))
+        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         mBinding?.presenter = mPresenter
 

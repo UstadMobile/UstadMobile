@@ -5,6 +5,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Site
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -39,11 +40,13 @@ class AuthManagerTest {
 
         repo = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
 
-
         runBlocking {
             repo.insertPersonAndGroup(Person().apply {
                 personUid = testUserUid
                 username = "testuser"
+            })
+            repo.siteDao.insert(Site().apply {
+                siteName = "Site"
             })
 
         }

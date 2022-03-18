@@ -410,7 +410,7 @@ class PersonAccountEditFragmentTest : TestCase(){
                 val personInDb = dbRule.db.personDao.findByUidLive(person.personUid).waitUntilWithFragmentScenario(fragmentScenario) {
                     it?.username != null
                 }
-                assertEquals("Account was created successfully", "dummyuser" , personInDb?.username)
+                assertEquals("Account was created successfully", "dummyUser" , personInDb?.username)
 
             }
 

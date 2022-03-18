@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.regex.Pattern
 
-
 class WebChunkWebViewClient(private val containerUid: Long, private val db: UmAppDatabase,
                             mPresenter: WebChunkPresenter?) : WebViewClient() {
 
@@ -36,7 +35,7 @@ class WebChunkWebViewClient(private val containerUid: Long, private val db: UmAp
             this.presenter = mPresenter
 
             val indexBytes = db.containerEntryDao.openEntryInputStream(containerUid,
-                    "index.json")?.readBytes() ?: throw IOException("Could not find index.json")
+                "index.json")?.readBytes() ?: throw IOException("Could not find index.json")
             val indexLog = Gson().fromJson(String(indexBytes), IndexLog::class.java)
             val indexList = indexLog.entries
             val firstUrlToOpen = indexList!![0]
@@ -147,7 +146,7 @@ class WebChunkWebViewClient(private val containerUid: Long, private val db: UmAp
         }
         try {
             val entry = db.containerEntryDao.findByPathInContainer(containerUid, log.path!!)
-                    ?: return WebResourceResponse("", "utf-8", 404, "Not Found", null, null)
+                ?: return WebResourceResponse("", "utf-8", 404, "Not Found", null, null)
 
 
             var mutMap = mutableMapOf<String, String>()
@@ -161,11 +160,11 @@ class WebChunkWebViewClient(private val containerUid: Long, private val db: UmAp
 
 
             var data = entry.containerEntryFile?.openInputStream() ?:
-                throw IOException("${entry.cePath} has no containerentryfile")
+            throw IOException("${entry.cePath} has no containerentryfile")
 
             // if not range header, load the file as normal
             var rangeHeader: String? = request.requestHeaders["Range"]
-                    ?: return WebResourceResponse(log.mimeType, "utf-8", 200, "OK", mutMap, data)
+                ?: return WebResourceResponse(log.mimeType, "utf-8", 200, "OK", mutMap, data)
 
             val totalLength = entry.containerEntryFile!!.ceTotalSize
             val isHEADRequest = request.method == "HEAD"
@@ -182,17 +181,17 @@ class WebChunkWebViewClient(private val containerUid: Long, private val db: UmAp
 
                 range.responseHeaders.forEach { mutMap[it.key] = it.value }
                 return WebResourceResponse(log.mimeType, "utf-8", HttpURLConnection.HTTP_PARTIAL,
-                        "Partial Content", mutMap, if(isHEADRequest) null else data)
+                    "Partial Content", mutMap, if(isHEADRequest) null else data)
 
             } else if (range?.statusCode == 416) {
                 return WebResourceResponse("text/plain", "utf-8",416,
-                        if (isHEADRequest) "" else "Range request not satisfiable", null, null)
+                    if (isHEADRequest) "" else "Range request not satisfiable", null, null)
             } else {
 
                 mutMap["Content-Length"] = totalLength.toString()
                 mutMap["Connection"] = "close"
                 return WebResourceResponse(log.mimeType, "utf-8", 200,
-                        "OK", mutMap, data)
+                    "OK", mutMap, data)
             }
         } catch (e: Exception) {
             System.err.println("did not find entry in zip for url " + log.url!!)

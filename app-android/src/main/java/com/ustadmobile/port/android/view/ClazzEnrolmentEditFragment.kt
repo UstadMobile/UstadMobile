@@ -2,7 +2,9 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.text.format.DateFormat
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
@@ -10,25 +12,19 @@ import com.toughra.ustadmobile.databinding.FragmentClazzEnrolmentBinding
 import com.ustadmobile.core.controller.ClazzEnrolmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
-import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
-import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import java.util.*
 
 
-interface ClazzEnrolmentFragmentEventHandler {
-    fun handleReasonLeavingClicked()
-}
 
 class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingReason>(),
-        ClazzEnrolmentEditView, ClazzEnrolmentFragmentEventHandler,
+        ClazzEnrolmentEditView,
         DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>  {
 
     private var mBinding: FragmentClazzEnrolmentBinding? = null
@@ -42,7 +38,7 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
         val rootView: View
         mBinding = FragmentClazzEnrolmentBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.activityEventHandler = this
+            it.presenter = mPresenter
             it.statusSelectorListener = this
         }
 
@@ -59,19 +55,6 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
 
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                LeavingReason::class.java) {
-            val reason = it.firstOrNull() ?: return@observeResult
-            mBinding?.clazzEnrolmentEditReasonText?.setText(reason.leavingReasonTitle)
-            entity?.clazzEnrolmentLeavingReasonUid = reason.leavingReasonUid
-            entity?.leavingReason = reason
-            mBinding?.clazzEnrolment = entity
-        }
-    }
-
-    override fun handleReasonLeavingClicked() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(LeavingReason::class.java, R.id.leaving_reason_list)
     }
 
     override fun onDestroyView() {
