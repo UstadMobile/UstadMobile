@@ -67,7 +67,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
     }
 
     private val courseBlockObserver = Observer<List<CourseBlockWithEntity>?> {
-        t -> courseBlockRecyclerAdapter?.submitList(t)
+        t -> courseBlockRecyclerAdapter?.dataSet = t
     }
 
     override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null

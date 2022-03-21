@@ -610,22 +610,28 @@ class ClazzEdit2Presenter(context: Any,
 
         val fromLocation = currentList[fromPosition]
         currentList.removeAt(fromPosition)
-        if (toPosition < fromPosition) {
-            currentList.add(toPosition + 1, fromLocation)
-        } else {
-            currentList.add(toPosition - 1, fromLocation)
-        }
+        currentList.add(toPosition, fromLocation)
 
-        //if module moves, move all children to new index
-        val movedBlock = currentList[fromPosition]
+        val movedBlock = currentList[toPosition]
         if(movedBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE){
+            //if module moves, move all children to new index
             val childBlocks = currentList.filter { it.cbModuleParentBlockUid == movedBlock.cbUid }
+            currentList.removeAll(childBlocks)
+            val index = currentList.indexOf(movedBlock) + 1
+            currentList.addAll(index, childBlocks)
 
+        }else{
+            //if child moves out of module, update child to have parentBlock = 0 or find new parent
+            movedBlock.cbModuleParentBlockUid = 0
+            for(n in toPosition downTo 0){
+                if(currentList[n].cbType == CourseBlock.BLOCK_MODULE_TYPE){
+                    movedBlock.cbModuleParentBlockUid = currentList[n].cbUid
+                    break
+                }
+            }
+            currentList[toPosition] = movedBlock
         }
-
-        //if child moves out of module, update child to have parentBlock = 0
-
-
+        
         // finally update the list with new index values
         currentList.forEachIndexed{ index , item ->
             item.cbIndex = index

@@ -61,7 +61,7 @@
         <!-- Line 1-->
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-            android:id="@+id/item_schedule_line1_text"
+            android:id="@+id/item_course_block_line1_text"
             android:text="@{block.cbTitle}"
             android:onClick="@{() -> oneToManyJoinListener.onClickEdit(block)}"
             tools:text="Module"
