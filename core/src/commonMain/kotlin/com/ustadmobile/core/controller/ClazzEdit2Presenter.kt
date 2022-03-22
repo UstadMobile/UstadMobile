@@ -467,16 +467,20 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     fun handleClickAddContent(){
+        val args = mutableMapOf(
+            ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
+                ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
+            UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+            ContentEntryList2View.ARG_SELECT_FOLDER_VISIBLE to false.toString()
+        )
+
         navigateForResult(NavigateForResultOptions(
             this, null,
             ContentEntryList2View.VIEW_NAME,
             ContentEntry::class,
             ContentEntry.serializer(),
             SAVEDSTATE_KEY_CONTENT,
-            arguments = mutableMapOf(ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
-                    ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
-                UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString(),
-                ContentEntryList2View.ARG_SELECT_FOLDER_VISIBLE to false.toString()))
+            arguments = args)
         )
     }
 
@@ -620,7 +624,7 @@ class ClazzEdit2Presenter(context: Any,
             val index = currentList.indexOf(movedBlock) + 1
             currentList.addAll(index, childBlocks)
 
-        }else{
+        }else if(movedBlock.cbIndentLevel != 0){
             //if child moves out of module, update child to have parentBlock = 0 or find new parent
             movedBlock.cbModuleParentBlockUid = 0
             for(n in toPosition downTo 0){

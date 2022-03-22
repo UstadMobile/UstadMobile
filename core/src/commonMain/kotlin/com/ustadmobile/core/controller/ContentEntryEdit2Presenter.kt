@@ -28,9 +28,6 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
-import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
-import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
@@ -229,7 +226,9 @@ class ContentEntryEdit2Presenter(
                 entity.licenseName = view.licenceOptions?.firstOrNull {
                     it.code == entity.licenseType
                 }.toString()
+
                 val isNewEntry = entity.contentEntryUid == 0L
+
                 if (entity.contentEntryUid == 0L) {
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
 
@@ -256,8 +255,6 @@ class ContentEntryEdit2Presenter(
                 val videoDimensions = view.videoDimensions
                 val conversionParams = mapOf("compress" to view.compressionEnabled.toString(),
                         "dimensions" to "${videoDimensions.first}x${videoDimensions.second}")
-
-                val popUpTo = arguments[ARG_POPUPTO_ON_FINISH] ?: CURRENT_DEST
 
                 if (metaData != null && fromUri != null) {
 
@@ -290,13 +287,11 @@ class ContentEntryEdit2Presenter(
                         view.loading = false
                         view.fieldsEnabled = true
 
-                        if(arguments.containsKey(ARG_RESULT_DEST_KEY)){
-                            finishWithResult(safeStringify(di,
-                                ListSerializer(ContentEntry.serializer()),
-                                listOf(entity)))
-                        }else{
-                            systemImpl.popBack(popUpTo, popUpInclusive = true, context)
-                        }
+
+                        finishWithResult(safeStringify(di,
+                            ListSerializer(ContentEntry.serializer()),
+                            listOf(entity))
+                        )
 
                         return@launch
 
@@ -329,13 +324,12 @@ class ContentEntryEdit2Presenter(
                         view.loading = false
                         view.fieldsEnabled = true
 
-                        if(arguments.containsKey(ARG_RESULT_DEST_KEY)){
-                            finishWithResult(safeStringify(di,
-                                ListSerializer(ContentEntry.serializer()),
-                                listOf(entity)))
-                        }else{
-                            systemImpl.popBack(popUpTo, popUpInclusive = true, context)
-                        }
+
+                        finishWithResult(safeStringify(di,
+                            ListSerializer(ContentEntry.serializer()),
+                            listOf(entity))
+                        )
+
 
                         return@launch
 
@@ -353,13 +347,12 @@ class ContentEntryEdit2Presenter(
                 view.loading = false
                 view.fieldsEnabled = true
 
-                if(arguments.containsKey(ARG_RESULT_DEST_KEY)){
-                    finishWithResult(safeStringify(di,
-                        ListSerializer(ContentEntry.serializer()),
-                        listOf(entity)))
-                }else{
-                    systemImpl.popBack(popUpTo, popUpInclusive = true, context)
-                }
+
+                finishWithResult(safeStringify(di,
+                    ListSerializer(ContentEntry.serializer()),
+                    listOf(entity))
+                )
+
             } else {
                 view.titleErrorEnabled = entity.title == null
                 view.fileImportErrorVisible = entity.title != null && entity.leaf

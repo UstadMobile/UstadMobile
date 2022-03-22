@@ -298,7 +298,13 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_LEAF to false.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(ContentEntryEdit2View.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            ContentEntryEdit2View.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickImportFile() {
@@ -309,7 +315,13 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(SelectFileView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectFileView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickImportLink() {
@@ -318,7 +330,13 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(ContentEntryImportLinkView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            ContentEntryImportLinkView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickImportGallery() {
@@ -328,7 +346,13 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(SelectFileView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectFileView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickAddFolder() {
@@ -337,7 +361,13 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(SelectFolderView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectFolderView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     fun handleMoveWithSelectedEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {

@@ -1,26 +1,25 @@
 package com.ustadmobile.port.android.view
 
-import SelectFolderView
 import android.net.Uri
 import android.os.Bundle
-import android.provider.DocumentsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.documentfile.provider.DocumentFile
 import androidx.navigation.fragment.findNavController
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 import org.kodein.di.instance
-import org.w3c.dom.DocumentFragment
 
 class SelectFolderFragment(private val registry: ActivityResultRegistry? = null) : UstadBaseFragment() {
 
@@ -45,11 +44,14 @@ class SelectFolderFragment(private val registry: ActivityResultRegistry? = null)
                     val map = arguments.toStringMap()
                     val args = mutableMapOf<String, String>()
                     args[ARG_URI] = it.toString()
-                    args[UstadView.ARG_POPUPTO_ON_FINISH] = SelectFolderView.VIEW_NAME
                     args.putFromOtherMapIfPresent(map, UstadView.ARG_LEAF)
                     args.putFromOtherMapIfPresent(map, UstadView.ARG_PARENT_ENTRY_UID)
-                    systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
-                            args, requireContext())
+
+                    navigateToEditEntity(
+                        null, R.id.content_entry_edit_dest,
+                        ContentEntry::class.java,
+                        argBundle = args.toBundle()
+                    )
                 }
             }
         }
