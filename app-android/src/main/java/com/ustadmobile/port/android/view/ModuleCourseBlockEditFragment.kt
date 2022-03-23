@@ -5,30 +5,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentCourseBlockEditBinding
-import com.ustadmobile.core.controller.CourseBlockEditPresenter
+import com.toughra.ustadmobile.databinding.FragmentModuleCourseBlockEditBinding
+import com.ustadmobile.core.controller.ModuleCourseBlockEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.CourseBlockEditView
+import com.ustadmobile.core.view.ModuleCourseBlockEditView
 import com.ustadmobile.lib.db.entities.CourseBlock
 
-class CourseBlockEditFragment: UstadEditFragment<CourseBlock>(), CourseBlockEditView {
+class ModuleCourseBlockEditFragment: UstadEditFragment<CourseBlock>(), ModuleCourseBlockEditView {
 
-    private var mBinding: FragmentCourseBlockEditBinding? = null
+    private var mBinding: FragmentModuleCourseBlockEditBinding? = null
 
-    private var mPresenter: CourseBlockEditPresenter? = null
+    private var mPresenter: ModuleCourseBlockEditPresenter? = null
 
     override val mEditPresenter: UstadEditPresenter<*, CourseBlock>?
         get() = mPresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentCourseBlockEditBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentModuleCourseBlockEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
         }
 
-        mPresenter = CourseBlockEditPresenter(requireContext(), arguments.toStringMap(), this,
+        mPresenter = ModuleCourseBlockEditPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
