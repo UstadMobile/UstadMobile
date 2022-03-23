@@ -1576,6 +1576,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="penalty_label">If completed after deadline but before end of grace period</string>
     <string name="submissions">Submissions</string>
     <string name="add_text">Add text</string>
+    <string name="edit_text">Edit text</string>
 
 
     <!--

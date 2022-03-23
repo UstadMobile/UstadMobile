@@ -2,7 +2,7 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.CourseBlock
 
-interface CourseBlockEditView: UstadEditView<CourseBlock> {
+interface TextCourseBlockEditView: UstadEditView<CourseBlock> {
 
     var blockTitleError: String?
 
@@ -13,7 +13,9 @@ interface CourseBlockEditView: UstadEditView<CourseBlock> {
 
     companion object {
 
-        const val VIEW_NAME = "CourseBlockEdit"
+        const val VIEW_NAME = "TextCourseBlockEdit"
+
+        const val EDIT_ENABLED = "editEnabled"
     }
 
 }

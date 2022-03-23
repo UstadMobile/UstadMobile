@@ -14,7 +14,6 @@ import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.CourseBlockEditView.Companion.VIEW_NAME
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
 import com.ustadmobile.door.DoorDatabaseRepository
@@ -212,7 +211,35 @@ class ClazzEdit2Presenter(context: Any,
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
             UmPlatformUtil.run {
-                requireSavedStateHandle()[ARG_SAVEDSTATE_BLOCK] = null
+                requireSavedStateHandle()[ARG_SAVEDSTATE_MODULE] = null
+            }
+        }
+        observeSavedStateResult(ARG_SAVEDSTATE_TEXT,
+            ListSerializer(CourseBlock.serializer()), CourseBlock::class){
+            val textBlock = it.firstOrNull() ?: return@observeSavedStateResult
+
+            val foundBlock: CourseBlockWithEntity = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.find {
+                    block -> block.cbUid == textBlock.cbUid
+            } ?: CourseBlockWithEntity().apply {
+                cbClazzUid = textBlock.cbClazzUid
+                cbTableId = CourseBlock.TABLE_ID
+                cbTableUid = textBlock.cbUid
+                cbTitle = textBlock.cbTitle
+                cbType = CourseBlock.BLOCK_TEXT_TYPE
+                cbDescription = textBlock.cbDescription
+                cbStartDate = textBlock.cbStartDate
+                cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
+                cbUid = textBlock.cbUid
+            }
+
+            foundBlock.cbTitle = textBlock.cbTitle
+            foundBlock.cbDescription = textBlock.cbDescription
+            foundBlock.cbStartDate = textBlock.cbStartDate
+
+            courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
+
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[ARG_SAVEDSTATE_TEXT] = null
             }
         }
     }
@@ -491,10 +518,24 @@ class ClazzEdit2Presenter(context: Any,
         navigateForResult(NavigateForResultOptions(
             this,
             currentEntityValue = null,
-            destinationViewName = VIEW_NAME,
+            destinationViewName = ModuleCourseBlockEditView.VIEW_NAME,
             entityClass = CourseBlock::class,
             serializationStrategy = CourseBlock.serializer(),
             destinationResultKey = ARG_SAVEDSTATE_MODULE,
+            arguments = args))
+    }
+
+    fun handleClickAddText(){
+        val args = mutableMapOf<String, String>()
+        args[UstadView.ARG_CLAZZUID] = entity?.clazzUid.toString()
+
+        navigateForResult(NavigateForResultOptions(
+            this,
+            currentEntityValue = null,
+            destinationViewName = TextCourseBlockEditView.VIEW_NAME,
+            entityClass = CourseBlock::class,
+            serializationStrategy = CourseBlock.serializer(),
+            destinationResultKey = ARG_SAVEDSTATE_TEXT,
             arguments = args))
     }
 
@@ -505,6 +546,8 @@ class ClazzEdit2Presenter(context: Any,
         const val ARG_SAVEDSTATE_BLOCK = "courseBlocks"
 
         const val ARG_SAVEDSTATE_MODULE = "courseModule"
+
+        const val ARG_SAVEDSTATE_TEXT = "courseText"
 
         const val SAVEDSTATE_KEY_SCHOOL = "School"
 
@@ -557,10 +600,24 @@ class ClazzEdit2Presenter(context: Any,
                 NavigateForResultOptions(
                     this,
                     currentEntityValue = joinedEntity,
-                    destinationViewName = VIEW_NAME,
+                    destinationViewName = ModuleCourseBlockEditView.VIEW_NAME,
                     entityClass = CourseBlock::class,
                     serializationStrategy = CourseBlock.serializer(),
                     destinationResultKey = ARG_SAVEDSTATE_MODULE,
+                    arguments = args)
+            }
+            CourseBlock.BLOCK_TEXT_TYPE -> {
+                val args = mutableMapOf<String, String>()
+                args[UstadView.ARG_CLAZZUID] = joinedEntity.cbClazzUid.toString()
+                args[UstadView.ARG_ENTITY_UID] = joinedEntity.cbUid.toString()
+
+                NavigateForResultOptions(
+                    this,
+                    currentEntityValue = joinedEntity,
+                    destinationViewName = TextCourseBlockEditView.VIEW_NAME,
+                    entityClass = CourseBlock::class,
+                    serializationStrategy = CourseBlock.serializer(),
+                    destinationResultKey = ARG_SAVEDSTATE_TEXT,
                     arguments = args)
             }
             else -> return

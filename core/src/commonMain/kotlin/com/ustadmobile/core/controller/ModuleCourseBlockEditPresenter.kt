@@ -9,7 +9,7 @@ import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
-import com.ustadmobile.core.view.CourseBlockEditView
+import com.ustadmobile.core.view.ModuleCourseBlockEditView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -21,9 +21,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
-class CourseBlockEditPresenter(context: Any, args: Map<String, String>, view: CourseBlockEditView,
-                            di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadEditPresenter<CourseBlockEditView, CourseBlock>(context, args, view, di, lifecycleOwner) {
+class ModuleCourseBlockEditPresenter(context: Any, args: Map<String, String>, view: ModuleCourseBlockEditView,
+                                     di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<ModuleCourseBlockEditView, CourseBlock>(context, args, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
