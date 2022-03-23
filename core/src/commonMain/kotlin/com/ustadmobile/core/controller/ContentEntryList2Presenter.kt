@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import SelectFolderView
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.generated.locale.MessageID

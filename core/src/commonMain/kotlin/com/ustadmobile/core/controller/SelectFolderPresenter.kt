@@ -1,10 +1,10 @@
 package com.ustadmobile.core.controller
 
-import SelectFolderView
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.SelectFolderView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.serialization.builtins.ListSerializer

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import SelectFolderView
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,8 +11,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.ustadmobile.core.controller.SelectFolderPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.SelectFolderView
 
-class SelectFolderFragment(private val registry: ActivityResultRegistry? = null) : UstadBaseFragment(), SelectFolderView {
+class SelectFolderFragment(private val registry: ActivityResultRegistry? = null) : UstadBaseFragment(),
+    SelectFolderView {
 
     private var activityResultLauncher: ActivityResultLauncher<Uri>? = null
 

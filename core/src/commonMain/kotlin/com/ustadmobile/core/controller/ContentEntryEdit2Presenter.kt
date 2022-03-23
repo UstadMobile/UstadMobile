@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import SelectFolderView
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.ContentPluginManager
@@ -18,12 +17,9 @@ import com.ustadmobile.core.util.ext.encodeStringMapToString
 import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
-import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
-import com.ustadmobile.core.view.ContentEntryImportLinkView
-import com.ustadmobile.core.view.LanguageListView
-import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
