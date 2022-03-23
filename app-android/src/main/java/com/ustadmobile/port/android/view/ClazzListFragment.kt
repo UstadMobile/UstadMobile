@@ -19,7 +19,6 @@ import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import org.kodein.di.direct

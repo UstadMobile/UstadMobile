@@ -41,13 +41,14 @@
     <androidx.core.widget.NestedScrollView
         android:id="@+id/fragment_leaving_reason_edit_edit_scroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fragment_course_block_edit_edit_clx"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/course_block_edit_title_textinput"
@@ -128,6 +129,8 @@
                 android:imeOptions="flagNoExtractUi"
                 android:padding="@dimen/dimen_16dp"
                 android:scrollbars="vertical"
+                android:overScrollMode="always"
+                android:scrollbarStyle="insideInset"
                 app:historyEnable="true"
                 app:historySize="10"
                 app:textColor="?colorOnBackground"

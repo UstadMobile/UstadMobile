@@ -14,8 +14,6 @@ interface TextCourseBlockEditView: UstadEditView<CourseBlock> {
     companion object {
 
         const val VIEW_NAME = "TextCourseBlockEdit"
-
-        const val EDIT_ENABLED = "editEnabled"
     }
 
 }

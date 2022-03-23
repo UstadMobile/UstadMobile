@@ -12,7 +12,6 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.TextCourseBlockEditView
-import com.ustadmobile.core.view.TextCourseBlockEditView.Companion.EDIT_ENABLED
 import com.ustadmobile.lib.db.entities.CourseBlock
 import org.wordpress.aztec.Aztec
 import org.wordpress.aztec.ITextFormat
@@ -39,7 +38,6 @@ class TextCourseBlockEditFragment: UstadEditFragment<CourseBlock>(), TextCourseB
                 it.visualEditor.setCalypsoMode(false)
                 it.addPlugin(CssUnderlinePlugin())
                 it.initSourceEditorHistory()
-                it.visualEditor.isEnabled = (arguments?.get(EDIT_ENABLED).toString().toBoolean())
             }
         }
 

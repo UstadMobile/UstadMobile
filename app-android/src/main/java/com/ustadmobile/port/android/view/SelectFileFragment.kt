@@ -7,63 +7,52 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.navigation.fragment.findNavController
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
-import com.ustadmobile.core.util.ext.toBundle
+import com.ustadmobile.core.controller.SelectFilePresenterCommon
+import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
-import com.ustadmobile.core.view.SelectFileView.Companion.ARG_MIMETYPE_SELECTED
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
-import org.kodein.di.instance
+import com.ustadmobile.core.view.SelectFileView
 
-class SelectFileFragment(private val registry: ActivityResultRegistry? = null) : UstadBaseFragment() {
+class SelectFileFragment(private val registry: ActivityResultRegistry? = null) : UstadBaseFragment(), SelectFileView {
 
-    var activityResultLauncher: ActivityResultLauncher<Array<String>>? = null
+    private var activityResultLauncher: ActivityResultLauncher<Array<String>>? = null
 
-    val systemImpl: UstadMobileSystemImpl by instance()
+    private var mPresenter: SelectFilePresenterCommon? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
 
         activityResultLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument(),
-                registry ?: requireActivity().activityResultRegistry) {
+            registry ?: requireActivity().activityResultRegistry) {
 
-            when {
-                it == null -> {
-                    findNavController().popBackStack()
-                }
-                (arguments?.get(UstadView.ARG_RESULT_DEST_VIEWNAME) == ContentEntryEdit2View.VIEW_NAME) -> {
-                    saveResultToBackStackSavedStateHandle(listOf(it.toString()))
-                }
-                else -> {
-                    val map = arguments.toStringMap()
-                    val args = mutableMapOf<String, String>()
-                    args[ARG_URI] = it.toString()
-                    args.putFromOtherMapIfPresent(map, UstadView.ARG_LEAF)
-                    args.putFromOtherMapIfPresent(map, UstadView.ARG_PARENT_ENTRY_UID)
-
-                    navigateToEditEntity(
-                        null, R.id.content_entry_edit_dest,
-                        ContentEntry::class.java,
-                        argBundle = args.toBundle()
-                    )
-                }
-            }
+            mPresenter?.handleUriSelected(it?.toString())
         }
 
+        mPresenter = SelectFilePresenterCommon(requireContext(),
+            arguments.toStringMap(),
+            this, di).withViewLifecycle()
+        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+
+        return View(requireContext())
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val mimeTypeList = arguments?.get(ARG_MIMETYPE_SELECTED)?.toString()?.split(";")?.toTypedArray()
-        activityResultLauncher?.launch(mimeTypeList)
-
-        return null
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter = null
+        activityResultLauncher = null
     }
+
+    override var acceptedMimeTypes: List<String> = listOf()
+        set(value){
+            field = value
+            activityResultLauncher?.launch(value.toTypedArray())
+        }
+
+    override var noFileSelectedError: String?= null
+    override var unSupportedFileError: String? = null
+    override var fieldsEnabled: Boolean = false
+    override var entity: Any? = null
 
 }
