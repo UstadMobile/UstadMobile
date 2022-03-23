@@ -612,6 +612,11 @@ class ClazzEdit2Presenter(context: Any,
     override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
         val currentList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: mutableListOf()
 
+        if(currentList[fromPosition].cbModuleParentBlockUid != currentList[toPosition].cbModuleParentBlockUid){
+            courseBlockOneToManyJoinEditHelper.liveList.sendValue(currentList.toList())
+            return false
+        }
+
         val fromLocation = currentList[fromPosition]
         currentList.removeAt(fromPosition)
         currentList.add(toPosition, fromLocation)
