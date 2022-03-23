@@ -283,8 +283,16 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
 
     fun handleClickEditFolder() {
-        systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to parentEntryUid.toString()), context)
+        val args = mutableMapOf(
+            UstadView.ARG_ENTITY_UID to parentEntryUid.toString())
+
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null, ContentEntryEdit2View.VIEW_NAME,
+                ContentEntry::class,
+                ContentEntry.serializer(),
+                arguments = args)
+        )
     }
 
     fun handleClickShowHiddenItems() {
