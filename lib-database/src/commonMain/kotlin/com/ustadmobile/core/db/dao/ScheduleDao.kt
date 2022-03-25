@@ -79,14 +79,21 @@ abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
     abstract suspend fun updateAsync(entity: Schedule) : Int
 
     @Transaction
-    override suspend fun deactivateByUids(uidList: List<Long>) {
-        uidList.forEach { updateScheduleActivated(it, false) }
+    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
+        uidList.forEach { updateScheduleActivated(it, false, changeTime) }
     }
 
-    @Query("""UPDATE Schedule SET scheduleActive = :active,
-            scheduleLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
-            WHERE scheduleUid = :scheduleUid""")
-    abstract suspend fun updateScheduleActivated(scheduleUid: Long, active: Boolean)
+    @Query("""
+        UPDATE Schedule 
+           SET scheduleActive = :active,
+               scheduleLastChangedTime = :changeTime
+         WHERE scheduleUid = :scheduleUid
+            """)
+    abstract suspend fun updateScheduleActivated(
+        scheduleUid: Long,
+        active: Boolean,
+        changeTime: Long
+    )
 
     @Query("SELECT * FROM Schedule WHERE scheduleUid = :uid")
     abstract fun findByUid(uid: Long): Schedule?

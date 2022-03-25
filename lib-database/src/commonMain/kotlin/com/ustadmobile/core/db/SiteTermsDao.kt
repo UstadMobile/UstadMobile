@@ -90,18 +90,18 @@ abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
 
 
     @Transaction
-    override suspend fun deactivateByUids(uidList: List<Long>) {
+    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
         uidList.forEach {
-            updateActiveByUid(it, false)
+            updateActiveByUid(it, false, changeTime)
         }
     }
 
     @Query("""
         UPDATE SiteTerms 
-        SET sTermsActive = :active,
-        sTermsLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL}
-        WHERE sTermsUid = :sTermsUid
+           SET sTermsActive = :active,
+               sTermsLct = :changeTime
+         WHERE sTermsUid = :sTermsUid
         """)
-    abstract suspend fun updateActiveByUid(sTermsUid: Long, active: Boolean)
+    abstract suspend fun updateActiveByUid(sTermsUid: Long, active: Boolean, changeTime: Long)
 
 }

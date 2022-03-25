@@ -160,13 +160,13 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
     abstract suspend fun updateInActiveByClazzAssignmentContentJoinUid(contentUid: Long, active : Boolean,
                                                                        clazzAssignmentUid: Long)
 
-    suspend fun deactivateByUids(uidList: List<Long>, clazzAssignmentUid: Long) {
+    suspend fun deactivateByUids(uidList: List<Long>, clazzAssignmentUid: Long, changeTime: Long) {
         uidList.forEach {
             updateInActiveByClazzAssignmentContentJoinUid(it, false, clazzAssignmentUid)
         }
     }
 
-    override suspend fun deactivateByUids(uidList: List<Long>) {
+    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
         // not used
     }
 
