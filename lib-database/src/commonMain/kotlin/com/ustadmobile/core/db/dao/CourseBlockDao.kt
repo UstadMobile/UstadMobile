@@ -244,7 +244,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
 
     override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
         uidList.forEach {
-            updateActiveByUid(it, true, changeTime)
+            updateActiveByUid(it, false, changeTime)
         }
     }
 

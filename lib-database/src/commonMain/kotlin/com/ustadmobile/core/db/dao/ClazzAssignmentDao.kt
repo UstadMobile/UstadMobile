@@ -84,8 +84,17 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
     abstract suspend fun getAllAssignmentsByClazzUidAsync(clazzUid: Long): List<ClazzAssignment>
 
 
-    override suspend fun deactivateByUids(uidList: List<Long>){
+    @Query("""
+        UPDATE ClazzAssignment 
+           SET caActive = :active, 
+               caLct = :changeTime
+         WHERE caUid = :cbUid""")
+    abstract fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
+    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
+        uidList.forEach {
+            updateActiveByUid(it, false, changeTime)
+        }
     }
 
     @Query("""

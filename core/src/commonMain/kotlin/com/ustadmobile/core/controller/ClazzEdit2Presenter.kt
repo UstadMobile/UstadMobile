@@ -22,6 +22,7 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_PARENT_GROUP
@@ -427,7 +428,7 @@ class ClazzEdit2Presenter(context: Any,
                         courseBlockOneToManyJoinEditHelper.entitiesToUpdate
                                 .mapNotNull { it.assignment })
                 txDb.clazzAssignmentDao.deactivateByUids(
-                        courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate)
+                        courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate, systemTimeInMillis())
 
                 assignmentList.forEach { assignment ->
                     val clazzAssignmentObjectId = UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
