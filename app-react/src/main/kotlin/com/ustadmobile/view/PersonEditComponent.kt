@@ -117,7 +117,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
             }
         }
 
-    private var passwordLabel = FieldLabel(getString(MessageID.password), id = "password-og")
+    private var passwordLabel = FieldLabel(getString(MessageID.password), id = "password-field")
 
     override var passwordError: String?  = null
         set(value) {
@@ -139,7 +139,8 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
             field = value
         }
 
-    private var confirmPasswordLabel = FieldLabel(getString(MessageID.confirm_password))
+    private var confirmPasswordLabel = FieldLabel(
+        getString(MessageID.confirm_password), id = "confirm-password-field")
     
     override var confirmError: String?  = null
         set(value) {
@@ -271,7 +272,8 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
 
                     umTextField(label = "${lastNameLabel.text}",
                         value = entity?.lastName,
-                        error = lastNameLabel.error, disabled = !fieldsEnabled,
+                        error = lastNameLabel.error,
+                        disabled = !fieldsEnabled,
                         helperText = lastNameLabel.errorText,
                         variant = FormControlVariant.outlined,
                         onChange = {

@@ -16,7 +16,7 @@ kotlin {
         browser {
             //Specify distribution bundle output directory
             distribution {
-                directory = project.file("build/generated/src/umapp")
+                directory = project.file("build/generated/source/umwebapp")
             }
 
             binaries.executable()
@@ -70,10 +70,28 @@ dependencies {
     implementation "io.github.aakira:napier:$version_napier"
 }
 
-task copyWebAppBundleToJar(dependsOn: [":app-react:browserDistribution"]) {
+
+task copyWebAppBundleToJar(dependsOn: ":app-react:browserDistribution") {
+    inputs.files("./src/main/kotlin/*.kt")
+    tasks.findByPath(":app-ktor-server:shadowJar").mustRunAfter ":app-react:copyWebAppBundleToJar"
+    onlyIf {
+        /*
+         Only run this task if the input files have been updated since the task was last run.
+         upToDateWhen was not having the expected effect.
+         */
+        long inputLastModified = 0L
+
+        rootProject.fileTree(dir: "app-react/src/main/kotlin", include: "**/*.kt").each() { File file ->
+            if (file.lastModified() > inputLastModified)
+                inputLastModified = file.lastModified()
+        }
+        File outputFile = project.file("build/generated/source/umwebapp/app-react.js")
+        return inputLastModified < outputFile.lastModified()
+    }
+
     doLast{
         copy {
-            from project.file("build/generated/src/umapp").path
+            from project.file("build/generated/source/umwebapp").path
             into rootProject.file("app-ktor-server/src/main/resources/umapp").path
         }
     }
