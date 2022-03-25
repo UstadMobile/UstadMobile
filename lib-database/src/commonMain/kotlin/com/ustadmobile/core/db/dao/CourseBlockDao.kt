@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
@@ -239,12 +238,14 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
     @Query("""
         UPDATE CourseBlock 
            SET cbActive = :active, 
-               cbLct = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
+               cbLct = :changeTime
          WHERE cbUid = :cbUid""")
-    abstract fun updateActiveByUid(cbUid: Long, active: Boolean)
+    abstract fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
-    override suspend fun deactivateByUids(uidList: List<Long>){
-        uidList.forEach { updateActiveByUid(it, false) }
+    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
+        uidList.forEach {
+            updateActiveByUid(it, true, changeTime)
+        }
     }
 
 }
