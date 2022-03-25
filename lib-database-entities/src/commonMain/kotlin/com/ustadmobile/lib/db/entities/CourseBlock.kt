@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
@@ -42,6 +43,7 @@ open class CourseBlock {
 
     var cbIndex: Int = 0
 
+    @ColumnInfo(index = true)
     var cbClazzUid: Long = 0
 
     var cbActive: Boolean = true

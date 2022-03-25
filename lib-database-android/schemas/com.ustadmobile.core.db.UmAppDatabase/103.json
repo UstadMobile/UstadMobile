@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "f7924f53de0a0a5855e48a96e678f340",
+    "identityHash": "4ae9d0f455b8dc0cabfea55945335522",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6234,7 +6234,17 @@
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_CourseBlock_cbClazzUid",
+            "unique": false,
+            "columnNames": [
+              "cbClazzUid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseBlock_cbClazzUid` ON `${TABLE_NAME}` (`cbClazzUid`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -9815,7 +9825,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f7924f53de0a0a5855e48a96e678f340')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4ae9d0f455b8dc0cabfea55945335522')"
     ]
   }
 }

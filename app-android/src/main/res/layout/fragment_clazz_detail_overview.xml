@@ -40,7 +40,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_clazz_edit_edit_clx"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/dimen_500dp">
+            android:layout_height="match_parent">
 
             <TextView
                 android:textStyle="bold"
@@ -278,8 +278,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/fragment_clazz_detail_overview_schedule_recyclerview"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_8dp"
+                android:nestedScrollingEnabled="false"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView37" />
@@ -288,8 +289,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/fragment_clazz_detail_overview_block_recyclerview"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_8dp"
+                android:nestedScrollingEnabled="false"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_schedule_recyclerview" />

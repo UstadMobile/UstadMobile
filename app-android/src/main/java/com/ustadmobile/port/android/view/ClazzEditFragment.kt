@@ -274,12 +274,11 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
                 TitleDescBottomSheetOption(
                         requireContext().getString(R.string.assignments),
                         requireContext().getString(R.string.add_assignment_block_content_desc),
-                        CourseBlock.BLOCK_ASSIGNMENT_TYPE),
-                TitleDescBottomSheetOption(
+                        CourseBlock.BLOCK_ASSIGNMENT_TYPE)
+               /* TitleDescBottomSheetOption(
                         requireContext().getString(R.string.discussion_board),
                         requireContext().getString(R.string.add_discussion_board_desc),
-                        CourseBlock.BLOCK_DISCUSSION_TYPE),
-
+                        CourseBlock.BLOCK_DISCUSSION_TYPE),*/
         )
 
         mPresenter?.onCreate(backStackSavedState)

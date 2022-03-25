@@ -118,42 +118,4 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
     """)
     abstract suspend fun findLastSubmissionFromStudent(studentUid: Long, assignmentUid: Long): CourseAssignmentSubmission?
 
-  /*  @Query("""
-        SELECT * 
-          FROM AssignmentFileSubmission
-         WHERE afsAssignmentUid = :assignmentUid
-           AND afsStudentUid = :studentUid
-           AND afsActive
-           AND afsSubmitted
-    """)
-    abstract fun getAllSubmittedFileSubmissionsFromStudent(assignmentUid: Long, studentUid: Long)
-            : DoorDataSourceFactory<Int, CourseAssignmentSubmissionAttachment>
-
-
-    @Update
-    abstract suspend fun updateAsync(entity: CourseAssignmentSubmissionAttachment): Int
-
-
-    @Query("""
-        UPDATE AssignmentFileSubmission
-           SET afsSubmitted = :submit, afsLct = :currentTime,
-               afsTimestamp = :currentTime
-         WHERE afsAssignmentUid = :assignmentUid
-           AND afsStudentUid = :studentUid
-           AND afsActive 
-           AND NOT afsSubmitted
-    """)
-    abstract suspend fun setFilesAsSubmittedForStudent(assignmentUid: Long, studentUid: Long,
-                                                       submit: Boolean, currentTime: Long)
-
-
-    @Query("""
-        SELECT afsStudentUid
-          FROM AssignmentFileSubmission
-         WHERE afsAssignmentUid = :assignmentUid
-           AND afsSubmitted 
-           AND afsActive
-         LIMIT 1
-    """)
-    abstract suspend fun findNextStudentToGrade(assignmentUid: Long): Long*/
 }
