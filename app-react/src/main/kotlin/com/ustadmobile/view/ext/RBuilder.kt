@@ -1,7 +1,7 @@
 package com.ustadmobile.view.ext
 
 
-import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -10,6 +10,9 @@ import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
 import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.RegisterAgeRedirectView
+import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.toolbarJsCssToPartialCss
@@ -88,9 +91,11 @@ private fun guardRoute(
     systemImpl: UstadMobileSystemImpl
 ): ReactElement?  = createElement {
     val viewName = getViewNameFromUrl()
-    val activeSession = systemImpl.getAppPref(UstadAccountManager.ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
+    val accessibleViews = listOf(Login2View.VIEW_NAME, PersonEditView.VIEW_NAME_REGISTER,
+        RegisterAgeRedirectView.VIEW_NAME, SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS)
+    val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
     val logout = activeSession == null && viewName != null
-            && viewName != Login2View.VIEW_NAME && viewName != "/"
+            && accessibleViews.indexOf(viewName) == -1 && viewName != "/"
     //Protest access to app's content without being logged in.
     if(logout){
         window.location.href = "./"
@@ -135,7 +140,7 @@ fun RBuilder.umGridContainer(
  * Simplest version of the GridItem used by the app
  */
 fun RBuilder.umItem(
-    xs: GridSize? = null,
+    xs: GridSize = GridSize.cells12,
     sm: GridSize? = null,
     lg: GridSize? = null,
     className: String? = null,
@@ -143,9 +148,15 @@ fun RBuilder.umItem(
     display: Display = Display.flex,
     flexDirection: FlexDirection = FlexDirection.column,
     handler: StyledHandler<GridProps>? = null) {
-    gridItem(xs = xs,sm = sm, lg = lg,
-        alignItems = alignItems , className = className,
-        handler = handler, display = display, flexDirection = flexDirection)
+    gridItem(
+        xs = xs,
+        sm = sm,
+        lg = lg,
+        alignItems = alignItems ,
+        className = className,
+        handler = handler,
+        display = display,
+        flexDirection = flexDirection)
 }
 
 fun RBuilder.umEntityAvatar (
@@ -441,19 +452,24 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
 
                                 umGridContainer(columnSpacing = GridSpacing.spacing2) {
                                     umItem(GridSize.cells4){
-                                        umIconButton("check",
-                                            onClick = {
-                                                stopEventPropagation(it)
-                                                onClickAccept?.invoke()
-                                            },
-                                            className = "${StyleManager.name}-successClass",
-                                            size = IconButtonSize.small)
+                                        styledSpan {
+                                            css{
+                                                width = 50.px
+                                            }
+                                            umIconButton("check",
+                                                onClick = {
+                                                    stopEventPropagation(it)
+                                                    onClickAccept?.invoke()
+                                                },
+                                                className = "${StyleManager.name}-successClass",
+                                                size = IconButtonSize.small)
+                                        }
                                     }
 
                                     umItem(GridSize.cells4){
                                         styledSpan {
                                             css{
-                                                width = 40.px
+                                                width = 50.px
                                             }
                                             umIconButton("close",
                                                 onClick = {
