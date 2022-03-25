@@ -89,6 +89,22 @@ class SettingsComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(pr
 
                 }
 
+                if(workspaceSettingsVisible){
+                    umItem(GridSize.cells12){
+                        umListItem(button = true) {
+                            attrs.onClick = {
+                                stopEventPropagation(it)
+                                mPresenter?.handleClickWorkspace()
+                            }
+                            createListItemWithLeftIconTitleAndDescription("account_balance",
+                                getString(MessageID.site),
+                                getString(MessageID.manage_site_settings),
+                                onMainList = true
+                            )
+                        }
+                    }
+                }
+
                 if(reasonLeavingVisible){
                     umItem(GridSize.cells12){
                         umListItem(button = true) {

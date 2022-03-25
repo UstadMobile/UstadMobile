@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
@@ -29,19 +29,16 @@ class SiteEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    val siteTermsOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<SiteTermsWithLanguage>(SiteTerms::sTermsUid,
-            "state_SiteTerms_list", ListSerializer(SiteTerms.serializer()),
-            ListSerializer(SiteTermsWithLanguage.serializer()), this, SiteTermsWithLanguage::class) {
-        sTermsUid = it
-    }
+    private val siteTermsOneToManyJoinEditHelper = OneToManyJoinEditHelperMp(
+        SiteTermsWithLanguage::sTermsUid,
+        ARG_SAVEDSTATE_TERMS,
+        ListSerializer(SiteTerms.serializer()),
+        ListSerializer(SiteTermsWithLanguage.serializer()),
+        this, requireSavedStateHandle(),
+        SiteTermsWithLanguage::class) { sTermsUid = it }
 
-    fun handleAddOrEditSiteTerms(siteTerms: SiteTermsWithLanguage) {
-        siteTermsOneToManyJoinEditHelper.onEditResult(siteTerms)
-    }
-
-    fun handleRemoveSiteTerms(siteTerms: SiteTermsWithLanguage) {
-        siteTermsOneToManyJoinEditHelper.onDeactivateEntity(siteTerms)
-    }
+    val siteTermsOneToManyJoinListener = siteTermsOneToManyJoinEditHelper.createNavigateForResultListener(
+        SiteEditView.VIEW_NAME, SiteTermsWithLanguage.serializer())
 
 
     /*
@@ -105,6 +102,8 @@ class SiteEditPresenter(context: Any,
     companion object {
 
         //TODO: Add constants for keys that would be used for any One To Many Join helpers
+
+        const val ARG_SAVEDSTATE_TERMS = "terms"
 
     }
 

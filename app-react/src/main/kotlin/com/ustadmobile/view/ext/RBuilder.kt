@@ -250,19 +250,20 @@ fun RBuilder.createListSectionTitle(titleText: String, variant: TypographyVarian
     }
 }
 
-fun RBuilder.createInformation(icon:String? = null, data: String?, label: String? = null, onClick:(() -> Unit)? = null){
+fun RBuilder.createInformation(icon:String? = null, data: String?, label: String? = null,
+                               shrink: Boolean = false, onClick:(() -> Unit)? = null){
     umGridContainer {
         css{
             +defaultMarginTop
             display = displayProperty(data != "0" && !data.isNullOrEmpty(), true)
         }
-        umItem(GridSize.cells2){
+        umItem(GridSize.cells2, if(shrink) GridSize.cells1 else GridSize.cells2){
             if(icon != null){
                 umIcon(icon, className = "${StyleManager.name}-detailIconClass")
             }
         }
 
-        umItem(GridSize.cells10){
+        umItem(GridSize.cells10, if(shrink) GridSize.cells11 else GridSize.cells10){
             if(onClick != null){
                 attrs.asDynamic().onClick = {
                     onClick()

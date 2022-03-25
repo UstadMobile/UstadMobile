@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.SchoolEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -13,6 +12,7 @@ import com.ustadmobile.mui.components.FormControlVariant
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.mui.components.umTextField
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
@@ -61,8 +61,8 @@ class SchoolEditComponent (mProps: UmProps): UstadEditComponent<SchoolWithHolida
 
     override var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>? = null
         set(value) {
-            field?.removeObserver(scopedGrantListObserver)
             field = value
+            field?.removeObserver(scopedGrantListObserver)
             field?.observe(this, scopedGrantListObserver)
         }
 
