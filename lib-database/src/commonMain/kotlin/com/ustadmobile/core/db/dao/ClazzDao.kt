@@ -18,7 +18,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
 
 @Repository
 @Dao
-abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
+abstract class ClazzDao : BaseDao<Clazz> {
 
     @Query("""
      REPLACE INTO ClazzReplicate(clazzPk, clazzDestination)
@@ -119,11 +119,6 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid, " +
             " clazzLastChangedBy =  ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} WHERE clazzUid = :clazzUid ")
     abstract suspend fun updateSchoolOnClazzUid(clazzUid: Long, schoolUid: Long)
-
-    /**
-     * Does not deactivate the clazz, dissassociates a school from the class.
-     */
-    override suspend fun deactivateByUids(uidList: List<Long>) = assignClassesToSchool(uidList, 0L)
 
     suspend fun assignClassesToSchool(uidList: List<Long>, schoolUid: Long) {
         uidList.forEach {

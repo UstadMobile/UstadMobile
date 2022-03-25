@@ -29,7 +29,8 @@ class NavigateForResultOptions<T : Any>(
     val serializationStrategy: SerializationStrategy<T>,
     val destinationResultKey: String? = null,
     overwriteDestination: Boolean? = null,
-    val arguments: MutableMap<String, String> = mutableMapOf()) {
+    val arguments: MutableMap<String, String> = mutableMapOf()
+) {
 
     val overwriteDestination: Boolean = overwriteDestination ?: (fromPresenter is UstadEditPresenter<*, *>)
 

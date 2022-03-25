@@ -63,8 +63,6 @@ class PersonEditPresenterTest  {
 
     private lateinit var impl: UstadMobileSystemImpl
 
-    private lateinit var repoEntityRoleDao: EntityRoleDao
-
     @Before
     fun setUp() {
         context = Any()
@@ -98,8 +96,6 @@ class PersonEditPresenterTest  {
         mockDao = spy(repo.personDao)
         whenever(repo.personDao).thenReturn(mockDao)
 
-        repoEntityRoleDao = spy(repo.entityRoleDao)
-        whenever(repo.entityRoleDao).thenReturn(repoEntityRoleDao)
     }
 
     @After

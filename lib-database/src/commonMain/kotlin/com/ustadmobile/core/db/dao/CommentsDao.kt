@@ -3,7 +3,6 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
@@ -173,14 +172,18 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
     @Query("""
         UPDATE Comments 
            SET commentsInActive = :inActive,
-               commentsLct = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL}
+               commentsLct = :changeTime
          WHERE Comments.commentsUid = :uid
     """)
-    abstract suspend fun updateInActiveByCommentUid(uid: Long, inActive: Boolean)
+    abstract suspend fun updateInActiveByCommentUid(
+        uid: Long,
+        inActive: Boolean,
+        changeTime: Long
+    )
 
-    override suspend fun deactivateByUids(uidList: List<Long>) {
+    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
         uidList.forEach {
-            updateInActiveByCommentUid(it, true)
+            updateInActiveByCommentUid(it, true, changeTime)
         }
     }
 }

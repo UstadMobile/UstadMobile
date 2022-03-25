@@ -9,15 +9,7 @@ import com.ustadmobile.lib.db.entities.*
 
 @Repository
 @Dao
-abstract class EntityRoleDao : BaseDao<EntityRole>, OneToManyJoinDao<EntityRole> {
-
-    @Transaction
-    override suspend fun deactivateByUids(uidList: List<Long>) {
-        uidList.forEach { updateEntityRoleActive(it, false) }
-    }
-
-    @Query("UPDATE EntityRole SET erActive = :active WHERE erUid = :uid")
-    abstract suspend fun updateEntityRoleActive(uid: Long, active: Boolean)
+abstract class EntityRoleDao {
 
     @Query("""
         SELECT COALESCE((
