@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.SiteEditView
+import com.ustadmobile.core.view.SiteTermsEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -38,7 +39,7 @@ class SiteEditPresenter(context: Any,
         SiteTermsWithLanguage::class) { sTermsUid = it }
 
     val siteTermsOneToManyJoinListener = siteTermsOneToManyJoinEditHelper.createNavigateForResultListener(
-        SiteEditView.VIEW_NAME, SiteTermsWithLanguage.serializer())
+        SiteTermsEditView.VIEW_NAME, SiteTermsWithLanguage.serializer())
 
 
     /*
@@ -47,7 +48,6 @@ class SiteEditPresenter(context: Any,
      */
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
         view.siteTermsList = siteTermsOneToManyJoinEditHelper.liveList
     }
 

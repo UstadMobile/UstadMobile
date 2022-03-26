@@ -40,6 +40,7 @@ object RouteManager {
         UstadDestination(view = RegisterAgeRedirectView.VIEW_NAME, component = RegisterAgeRedirectComponent::class, showNavigation = false),
         UstadDestination(view = SiteTermsDetailView.VIEW_NAME, component = SiteTermsDetailComponent::class),
         UstadDestination(view = SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS, component = SiteTermsDetailComponent::class, showNavigation = false),
+        UstadDestination(view = SiteTermsEditView.VIEW_NAME, component = SiteTermsEditComponent::class),
         UstadDestination(view = SiteDetailView.VIEW_NAME, component = SiteDetailComponent::class),
         UstadDestination(view = SiteEditView.VIEW_NAME, component = SiteEditComponent::class),
         UstadDestination(view = ClazzDetailView.VIEW_NAME, component = ClazzDetailComponent::class),

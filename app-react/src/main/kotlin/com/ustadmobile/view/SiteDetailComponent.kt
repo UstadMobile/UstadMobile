@@ -34,13 +34,6 @@ class SiteDetailComponent(props: UmProps): UstadDetailComponent<Site>(props), Si
 
     private var currentSiteList: MutableList<Site> = mutableListOf()
 
-    private val currentSiteObserver = ObserverFnWrapper<List<SiteTermsWithLanguage>>{
-        if(it.isEmpty()) return@ObserverFnWrapper
-        setState {
-            siteTermsWithLanguageList = it
-        }
-    }
-
     private val observer = ObserverFnWrapper<List<SiteTermsWithLanguage>>{
         if(it.isEmpty()) return@ObserverFnWrapper
         setState {
@@ -54,7 +47,6 @@ class SiteDetailComponent(props: UmProps): UstadDetailComponent<Site>(props), Si
             val liveData = value?.getData(0,Int.MAX_VALUE)
             liveData?.removeObserver(observer)
             liveData?.observe(this, observer)
-
         }
 
 

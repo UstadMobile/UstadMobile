@@ -43,9 +43,9 @@ class SiteEditComponent(props: UmProps): UstadEditComponent<Site>(props), SiteEd
 
     override var siteTermsList: DoorLiveData<List<SiteTermsWithLanguage>>? = null
         set(value) {
+            value?.removeObserver(siteTermsObserver)
+            value?.observe(this, siteTermsObserver)
             field = value
-            field?.removeObserver(siteTermsObserver)
-            field?.observe(this, siteTermsObserver)
         }
 
     override var fieldsEnabled: Boolean = false
@@ -119,10 +119,12 @@ class SiteEditComponent(props: UmProps): UstadEditComponent<Site>(props), SiteEd
                 }
 
                 renderSiteTerms(
-                    listener = mPresenter?.siteTermsOneToManyJoinListener,
-                    terms = siteTermsWithLanguageList,
+                    mPresenter?.siteTermsOneToManyJoinListener,
+                    siteTermsWithLanguageList,
                     createNewItem = newItem,
-                    withDelete = true)
+                    withDelete = true){
+                    mPresenter?.siteTermsOneToManyJoinListener?.onClickEdit(it)
+                }
             }
         }
     }

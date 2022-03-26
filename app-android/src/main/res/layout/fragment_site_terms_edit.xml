@@ -22,8 +22,8 @@
             type="boolean" />
 
         <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.SiteTermsEditFragmentEventHandler" />
+            name="mPresenter"
+            type="com.ustadmobile.core.controller.SiteTermsEditPresenter" />
 
         <variable
             name="languageError"
@@ -61,7 +61,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:runOnClickWhenFocused="@{true}"
-                    android:onClick="@{() -> activityEventHandler.onClickLanguage()}"
+                    android:onClick="@{() -> mPresenter.handleClickLanguage()}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     android:text="@{siteTerms.stLanguage.name}"
                     android:hint="@string/language" />
@@ -85,10 +85,10 @@
 
             <org.wordpress.aztec.toolbar.AztecToolbar
                 android:id="@+id/formatting_toolbar"
-                app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:layout_editor_absoluteX="60dp" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

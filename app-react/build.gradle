@@ -56,6 +56,9 @@ dependencies {
     implementation npm("moment-timezone","$version_npm_moment_timezone")
     implementation npm("@date-io/moment","$version_npm_mement_io")
     implementation npm("@mui/lab","$version_npm_mui_lab")
+    implementation npm("@mui/styles","$version_npm_mui_styles")
+    implementation npm("@mui/material","$version_npm_mui_material")
+    implementation npm("@mui/icons-material","$version_npm_mui_icons")
     implementation npm("date-fns","$version_npm_date_fns")
     implementation npm("html-to-image","$version_npm_html_to_image")
     implementation "com.github.UstadMobile.door:room-annotations:$version_door"
@@ -65,7 +68,10 @@ dependencies {
     implementation "io.ktor:ktor-client-js:$version_ktor"
     implementation "io.ktor:ktor-client-json-js:$version_ktor"
     implementation npm("timezones.json","$version_npm_timezones")
-    implementation npm("mime-matcher","^1.0.5")
+    implementation npm("mime-matcher","$version_npm_mime_matcher")
+    implementation npm("mui-rte","$version_npm_mui_rte")
+    implementation npm("draft-js","$version_npm_draft_js")
+    implementation npm("draft-js-export-html","$version_npm_draft_js_html_export")
     implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "io.github.aakira:napier:$version_napier"
 }

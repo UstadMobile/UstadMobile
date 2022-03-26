@@ -743,6 +743,7 @@ fun RBuilder.createListItemWithTitleDescriptionAndRightAction(
 
                    umIconButton(iconName,
                        onClick = {
+                           Util.stopEventPropagation(it)
                            onActionClick?.invoke(it)
                        })
                }
