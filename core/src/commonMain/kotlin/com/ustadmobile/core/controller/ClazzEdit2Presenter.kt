@@ -134,8 +134,7 @@ class ClazzEdit2Presenter(context: Any,
                 assignment -> assignment.assignment?.caUid == newAssignment.caUid
             } ?: CourseBlockWithEntity().apply {
                 cbClazzUid = newAssignment.caClazzUid
-                cbTableId = ClazzAssignment.TABLE_ID
-                cbTableUid = newAssignment.caUid
+                cbEntityUid = newAssignment.caUid
                 cbTitle = newAssignment.caTitle
                 cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                 cbDescription = newAssignment.caDescription
@@ -165,8 +164,7 @@ class ClazzEdit2Presenter(context: Any,
                     assignment.entry?.contentEntryUid == newContent.contentEntryUid
                 } ?: CourseBlockWithEntity().apply {
                     cbClazzUid = entity?.clazzUid ?: 0L
-                    cbTableId = ClazzAssignment.TABLE_ID
-                    cbTableUid = newContent.contentEntryUid
+                    cbEntityUid = newContent.contentEntryUid
                     cbTitle = newContent.title
                     cbType = CourseBlock.BLOCK_CONTENT_TYPE
                     cbDescription = newContent.description
@@ -195,19 +193,18 @@ class ClazzEdit2Presenter(context: Any,
                     block -> block.cbUid == moduleBlock.cbUid
             } ?: CourseBlockWithEntity().apply {
                 cbClazzUid = moduleBlock.cbClazzUid
-                cbTableId = CourseBlock.TABLE_ID
-                cbTableUid = moduleBlock.cbUid
+                cbEntityUid = moduleBlock.cbUid
                 cbTitle = moduleBlock.cbTitle
                 cbType = CourseBlock.BLOCK_MODULE_TYPE
                 cbDescription = moduleBlock.cbDescription
-                cbStartDate = moduleBlock.cbStartDate
+                cbHideUntilDate = moduleBlock.cbHideUntilDate
                 cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
                 cbUid = moduleBlock.cbUid
             }
 
             foundBlock.cbTitle = moduleBlock.cbTitle
             foundBlock.cbDescription = moduleBlock.cbDescription
-            foundBlock.cbStartDate = moduleBlock.cbStartDate
+            foundBlock.cbHideUntilDate = moduleBlock.cbHideUntilDate
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
@@ -223,19 +220,18 @@ class ClazzEdit2Presenter(context: Any,
                     block -> block.cbUid == textBlock.cbUid
             } ?: CourseBlockWithEntity().apply {
                 cbClazzUid = textBlock.cbClazzUid
-                cbTableId = CourseBlock.TABLE_ID
-                cbTableUid = textBlock.cbUid
+                cbEntityUid = textBlock.cbUid
                 cbTitle = textBlock.cbTitle
                 cbType = CourseBlock.BLOCK_TEXT_TYPE
                 cbDescription = textBlock.cbDescription
-                cbStartDate = textBlock.cbStartDate
+                cbHideUntilDate = textBlock.cbHideUntilDate
                 cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
                 cbUid = textBlock.cbUid
             }
 
             foundBlock.cbTitle = textBlock.cbTitle
             foundBlock.cbDescription = textBlock.cbDescription
-            foundBlock.cbStartDate = textBlock.cbStartDate
+            foundBlock.cbHideUntilDate = textBlock.cbHideUntilDate
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
@@ -670,12 +666,15 @@ class ClazzEdit2Presenter(context: Any,
     override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
         val currentList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: mutableListOf()
 
-        if(currentList[fromPosition].cbModuleParentBlockUid != currentList[toPosition].cbModuleParentBlockUid){
+        val fromLocation = currentList[fromPosition]
+
+        // check if its module
+        if(fromLocation.cbType == CourseBlock.BLOCK_MODULE_TYPE &&
+                fromLocation.cbModuleParentBlockUid != currentList[toPosition].cbModuleParentBlockUid){
             courseBlockOneToManyJoinEditHelper.liveList.sendValue(currentList.toList())
             return false
         }
 
-        val fromLocation = currentList[fromPosition]
         currentList.removeAt(fromPosition)
         currentList.add(toPosition, fromLocation)
 

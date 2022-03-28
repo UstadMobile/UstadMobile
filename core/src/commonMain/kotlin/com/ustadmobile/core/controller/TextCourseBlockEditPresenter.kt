@@ -38,8 +38,7 @@ class TextCourseBlockEditPresenter(context: Any, args: Map<String, String>, view
             cbUid = db.doorPrimaryKeyManager.nextIdAsync(CourseBlock.TABLE_ID)
             cbClazzUid = clazzUid
             cbType = CourseBlock.BLOCK_TEXT_TYPE
-            cbTableUid = cbUid
-            cbTableId = CourseBlock.TABLE_ID
+            cbEntityUid = cbUid
         }
 
         val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
@@ -49,11 +48,11 @@ class TextCourseBlockEditPresenter(context: Any, args: Map<String, String>, view
         val timeZone = clazzWithSchool.effectiveTimeZone()
         view.timeZone = timeZone
 
-        if(entity.cbStartDate != 0L){
-            val startDateTimeMidnight = DateTime(entity.cbStartDate)
+        if(entity.cbHideUntilDate != 0L){
+            val startDateTimeMidnight = DateTime(entity.cbHideUntilDate)
                 .toLocalMidnight(timeZone).unixMillisLong
             view.startDate = startDateTimeMidnight
-            view.startTime = entity.cbStartDate - startDateTimeMidnight
+            view.startTime = entity.cbHideUntilDate - startDateTimeMidnight
         }else{
             view.startDate = 0L
         }
@@ -80,11 +79,11 @@ class TextCourseBlockEditPresenter(context: Any, args: Map<String, String>, view
             val timeZone = clazzWithSchool.effectiveTimeZone()
             view.timeZone = timeZone
 
-            if(entity.cbStartDate != 0L){
-                val startDateTimeMidnight = DateTime(entity.cbStartDate)
+            if(entity.cbHideUntilDate != 0L){
+                val startDateTimeMidnight = DateTime(entity.cbHideUntilDate)
                     .toLocalMidnight(timeZone).unixMillisLong
                 view.startDate = startDateTimeMidnight
-                view.startTime = entity.cbStartDate - startDateTimeMidnight
+                view.startTime = entity.cbHideUntilDate - startDateTimeMidnight
             }else{
                 view.startDate = 0L
             }
@@ -102,7 +101,7 @@ class TextCourseBlockEditPresenter(context: Any, args: Map<String, String>, view
             }
 
             val timeZone = view.timeZone ?: "UTC"
-            entity.cbStartDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+            entity.cbHideUntilDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
                 .localMidnight.utc.unixMillisLong + view.startTime
 
             finishWithResult(safeStringify(di,

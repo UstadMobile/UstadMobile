@@ -14,19 +14,29 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 
-class ClazzDetailOverviewPresenter(context: Any,
-                          arguments: Map<String, String>,
-                                   view: ClazzDetailOverviewView, di: DI,
-                          lifecycleOwner: DoorLifecycleOwner,
-                                   val contentEntryListItemListener: DefaultContentEntryListItemListener
-                                   = DefaultContentEntryListItemListener(view = view, context = context,
-                                       di = di, clazzUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L))
+class ClazzDetailOverviewPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: ClazzDetailOverviewView,
+    di: DI,
+    lifecycleOwner: DoorLifecycleOwner,
+    val contentEntryListItemListener: DefaultContentEntryListItemListener =
+        DefaultContentEntryListItemListener(
+            view = view,
+            context = context,
+            di = di,
+            clazzUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        )
+) : UstadDetailPresenter<ClazzDetailOverviewView, ClazzWithDisplayDetails>(
+    context,
+    arguments,
+    view,
+    di,
+    lifecycleOwner
+), ContentEntryListItemListener by contentEntryListItemListener {
 
-    : UstadDetailPresenter<ClazzDetailOverviewView, ClazzWithDisplayDetails>(context, arguments, view,
-        di, lifecycleOwner), ContentEntryListItemListener by contentEntryListItemListener {
 
-
-    var collapsedList: Set<Long> = mutableSetOf()
+    var collapsedList: MutableSet<Long> = mutableSetOf()
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.LIVEDATA
@@ -44,8 +54,8 @@ class ClazzDetailOverviewPresenter(context: Any,
                     accountManager.activeAccount.personUid, entityUid,
                     Role.PERMISSION_CLAZZ_ADD_STUDENT)
             view.courseBlockList = repo.courseBlockDao.findAllCourseBlockByClazzUidLive(
-                entityUid, accountManager.activeAccount.personUid, collapsedList.toList(), systemTimeInMillis(),
-                Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
+                entityUid, accountManager.activeAccount.personUid,
+                collapsedList.toList(), systemTimeInMillis())
         }
 
         return repo.clazzDao.getClazzWithDisplayDetails(entityUid, systemTimeInMillis())
@@ -63,16 +73,16 @@ class ClazzDetailOverviewPresenter(context: Any,
     }
 
     fun handleModuleExpandCollapseClicked(courseBlock: CourseBlock){
+        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val foundBlock: Long? = collapsedList.find { it == courseBlock.cbUid }
         if(foundBlock != null){
-            collapsedList.minus(foundBlock)
+            collapsedList.remove(foundBlock)
         }else{
-            collapsedList.plus(courseBlock.cbUid)
+            collapsedList.add(courseBlock.cbUid)
         }
         view.courseBlockList = repo.courseBlockDao.findAllCourseBlockByClazzUidLive(
-            entity?.clazzUid ?: 0, accountManager.activeAccount.personUid,
-            collapsedList.toList(), systemTimeInMillis(),
-            Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
+            entityUid, accountManager.activeAccount.personUid,
+            collapsedList.toList(), systemTimeInMillis())
     }
 
     fun handleClickAssignment(assignment: ClazzAssignment){
