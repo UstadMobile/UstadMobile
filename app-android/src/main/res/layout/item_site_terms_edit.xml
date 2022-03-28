@@ -9,15 +9,12 @@
         <variable name="mPresenter"
             type="com.ustadmobile.core.controller.SiteEditPresenter" />
 
-        <variable name="mEventHandler"
-            type="com.ustadmobile.port.android.view.SiteEditFragmentEventHandler" />
-
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> mEventHandler.onClickEditSiteTerms(siteTerms)}"
+        android:onClick="@{() -> mPresenter.siteTermsOneToManyJoinListener.onClickEdit(siteTerms)}"
         android:background="?attr/selectableItemBackground">
 
 
@@ -56,7 +53,7 @@
             app:tint="?colorOnIconTint"
             android:contentDescription="@string/delete"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:onClick="@{() -> mPresenter.handleRemoveSiteTerms(siteTerms)}" />
+            android:onClick="@{() -> mPresenter.siteTermsOneToManyJoinListener.onClickDelete(siteTerms)}" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

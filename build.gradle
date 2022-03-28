@@ -208,6 +208,9 @@ ext {
     version_npm_mement_io = "^1.3.13"
     version_npm_picker_ui = "^3.3.10"
     version_npm_mui_lab = "5.0.0-alpha.58"
+    version_npm_mui_styles = "^5.5.1"
+    version_npm_mui_icons = "^5.5.1"
+    version_npm_mui_material = "^5.5.2"
     version_npm_timezones = "^1.5.2"
     version_npm_buffer = "^6.0.3"
     version_npm_asmcrypto = "^2.3.2"
@@ -215,6 +218,10 @@ ext {
     version_npm_google_charts = "^3.0.15"
     version_npm_html_to_image = "^1.9.0"
     version_npm_date_fns = "2.27.0"
+    version_npm_mime_matcher = "^1.0.5"
+    version_npm_mui_rte = "^2.0.1"
+    version_npm_draft_js = "^0.11.7"
+    version_npm_draft_js_html_export = "^1.4.1"
 
 }
 

@@ -57,7 +57,7 @@ class ContentEntryImportLinkComponent(mProps: UmProps): UstadBaseComponent<UmPro
         ustadComponentTitle = getString(MessageID.enter_url)
         fabManager?.visible = true
         fabManager?.icon = "done"
-        fabManager?.text = getString(MessageID.add)
+        fabManager?.text = getString(MessageID.next)
         fabManager?.onClickListener = {
             mPresenter?.handleClickDone(importLink)
         }
@@ -76,11 +76,12 @@ class ContentEntryImportLinkComponent(mProps: UmProps): UstadBaseComponent<UmPro
             umGridContainer(GridSpacing.spacing4) {
 
                 umItem(GridSize.cells12){
-                    umTextField(label = "${importLinkLabel.text}",
+                    umTextField(
+                        label = "${importLinkLabel.text}",
                         helperText = importLinkLabel.errorText,
                         value = importLink,
                         error = importLinkLabel.error,
-                        disabled = !inProgress && importLink.isNotEmpty(),
+                        disabled = inProgress,
                         variant = FormControlVariant.outlined,
                         onChange = {
                             setState {

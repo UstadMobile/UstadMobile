@@ -6,6 +6,9 @@
     <data>
         <import type="android.view.View"/>
 
+        <variable name="mPresenter"
+            type="com.ustadmobile.core.controller.SiteEditPresenter" />
+
         <variable
             name="site"
             type="com.ustadmobile.lib.db.entities.Site" />
@@ -17,11 +20,6 @@
         <variable
             name="fieldsEnabled"
             type="boolean" />
-
-        <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.SiteEditFragmentEventHandler" />
-
     </data>
 
 
@@ -98,7 +96,7 @@
             <include layout="@layout/item_createnew"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:onClickNew="@{() -> activityEventHandler.onClickNewSiteTerms()}"
+                app:onClickNew="@{() -> mPresenter.siteTermsOneToManyJoinListener.onClickNew()}"
                 app:createNewText="@{@string/terms_and_policies}"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_work_space_edit_terms_rv"
                 app:layout_constraintStart_toStartOf="parent"
