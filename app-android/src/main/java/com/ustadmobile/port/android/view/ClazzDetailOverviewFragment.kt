@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -45,12 +46,21 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         ClazzDetailOverviewView, ClazzDetailFragmentEventHandler, Observer<PagedList<Schedule>>,
         ClazzDetailOverviewEventListener {
 
-    private var mBinding: FragmentClazzDetailOverviewBinding? = null
+
+
+    private var mBinding: FragmentCourseDetailOverviewBinding? = null
 
     private var mPresenter: ClazzDetailOverviewPresenter? = null
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
+
+    private var detailMergerRecyclerView: RecyclerView? = null
+    private var detailMergerRecyclerAdapter: ConcatAdapter? = null
+
+    private var detailRecyclerAdapter: CourseHeaderDetailRecyclerAdapter? = null
+
+    private var scheduleHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
 
     private var currentLiveData: LiveData<PagedList<Schedule>>? = null
 
@@ -104,7 +114,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             val block = getItem(position)
-            when(holder.itemViewType){
+            when(block?.cbType){
                 CourseBlock.BLOCK_MODULE_TYPE -> {
                     val moduleHolder = (holder as ModuleCourseBlockViewHolder)
                     moduleHolder.binding.block = block
@@ -182,28 +192,38 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         }
 
     override fun onChanged(t: PagedList<Schedule>?) {
+        scheduleHeaderAdapter?.visible = !t.isNullOrEmpty()
         mScheduleListRecyclerAdapter?.submitList(t)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView: View
-        mScheduleListRecyclerAdapter = ScheduleRecyclerViewAdapter()
-        courseBlockDetailRecyclerAdapter = CourseBlockDetailRecyclerViewAdapter(
-            mPresenter, viewLifecycleOwner, di)
-        mBinding = FragmentClazzDetailOverviewBinding.inflate(inflater, container,
+
+        mBinding = FragmentCourseDetailOverviewBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
-            it.fragmentClazzDetailOverviewScheduleRecyclerview.apply {
-                adapter = mScheduleListRecyclerAdapter
-                layoutManager = LinearLayoutManager(requireContext())
-            }
-            it.fragmentClazzDetailOverviewBlockRecyclerview.apply {
-                adapter = courseBlockDetailRecyclerAdapter
-                layoutManager = LinearLayoutManager(requireContext())
-            }
         }
-        mBinding?.fragmentEventHandler = this
+
+        detailMergerRecyclerView =
+            rootView.findViewById(R.id.fragment_course_detail_overview)
+
+        // 1
+        detailRecyclerAdapter = CourseHeaderDetailRecyclerAdapter(this)
+
+        // 2
+        scheduleHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.schedule).toString()).apply {
+            visible = false
+        }
+
+        // 3
+        mScheduleListRecyclerAdapter = ScheduleRecyclerViewAdapter()
+
+        // 4
+        courseBlockDetailRecyclerAdapter = CourseBlockDetailRecyclerViewAdapter(
+            mPresenter, viewLifecycleOwner, di)
+
+
 
         val accountManager: UstadAccountManager by instance()
         repo = di.direct.on(accountManager.activeAccount).instance(tag = TAG_REPO)
@@ -213,18 +233,32 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
         courseBlockDetailRecyclerAdapter?.mPresenter = mPresenter
 
+        detailMergerRecyclerAdapter = ConcatAdapter(detailRecyclerAdapter, scheduleHeaderAdapter,
+            mScheduleListRecyclerAdapter, courseBlockDetailRecyclerAdapter)
+
+        detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
+        detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+
+
+
         return rootView
     }
 
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mBinding?.fragmentClazzDetailOverviewScheduleRecyclerview?.adapter = null
-        mBinding?.fragmentClazzDetailOverviewBlockRecyclerview?.adapter = null
-        mScheduleListRecyclerAdapter = null
         mBinding = null
         mPresenter = null
         entity = null
+
+        detailMergerRecyclerView?.adapter = null
+        detailMergerRecyclerView = null
+
+        detailRecyclerAdapter = null
+        scheduleHeaderAdapter = null
+        mScheduleListRecyclerAdapter = null
+        courseBlockDetailRecyclerAdapter = null
+
     }
 
 
@@ -232,13 +266,13 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         get() = field
         set(value) {
             field = value
-            mBinding?.clazz = value
+            detailRecyclerAdapter?.clazz = value
         }
 
     override var clazzCodeVisible: Boolean
-        get() = mBinding?.clazzCodeVisible ?: false
+        get() = detailRecyclerAdapter?.clazzCodeVisible ?: false
         set(value) {
-            mBinding?.clazzCodeVisible = value
+            detailRecyclerAdapter?.clazzCodeVisible = value
         }
 
     override fun onClickClassCode(code: String?) {

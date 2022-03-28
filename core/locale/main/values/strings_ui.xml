@@ -928,6 +928,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <!-- This is a code that the teacher can give to students to allow them to join the class -->
     <string name="class_code">Class code</string>
 
+    <!-- This is a code that the teacher can give to students to allow them to join the course -->
+    <string name="course_code">Course code</string>
+
     <!-- Pending requests - use on classes / schools to list people who have requested to join a class / school -->
     <string name="pending_requests">Pending requests</string>
 
