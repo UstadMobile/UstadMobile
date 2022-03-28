@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "4ae9d0f455b8dc0cabfea55945335522",
+    "identityHash": "494541f3c6d077c6023e24d733c9565a",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6141,7 +6141,7 @@
       },
       {
         "tableName": "CourseBlock",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbModuleParentBlockUid` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbStartDate` INTEGER NOT NULL, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbHidden` INTEGER NOT NULL, `cbTableId` INTEGER NOT NULL, `cbTableUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbModuleParentBlockUid` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbHideUntilDate` INTEGER NOT NULL, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbHidden` INTEGER NOT NULL, `cbEntityUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cbUid",
@@ -6180,8 +6180,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "cbStartDate",
-            "columnName": "cbStartDate",
+            "fieldPath": "cbHideUntilDate",
+            "columnName": "cbHideUntilDate",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6210,14 +6210,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "cbTableId",
-            "columnName": "cbTableId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cbTableUid",
-            "columnName": "cbTableUid",
+            "fieldPath": "cbEntityUid",
+            "columnName": "cbEntityUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -9825,7 +9819,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4ae9d0f455b8dc0cabfea55945335522')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '494541f3c6d077c6023e24d733c9565a')"
     ]
   }
 }

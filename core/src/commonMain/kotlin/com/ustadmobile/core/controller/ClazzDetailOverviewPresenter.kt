@@ -1,9 +1,12 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.NavigateForResultOptions
+import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.ClazzDetailOverviewView
+import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -12,6 +15,8 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 
 class ClazzDetailOverviewPresenter(
@@ -37,6 +42,12 @@ class ClazzDetailOverviewPresenter(
 
 
     var collapsedList: MutableSet<Long> = mutableSetOf()
+
+    val deepLink: String
+        get() {
+            val activeEndpoint = di.direct.instance<UstadAccountManager>().activeAccount.endpointUrl
+            return arguments.toDeepLink(activeEndpoint, ClazzDetailView.VIEW_NAME)
+        }
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.LIVEDATA
@@ -89,6 +100,10 @@ class ClazzDetailOverviewPresenter(
         ustadNavController.navigate(
             ClazzAssignmentDetailView.VIEW_NAME,
             mapOf(ARG_ENTITY_UID to assignment.caUid.toString()))
+    }
+
+    fun handleDownloadAllClicked() {
+
     }
 
 

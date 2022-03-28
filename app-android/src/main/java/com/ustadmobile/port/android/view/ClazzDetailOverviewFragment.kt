@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -40,6 +41,10 @@ import org.kodein.di.on
 
 interface ClazzDetailOverviewEventListener {
     fun onClickClassCode(code: String?)
+
+    fun onClickShare()
+
+    fun onClickDownloadAll()
 }
 
 class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(),
@@ -61,6 +66,8 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
     private var detailRecyclerAdapter: CourseHeaderDetailRecyclerAdapter? = null
 
     private var scheduleHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
+
+    private var downloadRecyclerAdapter: CourseDownloadDetailRecyclerAdapter? = null
 
     private var currentLiveData: LiveData<PagedList<Schedule>>? = null
 
@@ -209,6 +216,9 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
             rootView.findViewById(R.id.fragment_course_detail_overview)
 
         // 1
+        downloadRecyclerAdapter = CourseDownloadDetailRecyclerAdapter(this)
+
+        // 1
         detailRecyclerAdapter = CourseHeaderDetailRecyclerAdapter(this)
 
         // 2
@@ -233,7 +243,8 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
         courseBlockDetailRecyclerAdapter?.mPresenter = mPresenter
 
-        detailMergerRecyclerAdapter = ConcatAdapter(detailRecyclerAdapter, scheduleHeaderAdapter,
+        detailMergerRecyclerAdapter = ConcatAdapter(downloadRecyclerAdapter,
+            detailRecyclerAdapter, scheduleHeaderAdapter,
             mScheduleListRecyclerAdapter, courseBlockDetailRecyclerAdapter)
 
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
@@ -254,6 +265,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         detailMergerRecyclerView?.adapter = null
         detailMergerRecyclerView = null
 
+        downloadRecyclerAdapter = null
         detailRecyclerAdapter = null
         scheduleHeaderAdapter = null
         mScheduleListRecyclerAdapter = null
@@ -280,6 +292,20 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                 as? ClipboardManager
         clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("link", code)))
         showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
+    }
+
+    override fun onClickShare() {
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, mPresenter?.deepLink)
+            type = "text/plain"
+        }
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
+    }
+
+    override fun onClickDownloadAll() {
+        mPresenter?.handleDownloadAllClicked()
     }
 
     companion object {
