@@ -56,7 +56,7 @@ import kotlin.jvm.JvmField
     ClazzAssignmentRollUp::class,
     PersonAuth2::class,
     UserSession::class,
-    ContentJob::class, ContentJobItem::class, CourseBlock::class,
+    ContentJob::class, ContentJobItem::class, CourseBlock::class, CourseTerminology::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -72,6 +72,7 @@ import kotlin.jvm.JvmField
     CourseAssignmentSubmissionAttachmentReplicate::class,
     CourseAssignmentMarkReplicate::class,
     CourseBlockReplicate::class,
+    CourseTerminologyReplicate::class,
     ScheduleReplicate::class,
     HolidayCalendarReplicate::class,
     HolidayReplicate::class,
@@ -153,6 +154,7 @@ abstract class UmAppDatabase : DoorDatabase() {
         reportDao.initPreloadedTemplates()
         leavingReasonDao.initPreloadedLeavingReasons()
         languageDao.initPreloadedLanguages()
+        courseTerminologyDao.initPreloadedTerminology()
     }
 
     @JsName("networkNodeDao")
@@ -166,6 +168,9 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     @JsName("courseBlockDao")
     abstract val courseBlockDao: CourseBlockDao
+
+    @JsName("courseTerminologyDao")
+    abstract val courseTerminologyDao: CourseTerminologyDao
 
     @JsName("clazzEnrolmentDao")
     abstract val clazzEnrolmentDao: ClazzEnrolmentDao

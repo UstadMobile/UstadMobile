@@ -39,7 +39,7 @@ import org.kodein.di.instance
 class ClazzEdit2Presenter(context: Any,
                           arguments: Map<String, String>, view: ClazzEdit2View,  di : DI,
                           lifecycleOwner: DoorLifecycleOwner)
-    : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendarAndSchool>(context, arguments, view,
+    : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendarAndSchoolAndTerminology>(context, arguments, view,
          di, lifecycleOwner), TreeOneToManyJoinEditListener<CourseBlockWithEntity>, ItemTouchHelperListener {
 
     private val scheduleOneToManyJoinEditHelper
@@ -102,6 +102,18 @@ class ClazzEdit2Presenter(context: Any,
             view.entity = entity
             UmPlatformUtil.run {
                 requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
+            }
+        }
+
+        observeSavedStateResult(
+            SAVEDSTATE_KEY_TERMINOLOGY,
+            ListSerializer(CourseTerminology.serializer()), CourseTerminology::class) {
+            val terminology = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.clazzTerminologyUid = terminology.ctUid
+            entity?.terminology = terminology
+            view.entity = entity
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_TERMINOLOGY] = null
             }
         }
 
@@ -241,18 +253,19 @@ class ClazzEdit2Presenter(context: Any,
         }
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWithHolidayCalendarAndSchool? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWithHolidayCalendarAndSchoolAndTerminology? {
         val clazzUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
 
         val clazz = db.onRepoWithFallbackToDb(2000) {
             it.clazzDao.takeIf {clazzUid != 0L }?.findByUidWithHolidayCalendarAsync(clazzUid)
-        } ?: ClazzWithHolidayCalendarAndSchool().also { newClazz ->
+        } ?: ClazzWithHolidayCalendarAndSchoolAndTerminology().also { newClazz ->
             newClazz.clazzUid = db.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)
             newClazz.clazzName = ""
             newClazz.isClazzActive = true
             newClazz.clazzTimeZone = getDefaultTimeZoneId()
             newClazz.clazzSchoolUid = arguments[ARG_SCHOOL_UID]?.toLong() ?: 0L
             newClazz.school = db.schoolDao.takeIf { newClazz.clazzSchoolUid != 0L }?.findByUidAsync(newClazz.clazzSchoolUid)
+            newClazz.terminology = db.courseTerminologyDao.takeIf { newClazz.clazzTerminologyUid != 0L }?.findByUidAsync(newClazz.clazzTerminologyUid)
         }
 
         view.coursePicture = db.onDbThenRepoWithTimeout(2000) { dbToUse, _ ->
@@ -314,14 +327,14 @@ class ClazzEdit2Presenter(context: Any,
         return clazz
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): ClazzWithHolidayCalendarAndSchool? {
+    override fun onLoadFromJson(bundle: Map<String, String>): ClazzWithHolidayCalendarAndSchoolAndTerminology? {
         super.onLoadFromJson(bundle)
         val clazzJsonStr = bundle[ARG_ENTITY_JSON]
-        var clazz: ClazzWithHolidayCalendarAndSchool? = null
+        var clazz: ClazzWithHolidayCalendarAndSchoolAndTerminology? = null
         clazz = if(clazzJsonStr != null) {
-            safeParse(di, ClazzWithHolidayCalendarAndSchool.serializer(), clazzJsonStr)
+            safeParse(di, ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer(), clazzJsonStr)
         }else {
-            ClazzWithHolidayCalendarAndSchool()
+            ClazzWithHolidayCalendarAndSchoolAndTerminology()
         }
 
         scheduleOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
@@ -370,10 +383,10 @@ class ClazzEdit2Presenter(context: Any,
 
     fun handleTerminologyClicked(){
         navigateForResult(NavigateForResultOptions(this,
-            LongWrapper(entity?.clazzFeatures ?: 0),
-            BitmaskEditView.VIEW_NAME,
-            LongWrapper::class,
-            LongWrapper.serializer(),
+            null,
+            CourseTerminologyListView.VIEW_NAME,
+            CourseTerminology::class,
+            CourseTerminology.serializer(),
             SAVEDSTATE_KEY_TERMINOLOGY))
     }
 
@@ -386,7 +399,7 @@ class ClazzEdit2Presenter(context: Any,
             SAVEDSTATE_KEY_FEATURES))
     }
 
-    override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
+    override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchoolAndTerminology) {
         presenterScope.launch {
 
             if (entity.clazzStartTime == 0L) {
@@ -480,7 +493,7 @@ class ClazzEdit2Presenter(context: Any,
                         arguments.plus(UstadView.ARG_CLAZZUID to entity.clazzUid.toString()),
                         context)
             }else{
-                onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity, ClazzWithHolidayCalendarAndSchool.serializer())
+                onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity, ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer())
             }
         }
     }

@@ -4,7 +4,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 
-interface ClazzEdit2View: UstadEditView<ClazzWithHolidayCalendarAndSchool> {
+interface ClazzEdit2View: UstadEditView<ClazzWithHolidayCalendarAndSchoolAndTerminology> {
 
     var clazzSchedules: DoorMutableLiveData<List<Schedule>>?
 

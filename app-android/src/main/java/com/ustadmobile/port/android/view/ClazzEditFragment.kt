@@ -38,7 +38,7 @@ interface ClazzEditFragmentEventHandler {
 
     fun handleAttendanceClicked(isChecked: Boolean)
 }
-class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(),
+class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolAndTerminology>(),
         ClazzEdit2View, ClazzEditFragmentEventHandler,
         TitleDescBottomSheetOptionSelectedListener {
 
@@ -47,7 +47,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     private var mPresenter: ClazzEdit2Presenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendarAndSchool>?
+    override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendarAndSchoolAndTerminology>?
         get() = mPresenter
 
     private var scheduleRecyclerAdapter: ScheduleRecyclerAdapter? = null
@@ -184,7 +184,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
 
 
-    override var entity: ClazzWithHolidayCalendarAndSchool? = null
+    override var entity: ClazzWithHolidayCalendarAndSchoolAndTerminology? = null
         get() = field
         set(value) {
             mDataBinding?.clazz = value

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "494541f3c6d077c6023e24d733c9565a",
+    "identityHash": "84970b38da06f4e91fb127accedf3001",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1156,7 +1156,7 @@
       },
       {
         "tableName": "Clazz",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzName` TEXT, `clazzDesc` TEXT, `attendanceAverage` REAL NOT NULL, `clazzHolidayUMCalendarUid` INTEGER NOT NULL, `clazzScheuleUMCalendarUid` INTEGER NOT NULL, `isClazzActive` INTEGER NOT NULL, `clazzLocationUid` INTEGER NOT NULL, `clazzStartTime` INTEGER NOT NULL, `clazzEndTime` INTEGER NOT NULL, `clazzFeatures` INTEGER NOT NULL, `clazzSchoolUid` INTEGER NOT NULL, `clazzMasterChangeSeqNum` INTEGER NOT NULL, `clazzLocalChangeSeqNum` INTEGER NOT NULL, `clazzLastChangedBy` INTEGER NOT NULL, `clazzLct` INTEGER NOT NULL, `clazzTimeZone` TEXT, `clazzStudentsPersonGroupUid` INTEGER NOT NULL, `clazzTeachersPersonGroupUid` INTEGER NOT NULL, `clazzPendingStudentsPersonGroupUid` INTEGER NOT NULL, `clazzParentsPersonGroupUid` INTEGER NOT NULL, `clazzCode` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzName` TEXT, `clazzDesc` TEXT, `attendanceAverage` REAL NOT NULL, `clazzHolidayUMCalendarUid` INTEGER NOT NULL, `clazzScheuleUMCalendarUid` INTEGER NOT NULL, `isClazzActive` INTEGER NOT NULL, `clazzLocationUid` INTEGER NOT NULL, `clazzStartTime` INTEGER NOT NULL, `clazzEndTime` INTEGER NOT NULL, `clazzFeatures` INTEGER NOT NULL, `clazzSchoolUid` INTEGER NOT NULL, `clazzEnrolmentPolicy` INTEGER NOT NULL DEFAULT 100, `clazzTerminologyUid` INTEGER NOT NULL DEFAULT 100, `clazzMasterChangeSeqNum` INTEGER NOT NULL, `clazzLocalChangeSeqNum` INTEGER NOT NULL, `clazzLastChangedBy` INTEGER NOT NULL, `clazzLct` INTEGER NOT NULL, `clazzTimeZone` TEXT, `clazzStudentsPersonGroupUid` INTEGER NOT NULL, `clazzTeachersPersonGroupUid` INTEGER NOT NULL, `clazzPendingStudentsPersonGroupUid` INTEGER NOT NULL, `clazzParentsPersonGroupUid` INTEGER NOT NULL, `clazzCode` TEXT)",
         "fields": [
           {
             "fieldPath": "clazzUid",
@@ -1229,6 +1229,20 @@
             "columnName": "clazzSchoolUid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "clazzEnrolmentPolicy",
+            "columnName": "clazzEnrolmentPolicy",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "100"
+          },
+          {
+            "fieldPath": "clazzTerminologyUid",
+            "columnName": "clazzTerminologyUid",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "100"
           },
           {
             "fieldPath": "clazzMasterChangeSeqNum",
@@ -6242,6 +6256,44 @@
         "foreignKeys": []
       },
       {
+        "tableName": "CourseTerminology",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ctUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ctTitle` TEXT, `ctTerminology` TEXT, `ctLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "ctUid",
+            "columnName": "ctUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ctTitle",
+            "columnName": "ctTitle",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ctTerminology",
+            "columnName": "ctTerminology",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ctLct",
+            "columnName": "ctLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "ctUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "SqliteChangeSeqNums",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sCsnTableId` INTEGER NOT NULL, `sCsnNextLocal` INTEGER NOT NULL, `sCsnNextPrimary` INTEGER NOT NULL, PRIMARY KEY(`sCsnTableId`))",
         "fields": [
@@ -6890,6 +6942,69 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseBlockReplicate_cbDestination_cbPending` ON `${TABLE_NAME}` (`cbDestination`, `cbPending`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseTerminologyReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ctPk` INTEGER NOT NULL, `ctVersionId` INTEGER NOT NULL DEFAULT 0, `ctDestination` INTEGER NOT NULL, `ctPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`ctPk`, `ctDestination`))",
+        "fields": [
+          {
+            "fieldPath": "ctPk",
+            "columnName": "ctPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ctVersionId",
+            "columnName": "ctVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "ctDestination",
+            "columnName": "ctDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ctPending",
+            "columnName": "ctPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "ctPk",
+            "ctDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_CourseTerminologyReplicate_ctPk_ctDestination_ctVersionId",
+            "unique": false,
+            "columnNames": [
+              "ctPk",
+              "ctDestination",
+              "ctVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseTerminologyReplicate_ctPk_ctDestination_ctVersionId` ON `${TABLE_NAME}` (`ctPk`, `ctDestination`, `ctVersionId`)"
+          },
+          {
+            "name": "index_CourseTerminologyReplicate_ctDestination_ctPending",
+            "unique": false,
+            "columnNames": [
+              "ctDestination",
+              "ctPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseTerminologyReplicate_ctDestination_ctPending` ON `${TABLE_NAME}` (`ctDestination`, `ctPending`)"
           }
         ],
         "foreignKeys": []
@@ -9819,7 +9934,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '494541f3c6d077c6023e24d733c9565a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '84970b38da06f4e91fb127accedf3001')"
     ]
   }
 }

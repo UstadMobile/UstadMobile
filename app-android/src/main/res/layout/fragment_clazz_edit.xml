@@ -19,7 +19,7 @@
 
         <variable
             name="clazz"
-            type="com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool" />
+            type="com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology" />
 
         <variable
             name="activityEventHandler"
@@ -424,7 +424,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/activity_clazz_edit_terminology_text"
-                    android:text="@{clazz.holidayCalendar.umCalendarName}"
+                    android:text="@{clazz.terminology.ctTitle}"
                     android:onClick="@{() -> mPresenter.handleTerminologyClicked()}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"

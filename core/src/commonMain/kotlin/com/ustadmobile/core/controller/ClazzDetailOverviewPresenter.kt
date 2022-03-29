@@ -76,8 +76,8 @@ class ClazzDetailOverviewPresenter(
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         navigateForResult(
             NavigateForResultOptions(this,
-                null, ClazzEdit2View.VIEW_NAME, ClazzWithHolidayCalendarAndSchool::class,
-                ClazzWithHolidayCalendarAndSchool.serializer(), SAVEDSTATE_KEY_CLAZZ,
+                null, ClazzEdit2View.VIEW_NAME, ClazzWithHolidayCalendarAndSchoolAndTerminology::class,
+                ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer(), SAVEDSTATE_KEY_CLAZZ,
                 arguments = mutableMapOf(ARG_ENTITY_UID to entityUid.toString())
             )
         )
