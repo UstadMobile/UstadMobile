@@ -368,6 +368,15 @@ class ClazzEdit2Presenter(context: Any,
         )
     }
 
+    fun handleTerminologyClicked(){
+        navigateForResult(NavigateForResultOptions(this,
+            LongWrapper(entity?.clazzFeatures ?: 0),
+            BitmaskEditView.VIEW_NAME,
+            LongWrapper::class,
+            LongWrapper.serializer(),
+            SAVEDSTATE_KEY_TERMINOLOGY))
+    }
+
     fun handleClickFeatures() {
         navigateForResult(NavigateForResultOptions(this,
             LongWrapper(entity?.clazzFeatures ?: 0),
@@ -555,6 +564,8 @@ class ClazzEdit2Presenter(context: Any,
         const val SAVEDSTATE_KEY_HOLIDAYCALENDAR = "ClazzHolidayCalendar"
 
         const val SAVEDSTATE_KEY_FEATURES = "ClazzFeatures"
+
+        const val SAVEDSTATE_KEY_TERMINOLOGY ="ClazzTerminology"
 
     }
 

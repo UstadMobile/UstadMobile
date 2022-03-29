@@ -10,10 +10,12 @@
         <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
         <import type="com.ustadmobile.core.util.TreeOneToManyJoinEditListener"/>
         <import type="com.ustadmobile.lib.db.entities.Schedule"/>
+        <import type="com.ustadmobile.lib.db.entities.Clazz"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlockWithEntity"/>
         <import type="com.ustadmobile.core.controller.ClazzEdit2Presenter"/>
         <import type="com.ustadmobile.core.model.BitmaskMessageId"/>
         <import type="java.util.List"/>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
         <variable
             name="clazz"
@@ -125,7 +127,7 @@
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginBottom="@dimen/dimen_8dp"
-                android:hint="@string/class_name"
+                android:hint="@string/name"
                 app:hintEnabled="true"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -149,7 +151,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
-                android:hint="@string/class_description"
+                tools:hint="@string/description"
+                android:hint="@{StringExtKt.optional(context, @string/description)}"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintEnabled="true"
                 android:enabled="@{fieldsEnabled}"
@@ -167,6 +170,31 @@
 
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_clazz_edit_school_selected"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_description"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:hint="@string/institution"
+                android:hint="@{StringExtKt.optional(context, @string/institution)}">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/fragment_clazz_edit_school_text"
+                    android:onClick="@{() -> mPresenter.handleClickSchool()}"
+                    android:text="@{clazz.school.schoolName}"
+                    app:runOnClickWhenFocused="@{true}"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+
+            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/activity_clazz_edit_start_date_edittext"
                 android:layout_width="@dimen/dimen_0dp"
                 android:layout_height="wrap_content"
@@ -175,7 +203,7 @@
                 app:errorEnabled="@{clazzStartDateError != null}"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_description"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_edit_school_selected"
                 app:layout_constraintEnd_toStartOf="@+id/activity_clazz_edit_end_date_edittext"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
@@ -204,10 +232,11 @@
                 android:layout_marginVertical="@dimen/dimen_8dp"
                 app:errorText="@{clazzEndDateError}"
                 app:errorEnabled="@{clazzEndDateError != null}"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_description"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_edit_school_selected"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/activity_clazz_edit_start_date_edittext"
-                android:hint="@string/end_date"
+                tools:hint="@string/end_date"
+                android:hint="@{StringExtKt.optional(context, @string/end_date)}"
                 >
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -278,8 +307,6 @@
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_course_add_new_block"
                 app:layout_constraintStart_toStartOf="parent" />
 
-
-
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/activity_clazz_edit_schedule_heading"
@@ -334,36 +361,40 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_clazz_edit_school_selected"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
+            <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                android:id="@+id/activity_clazz_edit_setup_heading"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/dimen_8dp"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_holiday_calendar_selected"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:layout_marginBottom="@dimen/dimen_8dp"
+                android:text="@string/course_setup"
                 app:layout_constraintStart_toStartOf="parent"
-                android:hint="@string/school">
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_holiday_calendar_selected" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/fragment_clazz_edit_school_text"
-                    android:onClick="@{() -> mPresenter.handleClickSchool()}"
-                    android:text="@{clazz.school.schoolName}"
-                    app:runOnClickWhenFocused="@{true}"
-                    android:inputType="@{InputType.TYPE_NULL}"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
 
-            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/activity_clazz_edit_attendance_switch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dimen_20dp"
+                android:enabled="@{fieldsEnabled}"
+                android:text="@string/attendance"
+                android:checked="@{(clazz.clazzFeatures &amp; Clazz.CLAZZ_FEATURE_ATTENDANCE) == Clazz.CLAZZ_FEATURE_ATTENDANCE}"
+                android:onCheckedChanged="@{(view, isChecked) -> activityEventHandler.handleAttendanceClicked(isChecked)}"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_setup_heading" />
+
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/fragment_clazz_edit_features"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_edit_school_selected"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_attendance_switch"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -378,11 +409,35 @@
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/activity_clazz_edit_terminology"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_edit_features"
+                app:layout_constraintStart_toStartOf="parent"
+                android:hint="@string/terminology">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/activity_clazz_edit_terminology_text"
+                    android:text="@{clazz.holidayCalendar.umCalendarName}"
+                    android:onClick="@{() -> mPresenter.handleTerminologyClicked()}"
+                    app:runOnClickWhenFocused="@{true}"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
             <include layout="@layout/item_scoped_grant_one_to_many_list"
                 android:id="@+id/clazz_edit_fragment_permissions_inc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_edit_features"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_terminology"
                 app:scopedGrantsOneToManyListener="@{mPresenter.scopedGrantOneToManyHelper}"
                 />
 

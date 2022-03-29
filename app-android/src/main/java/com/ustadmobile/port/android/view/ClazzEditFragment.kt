@@ -35,6 +35,8 @@ import java.io.File
 interface ClazzEditFragmentEventHandler {
 
     fun onAddCourseBlockClicked()
+
+    fun handleAttendanceClicked(isChecked: Boolean)
 }
 class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(),
         ClazzEdit2View, ClazzEditFragmentEventHandler,
@@ -288,6 +290,12 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
     override fun onAddCourseBlockClicked() {
         val sheet = TitleDescBottomSheetOptionFragment(bottomSheetOptionList, this)
         sheet.show(childFragmentManager, sheet.tag)
+    }
+
+    override fun handleAttendanceClicked(isChecked: Boolean) {
+        val clazz = mDataBinding?.clazz
+        clazz?.clazzFeatures = if(isChecked) Clazz.CLAZZ_FEATURE_ATTENDANCE else 0
+        mDataBinding?.clazz = clazz
     }
 
     override fun onBottomSheetOptionSelected(optionSelected: TitleDescBottomSheetOption) {
