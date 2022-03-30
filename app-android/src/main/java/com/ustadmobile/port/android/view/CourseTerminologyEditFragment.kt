@@ -91,5 +91,6 @@ class CourseTerminologyEditFragment: UstadEditFragment<CourseTerminology>(), Cou
         set(value) {
             field = value
             terminologyEntryAdapter?.submitList(value)
+            terminologyEntryAdapter?.notifyDataSetChanged()
         }
 }

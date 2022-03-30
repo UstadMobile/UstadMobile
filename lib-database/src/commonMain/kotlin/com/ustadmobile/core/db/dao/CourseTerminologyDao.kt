@@ -5,7 +5,10 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.CourseTerminology
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
 
 @Repository
@@ -67,8 +70,8 @@ abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
      SET ctPending = true
   */               
     """)
-    @ReplicationRunOnChange([CourseBlock::class])
-    @ReplicationCheckPendingNotificationsFor([CourseBlock::class])
+    @ReplicationRunOnChange([CourseTerminology::class])
+    @ReplicationCheckPendingNotificationsFor([CourseTerminology::class])
     abstract suspend fun replicateOnChange()
 
 

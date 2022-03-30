@@ -4,6 +4,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.CourseTerminologyDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.test.waitUntil
@@ -90,10 +91,10 @@ class CourseTerminologyEditPresenterTest {
 
         initialEntity!!.ctTitle = "Professional English"
         whenever(mockView.terminologyTermList).thenReturn(listOf(
-            TerminologyEntry("AddStudent","ABC"),
-            TerminologyEntry("AddTeacher","XTZ"),
-            TerminologyEntry("Student","fsds"),
-            TerminologyEntry("Teacher","abc")
+            TerminologyEntry("AddStudent",MessageID.standard, "ABC"),
+            TerminologyEntry("AddTeacher",MessageID.standard,"XTZ"),
+            TerminologyEntry("Student",MessageID.standard,"fsds"),
+            TerminologyEntry("Teacher",MessageID.standard,"abc")
         ))
         whenever(mockView.entity).thenReturn(initialEntity)
         presenter.handleClickSave(initialEntity)
@@ -142,10 +143,10 @@ class CourseTerminologyEditPresenterTest {
 
         whenever(mockView.entity).thenReturn(initialEntity)
         whenever(mockView.terminologyTermList).thenReturn(listOf(
-            TerminologyEntry("AddStudent","Add Student"),
-            TerminologyEntry("AddTeacher","XTZ"),
-            TerminologyEntry("Student","fsds"),
-            TerminologyEntry("Teacher","abc")))
+            TerminologyEntry("AddStudent",MessageID.standard,"Add Student"),
+            TerminologyEntry("AddTeacher",MessageID.standard,"XTZ"),
+            TerminologyEntry("Student",MessageID.standard,"fsds"),
+            TerminologyEntry("Teacher",MessageID.standard,"abc")))
 
         presenter.handleClickSave(initialEntity)
 

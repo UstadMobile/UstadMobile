@@ -16,7 +16,6 @@ class CourseTerminologyHeaderAdapter()
     private var viewHolder: CourseTerminologyHeaderHolder? = null
 
     var courseTerminology: CourseTerminology? = null
-        get() = viewHolder?.itemBinding?.courseTerminology
         set(value){
             if(field == value)
                 return

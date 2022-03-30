@@ -100,7 +100,7 @@ class CourseTerminologyEditPresenter(
             var foundError = false
             if(entity.ctTitle == null){
                 foundError = true
-                view.titleErrorText = systemImpl.getString(MessageID.field_required_prompt, this)
+                view.titleErrorText = systemImpl.getString(MessageID.field_required_prompt, context)
             }else{
                 view.titleErrorText = null
             }
@@ -109,7 +109,7 @@ class CourseTerminologyEditPresenter(
             termList.forEach {
                  it.errorMessage = if(it.term.isNullOrEmpty()) {
                      foundError = true
-                     systemImpl.getString(MessageID.field_required_prompt, this)
+                     systemImpl.getString(MessageID.field_required_prompt, context)
                  } else {
                      null
                  }
