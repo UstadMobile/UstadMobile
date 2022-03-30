@@ -137,15 +137,6 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    /**
-     * Check if the directory is writable
-     * @param dir Directory to be checked
-     * @return True if is writable otherwise is read only
-     */
-    actual fun canWriteFileInDir(dirPath: String): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     actual companion object {
 
         /**

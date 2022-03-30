@@ -234,34 +234,6 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
 
     }
 
-    /**
-     * Check if the directory is writable
-     * @param dir Directory to be checked
-     * @return True if is writable otherwise is read only
-     */
-    actual fun canWriteFileInDir(dirPath: String): Boolean {
-        var canWriteFiles = false
-        val testFile = File(dirPath, System.currentTimeMillis().toString() + ".txt")
-        try {
-            val writer = FileWriter(testFile)
-            writer.append("sampletest")
-            writer.flush()
-            writer.close()
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-            canWriteFiles = false
-        } catch (e: IOException) {
-            e.printStackTrace()
-            canWriteFiles = false
-        }
-
-        if (testFile.exists()) {
-            canWriteFiles = testFile.delete()
-        }
-        return canWriteFiles
-    }
-
-
 
     /**
      * Open the given link in a browser and/or tab depending on the platform
