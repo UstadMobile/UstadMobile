@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemAssignmentFileSubmissionBinding
 import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -27,7 +28,7 @@ class SubmissionAdapter(
         }
 
 
-    var assignment: ClazzAssignment? = null
+    var assignment: ClazzAssignmentWithCourseBlock? = null
         set(value){
             if(field == value)
                 return

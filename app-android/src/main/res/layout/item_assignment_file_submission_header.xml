@@ -11,7 +11,7 @@
 
         <variable
             name="assignment"
-            type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+            type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock" />
 
         <variable
             name="assignmentMark"
@@ -104,7 +104,7 @@
             android:contentDescription="@string/school"
             android:textStyle="bold"
             android:visibility="@{showPoints ? View.VISIBLE : View.GONE}"
-            android:text='@{assignmentMark.camMark + &quot;/&quot; + assignment.caMaxPoints + " " + @string/points}'
+            android:text='@{assignmentMark.camMark + &quot;/&quot; + assignment.block.cbMaxPoints + " " + @string/points}'
             app:layout_constraintStart_toEndOf="@+id/submission_status_score_icon"
             app:layout_constraintTop_toBottomOf="@id/submission_status_label"
             tools:text="8/10 points" />
@@ -130,7 +130,7 @@
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             android:textColor="@color/errorColor"
             android:layout_marginEnd="@dimen/dimen_4dp"
-            android:text="@{@string/late_penalty(assignment.caLateSubmissionPenalty)}"
+            android:text="@{@string/late_penalty(assignment.block.cbLateSubmissionPenalty)}"
             android:visibility="@{showPoints &amp; assignmentMark.camPenalty != 0 ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toEndOf="@+id/submission_status_score_value"
             app:layout_constraintEnd_toEndOf="parent"

@@ -9,7 +9,7 @@
 
         <variable
             name="assignment"
-            type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+            type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock" />
 
         <variable
             name="deadlinePassed"

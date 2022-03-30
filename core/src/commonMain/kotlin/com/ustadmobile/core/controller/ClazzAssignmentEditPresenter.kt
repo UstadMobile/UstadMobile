@@ -19,7 +19,9 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.ClazzWithSchool
+import com.ustadmobile.lib.db.entities.CourseBlock
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
@@ -29,7 +31,7 @@ class ClazzAssignmentEditPresenter(context: Any,
                                    arguments: Map<String, String>, view: ClazzAssignmentEditView,
                                    lifecycleOwner: DoorLifecycleOwner,
                                    di: DI)
-    : UstadEditPresenter<ClazzAssignmentEditView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner) {
+    : UstadEditPresenter<ClazzAssignmentEditView, ClazzAssignmentWithCourseBlock>(context, arguments, view, di, lifecycleOwner) {
 
     enum class SubmissionTypeOptions(val optionVal: Int, val messageId: Int){
         INDIVIDUAL(ClazzAssignment.SUBMISSION_TYPE_INDIVIDUAL, MessageID.individual),
@@ -107,14 +109,21 @@ class ClazzAssignmentEditPresenter(context: Any,
     }
 
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignmentWithCourseBlock? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        val clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: throw IllegalArgumentException("clazzUid was not given")
 
         val clazzAssignment = db.onRepoWithFallbackToDb(2000) {
-            it.clazzAssignmentDao.findByUidAsync(entityUid)
-        } ?: ClazzAssignment().apply {
-            caClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: throw IllegalArgumentException("clazzUid was not given")
+            it.clazzAssignmentDao.findByUidWithBlockAsync(entityUid)
+        } ?: ClazzAssignmentWithCourseBlock().apply {
+            caClazzUid = clazzUid
             caUid = db.doorPrimaryKeyManager.nextIdAsync(ClazzAssignment.TABLE_ID)
+            block = CourseBlock().apply {
+                cbUid = db.doorPrimaryKeyManager.nextIdAsync(CourseBlock.TABLE_ID)
+                cbClazzUid = clazzUid
+                cbEntityUid = caUid
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+            }
         }
 
         val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
@@ -130,16 +139,22 @@ class ClazzAssignmentEditPresenter(context: Any,
     }
 
 
-    override fun onLoadFromJson(bundle: Map<String, String>): ClazzAssignment {
+    override fun onLoadFromJson(bundle: Map<String, String>): ClazzAssignmentWithCourseBlock {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         val editEntity = if (entityJsonStr != null) {
-             safeParse(di, ClazzAssignment.serializer(), entityJsonStr)
+             safeParse(di, ClazzAssignmentWithCourseBlock.serializer(), entityJsonStr)
         }else{
-            ClazzAssignment().apply {
+            ClazzAssignmentWithCourseBlock().apply {
                 caClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
                 caUid = db.doorPrimaryKeyManager.nextId(ClazzAssignment.TABLE_ID)
+                block = CourseBlock().apply {
+                    cbUid = db.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
+                    cbClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
+                    cbEntityUid = caUid
+                    cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                }
             }
         }
 
@@ -167,79 +182,87 @@ class ClazzAssignmentEditPresenter(context: Any,
                 entityVal)
     }
 
-    fun loadEntityIntoDateTime(entity: ClazzAssignment){
+    fun loadEntityIntoDateTime(entity: ClazzAssignmentWithCourseBlock){
         val timeZone = view.timeZone ?: "UTC"
 
-        if(entity.caStartDate != 0L){
-            val startDateTimeMidnight = DateTime(entity.caStartDate)
+        val block = entity.block ?: return
+        if(block.cbHideUntilDate != 0L){
+            val startDateTimeMidnight = DateTime(block.cbHideUntilDate)
                     .toLocalMidnight(timeZone).unixMillisLong
             view.startDate = startDateTimeMidnight
-            view.startTime = entity.caStartDate - startDateTimeMidnight
+            view.startTime = block.cbHideUntilDate - startDateTimeMidnight
         }else{
             view.startDate = 0
         }
 
 
-        if(entity.caDeadlineDate != Long.MAX_VALUE){
-            val deadlineDateTimeMidnight = DateTime(entity.caDeadlineDate)
+        if(block.cbDeadlineDate != Long.MAX_VALUE){
+            val deadlineDateTimeMidnight = DateTime(block.cbDeadlineDate)
                     .toLocalMidnight(timeZone).unixMillisLong
             view.deadlineDate = deadlineDateTimeMidnight
-            view.deadlineTime = entity.caDeadlineDate - deadlineDateTimeMidnight
+            view.deadlineTime = block.cbDeadlineDate - deadlineDateTimeMidnight
         }else{
             view.deadlineDate = Long.MAX_VALUE
         }
 
-        if(entity.caGracePeriodDate != Long.MAX_VALUE){
-            val gracePeriodDateTimeMidnight = DateTime(entity.caGracePeriodDate)
+        if(block.cbGracePeriodDate != Long.MAX_VALUE){
+            val gracePeriodDateTimeMidnight = DateTime(block.cbGracePeriodDate)
                     .toLocalMidnight(timeZone).unixMillisLong
             view.gracePeriodDate = gracePeriodDateTimeMidnight
-            view.gracePeriodTime = entity.caGracePeriodDate - gracePeriodDateTimeMidnight
+            view.gracePeriodTime = block.cbGracePeriodDate - gracePeriodDateTimeMidnight
         }else{
             view.gracePeriodDate = Long.MAX_VALUE
         }
     }
 
-    fun saveDateTimeIntoEntity(entity: ClazzAssignment){
+    fun saveDateTimeIntoEntity(entity: ClazzAssignmentWithCourseBlock){
         val timeZone = view.timeZone ?: "UTC"
 
-        entity.caStartDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+        entity.block?.cbHideUntilDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
                 .localMidnight.utc.unixMillisLong + view.startTime
 
         if(view.deadlineDate != Long.MAX_VALUE){
-            entity.caDeadlineDate = DateTime(view.deadlineDate).toOffsetByTimezone(timeZone)
+            entity.block?.cbDeadlineDate = DateTime(view.deadlineDate).toOffsetByTimezone(timeZone)
                     .localMidnight.utc.unixMillisLong + view.deadlineTime
         }
 
         if(view.gracePeriodDate != Long.MAX_VALUE){
-            entity.caGracePeriodDate = DateTime(view.gracePeriodDate).toOffsetByTimezone(timeZone)
+            entity.block?.cbGracePeriodDate = DateTime(view.gracePeriodDate).toOffsetByTimezone(timeZone)
                     .localMidnight.utc.unixMillisLong + view.gracePeriodTime
         }
     }
 
-    override fun handleClickSave(entity: ClazzAssignment) {
+    override fun handleClickSave(entity: ClazzAssignmentWithCourseBlock) {
         presenterScope.launch {
+
+            val block = entity.block ?: return@launch
+            saveDateTimeIntoEntity(entity)
 
             if (entity.caTitle.isNullOrEmpty()) {
                 view.caTitleError = systemImpl.getString(MessageID.field_required_prompt, context)
+            }else{
+                view.caTitleError = null
+            }
+
+            if(block.cbMaxPoints == 0){
+                view.caMaxPointsError = systemImpl.getString(MessageID.field_required_prompt, context)
+            }else{
+                view.caMaxPointsError = null
+            }
+
+            if(entity.caTitle.isNullOrEmpty() || block.cbMaxPoints == 0){
                 return@launch
             }
 
-            saveDateTimeIntoEntity(entity)
 
-            if (entity.caDeadlineDate <= entity.caStartDate) {
+            if (block.cbDeadlineDate <= block.cbHideUntilDate) {
                 view.caDeadlineError = systemImpl.getString(MessageID.end_is_before_start_error, context)
                 return@launch
             }
 
 
-            if (entity.caGracePeriodDate < entity.caDeadlineDate) {
+            if (block.cbGracePeriodDate < block.cbDeadlineDate) {
                 view.caGracePeriodError = systemImpl.getString(MessageID.after_deadline_date_error, context)
-                return@launch
-            }
-
-
-            if(entity.caMaxPoints == 0){
-                view.caMaxPointsError = systemImpl.getString(MessageID.field_required_prompt, context)
                 return@launch
             }
             
@@ -248,10 +271,11 @@ class ClazzAssignmentEditPresenter(context: Any,
             view.fieldsEnabled = false
 
             // if grace period is not set, set the date to equal the deadline
-            if(entity.caGracePeriodDate == Long.MAX_VALUE || view.gracePeriodTime == 0L){
-                entity.caGracePeriodDate = entity.caDeadlineDate
+            if(block.cbGracePeriodDate == Long.MAX_VALUE || view.gracePeriodTime == 0L){
+                block.cbGracePeriodDate = block.cbDeadlineDate
             }
 
+            entity.block = block
 
             finishWithResult(safeStringify(di,
                             ListSerializer(ClazzAssignment.serializer()),

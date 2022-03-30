@@ -7,7 +7,7 @@
 
 
         <import type="android.view.View" />
-        <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
+        <import type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock"/>
         <import type="com.ustadmobile.port.android.view.SubmissionAdapter"/>
 
         <variable
@@ -20,7 +20,7 @@
 
         <variable
             name="assignment"
-            type="ClazzAssignment" />
+            type="ClazzAssignmentWithCourseBlock" />
 
         <variable
             name="hasPassedDeadline"

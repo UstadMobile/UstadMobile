@@ -128,7 +128,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid 
                         AND ClazzEnrolment.clazzEnrolmentActive 
                         AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                        AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
+                        AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
                         AS totalStudents, 
  
                0 AS notSubmittedStudents,
@@ -149,7 +149,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                           AND ClazzEnrolment.clazzEnrolmentActive
                           AND CourseAssignmentMark.camUid IS NULL
                           AND ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-                          AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
+                          AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
                 ELSE 0 END) AS submittedStudents,         
                
                 (CASE WHEN (SELECT hasPermission 
@@ -163,7 +163,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                             AND ClazzEnrolment.clazzEnrolmentActive
                             AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                             AND ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
-                            AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
+                            AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
                    ELSE 0 END) AS markedStudents,
                    
                    (CASE WHEN CourseAssignmentMark.camAssignmentUid IS NOT NULL 

@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemMarkFileSubmissionBinding
-import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentProgressFragmentEventHandler): SingleItemRecyclerViewAdapter<
@@ -15,7 +15,7 @@ class MarkFileSubmissionAdapter(val eventHandler: ClazzAssignmentDetailStudentPr
 
     private var viewHolder: MarkFileSubmissionViewHolder? = null
 
-    var assignment: ClazzAssignment? = null
+    var assignment: ClazzAssignmentWithCourseBlock? = null
         set(value){
             if(field == value)
                 return

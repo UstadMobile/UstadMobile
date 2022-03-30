@@ -41,7 +41,7 @@ interface ClazzAssignmentDetailStudentProgressFragmentEventHandler {
 
 }
 
-class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzAssignment>(),
+class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzAssignmentWithCourseBlock>(),
         ClazzAssignmentDetailStudentProgressView, ClazzAssignmentDetailStudentProgressFragmentEventHandler,
         OpenSheetListener, FileSubmissionListItemListener {
 
@@ -225,7 +225,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             submissionStatusHeaderAdapter?.assignmentStatus = value
         }
 
-    override var entity: ClazzAssignment? = null
+    override var entity: ClazzAssignmentWithCourseBlock? = null
         get() = field
         set(value) {
             field = value

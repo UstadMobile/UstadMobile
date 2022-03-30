@@ -134,7 +134,7 @@ fun XapiStatementEndpoint.storeSubmitFileSubmissionStatement(account: UmAccount,
 
 fun XapiStatementEndpoint.storeMarkedStatement(
         account: UmAccount, student: Person, contextRegistration: String,
-        grade: Int, assignment: ClazzAssignment, studentSubmitStatement: StatementEntity?){
+        grade: Int, assignment: ClazzAssignmentWithCourseBlock, studentSubmitStatement: StatementEntity?){
 
     val statement = Statement().apply {
         this.actor = Actor().apply {
@@ -162,8 +162,8 @@ fun XapiStatementEndpoint.storeMarkedStatement(
                 success = true
                 score = Score().apply {
                     raw = grade.toLong()
-                    max = assignment.caMaxPoints.toLong()
-                    scaled = (grade.toFloat() / assignment.caMaxPoints)
+                    max = assignment.block?.cbMaxPoints?.toLong() ?: 0L
+                    scaled = (grade.toFloat() / (assignment.block?.cbMaxPoints ?: 1))
                 }
         }
         this.`object` = XObject().apply {

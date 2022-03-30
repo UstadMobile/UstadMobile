@@ -15,6 +15,7 @@ class ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer : ContentEn
     @Embedded
     var scoreProgress: ContentEntryStatementScoreProgress? = null
 
+    // TODO cleanup
    var assignmentContentWeight: Int = 0
 
     override fun equals(other: Any?): Boolean {
