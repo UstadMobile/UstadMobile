@@ -19,11 +19,18 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
-class CourseTerminologyEditPresenter(context: Any,
-        arguments: Map<String, String>, view: CourseTerminologyEditView,
-        lifecycleOwner: DoorLifecycleOwner,
-        di: DI)
-    : UstadEditPresenter<CourseTerminologyEditView, CourseTerminologyWithLabel>(context, arguments, view, di, lifecycleOwner) {
+class CourseTerminologyEditPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: CourseTerminologyEditView,
+    lifecycleOwner: DoorLifecycleOwner,
+    di: DI)
+    : UstadEditPresenter<CourseTerminologyEditView, CourseTerminologyWithLabel>(
+    context,
+    arguments,
+    view,
+    di,
+    lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

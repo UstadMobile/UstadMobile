@@ -1797,8 +1797,4 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="currently_enrolled">Currently enrolled</string>
     <string name="past_enrollments">Past enrollments</string>
 
-    <string name="add_teacher">Add teacher</string>
-    <string name="add_student">Add student</string>
-
-
 </resources>

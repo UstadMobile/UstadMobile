@@ -60,7 +60,7 @@
             app:srcCompat="@drawable/ic_calendar_today_24px_"
             android:layout_width="12dp"
             android:layout_height="12dp"
-            app:visibleIfDateSet="@{assignment.caDeadlineDate}"
+            app:visibleIfDateSet="@{block.cbDeadlineDate}"
             app:layout_constraintStart_toStartOf="@+id/item_block_line1_text"
             app:layout_constraintTop_toBottomOf="@+id/item_block_line2_desc"
             app:layout_constraintBottom_toBottomOf="@+id/line3_deadline"
@@ -102,8 +102,8 @@
             android:paddingEnd="@dimen/dimen_5dp"
             app:layout_constraintStart_toEndOf="@+id/item_clazz_assignment_deadline_icon"
             app:layout_constraintTop_toBottomOf="@+id/item_block_line2_desc"
-            app:visibleIfDateSet="@{assignment.caDeadlineDate}"
-            app:dateTimeInMillis="@{assignment.caDeadlineDate}"
+            app:visibleIfDateSet="@{block.cbDeadlineDate}"
+            app:dateTimeInMillis="@{block.cbDeadlineDate}"
             app:timeZoneId="@{timeZoneId}"
             app:dateTimeInMillisMode="@{dateTimeMode}"
             tools:text="17/10/2021"
@@ -117,7 +117,7 @@
             android:layout_marginStart="@dimen/dimen_12dp"
             app:layout_goneMarginStart="@dimen/dimen_0dp"
             android:visibility="@{assignment.mark != null ? View.VISIBLE : View.GONE}"
-            android:text='@{assignment.mark.camMark + &quot;/&quot; + assignment.caMaxPoints + " " + @string/points}'
+            android:text='@{assignment.mark.camMark + &quot;/&quot; + block.cbMaxPoints + " " + @string/points}'
             app:layout_constraintStart_toEndOf="@id/line3_deadline"
             app:layout_constraintTop_toBottomOf="@id/item_block_line2_desc"
             tools:text="8/10 points" />
@@ -133,7 +133,7 @@
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             android:textColor="@color/errorColor"
             android:layout_marginEnd="@dimen/dimen_4dp"
-            android:text="@{@string/late_penalty(assignment.caLateSubmissionPenalty)}"
+            android:text="@{@string/late_penalty(block.cbLateSubmissionPenalty)}"
             android:visibility="@{assignment.mark != null &amp; assignment.mark.camPenalty != 0 ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toEndOf="@+id/submission_status_score_value"
             app:layout_constraintEnd_toEndOf="parent"
