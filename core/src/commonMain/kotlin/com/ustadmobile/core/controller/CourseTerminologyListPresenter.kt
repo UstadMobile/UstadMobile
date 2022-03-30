@@ -32,7 +32,7 @@ class CourseTerminologyListPresenter(
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return false
+        return true
     }
 
     private fun updateListOnView() {

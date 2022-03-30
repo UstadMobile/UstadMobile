@@ -22,7 +22,7 @@ class TerminologyEntryAdapter() : ListAdapter<TerminologyEntry,
     }
 
     override fun onBindViewHolder(holder: TerminologyEntryHolder, position: Int) {
-
+        holder.itemBinding.entry = getItem(position)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

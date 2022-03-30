@@ -53,6 +53,6 @@ class CourseTerminologyListFragment(): UstadListViewFragment<CourseTerminology, 
     }
 
     override val displayTypeRepo: Any?
-        get() = dbRepo?.courseBlockDao
+        get() = dbRepo?.courseTerminologyDao
 
 }

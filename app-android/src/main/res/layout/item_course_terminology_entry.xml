@@ -28,6 +28,8 @@
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginBottom="@dimen/dimen_8dp"
             app:hintMessageId="@{entry.messageId}"
+            app:errorEnabled="@{entry.errorMessage != null}"
+            app:errorText="@{entry.errorMessage}"
             tools:hint="@string/add_a_teacher"
             app:hintEnabled="true"
             app:errorTextColor="?colorError"
