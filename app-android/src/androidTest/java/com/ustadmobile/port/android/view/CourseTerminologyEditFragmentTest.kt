@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
@@ -113,12 +114,14 @@ class CourseTerminologyEditFragmentTest : TestCase(){
 
                 //TODO: if required, use the savedstatehandle to add link entities
 
-                /*
+                */
+/*
                 fragmentScenario.onFragment { fragment ->
                     fragment..findNavController()?.currentBackStackEntry?.savedStateHandle
                             ?.set("RelatedEntityName", defaultGson().toJson(listOf(courseTerminology.relatedEntity)))
                 }
-                */
+                *//*
+
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
@@ -134,4 +137,4 @@ class CourseTerminologyEditFragmentTest : TestCase(){
         }
 
     }
-}
+}*/

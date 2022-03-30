@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -24,4 +25,4 @@ class CourseTerminologyListFragmentTest : TestCase()  {
 
 
 
-}
+}*/
