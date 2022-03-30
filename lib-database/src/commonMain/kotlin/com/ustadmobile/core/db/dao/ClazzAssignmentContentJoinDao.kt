@@ -8,8 +8,7 @@ import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
-abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoin>,
-        OneToManyJoinDao<ClazzAssignmentContentJoin> {
+abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoin>{
 
     @Query("""
      REPLACE INTO ClazzAssignmentContentJoinReplicate(cacjPk, cacjDestination)
