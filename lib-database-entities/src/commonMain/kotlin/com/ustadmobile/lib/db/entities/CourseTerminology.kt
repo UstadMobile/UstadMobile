@@ -41,29 +41,6 @@ open class CourseTerminology {
 
         const val TABLE_ID = 450
 
-        const val STANDARD_ENGLISH_UID = 100L
-
-        const val STANDARD_TAJIK_UID = 101L
-
-        const val STANDARD_RUSSIAN_UID = 102L
-
-        const val STANDARD_ARABIC_UID = 103L
-
-
-        val FIXED_UIDS = mapOf(
-            STANDARD_ENGLISH_UID to CourseTerminology().apply {
-                ctUid = STANDARD_ENGLISH_UID
-                ctTitle = "Standard teacher/student - English"
-            },
-            STANDARD_TAJIK_UID to CourseTerminology().apply {
-                ctUid = STANDARD_TAJIK_UID
-                ctTitle = "Standard teacher/student - Tajik"
-            },
-            STANDARD_RUSSIAN_UID to CourseTerminology().apply {
-                ctUid = STANDARD_RUSSIAN_UID
-                ctTitle = "Standard teacher/student - Russian"
-            }
-        )
 
     }
 

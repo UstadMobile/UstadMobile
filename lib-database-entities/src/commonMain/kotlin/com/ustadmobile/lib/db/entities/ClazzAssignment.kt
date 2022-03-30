@@ -120,8 +120,8 @@ open class ClazzAssignment {
         const val TEXT_WORD_LIMIT = 1
         const val TEXT_CHAR_LIMIT = 2
 
-        const val COMPLETION_CRITERIA_SUBMIT = 1
-        const val COMPLETION_CRITERIA_GRADED = 2
+        const val COMPLETION_CRITERIA_SUBMIT = 100
+        const val COMPLETION_CRITERIA_GRADED = 102
 
     }
 

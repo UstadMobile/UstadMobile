@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 class CourseTerminologyWithLabel : CourseTerminology() {
 
-    var label: CourseTerminologyLabel? = null
+    var label: TerminologyEntry? = null
 
 }

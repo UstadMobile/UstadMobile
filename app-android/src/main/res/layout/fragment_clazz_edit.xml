@@ -390,35 +390,13 @@
 
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_clazz_edit_features"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_attendance_switch"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginVertical="@dimen/dimen_8dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:hint="@string/features_enabled">
-                <com.google.android.material.textfield.TextInputEditText
-                    app:runOnClickWhenFocused="@{true}"
-                    android:onClick="@{() -> mPresenter.handleClickFeatures()}"
-                    android:inputType="@{InputType.TYPE_NULL}"
-                    app:textBitmaskFlags="@{featuresBitmaskFlags}"
-                    app:textBitmaskValue="@{clazz.clazzFeatures}"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-
-
-            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/activity_clazz_edit_terminology"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_edit_features"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_attendance_switch"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/terminology">
 

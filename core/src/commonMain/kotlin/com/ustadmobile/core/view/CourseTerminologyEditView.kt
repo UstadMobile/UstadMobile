@@ -1,21 +1,14 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.lib.db.entities.CourseTerminologyWithLabel
+import com.ustadmobile.lib.db.entities.CourseTerminology
+import com.ustadmobile.lib.db.entities.TerminologyEntry
 
 
-interface CourseTerminologyEditView: UstadEditView<CourseTerminologyWithLabel> {
+interface CourseTerminologyEditView: UstadEditView<CourseTerminology> {
 
     var titleErrorText: String?
 
-    var teacherErrorText: String?
-
-    var studentErrorText: String?
-
-
-    var addTeacherErrorText: String?
-
-    var addStudentErrorText: String?
-
+    var terminologyTermList: List<TerminologyEntry>?
 
     companion object {
 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "9aa621508fa19fa63df671d0346bde10",
+    "identityHash": "6d4ccbe5d62c0e2a51a43a04328008a0",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1156,7 +1156,7 @@
       },
       {
         "tableName": "Clazz",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzName` TEXT, `clazzDesc` TEXT, `attendanceAverage` REAL NOT NULL, `clazzHolidayUMCalendarUid` INTEGER NOT NULL, `clazzScheuleUMCalendarUid` INTEGER NOT NULL, `isClazzActive` INTEGER NOT NULL, `clazzLocationUid` INTEGER NOT NULL, `clazzStartTime` INTEGER NOT NULL, `clazzEndTime` INTEGER NOT NULL, `clazzFeatures` INTEGER NOT NULL, `clazzSchoolUid` INTEGER NOT NULL, `clazzEnrolmentPolicy` INTEGER NOT NULL DEFAULT 100, `clazzTerminologyUid` INTEGER NOT NULL DEFAULT 100, `clazzMasterChangeSeqNum` INTEGER NOT NULL, `clazzLocalChangeSeqNum` INTEGER NOT NULL, `clazzLastChangedBy` INTEGER NOT NULL, `clazzLct` INTEGER NOT NULL, `clazzTimeZone` TEXT, `clazzStudentsPersonGroupUid` INTEGER NOT NULL, `clazzTeachersPersonGroupUid` INTEGER NOT NULL, `clazzPendingStudentsPersonGroupUid` INTEGER NOT NULL, `clazzParentsPersonGroupUid` INTEGER NOT NULL, `clazzCode` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzName` TEXT, `clazzDesc` TEXT, `attendanceAverage` REAL NOT NULL, `clazzHolidayUMCalendarUid` INTEGER NOT NULL, `clazzScheuleUMCalendarUid` INTEGER NOT NULL, `isClazzActive` INTEGER NOT NULL, `clazzLocationUid` INTEGER NOT NULL, `clazzStartTime` INTEGER NOT NULL, `clazzEndTime` INTEGER NOT NULL, `clazzFeatures` INTEGER NOT NULL, `clazzSchoolUid` INTEGER NOT NULL, `clazzEnrolmentPolicy` INTEGER NOT NULL DEFAULT 100, `clazzTerminologyUid` INTEGER NOT NULL DEFAULT 25966, `clazzMasterChangeSeqNum` INTEGER NOT NULL, `clazzLocalChangeSeqNum` INTEGER NOT NULL, `clazzLastChangedBy` INTEGER NOT NULL, `clazzLct` INTEGER NOT NULL, `clazzTimeZone` TEXT, `clazzStudentsPersonGroupUid` INTEGER NOT NULL, `clazzTeachersPersonGroupUid` INTEGER NOT NULL, `clazzPendingStudentsPersonGroupUid` INTEGER NOT NULL, `clazzParentsPersonGroupUid` INTEGER NOT NULL, `clazzCode` TEXT)",
         "fields": [
           {
             "fieldPath": "clazzUid",
@@ -1242,7 +1242,7 @@
             "columnName": "clazzTerminologyUid",
             "affinity": "INTEGER",
             "notNull": true,
-            "defaultValue": "100"
+            "defaultValue": "25966"
           },
           {
             "fieldPath": "clazzMasterChangeSeqNum",
@@ -6124,7 +6124,7 @@
       },
       {
         "tableName": "CourseBlock",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbModuleParentBlockUid` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbHideUntilDate` INTEGER NOT NULL, `cbDeadlineDate` INTEGER NOT NULL, `cbLateSubmissionPenalty` INTEGER NOT NULL, `cbGracePeriodDate` INTEGER NOT NULL, `cbMaxPoints` INTEGER NOT NULL, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbHidden` INTEGER NOT NULL, `cbEntityUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbModuleParentBlockUid` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbCompletionCriteria` INTEGER NOT NULL, `cbHideUntilDate` INTEGER NOT NULL, `cbDeadlineDate` INTEGER NOT NULL, `cbLateSubmissionPenalty` INTEGER NOT NULL, `cbGracePeriodDate` INTEGER NOT NULL, `cbMaxPoints` INTEGER NOT NULL, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbHidden` INTEGER NOT NULL, `cbEntityUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cbUid",
@@ -6161,6 +6161,12 @@
             "columnName": "cbDescription",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "cbCompletionCriteria",
+            "columnName": "cbCompletionCriteria",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "cbHideUntilDate",
@@ -9927,7 +9933,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9aa621508fa19fa63df671d0346bde10')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6d4ccbe5d62c0e2a51a43a04328008a0')"
     ]
   }
 }

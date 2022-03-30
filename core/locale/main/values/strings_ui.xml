@@ -329,6 +329,7 @@
     <string name="xapi_score">Score (%)</string>
     <string name="import_title_not_entered">Title not entered</string>
 
+    <string name="standard">Standard</string>
 
     <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>

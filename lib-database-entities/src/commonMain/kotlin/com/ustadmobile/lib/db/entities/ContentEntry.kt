@@ -113,11 +113,13 @@ open class ContentEntry() {
     /**
      *  Represents if the entry is marked as completed by the content, student or min score
      */
+    @Deprecated("use on courseBlock, will be removed soon")
     var completionCriteria: Int = COMPLETION_CRITERIA_AUTOMATIC
 
     /**
      * Minimum score for content to mark as complete if completion criteria is set to min score
      */
+    @Deprecated("use on courseBlock, will be removed soon")
     var minScore: Int = 0
 
     var contentTypeFlag: Int = 0

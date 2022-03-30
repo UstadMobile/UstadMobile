@@ -33,6 +33,11 @@ class CourseTerminologyListFragment(): UstadListViewFragment<CourseTerminology, 
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        ustadFragmentTitle = requireContext().getString(R.string.select_terminology)
+    }
+
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */

@@ -154,7 +154,6 @@ abstract class UmAppDatabase : DoorDatabase() {
         reportDao.initPreloadedTemplates()
         leavingReasonDao.initPreloadedLeavingReasons()
         languageDao.initPreloadedLanguages()
-        courseTerminologyDao.initPreloadedTerminology()
     }
 
     @JsName("networkNodeDao")

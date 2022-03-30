@@ -12,11 +12,15 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.CourseTerminologyLabel
-import com.ustadmobile.lib.db.entities.CourseTerminologyWithLabel
+import com.ustadmobile.lib.db.entities.TerminologyEntry
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.instance
+import kotlin.jvm.JvmStatic
 
 
 class CourseTerminologyEditPresenter(
@@ -25,7 +29,7 @@ class CourseTerminologyEditPresenter(
     view: CourseTerminologyEditView,
     lifecycleOwner: DoorLifecycleOwner,
     di: DI)
-    : UstadEditPresenter<CourseTerminologyEditView, CourseTerminologyWithLabel>(
+    : UstadEditPresenter<CourseTerminologyEditView, CourseTerminology>(
     context,
     arguments,
     view,
@@ -35,33 +39,44 @@ class CourseTerminologyEditPresenter(
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): CourseTerminologyWithLabel? {
+    private val json: Json by instance()
+
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): CourseTerminology? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val entity =  db.onRepoWithFallbackToDb(2000) {
             it.takeIf { entityUid != 0L }?.courseTerminologyDao?.findByUidAsync(entityUid)
-        }
+        } ?: CourseTerminology()
 
-        val entityWithLabel = CourseTerminologyWithLabel().apply {
-            ctTitle = entity?.ctTitle
-            ctUid = entity?.ctUid ?: 0L
-            ctTerminology = entity?.ctTerminology
-            ctLct = entity?.ctLct ?: 0
-            label = ctTerminology?.let { safeParse(di, CourseTerminologyLabel.serializer(), it) } ?: CourseTerminologyLabel()
-        }
+        makeTermList(entity)
 
-        return entityWithLabel
+        return entity
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): CourseTerminologyWithLabel? {
+    private fun makeTermList(terminology: CourseTerminology){
+        val termMap: Map<String,String> = terminology.ctTerminology?.let {
+            json.decodeFromString(
+                MapSerializer(String.serializer(), String.serializer()), it)
+        } ?: mapOf()
+
+        val termList = TERMINOLOGY_ENTRY_MESSAGE_ID.entries.map {
+            TerminologyEntry(it.key,it.value, termMap[it.key])
+        }.sortedBy { it.id }
+
+        view.terminologyTermList = termList
+    }
+
+    override fun onLoadFromJson(bundle: Map<String, String>): CourseTerminology? {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: CourseTerminologyWithLabel? = null
-        if(entityJsonStr != null) {
-            editEntity = safeParse(di, CourseTerminologyWithLabel.serializer(), entityJsonStr)
+        val editEntity: CourseTerminology = if(entityJsonStr != null) {
+            safeParse(di, CourseTerminology.serializer(), entityJsonStr)
         }else {
-            editEntity = CourseTerminologyWithLabel()
+            CourseTerminology()
         }
+
+        makeTermList(editEntity)
+
 
         return editEntity
     }
@@ -69,49 +84,47 @@ class CourseTerminologyEditPresenter(
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
+        entityVal?.ctTerminology = json.encodeToString(
+            MapSerializer(String.serializer(), String.serializer()),
+            view.terminologyTermList?.associate { it.id to it.term.toString() } ?: mapOf()
+        )
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
     }
 
-    override fun handleClickSave(entity: CourseTerminologyWithLabel) {
+    override fun handleClickSave(entity: CourseTerminology) {
         presenterScope.launch(doorMainDispatcher()) {
 
+            val termList = view.terminologyTermList ?: listOf()
+
+            var foundError = false
             if(entity.ctTitle == null){
+                foundError = true
                 view.titleErrorText = systemImpl.getString(MessageID.field_required_prompt, this)
             }else{
                 view.titleErrorText = null
             }
 
-            if(entity.label?.ctTeacher == null){
-                view.teacherErrorText =  systemImpl.getString(MessageID.field_required_prompt, this)
-            }else{
-                view.teacherErrorText = null
+
+            termList.forEach {
+                 it.errorMessage = if(it.term.isNullOrEmpty()) {
+                     foundError = true
+                     systemImpl.getString(MessageID.field_required_prompt, this)
+                 } else {
+                     null
+                 }
             }
 
-            if(entity.label?.ctStudent == null){
-                view.studentErrorText =  systemImpl.getString(MessageID.field_required_prompt, this)
-            }else{
-                view.studentErrorText = null
-            }
 
-            if(entity.label?.ctAddTeacher == null){
-                view.addTeacherErrorText =  systemImpl.getString(MessageID.field_required_prompt, this)
-            }else{
-                view.addTeacherErrorText = null
-            }
-
-            if(entity.label?.ctAddStudent == null){
-                view.addStudentErrorText =  systemImpl.getString(MessageID.field_required_prompt, this)
-            }else{
-                view.addStudentErrorText = null
-            }
-
-            val label = entity.label
-            if(entityNotFilled(entity) || label == null){
+            if(foundError){
+                view.terminologyTermList = termList.toList()
                 return@launch
             }
 
-            entity.ctTerminology = safeStringify(di, CourseTerminologyLabel.serializer(), label)
+            entity.ctTerminology = json.encodeToString(
+                MapSerializer(String.serializer(), String.serializer()),
+                termList.associate { it.id to it.term.toString() }
+            )
 
             if(entity.ctUid == 0L) {
                 entity.ctUid = repo.courseTerminologyDao.insertAsync(entity)
@@ -126,16 +139,17 @@ class CourseTerminologyEditPresenter(
         }
     }
 
-    private fun entityNotFilled(entity: CourseTerminologyWithLabel): Boolean {
-        return entity.ctTitle == null || entity.label?.ctTeacher == null ||
-                entity.label?.ctTeacher == null || entity.label?.ctStudent == null ||
-                entity.label?.ctAddTeacher == null || entity.label?.ctAddStudent == null
-    }
 
 
     companion object {
 
-        //TODO: Add constants for keys that would be used for any One To Many Join helpers
+        @JvmStatic
+        val TERMINOLOGY_ENTRY_MESSAGE_ID = mapOf(
+            "Teacher" to MessageID.teacher,
+            "Student" to MessageID.student,
+            "AddTeacher" to MessageID.add_a_teacher,
+            "AddStudent" to MessageID.add_a_student
+        )
 
     }
 

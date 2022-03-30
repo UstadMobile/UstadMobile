@@ -1,6 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
@@ -82,7 +84,7 @@ abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
          FROM CourseTerminology
      ORDER BY ctTitle   
     """)
-    abstract fun findAllCourseTerminologyLive(): List<CourseTerminology>
+    abstract fun findAllCourseTerminologyList(): List<CourseTerminology>
 
 
     @JsName("findByUid")
@@ -95,22 +97,5 @@ abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
 
     @Update
     abstract suspend fun updateAsync(entity: CourseTerminology): Int
-
-    @JsName("findByUidList")
-    @Query("SELECT ctUid FROM CourseTerminology WHERE ctUid IN (:uidList)")
-    abstract suspend fun findByUidList(uidList: List<Long>): List<Long>
-
-    @JsName("replaceList")
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun replaceList(entityList: List<CourseTerminology>)
-
-
-    suspend fun initPreloadedTerminology() {
-        val uidsInserted = findByUidList(CourseTerminology.FIXED_UIDS.map { it.key })
-        val terminologyListToInsert = CourseTerminology.FIXED_UIDS.filter { it.key !in uidsInserted }.map { it.value }
-        replaceList(terminologyListToInsert)
-    }
-
-
 
 }

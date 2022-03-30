@@ -6,19 +6,26 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.CourseTerminologyDao
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.util.test.waitUntilAsyncOrTimeout
 import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.CourseTerminologyLabel
+import com.ustadmobile.lib.db.entities.TerminologyEntry
 import com.ustadmobile.lib.db.entities.CourseTerminologyWithLabel
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
@@ -55,6 +62,11 @@ class CourseTerminologyEditPresenterTest {
 
         di = DI {
             import(ustadTestRule.diModule)
+            bind<Json>() with singleton {
+                Json {
+                    encodeDefaults = true
+                }
+            }
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -76,27 +88,29 @@ class CourseTerminologyEditPresenterTest {
 
         val initialEntity = mockView.captureLastEntityValue()!!
 
-        //TODO: Make some changes (e.g. as the user would do using data binding
         initialEntity!!.ctTitle = "Professional English"
-        initialEntity!!.label!!.ctTeacher = "Course Leader"
-        initialEntity!!.label!!.ctStudent = "Course Leader"
-        initialEntity!!.label!!.ctAddTeacher = "Course Leader"
-        initialEntity!!.label!!.ctAddStudent = "Course Leader"
-
+        whenever(mockView.terminologyTermList).thenReturn(listOf(
+            TerminologyEntry("AddStudent","ABC"),
+            TerminologyEntry("AddTeacher","XTZ"),
+            TerminologyEntry("Student","fsds"),
+            TerminologyEntry("Teacher","abc")
+        ))
+        whenever(mockView.entity).thenReturn(initialEntity)
         presenter.handleClickSave(initialEntity)
 
         runBlocking {
-            db.waitUntilAsyncOrTimeout(5000, listOf("@Entity")) {
-                db.courseTerminologyDao.findAllCourseTerminologyLive().size == 1
+            db.waitUntil(5000, listOf("CourseTerminology")) {
+                db.courseTerminologyDao.findAllCourseTerminologyList().size == 1
             }
         }
 
-        val entitySaved = db.courseTerminologyDao.findAllCourseTerminologyLive()[0]
+
+        val entitySaved = db.courseTerminologyDao.findAllCourseTerminologyList()[0]
         Assert.assertEquals("Entity was saved to database",  "Professional English",
                 entitySaved.ctTitle)
-        val label: CourseTerminologyLabel = safeParse(di, CourseTerminologyLabel.serializer(), entitySaved!!.ctTerminology!!)
+        val label: Map<String,String> = safeParse(di, MapSerializer(String.serializer(), String.serializer()), entitySaved!!.ctTerminology!!)
         Assert.assertEquals("Name was saved and updated",
-            "Course Leader", label.ctTeacher)
+            "ABC", label["AddStudent"])
     }
 
     @Test
@@ -106,13 +120,12 @@ class CourseTerminologyEditPresenterTest {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val testEntity = CourseTerminologyWithLabel().apply {
             ctTitle = "Standard English"
-            label = CourseTerminologyLabel().apply {
-                ctTeacher = "Teacher"
-                ctStudent = "Student"
-                ctAddTeacher = "Add teacher"
-                ctAddStudent = "Add student"
-            }
-            ctTerminology = safeStringify(di, CourseTerminologyLabel.serializer(), label!!)
+            ctTerminology = safeStringify(di,
+                MapSerializer(String.serializer(), String.serializer()),
+                mapOf("AddStudent" to "ABC",
+                    "AddTeacher" to "XTZ",
+                    "Student" to "fsds",
+                    "Teacher" to "abc"))
             ctUid = repo.courseTerminologyDao.insert(this)
         }
 
@@ -126,9 +139,16 @@ class CourseTerminologyEditPresenterTest {
 
         //Make some changes to the entity (e.g. as the user would do using data binding)
         initialEntity!!.ctTitle = "Professional English"
-        initialEntity!!.label!!.ctTeacher = "Course Leader"
+
+        whenever(mockView.entity).thenReturn(initialEntity)
+        whenever(mockView.terminologyTermList).thenReturn(listOf(
+            TerminologyEntry("AddStudent","Add Student"),
+            TerminologyEntry("AddTeacher","XTZ"),
+            TerminologyEntry("Student","fsds"),
+            TerminologyEntry("Teacher","abc")))
 
         presenter.handleClickSave(initialEntity)
+
 
         runBlocking {
             db.waitUntilAsyncOrTimeout(5000, listOf("CourseTerminology")) {
@@ -138,12 +158,12 @@ class CourseTerminologyEditPresenterTest {
 
         runBlocking {
             val entitySaved = db.courseTerminologyDao.findByUidAsync(testEntity.ctUid)
-            val label: CourseTerminologyLabel = safeParse(di, CourseTerminologyLabel.serializer(), entitySaved!!.ctTerminology!!)
+            val label: Map<String,String> = safeParse(di, MapSerializer(String.serializer(), String.serializer()), entitySaved!!.ctTerminology!!)
+            Assert.assertEquals("Name was saved and updated",
+                "Add Student", label["AddStudent"])
 
             Assert.assertEquals("Name was saved and updated",
                 "Professional English", entitySaved.ctTitle)
-            Assert.assertEquals("Name was saved and updated",
-                "Course Leader", label.ctTeacher)
         }
 
     }

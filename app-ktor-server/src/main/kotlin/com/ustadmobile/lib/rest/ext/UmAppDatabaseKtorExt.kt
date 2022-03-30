@@ -2,8 +2,11 @@ package com.ustadmobile.lib.rest.ext
 
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.controller.CourseTerminologyEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.doublePbkdf2Hash
 import com.ustadmobile.core.util.ext.grantScopedPermission
@@ -16,6 +19,9 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.randomString
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -33,6 +39,38 @@ internal fun UmAppDatabase.insertDefaultSite() {
             registrationAllowed = false
             authSalt = randomString(20)
         })
+    }
+}
+
+fun UmAppDatabase.insertCourseTerminology(di: DI){
+    val (db, repo) = requireDbAndRepo()
+    val termList = db.courseTerminologyDao.findAllCourseTerminologyList()
+    if(termList.isEmpty()) {
+
+        val impl: UstadMobileSystemImpl by di.instance()
+        val json: Json by di.instance()
+
+        val languageOptions = impl.getAllUiLanguagesList(Any())
+        val terminologyList = mutableListOf<CourseTerminology>()
+
+        languageOptions.forEach {
+            if(it.first.isNullOrEmpty()) return@forEach
+
+            terminologyList.add(CourseTerminology().apply {
+                ctUid = (it.first[0].code shl(8)) + (it.second[1].code).toLong()
+                ctTitle = impl.getString(
+                    com.ustadmobile.core.generated.locale.MessageID.class_code,
+                    Any()) + " - " + it.second
+                ctTerminology = json.encodeToString(
+                    MapSerializer(kotlin.String.serializer(), kotlin.String.serializer()),
+                    com.ustadmobile.core.controller.CourseTerminologyEditPresenter.TERMINOLOGY_ENTRY_MESSAGE_ID
+                        .map { it.key to impl.getString(it.value, Any()) }
+                        .toMap()
+                )
+            })
+        }
+
+        repo.courseTerminologyDao.insertList(terminologyList)
     }
 }
 
@@ -82,6 +120,7 @@ suspend fun UmAppDatabase.initAdminUser(
     }
 }
 
-fun UmAppDatabase.ktorInitRepo() {
+fun UmAppDatabase.ktorInitRepo(di: DI) {
     insertDefaultSite()
+    insertCourseTerminology(di)
 }
