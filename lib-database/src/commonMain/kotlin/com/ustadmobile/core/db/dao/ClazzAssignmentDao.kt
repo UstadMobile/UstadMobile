@@ -286,7 +286,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
                            
         
         FROM ClazzAssignment
-             LEFT JOIN CourseBlock
+             JOIN CourseBlock
              ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
              AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
        WHERE caActive

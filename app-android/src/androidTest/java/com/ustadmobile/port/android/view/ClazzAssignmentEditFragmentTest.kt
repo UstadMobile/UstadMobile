@@ -169,7 +169,6 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
                 this.cbClazzUid = testClazz.clazzUid
                 this.cbEntityUid = caUid
                 cbHideUntilDate = DateTime(2021, 1, 20).unixMillisLong
-                cbDeadlineDate = DateTime(2021, 2, 20).unixMillisLong
                 this.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                 this.cbUid = dbRule.repo.courseBlockDao.insert(this)
             }
@@ -178,7 +177,8 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
 
         init {
 
-            val args = bundleOf(UstadView.ARG_ENTITY_UID to existingClazzAssignment.caUid)
+            val args = bundleOf(UstadView.ARG_ENTITY_UID to existingClazzAssignment.caUid.toString(),
+                UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString())
             fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                     fragmentArgs = args) {
                 ClazzAssignmentEditFragment().also {
