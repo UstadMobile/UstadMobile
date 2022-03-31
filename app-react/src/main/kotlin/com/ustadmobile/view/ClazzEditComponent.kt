@@ -21,6 +21,7 @@ import react.RBuilder
 import react.setState
 import styled.css
 import styled.styledDiv
+import kotlin.js.Date
 
 class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayCalendarAndSchool>(mProps),
     ClazzEdit2View {
@@ -51,22 +52,33 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
     private var scheduleList: List<Schedule> = listOf()
 
+    private var courseBlockList: List<CourseBlockWithEntity> = listOf()
+
     private val scheduleObserver = ObserverFnWrapper<List<Schedule>> {
         setState {
             scheduleList = it
         }
     }
 
+    private val courseBlockObserver = ObserverFnWrapper<List<CourseBlockWithEntity>> {
+        setState {
+            courseBlockList = it
+        }
+    }
+
     override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
-        get() = field
         set(value) {
             field?.removeObserver(scheduleObserver)
             field = value
             value?.observe(this, scheduleObserver)
         }
-    override var courseBlocks: DoorMutableLiveData<List<CourseBlockWithEntity>>?
-        get() = TODO("Not yet implemented")
-        set(value) {}
+
+    override var courseBlocks: DoorMutableLiveData<List<CourseBlockWithEntity>>? = null
+        set(value) {
+            field?.removeObserver(courseBlockObserver)
+            field = value
+            value?.observe(this, courseBlockObserver)
+        }
 
     override var clazzEndDateError: String? = null
         set(value) {
@@ -99,6 +111,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
     override var coursePicturePath: String?
         get() = TODO("Not yet implemented")
         set(value) {}
+
     override var coursePicture: CoursePicture?
         get() = TODO("Not yet implemented")
         set(value) {}
@@ -137,6 +150,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                 +contentContainer
                 +defaultPaddingTop
             }
+            renderAddContentOptionsDialog()
             umGridContainer(GridSpacing.spacing4) {
                 umItem(GridSize.cells12, GridSize.cells4){
                     umEntityAvatar(fallbackSrc = ASSET_ENTRY, listItem = true)
@@ -206,15 +220,31 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                         }
                     }
 
+                    createListSectionTitle(getString(MessageID.course_blocks))
+
+                    val createCourse = CreateNewItem(true, MessageID.add_block){
+                        setState {
+                            showAddEntryOptions = true
+                        }
+                    }
+
+                    mPresenter?.let { presenter ->
+                        renderCourseBlocks(presenter,courseBlockList.toSet().toList(),createCourse){
+                            mPresenter?.onClickEdit(it)
+                        }
+                    }
+
+                    umSpacer()
+
                     createListSectionTitle(getString(MessageID.schedule))
 
-                    val createNewItem = CreateNewItem(true, MessageID.add_a_schedule){
+                    val createSchedule = CreateNewItem(true, MessageID.add_a_schedule){
                         mPresenter?.scheduleOneToManyJoinListener?.onClickNew()
                     }
 
                     mPresenter?.let { presenter ->
                         renderSchedules(presenter.scheduleOneToManyJoinListener,
-                            scheduleList.toSet().toList(), createNewItem = createNewItem){
+                            scheduleList.toSet().toList(), createNewItem = createSchedule){
                             mPresenter?.scheduleOneToManyJoinListener?.onClickEdit(it)
                         }
                     }
@@ -305,6 +335,31 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
                 }
 
+            }
+        }
+    }
+
+    fun RBuilder.renderAddContentOptionsDialog() {
+        if(showAddEntryOptions){
+            val options  = listOf(
+                UmDialogOptionItem("apps",MessageID.module, MessageID.course_module) {
+                    mPresenter?.handleClickAddModule()
+                },
+                UmDialogOptionItem("text_snippet",MessageID.text, MessageID.formatted_text_to_show_to_course_participants) {
+                    mPresenter?.handleClickAddText()
+                },
+                UmDialogOptionItem("library_books",MessageID.content, MessageID.add_course_block_content_desc) {
+                    mPresenter?.handleClickAddContent()
+                },
+                UmDialogOptionItem("assignment",MessageID.assignments, MessageID.add_assignment_block_content_desc) {
+                    mPresenter?.handleClickAddAssignment()
+                }
+            )
+
+            renderDialogOptions(systemImpl,options, Date().getTime().toLong()){
+                setState {
+                    showAddEntryOptions = false
+                }
             }
         }
     }

@@ -57,12 +57,14 @@ class ClazzEdit2Presenter(context: Any,
     val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(repo, this,
         requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
 
+
     private val courseBlockOneToManyJoinEditHelper
-            = DefaultOneToManyJoinEditHelper(CourseBlockWithEntity::cbUid,
+            = OneToManyJoinEditHelperMp(CourseBlockWithEntity::cbUid,
             ARG_SAVEDSTATE_BLOCK,
             ListSerializer(CourseBlockWithEntity.serializer()),
             ListSerializer(CourseBlockWithEntity.serializer()),
             this,
+            requireSavedStateHandle(),
             CourseBlockWithEntity::class) {cbUid = it}
 
     override val persistenceMode: PersistenceMode
