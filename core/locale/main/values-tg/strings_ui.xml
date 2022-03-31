@@ -90,7 +90,7 @@
     <string name="no_video_file_found">Ягон файли видеоӣ ёфт нашуд</string>
     <string name="cancel_invite">Бекор кардани даъват</string>
     <string name="share_offline_zip_checkbox_label">Файли фишурдашударо фиристед</string>
-    <string name="preparing">Ҳолати омода шудан аст</string>
+    <string name="preparing">Ҳолати омода шавӣ аст</string>
     <string name="field_required_prompt">Ин бахш ҳатмист</string>
     <string name="field_password_min">Ҳадди ақал 5 аломат</string>
     <string name="field_password_error_min">Парол бояд на камтар аз 5 аломат бошад</string>
@@ -982,7 +982,7 @@
     <string name="time_range">Доираи вақт</string>
     <string name="selected_custom_range">Доираи фармоишӣ: %1$s%</string>
     <string name="new_custom_date_range" value="804">Доираи вақти фармоиши нав…</string>
-    <string name="report_filter_edit_field">Соҳа</string>
+    <string name="report_filter_edit_field">Самт</string>
     <string name="report_filter_edit_values">Қиммат</string>
     <string name="edit_filters">Таҳрири филтрҳо</string>
     <string name="field_person_gender">Ҷинси шахс</string>
