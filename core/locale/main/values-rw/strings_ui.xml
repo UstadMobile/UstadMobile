@@ -21,7 +21,7 @@
     <string name="download">Kurura( Dowunirodinga)</string>
     <string name="pause_download">Hagarika gukurura (Kudawunirodinga)</string>
     <string name="processing">Iri gutunganywa</string>
-    <string name="app_name">Ustad Mobile</string>
+    <string name="app_name">Urubuga rwa Ustad Mobile</string>
     <string name="download_locally_availability">Ibiboneka hafi aho</string>
     <string name="number_active_users">Ikoresha ry\'ibikubiyemo- Umubare wabari gukoresha porogaramu</string>
     <string name="report">Raporo</string>
@@ -59,9 +59,9 @@
     <string name="add_file_description">Shyiraho ibikubiye mu burezi ukoresheje igenamiterere zihuje imikorere e.g. PDF, xAPI, H5P, EPUB</string>
     <string name="onboarding_no_internet_headline">Nta interineti ihari\? Ntakibazo.</string>
     <string name="exams">Ibizamini</string>
-    <string name="onboarding_no_internet_subheadline">Kurura amashusho,ingingo n\'imyitozo igendanye n\'uburezi kugira ngo uze kubikoresha hanyuma.</string>
+    <string name="onboarding_no_internet_subheadline">Buri kintu gikora nta interineti</string>
     <string name="reports">Amaraporo</string>
-    <string name="onboarding_offline_sharing_subheading">"Sangiza ibikubiyemo kumuvuduko wo hejuru  nundi uri gukoresha ibi uri iruhande rwawe."</string>
+    <string name="onboarding_offline_sharing_subheading">Bika igihe n\'amakuru ukoresheje uburyo bwihuta bwo gusangiza amakuru nta enterineti</string>
     <string name="location_permission_title">Uruhushya rugaragaza aho uherereye rurakenewe</string>
     <string name="xapi_options_report_title">Umutwe wa raporo</string>
     <string name="xapi_options_data_set">Amakuru akenewe</string>
@@ -93,7 +93,7 @@
     <string name="preview">Banza witegereze</string>
     <string name="file_required_prompt">Idosiye yo gukurwa hamwe yinjizwa ahandi ntabwo yahiswemo,ongera ugerageze</string>
     <string name="content_creation_folder_new_message">Ububiko bushya bwongeweho neza</string>
-    <string name="content_creation_folder_update_message">Ububiko bwavuguruwe neza.</string>
+    <string name="content_creation_folder_update_message">Ububiko bwavuguruwe neza</string>
     <string name="error_message_load_page">Gutunganya paji byanze</string>
     <string name="onboarding_offline_sharing">Sangiza abandi udafite interineti</string>
     <string name="supported_files">Idosiye zikorana :<b>amashusho,amajwi,EPUB,Xapi Zip,H5P</b></string>
@@ -316,7 +316,7 @@
     <string name="update">Injizamo amakuru mashya</string>
     <string name="yes_no">Yego-Oya</string>
     <string name="end_is_before_start_error">Umusozo ubanziriza intangiriro</string>
-    <string name="record_attendance_for_most_recent_occurrence">Uzuza mu bwitabire ingeso/ikintu giherutse gukunda kuba mu ishuri.</string>
+    <string name="record_attendance_for_most_recent_occurrence">Andika mu bwitabire ingeso/ikintu giherutse kuba vuba mu ishuri</string>
     <string name="site_link">Ihuzarubuga</string>
     <string name="please_enter_the_linK">Urasabwa kwinjiza ihuzarubuga yawe wahawe na mwarimu cg umuyobozi:</string>
     <string name="sites_can_be_help_text">Imbuga zishobora gushyirirwaho ibigo by\'amashuri, imishinga, n\'imiryango yabishyize hamwe, n\'ibindi. Buri rubugarushobora kwiharira abarukoresha , abayobozi,ibirukubiyemo, amashuri, n\'ibindi byinshi.</string>
@@ -951,4 +951,5 @@
     <string name="enrolment_requests_must_be_approved">Ubusabe bwo kwiyandikisha bugomba kwemererwa</string>
     <string name="add_new_terminology">Ongeramo ijambo rikoreshwa</string>
     <string name="add_course_block_content_desc">Shyiraho amajwi, amashusho,ibitambo bisomerwa kuri murandasi, Ibikubiyemo biganirwaho( H5P, XAPI, etc) ubikuye ku madsiye cg ihuza/ilinki</string>
+    <string name="onboarding_stay_organized_headline">Guma ufite gahunda</string>
 </resources>
