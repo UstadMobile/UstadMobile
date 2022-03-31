@@ -275,11 +275,10 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                                     setState {
                                         entity?.clazzTimeZone = it
                                     }
-                                }){
-                                attrs.asDynamic().onClick = {
+                                },
+                                onClick = {
                                     mPresenter?.handleClickTimezone()
-                                }
-                            }
+                                })
                         }
 
                         umItem(GridSize.cells12, GridSize.cells6 ) {

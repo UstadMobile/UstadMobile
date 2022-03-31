@@ -41,13 +41,14 @@ fun RBuilder.umTextField(
     id: String? = null,
     name: String? = null,
     className: String? = null,
+    onClick: (() -> Unit)? = null,
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
     css(defaultFullWidth)
     setProps(
         this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
         id, label, margin, false, name, onChange, placeholder, required, null, null,
-        false, type, value, variant
+        false, type, value, variant,onClick
     )
 }
 
@@ -141,6 +142,7 @@ private fun setProps(
     type: InputType,
     value: String?,
     variant: FormControlVariant,
+    onClick: (() -> Unit)? = null,
 ) {
     autoComplete?.let { textField.attrs.autoComplete = it }
     textField.attrs.autoFocus = autoFocus
@@ -166,6 +168,9 @@ private fun setProps(
     textField.attrs.select = select
     textField.attrs.type = type
     textField.attrs.value = value ?: ""
+    textField.attrs.onClick = {
+        onClick?.invoke()
+    }
     textField.attrs.variant = variant.toString()
 }
 

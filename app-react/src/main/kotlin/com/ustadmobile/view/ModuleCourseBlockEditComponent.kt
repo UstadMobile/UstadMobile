@@ -138,11 +138,11 @@ class ModuleCourseBlockEditComponent (mProps: UmProps): UstadEditComponent<Cours
                         label = "${doNotShowBeforeLabel.text}",
                         error = doNotShowBeforeLabel.error,
                         helperText = doNotShowBeforeLabel.errorText,
-                        value = entity?.cbStartDate.toDate(true),
+                        value = startDate.toDate(true),
                         inputVariant = FormControlVariant.outlined,
                         onChange = {
                             setState {
-                                entity?.cbStartDate = it.getTime().toLong()
+                                startDate = it.getTime().toLong()
                             }
                         }
                     )
@@ -153,11 +153,11 @@ class ModuleCourseBlockEditComponent (mProps: UmProps): UstadEditComponent<Cours
                         label = "${startTimeLabel.text}",
                         error = startTimeLabel.error,
                         helperText = startTimeLabel.errorText,
-                        value = entity?.cbStartDate.toDate(true),
+                        value = startDate.toDate(true),
                         inputVariant = FormControlVariant.outlined,
                         onChange = {
                             setState {
-                                entity?.cbStartDate =  it.getTime().toLong()
+                                startTime = startDate - it.getTime().toLong()
                             }
                         }
                     )
