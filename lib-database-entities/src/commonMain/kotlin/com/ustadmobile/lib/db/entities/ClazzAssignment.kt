@@ -34,7 +34,7 @@ open class ClazzAssignment {
 
     var caDescription: String? = null
 
-    @ColumnInfo(defaultValue = "0")
+    @ColumnInfo(defaultValue = "1")
     var caSubmissionType: Int = SUBMISSION_TYPE_INDIVIDUAL
 
     var caActive: Boolean = true
@@ -43,7 +43,8 @@ open class ClazzAssignment {
 
     var caPrivateCommentsEnabled: Boolean = false
 
-    @ColumnInfo(defaultValue = "1")
+    @Deprecated("use on courseBlock, will be removed soon")
+    @ColumnInfo(defaultValue = "100")
     var caCompletionCriteria: Int = COMPLETION_CRITERIA_SUBMIT
 
     @ColumnInfo(defaultValue = "1")

@@ -5,9 +5,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
 
@@ -16,20 +14,11 @@ import kotlin.js.JsName
 abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
 
     @Query("""
-    REPLACE INTO CourseTerminologyReplicate(ctPk, ctDestination)
-      SELECT DISTINCT CourseTerminology.ctUid AS ctPk,
+     REPLACE INTO CourseTerminologyReplicate(ctPk, ctDestination)
+      SELECT CourseTerminology.ctUid AS ctPk,
              :newNodeId AS ctDestination
-        FROM UserSession
-             JOIN PersonGroupMember 
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_CLAZZ_SELECT} 
-                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
-               JOIN CourseTerminology
-                    ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid                
-       WHERE UserSession.usClientNodeId = :newNodeId
-         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-         AND CourseTerminology.ctLct != COALESCE(
+        FROM CourseTerminology
+       WHERE CourseTerminology.ctLct != COALESCE(
              (SELECT ctVersionId
                 FROM CourseTerminologyReplicate
                WHERE ctPk = CourseTerminology.ctUid
@@ -42,21 +31,15 @@ abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
     @ReplicationCheckPendingNotificationsFor([CourseTerminology::class])
     abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
 
-
-
     @Query("""
-         REPLACE INTO CourseTerminologyReplicate(ctPk, ctDestination)
-  SELECT DISTINCT CourseTerminology.ctUid AS ctPk,
+ REPLACE INTO CourseTerminologyReplicate(ctPk, ctDestination)
+  SELECT CourseTerminology.ctUid AS ctUid,
          UserSession.usClientNodeId AS ctDestination
     FROM ChangeLog
          JOIN CourseTerminology
              ON ChangeLog.chTableId = ${CourseTerminology.TABLE_ID}
                 AND ChangeLog.chEntityPk = CourseTerminology.ctUid
-             JOIN Clazz
-                    ON  Clazz.clazzTerminologyUid = CourseTerminology.ctUid
-         ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-              ${Role.PERMISSION_CLAZZ_SELECT}
-              ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}  
+         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
    WHERE UserSession.usClientNodeId != (
          SELECT nodeClientId 
            FROM SyncNode
@@ -88,6 +71,16 @@ abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
      ORDER BY ctTitle   
     """)
     abstract fun findAllCourseTerminologyList(): List<CourseTerminology>
+
+
+    @Query("""
+        SELECT *
+          FROM CourseTerminology
+               JOIN Clazz 
+               ON Clazz.clazzTerminologyUid = CourseTerminology.ctUid
+         WHERE Clazz.clazzUid = :clazzUid
+    """)
+    abstract suspend fun getTerminologyForClazz(clazzUid: Long): CourseTerminology?
 
 
     @JsName("findByUid")

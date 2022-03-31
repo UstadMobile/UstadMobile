@@ -6,12 +6,20 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzListCardBinding
 import com.ustadmobile.core.controller.ClazzListItemListener
+import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
+import org.kodein.di.DI
+import org.kodein.di.instance
 
-class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?)
+class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?, di: DI)
     : SelectablePagedListAdapter<ClazzWithListDisplayDetails,
         ClazzListRecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
+
+    val json: Json by di.instance()
 
     class ClazzList2ViewHolder(val itemBinding: ItemClazzListCardBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
@@ -23,9 +31,18 @@ class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?)
     }
 
     override fun onBindViewHolder(holder: ClazzList2ViewHolder, position: Int) {
-        holder.itemBinding.clazz = getItem(position)
+        val clazz = getItem(position)
+        holder.itemBinding.clazz = clazz
         holder.itemView.tag = holder.itemBinding.clazz?.clazzUid
         holder.itemBinding.itemListener = itemListener
+
+        val termMap =  clazz?.terminology?.ctTerminology?.let {
+            json.decodeFromString(
+                MapSerializer(String.serializer(), String.serializer()),
+                it
+            )
+        } ?: mapOf()
+        holder.itemBinding.teacherStudentCount = """${clazz?.numTeachers ?: 0} ${termMap[TerminologyKeys.TEACHERS_KEY]}, ${clazz?.numStudents ?: 0} ${termMap[TerminologyKeys.STUDENTS_KEY]}"""
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

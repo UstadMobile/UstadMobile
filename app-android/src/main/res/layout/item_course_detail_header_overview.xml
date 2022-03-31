@@ -19,6 +19,10 @@
             name="clazzCodeVisible"
             type="boolean" />
 
+        <variable
+            name="teacherStudentCount"
+            type="String" />
+
 
     </data>
 
@@ -57,7 +61,7 @@
 
         <TextView
             android:id="@+id/fragment_clazz_detail_overview_num_members"
-            android:text="@{@string/x_teachers_y_students(clazz.numTeachers, clazz.numStudents)}"
+            android:text="@{teacherStudentCount}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_8dp"
