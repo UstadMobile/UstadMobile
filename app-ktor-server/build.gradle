@@ -68,6 +68,8 @@ dependencies {
     implementation "net.sf.kxml:kxml2:$version_kxml"
 
     implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
+    implementation "io.ktor:ktor-websockets:$version_ktor"
+
 
     implementation project(":core")
     implementation project(":sharedse")
