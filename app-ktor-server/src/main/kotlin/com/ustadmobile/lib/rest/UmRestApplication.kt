@@ -56,6 +56,8 @@ import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 import io.ktor.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.util.SysPathUtil
+import io.ktor.client.*
+import io.ktor.websocket.*
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -76,7 +78,7 @@ val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
  */
 val KTOR_SERVER_ROUTES = listOf("/UmAppDatabase", "/ConcatenatedContainerFiles2",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/ContainerUpload2", "/Site", "/import", "/contentupload")
+    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket")
 
 
 /**
@@ -392,6 +394,8 @@ fun Application.umRestApplication(
 
     val jsDevServer = appConfig.propertyOrNull("ktor.ustad.jsDevServer")?.getString()
     if(jsDevServer != null) {
+        install(WebSockets)
+
         intercept(ApplicationCallPipeline.Setup) {
             val requestUri = call.request.uri
             if(!KTOR_SERVER_ROUTES.any { requestUri.startsWith(it) }) {
@@ -431,7 +435,9 @@ fun Application.umRestApplication(
         }
 
         //Handle default route when running behind proxy
-        if(jsDevServer.isNullOrBlank()) {
+        if(!jsDevServer.isNullOrBlank()) {
+            webSocketProxyRoute(jsDevServer)
+        }else {
             route("/"){
                 get{
                     call.respondRedirect("umapp/")
