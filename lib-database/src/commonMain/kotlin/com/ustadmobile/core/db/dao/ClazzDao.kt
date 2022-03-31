@@ -152,7 +152,8 @@ abstract class ClazzDao : BaseDao<Clazz> {
                    AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
                         AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers,
                '' AS teacherNames,
-               0 AS lastRecorded
+               0 AS lastRecorded,
+               CourseTerminology.*
           FROM PersonGroupMember
                ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
                     :permission
@@ -165,6 +166,9 @@ abstract class ClazzDao : BaseDao<Clazz> {
                          WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
                            AND ClazzEnrolment.clazzEnrolmentActive
                            AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid LIMIT 1), 0)
+                LEFT JOIN CourseTerminology   
+                ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid           
+
          WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
            AND PersonGroupMember.groupMemberActive 
            AND CAST(Clazz.isClazzActive AS INTEGER) = 1
@@ -192,7 +196,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
                ELSE ''
                END DESC
     """)
-    @QueryLiveTables(["Clazz", "ClazzEnrolment", "ScopedGrant", "PersonGroupMember"])
+    @QueryLiveTables(["Clazz", "ClazzEnrolment", "ScopedGrant", "PersonGroupMember","CourseTerminology"])
     abstract fun findClazzesWithPermission(
         searchQuery: String,
         accountPersonUid: Long,
@@ -275,7 +279,8 @@ abstract class ClazzDao : BaseDao<Clazz> {
                  WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
                    AND clazzEnrolmentRole = $ROLE_TEACHER 
                    AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
-                       AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers
+                       AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers,
+                CourseTerminology.*      
          FROM Clazz 
               LEFT JOIN HolidayCalendar 
               ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid

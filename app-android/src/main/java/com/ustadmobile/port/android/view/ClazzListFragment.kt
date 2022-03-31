@@ -48,7 +48,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
             sortOrderOption = mPresenter?.sortOptions?.get(0),
             filterOptions = ClazzListPresenter.FILTER_OPTIONS.toListFilterOptions(requireContext(), di),
             onFilterOptionSelected = mPresenter)
-        mDataRecyclerViewAdapter = ClazzListRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = ClazzListRecyclerAdapter(mPresenter, di)
 
         return view
     }

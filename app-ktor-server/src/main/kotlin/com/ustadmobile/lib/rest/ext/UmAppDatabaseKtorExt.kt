@@ -58,12 +58,13 @@ fun UmAppDatabase.insertCourseTerminology(di: DI){
 
             terminologyList.add(CourseTerminology().apply {
                 ctUid = (pair.first[0].code shl(8)) + (pair.second[1].code).toLong()
-                ctTitle = impl.getString(
+                ctTitle = impl.getString(pair.first,
                     com.ustadmobile.core.generated.locale.MessageID.standard,
                     Any()) + " - " + pair.second
+
                 ctTerminology = json.encodeToString(
                     MapSerializer(kotlin.String.serializer(), kotlin.String.serializer()),
-                    com.ustadmobile.core.controller.CourseTerminologyEditPresenter.TERMINOLOGY_ENTRY_MESSAGE_ID
+                    com.ustadmobile.core.controller.TerminologyKeys.TERMINOLOGY_ENTRY_MESSAGE_ID
                         .map { it.key to impl.getString(pair.first, it.value, Any()) }
                         .toMap()
                 )

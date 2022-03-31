@@ -508,7 +508,6 @@
     <string name="attendance_high_to_low">Attendance (high to low)</string>
     <string name="attendance_low_to_high">Attendance (low to high)</string>
     <string name="teacher">Teacher</string>
-    <string name="teachers">Teachers</string>
     <string name="add_a_teacher">Add a teacher</string>
     <string name="partial">Partial</string>
     <string name="teachers_literal">Teachers</string>

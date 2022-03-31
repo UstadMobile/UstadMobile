@@ -20,7 +20,6 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
-import kotlin.jvm.JvmStatic
 
 
 class CourseTerminologyEditPresenter(
@@ -58,7 +57,7 @@ class CourseTerminologyEditPresenter(
                 MapSerializer(String.serializer(), String.serializer()), it)
         } ?: mapOf()
 
-        val termList = TERMINOLOGY_ENTRY_MESSAGE_ID.entries.map {
+        val termList = TerminologyKeys.TERMINOLOGY_ENTRY_MESSAGE_ID.entries.map {
             TerminologyEntry(it.key,it.value, termMap[it.key])
         }.sortedBy { it.id }
 
@@ -137,22 +136,6 @@ class CourseTerminologyEditPresenter(
                 ListSerializer(CourseTerminology.serializer()), listOf(entity))
             )
         }
-    }
-
-
-
-    companion object {
-
-        @JvmStatic
-        val TERMINOLOGY_ENTRY_MESSAGE_ID = mapOf(
-            "Teacher" to MessageID.teacher,
-            "Student" to MessageID.student,
-            "Teachers" to MessageID.teachers,
-            "Students" to MessageID.students,
-            "AddTeacher" to MessageID.add_a_teacher,
-            "AddStudent" to MessageID.add_a_student
-        )
-
     }
 
 }

@@ -73,6 +73,16 @@ abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
     abstract fun findAllCourseTerminologyList(): List<CourseTerminology>
 
 
+    @Query("""
+        SELECT *
+          FROM CourseTerminology
+               JOIN Clazz 
+               ON Clazz.clazzTerminologyUid = CourseTerminology.ctUid
+         WHERE Clazz.clazzUid = :clazzUid
+    """)
+    abstract suspend fun getTerminologyForClazz(clazzUid: Long): CourseTerminology?
+
+
     @JsName("findByUid")
     @Query("""
         SELECT * 

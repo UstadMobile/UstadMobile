@@ -15,6 +15,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemClazzmemberListItemBinding
 import com.toughra.ustadmobile.databinding.ItemClazzmemberPendingListItemBinding
 import com.ustadmobile.core.controller.ClazzMemberListPresenter
+import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toListFilterOptions
@@ -23,8 +24,8 @@ import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
@@ -33,11 +34,9 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
-import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
-import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolmentDetails, PersonWithClazzEnrolmentDetails>(),
@@ -119,6 +118,23 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         set(value) {
             field = value
             mNewStudentListRecyclerViewAdapter?.newItemVisible = value
+        }
+
+    override var termMap: Map<String, String>? = null
+        set(value) {
+            field = value
+            mUstadListHeaderRecyclerViewAdapter?.createNewText = value?.get(TerminologyKeys.ADD_TEACHER_KEY)
+                ?: requireContext().getString(R.string.add_a_teacher)
+
+            mUstadListHeaderRecyclerViewAdapter?.headerStringText = value?.get(TerminologyKeys.TEACHERS_KEY)
+                ?: requireContext().getString(R.string.teachers_literal)
+
+            mNewStudentListRecyclerViewAdapter?.createNewText = value?.get(TerminologyKeys.ADD_STUDENT_KEY)
+                ?: requireContext().getString(R.string.add_a_student)
+
+            mNewStudentListRecyclerViewAdapter?.headerStringText = value?.get(TerminologyKeys.STUDENTS_KEY)
+                ?: requireContext().getString(R.string.students)
+
         }
 
     class ClazzMemberListViewHolder(val itemBinding: ItemClazzmemberListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)

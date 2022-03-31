@@ -18,6 +18,10 @@
             name="itemListener"
             type="com.ustadmobile.core.controller.ClazzListItemListener" />
 
+        <variable
+            name="teacherStudentCount"
+            type="String" />
+
     </data>
 
 
@@ -158,7 +162,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dimen_8dp"
-                android:text="@{@string/x_teachers_y_students(clazz.numTeachers, clazz.numStudents)}"
+                android:text="@{teacherStudentCount}"
                 app:layout_constraintStart_toEndOf="@+id/item_clazzlist_people_icon"
                 app:layout_constraintTop_toBottomOf="@+id/barrier_desc"
                 tools:text="X students, Y teachers" />
