@@ -147,6 +147,8 @@ class CourseTerminologyEditPresenter(
         val TERMINOLOGY_ENTRY_MESSAGE_ID = mapOf(
             "Teacher" to MessageID.teacher,
             "Student" to MessageID.student,
+            "Teachers" to MessageID.teachers,
+            "Students" to MessageID.students,
             "AddTeacher" to MessageID.add_a_teacher,
             "AddStudent" to MessageID.add_a_student
         )

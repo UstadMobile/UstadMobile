@@ -7,7 +7,6 @@ import com.ustadmobile.door.annotation.ReplicationDestinationNodeId
 import com.ustadmobile.door.annotation.ReplicationEntityForeignKey
 import com.ustadmobile.door.annotation.ReplicationPending
 import com.ustadmobile.door.annotation.ReplicationVersionId
-import kotlinx.serialization.Serializable
 
 @Entity(
     primaryKeys = arrayOf("ctPk", "ctDestination"),
@@ -15,7 +14,6 @@ import kotlinx.serialization.Serializable
         Index(value = arrayOf("ctDestination", "ctPending")))
 
 )
-@Serializable
 public class CourseTerminologyReplicate {
 
     @ReplicationEntityForeignKey
