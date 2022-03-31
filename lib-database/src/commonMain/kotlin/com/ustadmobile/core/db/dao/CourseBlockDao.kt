@@ -83,10 +83,10 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
         SELECT * 
           FROM CourseBlock 
                LEFT JOIN ClazzAssignment as assignment
-               ON assignment.caUid = CourseBlock.cbTableUid
+               ON assignment.caUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                LEFT JOIN ContentEntry as entry
-               ON entry.contentEntryUid = CourseBlock.cbTableUid
+               ON entry.contentEntryUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
          WHERE cbClazzUid = :clazzUid
            AND cbActive
@@ -100,7 +100,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                SELECT PrsGrpMbr.groupMemberPersonUid
                   FROM Clazz
                        ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                          :permission
+                          ${Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS}
                           ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
                  WHERE Clazz.clazzUid = :clazzUid
                    AND PrsGrpMbr.groupMemberPersonUid = :personUid))
@@ -128,7 +128,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid 
                         AND ClazzEnrolment.clazzEnrolmentActive 
                         AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                        AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
+                        AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
                         AS totalStudents, 
  
                0 AS notSubmittedStudents,
@@ -149,7 +149,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                           AND ClazzEnrolment.clazzEnrolmentActive
                           AND CourseAssignmentMark.camUid IS NULL
                           AND ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-                          AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
+                          AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
                 ELSE 0 END) AS submittedStudents,         
                
                 (CASE WHEN (SELECT hasPermission 
@@ -163,7 +163,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                             AND ClazzEnrolment.clazzEnrolmentActive
                             AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                             AND ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
-                            AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
+                            AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
                    ELSE 0 END) AS markedStudents,
                    
                    (CASE WHEN CourseAssignmentMark.camAssignmentUid IS NOT NULL 
@@ -178,11 +178,11 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                AND CourseBlock.cbTYpe != ${CourseBlock.BLOCK_MODULE_TYPE}
           
                LEFT JOIN ClazzAssignment
-               ON ClazzAssignment.caUid = CourseBlock.cbTableUid
+               ON ClazzAssignment.caUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                
                LEFT JOIN ContentEntry
-               ON ContentEntry.contentEntryUid = CourseBlock.cbTableUid
+               ON ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
                AND NOT ceInactive
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                
@@ -217,9 +217,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND CourseBlock.cbActive
            AND NOT CourseBlock.cbHidden
-           AND :currentTime > CourseBlock.cbStartDate
-           AND (CourseBlock.cbType = ${CourseBlock.BLOCK_MODULE_TYPE} 
-                OR :currentTime > parentBlock.cbStartDate)
+           AND :currentTime > CourseBlock.cbHideUntilDate     
            AND CourseBlock.cbModuleParentBlockUid NOT IN (:collapseList)
       ORDER BY CourseBlock.cbIndex
     """)
@@ -230,8 +228,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
     abstract fun findAllCourseBlockByClazzUidLive(clazzUid: Long,
                                                   personUid: Long,
                                                   collapseList: List<Long>,
-                                                  currentTime: Long,
-                                                  permission: Long):
+                                                  currentTime: Long):
             DoorDataSourceFactory<Int, CourseBlockWithCompleteEntity>
 
 

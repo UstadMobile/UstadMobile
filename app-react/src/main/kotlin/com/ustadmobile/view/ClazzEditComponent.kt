@@ -23,12 +23,12 @@ import styled.css
 import styled.styledDiv
 import kotlin.js.Date
 
-class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayCalendarAndSchool>(mProps),
+class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayCalendarAndSchoolAndTerminology>(mProps),
     ClazzEdit2View {
 
     private var mPresenter: ClazzEdit2Presenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendarAndSchool>?
+    override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendarAndSchoolAndTerminology>?
         get() = mPresenter
 
     override val viewNames: List<String>
@@ -124,7 +124,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
             }
         }
 
-    override var entity: ClazzWithHolidayCalendarAndSchool? = null
+    override var entity: ClazzWithHolidayCalendarAndSchoolAndTerminology? = null
         get() = field
         set(value) {
             if(value?.clazzName != null){

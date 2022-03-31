@@ -15,10 +15,10 @@ import kotlinx.serialization.Serializable
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
                 sqlStatements = [
-                    """REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbStartDate, cbIndex, cbClazzUid, cbActive,cbHidden, cbTableId, cbTableUid, cbLct) 
-         VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbModuleParentBlockUid, NEW.cbTitle, NEW.cbDescription, NEW.cbStartDate, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbHidden, NEW.cbTableId,  NEW.cbTableUid, NEW.cbLct) 
+                    """REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints, cbIndex, cbClazzUid, cbActive,cbHidden, cbEntityUid, cbLct) 
+         VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbModuleParentBlockUid, NEW.cbTitle, NEW.cbDescription, NEW.cbCompletionCriteria, NEW.cbHideUntilDate, NEW.cbDeadlineDate, NEW.cbLateSubmissionPenalty, NEW.cbGracePeriodDate, NEW.cbMaxPoints, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbHidden, NEW.cbEntityUid, NEW.cbLct) 
          /*psql ON CONFLICT (cbUid) DO UPDATE 
-         SET cbUid = EXCLUDED.cbUid, cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbModuleParentBlockUid = EXCLUDED.cbModuleParentBlockUid, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbStartDate = EXCLUDED.cbStartDate, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbHidden = EXCLUDED.cbHidden, cbTableId = EXCLUDED.cbTableId, cbTableUid = EXCLUDED.cbTableUid, cbLct = EXCLUDED.cbLct
+         SET cbUid = EXCLUDED.cbUid, cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbModuleParentBlockUid = EXCLUDED.cbModuleParentBlockUid, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbCompletionCriteria = EXCLUDED.cbCompletionCriteria, cbHideUntilDate = EXCLUDED.cbHideUntilDate,cbDeadlineDate = EXCLUDED.cbDeadlineDate, cbLateSubmissionPenalty = EXCLUDED.cbLateSubmissionPenalty, cbGracePeriodDate= EXCLUDED.cbGracePeriodDate, cbMaxPoints = EXCLUDED.cbMaxPoints, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbHidden = EXCLUDED.cbHidden, cbEntityUid = EXCLUDED.cbEntityUid, cbLct = EXCLUDED.cbLct
          */"""
                 ]
         )
@@ -29,6 +29,10 @@ open class CourseBlock {
     @PrimaryKey(autoGenerate = true)
     var cbUid: Long = 0
 
+    /**
+     * If cbType is ContentEntry or Assignment
+     * then cbEntityUid is the uid for the respective entity
+     */
     var cbType: Int = 0
 
     var cbIndentLevel: Int = 0
@@ -39,7 +43,17 @@ open class CourseBlock {
 
     var cbDescription: String? = null
 
-    var cbStartDate: Long = 0
+    var cbCompletionCriteria: Int = 0
+
+    var cbHideUntilDate: Long = 0
+
+    var cbDeadlineDate: Long = Long.MAX_VALUE
+
+    var cbLateSubmissionPenalty: Int = 0
+
+    var cbGracePeriodDate: Long = Long.MAX_VALUE
+
+    var cbMaxPoints: Int = 10
 
     var cbIndex: Int = 0
 
@@ -50,9 +64,7 @@ open class CourseBlock {
 
     var cbHidden: Boolean = false
 
-    var cbTableId: Int = 0
-
-    var cbTableUid: Long = 0
+    var cbEntityUid: Long = 0
 
     @LastChangedTime
     @ReplicationVersionId
@@ -62,15 +74,15 @@ open class CourseBlock {
 
         const val TABLE_ID = 124
 
-        const val BLOCK_MODULE_TYPE = 1
+        const val BLOCK_MODULE_TYPE = 100
 
-        const val BLOCK_TEXT_TYPE = 2
+        const val BLOCK_TEXT_TYPE = 102
 
-        const val BLOCK_ASSIGNMENT_TYPE = 3
+        const val BLOCK_ASSIGNMENT_TYPE = 103
 
-        const val BLOCK_CONTENT_TYPE = 4
+        const val BLOCK_CONTENT_TYPE = 104
 
-        const val BLOCK_DISCUSSION_TYPE = 5
+        const val BLOCK_DISCUSSION_TYPE = 105
 
     }
 
@@ -90,8 +102,7 @@ open class CourseBlock {
         if (cbClazzUid != other.cbClazzUid) return false
         if (cbActive != other.cbActive) return false
         if (cbHidden != other.cbHidden) return false
-        if (cbTableId != other.cbTableId) return false
-        if (cbTableUid != other.cbTableUid) return false
+        if (cbEntityUid != other.cbEntityUid) return false
         if (cbLct != other.cbLct) return false
 
         return true
@@ -108,8 +119,7 @@ open class CourseBlock {
         result = 31 * result + cbClazzUid.hashCode()
         result = 31 * result + cbActive.hashCode()
         result = 31 * result + cbHidden.hashCode()
-        result = 31 * result + cbTableId
-        result = 31 * result + cbTableUid.hashCode()
+        result = 31 * result + cbEntityUid.hashCode()
         result = 31 * result + cbLct.hashCode()
         return result
     }

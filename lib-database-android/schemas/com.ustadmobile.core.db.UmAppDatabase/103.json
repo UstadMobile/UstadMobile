@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "4ae9d0f455b8dc0cabfea55945335522",
+    "identityHash": "6d4ccbe5d62c0e2a51a43a04328008a0",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1156,7 +1156,7 @@
       },
       {
         "tableName": "Clazz",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzName` TEXT, `clazzDesc` TEXT, `attendanceAverage` REAL NOT NULL, `clazzHolidayUMCalendarUid` INTEGER NOT NULL, `clazzScheuleUMCalendarUid` INTEGER NOT NULL, `isClazzActive` INTEGER NOT NULL, `clazzLocationUid` INTEGER NOT NULL, `clazzStartTime` INTEGER NOT NULL, `clazzEndTime` INTEGER NOT NULL, `clazzFeatures` INTEGER NOT NULL, `clazzSchoolUid` INTEGER NOT NULL, `clazzMasterChangeSeqNum` INTEGER NOT NULL, `clazzLocalChangeSeqNum` INTEGER NOT NULL, `clazzLastChangedBy` INTEGER NOT NULL, `clazzLct` INTEGER NOT NULL, `clazzTimeZone` TEXT, `clazzStudentsPersonGroupUid` INTEGER NOT NULL, `clazzTeachersPersonGroupUid` INTEGER NOT NULL, `clazzPendingStudentsPersonGroupUid` INTEGER NOT NULL, `clazzParentsPersonGroupUid` INTEGER NOT NULL, `clazzCode` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzName` TEXT, `clazzDesc` TEXT, `attendanceAverage` REAL NOT NULL, `clazzHolidayUMCalendarUid` INTEGER NOT NULL, `clazzScheuleUMCalendarUid` INTEGER NOT NULL, `isClazzActive` INTEGER NOT NULL, `clazzLocationUid` INTEGER NOT NULL, `clazzStartTime` INTEGER NOT NULL, `clazzEndTime` INTEGER NOT NULL, `clazzFeatures` INTEGER NOT NULL, `clazzSchoolUid` INTEGER NOT NULL, `clazzEnrolmentPolicy` INTEGER NOT NULL DEFAULT 100, `clazzTerminologyUid` INTEGER NOT NULL DEFAULT 25966, `clazzMasterChangeSeqNum` INTEGER NOT NULL, `clazzLocalChangeSeqNum` INTEGER NOT NULL, `clazzLastChangedBy` INTEGER NOT NULL, `clazzLct` INTEGER NOT NULL, `clazzTimeZone` TEXT, `clazzStudentsPersonGroupUid` INTEGER NOT NULL, `clazzTeachersPersonGroupUid` INTEGER NOT NULL, `clazzPendingStudentsPersonGroupUid` INTEGER NOT NULL, `clazzParentsPersonGroupUid` INTEGER NOT NULL, `clazzCode` TEXT)",
         "fields": [
           {
             "fieldPath": "clazzUid",
@@ -1229,6 +1229,20 @@
             "columnName": "clazzSchoolUid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "clazzEnrolmentPolicy",
+            "columnName": "clazzEnrolmentPolicy",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "100"
+          },
+          {
+            "fieldPath": "clazzTerminologyUid",
+            "columnName": "clazzTerminologyUid",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "25966"
           },
           {
             "fieldPath": "clazzMasterChangeSeqNum",
@@ -5215,7 +5229,7 @@
       },
       {
         "tableName": "ClazzAssignment",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caSubmissionType` INTEGER NOT NULL DEFAULT 0, `caDeadlineDate` INTEGER NOT NULL, `caStartDate` INTEGER NOT NULL, `caLateSubmissionPenalty` INTEGER NOT NULL, `caGracePeriodDate` INTEGER NOT NULL, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caCompletionCriteria` INTEGER NOT NULL DEFAULT 1, `caRequireFileSubmission` INTEGER NOT NULL DEFAULT 1, `caFileType` INTEGER NOT NULL DEFAULT 0, `caSizeLimit` INTEGER NOT NULL DEFAULT 50, `caNumberOfFiles` INTEGER NOT NULL DEFAULT 1, `caEditAfterSubmissionType` INTEGER NOT NULL DEFAULT 0, `caMarkingType` INTEGER NOT NULL DEFAULT 1, `caMaxPoints` INTEGER NOT NULL DEFAULT 10, `caRequireTextSubmission` INTEGER NOT NULL DEFAULT 1, `caTextLimitType` INTEGER NOT NULL DEFAULT 1, `caTextLimit` INTEGER NOT NULL DEFAULT 500, `caXObjectUid` INTEGER NOT NULL DEFAULT 0, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caSubmissionType` INTEGER NOT NULL DEFAULT 0, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caCompletionCriteria` INTEGER NOT NULL DEFAULT 1, `caRequireFileSubmission` INTEGER NOT NULL DEFAULT 1, `caFileType` INTEGER NOT NULL DEFAULT 0, `caSizeLimit` INTEGER NOT NULL DEFAULT 50, `caNumberOfFiles` INTEGER NOT NULL DEFAULT 1, `caEditAfterSubmissionType` INTEGER NOT NULL DEFAULT 0, `caMarkingType` INTEGER NOT NULL DEFAULT 1, `caRequireTextSubmission` INTEGER NOT NULL DEFAULT 1, `caTextLimitType` INTEGER NOT NULL DEFAULT 1, `caTextLimit` INTEGER NOT NULL DEFAULT 500, `caXObjectUid` INTEGER NOT NULL DEFAULT 0, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "caUid",
@@ -5241,30 +5255,6 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
-          },
-          {
-            "fieldPath": "caDeadlineDate",
-            "columnName": "caDeadlineDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "caStartDate",
-            "columnName": "caStartDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "caLateSubmissionPenalty",
-            "columnName": "caLateSubmissionPenalty",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "caGracePeriodDate",
-            "columnName": "caGracePeriodDate",
-            "affinity": "INTEGER",
-            "notNull": true
           },
           {
             "fieldPath": "caActive",
@@ -5332,13 +5322,6 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "1"
-          },
-          {
-            "fieldPath": "caMaxPoints",
-            "columnName": "caMaxPoints",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "10"
           },
           {
             "fieldPath": "caRequireTextSubmission",
@@ -6141,7 +6124,7 @@
       },
       {
         "tableName": "CourseBlock",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbModuleParentBlockUid` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbStartDate` INTEGER NOT NULL, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbHidden` INTEGER NOT NULL, `cbTableId` INTEGER NOT NULL, `cbTableUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbModuleParentBlockUid` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbCompletionCriteria` INTEGER NOT NULL, `cbHideUntilDate` INTEGER NOT NULL, `cbDeadlineDate` INTEGER NOT NULL, `cbLateSubmissionPenalty` INTEGER NOT NULL, `cbGracePeriodDate` INTEGER NOT NULL, `cbMaxPoints` INTEGER NOT NULL, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbHidden` INTEGER NOT NULL, `cbEntityUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cbUid",
@@ -6180,8 +6163,38 @@
             "notNull": false
           },
           {
-            "fieldPath": "cbStartDate",
-            "columnName": "cbStartDate",
+            "fieldPath": "cbCompletionCriteria",
+            "columnName": "cbCompletionCriteria",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbHideUntilDate",
+            "columnName": "cbHideUntilDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbDeadlineDate",
+            "columnName": "cbDeadlineDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbLateSubmissionPenalty",
+            "columnName": "cbLateSubmissionPenalty",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbGracePeriodDate",
+            "columnName": "cbGracePeriodDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbMaxPoints",
+            "columnName": "cbMaxPoints",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6210,14 +6223,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "cbTableId",
-            "columnName": "cbTableId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cbTableUid",
-            "columnName": "cbTableUid",
+            "fieldPath": "cbEntityUid",
+            "columnName": "cbEntityUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6245,6 +6252,44 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseBlock_cbClazzUid` ON `${TABLE_NAME}` (`cbClazzUid`)"
           }
         ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseTerminology",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ctUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ctTitle` TEXT, `ctTerminology` TEXT, `ctLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "ctUid",
+            "columnName": "ctUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ctTitle",
+            "columnName": "ctTitle",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ctTerminology",
+            "columnName": "ctTerminology",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ctLct",
+            "columnName": "ctLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "ctUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
         "foreignKeys": []
       },
       {
@@ -6896,6 +6941,69 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseBlockReplicate_cbDestination_cbPending` ON `${TABLE_NAME}` (`cbDestination`, `cbPending`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseTerminologyReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ctPk` INTEGER NOT NULL, `ctVersionId` INTEGER NOT NULL DEFAULT 0, `ctDestination` INTEGER NOT NULL, `ctPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`ctPk`, `ctDestination`))",
+        "fields": [
+          {
+            "fieldPath": "ctPk",
+            "columnName": "ctPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ctVersionId",
+            "columnName": "ctVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "ctDestination",
+            "columnName": "ctDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ctPending",
+            "columnName": "ctPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "ctPk",
+            "ctDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_CourseTerminologyReplicate_ctPk_ctDestination_ctVersionId",
+            "unique": false,
+            "columnNames": [
+              "ctPk",
+              "ctDestination",
+              "ctVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseTerminologyReplicate_ctPk_ctDestination_ctVersionId` ON `${TABLE_NAME}` (`ctPk`, `ctDestination`, `ctVersionId`)"
+          },
+          {
+            "name": "index_CourseTerminologyReplicate_ctDestination_ctPending",
+            "unique": false,
+            "columnNames": [
+              "ctDestination",
+              "ctPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseTerminologyReplicate_ctDestination_ctPending` ON `${TABLE_NAME}` (`ctDestination`, `ctPending`)"
           }
         ],
         "foreignKeys": []
@@ -9825,7 +9933,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4ae9d0f455b8dc0cabfea55945335522')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6d4ccbe5d62c0e2a51a43a04328008a0')"
     ]
   }
 }

@@ -4,23 +4,15 @@ import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.util.FieldLabel
-import com.ustadmobile.util.StyleManager.defaultMarginTop
-import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.util.ext.toDate
-import com.ustadmobile.view.ext.*
 import react.RBuilder
-import react.dom.html.InputType
 import react.setState
-import styled.css
-import styled.styledDiv
 
-class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAssignment>(mProps),
+class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAssignmentWithCourseBlock>(mProps),
     ClazzAssignmentEditView {
 
     private var mPresenter: ClazzAssignmentEditPresenter? = null
@@ -28,7 +20,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
     override val viewNames: List<String>
         get() = listOf(ClazzAssignmentEditView.VIEW_NAME)
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzAssignment>?
+    override val mEditPresenter: UstadEditPresenter<*, ClazzAssignmentWithCourseBlock>?
         get() = mPresenter
 
     private var titleLabel = FieldLabel(text = getString(MessageID.title))
@@ -219,7 +211,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
             }
         }
 
-    override var entity: ClazzAssignment? = null
+    override var entity: ClazzAssignmentWithCourseBlock? = null
         get() = field
         set(value) {
             setState {
@@ -235,7 +227,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
     }
 
     override fun RBuilder.render() {
-        styledDiv {
+        /*styledDiv {
             css{
                 +fieldsOnlyFormScreen
             }
@@ -264,7 +256,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 label = "${doNotShowBeforeLabel.text}",
                                 error = doNotShowBeforeLabel.error,
                                 helperText = doNotShowBeforeLabel.errorText,
-                                value = entity?.caStartDate.toDate(true),
+                                value = entity?.ca,
                                 inputVariant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
@@ -545,6 +537,6 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                 }
 
             }
-        }
+        }*/
     }
 }

@@ -28,6 +28,7 @@ object ClazzAssignmentDetailStudentProgressListScreen : KScreen<ClazzAssignmentD
     class ClazzAssignmentWithMetrics(parent: Matcher<View>) : KRecyclerItem<ClazzAssignmentWithMetrics>(parent) {
         val notStartedText: KTextView = KTextView(parent) { withId(R.id.item_clazz_progress_detail_not_started_value) }
         val startedText: KTextView = KTextView(parent) { withId(R.id.item_clazz_assignment_progress_detail_started_value) }
+        val marked: KTextView = KTextView(parent) { withId(R.id.item_clazz_assignment_progress_detail_marked_value)}
     }
 
     class StudentAttempt(parent: Matcher<View>) : KRecyclerItem<StudentAttempt>(parent) {

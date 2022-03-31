@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzAssignmentDetailBinding
-import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
@@ -16,7 +16,7 @@ class ClazzAssignmentBasicDetailRecyclerAdapter()
 
     private var viewHolder: ClazzAssignmentDetailViewHolder? = null
 
-    var clazzAssignment: ClazzAssignment? = null
+    var clazzAssignment: ClazzAssignmentWithCourseBlock? = null
         set(value){
             if(field == value)
                 return

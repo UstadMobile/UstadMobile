@@ -28,7 +28,7 @@ import styled.styledDiv
 import styled.styledSpan
 import kotlin.js.Date
 
-class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzAssignment>(mProps),
+class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzAssignmentWithCourseBlock>(mProps),
     ClazzAssignmentDetailOverviewView {
 
     private var mPresenter: ClazzAssignmentDetailOverviewPresenter? = null
@@ -127,7 +127,7 @@ class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<Cl
         get() = TODO("Not yet implemented")
         set(value) {}
 
-    override var entity: ClazzAssignment? = null
+    override var entity: ClazzAssignmentWithCourseBlock? = null
         get() = field
         set(value) {
             setState {
@@ -165,8 +165,8 @@ class ClazzAssignmentOverviewComponent(mProps: UmProps): UstadDetailComponent<Cl
                         umIcon("event_available")
                     }
 
-                    umTypography("${entity?.caDeadlineDate.toDate()?.fullDateFormat()} " +
-                            "- ${entity?.caDeadlineDate.toDate()?.formattedInHoursAndMinutes()}"){
+                    umTypography("${entity?.block?.cbDeadlineDate.toDate()?.fullDateFormat()} " +
+                            "- ${entity?.block?.cbDeadlineDate.toDate()?.formattedInHoursAndMinutes()}"){
                         css{
                             marginTop = LinearDimension("2px")
                             +StyleManager.alignTextToStart

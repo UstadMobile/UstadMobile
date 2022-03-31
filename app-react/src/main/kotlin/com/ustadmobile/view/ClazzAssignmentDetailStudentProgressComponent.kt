@@ -29,7 +29,7 @@ import styled.styledDiv
 import styled.styledSpan
 import kotlin.js.Date
 
-class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetailComponent<ClazzAssignment>(mProps),
+class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetailComponent<ClazzAssignmentWithCourseBlock>(mProps),
     ClazzAssignmentDetailStudentProgressView {
 
     private var mPresenter: ClazzAssignmentDetailStudentProgressPresenter? = null
@@ -93,7 +93,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
         get() = TODO("Not yet implemented")
         set(value) {}
 
-    override var entity: ClazzAssignment? = null
+    override var entity: ClazzAssignmentWithCourseBlock? = null
         get() = field
         set(value) {
             setState {

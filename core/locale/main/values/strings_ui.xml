@@ -329,6 +329,7 @@
     <string name="xapi_score">Score (%)</string>
     <string name="import_title_not_entered">Title not entered</string>
 
+    <string name="standard">Standard</string>
 
     <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>
@@ -927,6 +928,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <!-- This is a code that the teacher can give to students to allow them to join the class -->
     <string name="class_code">Class code</string>
+
+    <!-- This is a code that the teacher can give to students to allow them to join the course -->
+    <string name="course_code">Course code</string>
 
     <!-- Pending requests - use on classes / schools to list people who have requested to join a class / school -->
     <string name="pending_requests">Pending requests</string>
@@ -1793,6 +1797,5 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="edit_course">Edit course</string>
     <string name="currently_enrolled">Currently enrolled</string>
     <string name="past_enrollments">Past enrollments</string>
-
 
 </resources>

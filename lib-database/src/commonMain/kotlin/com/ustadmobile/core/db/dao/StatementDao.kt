@@ -238,6 +238,10 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                       JOIN ClazzEnrolment
                        ON ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
                        
+                       JOIN CourseBlock
+                       ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
+                       AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                       
           	           JOIN StatementEntity AS SubmissionStatement
           	           ON SubmissionStatement.statementUid = (SELECT statementUid 
                                    FROM StatementEntity
@@ -245,8 +249,8 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                                     AND xObjectUid = ClazzAssignment.caXObjectUid
                                     AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
                                     AND StatementEntity.timestamp 
-                                        BETWEEN ClazzAssignment.caStartDate
-                                        AND ClazzAssignment.caGracePeriodDate
+                                        BETWEEN CourseBlock.cbHideUntilDate
+                                        AND CourseBlock.cbGracePeriodDate
                                ORDER BY timestamp DESC LIMIT 1)
                                
           	           LEFT JOIN XObjectEntity

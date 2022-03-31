@@ -70,14 +70,15 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_course_block_download"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingEnd="@dimen/dimen_16dp"
-            android:paddingStart="0dp"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:layout_margin="@dimen/dimen_8dp"
             android:tint="?colorOnIconTint"
+            android:padding="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
+            tools:src="@drawable/ic_arrow_drop_up_black_24dp"
             android:onClick="@{() -> presenter.handleModuleExpandCollapseClicked(block)}"
             app:fallbackDrawable="@{block.expanded ? @drawable/ic_arrow_drop_up_black_24dp : @drawable/ic_arrow_drop_down_black_24dp}"
             />

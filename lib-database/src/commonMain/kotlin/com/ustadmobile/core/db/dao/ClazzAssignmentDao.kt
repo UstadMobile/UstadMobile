@@ -245,7 +245,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid 
                         AND ClazzEnrolment.clazzEnrolmentActive 
                         AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                        AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
+                        AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
                         AS totalStudents, 
         
                0 AS notSubmittedStudents,
@@ -266,7 +266,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
                           AND ClazzEnrolment.clazzEnrolmentActive
                           AND CourseAssignmentMark.camUid IS NULL
                           AND ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-                          AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
+                          AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
                 ELSE 0 END) AS submittedStudents,      
 
                   
@@ -281,11 +281,14 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
                             AND ClazzEnrolment.clazzEnrolmentActive
                             AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                             AND ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
-                            AND ClazzAssignment.caGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
+                            AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
                    ELSE 0 END) AS markedStudents
                            
         
         FROM ClazzAssignment
+             JOIN CourseBlock
+             ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
+             AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
        WHERE caActive
          AND caClazzUid = :clazzUid 
          AND caUid = :clazzAssignmentUid
@@ -304,6 +307,17 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
          WHERE caUid = :uid
     """)
     abstract suspend fun findByUidAsync(uid: Long): ClazzAssignment?
+
+
+    @Query("""
+        SELECT * 
+          FROM ClazzAssignment
+               LEFT JOIN CourseBlock
+               ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
+               AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+         WHERE caUid = :uid
+    """)
+    abstract suspend fun findByUidWithBlockAsync(uid: Long): ClazzAssignmentWithCourseBlock?
 
     @Query("""
         SELECT * 

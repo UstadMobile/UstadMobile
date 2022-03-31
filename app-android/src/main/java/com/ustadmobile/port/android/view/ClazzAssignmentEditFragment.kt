@@ -12,18 +12,18 @@ import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 
 
-class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAssignmentEditView {
+class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignmentWithCourseBlock>(), ClazzAssignmentEditView {
 
     private var mBinding: FragmentClazzAssignmentEditBinding? = null
 
     private var mPresenter: ClazzAssignmentEditPresenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzAssignment>?
+    override val mEditPresenter: UstadEditPresenter<*, ClazzAssignmentWithCourseBlock>?
         get() = mPresenter
 
 
@@ -33,7 +33,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         gracePeriodDate = Long.MAX_VALUE
         deadlineTime = 0
         gracePeriodTime = 0
-        entityVal?.caLateSubmissionPenalty = 0
+        entityVal?.block?.cbLateSubmissionPenalty = 0
         entity = entityVal
     }
 
@@ -98,7 +98,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignment>(), ClazzAs
         entity = null
     }
 
-    override var entity: ClazzAssignment? = null
+    override var entity: ClazzAssignmentWithCourseBlock? = null
         get() = field
         set(value) {
             field = value

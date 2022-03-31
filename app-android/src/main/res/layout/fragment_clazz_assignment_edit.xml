@@ -7,14 +7,14 @@
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
         <import type="android.content.Context" />
-        <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
+        <import type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock"/>
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
         <variable
             name="clazzAssignment"
-            type="ClazzAssignment" />
+            type="ClazzAssignmentWithCourseBlock" />
 
         <variable
             name="timeZone"
@@ -290,7 +290,7 @@
                     android:enabled="@{fieldsEnabled}"
                     android:digits="0123456789"
                     android:inputType="number"
-                    android:text="@={`` + clazzAssignment.caMaxPoints}"
+                    android:text="@={`` + clazzAssignment.block.cbMaxPoints}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
@@ -430,7 +430,7 @@
                     android:inputType="number"
                     app:minValue="@{0}"
                     app:maxValue="@{100}"
-                    android:text="@={`` + clazzAssignment.caLateSubmissionPenalty}"
+                    android:text="@={`` + clazzAssignment.block.cbLateSubmissionPenalty}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 

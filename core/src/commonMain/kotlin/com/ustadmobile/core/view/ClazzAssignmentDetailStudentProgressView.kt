@@ -4,7 +4,7 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
 
-interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignment> {
+interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignmentWithCourseBlock> {
 
     var submitMarkError: String?
 

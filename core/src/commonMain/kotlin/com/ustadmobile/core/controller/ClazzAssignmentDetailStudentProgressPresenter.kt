@@ -35,7 +35,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
                                                                     arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0L,
                                                                     ClazzAssignment.TABLE_ID, false,
                                                                     arguments[ARG_PERSON_UID]?.toLong() ?: 0L))
-    : UstadDetailPresenter<ClazzAssignmentDetailStudentProgressView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner),
+    : UstadDetailPresenter<ClazzAssignmentDetailStudentProgressView, ClazzAssignmentWithCourseBlock>(context, arguments, view, di, lifecycleOwner),
         NewCommentItemListener by newPrivateCommentListener, ContentWithAttemptListener {
 
 
@@ -72,11 +72,11 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
 
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignmentWithCourseBlock? {
         val mLoggedInPersonUid = accountManager.activeAccount.personUid
 
         val clazzAssignment = db.onRepoWithFallbackToDb(2000) {
-            db.clazzAssignmentDao.findByUidAsync(selectedClazzAssignmentUid)
+            db.clazzAssignmentDao.findByUidWithBlockAsync(selectedClazzAssignmentUid)
         } ?: throw IllegalArgumentException("Clazz assignment uid not found")
 
         view.person = db.onRepoWithFallbackToDb(2000){
@@ -145,7 +145,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
 
 
     fun onClickSubmitGrade(grade: Int): Boolean {
-        if(grade < 0 || (grade > entity?.caMaxPoints ?: 0)){
+        if(grade < 0 || (grade > entity?.block?.cbMaxPoints ?: 0)){
            // to highlight the textfield to show error
             view.submitMarkError = " "
             return false
@@ -164,7 +164,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
                 camStudentUid = person.personUid
                 camAssignmentUid = assignment.caUid
                 camMark = grade
-                camPenalty = if(statement.timestamp > assignment.caDeadlineDate) assignment.caLateSubmissionPenalty else 0
+                camPenalty = if(statement.timestamp > (assignment.block?.cbDeadlineDate ?: 0)) assignment.block?.cbLateSubmissionPenalty ?: 0 else 0
             })
             withContext(Dispatchers.Default) {
                 statementEndpoint.storeMarkedStatement(

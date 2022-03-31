@@ -9,7 +9,7 @@
 
         <variable
             name="assignment"
-            type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+            type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock" />
 
         <variable
             name="errorText"
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:hint="@string/points_cap"
-            app:suffixText="@{&quot;/&quot; + assignment.caMaxPoints}"
+            app:suffixText="@{&quot;/&quot; + assignment.block.cbMaxPoints}"
             app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
             app:hintEnabled="true"
             app:errorText="@{errorText}"

@@ -12,9 +12,9 @@ import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSE
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
-import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
+import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 
 @Repository
 @Dao
@@ -96,11 +96,22 @@ abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Clazz?
 
-    @Query("""SELECT Clazz.*, HolidayCalendar.*, School.* FROM Clazz 
-            LEFT JOIN HolidayCalendar ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
-            LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
-            WHERE Clazz.clazzUid = :uid""")
-    abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendarAndSchool?
+    @Query("""
+        SELECT Clazz.*, 
+               HolidayCalendar.*, 
+               School.*,
+               CourseTerminology.*
+          FROM Clazz 
+               LEFT JOIN HolidayCalendar 
+               ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
+               
+               LEFT JOIN School 
+               ON School.schoolUid = Clazz.clazzSchoolUid
+               
+               LEFT JOIN CourseTerminology
+               ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+         WHERE Clazz.clazzUid = :uid""")
+    abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendarAndSchoolAndTerminology?
 
     @Update
     abstract suspend fun updateAsync(entity: Clazz): Int
@@ -269,15 +280,28 @@ abstract class ClazzDao : BaseDao<Clazz> {
      * specified for the associated school.
      */
     @Query("""
-        SELECT Clazz.*, HolidayCalendar.*, School.*
-        FROM Clazz 
-        LEFT JOIN HolidayCalendar ON ((clazz.clazzHolidayUMCalendarUid != 0 AND HolidayCalendar.umCalendarUid = clazz.clazzHolidayUMCalendarUid)
-         OR clazz.clazzHolidayUMCalendarUid = 0 AND clazz.clazzSchoolUid = 0 AND HolidayCalendar.umCalendarUid = 
-            (SELECT schoolHolidayCalendarUid FROM School WHERE schoolUid = clazz.clazzSchoolUid))
-        LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
-        WHERE :filterUid = 0 OR Clazz.clazzUid = :filterUid
+        SELECT Clazz.*, 
+               HolidayCalendar.*, 
+               School.*,
+               CourseTerminology.*
+         FROM Clazz 
+              LEFT JOIN HolidayCalendar 
+              ON ((clazz.clazzHolidayUMCalendarUid != 0 
+                AND HolidayCalendar.umCalendarUid = clazz.clazzHolidayUMCalendarUid)
+                OR clazz.clazzHolidayUMCalendarUid = 0 AND clazz.clazzSchoolUid = 0 
+                AND HolidayCalendar.umCalendarUid = (SELECT schoolHolidayCalendarUid 
+                                                       FROM School 
+                                                      WHERE schoolUid = clazz.clazzSchoolUid))
+              LEFT JOIN School 
+              ON School.schoolUid = Clazz.clazzSchoolUid
+              
+              LEFT JOIN CourseTerminology
+              ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+                
+        WHERE :filterUid = 0 
+           OR Clazz.clazzUid = :filterUid
     """)
-    abstract fun findClazzesWithEffectiveHolidayCalendarAndFilter(filterUid: Long): List<ClazzWithHolidayCalendarAndSchool>
+    abstract fun findClazzesWithEffectiveHolidayCalendarAndFilter(filterUid: Long): List<ClazzWithHolidayCalendarAndSchoolAndTerminology>
 
     @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
     abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
