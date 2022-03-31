@@ -1,6 +1,5 @@
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
@@ -11,18 +10,26 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
-import com.ustadmobile.core.util.graph.*
+import com.ustadmobile.core.util.graph.LabelValueFormatter
+import com.ustadmobile.core.util.graph.MessageIdFormatter
+import com.ustadmobile.core.util.graph.TimeFormatter
+import com.ustadmobile.core.util.graph.UidAndLabelFormatter
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 fun UmAppDatabase.runPreload() {
-    preload()
+    GlobalScope.launch { preload() }
 }
 
 /**
@@ -92,7 +99,8 @@ suspend fun UmAppDatabase.processEnrolmentIntoClass(
 ) : ClazzEnrolment {
 
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(
-        enrolment.clazzEnrolmentClazzUid) ?: throw IllegalArgumentException("Class does not exist")
+        enrolment.clazzEnrolmentClazzUid)
+        ?: throw IllegalArgumentException("processEnrolmentIntoClass: Class does not exist")
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
 
     enrolment.clazzEnrolmentDateJoined = DateTime(enrolment.clazzEnrolmentDateJoined)
@@ -134,7 +142,7 @@ suspend fun UmAppDatabase.processEnrolmentIntoClass(
 
     parentsToEnrol.forEach { parentJoin ->
         onRepoWithFallbackToDb(2500) {
-            it.personDao.findByUid(parentJoin.parentPersonUid)
+            it.personDao.findByUidAsync(parentJoin.parentPersonUid)
         }?.also { parentPerson ->
             enrolPersonIntoClazzAtLocalTimezone(parentPerson, enrolment.clazzEnrolmentClazzUid,
                 ClazzEnrolment.ROLE_PARENT, clazzWithSchoolVal)
@@ -199,7 +207,7 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
     //find the group member and update that
     val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrolment.personUid,
         effectiveClazz.clazzStudentsPersonGroupUid,
-        effectiveClazz.clazzPendingStudentsPersonGroupUid)
+        effectiveClazz.clazzPendingStudentsPersonGroupUid, systemTimeInMillis())
 
     if(numGroupUpdates != 1) {
         throw IllegalStateException("Approve pending clazz member - no membership of clazz's pending group!")
@@ -207,7 +215,8 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
 
     //change the role
     val enrolmentUpdateCount = clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.personUid, clazzUid,
-        newRole = ClazzEnrolment.ROLE_STUDENT, oldRole = ClazzEnrolment.ROLE_STUDENT_PENDING)
+        newRole = ClazzEnrolment.ROLE_STUDENT, oldRole = ClazzEnrolment.ROLE_STUDENT_PENDING,
+        systemTimeInMillis())
     if(enrolmentUpdateCount != 1) {
         throw IllegalStateException("Approve pending clazz member - no update of enrolment!")
     }
@@ -218,10 +227,10 @@ suspend fun UmAppDatabase.declinePendingClazzEnrolment(enrolment: PersonWithClaz
         ?: throw IllegalStateException("Class does not exist")
 
         clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(enrolment.personUid,
-            clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING, false)
+            clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING, false, systemTimeInMillis())
 
-        personGroupMemberDao.setGroupMemberToInActive(enrolment.personUid,
-            effectiveClazz.clazzPendingStudentsPersonGroupUid)
+        personGroupMemberDao.updateGroupMemberActive(false, enrolment.personUid,
+            effectiveClazz.clazzPendingStudentsPersonGroupUid, systemTimeInMillis())
 
 }
 
@@ -237,7 +246,7 @@ suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, schoo
     //find the group member and update that
     val numGroupUpdates = personGroupMemberDao.moveGroupAsync(member.schoolMemberPersonUid,
             effectiveClazz.schoolStudentsPersonGroupUid,
-            effectiveClazz.schoolPendingStudentsPersonGroupUid)
+            effectiveClazz.schoolPendingStudentsPersonGroupUid, systemTimeInMillis())
     if(numGroupUpdates != 1) {
         println("No group update?")
     }
@@ -246,8 +255,10 @@ suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, schoo
 /**
  * Inserts the person, sets its group and groupmember. Does not check if its an update
  */
-suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T,
-    groupFlag: Int = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP): T{
+suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(
+    entity: T,
+    groupFlag: Int = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP
+): T{
 
     val groupPerson = PersonGroup().apply {
         groupName = "Person individual group"
@@ -409,9 +420,11 @@ data class SeriesData(val dataList: List<StatementDao.ReportData>,
 /**
  * Insert a new school
  */
-suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,
-                                                   impl: UstadMobileSystemImpl, context: Any)
-                                                    :Long {
+suspend fun UmAppDatabase.createNewSchoolAndGroups(
+    school: School,
+    impl: UstadMobileSystemImpl,
+    context: Any
+) :Long {
     school.schoolTeachersPersonGroupUid = personGroupDao.insertAsync(
             PersonGroup("${school.schoolName} - " +
                     impl.getString(MessageID.teachers_literal, context)))
@@ -429,13 +442,6 @@ suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,
 
     school.schoolUid = schoolDao.insertAsync(school)
 
-//    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-//            school.schoolTeachersPersonGroupUid, Role.ROLE_SCHOOL_STAFF_UID.toLong()))
-//    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-//            school.schoolStudentsPersonGroupUid, Role.ROLE_SCHOOL_STUDENT_UID.toLong()))
-//    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-//            school.schoolPendingStudentsPersonGroupUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID.toLong()))
-
     return school.schoolUid
 }
 
@@ -449,14 +455,15 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
     val matches = schoolMemberDao.findBySchoolAndPersonAndRole(schoolUid, personUid,  role)
     if(matches.isEmpty()) {
 
-        val schoolMember = SchoolMember()
-        schoolMember.schoolMemberActive = true
-        schoolMember.schoolMemberPersonUid = personUid
-        schoolMember.schoolMemberSchoolUid = schoolUid
-        schoolMember.schoolMemberRole = role
-        schoolMember.schoolMemberJoinDate = systemTimeInMillis()
+        val schoolMember = SchoolMember().apply {
+            schoolMemberActive = true
+            schoolMemberPersonUid = personUid
+            schoolMemberSchoolUid = schoolUid
+            schoolMemberRole = role
+            schoolMemberJoinDate = systemTimeInMillis()
+            schoolMemberUid = schoolMemberDao.insertAsync(this)
+        }
 
-        schoolMember.schoolMemberUid = schoolMemberDao.insert(schoolMember)
 
         val personGroupUid = when(role) {
             Role.ROLE_SCHOOL_STAFF_UID -> school.schoolTeachersPersonGroupUid
@@ -579,18 +586,55 @@ suspend fun UmAppDatabase.grantScopedPermission(toPerson: Person, permissions: L
  * Insert authentication credentials for the given person uid with the given password. This is fine
  * to use in tests etc, but for performance it is better to use AuthManager.setAuth
  */
-suspend fun UmAppDatabase.insertPersonAuthCredentials2(personUid: Long,
-                                            password: String,
-                                            pbkdf2Params: Pbkdf2Params,
-                                            site: Site? = null
+suspend fun UmAppDatabase.insertPersonAuthCredentials2(
+    personUid: Long,
+    password: String,
+    pbkdf2Params: Pbkdf2Params,
+    site: Site? = null
 ) {
     val db = (this as DoorDatabaseRepository).db as UmAppDatabase
     val effectiveSite = site ?: db.siteDao.getSite()
     val authSalt = effectiveSite?.authSalt ?: throw IllegalStateException("insertAuthCredentials: No auth salt!")
+    val lastChangedBy = db.syncNodeDao.getLocalNodeClientId()
 
     personAuth2Dao.insertAsync(PersonAuth2().apply {
         pauthUid = personUid
         pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
         pauthAuth = password.doublePbkdf2Hash(authSalt, pbkdf2Params).encodeBase64()
+        pauthLcb = lastChangedBy
     })
+}
+
+/**
+ * 25/Feb/2022
+ *
+ * This should NOT be needed, but content imports (maybe 4% of the time) have been observed that end
+ * with the container size not being updated in spite of the fact that the process completed. This
+ * happens for no apparent reason. All container entries were present. The fileSize on the container
+ * should be 0 until the container is ready (to avoid any possibility of a client downloading a
+ * container that is not ready).
+ */
+suspend fun UmAppDatabase.validateAndUpdateContainerSize(
+    containerUid: Long,
+    attempts: Int = 3,
+    waitInterval: Long = 200
+) : Long{
+    var containerSize: Long = 0
+    for(i in 0 until attempts) {
+        containerSize = withDoorTransactionAsync(UmAppDatabase::class) {
+            val currentSize = containerDao.getContainerSizeByUid(containerUid)
+            if(currentSize != 0L)
+                return@withDoorTransactionAsync currentSize
+
+            containerDao.updateContainerSizeAndNumEntriesAsync(containerUid, systemTimeInMillis())
+            containerDao.getContainerSizeByUid(containerUid)
+        }
+
+        if(containerSize != 0L)
+            return containerSize
+
+        delay(waitInterval)
+    }
+
+    return containerSize
 }

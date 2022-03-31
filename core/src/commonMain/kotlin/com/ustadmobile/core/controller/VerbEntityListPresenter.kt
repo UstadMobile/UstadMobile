@@ -3,11 +3,13 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.VerbEntityListView
 import com.ustadmobile.core.view.VerbEntityListView.Companion.ARG_EXCLUDE_VERBUIDS_LIST
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.VerbDisplay
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class VerbEntityListPresenter(context: Any, arguments: Map<String, String>, view: VerbEntityListView,
@@ -57,7 +59,9 @@ class VerbEntityListPresenter(context: Any, arguments: Map<String, String>, view
 
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
+
     override fun handleClickEntry(entry: VerbDisplay) {
-        view.finishWithResult(listOf(entry))
+        finishWithResult(safeStringify(di, ListSerializer(VerbDisplay.serializer()), listOf(entry)))
     }
 }

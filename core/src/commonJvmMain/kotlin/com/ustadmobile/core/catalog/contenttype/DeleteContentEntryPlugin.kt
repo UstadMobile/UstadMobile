@@ -5,17 +5,16 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.contentjob.ContentPluginIds.DELETE_CONTENT_ENTRY_PLUGIN
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.deleteFilesForContentEntry
+import com.ustadmobile.core.util.ext.deleteZombieContainerEntryFiles
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import io.ktor.client.*
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.io.File
+import com.ustadmobile.door.ext.dbType
 
 class DeleteContentEntryPlugin(
         private var context: Any,
@@ -38,21 +37,26 @@ class DeleteContentEntryPlugin(
         return null
     }
 
-    override suspend fun processJob(jobItem: ContentJobItemAndContentJob, process: ContentJobProcessContext, progress: ContentJobProgressListener): ProcessResult {
-
+    override suspend fun processJob(
+        jobItem: ContentJobItemAndContentJob,
+        process: ContentJobProcessContext,
+        progress: ContentJobProgressListener
+    ): ProcessResult {
         val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
 
 
         contentJobItem.cjiItemProgress = 25
         progress.onProgress(contentJobItem)
 
-        // delete all containerEntries, containerEntryFiles and torrentFile for this contentEntry
-        val numFailures = deleteFilesForContentEntry(contentJobItem.cjiContentEntryUid, di, endpoint)
+        val zombiesNotDeleted = db.withDoorTransactionAsync(UmAppDatabase::class) { txDb: UmAppDatabase ->
+            txDb.containerEntryDao.deleteByContentEntryUid(contentJobItem.cjiContentEntryUid)
+            txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
+        }
 
         contentJobItem.cjiItemProgress = 100
         progress.onProgress(contentJobItem)
 
-        return if(numFailures == 0){
+        return if(zombiesNotDeleted.isEmpty()){
             ProcessResult(JobStatus.COMPLETE)
         }else{
             ProcessResult(JobStatus.FAILED)

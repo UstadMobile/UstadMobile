@@ -10,7 +10,15 @@ in both production and development environment. It is built as KTOR server.
 ```
 ./gradlew app-ktor-server:shadowJar
 ```
-Ths builds the server jar which can be found in app-ktor-server/build/libs/ustad-server-all.jar .
+
+By default the Javascript (app-react) version will be built and bundled in the static resources
+directory. If you don't need this, it can be skipped by using
+
+```
+./gradlew app-ktor-server:shadowJar -Pskipreactproductionbundle=true
+```
+
+This builds the server jar which can be found in app-ktor-server/build/libs/ustad-server-all.jar .
 
 2. Copy the default configuration file and adjust it for your database and/or https certificate (optional)
 

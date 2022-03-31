@@ -1,12 +1,12 @@
 package com.ustadmobile.port.android.view
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -20,15 +20,12 @@ import com.ustadmobile.core.controller.ReportFilterEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ReportFilterEditView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ReportFilter
+import com.ustadmobile.lib.db.entities.UidAndLabel
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
 
 interface ReportFilterEditFragmentEventHandler {
@@ -204,30 +201,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setEditFragmentTitle(R.string.edit_filters, R.string.edit_filters)
-
-
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
-
-        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                ContentEntry::class.java) {
-            val entry = it.firstOrNull() ?: return@observeResult
-
-            mPresenter?.handleAddOrEditUidAndLabel(UidAndLabel().apply {
-                uid = entry.contentEntryUid
-                labelName = entry.title
-            })
-        }
-
-        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                LeavingReason::class.java) {
-            val reason = it.firstOrNull() ?: return@observeResult
-
-            mPresenter?.handleAddOrEditUidAndLabel(UidAndLabel().apply {
-                uid = reason.leavingReasonUid
-                labelName = reason.leavingReasonTitle
-            })
-        }
-
         uidAndLabelFilterItemRecyclerAdapter?.presenter = mPresenter
 
     }
@@ -267,12 +241,9 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
     override fun onClickNewItemFilter() {
         onSaveStateToBackStackStateHandle()
         if(entity?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY) {
-            navigateToPickEntityFromList(ContentEntry::class.java, R.id.content_entry_list_dest,
-                    bundleOf(ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
-                                    ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
-                            UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()))
+            mPresenter?.handleAddContentClicked()
         }else if(entity?.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON){
-            navigateToPickEntityFromList(LeavingReason::class.java, R.id.leaving_reason_list)
+            mPresenter?.handleAddLeavingReasonClicked()
         }
     }
 
@@ -287,9 +258,16 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
                 return oldItem.uid == newItem.uid
             }
 
-            override fun areContentsTheSame(oldItem: UidAndLabel, newItem: UidAndLabel): Boolean {
-                return oldItem.uid == newItem.uid
-                        && oldItem.labelName == newItem.labelName
+            /**
+             * When using two-way binding we need to be sure that we are saving to the same
+             * object in memory
+             */
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(
+                oldItem: UidAndLabel,
+                newItem: UidAndLabel
+            ): Boolean {
+                return oldItem === newItem
             }
         }
 

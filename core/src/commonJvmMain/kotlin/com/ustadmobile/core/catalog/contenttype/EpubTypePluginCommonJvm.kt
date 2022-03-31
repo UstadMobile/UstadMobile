@@ -122,12 +122,11 @@ class EpubTypePluginCommonJvm(
 
                     val contentNeedUpload = !uri.isRemote()
                     val localUri = process.getLocalOrCachedUri()
-                    val epubIsProcessed = contentJobItem.cjiContainerUid != 0L
 
                     contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
                         progress, context, di)
 
-                    if(!epubIsProcessed) {
+                    if(!contentJobItem.cjiContainerProcessed) {
 
                         val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
                                 ?: Container().apply {
@@ -142,32 +141,42 @@ class EpubTypePluginCommonJvm(
                                 ?: defaultContainerDir.toURI().toString()
                         val containerFolderUri = DoorUri.parse(containerFolder)
 
+                        contentJobItem.cjiContainerUid = container.containerUid
+                        process.withContentJobItemTransactionMutex { txDb ->
+                            txDb.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                                container.containerUid)
+                        }
+
                         repo.addEntriesToContainerFromZip(container.containerUid,
                                 localUri,
                                 ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-
-                        contentJobItem.cjiContainerUid = container.containerUid
-                        db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
-                            container.containerUid)
                         contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                             progress)
 
-                        contentJobItem.cjiConnectivityNeeded = true
-                        db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+                        process.withContentJobItemTransactionMutex { txDb ->
+                            txDb.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
+                        }
 
+                    }
+
+                    if(contentNeedUpload) {
                         val haveConnectivityToContinueJob = db.contentJobDao
                             .isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid ?: 0)
 
                         if (!haveConnectivityToContinueJob) {
-                            return@withContext ProcessResult(JobStatus.QUEUED)
+                            return@withContext ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
                         }
-                    }
 
-                    if(contentNeedUpload) {
+                        process.withContentJobItemTransactionMutex { txDb ->
+                            txDb.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+                        }
+
                         val progressListenerAdapter = NetworkProgressListenerAdapter(progress,
                             contentJobItem)
-                        uploader.upload(contentJobItem, progressListenerAdapter, httpClient, endpoint)
+                        return@withContext ProcessResult(uploader.upload(
+                                contentJobItem, progressListenerAdapter, httpClient, endpoint,
+                                process))
                     }
 
                     return@withContext ProcessResult(JobStatus.COMPLETE)

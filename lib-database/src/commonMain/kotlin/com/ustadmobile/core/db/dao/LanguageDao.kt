@@ -3,16 +3,57 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.LeavingReason
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
 @Dao
 @Repository
 abstract class LanguageDao : BaseDao<Language> {
+
+    @Query("""
+     REPLACE INTO LanguageReplicate(languagePk, languageDestination)
+      SELECT DISTINCT Language.langUid AS languagePk,
+             :newNodeId AS languageDestination
+        FROM Language
+       WHERE Language.langLct != COALESCE(
+             (SELECT languageVersionId
+                FROM LanguageReplicate
+               WHERE languagePk = Language.langUid
+                 AND languageDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(languagePk, languageDestination) DO UPDATE
+             SET languagePending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([Language::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+ REPLACE INTO LanguageReplicate(languagePk, languageDestination)
+  SELECT DISTINCT Language.langUid AS languageUid,
+         UserSession.usClientNodeId AS languageDestination
+    FROM ChangeLog
+         JOIN Language
+             ON ChangeLog.chTableId = ${Language.TABLE_ID}
+                AND ChangeLog.chEntityPk = Language.langUid
+         JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND Language.langLct != COALESCE(
+         (SELECT languageVersionId
+            FROM LanguageReplicate
+           WHERE languagePk = Language.langUid
+             AND languageDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(languagePk, languageDestination) DO UPDATE
+     SET languagePending = true
+  */               
+    """)
+    @ReplicationRunOnChange([Language::class])
+    @ReplicationCheckPendingNotificationsFor([Language::class])
+    abstract suspend fun replicateOnChange()
 
     @JsName("insertListAsync")
     @Insert

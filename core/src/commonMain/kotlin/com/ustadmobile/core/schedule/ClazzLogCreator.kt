@@ -2,6 +2,7 @@ package com.ustadmobile.core.schedule
 
 import com.soywiz.klock.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Holiday
 import kotlinx.coroutines.GlobalScope
@@ -86,9 +87,10 @@ fun UmAppDatabase.createClazzLogs(fromTime: Long, toTime: Long, clazzFilter: Lon
             }
 
             logsToReschedule.forEach {
-                clazzLogDao.updateStatusByClazzLogUid(it.clazzLogUid, ClazzLog.STATUS_RESCHEDULED)
+                clazzLogDao.updateStatusByClazzLogUid(it.clazzLogUid, ClazzLog.STATUS_RESCHEDULED,
+                    systemTimeInMillis())
                 clazzLogAttendanceRecordDao.updateRescheduledClazzLogUids(it.clazzLogUid,
-                        clazzLog.clazzLogUid)
+                        clazzLog.clazzLogUid, systemTimeInMillis())
             }
 
             if (!alreadyCreatedClazzLogs.any { it.clazzLogUid == clazzLog.clazzLogUid }) {

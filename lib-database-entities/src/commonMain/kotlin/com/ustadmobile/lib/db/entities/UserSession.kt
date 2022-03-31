@@ -3,29 +3,30 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.ClientSyncManager.Companion.TABLEID_SYNC_ALL_TABLES
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity(indices = [
     Index(value = ["usPersonUid", "usStatus", "usClientNodeId"], name = "person_status_node_idx"),
     Index(value = ["usClientNodeId", "usStatus", "usPersonUid"], name = "node_status_person_idx")])
-@SyncableEntity(tableId = UserSession.TABLE_ID,
-    syncFindAllQuery = """
-        SELECT UserSession.*
-          FROM UserSession
-         WHERE usClientNodeId =  :clientId
-    """,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId,
-               $TABLEID_SYNC_ALL_TABLES AS tableId
-          FROM ChangeLog
-               JOIN UserSession 
-                    ON ChangeLog.chTableId = ${UserSession.TABLE_ID}
-                       AND ChangeLog.chEntityPk = UserSession.usUid
-                        
-    """])
 @Serializable
+@ReplicateEntity(tableId = UserSession.TABLE_ID, tracker = UserSessionReplicate::class,
+    priority = ReplicateEntity.HIGHEST_PRIORITY)
+@Triggers(arrayOf(
+ Trigger(
+     name = "usersession_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO UserSession(usUid, usPcsn, usLcsn, usLcb, usLct, usPersonUid, usClientNodeId, usStartTime, usEndTime, usStatus, usReason, usAuth, usSessionType) 
+         VALUES (NEW.usUid, NEW.usPcsn, NEW.usLcsn, NEW.usLcb, NEW.usLct, NEW.usPersonUid, NEW.usClientNodeId, NEW.usStartTime, NEW.usEndTime, NEW.usStatus, NEW.usReason, NEW.usAuth, NEW.usSessionType) 
+         /*psql ON CONFLICT (usUid) DO UPDATE 
+         SET usPcsn = EXCLUDED.usPcsn, usLcsn = EXCLUDED.usLcsn, usLcb = EXCLUDED.usLcb, usLct = EXCLUDED.usLct, usPersonUid = EXCLUDED.usPersonUid, usClientNodeId = EXCLUDED.usClientNodeId, usStartTime = EXCLUDED.usStartTime, usEndTime = EXCLUDED.usEndTime, usStatus = EXCLUDED.usStatus, usReason = EXCLUDED.usReason, usAuth = EXCLUDED.usAuth, usSessionType = EXCLUDED.usSessionType
+         */"""
+     ]
+ )
+))
 class UserSession {
 
     @PrimaryKey(autoGenerate = true)
@@ -40,12 +41,13 @@ class UserSession {
     @LastChangedBy
     var usLcb: Int = 0
 
+    @ReplicationVersionId
     @LastChangedTime
     var usLct: Long = 0
 
     var usPersonUid: Long = 0
 
-    var usClientNodeId: Int = 0
+    var usClientNodeId: Long = 0
 
     var usStartTime: Long = 0
 
@@ -81,5 +83,13 @@ class UserSession {
 
         const val REASON_PASSWORD_CHANGED = 3
 
+        const val USER_SESSION_NOT_LOCAL_DEVICE_SQL = """
+            UserSession.usClientNodeId != (
+                 SELECT nodeClientId 
+                   FROM SyncNode
+                  LIMIT 1)
+        """
+
     }
+
 }

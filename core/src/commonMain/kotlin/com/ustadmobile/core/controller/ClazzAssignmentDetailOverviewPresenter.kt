@@ -1,9 +1,11 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
@@ -41,8 +43,13 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
     }
 
     override fun handleClickEdit() {
-        systemImpl.go(ClazzAssignmentEditView.VIEW_NAME,
-                mapOf(ARG_ENTITY_UID to entity?.caUid.toString()), context)
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null, ClazzAssignmentEditView.VIEW_NAME, ClazzAssignment::class,
+                ClazzAssignment.serializer(), SAVEDSTATE_KEY_CLAZZ_ASSIGNMENT,
+                arguments = mutableMapOf(ARG_ENTITY_UID to entity?.caUid.toString())
+            )
+        )
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {
@@ -100,7 +107,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
     companion object {
 
         //TODO: Add constants for keys that would be used for any One To Many Join helpers
-
+        const val  SAVEDSTATE_KEY_CLAZZ_ASSIGNMENT = "ClassAssignment"
     }
 
 }

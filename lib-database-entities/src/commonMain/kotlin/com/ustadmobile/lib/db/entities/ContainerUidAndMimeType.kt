@@ -7,5 +7,5 @@ open class ContainerUidAndMimeType(){
 
     var containerUid: Long = 0
 
-    var mimeType: String = ""
+    var mimeType: String ? = null
 }

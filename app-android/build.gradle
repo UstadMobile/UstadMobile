@@ -6,17 +6,20 @@ buildscript {
         maven {
             url "https://devserver3.ustadmobile.com/maven"
         }
+        maven {
+            url 'https://jitpack.io/'
+        }
     }
 
     dependencies {
-        classpath "digital.wup:android-maven-publish:$version_android_maven_publish"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
     }
 }
 
 plugins {
-    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha06"
+    id "com.ustadmobile.adbscreenrecorder"
+    id 'maven-publish'
 }
 
 apply plugin: 'com.android.library'
@@ -25,7 +28,6 @@ apply plugin: "kotlin-android"
 //Jacoco on Android is persistently getting stuck - see https://github.com/arturdm/jacoco-android-gradle-plugin/issues/60.
 // Should be disabled until this is fixed or excluded unless we are specifically running tests for coverage.
 //apply plugin: "jacoco"
-apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: 'kotlinx-serialization'
 apply plugin: "kotlin-kapt"
 
@@ -64,12 +66,14 @@ afterEvaluate {
 }
 
 //Start the test server that Espresso tests can use when we need to test communicating with a real server
+/* Disabled 10/Mar/22 as this is not in use, but will be restored in the near future
 tasks.whenTaskAdded { task ->
     if (task.name.toLowerCase().startsWith("connected") && task.name.toLowerCase().endsWith("androidtest")) {
         task.dependsOn(":lib-http-testserver:startServer")
         task.finalizedBy(":lib-http-testserver:stopServer")
     }
 }
+*/
 
 android {
     buildFeatures {
@@ -116,45 +120,27 @@ android {
         }
     }
 
-    lintOptions {
-        abortOnError false
-    }
 
     compileSdkVersion rootProject.ext.version_android_compile_sdk
-    buildToolsVersion rootProject.ext.version_android_buildtools
 
     defaultConfig {
+        testInstrumentationRunnerArguments clearPackageData: 'true', notAnnotation: 'com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest'
+
         //When using variables the build analyzer reports that major tasks reran because of a
         // 'chnage' in the value of minSdkVersion, hence hardcoding them here.
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
 
         multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunnerArguments clearPackageData: 'true'
         buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""
         buildConfigField "String", "TEST_PORT", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"] + "\""
-        testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
 
         //see https://proandroiddev.com/current-issues-with-kotlin-multiplatform-and-how-to-fix-them-5ae62822a546
         packagingOptions {
             pickFirst "META-INF/io.netty.versions.properties"
             excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module"]
-        }
-
-        missingDimensionStrategy 'api', 'api18'
-    }
-
-    flavorDimensions "config"
-
-    productFlavors {
-        /**
-         * Used for day to day work in Android studio to avoid the need to use multidex when running tests
-         */
-        devMinApi21 {
-            dimension "config"
-            minSdkVersion 21
         }
     }
 
@@ -169,6 +155,9 @@ android {
             minifyEnabled false
             testCoverageEnabled = false
         }
+    }
+    lint {
+        abortOnError false
     }
 
     kotlinOptions {
@@ -285,7 +274,7 @@ dependencies {
     implementation project(':core')
     implementation project(':sharedse')
 
-    implementation "com.ustadmobile.door:door-runtime:$version_door"
+    implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(':lib-database-android')
     implementation project(":lib-database-entities")
     implementation project(':lib-util')
@@ -369,9 +358,6 @@ dependencies {
     implementation "io.ktor:ktor-client-okhttp:$version_ktor"
     implementation "io.ktor:ktor-client-cio:$version_ktor"
 
-    //Codec2 (low bitrate voice) Android library
-    implementation "com.ustadmobile.codec2:libcodec2-android:0.8-SNAPSHOT64-2"
-
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
@@ -449,7 +435,7 @@ dependencies {
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
-    androidTestImplementation "com.ustadmobile.adbscreenrecorder:lib-client:$version_android_adbscreenrecorder"
+    androidTestImplementation "com.github.UstadMobile.AdbScreenRecorder:lib-client:$version_android_adbscreenrecorder"
 
     kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
 }
@@ -459,23 +445,34 @@ task sourceJar(type: Jar) {
     classifier "source"
 }
 
-publishing {
-    publications {
-        //For the moment - publish only vanilla debug variant. Can publish others as per:
-        // https://github.com/wupdigital/android-maven-publish
-        mavenLocalconfigAar(MavenPublication) {
-            from components.findByName("androidVanillaDebug")
-            groupId rootProject.group
-            artifactId project.name
-            version rootProject.version
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = rootProject.group
+                artifactId = project.name
+                version = rootProject.version
+            }
+            // Creates a Maven publication called “debug”.
+            debug(MavenPublication) {
+                // Applies the component for the debug build variant.
+                from components.debug
+
+                groupId = rootProject.group
+                artifactId = project.name
+                version = rootProject.version
+            }
         }
 
-    }
 
-    repositories {
-        //Set this in projectdir/extrasettings.gradle
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
+        repositories {
+            maven {
+                url rootProject.ext.buildConfigProperties['repo.dir']
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ package com.ustadmobile.core.util
 
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.db.dao.OneToManyJoinDao
+import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.atomicfu.atomic
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
@@ -39,7 +40,7 @@ open class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
 
     override suspend fun commitToDatabase(dao: OneToManyJoinDao<in T>, fkSetter: (T) -> Unit) {
         super.commitToDatabase(dao, fkSetter)
-        dao.deactivateByUids(primaryKeysToDeactivate)
+        dao.deactivateByUids(primaryKeysToDeactivate, systemTimeInMillis())
     }
 
     override fun doesNewEntityRequireFakePk(pk: Long) = (pk == 0L)

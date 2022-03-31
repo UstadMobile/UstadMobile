@@ -1,6 +1,5 @@
 package com.ustadmobile.core.io
 
-import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.readAndSaveToDir
@@ -10,13 +9,16 @@ import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
 import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.*
 import org.kodein.di.*
 import java.io.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
+import com.ustadmobile.core.util.ext.getContentEntryJsonFilesFromDir
 
 
 /**
@@ -39,10 +41,12 @@ import java.util.concurrent.atomic.AtomicLong
  * @param siteUrl Endpoint Site URL (used for retrieving dependencies)
  * @param di the dependency injection object
  */
-class UploadSession(val sessionUuid: String,
-                    val containerEntryPaths: List<ContainerEntryWithMd5>,
-                    val siteUrl: String,
-                    override val di: DI) : DIAware, Closeable {
+class UploadSession(
+    val sessionUuid: String,
+    val containerEntryPaths: List<ContainerEntryWithMd5>,
+    val siteUrl: String,
+    override val di: DI
+) : DIAware, Closeable {
 
     val lastActive = AtomicLong(systemTimeInMillis())
 
@@ -72,17 +76,15 @@ class UploadSession(val sessionUuid: String,
 
     private val md5sExpected: List<String>
 
-    private val firstFile: File
-
-    private val firstFileHeader: File
-
     val startFromByte: Long
 
     private val pipeOut = PipedOutputStream()
 
     private val pipeIn = PipedInputStream(pipeOut)
 
-    private val readJob: Job
+    private var readJob: Job? = null
+
+    val containerUidFolder: File
 
     init {
         UUID.fromString(sessionUuid) //validate this is a real uuid, does not contain nasty characters
@@ -91,45 +93,58 @@ class UploadSession(val sessionUuid: String,
         entriesRequired = runBlocking {
             db.linkExistingContainerEntries(containerUid, containerEntryPaths).entriesWithoutMatchingFile
         }
+        containerUidFolder = File(containerDir, "${entriesRequired.first().ceContainerUid}")
+        containerUidFolder.mkdirs()
 
         md5sExpected = entriesRequired.distinctMds5sSorted()
 
-        firstFile = File(uploadWorkDir,
-                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherOkHttp.SUFFIX_PART}")
-        firstFileHeader = File(uploadWorkDir,
-                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherOkHttp.SUFFIX_HEADER}")
+        if(md5sExpected.isNotEmpty()) {
 
-        startFromByte = if(firstFile.exists() && firstFileHeader.exists())
-            firstFile.length() + firstFileHeader.length()
-        else
-            0L
+            val firstFile = File(uploadWorkDir,
+                    "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherOkHttp.SUFFIX_PART}")
+            val firstFileHeader = File(uploadWorkDir,
+                    "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherOkHttp.SUFFIX_HEADER}")
 
-        uploadSessionParams = UploadSessionParams(md5sExpected, startFromByte)
+            startFromByte = if (firstFile.exists() && firstFileHeader.exists())
+                firstFile.length() + firstFileHeader.length()
+            else
+                0L
 
-        readJob = GlobalScope.launch(Dispatchers.IO) {
-            var concatIn: ConcatenatedInputStream2? = null
-            try {
-                //TODO: this call to readAndSaveToDir must be updated as it no longer links entries etc.
-                concatIn = ConcatenatedInputStream2(pipeIn)
-                concatIn.readAndSaveToDir(containerDir, uploadWorkDir, db, AtomicLong(0L),
-                    md5sExpected.toMutableList(), "UploadSession")
-            }catch(e: Exception) {
-                Napier.e("UploadSession;Exception reading, closing pipeOut to ")
-                pipeOut.close()
-                e.printStackTrace()
-            }finally {
-                concatIn?.close()
+            uploadSessionParams = UploadSessionParams(md5sExpected, startFromByte)
+
+            readJob = GlobalScope.launch(Dispatchers.IO) {
+                var concatIn: ConcatenatedInputStream2? = null
+                try {
+                    concatIn = ConcatenatedInputStream2(pipeIn)
+                    concatIn.readAndSaveToDir(
+                        containerUidFolder,
+                        uploadWorkDir,
+                        AtomicLong(0L),
+                        md5sExpected.toMutableList(),
+                        "UploadSession",
+                        di.direct.instance()
+                    )
+                } catch (e: Exception) {
+                    Napier.e("UploadSession;Exception reading, closing pipeOut to ")
+                    pipeOut.close()
+                    e.printStackTrace()
+                } finally {
+                    concatIn?.close()
+                }
             }
-        }
 
-        if(startFromByte > 0) {
-            FileInputStream(firstFileHeader).use { firstFileHeaderIn ->
-                firstFileHeaderIn.copyTo(pipeOut)
-            }
+            if (startFromByte > 0) {
+                FileInputStream(firstFileHeader).use { firstFileHeaderIn ->
+                    firstFileHeaderIn.copyTo(pipeOut)
+                }
 
-            FileInputStream(firstFile).use { firstFileIn ->
-                firstFileIn.copyTo(pipeOut)
+                FileInputStream(firstFile).use { firstFileIn ->
+                    firstFileIn.copyTo(pipeOut)
+                }
             }
+        }else{
+            startFromByte = 0
+            uploadSessionParams = UploadSessionParams(md5sExpected, startFromByte)
         }
     }
 
@@ -148,9 +163,16 @@ class UploadSession(val sessionUuid: String,
     override fun close() {
         pipeOut.close()
         runBlocking {
-            readJob.join()
-            db.linkExistingContainerEntries(containerEntryPaths.first().ceContainerUid,
-                entriesRequired)
+            readJob?.join()
+
+            val containerEntryFiles = containerUidFolder.getContentEntryJsonFilesFromDir(
+                di.direct.instance())
+            db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                txDb.containerEntryFileDao.insertListAsync(containerEntryFiles)
+                txDb.linkExistingContainerEntries(containerEntryPaths.first().ceContainerUid,
+                    entriesRequired)
+            }
+
         }
 
         uploadWorkDir.takeIf { it.listFiles().isEmpty() }?.delete()

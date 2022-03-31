@@ -23,6 +23,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.port.android.screen.VideoContentScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
+import com.ustadmobile.test.port.android.util.waitUntilOnFragment
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.util.test.ext.insertVideoContent
@@ -93,10 +94,20 @@ class VideoContentFragmentTest : TestCase() {
                 exoPlayButton{
                     click()
                 }
+                
+                runBlocking {
+                    fragmentScenario.waitUntilOnFragment(5000,
+                        {
+                            it.view?.findViewById<PlayerView>(R.id.activity_video_player_view)
+                                ?.player?.playbackState
+                        }) { playState -> playState == STATE_BUFFERING || playState == STATE_READY }
+                }
+
                 fragmentScenario.onFragment {
                     val videoPlayer = it.view?.findViewById<PlayerView>(R.id.activity_video_player_view)
                     val playState = videoPlayer?.player?.playbackState
-                    Assert.assertTrue("player is playing", playState == STATE_BUFFERING || playState == STATE_READY)
+                    Assert.assertTrue("player is playing",
+                        playState == STATE_BUFFERING || playState == STATE_READY)
                 }
 
                 fragmentScenario.letOnFragment {

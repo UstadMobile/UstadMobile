@@ -20,7 +20,6 @@ import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STA
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.util.UstadTestRule
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
@@ -110,13 +109,6 @@ class DownloadDialogPresenterTest {
         whenever(repo.contentEntryDao).thenReturn(contentEntrySpy)
 
         runBlocking {
-
-            val downloadJobDaoSpy = spy(db.contentJobItemDao) {
-                onBlocking { findStatusForActiveContentJobItem(any()) }.doReturn(0)
-            }
-
-            whenever(db.contentJobItemDao).thenReturn(downloadJobDaoSpy)
-
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()),
                     mockedDialogView, di, mockLifecycle)
@@ -151,13 +143,6 @@ class DownloadDialogPresenterTest {
         whenever(repo.contentEntryDao).thenReturn(contentEntrySpy)
 
         runBlocking {
-
-            val downloadJobDaoSpy = spy(db.contentJobItemDao) {
-                onBlocking { findStatusForActiveContentJobItem(any()) }.doReturn(0)
-            }
-
-            whenever(db.contentJobItemDao).thenReturn(downloadJobDaoSpy)
-
             storageDirs = listOf(ContainerStorageDir("/","Phone",
                     10L,true))
 
@@ -175,8 +160,7 @@ class DownloadDialogPresenterTest {
             verify(mockedDialogView, timeout(5000).atLeastOnce()).setBottomPositiveButtonEnabled(false)
         }
     }
-//
-//
+
     private data class MockDownloadJob(var contentEntryUid: Long, var status: Int,
                                        var existingDownloadSizeInfo: DownloadJobSizeInfo) {
     }
@@ -186,13 +170,13 @@ class DownloadDialogPresenterTest {
             val existingDownloadSizeInfo = DownloadJobSizeInfo(4, 1000L)
             val entryDaoSpy = spy(db.contentEntryDao) {
                 onBlocking { getRecursiveDownloadTotals( any()) }.doReturn(existingDownloadSizeInfo)
-            }
-            val statusSpy = spy(db.contentJobItemDao){
-                onBlocking { findStatusForActiveContentJobItem(any()) }.doReturn(djStatus)
+                onBlocking { statusForDownloadDialog(any()) }.thenAnswer {
+                    djStatus
+                }
             }
 
             whenever(repo.contentEntryDao).thenReturn(entryDaoSpy)
-            whenever(db.contentJobItemDao).thenReturn(statusSpy)
+            whenever(db.contentEntryDao).thenReturn(entryDaoSpy)
 
             MockDownloadJob(1L, djStatus, existingDownloadSizeInfo)
         }
@@ -200,7 +184,7 @@ class DownloadDialogPresenterTest {
 
     @Test
     fun givenExistingDownloadJobNotStarted_whenViewCreated_shouldGetSizeFromDatabase() {
-        val mockExistingDownloadJob = setupMockDownloadJob(ContentJobItem.STATUS_DOWNLOAD)
+        val mockExistingDownloadJob = setupMockDownloadJob(JobStatus.NOT_QUEUED)
 
         runBlocking {
             presenter = DownloadDialogPresenter(context,
@@ -265,7 +249,7 @@ class DownloadDialogPresenterTest {
             verifyBlocking(contentJobManager, timeout(5000)) {
                 enqueueContentJob(any(), capture())
             }
-            val contentJobItem = db.contentJobItemDao.findByJobId(this.firstValue)!!
+            val contentJobItem = db.contentJobItemDao.findRootJobItemByJobId(this.firstValue)!!
             assertEquals("Download Job created with status = NEEDS_PREPARED",
                     JobStatus.QUEUED, contentJobItem.cjiRecursiveStatus)
             assertEquals("Download job root content entry uid is the same as presenter arg",
@@ -291,19 +275,13 @@ class DownloadDialogPresenterTest {
     @Test
     fun givenDownloadRunning_whenCreated_shouldShowStackedOptions() {
         runBlocking{
-
-
-            val downloadJobDaoSpy = spy(db.contentJobItemDao) {
-                onBlocking { findStatusForActiveContentJobItem(any()) }.doReturn(ContentJobItem.STATUS_RUNNING)
-            }
-            whenever(db.contentJobItemDao).thenReturn(downloadJobDaoSpy)
-
+            setupMockDownloadJob(JobStatus.RUNNING)
             val args = mapOf(ARG_CONTENT_ENTRY_UID to "1")
             presenter = DownloadDialogPresenter(context, args, mockedDialogView, di, mockLifecycle)
-            presenter.onCreate(HashMap<String, String>())
+            presenter.onCreate(mapOf())
             presenter.onStart()
 
-            verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)
+            verify(mockedDialogView, timeout(5000 * 1000)).setStackOptionsVisible(true)
             argumentCaptor<IntArray>() {
                 verify(mockedDialogView, timeout(5000)).setStackedOptions(capture(), any())
                 assertArrayEquals("Set expected stacked options", DownloadDialogPresenter.STACKED_OPTIONS,
@@ -312,52 +290,14 @@ class DownloadDialogPresenterTest {
         }
     }
 
-    //@Test
-    @Throws(InterruptedException::class)
-    fun givenDownloadRunning_whenClickPause_shouldCallPause() {
-        runBlocking {
-          /*  val contentJob = ContentJob(cjUid = 1)
-            val contentJobItem = ContentJobItem().apply {
-                cjiRecursiveStatus = JobStatus.RUNNING
-                cjiJobUid = 1
-                cjiContentEntryUid = 1
-            }
-
-            val existingDownloadJobLiveData = DoorMutableLiveData<ContentJobItem?>(contentJobItem)
-            val downloadJobDaoSpy = spy(db.contentJobItemDao) {
-                onBlocking { findLiveDataByContentEntryUid(any()) }.doReturn(existingDownloadJobLiveData)
-            }
-            whenever(db.contentJobItemDao).thenReturn(downloadJobDaoSpy)*/
-
-
-            presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"),
-                    mockedDialogView, di, mockLifecycle)
-            presenter.onCreate(HashMap<String, String>())
-            presenter.onStart()
-
-            verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)
-
-            //presenter.handleClickStackedButton(DownloadDialogPresenter.STACKED_BUTTON_PAUSE)
-            //verify(contentJobManager, timeout(5000)).pause(existingDownloadJob.djUid)
-
-        }
-    }
-
     @Test
     fun givenDownloadRunning_whenClickCancel_shouldCancelJob() {
         runBlocking {
-            val contentJob = ContentJob(cjUid = 1)
-            db.contentJobDao.insertAsync(contentJob)
-            val contentJobItem = ContentJobItem().apply {
-                cjiRecursiveStatus = JobStatus.RUNNING
-                cjiJobUid = 1
-                cjiContentEntryUid = 1
-                cjiUid = db.contentJobItemDao.insertJobItem(this)
-            }
+            setupMockDownloadJob(JobStatus.RUNNING)
 
-            presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"), mockedDialogView,
-                    di, mockLifecycle)
-            presenter.onCreate(HashMap<String, String>())
+            presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"),
+                mockedDialogView, di, mockLifecycle)
+            presenter.onCreate(mapOf())
             presenter.onStart()
 
             verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)

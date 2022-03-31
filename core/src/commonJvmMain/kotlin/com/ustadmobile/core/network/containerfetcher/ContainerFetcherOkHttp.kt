@@ -111,15 +111,17 @@ class ContainerFetcherOkHttp(
             val bytesToSkipWriting = firstFile.length() + firstFileHeader.length()
             totalDownloadSize.set((firstFile.length() + firstFileHeader.length()) + httpResponse.headersContentLength())
 
-            val readAndSaveResult = inStream.readAndSaveToDir(destDirFile, destDirFile, db,
-                bytesSoFar, md5ExpectedList, logPrefix)
+            val readAndSaveResult = inStream.readAndSaveToDir(
+                destDirFile, destDirFile, bytesSoFar,
+                md5ExpectedList, logPrefix, di.direct.instance()
+            )
             val totalBytesRead= readAndSaveResult.totalBytesRead
             val payloadExpected = (totalDownloadSize.get() - (md5sToDownload.size * ConcatenatedEntry.SIZE))
 
             downloadStatus = if(totalBytesRead == payloadExpected) {
                 JobStatus.COMPLETE
             }else {
-                JobStatus.PAUSED
+                JobStatus.QUEUED
             }
             Napier.d("$logPrefix done downloaded ${bytesSoFar.get() - bytesToSkipWriting}/expected ${payloadExpected} bytes" +
                 " in ${System.currentTimeMillis() - startTime}ms")

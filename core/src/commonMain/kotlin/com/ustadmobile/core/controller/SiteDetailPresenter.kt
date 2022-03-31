@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.view.SiteDetailView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -9,7 +10,6 @@ import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.Site
-import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
@@ -33,8 +33,9 @@ class SiteDetailPresenter(context: Any,
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        return repo.personDao.takeIf { account != null }
-                ?.personIsAdmin(account?.personUid ?: 0) ?: false
+        return true
+//        return repo.personDao.takeIf { account != null }
+//                ?.personIsAdmin(account?.personUid ?: 0) ?: false
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Site {
@@ -50,8 +51,10 @@ class SiteDetailPresenter(context: Any,
     }
 
     override fun handleClickEdit() {
-        systemImpl.go(SiteEditView.VIEW_NAME,
-            mapOf(ARG_ENTITY_UID to entity?.siteUid?.toString()), context)
+        val siteUid = entity?.siteUid ?: return
+        navigateForResult(NavigateForResultOptions(this,
+            entity, SiteEditView.VIEW_NAME, Site::class, Site.serializer(),
+            arguments = mutableMapOf(ARG_ENTITY_UID to siteUid.toString())))
     }
 
     fun handleClickTerms(terms: SiteTermsWithLanguage?){

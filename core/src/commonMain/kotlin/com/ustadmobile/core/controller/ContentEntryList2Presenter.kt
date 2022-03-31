@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.lib.db.entities.Role
@@ -155,23 +156,31 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override fun handleClickSelectionOption(selectedItem: List<ContentEntry>, option: SelectionOption) {
+        val selectedContentEntryUids = selectedItem.map { it.contentEntryUid }
+        val selectedContentEntryParentChildUids = selectedItem.mapNotNull {
+            (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
+        }
+
         GlobalScope.launch(doorMainDispatcher()) {
             when (option) {
                 SelectionOption.MOVE -> {
-                    handleClickMove(selectedItem)
+                    handleClickMove(selectedContentEntryParentChildUids)
                 }
                 SelectionOption.HIDE -> {
                     when(contentFilter){
                         ARG_DISPLAY_CONTENT_BY_PARENT ->{
-                            repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedItem.map { it.contentEntryUid })
+                            repo.contentEntryDao.toggleVisibilityContentEntryItems(true,
+                                selectedContentEntryUids, systemTimeInMillis())
                         }
                         ARG_DISPLAY_CONTENT_BY_CLAZZ ->{
-                            repo.clazzContentJoinDao.toggleVisibilityClazzContent(false, selectedItem.map { it.contentEntryUid })
+                            repo.clazzContentJoinDao.toggleVisibilityClazzContent(false,
+                                selectedContentEntryUids, systemTimeInMillis())
                         }
                     }
                 }
                 SelectionOption.UNHIDE -> {
-                    repo.contentEntryDao.toggleVisibilityContentEntryItems(false, selectedItem.map { it.contentEntryUid })
+                    repo.contentEntryDao.toggleVisibilityContentEntryItems(false,
+                        selectedContentEntryUids, systemTimeInMillis())
                 }
             }
         }
@@ -180,16 +189,14 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     /**
      * Show ContentEntryList in picker mode so the user can select a folder to move entries to.
      *
-     * @param childrenToMove list of child entries selected to move
+     * @param childrenToMove list of content entry parent child join uids that will be
+     * moved
      */
-    fun handleClickMove(childrenToMove: List<ContentEntry>){
-
+    private fun handleClickMove(childrenToMove: List<Long>){
         val args = mutableMapOf(ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
                 ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_PARENT,
                 ARG_SHOW_ONLY_FOLDER_FILTER to true.toString(),
-                KEY_SELECTED_ITEMS to childrenToMove.mapNotNull {
-                    (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
-                }.joinToString(","))
+                KEY_SELECTED_ITEMS to childrenToMove.joinToString(","))
 
         navigateForResult(
                 NavigateForResultOptions(this,
@@ -206,7 +213,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         if (!parentChildJoinUids.isNullOrEmpty()) {
             GlobalScope.launch(doorMainDispatcher()) {
 
-                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(destContentEntryUid, parentChildJoinUids)
+                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
+                    destContentEntryUid, parentChildJoinUids, systemTimeInMillis())
 
                 view.showSnackBar(systemImpl.getString(MessageID.moved_x_entries, context).replace("%1\$s",
                         parentChildJoinUids.size.toString()), actionMessageId = MessageID.open_folder,
@@ -249,7 +257,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 val args = mutableMapOf(
                         ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_PARENT,
                         ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString())
-
                 navigateForResult(
                         NavigateForResultOptions(this,
                                 null, ContentEntryList2View.VIEW_NAME,
@@ -264,6 +271,10 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
             }
         }
 
+    }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
+        handleClickCreateNewFab()
     }
 
 
@@ -329,9 +340,10 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
         GlobalScope.launch(doorMainDispatcher()) {
             if (arguments.containsKey(KEY_SELECTED_ITEMS)) {
-                val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")?.map { it.trim().toLong() }
-                        ?: listOf()
-                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(entry.contentEntryUid, selectedItems)
+                val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")
+                    ?.map { it.trim().toLong() } ?: listOf()
+                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
+                    entry.contentEntryUid, selectedItems, systemTimeInMillis())
             }
         }
     }

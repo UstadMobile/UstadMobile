@@ -5,11 +5,13 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.LeavingReasonDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.LeavingReasonEditView
 import com.ustadmobile.core.view.LeavingReasonListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -17,8 +19,7 @@ import com.ustadmobile.lib.db.entities.LeavingReason
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.instance
+import org.kodein.di.*
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -42,6 +43,8 @@ class LeavingReasonListPresenterTest {
 
     private lateinit var di: DI
 
+    private lateinit var mockNavController: UstadNavController
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -53,6 +56,7 @@ class LeavingReasonListPresenterTest {
             import(ustadTestRule.diModule)
         }
         val repo: UmAppDatabase by di.activeRepoInstance()
+        mockNavController = di.direct.instance()
         context = Any()
         repoLeavingReasonDaoSpy = spy(repo.leavingReasonDao)
         whenever(repo.leavingReasonDao).thenReturn(repoLeavingReasonDaoSpy)
@@ -82,14 +86,14 @@ class LeavingReasonListPresenterTest {
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
 
         val repo: UmAppDatabase by di.activeRepoInstance()
-        val systemImpl: UstadMobileSystemImpl by di.instance()
+
         val testEntity = LeavingReason().apply {
             //set variables here
             leavingReasonTitle = "Moved"
             leavingReasonUid = repo.leavingReasonDao.insert(this)
         }
 
-        val presenterArgs = mapOf<String,String>()
+        val presenterArgs = mapOf<String, String>()
         val presenter = LeavingReasonListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
@@ -97,8 +101,9 @@ class LeavingReasonListPresenterTest {
 
         presenter.onClickLeavingReason(testEntity)
 
-        verify(systemImpl, timeout(5000)).go(eq(LeavingReasonEditView.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to testEntity.leavingReasonUid.toString())), any())
+        verify(mockNavController, timeout(5000)).navigate(
+            eq(LeavingReasonEditView.VIEW_NAME),
+            any(), any())
 
     }
 

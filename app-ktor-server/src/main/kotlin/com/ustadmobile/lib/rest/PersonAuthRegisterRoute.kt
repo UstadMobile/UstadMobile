@@ -17,15 +17,13 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
-import io.ktor.routing.Route
-import io.ktor.routing.post
-import io.ktor.routing.route
 import org.kodein.di.instance
 import org.kodein.di.on
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.view.UstadView
 import io.ktor.application.*
 import io.ktor.request.*
+import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -42,7 +40,7 @@ fun Route.personAuthRegisterRoute() {
             val password = call.request.queryParameters["password"]
             val maxDateOfBirth = call.request.queryParameters["maxDateOfBirth"]?.toLong() ?: 0L
 
-            val deviceId = call.request.header("X-nid")?.toInt()
+            val deviceId = call.request.header("X-nid")?.toLong()
             if(username == null || password == null || deviceId == null){
                 call.respond(HttpStatusCode.BadRequest, "No username/password provided, or no device id")
                 return@post
@@ -139,6 +137,19 @@ fun Route.personAuthRegisterRoute() {
             repo.insertPersonAuthCredentials2(mPerson.personUid, newPassword, authParams)
 
             call.respond(HttpStatusCode.OK, mPerson)
+        }
+
+        get("person") {
+            val di: DI by closestDI()
+            val db: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_DB)
+            val personUid = call.request.queryParameters["personUid"]?.toLong() ?: 0
+
+            val person = db.personDao.findByUid(personUid)
+            if(person != null) {
+                call.respond(HttpStatusCode.OK, person)
+            }else {
+                call.respond(HttpStatusCode.NoContent)
+            }
         }
     }
 }

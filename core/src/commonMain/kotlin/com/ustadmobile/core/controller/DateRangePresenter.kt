@@ -5,6 +5,7 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.toFixedDatePair
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.DateRangeView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -14,6 +15,7 @@ import com.ustadmobile.lib.db.entities.Moment
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -118,7 +120,8 @@ class DateRangePresenter(context: Any,
 
         GlobalScope.launch(doorMainDispatcher()) {
             withContext(doorMainDispatcher()) {
-                view.finishWithResult(listOf(entity))
+                finishWithResult(safeStringify(di,
+                    ListSerializer(DateRangeMoment.serializer()), listOf(entity)))
             }
         }
     }

@@ -14,6 +14,7 @@ import com.ustadmobile.core.controller.WebChunkPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -42,9 +43,12 @@ class WebChunkFragment : UstadBaseFragment(), WebChunkView, FragmentBackHandler 
         webView?.settings?.mediaPlaybackRequiresUserGesture = false
 
         mPresenter = WebChunkPresenter(this,
-                arguments.toStringMap(), this, di).withViewLifecycle()
+            arguments.toStringMap(), this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-
+        val accountManager = di.direct.instance<UstadAccountManager>()
+        val webClient = WebChunkWebViewClient(arguments?.getLong(UstadView.ARG_CONTAINER_UID) ?: 0,
+            di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB), mPresenter)
+        webView?.webViewClient = webClient
         return mBinding?.root
     }
 
@@ -65,26 +69,14 @@ class WebChunkFragment : UstadBaseFragment(), WebChunkView, FragmentBackHandler 
             field = value
             //title = value?.title
         }
-
-    override var containerUid: Long? = null
+    override var url: String = ""
         get() = field
         set(value) {
             field = value
-            if (value == null) {
-                showSnackBar(requireContext().getString(R.string.error_opening_file))
-                return
+            runOnUiThread{
+                webView?.loadUrl(value)
             }
-
-            val accountManager = di.direct.instance<UstadAccountManager>()
-            val webClient = WebChunkWebViewClient(value,
-                    di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB),
-                    mPresenter)
-            runOnUiThread(Runnable {
-                webView?.webViewClient = webClient
-                webView?.loadUrl(webClient.url)
-            })
         }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

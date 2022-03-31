@@ -16,7 +16,7 @@ import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.*
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -24,7 +24,6 @@ import kotlinx.serialization.json.Json
 import org.mockito.kotlin.*
 import org.xmlpull.v1.XmlPullParserFactory
 import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
@@ -59,54 +58,12 @@ class PersonAuthRegisterRouteTest {
 
             install(DIFeature) {
                 import(commonJvmDiModule)
-
-                bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
-                    NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
-                }
-
-                bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
-                    val nodeIdAndAuth : NodeIdAndAuth = instance()
-                    DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-                        .build().also {
-                            it.clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, isPrimary = true)
-                        }
-                }
+                import(commonTestKtorDiModule(endpointScope, temporaryFolder))
 
                 bind<NotificationSender>() with singleton {
                     mockNotificationSender
                 }
 
-                bind<Gson>() with singleton {
-                    Gson()
-                }
-
-                bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
-                    XmlPullParserFactory.newInstance().also {
-                        it.isNamespaceAware = true
-                    }
-                }
-
-                bind<UstadMobileSystemImpl>() with singleton {
-                    UstadMobileSystemImpl(instance(tag = DiTag.XPP_FACTORY_NSAWARE),
-                        temporaryFolder.newFolder())
-                }
-
-                bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
-                    val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-                    val nodeIdAndAuth: NodeIdAndAuth = instance()
-                    db.asRepository(
-                        RepositoryConfig.repositoryConfig(
-                            Any(), "http://localhost/", nodeIdAndAuth.nodeId,
-                            nodeIdAndAuth.auth, instance(), instance()))
-                }
-
-                bind<Pbkdf2Params>() with singleton {
-                    Pbkdf2Params()
-                }
-
-                bind<AuthManager>() with scoped(endpointScope).singleton {
-                    AuthManager(context, di)
-                }
 
                 registerContextTranslator { _: ApplicationCall ->
                     Endpoint("localhost")

@@ -2,16 +2,15 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.lib.db.entities.Container
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
 
 actual class VideoContentPresenter actual constructor(context: Any, arguments: Map<String, String>,
-                                                      view: VideoPlayerView, di: DI)
+                                                      view: VideoContentView, di: DI)
     : VideoContentPresenterCommon(context, arguments, view, di) {
 
     var container: Container? = null

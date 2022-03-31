@@ -23,8 +23,11 @@ import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 
 @AdbScreenRecord("Report edit screen tests")
@@ -51,6 +54,13 @@ class ReportEditFragmentTest: TestCase() {
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
 
+    private lateinit var gson: Gson
+
+
+    @Before
+    fun setup() {
+        gson = getApplicationDi().direct.instance()
+    }
 
     @AdbScreenRecord("with no report present, fill all the fields and navigate to detail")
     @Test
@@ -147,10 +157,12 @@ class ReportEditFragmentTest: TestCase() {
         //Freeze and serialize the value as it was first shown to the user
         var entityLoadedByFragment: ReportWithSeriesWithFilters? = null
         while(entityLoadedByFragment == null){
-            entityLoadedByFragment = fragmentScenario.nullableLetOnFragment { it.entity}
+            entityLoadedByFragment = fragmentScenario.nullableLetOnFragment { it.entity }
+            Thread.sleep(100)
         }
-        val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
-        val updatedReport = defaultGson().fromJson(entityLoadedJson, ReportWithSeriesWithFilters::class.java).apply {
+
+        val entityLoadedJson = gson.toJson(entityLoadedByFragment)
+        val updatedReport = gson.fromJson(entityLoadedJson, ReportWithSeriesWithFilters::class.java).apply {
             reportTitle = "Updated Report"
             xAxis = Report.MONTH
             val reportSeriesList = listOf(ReportSeries().apply {
@@ -178,21 +190,22 @@ class ReportEditFragmentTest: TestCase() {
             ReportEditScreen{
 
                 fillFields(fragmentScenario, updatedReport, entityLoadedByFragment, true,
-                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
+                        impl = systemImplNavRule.impl,
+                        context = ApplicationProvider.getApplicationContext(),
                         testContext = this@run)
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-                Assert.assertEquals("Entity in database was loaded for user",
+                Assert.assertEquals("Entity json was updated",
                         "New Report",
-                        defaultGson().fromJson(entityLoadedJson, ReportWithSeriesWithFilters::class.java).reportTitle)
+                        gson.fromJson(entityLoadedJson, ReportWithSeriesWithFilters::class.java).reportTitle)
 
 
                 val updatedEntityFromDb = dbRule.db.reportDao.findByUidLive(existingReport.reportUid)
                         .waitUntilWithFragmentScenario(fragmentScenario) { it?.reportTitle == "Updated Report" }
 
                 val listSeriesType = object : TypeToken<ArrayList<ReportSeries?>?>() {}.type
-                val seriesList = defaultGson().fromJson<List<ReportSeries>>(updatedEntityFromDb!!.reportSeries, listSeriesType)
+                val seriesList = gson.fromJson<List<ReportSeries>>(updatedEntityFromDb!!.reportSeries, listSeriesType)
 
                 Assert.assertEquals("Report name is updated", "Updated Report",
                         updatedEntityFromDb.reportTitle)

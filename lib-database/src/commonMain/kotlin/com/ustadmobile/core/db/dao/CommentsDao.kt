@@ -3,13 +3,59 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
+import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
 @Dao
 abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
+
+    @Query("""
+     REPLACE INTO CommentsReplicate(commentsPk, commentsDestination)
+      SELECT DISTINCT Comments.commentsUid AS commentsPk,
+             :newNodeId AS commentsDestination
+        FROM Comments
+       WHERE Comments.commentsLct != COALESCE(
+             (SELECT commentsVersionId
+                FROM CommentsReplicate
+               WHERE commentsPk = Comments.commentsUid
+                 AND commentsDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(commentsPk, commentsDestination) DO UPDATE
+             SET commentsPending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([Comments::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+     REPLACE INTO CommentsReplicate(commentsPk, commentsDestination)
+      SELECT DISTINCT Comments.commentsUid AS commentsPk,
+             UserSession.usClientNodeId AS commentsDestination
+        FROM ChangeLog
+             JOIN Comments
+                 ON ChangeLog.chTableId = ${Comments.TABLE_ID}
+                    AND ChangeLog.chEntityPk = Comments.commentsUid
+             JOIN UserSession 
+                  ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+       WHERE UserSession.usClientNodeId != (
+             SELECT nodeClientId 
+               FROM SyncNode
+              LIMIT 1)
+         AND Comments.commentsLct != COALESCE(
+             (SELECT commentsVersionId
+                FROM CommentsReplicate
+               WHERE commentsPk = Comments.commentsUid
+                 AND commentsDestination = UserSession.usClientNodeId), 0)
+     /*psql ON CONFLICT(commentsPk, commentsDestination) DO UPDATE
+         SET commentsPending = true
+      */               
+    """)
+    @ReplicationRunOnChange([Comments::class])
+    @ReplicationCheckPendingNotificationsFor([Comments::class])
+    abstract suspend fun replicateOnChange()
 
     @Query("SELECT * FROM Comments WHERE commentsUid = :uid " +
             " AND CAST(commentsInActive AS INTEGER) = 0")
@@ -124,14 +170,20 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
             List<CommentsWithPerson>
 
     @Query("""
-        UPDATE Comments SET commentsInActive = :inActive WHERE 
-        Comments.commentsUid = :uid
+        UPDATE Comments 
+           SET commentsInActive = :inActive,
+               commentsLct = :changeTime
+         WHERE Comments.commentsUid = :uid
     """)
-    abstract suspend fun updateInActiveByCommentUid(uid: Long, inActive: Boolean)
+    abstract suspend fun updateInActiveByCommentUid(
+        uid: Long,
+        inActive: Boolean,
+        changeTime: Long
+    )
 
-    override suspend fun deactivateByUids(uidList: List<Long>) {
+    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
         uidList.forEach {
-            updateInActiveByCommentUid(it, true)
+            updateInActiveByCommentUid(it, true, changeTime)
         }
     }
 }

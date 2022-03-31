@@ -19,15 +19,9 @@ interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRe
 
     var markCompleteVisible: Boolean
 
-    var canDownload: Boolean
+    var contentEntryButtons: ContentEntryButtonModel?
 
-    var canUpdate: Boolean
-
-    var hasContentToOpenOrDelete: Boolean
-
-    var contentJobItemStatus: Int
-
-    var contentJobItemProgress: ContentJobItemProgress?
+    var activeContentJobItems: List<ContentJobItemProgress>?
 
     companion object {
 

@@ -8,20 +8,21 @@ plugins {
 
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
-    buildToolsVersion rootProject.ext.version_android_buildtools
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     packagingOptions {
-        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+        resources {
+            excludes += ['META-INF/INDEX.LIST', '**/*.kotlin_metadata', 'META-INF/*.kotlin_module', 'licenses/**.TXT']
+        }
     }
+
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
@@ -52,17 +53,16 @@ kotlin {
 
     android()
 
-    /* JS is disabled until after Kotlin 1.4 upgrade
-    js {
-        nodejs()
-
-        compilations.main.kotlinOptions {
-            metaInfo = true
-            sourceMap = true
-            moduleKind = "commonjs"
+    js(LEGACY) {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless() //change to useChrome to run the actual browser
+                    webpackConfig.cssSupport.enabled = true
+                }
+            }
         }
     }
-    */
 
     jvm {
         compilations.main.kotlinOptions {
@@ -76,9 +76,9 @@ kotlin {
         commonMain {
             dependencies {
                 implementation kotlin('stdlib-common')
-                implementation "com.ustadmobile.door:door-runtime:$version_door"
+                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                compileOnly "com.ustadmobile.door:room-annotations:$version_door"
+                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
 
             }
         }

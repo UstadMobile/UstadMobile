@@ -27,26 +27,29 @@ class DefaultContentPluginUploader(
         contentJobItem: ContentJobItem,
         progress: NetworkProgressListener?,
         httpClient: HttpClient,
-        endpoint: Endpoint
-    ) {
-        withContext(Dispatchers.Default) {
+        endpoint: Endpoint,
+        processContext: ContentJobProcessContext,
+    ): Int {
+        return withContext(Dispatchers.Default) {
             try {
-                val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+                val (uploadSessionUuid, containerEntries) = processContext.withContentJobItemTransactionMutex { txDb ->
+                    val containerEntries = txDb.containerEntryDao.findByContainer(
+                        contentJobItem.cjiContainerUid)
 
-                val containerEntries = db.containerEntryDao.findByContainer(
-                    contentJobItem.cjiContainerUid)
+                    var uploadSessionUuid = contentJobItem.cjiUploadSessionUid
+                    if(uploadSessionUuid == null) {
+                        uploadSessionUuid = randomUuid().toString()
+                        contentJobItem.cjiUploadSessionUid = uploadSessionUuid
+                        txDb.contentJobItemDao.updateUploadSessionUuid(contentJobItem.cjiUid,
+                            uploadSessionUuid)
+                    }
 
-                var uploadSessionUuid = contentJobItem.cjiUploadSessionUid
-                if(uploadSessionUuid == null) {
-                    uploadSessionUuid = randomUuid().toString()
-                    contentJobItem.cjiUploadSessionUid = uploadSessionUuid
-                    db.contentJobItemDao.updateUploadSessionUuid(contentJobItem.cjiUid,
-                        uploadSessionUuid)
+                    uploadSessionUuid to containerEntries
                 }
 
                 val uploadRequest = ContainerUploaderRequest2(uploadSessionUuid,
                     containerEntries.map { it.toContainerEntryWithMd5() }, endpoint.url)
-                ContainerUploader2(uploadRequest, endpoint = endpoint, di = di,
+                return@withContext ContainerUploader2(uploadRequest, endpoint = endpoint, di = di,
                     progressListener = progress).upload()
             } catch (c: CancellationException) {
                 withContext(NonCancellable){

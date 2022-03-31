@@ -7,9 +7,23 @@ import com.ustadmobile.lib.db.entities.ContextXObjectStatementJoin.Companion.TAB
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@ReplicateEntity(tableId = TABLE_ID, tracker = ContextXObjectStatementJoinReplicate::class)
 @Serializable
-//TODO: check this
+@Triggers(arrayOf(
+ Trigger(
+     name = "contextxobjectstatementjoin_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO ContextXObjectStatementJoin(contextXObjectStatementJoinUid, contextActivityFlag, contextStatementUid, contextXObjectUid, verbMasterChangeSeqNum, verbLocalChangeSeqNum, verbLastChangedBy, contextXObjectLct) 
+         VALUES (NEW.contextXObjectStatementJoinUid, NEW.contextActivityFlag, NEW.contextStatementUid, NEW.contextXObjectUid, NEW.verbMasterChangeSeqNum, NEW.verbLocalChangeSeqNum, NEW.verbLastChangedBy, NEW.contextXObjectLct) 
+         /*psql ON CONFLICT (contextXObjectStatementJoinUid) DO UPDATE 
+         SET contextActivityFlag = EXCLUDED.contextActivityFlag, contextStatementUid = EXCLUDED.contextStatementUid, contextXObjectUid = EXCLUDED.contextXObjectUid, verbMasterChangeSeqNum = EXCLUDED.verbMasterChangeSeqNum, verbLocalChangeSeqNum = EXCLUDED.verbLocalChangeSeqNum, verbLastChangedBy = EXCLUDED.verbLastChangedBy, contextXObjectLct = EXCLUDED.contextXObjectLct
+         */"""
+     ]
+ )
+))
 class ContextXObjectStatementJoin {
 
     @PrimaryKey(autoGenerate = true)
@@ -31,6 +45,7 @@ class ContextXObjectStatementJoin {
     var verbLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var contextXObjectLct: Long = 0
 
     companion object {

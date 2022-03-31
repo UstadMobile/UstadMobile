@@ -1,15 +1,11 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorQuery
-import com.ustadmobile.door.SimpleDoorQuery
-import com.ustadmobile.door.annotation.QueryLiveTables
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.*
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.Serializable
 import kotlin.js.JsName
@@ -17,6 +13,81 @@ import kotlin.js.JsName
 @Dao
 @Repository
 abstract class StatementDao : BaseDao<StatementEntity> {
+
+    @Query("""
+     REPLACE INTO StatementEntityReplicate(sePk, seDestination)
+      SELECT DISTINCT StatementEntity.statementUid AS sePk,
+             :newNodeId AS seDestination
+        FROM UserSession
+             JOIN PersonGroupMember
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             JOIN ScopedGrant
+                  ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                     AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+             JOIN StatementEntity
+                 ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
+       WHERE UserSession.usClientNodeId = :newNodeId
+         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+         -- Temporary measure to prevent admin user getting clogged up
+         -- Restrict to the last 30 days of data
+         AND StatementEntity.timestamp > ( 
+       --notpsql
+       strftime('%s', 'now') * 1000
+       --endnotpsql
+       /*psql
+       ROUND(EXTRACT(epoch from NOW())*1000)
+       */
+       - (30 * CAST(86400000 AS BIGINT)))
+       --notpsql
+         AND StatementEntity.statementLct != COALESCE(
+             (SELECT seVersionId
+                FROM StatementEntityReplicate
+               WHERE sePk = StatementEntity.statementUid
+                 AND seDestination = UserSession.usClientNodeId), 0)
+       --endnotpsql           
+      /*psql ON CONFLICT(sePk, seDestination) DO UPDATE
+             SET sePending = (SELECT StatementEntity.statementLct
+            FROM StatementEntity
+           WHERE StatementEntity.statementUid = EXCLUDED.sePk ) 
+                 != StatementEntityReplicate.seVersionId
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([StatementEntity::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+ REPLACE INTO StatementEntityReplicate(sePk, seDestination)
+  SELECT DISTINCT StatementEntity.statementUid AS seUid,
+         UserSession.usClientNodeId AS seDestination
+    FROM ChangeLog
+         JOIN StatementEntity
+               ON ChangeLog.chTableId = ${StatementEntity.TABLE_ID}
+                  AND ChangeLog.chEntityPk = StatementEntity.statementUid
+         JOIN ScopedGrant
+              ON ${StatementEntity.FROM_STATEMENT_TO_SCOPEDGRANT_JOIN_ON_CLAUSE}
+                 AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}) > 0
+         JOIN PersonGroupMember
+              ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+         JOIN UserSession
+              ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                 AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId
+           FROM SyncNode
+          LIMIT 1)
+     AND StatementEntity.statementLct != COALESCE(
+         (SELECT seVersionId
+            FROM StatementEntityReplicate
+           WHERE sePk = StatementEntity.statementUid
+             AND seDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(sePk, seDestination) DO UPDATE
+     SET sePending = true
+  */
+    """)
+    @ReplicationRunOnChange([StatementEntity::class])
+    @ReplicationCheckPendingNotificationsFor([StatementEntity::class])
+    abstract suspend fun replicateOnChange()
 
     @JsName("insertListAsync")
     @Insert
@@ -52,7 +123,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
 
 
     @Query("""UPDATE StatementEntity SET extensionProgress = :progress,
-            statementLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            statementLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
             WHERE statementUid = :uid""")
     abstract fun updateProgress(uid: Long, progress: Int)
 
@@ -122,6 +193,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 ELSE 0
             END DESC
          """)
+    @SqliteOnly //This would need a considered group by to work on postgres
     abstract fun findPersonsWithContentEntryAttempts(contentEntryUid: Long, accountPersonUid: Long,
                                                      searchText: String, sortOrder: Int)
             : DoorDataSourceFactory<Int, PersonWithAttemptsSummary>
@@ -193,6 +265,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
         GROUP BY StatementEntity.contextRegistration 
         ORDER BY startDate DESC, resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC
          """)
+    @SqliteOnly
     abstract fun findSessionsForPerson(contentEntryUid: Long, accountPersonUid: Long, personUid: Long)
             : DoorDataSourceFactory<Int, PersonWithSessionsDisplay>
 
@@ -237,13 +310,15 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 
                 1 as totalContent
                
-         FROM (SELECT * FROM StatementEntity 
+         FROM (SELECT * 
+                 FROM StatementEntity 
                 WHERE contextRegistration = :contextRegistration
                   AND NOT contentEntryRoot
                   AND statementVerbUid = ${VerbEntity.VERB_ANSWERED_UID} 
-             GROUP BY xObjectUid)
+             GROUP BY xObjectUid) AS SessionStatements
     """)
-    abstract fun calculateScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
+    @SqliteOnly
+    abstract suspend fun calculateScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
 
 
     @Query("""
@@ -266,7 +341,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
               resultSuccess DESC 
               LIMIT 1
     """)
-    abstract fun findCompletedScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
+    abstract suspend fun findCompletedScoreForSession(contextRegistration: String): ContentEntryStatementScoreProgress?
 
 
     @Query("""

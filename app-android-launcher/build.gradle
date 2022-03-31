@@ -33,21 +33,19 @@ android {
     }
 
     compileSdkVersion rootProject.ext.version_android_compile_sdk
-    buildToolsVersion rootProject.ext.version_android_buildtools
 
-    lintOptions {
-        abortOnError false
-    }
 
     kotlinOptions {
         jvmTarget = "1.8"
     }
-
     packagingOptions {
-        // .kotlin_metadata files come from multiplatform modules, but are not needed unless we
-        // use kotlin reflection, which we don't.
-        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module"]
+        resources {
+            // .kotlin_metadata files come from multiplatform modules, but are not needed unless we
+            // use kotlin reflection, which we don't.
+            excludes += ['META-INF/INDEX.LIST', '**/*.kotlin_metadata', 'META-INF/*.kotlin_module']
+        }
     }
+
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -59,7 +57,7 @@ android {
         applicationId "${baseAppId}.launcher"
         resConfigs "en","tg","ru"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.ext.ustadVersion
         multiDexEnabled true //required for all variants to use java library desugaring
@@ -68,7 +66,6 @@ android {
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + rootProject.ext.buildConfigProperties["android.acra.auth"] + "\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        missingDimensionStrategy 'api', 'api18'
     }
 
     signingConfigs {
@@ -84,18 +81,6 @@ android {
         jumboMode = true
     }
 
-    flavorDimensions "config"
-
-    productFlavors {
-       devMinApi21 {
-            dimension "config"
-            minSdkVersion 21
-            applicationId "${baseAppId}"
-            testApplicationId "${baseAppId}.test"
-            versionCode rootProject.ext.ustadVersionCode
-        }
-    }
-
     buildTypes {
         debug {
             testCoverageEnabled = true
@@ -107,6 +92,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
+    }
+    lint {
+        abortOnError false
     }
 }
 

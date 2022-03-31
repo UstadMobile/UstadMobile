@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.db.dao.ScheduleDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
@@ -20,8 +21,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.instance
+import org.kodein.di.*
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -48,6 +48,8 @@ class ClazzDetailOverviewPresenterTest {
 
     private lateinit var di: DI
 
+    private lateinit var mockNavController: UstadNavController
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -63,6 +65,8 @@ class ClazzDetailOverviewPresenterTest {
         val db: UmAppDatabase by di.activeDbInstance()
 
         val repo: UmAppDatabase by di.activeRepoInstance()
+
+        mockNavController = di.direct.instance()
 
         repoClazzDaoSpy = spy(repo.clazzDao).also {
             whenever(repo.clazzDao).thenReturn(it)
@@ -114,8 +118,10 @@ class ClazzDetailOverviewPresenterTest {
 
         presenter.handleClickEdit()
 
-        val systemImpl: UstadMobileSystemImpl by di.instance()
-        verify(systemImpl, timeout(5000)).go(eq(ClazzEdit2View.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())), any())
+        verify(mockNavController, timeout(5000)).navigate(
+            eq(ClazzEdit2View.VIEW_NAME),
+            eq(mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())),
+            any()
+        )
     }
 }

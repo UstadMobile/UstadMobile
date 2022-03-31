@@ -1,13 +1,14 @@
-package com.ustadmobile.port.android.db
+ package com.ustadmobile.port.android.db
 
 import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.*
 import com.ustadmobile.door.asRoomMigration
+import com.ustadmobile.door.util.systemTimeInMillis
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
-import kotlin.random.Random
 
 
 class TestRoomMigration {
@@ -15,132 +16,6 @@ class TestRoomMigration {
     @Rule @JvmField
     var helper: MigrationTestHelper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(),
             UmAppDatabase::class.java.canonicalName, FrameworkSQLiteOpenHelperFactory())
-
-
-    @Test
-    fun migrate32to33() {
-        helper.createDatabase(TEST_DB, 32).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 33, true,
-                UmAppDatabase.MIGRATION_32_33.asRoomMigration())
-    }
-
-
-    @Test
-    fun migrate33to34() {
-        helper.createDatabase(TEST_DB, 33).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 34, true,
-                UmAppDatabase.MIGRATION_33_34.asRoomMigration())
-    }
-
-    @Test
-    fun migrate34to35() {
-        helper.createDatabase(TEST_DB, 34).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 35, true,
-                UmAppDatabase.MIGRATION_34_35.asRoomMigration())
-    }
-
-
-
-    @Test
-    fun migrate35to36() {
-        helper.createDatabase(TEST_DB, 35).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 36, true,
-                UmAppDatabase.MIGRATION_35_36.asRoomMigration())
-    }
-
-    @Test
-    fun migrate36to37() {
-        helper.createDatabase(TEST_DB, 36).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 37, true,
-            UmAppDatabase.MIGRATION_36_37.asRoomMigration())
-    }
-
-    @Test
-    fun migrate37to38() {
-        helper.createDatabase(TEST_DB, 37).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 38, true,
-                UmAppDatabase.MIGRATION_37_38.asRoomMigration())
-    }
-
-    @Test
-    fun migrate38to39() {
-        helper.createDatabase(TEST_DB, 38).apply {
-            //The NodeClientId would always have been inserted by the onCreate callback in the previous version
-            execSQL("INSERT INTO SyncNode(nodeClientId,master) VALUES (${Random.nextInt(1, Int.MAX_VALUE)}, 0)")
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 39, true,
-                UmAppDatabase.MIGRATION_38_39.asRoomMigration())
-    }
-
-    @Test
-    fun migrate39to40() {
-        helper.createDatabase(TEST_DB, 39).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 40, true,
-                UmAppDatabase.MIGRATION_39_40.asRoomMigration())
-    }
-
-    @Test
-    fun migrate40to41() {
-        helper.createDatabase(TEST_DB, 40).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 41, true,
-                UmAppDatabase.MIGRATION_40_41.asRoomMigration())
-    }
-
-
-    @Test
-    fun migrate41to42() {
-        helper.createDatabase(TEST_DB, 41).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 42, true,
-                UmAppDatabase.MIGRATION_41_42.asRoomMigration())
-    }
-    @Test
-    fun migrate42to43() {
-        helper.createDatabase(TEST_DB, 42).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 43, true,
-                UmAppDatabase.MIGRATION_42_43.asRoomMigration())
-    }
-
-    @Test
-    fun migrate43to44() {
-        helper.createDatabase(TEST_DB, 43).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 44, true,
-                UmAppDatabase.MIGRATION_43_44.asRoomMigration())
-    }
 
     @Test
     fun migrate44to45() {
@@ -601,6 +476,170 @@ class TestRoomMigration {
         helper.runMigrationsAndValidate(TEST_DB, 89, true,
             UmAppDatabase.MIGRATION_88_89.asRoomMigration())
     }
+
+
+
+    @Test
+    fun migrate89to90(){
+        helper.createDatabase(TEST_DB, 89).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 90, true,
+            UmAppDatabase.MIGRATION_89_90.asRoomMigration())
+    }
+
+    @Test
+    fun migrate90to91(){
+        helper.createDatabase(TEST_DB, 90).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 91, true,
+                UmAppDatabase.MIGRATION_90_91.asRoomMigration())
+    }
+
+    @Test
+    fun migrate91to92() {
+        helper.createDatabase(TEST_DB, 91).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 92, true,
+            UmAppDatabaseReplicationMigration91_92.asRoomMigration())
+    }
+
+    @Test
+    fun migrate92to93() {
+        helper.createDatabase(TEST_DB, 92).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 93, true,
+            UmAppDatabase.MIGRATION_92_93.asRoomMigration())
+    }
+
+    @Test
+    fun migrate93to94() {
+        helper.createDatabase(TEST_DB, 93).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 94, true,
+            UmAppDatabase.MIGRATION_93_94.asRoomMigration())
+    }
+
+    @Test
+    fun migrate94to95() {
+        helper.createDatabase(TEST_DB, 94).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 95, true,
+            UmAppDatabase.MIGRATION_94_95.asRoomMigration())
+    }
+
+    @Test
+    fun migrate95to96() {
+        helper.createDatabase(TEST_DB, 95).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 96, true,
+            UmAppDatabase.MIGRATION_95_96.asRoomMigration())
+    }
+
+    @Test
+    fun migrate96to97() {
+        helper.createDatabase(TEST_DB, 96).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 97, true,
+            UmAppDatabase.MIGRATION_96_97.asRoomMigration())
+    }
+
+    @Test
+    fun migrate97to98() {
+        helper.createDatabase(TEST_DB, 97).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 98, true,
+            UmAppDatabase.MIGRATION_97_98.asRoomMigration())
+    }
+
+    @Test
+    fun migrate98to99() {
+        helper.createDatabase(TEST_DB, 98).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 99, true,
+            UmAppDatabase.MIGRATION_98_99.asRoomMigration())
+    }
+
+    @Test
+    fun migrate99to100() {
+        helper.createDatabase(TEST_DB, 99).apply {
+            execSQL("INSERT INTO ContainerEntryFile(cefUid, cefMd5, cefPath, ceTotalSize, ceCompressedSize, compression, lastModified) " +
+                    "VALUES(1, 'abc', '/abc', 200, 100, 1, ${systemTimeInMillis()})")
+            execSQL("INSERT INTO ContainerEntryFile(cefUid, cefMd5, cefPath, ceTotalSize, ceCompressedSize, compression, lastModified) " +
+                    "VALUES(2, 'abc', '/abc', 200, 100, 1, ${systemTimeInMillis()})")
+            execSQL("INSERT INTO ContainerEntryFile(cefUid, cefMd5, cefPath, ceTotalSize, ceCompressedSize, compression, lastModified) " +
+                    "VALUES(3, 'def', '/def', 300, 100, 1, ${systemTimeInMillis()})")
+
+
+            execSQL("INSERT INTO ContainerEntry(ceUid, ceContainerUid, cePath, ceCefUid) " +
+                    "VALUES(1, 1, 'abc.txt', 1)")
+            execSQL("INSERT INTO ContainerEntry(ceUid, ceContainerUid, cePath, ceCefUid) " +
+                    "VALUES(2, 2, 'abc.txt', 2)")
+            execSQL("INSERT INTO ContainerEntry(ceUid, ceContainerUid, cePath, ceCefUid)" +
+                    "VALUES(3, 2, 'def', 3)")
+
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 100, true,
+            UmAppDatabase.MIGRATION_99_100.asRoomMigration()
+        ).apply {
+
+            val cefUidChangeCursor = query("SELECT ceCefUid FROM ContainerEntry WHERE ceUid = 2")
+            cefUidChangeCursor.moveToFirst()
+            val cefUid = cefUidChangeCursor.getInt(0)
+            Assert.assertEquals(
+                "ContainerEntry 2 link was changed to the first available containerentryfile",
+                1, cefUid)
+            cefUidChangeCursor.close()
+
+            val ceRemovedCursor = query("SELECT cefUid FROM ContainerEntryFile WHERE cefUid = 2")
+            Assert.assertFalse("Duplicate container entry file was removed",
+                ceRemovedCursor.moveToFirst())
+        }
+    }
+
+    @Test
+    fun migrate100to101() {
+        helper.createDatabase(TEST_DB, 100).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 101, true,
+            UmAppDatabase.MIGRATION_100_101.asRoomMigration())
+    }
+
+    @Test
+    fun migrate101to102() {
+        helper.createDatabase(TEST_DB, 101).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 102, true,
+            UmAppDatabase.MIGRATION_101_102.asRoomMigration())
+    }
+
+
+
 
     companion object {
         const val TEST_DB = "migration-test"

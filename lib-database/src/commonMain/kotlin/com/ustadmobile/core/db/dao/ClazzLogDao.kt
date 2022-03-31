@@ -3,18 +3,76 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.QueryLiveTables
-import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.SyncNode
+import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.UserSession
 
 
 @Repository
 @Dao
 abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
+    @Query("""
+     REPLACE INTO ClazzLogReplicate(clPk, clDestination)
+      SELECT DISTINCT ClazzLog.clazzLogUid AS clUid,
+             :newNodeId AS clDestination
+        FROM UserSession
+             JOIN PersonGroupMember 
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                  ${Role.PERMISSION_CLAZZ_SELECT} 
+                  ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
+             JOIN ClazzLog
+                  ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid
+       WHERE ClazzLog.clazzLogLastChangedTime != COALESCE(
+             (SELECT clVersionId
+                FROM ClazzLogReplicate
+               WHERE clPk = ClazzLog.clazzLogUid
+                 AND clDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(clPk, clDestination) DO UPDATE
+             SET clPending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([ClazzLog::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replace(entity: ClazzLog): Long
+
+    @Query("""
+ REPLACE INTO ClazzLogReplicate(clPk, clDestination)
+  SELECT DISTINCT ClazzLog.clazzLogUid AS clUid,
+         UserSession.usClientNodeId AS clDestination
+    FROM ChangeLog
+         JOIN ClazzLog 
+              ON ChangeLog.chTableId = ${ClazzLog.TABLE_ID} 
+             AND ClazzLog.clazzLogUid = ChangeLog.chEntityPk
+         JOIN Clazz 
+              ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid 
+         ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+              ${Role.PERMISSION_CLAZZ_SELECT}
+              ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND ClazzLog.clazzLogLastChangedTime != COALESCE(
+         (SELECT clVersionId
+            FROM ClazzLogReplicate
+           WHERE clPk = ClazzLog.clazzLogUid
+             AND clDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(clPk, clDestination) DO UPDATE
+     SET clPending = true
+  */               
+    """)
+    @ReplicationRunOnChange([ClazzLog::class])
+    @ReplicationCheckPendingNotificationsFor([ClazzLog::class])
+    abstract suspend fun replicateOnChange()
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
     abstract fun findByUid(uid: Long): ClazzLog?
@@ -81,9 +139,9 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
     @Query("""UPDATE ClazzLog 
         SET clazzLogStatusFlag = :newStatus,
-        clazzLogLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1)
+        clazzLogLastChangedTime = :timeChanged
         WHERE clazzLogUid = :clazzLogUid""")
-    abstract fun updateStatusByClazzLogUid(clazzLogUid: Long, newStatus: Int)
+    abstract fun updateStatusByClazzLogUid(clazzLogUid: Long, newStatus: Int, timeChanged: Long)
 
     @Update
     abstract suspend fun updateAsync(clazzLog: ClazzLog)

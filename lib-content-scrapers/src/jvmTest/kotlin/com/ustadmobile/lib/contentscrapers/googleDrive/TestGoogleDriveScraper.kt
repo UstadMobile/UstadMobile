@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.contentscrapers.googleDrive
 
-import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
@@ -9,11 +8,11 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexer
 import com.ustadmobile.lib.contentscrapers.googledrive.GoogleDriveScraper
+import com.ustadmobile.lib.contentscrapers.harscraper.TestHarScraper
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
@@ -28,6 +27,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import org.mockito.kotlin.spy
 import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
@@ -49,7 +49,7 @@ class TestGoogleDriveScraper {
 
     private lateinit var di: DI
     private lateinit var endpointScope: EndpointScope
-    private val endpoint = Endpoint(TestFolderIndexer.TEST_ENDPOINT)
+    private val endpoint = Endpoint(TestHarScraper.TEST_ENDPOINT)
 
     @Before
     fun setup() {
@@ -57,7 +57,7 @@ class TestGoogleDriveScraper {
 
         di = DI {
             bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
-                NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+                NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
@@ -66,9 +66,9 @@ class TestGoogleDriveScraper {
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 spy(
                     DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
-                    .addSyncCallback(nodeIdAndAuth, true)
+                    .addSyncCallback(nodeIdAndAuth)
                     .build()
-                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, true))
+                    .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId))
             }
             bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
                 containerDir

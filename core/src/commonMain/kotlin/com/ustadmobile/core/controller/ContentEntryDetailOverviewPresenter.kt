@@ -3,41 +3,47 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeCompletedStatement
+import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentPluginIds
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
-import com.ustadmobile.core.io.ext.getSize
-import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
-import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
-import com.ustadmobile.door.*
+import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.*
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
-import org.kodein.di.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
-class ContentEntryDetailOverviewPresenter(context: Any,
-                                          arguments: Map<String, String>, view: ContentEntryDetailOverviewView,
-                                          di: DI, lifecycleOwner: DoorLifecycleOwner)
-
-    : UstadDetailPresenter<ContentEntryDetailOverviewView, ContentEntryWithMostRecentContainer>(context,
-        arguments, view, di, lifecycleOwner){
+class ContentEntryDetailOverviewPresenter(
+    context: Any,
+    arguments: Map<String, String>, view: ContentEntryDetailOverviewView,
+    di: DI,
+    lifecycleOwner: DoorLifecycleOwner
+) : UstadDetailPresenter<ContentEntryDetailOverviewView, ContentEntryWithMostRecentContainer>(
+    context, arguments, view, di, lifecycleOwner
+){
 
     val deepLink: String
         get() {
@@ -45,18 +51,13 @@ class ContentEntryDetailOverviewPresenter(context: Any,
             return arguments.toDeepLink(activeEndpoint, ContentEntryDetailView.VIEW_NAME)
         }
 
-    private val isDownloadEnabled: Boolean by di.instance(tag = TAG_DOWNLOAD_ENABLED)
+    //True on Android, false on the web
+    private val isPlatformDownloadEnabled: Boolean by di.instance(tag = TAG_DOWNLOAD_ENABLED)
 
     private val contentEntryOpener: ContentEntryOpener by di.on(accountManager.activeAccount).instance()
 
-    private val localAvailabilityManager: LocalAvailabilityManager? by on(accountManager.activeAccount).instanceOrNull()
-
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
-
-    private var availabilityRequest: AvailabilityMonitorRequest? = null
-
-    private val availabilityRequestDeferred = CompletableDeferred<AvailabilityMonitorRequest>()
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
 
@@ -72,20 +73,8 @@ class ContentEntryDetailOverviewPresenter(context: Any,
         clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
     }
 
-    override fun onStart() {
-        super.onStart()
-        GlobalScope.launch {
-            localAvailabilityManager?.addMonitoringRequest(availabilityRequestDeferred.await())
-        }
-    }
 
-    override fun onStop() {
-        GlobalScope.launch {
-            localAvailabilityManager?.removeMonitoringRequest(availabilityRequestDeferred.await())
-        }
-    }
-
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithMostRecentContainer? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithMostRecentContainer {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         val entity = withTimeoutOrNull(2000) {
@@ -104,53 +93,25 @@ class ContentEntryDetailOverviewPresenter(context: Any,
             view.markCompleteVisible = false
         }
 
-        if (db is DoorDatabaseRepository) {
-            val containerUid = entity.container?.containerUid ?: 0L
-            availabilityRequest = AvailabilityMonitorRequest(listOf(containerUid)) { availableEntries ->
-                GlobalScope.launch(doorMainDispatcher()) {
-                    view.locallyAvailable = availableEntries[containerUid] ?: false
-                }
-            }.also {
-                availabilityRequestDeferred.complete(it)
-            }
-        }else{
+        if (db !is DoorDatabaseRepository) {
+            RateLimitedLiveData(db, listOf("Container", "ContentEntry", "ContentJobItem")) {
+                db.contentEntryDao.buttonsToShowForContentEntry(entityUid, isPlatformDownloadEnabled)
+            }.observeWithLifecycleOwner(lifecycleOwner) {
+                if(it == null)
+                    return@observeWithLifecycleOwner
 
-
-            db.containerDao.hasContainerWithFilesToDelete(entityUid)
-                    .observeWithLifecycleOwner(lifecycleOwner) {
-                        view.hasContentToOpenOrDelete = it ?: false
-                    }
-
-            db.containerDao.hasContainerWithFilesToDownload(entityUid)
-                    .observeWithLifecycleOwner(lifecycleOwner){
-                        view.canDownload = it ?: false
-                    }
-
-            db.containerDao.hasContainerWithFilesToUpdate(entityUid)
-                    .observeWithLifecycleOwner(lifecycleOwner){
-                        view.canUpdate = it ?: false
-                    }
-
-            val contentJobItemStatusLiveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
-                db.contentJobItemDao.findStatusForActiveContentJobItem(contentEntryUid)
+                view.contentEntryButtons = it
             }
 
-            val contentJobItemProgressLiveData = RateLimitedLiveData(db, listOf("ContentJobItem") , 1000){
-                db.contentJobItemDao.findProgressForActiveContentJobItem(contentEntryUid)
+
+            RateLimitedLiveData(db, CONTENT_JOB_ITEM_TABLE_LIST,
+                1000
+            ) {
+                db.contentJobItemDao.findActiveContentJobItems(contentEntryUid)
+            }.observeWithLifecycleOwner(lifecycleOwner){
+                val progress = it ?: return@observeWithLifecycleOwner
+                view.activeContentJobItems = progress
             }
-
-            withContext(doorMainDispatcher()){
-                contentJobItemStatusLiveData.observeWithLifecycleOwner(lifecycleOwner){
-                    val status = it ?: return@observeWithLifecycleOwner
-                    view.contentJobItemStatus = status
-                }
-                contentJobItemProgressLiveData.observeWithLifecycleOwner(lifecycleOwner){
-                    val progress = it ?: return@observeWithLifecycleOwner
-                    view.contentJobItemProgress = progress
-                }
-
-            }
-
         }
 
         return entity
@@ -162,24 +123,13 @@ class ContentEntryDetailOverviewPresenter(context: Any,
                         ARG_LEAF to true.toString()), context)
     }
 
-    fun handleOnClickOpenDownloadButton() {
-        presenterScope.launch {
-            val containerWithFiles = db.containerDao.findContainerWithFilesByContentEntryUid(contentEntryUid)
-            val canOpen = !isDownloadEnabled || (containerWithFiles != null && containerWithFiles.containerUid != 0L)
-            if (canOpen) {
-                val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
-                        "false", context)!!.toBoolean()
-                val account = accountManager.activeAccount
-                if (loginFirst && account.personUid == 0L) {
-                    systemImpl.go(Login2View.VIEW_NAME, arguments, context)
-                } else {
-                    openContentEntry()
-                }
-            } else if (isDownloadEnabled) {
-                view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString()
-                        ?: "0")))
-            }
-        }
+    fun handleClickOpenButton() {
+        openContentEntry()
+    }
+
+    fun handleClickDownloadButton() {
+        view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString()
+            ?: "0")))
     }
 
     fun handleOnClickManageDownload() {
@@ -191,7 +141,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
         presenterScope.launch(doorMainDispatcher()) {
             try {
                 entity?.contentEntryUid?.also {
-                    contentEntryOpener.openEntry(context, it, isDownloadEnabled, false,
+                    contentEntryOpener.openEntry(context, it, isPlatformDownloadEnabled, false,
                             arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false, clazzUid = clazzUid)
                 }
             } catch (e: Exception) {
@@ -217,8 +167,30 @@ class ContentEntryDetailOverviewPresenter(context: Any,
                 arguments[ARG_ENTITY_UID]?.toLong() ?: 0, Role.PERMISSION_CONTENT_UPDATE)
     }
 
-    fun handleOnClickDeleteButton() {
-        handleOnClickManageDownload()
+    fun handleOnClickConfirmDelete() {
+        presenterScope.launch {
+            val job = db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                val job = ContentJob().apply {
+                    cjNotificationTitle = systemImpl.getString(MessageID.deleting_content, context)
+                        .replace("%1\$s",entity?.title ?: "")
+                    cjUid = txDb.contentJobDao.insertAsync(this)
+                }
+
+                txDb.contentJobItemDao.insertJobItem(ContentJobItem().apply {
+                    cjiJobUid = job.cjUid
+                    cjiContentEntryUid = entity?.contentEntryUid ?: 0L
+                    cjiPluginId = ContentPluginIds.DELETE_CONTENT_ENTRY_PLUGIN
+                    cjiIsLeaf = true
+                    cjiConnectivityNeeded = false
+                    cjiStatus = JobStatus.QUEUED
+                    sourceUri = entity?.toDeepLink(accountManager.activeEndpoint)
+                })
+
+                job
+            }
+            val contentJobManager : ContentJobManager = di.direct.instance()
+            contentJobManager.enqueueContentJob(accountManager.activeEndpoint, job.cjUid)
+        }
     }
 
     fun handleOnClickGroupActivityButton() {
@@ -259,6 +231,10 @@ class ContentEntryDetailOverviewPresenter(context: Any,
         scoreProgress?.contentComplete = true
         scoreProgress?.progress = 100
         view.scoreProgress = scoreProgress
+    }
+
+    companion object {
+        private val CONTENT_JOB_ITEM_TABLE_LIST = listOf("ContentJobItem")
     }
 
 }

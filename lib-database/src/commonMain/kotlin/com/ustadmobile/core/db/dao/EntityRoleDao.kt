@@ -3,39 +3,40 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.PostgresQuery
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
 @Repository
 @Dao
-abstract class EntityRoleDao : BaseDao<EntityRole>, OneToManyJoinDao<EntityRole> {
+abstract class EntityRoleDao {
 
-    @Transaction
-    override suspend fun deactivateByUids(uidList: List<Long>) {
-        uidList.forEach { updateEntityRoleActive(it, false) }
-    }
-
-    @Query("UPDATE EntityRole SET erActive = :active WHERE erUid = :uid")
-    abstract suspend fun updateEntityRoleActive(uid: Long, active: Boolean)
-
-    @Query("""SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0) 
+    @Query("""
+        SELECT COALESCE((
+               SELECT admin 
+                 FROM Person 
+                WHERE personUid = :accountPersonUid), 0)
             OR EXISTS(SELECT EntityRole.erUid FROM EntityRole 
-             JOIN Role ON EntityRole.erRoleUid = Role.roleUid 
-             JOIN PersonGroupMember ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-             WHERE 
-             PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
-             AND (Role.rolePermissions & :permission) > 0) AS hasPermission""")
+               JOIN Role 
+                    ON EntityRole.erRoleUid = Role.roleUid 
+               JOIN PersonGroupMember 
+                    ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
+               AND (Role.rolePermissions & :permission) > 0) AS hasPermission""")
+    @PostgresQuery("""
+        SELECT COALESCE((
+               SELECT admin 
+                 FROM Person 
+                WHERE personUid = :accountPersonUid), false)
+            OR EXISTS(SELECT EntityRole.erUid FROM EntityRole 
+               JOIN Role 
+                    ON EntityRole.erRoleUid = Role.roleUid 
+               JOIN PersonGroupMember 
+                    ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
+               AND (Role.rolePermissions & :permission) > 0) AS hasPermission
+    """)
     abstract suspend fun userHasTableLevelPermission(accountPersonUid: Long, permission: Long) : Boolean
-
-    @Query("""SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0) 
-            OR EXISTS(SELECT EntityRole.erUid FROM EntityRole 
-             JOIN Role ON EntityRole.erRoleUid = Role.roleUid 
-             JOIN PersonGroupMember ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-             WHERE 
-             PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-             AND (Role.rolePermissions & :permission) > 0) AS hasPermission""")
-    abstract suspend fun userHasAnySinglePermission(accountPersonUid: Long,
-                                                     permission: Long) : Boolean
 
     @Query("SELECT * FROM EntityRole WHERE erTableId = :tableId " +
             " AND erEntityUid = :entityUid AND erGroupUid = :groupUid " +

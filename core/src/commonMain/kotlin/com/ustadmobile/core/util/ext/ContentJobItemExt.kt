@@ -9,10 +9,13 @@ import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentJobItem
 import org.kodein.di.DI
+import kotlin.jvm.JvmStatic
 
 fun Int.isStatusPaused() = this == JobStatus.PAUSED
 
 fun Int.isStatusCompleted() = this >= JobStatus.COMPLETE_MIN
+
+fun Int.isStatusActiveOrQueued() = (this >= JobStatus.QUEUED && this < JobStatus.COMPLETE_MIN)
 
 fun ContentJobItem?.isStatusQueuedOrDownloading() = this?.cjiRecursiveStatus?.let {it >= JobStatus.WAITING_MIN && it < JobStatus.COMPLETE_MIN } ?: false
 
@@ -33,11 +36,10 @@ private val statusToMessageIdMap = mapOf(
         JobStatus.PAUSED to MessageID.download_entry_state_paused,
         JobStatus.QUEUED to MessageID.queued,
         JobStatus.RUNNING to MessageID.in_progress,
-        JobStatus.CANCELLING to MessageID.canceled,
+        JobStatus.WAITING_FOR_CONNECTION to MessageID.waiting,
         JobStatus.CANCELED to MessageID.canceled,
         JobStatus.COMPLETE to MessageID.completed,
-        JobStatus.FAILED to MessageID.failed,
-        JobStatus.DELETED to MessageID.deleted)
+        JobStatus.FAILED to MessageID.failed)
 
 private fun Int.downloadJobStatusStr(systemImpl: UstadMobileSystemImpl, context: Any): String {
     val messageId = statusToMessageIdMap[this]

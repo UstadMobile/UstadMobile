@@ -8,7 +8,7 @@ interface ClazzAssignmentListView: UstadListView<ClazzAssignmentWithMetrics, Cla
     var clazzTimeZone: String?
 
     companion object {
-        const val VIEW_NAME = "ClazzAssignmentListView"
+        const val VIEW_NAME = "ClassAssignmentListView"
     }
 
 }

@@ -1,14 +1,15 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
-import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.impl.NavigateForResultOptions
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.OUTCOME_TO_MESSAGE_ID_MAP
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.core.view.ReportFilterEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
@@ -20,15 +21,16 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
-class ReportFilterEditPresenter(context: Any,
-                                arguments: Map<String, String>, view: ReportFilterEditView,
-                                di: DI,
-                                lifecycleOwner: DoorLifecycleOwner)
-    : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
+class ReportFilterEditPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: ReportFilterEditView,
+    di: DI,
+    lifecycleOwner: DoorLifecycleOwner
+) : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
+    private val fieldRequiredText = systemImpl.getString(MessageID.field_required_prompt, context)
 
-    val fieldRequiredText = systemImpl.getString(MessageID.field_required_prompt, context)
-
-    val uidhelperDeferred = CompletableDeferred<Boolean>()
+    private val uidhelperDeferred = CompletableDeferred<Boolean>()
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
@@ -82,7 +84,7 @@ class ReportFilterEditPresenter(context: Any,
             ListSerializer(UidAndLabel.serializer()),
             ListSerializer(UidAndLabel.serializer()), this, UidAndLabel::class) { uid = it }
 
-    fun handleAddOrEditUidAndLabel(entry: UidAndLabel) {
+    private fun handleAddOrEditUidAndLabel(entry: UidAndLabel) {
         GlobalScope.launch(doorMainDispatcher()) {
             uidhelperDeferred.await()
             uidAndLabelOneToManyHelper.onEditResult(entry)
@@ -232,6 +234,58 @@ class ReportFilterEditPresenter(context: Any,
         savedState.putEntityAsJson(ARG_ENTITY_JSON, ReportFilter.serializer(), entityVal)
     }
 
+
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        observeSavedStateResult(
+            RESULT_LEAVING_REASON_KEY,
+            ListSerializer(LeavingReason.serializer()), LeavingReason::class) {
+            val reason = it.firstOrNull() ?: return@observeSavedStateResult
+            handleAddOrEditUidAndLabel(UidAndLabel().apply {
+                uid = reason.leavingReasonUid
+                labelName = reason.leavingReasonTitle
+            })
+        }
+
+        observeSavedStateResult(
+            RESULT_CONTENT_KEY,
+            ListSerializer(ContentEntry.serializer()), ContentEntry::class) {
+            val entry = it.firstOrNull() ?: return@observeSavedStateResult
+            handleAddOrEditUidAndLabel(UidAndLabel().apply {
+                uid = entry.contentEntryUid
+                labelName = entry.title
+            })
+        }
+    }
+
+    fun handleAddLeavingReasonClicked(){
+        navigateForResult(
+            NavigateForResultOptions(
+                this, null,
+                LeavingReasonListView.VIEW_NAME,
+                LeavingReason::class,
+                LeavingReason.serializer(),
+                RESULT_LEAVING_REASON_KEY
+            )
+        )
+    }
+
+    fun handleAddContentClicked(){
+        navigateForResult(
+            NavigateForResultOptions(
+                this, null,
+                ContentEntryList2View.VIEW_NAME,
+                ContentEntry::class,
+                ContentEntry.serializer(),
+                RESULT_CONTENT_KEY,
+                arguments = mutableMapOf(ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
+                        ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
+                    UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString())
+            )
+        )
+    }
+
     override fun handleClickSave(entity: ReportFilter) {
         if (entity.reportFilterField == 0) {
             view.fieldErrorText = fieldRequiredText
@@ -250,6 +304,7 @@ class ReportFilterEditPresenter(context: Any,
             entity.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
                     ?.joinToString { it.uid.toString() }
         }
+
         if (entity.reportFilterDropDownValue == 0 && entity.reportFilterValue.isNullOrBlank() &&
                 (entity.reportFilterValueBetweenX.isNullOrEmpty() ||
                         entity.reportFilterValueBetweenY.isNullOrEmpty())) {
@@ -258,12 +313,19 @@ class ReportFilterEditPresenter(context: Any,
         } else {
             view.valuesErrorText = null
         }
-        view.finishWithResult(listOf(entity))
+
+        val serializedResult = safeStringify(di, ListSerializer(ReportFilter.serializer()),
+            listOf(entity))
+        finishWithResult(serializedResult)
     }
 
     companion object {
 
         val genderMap = PersonConstants.GENDER_MESSAGE_ID_MAP
+
+        const val RESULT_CONTENT_KEY = "Content"
+
+        const val RESULT_LEAVING_REASON_KEY = "LeavingReason"
 
     }
 

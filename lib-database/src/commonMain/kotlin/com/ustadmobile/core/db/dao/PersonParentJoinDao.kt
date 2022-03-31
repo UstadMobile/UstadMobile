@@ -4,14 +4,69 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
+import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.annotation.Repository.Companion.METHOD_DELEGATE_TO_WEB
+import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
 abstract class PersonParentJoinDao {
+
+    @Query("""
+     REPLACE INTO PersonParentJoinReplicate(ppjPk, ppjDestination)
+      SELECT DISTINCT PersonParentJoin.ppjUid AS ppjPk,
+             :newNodeId AS ppjDestination
+        FROM UserSession
+             JOIN PersonGroupMember
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
+                  ${Role.PERMISSION_PERSON_SELECT}
+                  ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+             JOIN PersonParentJoin
+                  ON PersonParentJoin.ppjParentPersonUid = Person.personUid       
+       WHERE UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+         AND PersonParentJoin.ppjLct != COALESCE(
+             (SELECT ppjVersionId
+                FROM PersonParentJoinReplicate
+               WHERE ppjPk = PersonParentJoin.ppjUid
+                 AND ppjDestination = :newNodeId), 0) 
+      /*psql ON CONFLICT(ppjPk, ppjDestination) DO UPDATE
+             SET ppjPending = true
+      */       
+    """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([PersonParentJoin::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+ REPLACE INTO PersonParentJoinReplicate(ppjPk, ppjDestination)
+  SELECT DISTINCT PersonParentJoin.ppjUid AS ppjUid,
+         UserSession.usClientNodeId AS ppjDestination
+    FROM ChangeLog
+         JOIN PersonParentJoin
+             ON ChangeLog.chTableId = ${PersonParentJoin.TABLE_ID}
+                AND ChangeLog.chEntityPk = PersonParentJoin.ppjUid
+         JOIN Person
+              ON PersonParentJoin.ppjParentPersonUid = Person.personUid
+         ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+              ${Role.PERMISSION_PERSON_SELECT}
+              ${Person.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}       
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId
+           FROM SyncNode
+          LIMIT 1)
+     AND PersonParentJoin.ppjLct != COALESCE(
+         (SELECT ppjVersionId
+            FROM PersonParentJoinReplicate
+           WHERE ppjPk = PersonParentJoin.ppjUid
+             AND ppjDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(ppjPk, ppjDestination) DO UPDATE
+     SET ppjPending = true
+  */
+    """)
+    @ReplicationRunOnChange([PersonParentJoin::class])
+    @ReplicationCheckPendingNotificationsFor([PersonParentJoin::class])
+    abstract suspend fun replicateOnChange()
 
     @Insert
     abstract suspend fun insertAsync(entity: PersonParentJoin): Long
@@ -23,6 +78,16 @@ abstract class PersonParentJoinDao {
          WHERE PersonParentJoin.ppjUid = :uid
     """)
     abstract suspend fun findByUidWithMinorAsync(uid: Long): PersonParentJoinWithMinorPerson?
+
+    @Query("""
+        SELECT PersonParentJoin.*, Person.*
+          FROM PersonParentJoin
+     LEFT JOIN Person ON Person.personUid = PersonParentJoin.ppjMinorPersonUid    
+         WHERE PersonParentJoin.ppjUid = :uid
+    """)
+    @RepoHttpAccessible
+    @Repository(METHOD_DELEGATE_TO_WEB)
+    abstract suspend fun findByUidWithMinorAsyncFromWeb(uid: Long): PersonParentJoinWithMinorPerson?
 
     @Query("""
         SELECT PersonParentJoin.*

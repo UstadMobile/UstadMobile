@@ -4,9 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.PostgresQuery
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItem
 
 @Dao
 abstract class ContentJobDao {
@@ -43,28 +43,19 @@ abstract class ContentJobDao {
     abstract suspend fun updateDestinationDir(cjUid: Long, toUri: String)
 
 
-    fun findMeteredAllowedLiveData(contentJobId: Long, dbType: Int): DoorLiveData<Boolean> {
-        return when {
-            dbType == 1 -> findMeteredAllowedLiveDataSqlite(contentJobId) //SQLite
-            else -> findMeteredAllowedLiveDataPostgres(contentJobId)
-        }
-    }
-
     @Query("""
         SELECT COALESCE((SELECT ContentJob.cjIsMeteredAllowed
           FROM ContentJob
          WHERE cjUid = :contentJobId
          LIMIT 1), 0)
     """)
-    abstract fun findMeteredAllowedLiveDataSqlite(contentJobId: Long): DoorLiveData<Boolean>
-
-    @Query("""
+    @PostgresQuery("""
         SELECT COALESCE((SELECT ContentJob.cjIsMeteredAllowed
           FROM ContentJob
          WHERE cjUid = :contentJobId
-         LIMIT 1), FALSE)   /* nothing */
+         LIMIT 1), FALSE)
     """)
-    abstract fun findMeteredAllowedLiveDataPostgres(contentJobId: Long): DoorLiveData<Boolean>
+    abstract fun findMeteredAllowedLiveData(contentJobId: Long): DoorLiveData<Boolean>
 
     @Query("""
         UPDATE ContentJob 
@@ -81,6 +72,7 @@ abstract class ContentJobDao {
      *  It's only purpose is to check if the connectivity is acceptable for the job
      *  e.g. connectivity == unmetered or (connectivity == metered and meteredNetworkAllowed == true)
      */
+    //language=RoomSql
     @Query("""
           WITH ConnectivityStateCte(state) AS 
              (SELECT COALESCE(
@@ -88,12 +80,14 @@ abstract class ContentJobDao {
                         FROM ConnectivityStatus 
                        LIMIT 1), 0))
    
-           SELECT COALESCE((SELECT 1 
-            FROM ContentJob 
-           WHERE cjUid = :jobId
-             AND (cjIsMeteredAllowed 
-             AND (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_METERED})
-			  OR (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_UNMETERED}),0)
+           SELECT COALESCE((
+                  SELECT 1 
+                    FROM ContentJob 
+                   WHERE cjUid = :jobId
+                    AND ((cjIsMeteredAllowed 
+                         AND (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_METERED})
+			             OR (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_UNMETERED})
+                  ) ,0)
     """)
     abstract suspend fun isConnectivityAcceptableForJob(jobId: Long): Boolean
 

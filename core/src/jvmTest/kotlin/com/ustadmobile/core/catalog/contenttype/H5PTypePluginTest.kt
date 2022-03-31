@@ -4,6 +4,7 @@ package com.ustadmobile.core.catalog.contenttype
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
+import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UstadTestRule
@@ -64,9 +65,9 @@ class H5PTypePluginTest {
         mockWebServer.start()
         val accountManager: UstadAccountManager by di.instance()
 
-        val umAppDatabase: UmAppDatabase = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
+        db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
         val connectivityStatus = ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "NetworkSSID")
-        umAppDatabase.connectivityStatusDao.insert(connectivityStatus)
+        db.connectivityStatusDao.insert(connectivityStatus)
 
         h5pPlugin = H5PTypePluginCommonJvm(Any(), accountManager.activeEndpoint, di)
     }
@@ -83,7 +84,8 @@ class H5PTypePluginTest {
 
         val metadata = runBlocking {
             val h5pUri = DoorUri.parse(tempH5pFile.toURI().toString())
-            val processContext = ContentJobProcessContext(h5pUri, tempUri, mutableMapOf(), di)
+            val processContext = ContentJobProcessContext(h5pUri, tempUri, mutableMapOf(),
+                DummyContentJobItemTransactionRunner(db), di)
             h5pPlugin.extractMetadata(h5pUri,processContext)
         }!!
 
@@ -115,7 +117,7 @@ class H5PTypePluginTest {
 
             val doorUri = DoorUri.parse(mockWebServer.url("/com/ustadmobile/core/contenttype/dialog-cards-620.h5p").toString())
             val processContext = ContentJobProcessContext(doorUri, tempUri, params = mutableMapOf(),
-                    di)
+                DummyContentJobItemTransactionRunner(db), di)
 
             val uid = repo.contentEntryDao.insert(ContentEntry().apply{
                 title = "hello"
@@ -153,6 +155,8 @@ class H5PTypePluginTest {
 
             val indexEntry = db.containerEntryDao.findByPathInContainer(container.containerUid, launchHref!!)
             Assert.assertNotNull(indexEntry)
+
+            Assert.assertNotEquals("Container size is non-zero", 0L, container.fileSize)
 
             // walk through the zip entries and check all exists in containerEntry
             ZipFile(tempH5pFile).entries().toList()

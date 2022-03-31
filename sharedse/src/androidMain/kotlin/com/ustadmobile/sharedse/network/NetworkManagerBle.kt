@@ -1,6 +1,5 @@
 package com.ustadmobile.sharedse.network
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -8,7 +7,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.net.*
 import android.net.wifi.WifiManager
 import android.net.wifi.p2p.WifiP2pGroup
@@ -19,12 +17,10 @@ import android.os.ParcelUuid
 import android.os.SystemClock
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
-import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.AsyncServiceManager
 import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
@@ -79,10 +75,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
 
     private var bluetoothAdapter: BluetoothAdapter? = null
 
-    private var bleServiceAdvertiser: Any? = null
-
-    private var bleScanCallback: Any? = null
-
     private val mContext: Context = context as Context
 
     private val parcelServiceUuid = ParcelUuid(UUID.fromString(USTADMOBILE_BLE_SERVICE_UUID))
@@ -101,9 +93,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
 
     internal lateinit var managerHelper : NetworkManagerBleHelper
 
-    @Volatile
-    private var bleAdvertisingLastStartTime: Long = 0
-
     private val wifiDirectGroupLastRequestedTime = AtomicLong()
 
     private val wifiDirectRequestLastCompletedTime = AtomicLong()
@@ -114,8 +103,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
 
     private var localOkHttpClient: OkHttpClient? = null
 
-    private var gattClientCallbackManager: GattClientCallbackManager? = null
-
     override var localConnectionOpener: ConnectionOpener? = null
         get() = field
         protected set
@@ -123,48 +110,8 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
     override val localHttpPort: Int
         get() = httpd.listeningPort
 
-    /**
-     * Receiver to handle bluetooth state changes
-     */
-    private val mBluetoothAndWifiStateChangeBroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            updateEnableServicesPromptsRequired()
-            checkP2PBleServices()
-        }
-    }
-
 
     private val delayedExecutor = Executors.newSingleThreadScheduledExecutor()
-
-    private val scanningServiceManager = object : AsyncServiceManager(
-            STATE_STOPPED,
-            { runnable, delay -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS) }) {
-        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-        override fun start() {
-            //TODO: NodeHistory Handler should be networkmanager itself
-            if (isBleCapable) {
-                UMLog.l(UMLog.DEBUG, 689, "Starting BLE scanning")
-                notifyStateChanged(STATE_STARTED)
-                gattClientCallbackManager = GattClientCallbackManager(context as Context,
-                        bluetoothAdapter!!, {nodeAddr: String, evtType: Int -> Unit})
-                bluetoothAdapter!!.startLeScan(arrayOf(parcelServiceUuid.uuid),
-                        bleScanCallback as BluetoothAdapter.LeScanCallback?)
-                UMLog.l(UMLog.DEBUG, 689,
-                        "BLE Scanning started ")
-            } else {
-                notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
-                UMLog.l(UMLog.ERROR, 689,
-                        "Not BLE capable, no need to start")
-            }
-        }
-
-        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-        override fun stop() {
-            bluetoothAdapter!!.stopLeScan(bleScanCallback as BluetoothAdapter.LeScanCallback?)
-            gattClientCallbackManager = null
-            notifyStateChanged(STATE_STOPPED)
-        }
-    }
 
     /**
      * Handle network state change events for android version < Lollipop
@@ -180,21 +127,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         }
     }
 
-
-    /**
-     * Check if the device needs runtime-permission
-     * @return True if needed else False
-     */
-    private val isBleDeviceSDKVersion: Boolean
-        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
-
-
-    /**
-     * Check if the device can advertise BLE service
-     * @return True if can advertise else false
-     */
-    private val isAdvertiser: Boolean
-        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
     private class WifiDirectGroupAndroid(group: WifiP2pGroup, endpointPort: Int) : WiFiDirectGroupBle(group.networkName, group.passphrase) {
         init {
@@ -332,7 +264,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
     /**
      * Callback for the network connectivity changes for android version >= Lollipop
      */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private inner class UmNetworkCallback : ConnectivityManager.NetworkCallback() {
 
         override fun onAvailable(network: Network) {
@@ -373,11 +304,7 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         else
             ConnectivityStatus.STATE_UNMETERED
 
-        val networkInfo: NetworkInfo? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            connectivityManager!!.getNetworkInfo(network)
-        } else {
-            connectivityManager!!.activeNetworkInfo
-        }
+        val networkInfo: NetworkInfo? = connectivityManager!!.getNetworkInfo(network)
 
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" + prettyPrintNetwork(networkInfo))
         val networkExtraInfo = networkInfo?.extraInfo
@@ -400,30 +327,30 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
                 //TODO: set repo status
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                //only on main thread
-                //first - check if the old client exists and close it
-                val socketFactory = network!!.socketFactory
-                UMLog.l(UMLog.DEBUG, 0, "NetworkManager: create local network http " +
-                        "client for $ssid using $socketFactory")
 
-                val localOkHttpClientVal = di.direct.instance<OkHttpClient>().newBuilder()
-                        .socketFactory(socketFactory)
-                        .build()
+            //only on main thread
+            //first - check if the old client exists and close it
+            val socketFactory = network!!.socketFactory
+            UMLog.l(UMLog.DEBUG, 0, "NetworkManager: create local network http " +
+                    "client for $ssid using $socketFactory")
 
-                //closing localHttpClient would stop the underlying shared OkHttpClient's executors,
-                // pools, etc we don't want to do that
-                localHttpClient = HttpClient(OkHttp) {
-                    engine {
-                        preconfigured = localOkHttpClientVal
-                    }
-                    install(JsonFeature) {
-                        serializer = di.direct.instance<GsonSerializer>()
-                    }
+            val localOkHttpClientVal = di.direct.instance<OkHttpClient>().newBuilder()
+                    .socketFactory(socketFactory)
+                    .build()
+
+            //closing localHttpClient would stop the underlying shared OkHttpClient's executors,
+            // pools, etc we don't want to do that
+            localHttpClient = HttpClient(OkHttp) {
+                engine {
+                    preconfigured = localOkHttpClientVal
                 }
-
-                localConnectionOpener = { network.openConnection(it) as HttpURLConnection }
+                install(JsonFeature) {
+                    serializer = di.direct.instance<GsonSerializer>()
+                }
             }
+
+            localConnectionOpener = { network.openConnection(it) as HttpURLConnection }
+
         }
 
         _connectivityStatus.sendValue(status)
@@ -469,37 +396,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
 
         startMonitoringNetworkChanges()
 
-        if (isBleDeviceSDKVersion && isBleCapable) {
-
-            bleScanCallback = BluetoothAdapter.LeScanCallback { device, _, _ ->
-                val networkNode = NetworkNode().apply {
-                    bluetoothMacAddress = device.address
-                }
-                handleNodeDiscovered(networkNode)
-            }
-
-            //setting up bluetooth connection listener
-            val intentFilter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
-            intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
-            mContext.registerReceiver(mBluetoothAndWifiStateChangeBroadcastReceiver, intentFilter)
-
-            if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
-                bluetoothManager = mContext.getSystemService(Context.BLUETOOTH_SERVICE)
-                bluetoothAdapter = (bluetoothManager as BluetoothManager).adapter
-            }
-
-            /**
-             * Android will not send an initial state on startup as happens for most other
-             * receivers, so we have to do that ourselves
-             */
-            if (bluetoothAdapter != null) {
-                val initialBluetoothIntent = Intent(BluetoothAdapter.ACTION_STATE_CHANGED)
-                initialBluetoothIntent.putExtra(BluetoothAdapter.EXTRA_STATE,
-                        bluetoothAdapter!!.state)
-                mBluetoothAndWifiStateChangeBroadcastReceiver.onReceive(mContext, initialBluetoothIntent)
-            }
-        }
-
         updateEnableServicesPromptsRequired()
 
         super.onCreate()
@@ -528,49 +424,10 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
     }
 
     /**
-     * Check that the required
-     */
-    fun checkP2PBleServices(bleAdvertisingStartTime: Long = -1L) {
-        val permissionGranted = ActivityCompat.checkSelfPermission(mContext,
-                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val scanningEnabled = permissionGranted && isBluetoothEnabled && isBleCapable && wifiManager.isWifiEnabled
-        val advertisingEnabled = scanningEnabled and canDeviceAdvertise()
-        var waitedLongEnoughToStartScanning = true
-        val timeNow = System.currentTimeMillis()
-
-        if(bleAdvertisingStartTime != -1L) {
-            bleAdvertisingLastStartTime = bleAdvertisingStartTime
-        }
-
-        if (advertisingEnabled) {
-            waitedLongEnoughToStartScanning = bleAdvertisingLastStartTime != 0L && timeNow - bleAdvertisingLastStartTime > BLE_SCAN_WAIT_AFTER_ADVERTISING
-        }
-
-        scanningServiceManager.setEnabled(scanningEnabled && waitedLongEnoughToStartScanning)
-
-        if (scanningEnabled && !waitedLongEnoughToStartScanning) {
-            delayedExecutor.schedule({ this.checkP2PBleServices() },
-                    (BLE_SCAN_WAIT_AFTER_ADVERTISING + 1000).toLong(), TimeUnit.MILLISECONDS)
-        }
-    }
-
-    /**
      * {@inheritDoc}
      */
     actual override val isWiFiEnabled: Boolean
         get() = wifiManager.isWifiEnabled
-
-    /**
-     * {@inheritDoc}
-     */
-    actual override val isBleCapable: Boolean
-        get() {
-            return if (isBleDeviceSDKVersion)
-                BluetoothAdapter.getDefaultAdapter() != null && mContext.packageManager
-                        .hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
-            else
-                false
-        }
 
 
     /**
@@ -580,15 +437,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         get() = (bluetoothAdapter != null && bluetoothAdapter!!.isEnabled
                 && bluetoothAdapter!!.state == BluetoothAdapter.STATE_ON)
 
-
-    /**
-     * {@inheritDoc}
-     */
-    actual override fun canDeviceAdvertise(): Boolean {
-        return Build.VERSION.SDK_INT > BLE_ADVERTISE_MIN_SDK_VERSION &&
-                (isAdvertiser && bluetoothAdapter != null
-                        && bluetoothAdapter!!.isMultipleAdvertisementSupported)
-    }
 
     /**
      * {@inheritDoc}
@@ -629,8 +477,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         var connectedOrFailed = false
 
         var networkEnabled = false
-
-        var lastScanTime = 0L
 
         var networkSeenInScan = false
 
@@ -716,29 +562,17 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         managerHelper.restoreWiFi()
     }
 
-    override suspend fun sendBleMessage(bleMessage: BleMessage, deviceAddr: String): BleMessage? {
-        return gattClientCallbackManager?.getGattClient(deviceAddr)?.sendMessage(bleMessage)
-    }
-
     /**
      * Start monitoring network changes
      */
     private fun startMonitoringNetworkChanges() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val networkRequest = NetworkRequest.Builder()
-                    .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                    .build()
-            if (connectivityManager != null) {
-                connectivityManager!!.requestNetwork(networkRequest, UmNetworkCallback())
-            }
-        } else {
-            val connectionFilter = IntentFilter()
-            connectionFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE")
-            connectionFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
-            mContext.registerReceiver(networkStateChangeReceiver, connectionFilter)
+        val networkRequest = NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .build()
+        if (connectivityManager != null) {
+            connectivityManager!!.requestNetwork(networkRequest, UmNetworkCallback())
         }
-
     }
 
     /**
@@ -786,16 +620,11 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
      * {@inheritDoc}
      */
     override fun onDestroy() {
-        scanningServiceManager.setEnabled(false)
         wifiP2pGroupServiceManager!!.setEnabled(false)
 
-        if (isBleCapable) {
-            mContext.unregisterReceiver(mBluetoothAndWifiStateChangeBroadcastReceiver)
-        }
 
-        if (!isVersionLollipopOrAbove) {
-            mContext.unregisterReceiver(networkStateChangeReceiver)
-        }
+        mContext.unregisterReceiver(networkStateChangeReceiver)
+
 
         if (wifiP2PCapable.get()) {
             mContext.unregisterReceiver(wifiP2pGroupServiceManager!!.wifiP2pBroadcastReceiver)
@@ -804,26 +633,8 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         super.onDestroy()
     }
 
-    actual override val isVersionLollipopOrAbove: Boolean
-        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-
-    actual override val isVersionKitKatOrBelow: Boolean
-        get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
-
 
     companion object {
-
-        /**
-         * When we use BLE for advertising and scanning, we need wait a little bit after one starts
-         * before the other can start
-         */
-        const val BLE_SCAN_WAIT_AFTER_ADVERTISING = 4000
-
-        val USTADMOBILE_BLE_SERVICE_UUID_UUID = UUID.fromString(USTADMOBILE_BLE_SERVICE_UUID)
-
-        const val BLE_ADVERTISE_MIN_SDK_VERSION = 21
-
-        const val BLE_MIN_SDK_VERSION = 18
 
         @JvmStatic
         private val BLUETOOTH_ON_OR_TURNING_ON_STATES = listOf(BluetoothAdapter.STATE_ON,

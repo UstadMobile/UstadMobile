@@ -5,35 +5,24 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
-@SyncableEntity(tableId = Schedule.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT UserSession.usClientNodeId AS deviceId, 
-               ${Schedule.TABLE_ID} AS tableId 
-          FROM ChangeLog
-               JOIN Schedule 
-               ON ChangeLog.chTableId = ${Schedule.TABLE_ID} 
-                    AND Schedule.scheduleUid = ChangeLog.chEntityPk
-               JOIN Clazz 
-                    ON Clazz.clazzUid = Schedule.scheduleClazzUid 
-               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_CLAZZ_SELECT}
-                    ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}     
-                   """],
-    syncFindAllQuery = """
-        SELECT Schedule.*
-          FROM UserSession
-               JOIN PersonGroupMember
-                    ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
-               ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_CLAZZ_SELECT}
-                    ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
-               JOIN Schedule
-                    ON Schedule.scheduleClazzUid = Clazz.clazzUid
-         WHERE UserSession.usClientNodeId = :clientId
-               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}"""
-)
 @Entity
 @Serializable
+@ReplicateEntity(tableId = Schedule.TABLE_ID, tracker = ScheduleReplicate::class)
+@Triggers(arrayOf(
+ Trigger(
+     name = "schedule_remote_insert",
+     order = Trigger.Order.INSTEAD_OF,
+     on = Trigger.On.RECEIVEVIEW,
+     events = [Trigger.Event.INSERT],
+     sqlStatements = [
+         """REPLACE INTO Schedule(scheduleUid, sceduleStartTime, scheduleEndTime, scheduleDay, scheduleMonth, scheduleFrequency, umCalendarUid, scheduleClazzUid, scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum, scheduleLastChangedBy, scheduleLastChangedTime, scheduleActive) 
+         VALUES (NEW.scheduleUid, NEW.sceduleStartTime, NEW.scheduleEndTime, NEW.scheduleDay, NEW.scheduleMonth, NEW.scheduleFrequency, NEW.umCalendarUid, NEW.scheduleClazzUid, NEW.scheduleMasterChangeSeqNum, NEW.scheduleLocalChangeSeqNum, NEW.scheduleLastChangedBy, NEW.scheduleLastChangedTime, NEW.scheduleActive) 
+         /*psql ON CONFLICT (scheduleUid) DO UPDATE 
+         SET sceduleStartTime = EXCLUDED.sceduleStartTime, scheduleEndTime = EXCLUDED.scheduleEndTime, scheduleDay = EXCLUDED.scheduleDay, scheduleMonth = EXCLUDED.scheduleMonth, scheduleFrequency = EXCLUDED.scheduleFrequency, umCalendarUid = EXCLUDED.umCalendarUid, scheduleClazzUid = EXCLUDED.scheduleClazzUid, scheduleMasterChangeSeqNum = EXCLUDED.scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum = EXCLUDED.scheduleLocalChangeSeqNum, scheduleLastChangedBy = EXCLUDED.scheduleLastChangedBy, scheduleLastChangedTime = EXCLUDED.scheduleLastChangedTime, scheduleActive = EXCLUDED.scheduleActive
+         */"""
+     ]
+ )
+))
 class Schedule {
 
     @PrimaryKey(autoGenerate = true)
@@ -86,6 +75,7 @@ class Schedule {
     var scheduleLastChangedBy: Int = 0
 
     @LastChangedTime
+    @ReplicationVersionId
     var scheduleLastChangedTime: Long = 0
 
     //active or removed

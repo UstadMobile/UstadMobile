@@ -15,7 +15,10 @@ expect fun String.base64StringToByteArray(): ByteArray
 
 fun String?.toQueryLikeParam() = if(this.isNullOrEmpty()) "%" else "%$this%"
 
-inline fun String.requirePostfix(postFix: String) = if(this.endsWith(postFix)) this else "$this$postFix"
+fun String.requirePostfix(
+    postFix: String,
+    ignoreCase: Boolean = false
+) = if(this.endsWith(postFix, ignoreCase)) this else "$this$postFix"
 
 fun String?.alternative(alternative: String) = if(this.isNullOrEmpty()) alternative else this
 
@@ -85,3 +88,8 @@ fun String.appendQueryArgs(vararg pairs: Pair<String, String>): String {
 fun String.appendQueryArgs(args: Map<String, String>): String {
     return appendQueryArgs(args.toQueryString())
 }
+
+/**
+ * Validate email address using regular expressions
+ */
+expect fun String?.validEmail(): Boolean

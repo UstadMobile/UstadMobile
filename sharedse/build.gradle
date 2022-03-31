@@ -22,11 +22,6 @@ apply plugin: "maven-publish"
 
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
-    buildToolsVersion rootProject.ext.version_android_buildtools
-
-    lintOptions {
-        abortOnError false
-    }
 
 
     buildTypes {
@@ -34,17 +29,17 @@ android {
             consumerProguardFiles 'proguard-rules.pro'
         }
     }
-
     packagingOptions {
-        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+        resources {
+            excludes += ['META-INF/INDEX.LIST', '**/*.kotlin_metadata', 'META-INF/*.kotlin_module', 'licenses/**.TXT']
+        }
     }
 
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        missingDimensionStrategy 'api', 'api18'
     }
 
     compileOptions {
@@ -55,6 +50,9 @@ android {
         unitTests {
             returnDefaultValues = true
         }
+    }
+    lint {
+        abortOnError false
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
@@ -122,10 +120,10 @@ kotlin {
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
 
 
-                implementation "com.ustadmobile.door:door-runtime:$version_door"
+                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
-                compileOnly "com.ustadmobile.door:room-annotations:$version_door"
+                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
             }
         }

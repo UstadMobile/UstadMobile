@@ -17,6 +17,10 @@
             type="ClazzEnrolmentWithLeavingReason" />
 
         <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ClazzEnrolmentEditPresenter" />
+
+        <variable
             name="loading"
             type="boolean" />
 
@@ -48,11 +52,10 @@
             name="statusSelectorListener"
             type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
-        <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.ClazzEnrolmentFragmentEventHandler" />
+       <variable name="dateTimeMode"
+            type="Integer"/>
 
-        <variable name="dateTimeMode"
+        <variable name="dateTimeModeEnd"
             type="Integer"/>
 
         <variable
@@ -140,14 +143,14 @@
                 android:hint="@string/end_date">
 
             <com.google.android.material.textfield.TextInputEditText
+                app:dateTimeInMillis="@={clazzEnrolment.clazzEnrolmentDateLeft}"
+                app:timeZoneId="@{timeZoneId}"
+                app:dateTimeInMillisMode="@{dateTimeModeEnd}"
                 android:id="@+id/clazz_enrolment_edit_toDate_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:cursorVisible="false"
                 android:inputType="@{InputType.TYPE_NULL}"
-                app:dateTimeInMillis="@={clazzEnrolment.clazzEnrolmentDateLeft}"
-                app:timeZoneId="@{timeZoneId}"
-                app:dateTimeInMillisMode="@{dateTimeMode}"
                 app:runOnClickWhenFocused="@{true}" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -187,7 +190,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/clazz_enrolment_edit_reason_text"
-                    android:onClick="@{() -> activityEventHandler.handleReasonLeavingClicked()}"
+                    android:onClick="@{() -> presenter.handleReasonLeavingClicked()}"
                     android:text="@{clazzEnrolment.leavingReason.leavingReasonTitle}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"

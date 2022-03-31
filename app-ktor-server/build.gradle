@@ -3,6 +3,7 @@ plugins {
     id 'application'
     id 'kotlin'
     id 'maven-publish'
+
     id 'com.github.johnrengelman.shadow' version "$version_shadow"
     id 'kotlinx-serialization'
 }
@@ -72,8 +73,8 @@ dependencies {
     implementation project(":sharedse")
     implementation project(":lib-database")
     implementation project(":lib-database-mpp")
-    implementation "com.ustadmobile.door:room-annotations:$version_door"
-    implementation "com.ustadmobile.door:door-runtime:$version_door"
+    implementation "com.github.UstadMobile.door:room-annotations:$version_door"
+    implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(":lib-database-entities")
     implementation project(":lib-util")
     implementation project(":lib-content-scrapers")
@@ -120,6 +121,21 @@ shadowJar {
     archiveBaseName = "ustad-server"
 }
 
+task deleteAppResources{
+    doLast{
+        def webAppDir = project.file("src/main/resources/umapp")
+        if(webAppDir.exists()){
+            println("Deleteting web resource directory ${webAppDir.path}")
+            delete webAppDir
+        }
+    }
+}
+
+
 
 sourceCompatibility = "8"
 targetCompatibility = "8"
+
+if(findProperty("skipreactproductionbundle") != "true") {
+    shadowJar.dependsOn(":app-react:generateProductionBundle")
+}

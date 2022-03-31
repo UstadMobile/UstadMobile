@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.entities.Language
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -96,6 +97,11 @@ class ContentEntryEdit2PresenterTest {
             bind<ContentJobManager>() with singleton {
                 contentJobManager
             }
+            bind<Json>() with singleton {
+                Json {
+                    encodeDefaults = true
+                }
+            }
         }
 
         db = di.directActiveDbInstance()
@@ -153,7 +159,9 @@ class ContentEntryEdit2PresenterTest {
     @Test
     fun givenPresenterCreatedAndEntryNotCreated_whenClickSave_shouldCreateAnEntry() {
         createMockView()
-        val presenter = ContentEntryEdit2Presenter(context, mapOf(UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString()), mockView, mockLifecycleOwner, di)
+        val presenter = ContentEntryEdit2Presenter(context,
+            mapOf(UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString()), mockView,
+            mockLifecycleOwner, di)
 
         presenter.onCreate(null)
         val initialEntry = mockView.captureLastEntityValue()
@@ -172,7 +180,6 @@ class ContentEntryEdit2PresenterTest {
 
         verifyBlocking(contentJobManager, timeout(timeoutInMill)) {
             enqueueContentJob(any(), any())
-            //enqueueContentJob(eq("content://Dummy"), any(), any(),eq(ContainerImportJob.Companion.CLIENT_IMPORT_MODE), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
         }
 
 

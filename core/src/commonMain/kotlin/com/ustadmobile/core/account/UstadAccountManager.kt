@@ -3,15 +3,15 @@ package com.ustadmobile.core.account
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.ext.encryptWithPbkdf2
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.ext.toUmAccount
+import com.ustadmobile.core.util.ext.withEndpoint
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.door.*
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.door.ext.toHexString
+import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
@@ -30,15 +30,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.*
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
-                          private val appContext: Any,
-                          val di: DI) : SyncListener<UserSession> {
+class UstadAccountManager(
+    private val systemImpl: UstadMobileSystemImpl,
+    private val appContext: Any,
+    val di: DI
+) : IncomingReplicationListener {
 
     data class ResponseWithAccount(val statusCode: Int, val umAccount: UmAccount?)
 
@@ -172,8 +174,11 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
     }
 
 
-    suspend fun register(person: PersonWithAccount, endpointUrl: String,
-                         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()): PersonWithAccount = withContext(Dispatchers.Default){
+    suspend fun register(
+        person: PersonWithAccount,
+        endpointUrl: String,
+        accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()
+    ): PersonWithAccount = withContext(Dispatchers.Default){
         val parentVal = accountRegisterOptions.parentJoin
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
@@ -222,7 +227,7 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
 
 
         val userSession = UserSession().apply {
-            usClientNodeId = (endpointRepo as DoorDatabaseSyncRepository).clientId
+            usClientNodeId = (endpointRepo as DoorDatabaseRepository).config.nodeId.toLong()
             usPersonUid = person.personUid
             usStartTime = systemTimeInMillis()
             usSessionType = UserSession.TYPE_STANDARD
@@ -240,9 +245,9 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             commitActiveEndpointsToPref()
 
         withContext(doorMainDispatcher()) {
-            val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
-            (repo as DoorDatabaseRepository).addSyncListener(UserSession::class,
-                this@UstadAccountManager)
+            val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+            db.addIncomingReplicationListener(this@UstadAccountManager)
+
             userSessionLiveDataMediator.addEndpoint(endpoint)
         }
     }
@@ -253,27 +258,35 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             commitActiveEndpointsToPref()
 
         withContext(doorMainDispatcher()) {
-            val repo: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
-            (repo as DoorDatabaseRepository).removeSyncListener(UserSession::class,
-                this@UstadAccountManager)
+            val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+            db.removeIncomingReplicationListener(this@UstadAccountManager)
+
             userSessionLiveDataMediator.removeEndpoint(endpoint)
         }
     }
 
     private fun commitActiveEndpointsToPref() {
         val json = Json.encodeToString(ListSerializer(String.serializer()),
-            endpointsWithActiveSessions.map { it.url })
+            endpointsWithActiveSessions.toSet().map { it.url }.toList())
         systemImpl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, json, appContext)
     }
 
     //When sync data comes in, check to see if a change has been actioned that has ended our active
     // session
-    override fun onEntitiesReceived(evt: SyncEntitiesReceivedEvent<UserSession>) {
-        val activeSessionUpdate = evt.entitiesReceived.firstOrNull {
-            it.usUid == activeSession?.userSession?.usUid
-        }
+    override suspend fun onIncomingReplicationProcessed(
+        incomingReplicationEvent: IncomingReplicationEvent
+    ) {
+        if(incomingReplicationEvent.tableId != UserSession.TABLE_ID)
+            return
 
-        if(activeSessionUpdate != null && activeSessionUpdate.usStatus != UserSession.STATUS_ACTIVE) {
+        val activeSessionUid = activeSession?.userSession?.usUid ?: return
+
+        val activeSessionUpdate = incomingReplicationEvent.incomingReplicationData.firstOrNull {
+            it.jsonObject["usUid"]?.jsonPrimitive?.longOrNull == activeSessionUid
+        } ?: return
+
+        val activeSessionStatus = activeSessionUpdate.jsonObject["usStatus"]?.jsonPrimitive?.intOrNull
+        if(activeSessionStatus != UserSession.STATUS_ACTIVE) {
             activeSession = null
         }
     }
@@ -304,8 +317,10 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
     suspend fun login(username: String, password: String, endpointUrl: String,
         maxDateOfBirth: Long = 0L): UmAccount = withContext(Dispatchers.Default){
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
-        val nodeId = (repo as? DoorDatabaseSyncRepository)?.clientId
-                ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
+        val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_DB)
+
+        val nodeId = (repo as? DoorDatabaseRepository)?.config?.nodeId
+            ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
 
         val loginResponse = httpClient.post<HttpResponse> {
             url("${endpointUrl.removeSuffix("/")}/auth/login")
@@ -328,17 +343,53 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
         }
 
         val responseAccount = loginResponse.receive<UmAccount>()
-
         responseAccount.endpointUrl = endpointUrl
-        val person = repo.personDao.findByUid(responseAccount.personUid)
-            ?: throw IllegalStateException("Internal error: could not get person object")
-        val newSession = addSession(person, endpointUrl, password)
+
+        var personInDb = db.personDao.findByUidAsync(responseAccount.personUid)
+
+        if(personInDb == null){
+            val personOnServerResponse = httpClient.get<HttpResponse> {
+                url("${endpointUrl.removeSuffix("/")}/auth/person")
+                parameter("personUid", responseAccount.personUid)
+            }
+            if(personOnServerResponse.status.value == 200) {
+                val personObj = personOnServerResponse.receive<Person>()
+                repo.personDao.insertAsync(personObj)
+                personInDb = personObj
+            }else {
+                throw IllegalStateException("Internal error: could not get person object")
+            }
+        }
+
+        getSiteFromDbOrLoadFromHttp(endpointUrl, repo)
+
+        val newSession = addSession(personInDb, endpointUrl, password)
 
         activeEndpoint = Endpoint(endpointUrl)
         activeSession = newSession
 
         //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
         responseAccount
+    }
+
+    private suspend fun getSiteFromDbOrLoadFromHttp(
+        endpointUrl: String,
+        repo: UmAppDatabase
+    ) {
+        val db = (repo as DoorDatabaseRepository).db as UmAppDatabase
+        val siteInDb = db.siteDao.getSiteAsync()
+        if(siteInDb == null) {
+            val siteResponse = httpClient.get<HttpResponse> {
+                doorNodeAndVersionHeaders(repo as DoorDatabaseRepository)
+                url("${endpointUrl.removeSuffix("/")}/UmAppDatabase/SiteDao/getSiteAsync")
+            }
+            if(siteResponse.status.value == 200) {
+                val siteObj = siteResponse.receive<Site>()
+                repo.siteDao.replaceAsync(siteObj)
+            }else {
+                throw IllegalStateException("Internal error: no Site in database and could not fetch it from server")
+            }
+        }
     }
 
     suspend fun startGuestSession(endpointUrl: String) {
@@ -348,6 +399,8 @@ class UstadAccountManager(private val systemImpl: UstadMobileSystemImpl,
             firstNames = "Guest"
             lastName = "User"
         }, groupFlag = PERSONGROUP_FLAG_PERSONGROUP or PERSONGROUP_FLAG_GUESTPERSON)
+
+        getSiteFromDbOrLoadFromHttp(endpointUrl, repo)
 
         activeSession = addSession(guestPerson, endpointUrl, null)
     }

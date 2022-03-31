@@ -1,7 +1,6 @@
 plugins {
     id 'application'
     id 'kotlin'
-    id 'com.github.psxpaul.execfork' version '0.1.13'
     id 'com.github.johnrengelman.shadow' version "$version_shadow"
 }
 
@@ -19,7 +18,7 @@ dependencies {
     implementation project(":app-ktor-server")
     implementation project(":lib-database")
     implementation project(":lib-database-mpp")
-    implementation "com.ustadmobile.door:door-runtime:$version_door"
+    implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(":lib-test-common")
 
     implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
@@ -64,17 +63,19 @@ task appRunDebug(type: JavaExec) {
 
 /*
  * Unfortunately there is a bug on JavaExecFork and Gradle 5.6+
+ * This was not resolving and is not currently used. It may be useful shortly for use with the
+ * test server.
  */
-task appRunFork(type: com.github.psxpaul.task.JavaExecFork) {
-    //outputs.upToDateWhen { false }
-    classpath = sourceSets.test.runtimeClasspath
-    main = 'io.ktor.server.netty.EngineMain'
-    args = [ "-port=${rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"]}", "-host=${rootProject.ext.buildConfigProperties["test.um_http_testserver"]}" ]
-    waitForPort = 8400
-    workingDir = "$projectDir/"
-    standardOutput = "$projectDir/build/tmp/daemon.log"
-    errorOutput = "$projectDir/build/tmp/daemon-error.log"
-}
+//task appRunFork(type: com.github.psxpaul.task.JavaExecFork) {
+//    //outputs.upToDateWhen { false }
+//    classpath = sourceSets.test.runtimeClasspath
+//    main = 'io.ktor.server.netty.EngineMain'
+//    args = [ "-port=${rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"]}", "-host=${rootProject.ext.buildConfigProperties["test.um_http_testserver"]}" ]
+//    waitForPort = 8400
+//    workingDir = "$projectDir/"
+//    standardOutput = "$projectDir/build/tmp/daemon.log"
+//    errorOutput = "$projectDir/build/tmp/daemon-error.log"
+//}
 
 task startServer(type: Exec) {
     workingDir = "$projectDir/"

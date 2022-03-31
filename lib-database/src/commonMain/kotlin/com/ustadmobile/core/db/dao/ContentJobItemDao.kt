@@ -23,7 +23,8 @@ abstract class ContentJobItemDao {
                JOIN ContentJob
                ON ContentJobItem.cjiJobUid = ContentJob.cjUid
          WHERE ContentJobItem.cjiJobUid = :contentJobUid
-           AND ContentJobItem.cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.COMPLETE_MIN}
+           AND (ContentJobItem.cjiStatus = ${JobStatus.QUEUED} OR 
+                ContentJobItem.cjiStatus = ${JobStatus.WAITING_FOR_CONNECTION})
            AND (
                 NOT cjiConnectivityNeeded 
                 OR ((SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_UNMETERED}) 
@@ -36,53 +37,20 @@ abstract class ContentJobItemDao {
 
 
     @Query("""
-            SELECT COALESCE((
-                 SELECT CASE 
-                 WHEN (EXISTS(SELECT 1
-                          FROM Container 
-                         WHERE Container.containerContentEntryUid = :contentEntryUid
-                           AND EXISTS (SELECT ContainerEntry.ceUid 
-                                         FROM ContainerEntry
-                                        WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
-                      ORDER BY cntLastModified DESC LIMIT 1))
-                 THEN ${ContentJobItem.STATUS_COMPLETE}
-                 WHEN 
-                       (SELECT cjiFinishTime 
-                          FROM ContentJobItem 
-                         WHERE cjiPluginId != 14 
-                           AND cjiRecursiveStatus = ${JobStatus.COMPLETE}
-                           AND cjiContentEntryUid = :contentEntryUid
-					  ORDER BY cjiFinishTime DESC LIMIT 1) > 
-						COALESCE((SELECT cjiFinishTime 
-					       FROM ContentJobItem 
-						  WHERE cjiPluginId = 14 
-							AND cjiContentEntryUid = :contentEntryUid
-					   ORDER BY cjiFinishTime DESC LIMIT 1),0)
-                 THEN ${ContentJobItem.STATUS_COMPLETE}
-                 WHEN EXISTS (SELECT 1 FROM ContentJobItem 
-								  WHERE cjiContentEntryUid = :contentEntryUid
-								  AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
-                                  AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX})
-			     THEN ${ContentJobItem.STATUS_RUNNING} 				
-		         ELSE ${ContentJobItem.STATUS_DOWNLOAD}  
-	             END
-		    FROM ContentJobItem
-            WHERE cjiContentEntryUid = :contentEntryUid),${ContentJobItem.STATUS_DOWNLOAD}) as status
-    """)
-    abstract suspend fun findStatusForActiveContentJobItem(contentEntryUid: Long): Int
-
-
-    @Query("""
-        SELECT cjiRecursiveProgress AS progress, cjiRecursiveTotal AS total, cjNotificationTitle as progressTitle
+        SELECT cjiRecursiveProgress AS progress, 
+               cjiRecursiveTotal AS total, 
+               cjNotificationTitle as progressTitle,
+               ContentJobItem.cjiUid
           FROM ContentJobItem
           JOIN ContentJob
             ON ContentJob.cjUid = ContentJobItem.cjiJobUid
          WHERE cjiContentEntryUid = :contentEntryUid
-           AND cjiRecursiveStatus >= ${JobStatus.RUNNING_MIN}
+           AND cjiRecursiveStatus >= ${JobStatus.QUEUED}
            AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX}
-      ORDER BY cjiStartTime DESC LIMIT 1 
+      ORDER BY cjiStartTime DESC
     """)
-    abstract suspend fun findProgressForActiveContentJobItem(contentEntryUid: Long): ContentJobItemProgress?
+    abstract fun findActiveContentJobItems(contentEntryUid: Long): List<ContentJobItemProgress>
+
 
     @Insert
     abstract suspend fun insertJobItem(jobItem: ContentJobItem) : Long
@@ -111,9 +79,10 @@ abstract class ContentJobItemDao {
         SELECT * 
           FROM ContentJobItem
          WHERE cjiJobUid = :jobUid 
-           AND cjiParentCjiUid = 0 LIMIT 1
+           AND cjiParentCjiUid = 0 
+         LIMIT 1
     """)
-    abstract fun findByJobId(jobUid: Long): ContentJobItem?
+    abstract fun findRootJobItemByJobId(jobUid: Long): ContentJobItem?
 
     @Query("""
         UPDATE ContentJobItem
@@ -131,6 +100,13 @@ abstract class ContentJobItemDao {
     """)
     abstract suspend fun updateConnectivityNeeded(contentJobItemId: Long, connectivityNeeded: Boolean)
 
+
+    @Query("""
+        UPDATE ContentJobItem
+           SET cjiContainerProcessed = :cjiContainerProcessed
+         WHERE cjiUid = :contentJobItemId   
+    """)
+    abstract suspend fun updateContainerProcessed(contentJobItemId: Long, cjiContainerProcessed: Boolean)
 
     @Transaction
     open suspend fun commitProgressUpdates(updates: List<ContentJobItemProgressUpdate>) {
@@ -192,12 +168,15 @@ abstract class ContentJobItemDao {
 
 
     @Query("""
-        SELECT ContentJobItem.*
-          FROM ContentJobItem
-         WHERE cjiFinishTime = 0
-      ORDER BY cjiStartTime DESC LIMIT 1
-        """)
-    abstract suspend fun getActiveContentJobItem(): ContentJobItem?
+        SELECT COALESCE(
+               (SELECT ContentJobItem.cjiJobUid
+                  FROM ContentJobItem
+                 WHERE cjiContentEntryUid = :contentEntryUid
+                   AND cjiStatus BETWEEN ${JobStatus.QUEUED} AND ${JobStatus.RUNNING_MAX}
+              ORDER BY cjiFinishTime DESC), 0)
+    """)
+    abstract suspend fun getActiveContentJobIdByContentEntryUid(contentEntryUid: Long): Long
+
 
     @Query("""
         UPDATE ContentJobItem
@@ -205,4 +184,43 @@ abstract class ContentJobItemDao {
          WHERE cjiUid = :cjiUid  
     """)
     abstract suspend fun updateUploadSessionUuid(cjiUid: Long, uploadSessionUuid: String)
+
+
+    @Query("""
+        SELECT * 
+          FROM ContentJobItem
+         WHERE cjiJobUid = :jobId 
+    """)
+    abstract fun findAllByJobId(jobId: Long): List<ContentJobItem>
+
+    @Query("""
+        SELECT *
+          FROM ContentJobItem
+         WHERE cjiUid = :uid   
+    """)
+    abstract fun getJobItemByUidLive(uid: Long): DoorLiveData<ContentJobItem?>
+
+    @Query("""
+        SELECT cjiContainerUid
+          FROM ContentJobItem
+         WHERE cjiUid = :uid 
+    """)
+    abstract suspend fun getContainerUidByJobItemUid(uid: Long): Long
+
+    @Query("""
+        UPDATE ContentJobItem
+           SET cjiStatus = :newStatus
+         WHERE cjiJobUid = :jobUid
+           AND cjiStatus != :newStatus
+    """)
+    abstract suspend fun updateAllStatusesByJobUid(jobUid: Long, newStatus: Int)
+
+    @Query("""
+        SELECT ContentJobItem.cjiContainerUid
+          FROM ContentJobItem
+         WHERE cjiJobUid = :jobUid 
+    """)
+    abstract suspend fun findAllContainersByJobUid(jobUid: Long): List<Long>
+
+
 }

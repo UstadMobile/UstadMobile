@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -19,12 +20,13 @@ import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ObjectMessageIdOption
-import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportEditView
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.DateRangeMoment
+import com.ustadmobile.lib.db.entities.ReportFilter
+import com.ustadmobile.lib.db.entities.ReportSeries
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 
 
 interface ReportEditFragmentEventHandler {
@@ -63,9 +65,10 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
             }
     }
 
-    class RecyclerViewSeriesAdapter(val activityEventHandler: ReportEditFragmentEventHandler,
-                                    var presenter: ReportEditPresenter?)
-        : ListAdapter<ReportSeries, SeriesViewHolder>(DIFF_CALLBACK_SERIES) {
+    class RecyclerViewSeriesAdapter(
+        val activityEventHandler: ReportEditFragmentEventHandler,
+        var presenter: ReportEditPresenter?
+    ) : ListAdapter<ReportSeries, SeriesViewHolder>(DIFF_CALLBACK_SERIES) {
 
         var visualOptions: List<ReportEditPresenter.VisualTypeMessageIdOption>? = null
         var yAxisOptions: List<ReportEditPresenter.YAxisMessageIdOption>? = null
@@ -156,23 +159,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setEditFragmentTitle(R.string.create_a_new_report, R.string.edit_report)
-
-        val navController = findNavController()
-
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                ReportFilter::class.java) {
-            val filter = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddFilter(filter)
-        }
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                DateRangeMoment::class.java) {
-            val dateRangeMoment = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddCustomRange(dateRangeMoment)
-        }
-
     }
 
 
@@ -275,8 +262,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
 
     override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
         if(selectedOption.optionId == ReportEditPresenter.DateRangeOptions.NEW_CUSTOM_RANGE.code) {
-                navigateToEditEntity(null, R.id.date_range_dest,
-                        DateRangeMoment::class.java)
+                mPresenter?.handleDateRangeChange()
         }
         mPresenter?.handleDateRangeSelected(selectedOption)
         mPresenter?.handleXAxisSelected(selectedOption)
@@ -287,17 +273,13 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
     }
 
     override fun onClickNewFilter(series: ReportSeries) {
-        onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(ReportFilter().apply {
+        mPresenter?.handleOnFilterClicked(ReportFilter().apply {
             reportFilterSeriesUid = series.reportSeriesUid
-        }, R.id.report_filter_edit_dest,
-                ReportFilter::class.java)
+        })
     }
 
     override fun onClickEditFilter(filter: ReportFilter){
-        onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(filter, R.id.report_filter_edit_dest,
-                ReportFilter::class.java)
+        mPresenter?.handleOnFilterClicked(filter)
     }
 
     override fun onClickRemoveFilter(filter: ReportFilter) {
@@ -331,8 +313,15 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
                 return oldItem.reportSeriesUid == newItem.reportSeriesUid
             }
 
-            override fun areContentsTheSame(oldItem: ReportSeries,
-                                            newItem: ReportSeries): Boolean {
+            /* We are using a two-way binding within a recycler view. We must ensure that the
+             * we rebind the exact same object, otherwise the changes will be saved into a different
+             * object in memory
+             */
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(
+                oldItem: ReportSeries,
+                newItem: ReportSeries
+            ): Boolean {
                 return oldItem === newItem
             }
         }
@@ -342,8 +331,15 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
                 return oldItem.reportFilterUid == newItem.reportFilterUid
             }
 
-            override fun areContentsTheSame(oldItem: ReportFilter,
-                                            newItem: ReportFilter): Boolean {
+            /* We are using a two-way binding within a recycler view. We must ensure that the
+             * we rebind the exact same object, otherwise the changes will be saved into a different
+             * object in memory
+             */
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(
+                oldItem: ReportFilter,
+                newItem: ReportFilter
+            ): Boolean {
                 return oldItem === newItem
             }
         }

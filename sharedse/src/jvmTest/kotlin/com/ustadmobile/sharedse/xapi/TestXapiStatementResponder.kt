@@ -19,11 +19,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
-import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.door.ext.clearAllTablesAndResetSync
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -54,6 +53,8 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import javax.naming.InitialContext
 import kotlin.random.Random
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import kotlinx.coroutines.runBlocking
 
 class TestXapiStatementResponder {
 
@@ -78,7 +79,7 @@ class TestXapiStatementResponder {
         val endpointScope = EndpointScope()
         di = DI {
             bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
-                NodeIdAndAuth(Random.nextInt(0, Int.MAX_VALUE), randomUuid().toString())
+                NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
             }
 
             bind<UstadMobileSystemImpl>() with singleton {
@@ -115,10 +116,10 @@ class TestXapiStatementResponder {
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
-                    .addSyncCallback(nodeIdAndAuth, false)
+                    .addSyncCallback(nodeIdAndAuth)
                     .build()
-                    .clearAllTablesAndResetSync(nodeIdAndAuth.nodeId, false)
-                    .also { it.preload() })
+                    .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
+                    .also { runBlocking { it.preload() } })
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {

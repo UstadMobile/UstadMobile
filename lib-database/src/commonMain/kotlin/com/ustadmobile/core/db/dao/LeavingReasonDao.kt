@@ -3,16 +3,58 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.LeavingReason
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.UidAndLabel
+import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
 @Repository
 @Dao
 abstract class LeavingReasonDao : BaseDao<LeavingReason> {
+
+    @Query("""
+         REPLACE INTO LeavingReasonReplicate(lrPk, lrDestination)
+          SELECT DISTINCT LeavingReason.leavingReasonUid AS lrPk,
+                 :newNodeId AS lrDestination
+            FROM LeavingReason
+           WHERE LeavingReason.leavingReasonLct != COALESCE(
+                 (SELECT lrVersionId
+                    FROM LeavingReasonReplicate
+                   WHERE lrPk = LeavingReason.leavingReasonUid
+                     AND lrDestination = :newNodeId), 0) 
+          /*psql ON CONFLICT(lrPk, lrDestination) DO UPDATE
+                 SET lrPending = true
+          */       
+     """)
+    @ReplicationRunOnNewNode
+    @ReplicationCheckPendingNotificationsFor([LeavingReason::class])
+    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+
+    @Query("""
+ REPLACE INTO LeavingReasonReplicate(lrPk, lrDestination)
+  SELECT DISTINCT LeavingReason.leavingReasonUid AS lrUid,
+         UserSession.usClientNodeId AS lrDestination
+    FROM ChangeLog
+         JOIN LeavingReason
+              ON ChangeLog.chTableId = ${LeavingReason.TABLE_ID}
+                 AND ChangeLog.chEntityPk = LeavingReason.leavingReasonUid
+         JOIN UserSession 
+              ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+   WHERE UserSession.usClientNodeId != (
+         SELECT nodeClientId 
+           FROM SyncNode
+          LIMIT 1)
+     AND LeavingReason.leavingReasonLct != COALESCE(
+         (SELECT lrVersionId
+            FROM LeavingReasonReplicate
+           WHERE lrPk = LeavingReason.leavingReasonUid
+             AND lrDestination = UserSession.usClientNodeId), 0)
+ /*psql ON CONFLICT(lrPk, lrDestination) DO UPDATE
+     SET lrPending = true
+  */               
+    """)
+    @ReplicationRunOnChange([LeavingReason::class])
+    @ReplicationCheckPendingNotificationsFor([LeavingReason::class])
+    abstract suspend fun replicateOnChange()
 
     @Query("""SELECT * FROM LeavingReason""")
     abstract fun findAllReasons(): DoorDataSourceFactory<Int, LeavingReason>
@@ -26,7 +68,7 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
 
     @JsName("findByUidList")
     @Query("SELECT leavingReasonUid FROM LeavingReason WHERE leavingReasonUid IN (:uidList)")
-    abstract fun findByUidList(uidList: List<Long>): List<Long>
+    abstract suspend fun findByUidList(uidList: List<Long>): List<Long>
 
     @JsName("findByUidLive")
     @Query("SELECT * FROM LeavingReason WHERE leavingReasonUid = :uid")
@@ -40,12 +82,12 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
 
     @JsName("replaceList")
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun replaceList(entityList: List<LeavingReason>)
+    abstract suspend fun replaceList(entityList: List<LeavingReason>)
 
     @Update
     abstract suspend fun updateAsync(entity: LeavingReason): Int
 
-    fun initPreloadedLeavingReasons() {
+    suspend fun initPreloadedLeavingReasons() {
         val uidsInserted = findByUidList(LeavingReason.FIXED_UIDS.values.toList())
         val uidsToInsert = LeavingReason.FIXED_UIDS.filter { it.value !in uidsInserted }
         val verbListToInsert = uidsToInsert.map { reason ->

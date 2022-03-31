@@ -8,4 +8,6 @@ class ContentJobItemProgress {
 
     var progressTitle: String? = null
 
+    var cjiUid: Long = 0L
+
 }

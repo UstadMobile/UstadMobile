@@ -18,7 +18,6 @@ import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -78,7 +77,7 @@ class XapiTypePluginCommonJvm(
                 val xpp = xppFactory.newPullParser()
                 xpp.setInput(it, "UTF-8")
                 val activity = TinCanXML.loadFromXML(xpp).launchActivity
-                        ?: throw IOException("TinCanXml from name has no launchActivity!")
+                        ?: return@withContext null
 
                 val entry = ContentEntryWithLanguage().apply {
                     contentFlags = ContentEntry.FLAG_IMPORTED
@@ -106,11 +105,10 @@ class XapiTypePluginCommonJvm(
                 val doorUri = DoorUri.parse(uri)
                 val localUri = process.getLocalOrCachedUri()
                 val contentNeedUpload = !doorUri.isRemote()
-                val xapiIsProcessed = contentJobItem.cjiContainerUid != 0L
                 contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
                     progress, context, di)
 
-                if(!xapiIsProcessed) {
+                if(!contentJobItem.cjiContainerProcessed) {
 
                     val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
                             ?: Container().apply {
@@ -124,16 +122,18 @@ class XapiTypePluginCommonJvm(
                             ?: defaultContainerDir.toURI().toString()
                     val containerFolderUri = DoorUri.parse(containerFolder)
 
+                    contentJobItem.cjiContainerUid = container.containerUid
+                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                            container.containerUid)
+
                     repo.addEntriesToContainerFromZip(container.containerUid,
                             localUri,
                             ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
-                    contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
-                        container.containerUid)
-
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         progress)
+
+                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
 
                     contentJobItem.cjiConnectivityNeeded = true
                     db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
@@ -141,14 +141,16 @@ class XapiTypePluginCommonJvm(
                     val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
                             ?: 0)
                     if (!haveConnectivityToContinueJob) {
-                        return@withContext ProcessResult(JobStatus.QUEUED)
+                        return@withContext ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
                     }
                 }
 
                 if(contentNeedUpload) {
                     val progressListenerAdapter = NetworkProgressListenerAdapter(progress,
                         contentJobItem)
-                    uploader.upload(contentJobItem, progressListenerAdapter, httpClient, endpoint)
+                    return@withContext ProcessResult(uploader.upload(
+                            contentJobItem, progressListenerAdapter, httpClient, endpoint, process
+                    ))
                 }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
