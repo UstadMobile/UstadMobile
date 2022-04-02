@@ -4,6 +4,7 @@ package com.ustadmobile.view.ext
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.controller.BitmaskEditPresenter
+import com.ustadmobile.core.controller.SubmissionConstants.STATUS_MAP
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.ChartData
@@ -23,6 +24,7 @@ import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignCenterItems
+import com.ustadmobile.util.StyleManager.alignEndItems
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultMarginTop
@@ -43,10 +45,8 @@ import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.*
 import com.ustadmobile.util.getViewNameFromUrl
-import com.ustadmobile.view.ChartOptions
-import com.ustadmobile.view.ChartType
-import com.ustadmobile.view.ContentEntryListComponent
-import com.ustadmobile.view.umChart
+import com.ustadmobile.view.*
+import com.ustadmobile.view.ClazzEditComponent.Companion.BLOCK_ICON_MAP
 import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
@@ -238,7 +238,7 @@ fun RBuilder.umItemThumbnail(
 }
 
 
-fun RBuilder.createListSectionTitle(titleText: String, variant: TypographyVariant? = null){
+fun RBuilder.renderListSectionTitle(titleText: String, variant: TypographyVariant? = null){
     styledDiv {
         css{
             +defaultMarginBottom
@@ -250,8 +250,11 @@ fun RBuilder.createListSectionTitle(titleText: String, variant: TypographyVarian
     }
 }
 
-fun RBuilder.createInformation(icon:String? = null, data: String?, label: String? = null,
-                               shrink: Boolean = false, onClick:(() -> Unit)? = null){
+fun RBuilder.renderInformationOnDetailScreen(
+    icon:String? = null,
+    data: String?, label: String? = null,
+    shrink: Boolean = false,
+    onClick:(() -> Unit)? = null){
     umGridContainer {
         css{
             +defaultMarginTop
@@ -295,7 +298,7 @@ fun RBuilder.statusCircleIndicator(threshold: kotlin.Float) {
     }
 }
 
-fun RBuilder.createCreateNewItem(createNewText: String, iconName: String = "add"){
+fun RBuilder.renderCreateNewItemOnList(createNewText: String, iconName: String = "add"){
     styledDiv {
         css(listItemCreateNewDiv)
         umListItemIcon(iconName,"${StyleManager.name}-listCreateNewIconClass")
@@ -312,7 +315,7 @@ fun RBuilder.setBitmaskListText(systemImpl: UstadMobileSystemImpl,textBitmaskVal
         .joinToString { systemImpl.getString(it.messageId, this) }
 }
 
-fun RBuilder.createListItemWithLeftIconTitleAndDescription(
+fun RBuilder.renderListItemWithLeftIconTitleAndDescription(
     iconName: String,
     title: String? = null,
     description: String? = null,
@@ -350,7 +353,7 @@ fun RBuilder.createListItemWithLeftIconTitleAndDescription(
     }
 }
 
-fun RBuilder.createItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
+fun RBuilder.renderItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
     leftIcon: String,
     iconName: String,
     title: String?,
@@ -404,7 +407,7 @@ fun RBuilder.createItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
     }
 }
 
-fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
+fun RBuilder.renderListItemWithPersonAttendanceAndPendingRequests(
     personUid: Long,
     fullName: String,
     pending: Boolean = false,
@@ -491,7 +494,8 @@ fun RBuilder.createListItemWithPersonAttendanceAndPendingRequests(
     }
 }
 
-fun RBuilder.createPersonWithAttemptProgress(
+
+fun RBuilder.renderPersonWithAttemptProgress(
     item: PersonWithAttemptsSummary,
     systemImpl: UstadMobileSystemImpl,
     onMainList: Boolean = false){
@@ -634,7 +638,7 @@ fun RBuilder.createPersonWithAttemptProgress(
     }
 }
 
-fun RBuilder.createPersonListItemWithNameAndUserName(item: Person){
+fun RBuilder.renderPersonListItemWithNameAndUserName(item: Person){
     umGridContainer(GridSpacing.spacing5) {
         val padding = LinearDimension("4px")
         css{
@@ -665,7 +669,7 @@ fun RBuilder.createPersonListItemWithNameAndUserName(item: Person){
 }
 
 
-fun RBuilder.createListItemWithPersonTitleDescriptionAndAvatarOnLeft(
+fun RBuilder.renderListItemWithPersonTitleDescriptionAndAvatarOnLeft(
     title: String,
     subTitle: String? = null,
     iconName: String,
@@ -703,7 +707,212 @@ fun RBuilder.createListItemWithPersonTitleDescriptionAndAvatarOnLeft(
     }
 }
 
-fun RBuilder.createListItemWithTitleDescriptionAndRightAction(
+fun RBuilder.renderCourseBlockAssignment(
+    item: CourseBlockWithCompleteEntity,
+    systemImpl: UstadMobileSystemImpl,
+    timeZoneId: String? = null,
+    withAction: Boolean = false, ){
+    umGridContainer{
+        val padding = LinearDimension("4px")
+        css{
+            padding(top = padding, bottom = padding)
+        }
+
+        umItem(GridSize.cells2, GridSize.cells1){
+            umItemThumbnail("assignment", avatarVariant = AvatarVariant.circle)
+        }
+
+        umItem(GridSize.cells10, GridSize.cells11){
+            umGridContainer {
+                umItem(GridSize.cells12){
+                    umTypography(item.assignment?.caTitle ?: "",
+                        variant = TypographyVariant.body1){
+                        css {
+                            +alignTextToStart
+                            fontSize = (if(withAction) 1.2 else 1.4).em
+                        }
+                    }
+                }
+
+                if(!item.assignment?.caDescription.isNullOrEmpty()){
+                    umItem {
+                        umItem(GridSize.cells12){
+                            umTypography(item.assignment?.caDescription,
+                                variant = TypographyVariant.body2,
+                            ){
+                                css {
+                                    +alignTextToStart
+                                    fontSize = (if(withAction) 1 else 1.1).em
+                                }
+                            }
+                        }
+                    }
+                }
+
+                umItem(GridSize.cells12, flexDirection = FlexDirection.row){
+                    val date = item.cbDeadlineDate.toDate(true)
+                    if(date != null){
+                        styledSpan {
+                            css {
+                                padding(right = 1.spacingUnits)
+                            }
+                            umIcon("event", fontSize = IconFontSize.small) {
+                                css {
+                                    marginTop = 1.px
+                                }
+                            }
+                        }
+                        styledSpan {
+                            css{
+                                padding(right = 4.spacingUnits)
+                            }
+                            umTypography(date.standardFormat(timeZoneId),
+                                variant = TypographyVariant.body1,
+                                paragraph = true){
+                                css(alignTextToStart)
+                            }
+                        }
+                    }
+
+                    if(item.assignment?.mark != null){
+                        styledSpan {
+                            css{
+                                padding(right = 4.spacingUnits)
+                            }
+                            umTypography("${item.assignment?.mark?.camMark} / ${item.cbMaxPoints} ${systemImpl.getString(MessageID.points, this)}",
+                                variant = TypographyVariant.body1,
+                                paragraph = true){
+                                css(alignTextToStart)
+                            }
+                        }
+                    }
+
+
+                    if(item.assignment?.mark != null && item.assignment?.mark?.camPenalty != null){
+                        styledSpan {
+                            css {
+                                padding(right = 4.spacingUnits)
+                            }
+
+                            umTypography(systemImpl.getString(MessageID.late_penalty, this).format(item.cbLateSubmissionPenalty),
+                                variant = TypographyVariant.body1,
+                                paragraph = true){
+                                css{
+                                    +alignTextToStart
+                                    color = Color.red
+                                }
+                            }
+                        }
+                    }
+
+                    if(item.assignment?.progressSummary?.hasMetricsPermission == true){
+
+                        styledSpan {
+
+                            css{
+                                padding(right = 1.spacingUnits)
+                            }
+                            umIcon(
+                                ClazzAssignmentDetailOverviewComponent.ASSIGNMENT_STATUS_MAP[item.assignment?.fileSubmissionStatus
+                                    ?: 0] ?: "",
+                                fontSize = IconFontSize.small
+                            ) {
+                                css {
+                                    marginTop = 1.px
+                                }
+                            }
+                        }
+                        styledSpan {
+                            umTypography(systemImpl.getString(
+                                STATUS_MAP[item.assignment?.fileSubmissionStatus ?: 0]?: 0, this),
+                                variant = TypographyVariant.body1,
+                                paragraph = true){
+                                css(alignTextToStart)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun RBuilder.renderCourseBlockTextOrModuleListItem(
+    blockType: Int,
+    blockLevel: Int,
+    title: String,
+    description: String? = null,
+    showReorder: Boolean = false,
+    withAction: Boolean = false,
+    actionIconName: String = "",
+    onActionClick: ((Event) -> Unit)? = null){
+    val iconName = BLOCK_ICON_MAP[blockType] ?: ""
+    umGridContainer {
+        css {
+            marginLeft = (blockLevel * 2).spacingUnits
+        }
+        umItem(GridSize.cells2, GridSize.cells1){
+            if(showReorder){
+                umIcon("reorder",
+                    className = "${StyleManager.name}-entityImageIconClass")
+            }else {
+                umItemThumbnail(iconName, avatarVariant = AvatarVariant.circle)
+            }
+        }
+
+        umItem(if(withAction) GridSize.cells8 else GridSize.cells10,
+            if(withAction) GridSize.cells10 else GridSize.cells11){
+            umGridContainer {
+
+                umItem(GridSize.cells12){
+                    umTypography(title,
+                        variant = TypographyVariant.body1,
+                    ){
+                        css {
+                            +alignTextToStart
+                            fontSize = (if(withAction) 1.2 else 1.4).em
+                        }
+                    }
+                }
+
+                if(description != null){
+                    umItem(GridSize.cells12){
+                        umTypography(description,
+                            variant = TypographyVariant.body2,
+                        ){
+                            css {
+                                +alignTextToStart
+                                fontSize = (if(withAction) 1 else 1.1).em
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if(withAction){
+            umItem(GridSize.cells2, GridSize.cells1){
+                css(alignEndItems)
+                styledSpan {
+                    css{
+                        marginLeft = 50.pct
+                        marginTop = 15.pct
+                        width = 40.px
+                    }
+
+                    umIconButton(actionIconName,
+                        onClick = {
+                            stopEventPropagation(it)
+                            onActionClick?.invoke(it)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+fun RBuilder.renderListItemWithTitleDescriptionAndRightAction(
     title: String,
     iconName: String,
     withAction: Boolean = false,
@@ -743,7 +952,7 @@ fun RBuilder.createListItemWithTitleDescriptionAndRightAction(
 
                    umIconButton(iconName,
                        onClick = {
-                           Util.stopEventPropagation(it)
+                           stopEventPropagation(it)
                            onActionClick?.invoke(it)
                        })
                }
@@ -752,7 +961,7 @@ fun RBuilder.createListItemWithTitleDescriptionAndRightAction(
     }
 }
 
-fun RBuilder.createListItemWithAttendance(
+fun RBuilder.renderListItemWithAttendance(
     iconName: String, title: String,
     subTitle: String, attendance: kotlin.Float = -1f,
     attendanceLabel: String){
@@ -800,7 +1009,7 @@ fun RBuilder.createListItemWithAttendance(
 }
 
 
-fun RBuilder.createListItemWithIconAndTitle(
+fun RBuilder.renderListItemWithIconAndTitle(
     iconName: String,
     title: String,
     onClick: (() -> Unit)? = null
@@ -920,7 +1129,7 @@ fun RBuilder.umTopBar(
     }
 }
 
-fun RBuilder.createTopMainAction(
+fun RBuilder.renderTopMainAction(
     icon: String,
     title: String,
     xs: GridSize,
@@ -955,7 +1164,7 @@ fun RBuilder.createTopMainAction(
    }
 }
 
-fun RBuilder.createListItemWithTitleAndSwitch(title: String, enabled: Boolean, onClick: (Event) -> Unit){
+fun RBuilder.renderListItemWithTitleAndSwitch(title: String, enabled: Boolean, onClick: (Event) -> Unit){
     umGridContainer {
         attrs.onClick = {
             onClick.invoke(it.nativeEvent)
@@ -999,7 +1208,7 @@ fun RBuilder.umPartner(logo: String){
     }
 }
 
-fun RBuilder.createContentEntryListItem(
+fun RBuilder.renderContentEntryListItem(
     item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
     systemImpl: UstadMobileSystemImpl,
     showSelectBtn: Boolean = false,
@@ -1208,8 +1417,7 @@ fun setStatementQuestionAnswer(statementEntity: StatementEntity): String{
 }
 
 
-
-fun RBuilder.createSummaryCard(title: Any?, subTitle: String){
+fun RBuilder.renderSummaryCard(title: Any?, subTitle: String){
     umItem(GridSize.cells12, GridSize.cells4){
 
         umPaper(variant = PaperVariant.elevation) {
@@ -1233,7 +1441,7 @@ fun RBuilder.createSummaryCard(title: Any?, subTitle: String){
     }
 }
 
-fun RBuilder.drawChart(
+fun RBuilder.renderChart(
     chartData: ChartData ? = null,
     height: Int = 400,
     chartType: ChartType = ChartType.ComboChart,

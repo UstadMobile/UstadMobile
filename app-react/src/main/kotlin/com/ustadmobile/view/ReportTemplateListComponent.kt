@@ -6,7 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ReportTemplateListView
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.view.ext.createListItemWithLeftIconTitleAndDescription
+import com.ustadmobile.view.ext.renderListItemWithLeftIconTitleAndDescription
 import react.RBuilder
 import react.setState
 
@@ -44,7 +44,7 @@ class ReportTemplateListComponent(props: UmProps): UstadListComponent<Report,
             getString(it)
         } ?: item.reportDescription
 
-        createListItemWithLeftIconTitleAndDescription(
+        renderListItemWithLeftIconTitleAndDescription(
             "pie_chart",
             reportTitle ?: "", reportDesc,
             onMainList = true)

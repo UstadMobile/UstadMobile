@@ -7,13 +7,8 @@ import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
-import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
-import com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity
-import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.mui.components.GridSize
-import com.ustadmobile.mui.components.GridSpacing
-import com.ustadmobile.mui.components.TypographyVariant
-import com.ustadmobile.mui.components.umTypography
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
@@ -41,10 +36,19 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
 
     private var schedules: List<Schedule> = listOf()
 
-    private val observer = ObserverFnWrapper<List<Schedule>>{
+    private var courseBlocks: List<CourseBlockWithCompleteEntity> = listOf()
+
+    private val scheduleObserver = ObserverFnWrapper<List<Schedule>>{
         if(it.isEmpty()) return@ObserverFnWrapper
         setState {
             schedules = it
+        }
+    }
+
+    private val courseBlockObserver = ObserverFnWrapper<List<CourseBlockWithCompleteEntity>>{
+        if(it.isEmpty()) return@ObserverFnWrapper
+        setState {
+            courseBlocks = it
         }
     }
 
@@ -52,12 +56,17 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
-            liveData?.removeObserver(observer)
-            liveData?.observe(this, observer)
+            liveData?.removeObserver(scheduleObserver)
+            liveData?.observe(this, scheduleObserver)
         }
-    override var courseBlockList: DoorDataSourceFactory<Int, CourseBlockWithCompleteEntity>?
-        get() = TODO("Not yet implemented")
-        set(value) {}
+
+    override var courseBlockList: DoorDataSourceFactory<Int, CourseBlockWithCompleteEntity>? = null
+        set(value) {
+            field = value
+            val liveData = value?.getData(0,Int.MAX_VALUE)
+            liveData?.removeObserver(courseBlockObserver)
+            liveData?.observe(this, courseBlockObserver)
+        }
 
     override var clazzCodeVisible: Boolean = false
         get() = field
@@ -110,29 +119,43 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
                         val numOfStudentTeachers = getString(MessageID.x_teachers_y_students)
                             .format(entity?.numTeachers ?: 0, entity?.numStudents ?: 0)
 
-                        createInformation("people", numOfStudentTeachers, getString(MessageID.members))
+                        renderInformationOnDetailScreen("people", numOfStudentTeachers, getString(MessageID.members))
 
-                        createInformation("login", entity?.clazzCode ?: "", getString(MessageID.class_code)){
+                        renderInformationOnDetailScreen("login", entity?.clazzCode ?: "", getString(MessageID.class_code)){
                             Util.copyToClipboard(entity?.clazzCode ?: "") {
                                 showSnackBar(getString(MessageID.copied_to_clipboard))
                             }
                         }
 
-                        createInformation("school", entity?.clazzSchool?.schoolName)
+                        renderInformationOnDetailScreen("school", entity?.clazzSchool?.schoolName)
 
-                        createInformation("event", entity?.clazzStartTime.formatDateRange(entity?.clazzEndTime))
+                        renderInformationOnDetailScreen("event", entity?.clazzStartTime.formatDateRange(entity?.clazzEndTime))
 
-                        createInformation("event", entity?.clazzHolidayCalendar?.umCalendarName)
+                        renderInformationOnDetailScreen("event", entity?.clazzHolidayCalendar?.umCalendarName)
 
 
                         if(!schedules.isNullOrEmpty()){
                             umItem(GridSize.cells12){
-                                createListSectionTitle(getString(MessageID.schedule))
+                                renderListSectionTitle(getString(MessageID.schedule))
                             }
 
                             renderSchedules(schedules = schedules, withDelete = false)
                         }
 
+                        umSpacer(top = 3.spacingUnits)
+
+                        if(!courseBlocks.isNullOrEmpty()){
+                            renderCourseBlocksWithComplete(blocks = courseBlocks){
+                                when(it.cbType){
+                                    CourseBlock.BLOCK_MODULE_TYPE ->
+                                        mPresenter?.handleModuleExpandCollapseClicked(it)
+                                    CourseBlock.BLOCK_ASSIGNMENT_TYPE ->
+                                        mPresenter?.handleClickAssignment(it.assignment as ClazzAssignment)
+                                    CourseBlock.BLOCK_CONTENT_TYPE ->
+                                        mPresenter?.contentEntryListItemListener?.onClickContentEntry(it.entry!!)
+                                }
+                            }
+                        }
                     }
                 }
             }

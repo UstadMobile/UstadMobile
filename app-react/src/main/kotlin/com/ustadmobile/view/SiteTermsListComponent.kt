@@ -3,7 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.util.Util
-import com.ustadmobile.view.ext.createListItemWithTitleDescriptionAndRightAction
+import com.ustadmobile.view.ext.renderListItemWithTitleDescriptionAndRightAction
 import com.ustadmobile.view.ext.umGridContainer
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -21,7 +21,7 @@ class SiteTermsListComponent(mProps: SiteTermsListPropsProps): UstadSimpleList<S
                 onClick.invoke(it.nativeEvent)
             }
 
-            createListItemWithTitleDescriptionAndRightAction(
+            renderListItemWithTitleDescriptionAndRightAction(
                 item.stLanguage?.name ?: "",
                 "delete", props.withDelete){
                 props.listener?.onClickDelete(item)

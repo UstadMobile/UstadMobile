@@ -18,7 +18,7 @@ import com.ustadmobile.util.UmState
 import com.ustadmobile.util.Util
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.createCreateNewItem
+import com.ustadmobile.view.ext.renderCreateNewItemOnList
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umProfileAvatar
@@ -113,7 +113,7 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                         Util.stopEventPropagation(it)
                         mPresenter?.handleClickAddAccount()
                     }
-                    createCreateNewItem(getString(MessageID.add_another)
+                    renderCreateNewItemOnList(getString(MessageID.add_another)
                         .format(getString(MessageID.account)))
                 }
             }

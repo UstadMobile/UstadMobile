@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ext.isAttendanceEnabledAndRecorded
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
@@ -10,6 +11,7 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.FieldLabel
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
@@ -34,9 +36,11 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
     override val viewNames: List<String>
         get() = listOf(ClazzEdit2View.VIEW_NAME)
 
-    private var clazzNameLabel = FieldLabel(text = getString(MessageID.class_name))
+    private var nameLabel = FieldLabel(text = getString(MessageID.name ))
 
-    private var clazzDescLabel = FieldLabel(text = getString(MessageID.class_description))
+    private var descriptionLabel = FieldLabel(text = getStringWithOptionalLabel(MessageID.description))
+
+    private var institutionLabel = FieldLabel(text = getStringWithOptionalLabel(MessageID.institution))
 
     private var startDateLabel = FieldLabel(text = getString(MessageID.start_date))
 
@@ -46,13 +50,13 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
     private var holidayCalenderLabel = FieldLabel(text = getString(MessageID.holiday_calendar))
 
-    private var schoolNameLabel = FieldLabel(text = getString(MessageID.school))
-
-    private var featureLabel = FieldLabel(text = getString(MessageID.features_enabled))
+    private var terminologyLabel = FieldLabel(text = getString(MessageID.terminology))
 
     private var scheduleList: List<Schedule> = listOf()
 
     private var courseBlockList: List<CourseBlockWithEntity> = listOf()
+
+    private var attandenceEnabled = false;
 
     private val scheduleObserver = ObserverFnWrapper<List<Schedule>> {
         setState {
@@ -108,6 +112,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
             field = value
             field?.observe(this, scopedGrantListObserver)
         }
+
     override var coursePicturePath: String?
         get() = TODO("Not yet implemented")
         set(value) {}
@@ -133,12 +138,13 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
             setState{
                 field = value
+                attandenceEnabled = value?.isAttendanceEnabledAndRecorded() == true
             }
         }
 
     override fun onCreateView() {
         super.onCreateView()
-        setEditTitle(MessageID.add_a_new_class, MessageID.edit_clazz)
+        setEditTitle(MessageID.add_a_new_course, MessageID.edit_course)
         mPresenter = ClazzEdit2Presenter(this, arguments, this,
             di, this)
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
@@ -150,7 +156,9 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                 +contentContainer
                 +defaultPaddingTop
             }
+
             renderAddContentOptionsDialog()
+
             umGridContainer(GridSpacing.spacing4) {
                 umItem(GridSize.cells12, GridSize.cells4){
                     umEntityAvatar(fallbackSrc = ASSET_ENTRY, listItem = true)
@@ -158,12 +166,12 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
                 umItem(GridSize.cells12, GridSize.cells8){
 
-                    createListSectionTitle(getString(MessageID.basic_details))
+                    renderListSectionTitle(getString(MessageID.basic_details))
 
-                    umTextField(label = "${clazzNameLabel.text}",
-                        helperText = clazzNameLabel.errorText,
+                    umTextField(label = "${nameLabel.text}",
+                        helperText = nameLabel.errorText,
                         value = entity?.clazzName,
-                        error = clazzNameLabel.error,
+                        error = nameLabel.error,
                         fullWidth = true,
                         disabled = !fieldsEnabled,
                         variant = FormControlVariant.outlined,
@@ -171,20 +179,33 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                             setState {
                                 entity?.clazzName = it
                             }
-                        })
+                        }
+                    )
 
 
-                    umTextField(label = "${clazzDescLabel.text}",
+                    umTextField(label = "${descriptionLabel.text}",
                         value = entity?.clazzDesc,
-                        error = clazzDescLabel.error,
+                        error = descriptionLabel.error,
                         disabled = !fieldsEnabled,
-                        helperText = clazzDescLabel.errorText,
+                        helperText = descriptionLabel.errorText,
                         variant = FormControlVariant.outlined,
                         onChange = {
                             setState {
                                 entity?.clazzDesc = it
                             }
-                        })
+                        }
+                    )
+
+                    umTextField(label = "${institutionLabel.text}",
+                        helperText = institutionLabel.errorText,
+                        value = entity?.school?.schoolName,
+                        error = nameLabel.error,
+                        disabled = !fieldsEnabled,
+                        variant = FormControlVariant.outlined,
+                        onClick = {
+                            mPresenter?.handleClickSchool()
+                        }
+                    )
 
                     umGridContainer(GridSpacing.spacing4) {
 
@@ -220,9 +241,9 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                         }
                     }
 
-                    createListSectionTitle(getString(MessageID.course_blocks))
+                    renderListSectionTitle(getString(MessageID.course_blocks))
 
-                    val createCourse = CreateNewItem(true, MessageID.add_block){
+                    val createCourse = CreateNewItem(true, getString(MessageID.add_block)){
                         setState {
                             showAddEntryOptions = true
                         }
@@ -236,9 +257,9 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
                     umSpacer()
 
-                    createListSectionTitle(getString(MessageID.schedule))
+                    renderListSectionTitle(getString(MessageID.schedule))
 
-                    val createSchedule = CreateNewItem(true, MessageID.add_a_schedule){
+                    val createSchedule = CreateNewItem(true, getString(MessageID.add_a_schedule)){
                         mPresenter?.scheduleOneToManyJoinListener?.onClickNew()
                     }
 
@@ -250,17 +271,6 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                     }
 
                     umSpacer()
-
-                    umTextField(label = "${schoolNameLabel.text}",
-                        helperText = schoolNameLabel.errorText,
-                        value = entity?.school?.schoolName,
-                        error = clazzNameLabel.error,
-                        disabled = !fieldsEnabled,
-                        variant = FormControlVariant.outlined){
-                        attrs.asDynamic().onClick = {
-                            mPresenter?.handleClickSchool()
-                        }
-                    }
 
 
                     umGridContainer(GridSpacing.spacing4) {
@@ -278,7 +288,8 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                                 },
                                 onClick = {
                                     mPresenter?.handleClickTimezone()
-                                })
+                                }
+                            )
                         }
 
                         umItem(GridSize.cells12, GridSize.cells6 ) {
@@ -292,36 +303,45 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                                     setState {
                                         clazzEndDateError = null
                                     }
-                                }){
-                                attrs.asDynamic().onClick = {
+                                },
+                                onClick = {
                                     mPresenter?.handleHolidayCalendarClicked()
                                 }
-                            }
+                            )
                         }
                     }
 
-                    umTextField(label = "${featureLabel.text}",
-                        helperText = featureLabel.errorText,
-                        value = setBitmaskListText(systemImpl,entity?.clazzFeatures),
-                        error = clazzNameLabel.error,
-                        disabled = !fieldsEnabled,
-                        variant = FormControlVariant.outlined,
-                        onChange = {
+                    renderListSectionTitle(getString(MessageID.course_setup))
+
+                    umItem {
+                        css(StyleManager.defaultMarginTop)
+                        renderListItemWithTitleAndSwitch(getString(MessageID.attendance), attandenceEnabled){
                             setState {
-                                entity?.clazzFeatures = it.toLong()
+                                attandenceEnabled = !attandenceEnabled
+                                entity?.clazzFeatures = if(attandenceEnabled) Clazz.CLAZZ_FEATURE_ATTENDANCE else 0
                             }
-                        }){
-                        attrs.asDynamic().onClick = {
-                            mPresenter?.handleClickFeatures()
                         }
                     }
 
-                    createListSectionTitle(getString(MessageID.permissions))
+
+                    umTextField(label = "${terminologyLabel.text}",
+                        value = entity?.terminology?.ctTitle,
+                        error = terminologyLabel.error,
+                        disabled = !fieldsEnabled,
+                        helperText = terminologyLabel.errorText,
+                        variant = FormControlVariant.outlined,
+                        onClick = {
+                            mPresenter?.handleTerminologyClicked()
+                        }
+                    )
+
+
+                    renderListSectionTitle(getString(MessageID.permissions))
 
                     mPresenter?.let { presenter ->
                         scopeList?.let { scopeList ->
 
-                            val newItem = CreateNewItem(true, MessageID.add_person_or_group){
+                            val newItem = CreateNewItem(true, getString(MessageID.add_person_or_group)){
                                 mPresenter?.scopedGrantOneToManyHelper?.onClickNew()
                             }
 
@@ -338,7 +358,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
         }
     }
 
-    fun RBuilder.renderAddContentOptionsDialog() {
+    private fun RBuilder.renderAddContentOptionsDialog() {
         if(showAddEntryOptions){
             val options  = listOf(
                 UmDialogOptionItem("apps",MessageID.module, MessageID.course_module) {
@@ -368,6 +388,15 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
         mPresenter?.onDestroy()
         mPresenter = null
         entity = null
+    }
+
+    companion object {
+        val BLOCK_ICON_MAP = mapOf(
+            CourseBlock.BLOCK_MODULE_TYPE to "folder",
+            CourseBlock.BLOCK_ASSIGNMENT_TYPE to "assignment_turned_in",
+            CourseBlock.BLOCK_CONTENT_TYPE to "smart_display",
+            CourseBlock.BLOCK_TEXT_TYPE to "title"
+        )
     }
 
 }

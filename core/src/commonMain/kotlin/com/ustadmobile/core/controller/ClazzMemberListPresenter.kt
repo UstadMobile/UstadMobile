@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.approvePendingClazzEnrolment
 import com.ustadmobile.core.util.ext.declinePendingClazzEnrolment
 import com.ustadmobile.core.util.ext.toListFilterOptions
@@ -81,6 +82,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
         view.addTeacherVisible = db.clazzDao.personHasPermissionWithClazz(mLoggedInPersonUid,
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_TEACHER)
+        UmPlatformUtil.console("${view.addStudentVisible} ${view.addTeacherVisible}")
     }
 
     private fun updateListOnView() {

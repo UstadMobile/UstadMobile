@@ -15,7 +15,7 @@ import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.view.ext.createListSectionTitle
+import com.ustadmobile.view.ext.renderListSectionTitle
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
 import react.setState
@@ -112,9 +112,9 @@ class SiteEditComponent(props: UmProps): UstadEditComponent<Site>(props), SiteEd
 
             umItem(GridSize.cells12){
 
-                createListSectionTitle(getString(MessageID.terms_and_policies))
+                renderListSectionTitle(getString(MessageID.terms_and_policies))
 
-                val newItem = CreateNewItem(true, MessageID.terms_and_policies){
+                val newItem = CreateNewItem(true, getString(MessageID.terms_and_policies)){
                     mPresenter?.siteTermsOneToManyJoinListener?.onClickNew()
                 }
 

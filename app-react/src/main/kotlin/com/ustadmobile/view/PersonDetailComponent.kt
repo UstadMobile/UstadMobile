@@ -99,23 +99,23 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
             umGridContainer {
                 umItem(GridSize.cells12){
                     umGridContainer(GridSpacing.spacing4) {
-                        createTopMainAction("call", getString(MessageID.call), GridSize.cells4, GridSize.cells2,
+                        renderTopMainAction("call", getString(MessageID.call), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
 
                         }
-                        createTopMainAction("message",getString(MessageID.text), GridSize.cells4, GridSize.cells2,
+                        renderTopMainAction("message",getString(MessageID.text), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
 
                         }
-                        createTopMainAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
+                        renderTopMainAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
                             entity?.emailAddr != null){
 
                         }
-                        createTopMainAction("vpn_key",getString(MessageID.change_password), GridSize.cells6, GridSize.cells3,
+                        renderTopMainAction("vpn_key",getString(MessageID.change_password), GridSize.cells6, GridSize.cells3,
                             changePasswordVisible){
                             mPresenter?.handleChangePassword()
                         }
-                        createTopMainAction("person_add",getString(MessageID.create_account), GridSize.cells6, GridSize.cells3,
+                        renderTopMainAction("person_add",getString(MessageID.create_account), GridSize.cells6, GridSize.cells3,
                             showCreateAccountVisible){
                             mPresenter?.handleCreateAccount()
                         }
@@ -156,21 +156,21 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                                 }
 
                                 umItem(GridSize.cells12){
-                                    createInformation("event",
+                                    renderInformationOnDetailScreen("event",
                                         entity?.dateOfBirth.toDate()?.standardFormat(),
                                         getString(MessageID.birthday)
                                     )
 
                                     val genderMessageId = GENDER_MESSAGE_ID_MAP[entity?.gender ?: 0]
-                                    createInformation("person", if(genderMessageId == null) "" else getString(genderMessageId),
+                                    renderInformationOnDetailScreen("person", if(genderMessageId == null) "" else getString(genderMessageId),
                                         getString(MessageID.field_person_gender)
                                     )
 
-                                    createInformation("badge", entity?.personOrgId,
+                                    renderInformationOnDetailScreen("badge", entity?.personOrgId,
                                         getString(MessageID.organization_id)
                                     )
 
-                                    createInformation("account_circle", entity?.username,
+                                    renderInformationOnDetailScreen("account_circle", entity?.username,
                                         getString(MessageID.username)
                                     )
                                 }
@@ -183,16 +183,16 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                                 }
 
                                 umItem(GridSize.cells12){
-                                    createInformation("call",entity?.phoneNum,getString(MessageID.phone_number))
-                                    createInformation("email",entity?.emailAddr,getString(MessageID.email))
-                                    createInformation("place",entity?.personAddress,getString(MessageID.address))
+                                    renderInformationOnDetailScreen("call",entity?.phoneNum,getString(MessageID.phone_number))
+                                    renderInformationOnDetailScreen("email",entity?.emailAddr,getString(MessageID.email))
+                                    renderInformationOnDetailScreen("place",entity?.personAddress,getString(MessageID.address))
                                 }
 
 
                                 if(classList != null && classList?.isNotEmpty() == true){
 
                                     umItem(GridSize.cells12){
-                                        createListSectionTitle(getString(MessageID.classes))
+                                        renderListSectionTitle(getString(MessageID.classes))
 
                                         classList?.let { clazzes ->
                                             child(ClazzEnrolmentWithClazzSimpleListComponent::class){
@@ -234,7 +234,7 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                         "- ${Date(item.clazzEnrolmentDateLeft).standardFormat()}"
 
 
-                createListItemWithAttendance("people", title, enrollmentPeriod,
+                renderListItemWithAttendance("people", title, enrollmentPeriod,
                     item.attendance, getString(MessageID.x_percent_attended))
             }
         }

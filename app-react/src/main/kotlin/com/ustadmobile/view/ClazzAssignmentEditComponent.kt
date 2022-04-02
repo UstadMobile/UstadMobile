@@ -13,8 +13,8 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.toDate
-import com.ustadmobile.view.ext.createListItemWithTitleAndSwitch
-import com.ustadmobile.view.ext.createListSectionTitle
+import com.ustadmobile.view.ext.renderListItemWithTitleAndSwitch
+import com.ustadmobile.view.ext.renderListSectionTitle
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
@@ -298,14 +298,14 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 inputVariant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        startTime =  startDate - it.getTime().toLong()
+                                        startDate = it.getTime().toLong()
                                     }
                                 })
                         }
                     }
 
                     umItem {
-                        createListSectionTitle(timeZone ?: "", TypographyVariant.h6)
+                        renderListSectionTitle(timeZone ?: "", TypographyVariant.h6)
                     }
 
                     umGridContainer(columnSpacing = GridSpacing.spacing4) {
@@ -404,7 +404,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 inputVariant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        deadlineTime =  deadlineDate - it.getTime().toLong()
+                                        deadlineDate = it.getTime().toLong()
                                     }
                                 })
                         }
@@ -427,7 +427,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
                     umItem {
                         css(defaultMarginTop)
-                        createListItemWithTitleAndSwitch(getString(MessageID.require_file_submission), entity?.caRequireFileSubmission ?: false){
+                        renderListItemWithTitleAndSwitch(getString(MessageID.require_file_submission), entity?.caRequireFileSubmission ?: false){
                             setState {
                                 entity?.caRequireFileSubmission = !(entity?.caRequireFileSubmission ?: false)
                             }
@@ -485,7 +485,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
                     umItem {
                         css(defaultMarginTop)
-                        createListItemWithTitleAndSwitch(getString(MessageID.require_text_submission), entity?.caRequireTextSubmission ?: false){
+                        renderListItemWithTitleAndSwitch(getString(MessageID.require_text_submission), entity?.caRequireTextSubmission ?: false){
                             setState {
                                 entity?.caRequireTextSubmission = !(entity?.caRequireTextSubmission ?: false)
                             }
@@ -554,7 +554,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
                     umItem {
                         css(defaultMarginTop)
-                        createListItemWithTitleAndSwitch(getString(MessageID.allow_class_comments), entity?.caClassCommentEnabled ?: false){
+                        renderListItemWithTitleAndSwitch(getString(MessageID.allow_class_comments), entity?.caClassCommentEnabled ?: false){
                             setState {
                                 entity?.caClassCommentEnabled = !(entity?.caClassCommentEnabled ?: false)
                             }
@@ -562,7 +562,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                     }
 
                     umItem {
-                        createListItemWithTitleAndSwitch(getString(MessageID.allow_private_comments_from_students),
+                        renderListItemWithTitleAndSwitch(getString(MessageID.allow_private_comments_from_students),
                             entity?.caPrivateCommentsEnabled ?: false){
                             setState {
                                 entity?.caPrivateCommentsEnabled = !(entity?.caPrivateCommentsEnabled ?: false)

@@ -141,7 +141,7 @@ class TextCourseBlockEditComponent (mProps: UmProps): UstadEditComponent<CourseB
                         inputVariant = FormControlVariant.outlined,
                         onChange = {
                             setState {
-                                startTime = startDate - it.getTime().toLong()
+                                startDate = it.getTime().toLong()
                             }
                         }
                     )

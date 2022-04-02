@@ -1,6 +1,6 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.controller.ClazzEdit2Presenter
+import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.util.Util
 import com.ustadmobile.view.ext.umGridContainer
@@ -29,7 +29,7 @@ class CourseBlockListComponent(mProps: CourseBlockListProps): UstadSimpleList<Co
 }
 
 fun RBuilder.renderCourseBlocks(
-    presenter: ClazzEdit2Presenter,
+    presenter: UstadSingleEntityPresenter<*,*>?,
     blocks: List<CourseBlockWithEntity>,
     createNewItem: CreateNewItem = CreateNewItem(),
     onEntryClicked: ((CourseBlockWithEntity) -> Unit)? = null

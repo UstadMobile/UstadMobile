@@ -121,7 +121,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
 
                 if(contents.isNotEmpty()){
                     umItem(GridSize.cells12){
-                        createListSectionTitle(getString(MessageID.content), TypographyVariant.h6)
+                        renderListSectionTitle(getString(MessageID.content), TypographyVariant.h6)
                         umList {
                             css(horizontalList)
                             for (content in contents) {
@@ -290,7 +290,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                         umGridContainer(rowSpacing = GridSpacing.spacing1) {
 
                             umItem(GridSize.cells12){
-                                createListSectionTitle(getString(MessageID.private_comments), TypographyVariant.h6)
+                                renderListSectionTitle(getString(MessageID.private_comments), TypographyVariant.h6)
                             }
 
                             umItem(GridSize.cells12) {

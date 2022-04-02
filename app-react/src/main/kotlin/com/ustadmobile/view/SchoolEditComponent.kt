@@ -106,7 +106,7 @@ class SchoolEditComponent (mProps: UmProps): UstadEditComponent<SchoolWithHolida
 
                 umItem(GridSize.cells12, GridSize.cells8){
 
-                    createListSectionTitle(getString(MessageID.basic_details))
+                    renderListSectionTitle(getString(MessageID.basic_details))
 
                     umTextField(label = "${nameLabel.text}",
                         helperText = nameLabel.errorText,
@@ -215,11 +215,11 @@ class SchoolEditComponent (mProps: UmProps): UstadEditComponent<SchoolWithHolida
 
                     umSpacer()
 
-                    createListSectionTitle(getString(MessageID.permissions))
+                    renderListSectionTitle(getString(MessageID.permissions))
 
                     mPresenter?.let { presenter ->
                         scopeList?.let { scopeList ->
-                            val newItem = CreateNewItem(true, MessageID.add_person_or_group){
+                            val newItem = CreateNewItem(true, getString(MessageID.add_person_or_group)){
                                 mPresenter?.scopedGrantOneToManyHelper?.onClickNew()
                             }
 

@@ -14,7 +14,7 @@ import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.Util
-import com.ustadmobile.view.ext.createCreateNewItem
+import com.ustadmobile.view.ext.renderCreateNewItemOnList
 import kotlinx.css.*
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -34,14 +34,14 @@ interface SimpleListProps<T>: UmProps {
      */
     var mainList: Boolean
 
-    var presenter: UstadBaseController<*>
+    var presenter: UstadBaseController<*>?
 
     var listener: OneToManyJoinEditListener<T>?
 
     var hideDivider: Boolean
 }
 
-data class CreateNewItem(var visible: Boolean = false, var labelId: Int = 0, var onClickCreateNew: (() -> Unit)? = null)
+data class CreateNewItem(var visible: Boolean = false, var text: String = "", var onClickCreateNew: (() -> Unit)? = null)
 
 /**
  * This is meant for simple lists which on Android are either paged or simple list.
@@ -68,7 +68,7 @@ abstract class UstadSimpleList<P: SimpleListProps<*>>(mProps: P) : UstadBaseComp
         umList {
             css(horizontalList)
 
-            if(props.createNewItem?.visible == true && props.createNewItem?.labelId != 0){
+            if(props.createNewItem?.visible == true && !props.createNewItem?.text.isNullOrEmpty()){
                 umListItem(button = true, alignItems = ListItemAlignItems.flexStart) {
                     css{
                         +listCreateNewContainer
@@ -78,7 +78,7 @@ abstract class UstadSimpleList<P: SimpleListProps<*>>(mProps: P) : UstadBaseComp
                         Util.stopEventPropagation(it)
                         props.createNewItem?.onClickCreateNew?.invoke()
                     }
-                    createCreateNewItem(getString(props.createNewItem?.labelId ?: 0))
+                    renderCreateNewItemOnList(props.createNewItem?.text ?: "")
                 }
             }
 

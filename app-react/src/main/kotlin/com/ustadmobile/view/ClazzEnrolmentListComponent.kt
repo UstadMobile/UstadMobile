@@ -100,7 +100,7 @@ class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnro
     override fun RBuilder.renderListHeaderView() {
         umGridContainer(rowSpacing = GridSpacing.spacing2){
             umItem(GridSize.cells12) {
-                createTopMainAction("person",
+                renderTopMainAction("person",
                     getString(MessageID.view_profile),
                     GridSize.cells6,
                     GridSize.cells2,true){
@@ -109,7 +109,7 @@ class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnro
             }
 
             umItem (GridSize.cells12){
-                createListSectionTitle(headerText, TypographyVariant.h6)
+                renderListSectionTitle(headerText, TypographyVariant.h6)
             }
         }
     }
@@ -119,7 +119,7 @@ class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnro
             val startEndTime = "${item.clazzEnrolmentDateJoined.toDate()?.standardFormat()} " +
                     "- ${item.clazzEnrolmentDateLeft.toDate()?.standardFormat()
                         ?.replace("Invalid date", getString(MessageID.present))}"
-            createListItemWithTitleDescriptionAndRightAction(
+            renderListItemWithTitleDescriptionAndRightAction(
                 title = "${item.roleToString(this, systemImpl)} " +
                         "- ${item.outcomeToString(this, systemImpl)}",
                 iconName = "edit",

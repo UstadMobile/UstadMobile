@@ -12,8 +12,8 @@ import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.view.ext.createInformation
-import com.ustadmobile.view.ext.createListSectionTitle
+import com.ustadmobile.view.ext.renderInformationOnDetailScreen
+import com.ustadmobile.view.ext.renderListSectionTitle
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
 import react.setState
@@ -76,20 +76,20 @@ class SiteDetailComponent(props: UmProps): UstadDetailComponent<Site>(props), Si
 
             currentSiteList.forEach { site ->
                 umItem(GridSize.cells12, GridSize.cells4) {
-                    createInformation("account_balance",
+                    renderInformationOnDetailScreen("account_balance",
                         site.siteName,
                         getString(MessageID.name),
                         shrink = true
                     )
 
-                    createInformation("meeting_room",
+                    renderInformationOnDetailScreen("meeting_room",
                         getString(if(site.guestLogin) MessageID.yes else MessageID.no),
                         getString(MessageID.guest_login_enabled),
                         shrink = true
                     )
 
 
-                    createInformation("person_add_alt_1",
+                    renderInformationOnDetailScreen("person_add_alt_1",
                         getString(if(site.registrationAllowed) MessageID.yes else MessageID.no),
                         getString(MessageID.registration_allowed),
                         shrink = true
@@ -101,7 +101,7 @@ class SiteDetailComponent(props: UmProps): UstadDetailComponent<Site>(props), Si
             umItem {
                 css(StyleManager.defaultDoubleMarginTop)
 
-                createListSectionTitle(getString(MessageID.terms_and_policies))
+                renderListSectionTitle(getString(MessageID.terms_and_policies))
 
                 renderSiteTerms(
                     terms = siteTermsWithLanguageList,
