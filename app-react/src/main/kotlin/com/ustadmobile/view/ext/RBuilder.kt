@@ -358,17 +358,18 @@ fun RBuilder.renderItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
     iconName: String,
     title: String?,
     description: String?,
+    onMainList: Boolean = false,
     onClick:(Boolean, Event)-> Unit) {
     umGridContainer {
         attrs.onClick = {
             stopEventPropagation(it)
             onClick.invoke(false, it.nativeEvent)
         }
-        umItem(GridSize.cells2, GridSize.cells2){
+        umItem(GridSize.cells2,  if(onMainList) GridSize.cells1 else GridSize.cells2){
             umProfileAvatar(-1,leftIcon)
         }
 
-        umItem(GridSize.cells7, GridSize.cells9){
+        umItem(GridSize.cells8, if(onMainList) GridSize.cells10 else GridSize.cells8){
             umGridContainer {
                 umItem(GridSize.cells12){
                     umTypography(title,
@@ -388,7 +389,7 @@ fun RBuilder.renderItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
             }
         }
 
-        umItem(GridSize.cells2, GridSize.cells1){
+        umItem(GridSize.cells2,  if(onMainList) GridSize.cells1 else GridSize.cells2){
             css(alignCenterItems)
             styledSpan {
                 css{

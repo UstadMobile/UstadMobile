@@ -117,10 +117,12 @@ mainClassName = 'com.ustadmobile.lib.rest.ServerAppMain'
 
 // This task will generate your fat JAR and put it in the ./build/libs/ directory
 shadowJar {
-    manifest {
-        attributes 'Main-Class': mainClassName
+    doLast{
+        manifest {
+            attributes 'Main-Class': mainClassName
+        }
+        archiveBaseName = "ustad-server"
     }
-    archiveBaseName = "ustad-server"
 }
 
 sourceCompatibility = "8"

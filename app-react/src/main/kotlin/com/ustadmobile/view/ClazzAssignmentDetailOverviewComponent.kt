@@ -6,7 +6,6 @@ import com.ustadmobile.core.controller.SubmissionConstants.FILE_TYPE_MAP
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
-import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
@@ -89,7 +88,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
 
     private fun updateSubmitButtonVisibility(){
         updateUiWithStateChangeDelay {
-            fabManager?.visible = !hasPassedDeadline && addedCourseAssignmentSubmission.isNullOrEmpty()
+            fabManager?.visible = !hasPassedDeadline && !addedCourseAssignmentSubmission.isNullOrEmpty()
         }
     }
 
@@ -175,7 +174,6 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
 
     override fun onCreateView() {
         super.onCreateView()
-        editButtonMode = EditButtonMode.FAB
         fabManager?.text = getString(MessageID.submit)
         fabManager?.icon = "check"
         mPresenter = ClazzAssignmentDetailOverviewPresenter(this, arguments, this, this, di)
@@ -302,12 +300,19 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                 if(!addedCourseAssignmentSubmission.isNullOrEmpty()){
                     umItem {
                         addedCourseAssignmentSubmission?.forEach { submission ->
-                            renderItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
-                                "class","delete",
-                                submission.casText ?:"",
-                                "${getString(MessageID.submitted_cap)} : ${submission.casTimestamp.toDate()?.standardFormat(timeZone)}"
-                            ) { right, _ ->
-                                if (right) mPresenter?.handleDeleteSubmission(submission)
+                            umListItem {
+                                val dates = submission.casTimestamp.toDate()
+                                renderItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
+                                    "class","delete",
+                                    submission.casText ?:"",
+                                    if(dates == null ) ""
+                                    else  "${getString(MessageID.submitted_cap)} " +
+                                            ": ${submission.casTimestamp.toDate()?.standardFormat(timeZone)}",
+                                    onMainList = true
+                                ) { secondary, _ ->
+                                    if (secondary) mPresenter?.handleDeleteSubmission(submission)
+                                    if(!secondary) mPresenter?.handleOpenSubmission(submission, true)
+                                }
                             }
                         }
                     }
@@ -318,12 +323,13 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                     renderListSectionTitle(getString(MessageID.submissions))
 
                     courseAssignmentSubmissions.forEach { submission ->
-                        renderItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
-                            "class","delete",
-                            submission.casText ?:"",
-                            "${getString(MessageID.submitted_cap)} : ${submission.casTimestamp.toDate()?.standardFormat(timeZone)}"
-                        ) { right, _ ->
-                            if (right) mPresenter?.handleDeleteSubmission(submission)
+                        umListItem {
+                            renderListItemWithLeftIconTitleAndDescription(
+                                "class",submission.casText ?:"",
+                                getString(MessageID.submitted_cap) +
+                                        " : ${submission.casTimestamp.toDate()?.standardFormat(timeZone)}",
+                                onMainList = true
+                            )
                         }
                     }
                 }
