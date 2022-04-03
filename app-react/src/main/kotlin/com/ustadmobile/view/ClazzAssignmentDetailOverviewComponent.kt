@@ -10,6 +10,7 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.DraftJsUtil.clean
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
@@ -87,8 +88,9 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
         }
 
     private fun updateSubmitButtonVisibility(){
-        updateUiWithStateChangeDelay {
-            fabManager?.visible = !hasPassedDeadline && !addedCourseAssignmentSubmission.isNullOrEmpty()
+        updateUiWithStateChangeDelay(STATE_CHANGE_DELAY * 2) {
+            fabManager?.visible = !hasPassedDeadline
+                    && !addedCourseAssignmentSubmission.isNullOrEmpty()
         }
     }
 
@@ -304,7 +306,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                                 val dates = submission.casTimestamp.toDate()
                                 renderItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
                                     "class","delete",
-                                    submission.casText ?:"",
+                                    clean(submission.casText ?:""),
                                     if(dates == null ) ""
                                     else  "${getString(MessageID.submitted_cap)} " +
                                             ": ${submission.casTimestamp.toDate()?.standardFormat(timeZone)}",
@@ -325,7 +327,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                     courseAssignmentSubmissions.forEach { submission ->
                         umListItem {
                             renderListItemWithLeftIconTitleAndDescription(
-                                "class",submission.casText ?:"",
+                                "class",clean(submission.casText ?:""),
                                 getString(MessageID.submitted_cap) +
                                         " : ${submission.casTimestamp.toDate()?.standardFormat(timeZone)}",
                                 onMainList = true

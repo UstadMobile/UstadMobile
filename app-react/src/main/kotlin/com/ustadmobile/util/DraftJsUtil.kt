@@ -17,6 +17,11 @@ external val draftJsModule: dynamic
 @JsNonModule
 external val draftExportHtmlModule: dynamic
 
+
+@JsModule("striptags")
+@JsNonModule
+external val stripTagsJsModule: dynamic
+
 object DraftJsUtil {
 
     /**
@@ -37,5 +42,14 @@ object DraftJsUtil {
      */
     fun convertEditorContentToHtml(content: dynamic): String {
         return draftExportHtmlModule.stateToHTML(content).toString()
+    }
+
+    /**
+     * Strip all html tags from a string
+     * @param html Html string
+     * @return a clean string without html tags
+     */
+    fun clean(html: String): String {
+        return stripTagsJsModule(html).toString()
     }
 }

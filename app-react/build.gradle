@@ -68,6 +68,7 @@ dependencies {
     implementation "io.ktor:ktor-client-js:$version_ktor"
     implementation "io.ktor:ktor-client-json-js:$version_ktor"
     implementation npm("timezones.json","$version_npm_timezones")
+    implementation npm("striptags","$version_npm_striptags")
     implementation npm("mime-matcher","$version_npm_mime_matcher")
     implementation npm("mui-rte","$version_npm_mui_rte")
     implementation npm("draft-js","$version_npm_draft_js")
@@ -78,22 +79,21 @@ dependencies {
 
 
 task copyWebAppBundleToJar(dependsOn: ":app-react:browserDistribution") {
-    inputs.files("./src/main/kotlin/*.kt")
-    tasks.findByPath(":app-ktor-server:shadowJar").mustRunAfter ":app-react:copyWebAppBundleToJar"
-    onlyIf {
-        /*
-         Only run this task if the input files have been updated since the task was last run.
-         upToDateWhen was not having the expected effect.
-         */
-        long inputLastModified = 0L
-
-        rootProject.fileTree(dir: "app-react/src/main/kotlin", include: "**/*.kt").each() { File file ->
-            if (file.lastModified() > inputLastModified)
-                inputLastModified = file.lastModified()
-        }
-        File outputFile = project.file("build/generated/source/umwebapp/app-react.js")
-        return inputLastModified < outputFile.lastModified()
-    }
+//    inputs.files("./src/main/kotlin/*.kt")
+//    onlyIf {
+//        /*
+//         Only run this task if the input files have been updated since the task was last run.
+//         upToDateWhen was not having the expected effect.
+//         */
+//        long inputLastModified = 0L
+//
+//        rootProject.fileTree(dir: "app-react/src/main/kotlin", include: "**/*.kt").each() { File file ->
+//            if (file.lastModified() > inputLastModified)
+//                inputLastModified = file.lastModified()
+//        }
+//        File outputFile = project.file("build/generated/source/umwebapp/app-react.js")
+//        return !outputFile.exists() || inputLastModified < outputFile.lastModified()
+//    }
 
     doLast{
         copy {
@@ -117,3 +117,5 @@ tasks.whenTaskAdded { task ->
         task.dependsOn(deleteWebAppBundleFromJar)
     }
 }
+
+tasks.findByPath(":app-ktor-server:shadowJar").mustRunAfter ":app-react:copyWebAppBundleToJar"
