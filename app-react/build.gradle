@@ -79,21 +79,21 @@ dependencies {
 
 
 task copyWebAppBundleToJar(dependsOn: ":app-react:browserDistribution") {
-//    inputs.files("./src/main/kotlin/*.kt")
-//    onlyIf {
-//        /*
-//         Only run this task if the input files have been updated since the task was last run.
-//         upToDateWhen was not having the expected effect.
-//         */
-//        long inputLastModified = 0L
-//
-//        rootProject.fileTree(dir: "app-react/src/main/kotlin", include: "**/*.kt").each() { File file ->
-//            if (file.lastModified() > inputLastModified)
-//                inputLastModified = file.lastModified()
-//        }
-//        File outputFile = project.file("build/generated/source/umwebapp/app-react.js")
-//        return !outputFile.exists() || inputLastModified < outputFile.lastModified()
-//    }
+    inputs.files("./src/main/kotlin/*.kt")
+    onlyIf {
+        /*
+         Only run this task if the input files have been updated since the task was last run.
+         upToDateWhen was not having the expected effect.
+         */
+        long inputLastModified = 0L
+
+        rootProject.fileTree(dir: "app-react/src/main/kotlin", include: "**/*.kt").each() { File file ->
+            if (file.lastModified() > inputLastModified)
+                inputLastModified = file.lastModified()
+        }
+        File outputFile = project.file("build/generated/source/umwebapp/app-react.js")
+        return inputLastModified < outputFile.lastModified()
+    }
 
     doLast{
         copy {
