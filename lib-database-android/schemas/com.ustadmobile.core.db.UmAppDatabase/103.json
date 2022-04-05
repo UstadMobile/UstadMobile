@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "b73a37de7dbfde49302844736de743e6",
+    "identityHash": "7a69534bf11f17aae236f9c1229ff72e",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6293,6 +6293,110 @@
         "foreignKeys": []
       },
       {
+        "tableName": "CourseGroupSet",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cgsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cgsName` TEXT, `cgsTotalGroups` INTEGER NOT NULL, `cgsActive` INTEGER NOT NULL, `cgsClazzUid` INTEGER NOT NULL, `cgsLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "cgsUid",
+            "columnName": "cgsUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cgsName",
+            "columnName": "cgsName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cgsTotalGroups",
+            "columnName": "cgsTotalGroups",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cgsActive",
+            "columnName": "cgsActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cgsClazzUid",
+            "columnName": "cgsClazzUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cgsLct",
+            "columnName": "cgsLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "cgsUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_CourseGroupSet_cgsClazzUid",
+            "unique": false,
+            "columnNames": [
+              "cgsClazzUid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseGroupSet_cgsClazzUid` ON `${TABLE_NAME}` (`cgsClazzUid`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseGroupMember",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cgmUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cgmSetUid` INTEGER NOT NULL, `cgmGroupNumber` INTEGER NOT NULL, `cgmPersonUid` INTEGER NOT NULL, `cgmLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "cgmUid",
+            "columnName": "cgmUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cgmSetUid",
+            "columnName": "cgmSetUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cgmGroupNumber",
+            "columnName": "cgmGroupNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cgmPersonUid",
+            "columnName": "cgmPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cgmLct",
+            "columnName": "cgmLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "cgmUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "SqliteChangeSeqNums",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sCsnTableId` INTEGER NOT NULL, `sCsnNextLocal` INTEGER NOT NULL, `sCsnNextPrimary` INTEGER NOT NULL, PRIMARY KEY(`sCsnTableId`))",
         "fields": [
@@ -7004,6 +7108,132 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseTerminologyReplicate_ctDestination_ctPending` ON `${TABLE_NAME}` (`ctDestination`, `ctPending`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseGroupSetReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cgsPk` INTEGER NOT NULL, `cgsVersionId` INTEGER NOT NULL DEFAULT 0, `cgsDestination` INTEGER NOT NULL, `cgsPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`cgsPk`, `cgsDestination`))",
+        "fields": [
+          {
+            "fieldPath": "cgsPk",
+            "columnName": "cgsPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cgsVersionId",
+            "columnName": "cgsVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "cgsDestination",
+            "columnName": "cgsDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cgsPending",
+            "columnName": "cgsPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "cgsPk",
+            "cgsDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_CourseGroupSetReplicate_cgsPk_cgsDestination_cgsVersionId",
+            "unique": false,
+            "columnNames": [
+              "cgsPk",
+              "cgsDestination",
+              "cgsVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseGroupSetReplicate_cgsPk_cgsDestination_cgsVersionId` ON `${TABLE_NAME}` (`cgsPk`, `cgsDestination`, `cgsVersionId`)"
+          },
+          {
+            "name": "index_CourseGroupSetReplicate_cgsDestination_cgsPending",
+            "unique": false,
+            "columnNames": [
+              "cgsDestination",
+              "cgsPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseGroupSetReplicate_cgsDestination_cgsPending` ON `${TABLE_NAME}` (`cgsDestination`, `cgsPending`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseGroupMemberReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cgmPk` INTEGER NOT NULL, `cgmVersionId` INTEGER NOT NULL DEFAULT 0, `cgmDestination` INTEGER NOT NULL, `cgmPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`cgmPk`, `cgmDestination`))",
+        "fields": [
+          {
+            "fieldPath": "cgmPk",
+            "columnName": "cgmPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cgmVersionId",
+            "columnName": "cgmVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "cgmDestination",
+            "columnName": "cgmDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cgmPending",
+            "columnName": "cgmPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "cgmPk",
+            "cgmDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_CourseGroupMemberReplicate_cgmPk_cgmDestination_cgmVersionId",
+            "unique": false,
+            "columnNames": [
+              "cgmPk",
+              "cgmDestination",
+              "cgmVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseGroupMemberReplicate_cgmPk_cgmDestination_cgmVersionId` ON `${TABLE_NAME}` (`cgmPk`, `cgmDestination`, `cgmVersionId`)"
+          },
+          {
+            "name": "index_CourseGroupMemberReplicate_cgmDestination_cgmPending",
+            "unique": false,
+            "columnNames": [
+              "cgmDestination",
+              "cgmPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseGroupMemberReplicate_cgmDestination_cgmPending` ON `${TABLE_NAME}` (`cgmDestination`, `cgmPending`)"
           }
         ],
         "foreignKeys": []
@@ -9933,7 +10163,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b73a37de7dbfde49302844736de743e6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7a69534bf11f17aae236f9c1229ff72e')"
     ]
   }
 }

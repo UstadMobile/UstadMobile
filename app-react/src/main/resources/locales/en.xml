@@ -692,6 +692,10 @@
 
     <string name="course_leader">Course leader</string>
 
+    <!-- used to show what group a member of a course would be in. The
+  %1$s% will be replaced with the number of the group-->
+    <string name="group_number" formatted="false">Group %1$s</string>
+
     <!-- plurals are used to handle different languages that require special treatment
     e.g number 0 in arabic
     possible quantities: zero, one, two, few, many, and other.-->
@@ -1493,6 +1497,12 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     by groups of students (not by each student individually)
     -->
     <string name="group">Group</string>
+
+    <string name="add_group">Add group</string>
+
+    <string name="edit_group">Edit group</string>
+
+    <string name="new_group_set">New group set</string>
 
     <!--
     Used for an option for teachers and admins for content to stay hidden for students until

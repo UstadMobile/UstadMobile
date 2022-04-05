@@ -8,8 +8,6 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ClazzDetailView.Companion.ARG_TABS
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -92,11 +90,6 @@ class ClazzDetailPresenter(context: Any,
                 ClazzDetailOverviewView.VIEW_NAME.appendQueryArgs(
                     commonArgs + mapOf(ARG_ENTITY_UID to entityUid.toString())
                 ),
-                ContentEntryList2View.VIEW_NAME.appendQueryArgs(
-                    commonArgs + mapOf(
-                        ARG_CLAZZUID to entityUid.toString(),
-                        ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_CLAZZ)
-                ),
                 ClazzMemberListView.VIEW_NAME.appendQueryArgs(
                     commonArgs + mapOf(ARG_CLAZZUID to entityUid.toString())
                 ))
@@ -110,9 +103,13 @@ class ClazzDetailPresenter(context: Any,
                 )
             }
 
-            val desiredTabs = coreTabs + permissionAndFeatureBasedTabs
+            val groupsTab = CourseGroupSetListView.VIEW_NAME.appendQueryArgs(
+                commonArgs + mapOf(ARG_CLAZZUID to entityUid.toString())
+            )
+
+            val desiredTabs = coreTabs + permissionAndFeatureBasedTabs + groupsTab
             if(view.tabs != desiredTabs)
-                view.tabs =  coreTabs + permissionAndFeatureBasedTabs
+                view.tabs =  coreTabs + permissionAndFeatureBasedTabs + groupsTab
         }
     }
 

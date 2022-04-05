@@ -6,7 +6,6 @@
     <data>
         
         <import type="com.ustadmobile.lib.db.entities.TerminologyEntry"/>
-        <import type="com.ustadmobile.core.controller.CourseTerminologyEditPresenter"/>
 
         <variable
             name="entry"

@@ -4,44 +4,44 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.CourseTerminology"/>
-        <import type="com.ustadmobile.port.android.view.CourseTerminologyListFragment"/>
-        <import type="com.ustadmobile.port.android.view.CourseTerminologyListRecyclerAdapter"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseGroupSet"/>
+        <import type="com.ustadmobile.port.android.view.CourseGroupSetListFragment"/>
+        <import type="com.ustadmobile.port.android.view.CourseGroupSetListRecyclerAdapter"/>
 
         <variable
-            name="courseTerminology"
-            type="CourseTerminology" />
+            name="courseGroupSet"
+            type="CourseGroupSet" />
 
         <variable
             name="itemListener"
-            type="com.ustadmobile.core.controller.CourseTerminologyListItemListener" />
+            type="com.ustadmobile.core.controller.CourseGroupSetListItemListener" />
 
         <variable
             name="selectablePagedListAdapter"
-            type="CourseTerminologyListRecyclerAdapter" />
+            type="CourseGroupSetListRecyclerAdapter" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, courseTerminology)}"
-        app:onSelectableItemClicked="@{() -> itemListener.onClickCourseTerminology(courseTerminology)}"
-        android:background="@drawable/bg_listitem"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, courseGroupSet)}"
+        app:onSelectableItemClicked="@{() -> itemListener.onClickCourseGroupSet(courseGroupSet)}"
         android:padding="@dimen/dimen_16dp"
+        android:background="@drawable/bg_listitem"
         >
 
         <!-- Line 1-->
         <TextView
-            android:id="@+id/course_terminology_title"
+            android:id="@+id/line1_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:text="@{courseTerminology.ctTitle}"
-            tools:text="Standard English"
-            android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
+            android:text="@{courseGroupSet.cgsName}"
+            tools:text="Group 1"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
