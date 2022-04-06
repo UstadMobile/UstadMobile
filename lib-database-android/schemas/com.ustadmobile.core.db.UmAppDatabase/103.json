@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "7a69534bf11f17aae236f9c1229ff72e",
+    "identityHash": "fd3a3c5b3216975d38b2606cade65d85",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5472,7 +5472,7 @@
       },
       {
         "tableName": "CourseAssignmentSubmission",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`casUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `casAssignmentUid` INTEGER NOT NULL, `casStudentUid` INTEGER NOT NULL, `casText` TEXT, `casType` INTEGER NOT NULL, `casTimestamp` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`casUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `casAssignmentUid` INTEGER NOT NULL, `casSubmitterUid` INTEGER NOT NULL, `casText` TEXT, `casType` INTEGER NOT NULL, `casTimestamp` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "casUid",
@@ -5487,8 +5487,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "casStudentUid",
-            "columnName": "casStudentUid",
+            "fieldPath": "casSubmitterUid",
+            "columnName": "casSubmitterUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -10163,7 +10163,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7a69534bf11f17aae236f9c1229ff72e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fd3a3c5b3216975d38b2606cade65d85')"
     ]
   }
 }

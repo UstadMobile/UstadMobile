@@ -135,10 +135,10 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                
                (CASE WHEN (SELECT hasPermission 
                           FROM CtePermissionCheck)
-                     THEN (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casStudentUid)
+                     THEN (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casSubmitterUid)
                          FROM ClazzEnrolment
                               JOIN CourseAssignmentSubmission
-                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentSubmission.casStudentUid
+                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentSubmission.casSubmitterUid
                               AND ClazzAssignment.caUid = CourseAssignmentSubmission.casAssignmentUid
                              
                               LEFT JOIN CourseAssignmentMark
