@@ -7,6 +7,7 @@ import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.SubmissionConstants.STATUS_MAP
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
@@ -22,6 +23,7 @@ import com.ustadmobile.navigation.RouteManager.defaultDestination
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
+import com.ustadmobile.util.DraftJsUtil.clean
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.alignEndItems
@@ -38,6 +40,7 @@ import com.ustadmobile.util.StyleManager.mainComponentProfileInnerAvatar
 import com.ustadmobile.util.StyleManager.mainComponentSearch
 import com.ustadmobile.util.StyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.StyleManager.personListItemAvatar
+import com.ustadmobile.util.StyleManager.textGrayedOut
 import com.ustadmobile.util.StyleManager.toolbarTitle
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
@@ -738,7 +741,7 @@ fun RBuilder.renderCourseBlockAssignment(
                 if(!item.assignment?.caDescription.isNullOrEmpty()){
                     umItem {
                         umItem(GridSize.cells12){
-                            umTypography(item.assignment?.caDescription,
+                            umTypography(clean(item.assignment?.caDescription),
                                 variant = TypographyVariant.body2,
                             ){
                                 css {
@@ -841,37 +844,49 @@ fun RBuilder.renderCourseBlockAssignment(
 fun RBuilder.renderCourseBlockTextOrModuleListItem(
     blockType: Int,
     blockLevel: Int,
-    title: String,
+    title: String?,
     description: String? = null,
     showReorder: Boolean = false,
     withAction: Boolean = false,
     actionIconName: String = "",
+    hidden: Boolean = false,
+    id: String = "",
     onActionClick: ((Event) -> Unit)? = null){
     val iconName = BLOCK_ICON_MAP[blockType] ?: ""
+    UmPlatformUtil.log(hidden)
     umGridContainer {
-        css {
-            marginLeft = (blockLevel * 2).spacingUnits
-        }
-        umItem(GridSize.cells2, GridSize.cells1){
+        umItem(GridSize.cells2, if(showReorder) GridSize.cells2 else GridSize.cells1, flexDirection = FlexDirection.row){
             if(showReorder){
                 umIcon("reorder",
-                    className = "${StyleManager.name}-entityImageIconClass")
-            }else {
-                umItemThumbnail(iconName, avatarVariant = AvatarVariant.circle)
+                    color = if(hidden) IconColor.disabled else IconColor.inherit,
+                    className = "${StyleManager.name}-dragToReorderClass"
+                ){
+                    css{
+                        marginRight = 2.spacingUnits
+                    }
+                }
             }
+            umItemThumbnail(iconName, avatarVariant = AvatarVariant.circle)
         }
 
         umItem(if(withAction) GridSize.cells8 else GridSize.cells10,
-            if(withAction) GridSize.cells10 else GridSize.cells11){
+            if(withAction) if(showReorder) GridSize.cells9 else GridSize.cells10
+            else GridSize.cells11){
             umGridContainer {
+                css {
+                    paddingLeft = (blockLevel * 2).spacingUnits
+                }
 
                 umItem(GridSize.cells12){
-                    umTypography(title,
-                        variant = TypographyVariant.body1,
-                    ){
+                    umTypography(title ?: "",
+                        variant = TypographyVariant.body1){
                         css {
                             +alignTextToStart
-                            fontSize = (if(withAction) 1.2 else 1.4).em
+                            if(showReorder && hidden){
+                                +textGrayedOut
+                            }
+
+                            fontSize = (if(withAction) 1.1 else 1.2).em
                         }
                     }
                 }
@@ -879,11 +894,14 @@ fun RBuilder.renderCourseBlockTextOrModuleListItem(
                 if(description != null){
                     umItem(GridSize.cells12){
                         umTypography(description,
-                            variant = TypographyVariant.body2,
+                            variant = TypographyVariant.body2
                         ){
                             css {
                                 +alignTextToStart
-                                fontSize = (if(withAction) 1 else 1.1).em
+                                if(showReorder && hidden){
+                                    +textGrayedOut
+                                }
+                                fontSize = (if(withAction) 0.9 else 1).em
                             }
                         }
                     }
@@ -902,6 +920,8 @@ fun RBuilder.renderCourseBlockTextOrModuleListItem(
                     }
 
                     umIconButton(actionIconName,
+                        id = id,
+                        iconColor = if(hidden && showReorder) IconColor.disabled else IconColor.inherit,
                         onClick = {
                             stopEventPropagation(it)
                             onActionClick?.invoke(it)
@@ -1041,9 +1061,11 @@ fun RBuilder.renderListItemWithIconAndTitle(
 }
 
 fun RBuilder.umSpacer(
-    left: LinearDimension? = null, right: LinearDimension? = null,
+    left: LinearDimension? = null,
+    right: LinearDimension? = null,
     top: LinearDimension? = 1.spacingUnits,
-    bottom: LinearDimension? = 1.spacingUnits) {
+    bottom: LinearDimension? = 1.spacingUnits
+) {
     styledDiv {
         css {
             if (left != null) {
@@ -1070,7 +1092,8 @@ fun RBuilder.umTopBar(
     currentDestination: UstadDestination,
     searchLabel: String,
     name: String? = null,
-    onClick: (() -> Unit)?){
+    onClick: (() -> Unit)?
+){
     umAppBar(position = AppBarPosition.fixed) {
         css (if(currentDestination.showNavigation) StyleManager.mainComponentAppBar
         else StyleManager.mainComponentAppBarWithNoNav)

@@ -18,5 +18,5 @@ expect object UmPlatformUtil {
 
     fun debug()
 
-    fun console(content: Any)
+    fun log(content: Any)
 }

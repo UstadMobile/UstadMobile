@@ -73,6 +73,7 @@ dependencies {
     implementation npm("mui-rte","$version_npm_mui_rte")
     implementation npm("draft-js","$version_npm_draft_js")
     implementation npm("draft-js-export-html","$version_npm_draft_js_html_export")
+    implementation npm("react-beautiful-dnd","$version_npm_react_beautiful_dnd")
     implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "io.github.aakira:napier:$version_napier"
 }

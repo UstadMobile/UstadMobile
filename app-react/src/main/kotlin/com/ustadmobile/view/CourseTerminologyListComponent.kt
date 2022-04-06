@@ -35,13 +35,12 @@ class CourseTerminologyListComponent(mProps: UmProps): UstadListComponent<Course
     }
 
     override fun RBuilder.renderListItem(item: CourseTerminology) {
-        renderListItemWithLeftIconTitleAndDescription("text", item.ctTitle, onMainList = true)
+        renderListItemWithLeftIconTitleAndDescription("language", item.ctTitle, onMainList = true)
     }
 
     override fun handleClickEntry(entry: CourseTerminology) {
-        mPresenter?.handleClickEntry(entry)
+        mPresenter?.onClickCourseTerminology(entry)
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

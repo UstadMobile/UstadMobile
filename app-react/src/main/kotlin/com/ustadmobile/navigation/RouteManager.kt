@@ -15,7 +15,7 @@ object RouteManager {
             ContentEntryListComponent::class, true),
         UstadDestination(view = ContentEntryList2View.VIEW_NAME,
              component = ContentEntryListComponent::class,  showSearch = true),
-        //UstadDestination("school", MessageID.schools,SchoolListView.VIEW_NAME, SchoolListComponent::class, showSearch = true),
+        UstadDestination(view = SchoolListView.VIEW_NAME,  component = SchoolListComponent::class),
         UstadDestination("person", MessageID.people, PersonListView.VIEW_NAME, PersonListComponent::class, showSearch = true),
         UstadDestination("pie_chart", MessageID.reports, ReportListView.VIEW_NAME, ReportListComponent::class, divider = true),
         UstadDestination("settings", MessageID.settings, SettingsView.VIEW_NAME, SettingsComponent::class),

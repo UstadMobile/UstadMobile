@@ -14,8 +14,8 @@ actual object UmPlatformUtil {
         js("debugger;")
     }
 
-    actual fun console(content: Any) {
-        console.log(JSON.stringify(content))
+    actual fun log(content: Any) {
+        console.log("JS-LOG",JSON.stringify(content))
     }
 
 }

@@ -18,6 +18,7 @@ import com.ustadmobile.view.ext.renderCreateNewItemOnList
 import kotlinx.css.*
 import org.w3c.dom.events.Event
 import react.RBuilder
+import react.ReactElement
 import styled.css
 import styled.styledDiv
 
@@ -25,6 +26,11 @@ interface SimpleListProps<T>: UmProps {
     var entries: List<T>
     var onEntryClicked: ((entry: dynamic) -> Unit)?
     var createNewItem: CreateNewItem?
+
+    /**
+     * Flag to indicate whether the list items can be dragged to re-order
+     */
+    var draggable: Boolean
 
     /**
      * TRUE if this will be used as a main content of a component
@@ -60,41 +66,57 @@ abstract class UstadSimpleList<P: SimpleListProps<*>>(mProps: P) : UstadBaseComp
                     +listComponentContainerWithScroll
                 }
             }
+            renderMoreDialogOptions()
             renderList()
         }
     }
 
-    private fun RBuilder.renderList(){
-        umList {
-            css(horizontalList)
+    open fun RBuilder.renderMoreDialogOptions(){
 
-            if(props.createNewItem?.visible == true && !props.createNewItem?.text.isNullOrEmpty()){
-                umListItem(button = true, alignItems = ListItemAlignItems.flexStart) {
-                    css{
-                        +listCreateNewContainer
-                        marginBottom = 1.spacingUnits
-                    }
-                    attrs.onClick = {
-                        Util.stopEventPropagation(it)
-                        props.createNewItem?.onClickCreateNew?.invoke()
-                    }
-                    renderCreateNewItemOnList(props.createNewItem?.text ?: "")
+    }
+
+    private fun RBuilder.renderItems(): ReactElement? {
+        if(props.createNewItem?.visible == true && !props.createNewItem?.text.isNullOrEmpty()){
+            umListItem(button = true, alignItems = ListItemAlignItems.flexStart) {
+                css{
+                    +listCreateNewContainer
+                    marginBottom = 1.spacingUnits
+                }
+                attrs.onClick = {
+                    Util.stopEventPropagation(it)
+                    props.createNewItem?.onClickCreateNew?.invoke()
+                }
+                renderCreateNewItemOnList(props.createNewItem?.text ?: "")
+            }
+        }
+
+        props.entries.forEach{entry ->
+            umListItem(button = true, alignItems = ListItemAlignItems.flexStart) {
+                css{
+                    backgroundColor = Color(theme.palette.background.paper)
+                    width = 100.pct
+                }
+
+                attrs.divider = true
+                renderListItem(entry){
+                    it.stopPropagation()
+                    props.onEntryClicked?.invoke(entry)
                 }
             }
+        }
+        return null
+    }
 
-            props.entries.forEach {entry->
-                umListItem(button = true, alignItems = ListItemAlignItems.flexStart) {
-                    css{
-                        backgroundColor = Color(theme.palette.background.paper)
-                        width = 100.pct
-                    }
-
-                    attrs.divider = true
-                    renderListItem(entry){
-                        it.stopPropagation()
-                        props.onEntryClicked?.invoke(entry)
-                    }
-                }
+    private fun RBuilder.renderList(){
+        if(!props.draggable){
+            umList {
+                css(horizontalList)
+                renderItems()
+            }
+        }else {
+            umList {
+                css(horizontalList)
+                renderItems()
             }
         }
     }

@@ -506,6 +506,15 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         marginTop = 5.px
     }
 
+    val dragToReorderClass by css {
+        fontSize = 2.em
+        marginTop = 1.spacingUnits
+    }
+
+    val textGrayedOut by css {
+        color = Color(theme.palette.action.disabled)
+    }
+
     val chipSetFilter by css{
         display = Display.flex
         justifyContent = JustifyContent.start

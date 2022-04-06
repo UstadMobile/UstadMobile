@@ -8,9 +8,14 @@ import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.mui.components.TypographyVariant
+import com.ustadmobile.mui.components.umTypography
+import com.ustadmobile.util.DraftJsUtil.clean
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
@@ -18,6 +23,7 @@ import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.formatDateRange
 import com.ustadmobile.view.ext.*
+import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
 import styled.css
@@ -133,26 +139,28 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
 
                         renderInformationOnDetailScreen("event", entity?.clazzHolidayCalendar?.umCalendarName)
 
-
                         if(!schedules.isNullOrEmpty()){
                             umItem(GridSize.cells12){
+                                css(defaultDoubleMarginTop)
                                 renderListSectionTitle(getString(MessageID.schedule))
                             }
 
                             renderSchedules(schedules = schedules, withDelete = false)
                         }
 
-                        umSpacer(top = 3.spacingUnits)
+                        umSpacer()
 
-                        if(!courseBlocks.isNullOrEmpty()){
-                            renderCourseBlocksWithComplete(blocks = courseBlocks){
-                                when(it.cbType){
-                                    CourseBlock.BLOCK_MODULE_TYPE ->
-                                        mPresenter?.handleModuleExpandCollapseClicked(it)
-                                    CourseBlock.BLOCK_ASSIGNMENT_TYPE ->
-                                        mPresenter?.handleClickAssignment(it.assignment as ClazzAssignment)
-                                    CourseBlock.BLOCK_CONTENT_TYPE ->
-                                        mPresenter?.contentEntryListItemListener?.onClickContentEntry(it.entry!!)
+                        umGridContainer(GridSpacing.spacing4) {
+                            if(!courseBlocks.isNullOrEmpty()){
+                                renderCourseBlocks(blocks = courseBlocks){
+                                    when(it.cbType){
+                                        CourseBlock.BLOCK_MODULE_TYPE ->
+                                            mPresenter?.handleModuleExpandCollapseClicked(it)
+                                        CourseBlock.BLOCK_ASSIGNMENT_TYPE ->
+                                            mPresenter?.handleClickAssignment(it.assignment as ClazzAssignment)
+                                        CourseBlock.BLOCK_CONTENT_TYPE ->
+                                            mPresenter?.contentEntryListItemListener?.onClickContentEntry(it.entry!!)
+                                    }
                                 }
                             }
                         }
@@ -160,6 +168,52 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
                 }
             }
         }
+    }
+
+    interface CourseBlockWithCompleteListProps: SimpleListProps<CourseBlockWithCompleteEntity>
+
+    class CourseBlockWithCompleteListComponent(mProps: CourseBlockWithCompleteListProps): UstadSimpleList<CourseBlockWithCompleteListProps>(mProps){
+
+        override fun RBuilder.renderListItem(item: CourseBlockWithCompleteEntity, onClick: (Event) -> Unit) {
+            umGridContainer {
+                attrs.onClick = {
+                    Util.stopEventPropagation(it)
+                    onClick.invoke(it.nativeEvent)
+                }
+
+                when(item.cbType){
+                    in listOf(CourseBlock.BLOCK_MODULE_TYPE,CourseBlock.BLOCK_TEXT_TYPE) -> {
+                        renderCourseBlockTextOrModuleListItem(item.cbType, item.cbIndentLevel,
+                            item.cbTitle?: "",
+                            showReorder = false,
+                            withAction = item.cbType == CourseBlock.BLOCK_MODULE_TYPE && item.expanded,
+                            actionIconName = if(item.expanded) "expand_less" else "expand_more",
+                            description = clean(item.cbDescription ?: "")
+                        )
+                    }
+                    CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
+                        renderCourseBlockAssignment(item, systemImpl)
+                    }
+
+                    CourseBlock.BLOCK_CONTENT_TYPE -> {
+                        item.entry?.let {
+                            renderContentEntryListItem(it, systemImpl)
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    private fun RBuilder.renderCourseBlocks(
+        blocks: List<CourseBlockWithCompleteEntity>,
+        createNewItem: CreateNewItem = CreateNewItem(),
+        onEntryClicked: ((CourseBlockWithCompleteEntity) -> Unit)? = null
+    ) = child(CourseBlockWithCompleteListComponent::class) {
+        attrs.entries = blocks
+        attrs.onEntryClicked = onEntryClicked
+        attrs.createNewItem = createNewItem
     }
 
     override fun onDestroyView() {

@@ -223,6 +223,7 @@ ext {
     version_npm_draft_js = "^0.11.7"
     version_npm_draft_js_html_export = "^1.4.1"
     version_npm_striptags = "^3.2.0"
+    version_npm_react_beautiful_dnd = "^13.1.0"
 
 }
 

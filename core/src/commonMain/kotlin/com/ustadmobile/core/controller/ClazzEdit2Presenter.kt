@@ -452,6 +452,7 @@ class ClazzEdit2Presenter(context: Any,
                     FLAG_PARENT_GROUP to entity.clazzParentsPersonGroupUid,
                 ))
 
+
                 val assignmentList = courseBlockOneToManyJoinEditHelper.entitiesToInsert.mapNotNull { it.assignment }
                 txDb.clazzAssignmentDao.insertListAsync(assignmentList)
                 txDb.clazzAssignmentDao.updateListAsync(
@@ -477,25 +478,25 @@ class ClazzEdit2Presenter(context: Any,
                 }
             }
 
-            val coursePictureVal = view.coursePicture
-            if(coursePictureVal != null) {
-                coursePictureVal.coursePictureClazzUid = entity.clazzUid
+            UmPlatformUtil.runAsync {
+                val coursePictureVal = view.coursePicture
+                if(coursePictureVal != null) {
+                    coursePictureVal.coursePictureClazzUid = entity.clazzUid
 
-                if(coursePictureVal.coursePictureUid == 0L) {
-                    repo.coursePictureDao.insertAsync(coursePictureVal)
-                }else {
-                    repo.coursePictureDao.updateAsync(coursePictureVal)
+                    if(coursePictureVal.coursePictureUid == 0L) {
+                        repo.coursePictureDao.insertAsync(coursePictureVal)
+                    }else {
+                        repo.coursePictureDao.updateAsync(coursePictureVal)
+                    }
                 }
             }
 
 
             val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight
-
             val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()
             clazzLogCreatorManager.requestClazzLogCreation(entity.clazzUid,
                     accountManager.activeAccount.endpointUrl,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
-
             view.loading = false
 
             //Handle the following scenario: PersonEdit (user selects to add an enrolment), ClazzList

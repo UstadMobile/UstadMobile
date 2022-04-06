@@ -5,11 +5,11 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.approvePendingClazzEnrolment
 import com.ustadmobile.core.util.ext.declinePendingClazzEnrolment
 import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonListView
@@ -26,9 +26,7 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
-import org.kodein.di.instance
 
 class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, view: ClazzMemberListView,
                                di: DI, lifecycleOwner: DoorLifecycleOwner)
@@ -39,9 +37,6 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
-
-    val json: Json by di.instance()
-
 
     var searchText: String? = null
 
@@ -69,10 +64,8 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_STUDENT)
 
         val terminology = db.courseTerminologyDao.getTerminologyForClazz(filterByClazzUid)
-        val termMap = terminology?.ctTerminology?.let {
-            json.decodeFromString(MapSerializer(String.serializer(), String.serializer()),
-                it
-            )
+        val termMap: Map<String, String> = terminology?.ctTerminology?.let {
+            safeParse(di, MapSerializer(String.serializer(), String.serializer()), it)
         } ?: mapOf()
         view.termMap = termMap
 
@@ -82,7 +75,6 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
         view.addTeacherVisible = db.clazzDao.personHasPermissionWithClazz(mLoggedInPersonUid,
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_TEACHER)
-        UmPlatformUtil.console("${view.addStudentVisible} ${view.addTeacherVisible}")
     }
 
     private fun updateListOnView() {

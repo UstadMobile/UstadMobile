@@ -10,15 +10,20 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.DraftJsUtil.clean
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util
 import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
+import kotlinx.browser.document
+import org.w3c.dom.Element
+import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
 import styled.css
@@ -113,13 +118,21 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
             field?.observe(this, scopedGrantListObserver)
         }
 
-    override var coursePicturePath: String?
-        get() = TODO("Not yet implemented")
-        set(value) {}
+    override var coursePicturePath: String? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
 
-    override var coursePicture: CoursePicture?
-        get() = TODO("Not yet implemented")
-        set(value) {}
+    override var coursePicture: CoursePicture? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -397,6 +410,123 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
             CourseBlock.BLOCK_CONTENT_TYPE to "smart_display",
             CourseBlock.BLOCK_TEXT_TYPE to "title"
         )
+    }
+
+    interface CourseBlockListProps: SimpleListProps<CourseBlockWithEntity>
+
+    data class CourseOption(var titleId: Int, var show: Boolean = true, var onClick: (Event) -> Unit)
+
+    class CourseBlockListComponent(mProps: CourseBlockListProps): UstadSimpleList<CourseBlockListProps>(mProps){
+
+        private var menuOptions: MutableList<CourseOption> = mutableListOf()
+
+        private var showPopOverOptions = false
+
+        private var anchorElement: Element? = null
+
+        override fun RBuilder.renderMoreDialogOptions(){
+            umMenu(showPopOverOptions,
+                anchorElement = anchorElement,
+                onClose = {
+                    setState {
+                        showPopOverOptions = false
+                        anchorElement = null
+                    }
+                }) {
+
+                menuOptions.filter{it.show}.forEach { option ->
+                    umMenuItem("  ${getString(option.titleId)}  ",
+                        onClick = {
+                            option.onClick.invoke(it)
+                            setState {
+                                showPopOverOptions = false
+                                anchorElement = null
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
+        override fun RBuilder.renderListItem(item: CourseBlockWithEntity, onClick: (Event) -> Unit) {
+            umGridContainer {
+                attrs.onClick = {
+                    Util.stopEventPropagation(it)
+                    onClick.invoke(it.nativeEvent)
+                }
+                val presenter = props.presenter as ClazzEdit2Presenter
+
+                renderCourseBlockTextOrModuleListItem(
+                   item.cbType,
+                   item.cbIndentLevel,
+                   item.cbTitle,
+                   clean(item.cbDescription ?: ""),
+                   id = "${item.cbUid}",
+                   showReorder = true,
+                   withAction = true,
+                   hidden = item.cbHidden,
+                   actionIconName = "more_vert",
+                   onActionClick = {
+                       menuOptions = mutableListOf(
+                           CourseOption(MessageID.hide){
+                               presenter.onClickHide(item)
+                           },
+                           CourseOption(MessageID.unhide){
+                               presenter.onClickHide(item)
+                           },
+                           CourseOption(MessageID.indent){
+                               presenter.onClickIndent(item)
+                           },
+                           CourseOption(MessageID.unindent){
+                               presenter.onClickUnIndent(item)
+                           },
+                           CourseOption(MessageID.delete){
+                               presenter.onClickDelete(item)
+                           }
+                       )
+                       if(item.cbType == CourseBlock.BLOCK_MODULE_TYPE){
+                           menuOptions.first { it.titleId == MessageID.indent }.show = false
+                           menuOptions.first { it.titleId == MessageID.unindent }.show = false
+                       }
+                       if(item.cbIndentLevel == 2){
+                           menuOptions.first { it.titleId == MessageID.indent }.show = false
+                       }
+                       if(item.cbIndentLevel == 0){
+                           menuOptions.first { it.titleId == MessageID.unindent }.show = false
+                       }
+
+                       if(item.cbHidden){
+                           menuOptions.first { it.titleId == MessageID.hide }.show = false
+                           menuOptions.first { it.titleId == MessageID.unhide }.show = true
+                       }
+
+                       if(!item.cbHidden){
+                           menuOptions.first { it.titleId == MessageID.hide }.show = true
+                           menuOptions.first { it.titleId == MessageID.unhide }.show = false
+                       }
+                       setState {
+                           anchorElement = document.getElementById("${item.cbUid}")
+                           showPopOverOptions = true
+                       }
+
+                   }
+               )
+            }
+        }
+
+    }
+
+    private fun RBuilder.renderCourseBlocks(
+        presenter: ClazzEdit2Presenter,
+        blocks: List<CourseBlockWithEntity>,
+        createNewItem: CreateNewItem = CreateNewItem(),
+        onEntryClicked: ((CourseBlockWithEntity) -> Unit)? = null
+    ) = child(CourseBlockListComponent::class) {
+        attrs.entries = blocks
+        attrs.presenter = presenter
+        attrs.draggable = true
+        attrs.onEntryClicked = onEntryClicked
+        attrs.createNewItem = createNewItem
     }
 
 }

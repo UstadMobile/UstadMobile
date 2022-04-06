@@ -49,7 +49,7 @@ object DraftJsUtil {
      * @param html Html string
      * @return a clean string without html tags
      */
-    fun clean(html: String): String {
-        return stripTagsJsModule(html).toString()
+    fun clean(html: String?): String {
+        return stripTagsJsModule(html ?: "").toString()
     }
 }
