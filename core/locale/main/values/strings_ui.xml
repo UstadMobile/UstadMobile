@@ -1794,4 +1794,10 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="past_enrollments">Past enrollments</string>
 
 
+    <string name="unread">Unread</string>
+    <string name="new_chat">New chat</string>
+    <string name="new_group">New group</string>
+    <string name="chat">Chat</string>
+    <string name="you">You</string>
+
 </resources>

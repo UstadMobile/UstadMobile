@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="message"
+            type="com.ustadmobile.lib.db.entities.MessageWithPerson" />
+
+        <variable
+            name="loggedInPersonUid"
+            type="Long" />
+
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_comments_list_cl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_listitem"
+        >
+
+        <!--            android:background="@drawable/shape_bg_bubble_incoming"-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_message_list_chat_bubble"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/item_comments_list_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:layout_marginEnd="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textStyle="bold"
+                app:chatMessage="@{message}"
+                app:chatMessageOrientation="@{message}"
+                app:layout_constraintEnd_toStartOf="@+id/item_comments_list_line3_text"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:loggedInPersonUid="@{loggedInPersonUid}"
+                app:loggedInPersonUidOrientation="@{loggedInPersonUid}"
+                tools:text="Bob Dylan" />
+
+            <TextView
+                android:linksClickable="true"
+                android:id="@+id/item_comments_list_line2_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dimen_16dp"
+                android:paddingEnd="16dp"
+                android:autoLink="web"
+                android:text="@{message.messageText}"
+                app:chatMessageOrientation="@{message}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/item_comments_list_line3_text"
+                app:layout_constraintStart_toStartOf="@+id/item_comments_list_text"
+                app:layout_constraintTop_toBottomOf="@+id/item_comments_list_text"
+                app:loggedInPersonUidOrientation="@{loggedInPersonUid}"
+                tools:text="I like this activity. Shall we discuss this in our next meeting?" />
+
+
+            <TextView
+                android:visibility="visible"
+                android:id="@+id/item_comments_list_line3_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginEnd="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/item_comments_list_text"
+                app:relativeTime="@{message.messageTimestamp}"
+                tools:text="4:20" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

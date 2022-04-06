@@ -55,6 +55,10 @@
         android:name="com.ustadmobile.port.android.view.ClazzListFragment" />
 
     <fragment
+        android:id="@+id/chat_detail_dest"
+        android:name="com.ustadmobile.port.android.view.ChatDetailFragment"/>
+
+    <fragment
         android:id="@+id/clazz_detail_dest"
         android:name="com.ustadmobile.port.android.view.ClazzDetailFragment" />
 
@@ -156,6 +160,11 @@
         android:id="@+id/content_entry_list_home_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
         android:label="@string/library"/>
+
+    <fragment
+        android:id="@+id/chat_list_home_dest"
+        android:name="com.ustadmobile.port.android.view.ChatListFragment"
+        android:label="@string/messages"/>
 
     <fragment
         android:id="@+id/content_entry_list_select_folder"

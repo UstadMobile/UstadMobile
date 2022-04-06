@@ -2,6 +2,8 @@ package com.ustadmobile.port.android.view.binding
 
 import android.annotation.SuppressLint
 import android.text.format.DateFormat
+import android.text.format.DateUtils
+import android.view.Gravity
 import android.view.View
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
@@ -39,6 +41,26 @@ fun TextView.setCustomFieldHint(customField: CustomField?) {
         systemImpl.getString(customField.customFieldLabelMessageID, context)
     } else {
         ""
+    }
+}
+
+@BindingAdapter("chatMessage", "loggedInPersonUid")
+fun TextView.setChatMessageTitle(message: MessageWithPerson, loggedInPersonUid: Long){
+    if(message.messagePerson?.personUid == loggedInPersonUid){
+        text = systemImpl.getString(MessageID.you, context)
+        gravity = Gravity.RIGHT
+    }else{
+        text = message.messagePerson?.fullName()?:"" + " "
+        gravity = Gravity.LEFT
+    }
+}
+
+@BindingAdapter("chatMessageOrientation", "loggedInPersonUidOrientation")
+fun TextView.setChatMessagOrientation(message: MessageWithPerson, loggedInPersonUid: Long){
+    if(message.messagePerson?.personUid == loggedInPersonUid){
+        gravity = Gravity.RIGHT
+    }else{
+        gravity = Gravity.LEFT
     }
 }
 

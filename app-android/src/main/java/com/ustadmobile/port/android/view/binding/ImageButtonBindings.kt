@@ -18,3 +18,15 @@ fun ImageButton.setEditButtonClick(listener: NewCommentItemListener,
     }
 
 }
+
+
+@BindingAdapter("buttonListener2","editText2")
+fun ImageButton.setEditButtonClick2(listener: NewCommentItemListener, text: String?) {
+    setOnClickListener {
+        if(text.isNullOrEmpty()){
+            return@setOnClickListener
+        }
+        listener.addComment(text)
+    }
+
+}
