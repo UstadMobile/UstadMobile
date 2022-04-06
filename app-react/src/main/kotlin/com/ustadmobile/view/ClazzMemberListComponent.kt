@@ -51,7 +51,6 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
 
     private val studentListObserver = ObserverFnWrapper<List<PersonWithClazzEnrolmentDetails>>{
         setState {
-            console.log("kileha", it.size)
             students = it
         }
     }
@@ -90,12 +89,6 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
         get() = field
         set(value) {
             setState {
-                field = value
-            }
-        }
-    override var termMap: Map<String, String>? = null
-        set(value) {
-            setState{
                 field = value
             }
         }
