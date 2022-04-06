@@ -43,7 +43,7 @@ class MessagesRecyclerAdapter(val loggedInPersonUid: Long)
 
             holder.binding.itemCommentsListLine2Text.text = message?.messageText
             addMovement(holder.binding.itemCommentsListLine2Text, holder.itemView.context)
-            
+
         }
     }
 

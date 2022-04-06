@@ -115,7 +115,9 @@ abstract class ChatDao: BaseDao<Chat>{
                   LIMIT 1)
              WHERE ChatMember.chatMemberPersonUid = :personUid
                  AND ChatMember.chatMemberLeftDate = ${Long.MAX_VALUE}
-                 AND Chat.chatUid != 0 )
+                 AND Chat.chatUid != 0 
+                 
+             ORDER BY Message.messageTimestamp DESC)
         SELECT Chats.*
         FROM Chats
         UNION

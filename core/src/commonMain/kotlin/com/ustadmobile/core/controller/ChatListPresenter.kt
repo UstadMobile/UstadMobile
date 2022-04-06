@@ -63,7 +63,8 @@ class ChatListPresenter(context: Any, arguments: Map<String, String>, view: Chat
     fun handleClickCreateNewFab(destinationResultKey: String?) {
 
         val args: Map<String, String>? = mapOf(
-            ARG_GO_TO_COMPLETE to ChatDetailView.VIEW_NAME
+            ARG_GO_TO_COMPLETE to ChatDetailView.VIEW_NAME,
+            PersonListPresenter.ARG_HIDE_PERSON_ADD to "true"
         )
         navigateForResult(
             NavigateForResultOptions(
