@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.toTermMap
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.CourseTerminologyEditView
@@ -52,11 +53,7 @@ class CourseTerminologyEditPresenter(
     }
 
     private fun makeTermList(terminology: CourseTerminology){
-        val termMap: Map<String,String> = terminology.ctTerminology?.let {
-            json.decodeFromString(
-                MapSerializer(String.serializer(), String.serializer()), it)
-        } ?: mapOf()
-
+        val termMap = terminology.toTermMap(json, systemImpl, context)
         val termList = TerminologyKeys.TERMINOLOGY_ENTRY_MESSAGE_ID.entries.map {
             TerminologyEntry(it.key,it.value, termMap[it.key])
         }.sortedBy { it.id }

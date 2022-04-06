@@ -18,7 +18,7 @@ import kotlinx.serialization.Serializable
             """REPLACE INTO CourseGroupSet(cgsUid, cgsName, cgsTotalGroups, cgsActive, cgsClazzUid, cgsLct) 
          VALUES (NEW.cgsUid, NEW.cgsName, NEW.cgsTotalGroups, NEW.cgsActive, NEW.cgsClazzUid, NEW.cgsLct) 
          /*psql ON CONFLICT (cgsUid) DO UPDATE 
-         SET cgsUid = EXCLUDED.cgsUid, cgsName = EXCLUDED.cgsName, cgsTotalGroups = EXCLUDED.cgsTotalGroups, cgsActive = EXCLUDED.cgsActive, cgsClazzUid = EXCLUDED.cgsClazzUid, cgsLct = EXCLUDED.cgsLct
+         SET cgsName = EXCLUDED.cgsName, cgsTotalGroups = EXCLUDED.cgsTotalGroups, cgsActive = EXCLUDED.cgsActive, cgsClazzUid = EXCLUDED.cgsClazzUid, cgsLct = EXCLUDED.cgsLct
          */"""
         ]
     )

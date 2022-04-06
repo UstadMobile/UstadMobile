@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
                     """REPLACE INTO CourseAssignmentSubmission(casUid, casAssignmentUid, casStudentUid, casText, casType, casTimestamp) 
          VALUES (NEW.casUid, NEW.casAssignmentUid, NEW.casStudentUid, NEW.casText, NEW.casType, NEW.casTimestamp) 
          /*psql ON CONFLICT (casUid) DO UPDATE 
-         SET casUid = EXCLUDED.casUid, casAssignmentUid = EXCLUDED.casAssignmentUid, casStudentUid = EXCLUDED.casStudentUid, casText = EXCLUDED.casText, casType = EXCLUDED.casType, casTimestamp = EXCLUDED.casTimestamp
+         SET casAssignmentUid = EXCLUDED.casAssignmentUid, casStudentUid = EXCLUDED.casStudentUid, casText = EXCLUDED.casText, casType = EXCLUDED.casType, casTimestamp = EXCLUDED.casTimestamp
          */"""
                 ]
         )
@@ -30,6 +30,7 @@ open class CourseAssignmentSubmission {
 
     var casAssignmentUid: Long = 0
 
+    // change to casSubmitterUid, if individual then personUid else groupNumber
     var casStudentUid: Long = 0
 
     var casText: String? = null

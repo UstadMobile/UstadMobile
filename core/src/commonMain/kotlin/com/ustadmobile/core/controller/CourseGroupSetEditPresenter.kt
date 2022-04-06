@@ -13,6 +13,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.CourseGroupMember
 import com.ustadmobile.lib.db.entities.CourseGroupMemberPerson
 import com.ustadmobile.lib.db.entities.CourseGroupSet
@@ -106,23 +107,25 @@ class CourseGroupSetEditPresenter(context: Any,
 
             val members = view.memberList
 
-            if(entity.cgsUid == 0L) {
-                entity.cgsUid = repo.courseGroupSetDao.insertAsync(entity)
-            }else {
-                repo.courseGroupSetDao.updateAsync(entity)
+            repo.withDoorTransactionAsync(UmAppDatabase::class){ txDb ->
+                if(entity.cgsUid == 0L) {
+                    entity.cgsUid = txDb.courseGroupSetDao.insertAsync(entity)
+                }else {
+                    txDb.courseGroupSetDao.updateAsync(entity)
+                }
+
+                val toInsertList = members?.filter { it.member?.cgmUid == 0L }?.mapNotNull {
+                    it.member?.cgmSetUid = entity.cgsUid
+                    it.member
+                } ?: listOf()
+
+                val toUpdateList = members?.filter { it.member?.cgmUid != 0L }?.mapNotNull {
+                    it.member
+                } ?: listOf()
+
+                txDb.courseGroupMemberDao.insertListAsync(toInsertList)
+                txDb.courseGroupMemberDao.updateListAsync(toUpdateList)
             }
-
-            val toInsertList = members?.filter { it.member?.cgmUid == 0L }?.mapNotNull {
-                it.member?.cgmSetUid = entity.cgsUid
-                it.member
-            } ?: listOf()
-
-            val toUpdateList = members?.filter { it.member?.cgmUid != 0L }?.mapNotNull {
-                it.member
-            } ?: listOf()
-
-            repo.courseGroupMemberDao.insertListAsync(toInsertList)
-            repo.courseGroupMemberDao.updateListAsync(toUpdateList)
 
             finishWithResult(
                 safeStringify(di, ListSerializer(CourseGroupSet.serializer()),
@@ -136,7 +139,7 @@ class CourseGroupSetEditPresenter(context: Any,
     }
 
     fun handleNumberOfGroupsChanged(number: Int) {
-        view.groupList = createGroupList(number)
+        view.takeIf { number != 0 }?.groupList = createGroupList(number)
     }
 
     companion object {

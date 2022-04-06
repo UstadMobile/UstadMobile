@@ -23,7 +23,7 @@ class CourseGroupSetListPresenter(
     view,
     di,
     lifecycleOwner
-), CourseGroupSetListItemListener {
+) {
 
 
     private var clazzUidFilter: Long = 0
@@ -36,7 +36,7 @@ class CourseGroupSetListPresenter(
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return repo.clazzDao.personHasPermissionWithClazz(
-            account?.personUid?: 0, clazzUidFilter, Role.PERMISSION_CLAZZ_INSERT)
+            account?.personUid?: 0, clazzUidFilter, Role.PERMISSION_CLAZZ_UPDATE)
     }
 
     private fun updateListOnView() {
@@ -59,12 +59,12 @@ class CourseGroupSetListPresenter(
         handleClickCreateNewFab()
     }
 
-    override fun onClickCourseGroupSet(courseGroupSet: CourseGroupSet) {
+    override fun handleClickEntry(entry: CourseGroupSet) {
         systemImpl.go(
             CourseGroupSetDetailView.VIEW_NAME,
             mapOf(
-                UstadView.ARG_ENTITY_UID to courseGroupSet.cgsUid.toString(),
-                UstadView.ARG_CLAZZUID to courseGroupSet.cgsClazzUid.toString()
+                UstadView.ARG_ENTITY_UID to entry.cgsUid.toString(),
+                UstadView.ARG_CLAZZUID to entry.cgsClazzUid.toString()
             ), context
         )
     }

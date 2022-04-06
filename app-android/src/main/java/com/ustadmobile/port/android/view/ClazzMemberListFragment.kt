@@ -124,17 +124,12 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         set(value) {
             field = value
             mUstadListHeaderRecyclerViewAdapter?.createNewText = value?.get(TerminologyKeys.ADD_TEACHER_KEY)
-                ?: requireContext().getString(R.string.add_a_teacher)
 
             mUstadListHeaderRecyclerViewAdapter?.headerStringText = value?.get(TerminologyKeys.TEACHERS_KEY)
-                ?: requireContext().getString(R.string.teachers_literal)
 
             mNewStudentListRecyclerViewAdapter?.createNewText = value?.get(TerminologyKeys.ADD_STUDENT_KEY)
-                ?: requireContext().getString(R.string.add_a_student)
 
             mNewStudentListRecyclerViewAdapter?.headerStringText = value?.get(TerminologyKeys.STUDENTS_KEY)
-                ?: requireContext().getString(R.string.students)
-
         }
 
     class ClazzMemberListViewHolder(val itemBinding: ItemClazzmemberListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)

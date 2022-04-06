@@ -13,8 +13,8 @@
             type="CourseGroupSet" />
 
         <variable
-            name="itemListener"
-            type="com.ustadmobile.core.controller.CourseGroupSetListItemListener" />
+            name="presenter"
+            type="com.ustadmobile.core.controller.CourseGroupSetListPresenter" />
 
         <variable
             name="selectablePagedListAdapter"
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, courseGroupSet)}"
-        app:onSelectableItemClicked="@{() -> itemListener.onClickCourseGroupSet(courseGroupSet)}"
+        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(courseGroupSet)}"
         android:padding="@dimen/dimen_16dp"
         android:background="@drawable/bg_listitem"
         >

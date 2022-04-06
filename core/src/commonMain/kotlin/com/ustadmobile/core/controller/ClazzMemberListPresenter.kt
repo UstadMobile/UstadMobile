@@ -5,10 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.util.ext.approvePendingClazzEnrolment
-import com.ustadmobile.core.util.ext.declinePendingClazzEnrolment
-import com.ustadmobile.core.util.ext.toListFilterOptions
-import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonListView
@@ -23,8 +20,6 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -68,12 +63,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_STUDENT)
 
         val terminology = db.courseTerminologyDao.getTerminologyForClazz(filterByClazzUid)
-        val termMap = terminology?.ctTerminology?.let {
-            json.decodeFromString(MapSerializer(String.serializer(), String.serializer()),
-                it
-            )
-        } ?: mapOf()
-        view.termMap = termMap
+        view.termMap = terminology.toTermMap(json, systemImpl, context)
 
         selectedSortOption = SORT_OPTIONS[0]
         view.listFilterOptionChips = FILTER_OPTIONS.toListFilterOptions(context, di)

@@ -7,19 +7,19 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCourseGroupSetListBinding
-import com.ustadmobile.core.controller.CourseGroupSetListItemListener
+import com.ustadmobile.core.controller.CourseGroupSetListPresenter
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
-class CourseGroupSetListRecyclerAdapter(var itemListener: CourseGroupSetListItemListener?): SelectablePagedListAdapter<CourseGroupSet, CourseGroupSetListRecyclerAdapter.CourseGroupSetListViewHolder>(DIFF_CALLBACK) {
+class CourseGroupSetListRecyclerAdapter(var presenter: CourseGroupSetListPresenter?): SelectablePagedListAdapter<CourseGroupSet, CourseGroupSetListRecyclerAdapter.CourseGroupSetListViewHolder>(DIFF_CALLBACK) {
 
     class CourseGroupSetListViewHolder(val itemBinding: ItemCourseGroupSetListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseGroupSetListViewHolder {
         val itemBinding = ItemCourseGroupSetListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        itemBinding.itemListener = itemListener
+        itemBinding.presenter = presenter
         itemBinding.selectablePagedListAdapter = this
         return CourseGroupSetListViewHolder(itemBinding)
     }
@@ -32,7 +32,7 @@ class CourseGroupSetListRecyclerAdapter(var itemListener: CourseGroupSetListItem
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        itemListener = null
+        presenter = null
     }
 
     companion object {

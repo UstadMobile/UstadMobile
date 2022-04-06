@@ -888,10 +888,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     will be replaced with the number and %2$s will be replaced with the name of the item-->
     <string name="three_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d %6$s</string>
 
-    <!-- Used to show four quantities and names e.g. "5 oranges, 2 apples, 3 pears". %1$d etc
-   will be replaced with the number and %2$s will be replaced with the name of the item-->
-    <string name="four_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d %6$s, %7$d %8$s</string>
-
     <string name="marking">Marking</string>
     <string name="return_and_mark_next">Return and mark next</string>
     <string name="return_only">Return and finish</string>

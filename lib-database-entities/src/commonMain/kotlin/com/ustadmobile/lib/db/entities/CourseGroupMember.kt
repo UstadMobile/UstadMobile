@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
             """REPLACE INTO CourseGroupMember(cgmUid, cgmSetUid, cgmGroupNumber, cgmPersonUid, cgmLct) 
          VALUES (NEW.cgmUid, NEW.cgmSetUid, NEW.cgmGroupNumber, NEW.cgmPersonUid, NEW.cgmLct) 
          /*psql ON CONFLICT (cgmUid) DO UPDATE 
-         SET cgmUid = EXCLUDED.cgmUid, cgmSetUid = EXCLUDED.cgmSetUid, cgmGroupNumber = EXCLUDED.cgmGroupNumber, cgmPersonUid = EXCLUDED.cgmPersonUid, cgmLct = EXCLUDED.cgmLct
+         SET cgmSetUid = EXCLUDED.cgmSetUid, cgmGroupNumber = EXCLUDED.cgmGroupNumber, cgmPersonUid = EXCLUDED.cgmPersonUid, cgmLct = EXCLUDED.cgmLct
          */"""
         ]
     )
@@ -30,6 +30,7 @@ class CourseGroupMember {
 
     var cgmSetUid: Long = 0
 
+    // real group numbers start from 1, 0 means this person is not yet in a group
     var cgmGroupNumber: Int = 0
 
     var cgmPersonUid: Long = 0

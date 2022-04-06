@@ -110,7 +110,7 @@ class CourseGroupSetListPresenterTest {
         mockView.waitForListToBeSet()
 
 
-        presenter.onClickCourseGroupSet(testEntity)
+        presenter.handleClickEntry(testEntity)
 
 
         val systemImpl: UstadMobileSystemImpl by di.instance()

@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
                     """REPLACE INTO CourseAssignmentMark(camUid, camAssignmentUid, camStudentUid, camMark, camPenalty, camLct) 
          VALUES (NEW.camUid, NEW.camAssignmentUid, NEW.camStudentUid, NEW.camMark, NEW.camPenalty, NEW.camLct) 
          /*psql ON CONFLICT (camUid) DO UPDATE 
-         SET camUid = EXCLUDED.camUid, camAssignmentUid = EXCLUDED.camAssignmentUid, camStudentUid = EXCLUDED.camStudentUid, camMark = EXCLUDED.camMark, camPenalty = EXCLUDED.camPenalty, camLct = EXCLUDED.camLct
+         SET camAssignmentUid = EXCLUDED.camAssignmentUid, camStudentUid = EXCLUDED.camStudentUid, camMark = EXCLUDED.camMark, camPenalty = EXCLUDED.camPenalty, camLct = EXCLUDED.camLct
          */"""
                 ]
         )

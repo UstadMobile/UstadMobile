@@ -5,21 +5,23 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCourseDetailHeaderOverviewBinding
 import com.ustadmobile.core.controller.TerminologyKeys
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.toTermMap
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
-class CourseHeaderDetailRecyclerAdapter(val listener: ClazzDetailOverviewEventListener?, di: DI)
+class CourseHeaderDetailRecyclerAdapter(val listener: ClazzDetailOverviewEventListener?, di: DI, val context: Any)
     : SingleItemRecyclerViewAdapter<CourseHeaderDetailRecyclerAdapter.CourseDetailViewHolder>(true) {
 
     class CourseDetailViewHolder(var itemBinding: ItemCourseDetailHeaderOverviewBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
     val json: Json by di.instance()
+
+    val systemImpl: UstadMobileSystemImpl by di.instance()
 
     private var viewHolder: CourseDetailViewHolder? = null
 
@@ -29,12 +31,7 @@ class CourseHeaderDetailRecyclerAdapter(val listener: ClazzDetailOverviewEventLi
                 return
             field = value
             viewHolder?.itemBinding?.clazz = value
-            val termMap =  value?.terminology?.ctTerminology?.let {
-                json.decodeFromString(
-                    MapSerializer(String.serializer(), String.serializer()),
-                    it
-                )
-            } ?: mapOf()
+            val termMap = value?.terminology.toTermMap(json, systemImpl, context)
             teacherStudentCount = """${clazz?.numTeachers ?: 0} ${termMap[TerminologyKeys.TEACHERS_KEY]}, ${clazz?.numStudents ?: 0} ${termMap[TerminologyKeys.STUDENTS_KEY]}"""
         }
 
