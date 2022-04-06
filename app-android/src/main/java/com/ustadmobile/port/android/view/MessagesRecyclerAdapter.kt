@@ -1,44 +1,18 @@
 package com.ustadmobile.port.android.view
 
-import android.text.Layout
-import android.text.Spannable
-import android.text.method.LinkMovementMethod
-import android.text.style.URLSpan
+import android.content.Context
+import android.text.util.Linkify
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemMessageListBinding
 import com.ustadmobile.core.controller.ChatDetailPresenter
 import com.ustadmobile.lib.db.entities.MessageWithPerson
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import me.saket.bettermovementmethod.BetterLinkMovementMethod
 
-
-abstract class TextViewLinkHandler : LinkMovementMethod() {
-
-    override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {
-//        if (event.action != MotionEvent.ACTION_UP) return super.onTouchEvent(widget, buffer, event)
-        var x = event.x.toInt()
-        var y = event.y.toInt()
-        x -= widget.totalPaddingLeft
-        y -= widget.totalPaddingTop
-        x += widget.scrollX
-        y += widget.scrollY
-        val layout: Layout = widget.layout
-        val line: Int = layout.getLineForVertical(y)
-        val off: Int = layout.getOffsetForHorizontal(line, x.toFloat())
-        val link: Array<URLSpan> = buffer.getSpans(off, off, URLSpan::class.java)
-        if (link.size != 0) {
-            onLinkClick(link[0].getURL())
-        }
-        return true
-    }
-
-    abstract fun onLinkClick(url: String?)
-}
 
 class MessagesRecyclerAdapter(val loggedInPersonUid: Long)
     : SelectablePagedListAdapter<MessageWithPerson,
@@ -50,26 +24,57 @@ class MessagesRecyclerAdapter(val loggedInPersonUid: Long)
         : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageWithPersonViewHolder {
-        return MessageWithPersonViewHolder(ItemMessageListBinding.inflate(
+        val vh = MessageWithPersonViewHolder(ItemMessageListBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false))
+
+        addMovement(vh.binding.itemCommentsListLine2Text, parent.context)
+
+        return vh
     }
+
 
     override fun onBindViewHolder(holder: MessageWithPersonViewHolder, position: Int) {
         if(itemCount > 0 ) {
-            holder.binding.message = getItem(position)
-            holder.binding.loggedInPersonUid = loggedInPersonUid
-            holder.itemView.tag = getItem(position)?.messageUid
-            holder.binding.itemCommentsListLine2Text.movementMethod = object : TextViewLinkHandler() {
-                override fun onLinkClick(url: String?) {
-                    presenter?.handleClickLink(url?:"")
-                }
-            }
 
+            val message = getItem(position)
+            holder.binding.loggedInPersonUid = loggedInPersonUid
+            holder.itemView.tag = message?.messageUid
+            holder.binding.message = message
+
+            holder.binding.itemCommentsListLine2Text.text = message?.messageText
+            addMovement(holder.binding.itemCommentsListLine2Text, holder.itemView.context)
+            
         }
     }
 
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView)
+
+    private fun addMovement(textView: TextView, context: Context){
+
+        textView.linksClickable = true
+
+        textView.movementMethod =
+            BetterLinkMovementMethod.newInstance().apply {
+                this.setOnLinkClickListener(onClickListener)
+                this.setOnLinkLongClickListener(onLongClickListener)
+
+            }
+
+        Linkify.addLinks(textView, Linkify.ALL)
+
+    }
+
+    val onClickListener: BetterLinkMovementMethod.OnLinkClickListener =
+        BetterLinkMovementMethod.OnLinkClickListener{
+        _,url ->
+        presenter?.handleClickLink(url)
+
+        true
+    }
+
+    val onLongClickListener: BetterLinkMovementMethod.OnLinkLongClickListener =
+        BetterLinkMovementMethod.OnLinkLongClickListener{
+            _,_ ->
+        true
     }
 
     companion object{
@@ -84,8 +89,7 @@ class MessagesRecyclerAdapter(val loggedInPersonUid: Long)
                     override fun areContentsTheSame(oldItem: MessageWithPerson,
                                                     newItem: MessageWithPerson): Boolean {
                         return oldItem.messageSenderPersonUid == newItem.messageSenderPersonUid &&
-                                oldItem.messageText == newItem.messageText &&
-                                oldItem.messageTimestamp == newItem.messageTimestamp
+                                oldItem.messageText == newItem.messageText
                     }
                 }
 

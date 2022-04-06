@@ -52,12 +52,10 @@ class ChatDetailPresenter(
         loggedInPersonUid = accountManager.activeAccount.personUid
 
         presenterScope.launch{
-            //TODO: Get the title as query
-            //Get chat title etc
-            val chatWithLatestMessageAndCount = repo.chatDao.getChatWithLatestMessageAndCount(
+            val chatTitle = repo.chatDao.getTitleChat(
                 chatUid,
                 loggedInPersonUid )
-            view.title = chatWithLatestMessageAndCount?.chatName?:"Chat"
+            view.title = chatTitle
         }
 
 

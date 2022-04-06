@@ -387,6 +387,9 @@ dependencies {
     implementation 'com.github.varunasingh:Persian-Date-Picker-Dialog-Strings:primary-SNAPSHOT'
 
 
+    //Better Link Movement Method
+    implementation "me.saket:better-link-movement-method:$version_better_link_movement"
+
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
     testImplementation "androidx.test:core:$version_android_junit_runner"
