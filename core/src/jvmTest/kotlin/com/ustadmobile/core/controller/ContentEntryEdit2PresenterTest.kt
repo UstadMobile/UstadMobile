@@ -97,11 +97,6 @@ class ContentEntryEdit2PresenterTest {
             bind<ContentJobManager>() with singleton {
                 contentJobManager
             }
-            bind<Json>() with singleton {
-                Json {
-                    encodeDefaults = true
-                }
-            }
         }
 
         db = di.directActiveDbInstance()

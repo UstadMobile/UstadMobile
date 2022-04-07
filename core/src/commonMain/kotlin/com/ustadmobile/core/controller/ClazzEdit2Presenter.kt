@@ -696,11 +696,21 @@ class ClazzEdit2Presenter(context: Any,
         view.courseBlocks = courseBlockOneToManyJoinEditHelper.liveList
     }
 
+    /*
+     * Will hide or unhide the courseBlock, if block is a module, its children will also change
+     */
     override fun onClickHide(joinedEntity: CourseBlockWithEntity) {
         val newList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: return
         val foundBlock = newList.find { it.cbUid == joinedEntity.cbUid } ?: return
         foundBlock.cbHidden = !foundBlock.cbHidden
         newList[foundBlock.cbIndex] = foundBlock
+
+        if(foundBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
+            newList.forEach{
+                it.takeIf { it.cbModuleParentBlockUid == foundBlock.cbUid }
+                    ?.cbHidden = !it.cbHidden
+            }
+        }
         courseBlockOneToManyJoinEditHelper.liveList.sendValue(newList)
     }
 

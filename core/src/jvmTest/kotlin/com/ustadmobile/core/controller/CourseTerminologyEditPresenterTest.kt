@@ -63,11 +63,6 @@ class CourseTerminologyEditPresenterTest {
 
         di = DI {
             import(ustadTestRule.diModule)
-            bind<Json>() with singleton {
-                Json {
-                    encodeDefaults = true
-                }
-            }
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
