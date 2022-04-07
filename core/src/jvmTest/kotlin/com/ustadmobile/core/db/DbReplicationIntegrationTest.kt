@@ -221,7 +221,7 @@ class DbReplicationIntegrationTest {
         val remoteRepo: UmAppDatabase = remoteDi.direct.on(Endpoint("localhost"))
             .instance(tag = DoorTag.TAG_REPO)
         runBlocking { remoteRepo.preload() }
-        remoteRepo.ktorInitRepo()
+        remoteRepo.ktorInitRepo(remoteDi)
         runBlocking {
             remoteRepo.initAdminUser(remoteEndpoint, remoteDi)
         }

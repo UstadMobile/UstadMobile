@@ -4,14 +4,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemAssignmentFileSubmissionHeaderBinding
-import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class SubmissionStatusHeaderAdapter(): SingleItemRecyclerViewAdapter<
         SubmissionStatusHeaderAdapter.FileSubmissionHeaderViewHolder>(false) {
 
-    var assignment: ClazzAssignment? = null
+    var assignment: ClazzAssignmentWithCourseBlock? = null
         set(value){
             if(field == value)
                 return

@@ -131,13 +131,6 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
 
 
     /**
-     * Check if the directory is writable
-     * @param dir Directory to be checked
-     * @return True if is writable otherwise is read only
-     */
-    fun canWriteFileInDir(dirPath: String): Boolean
-
-    /**
      * Open the given link in a browser and/or tab depending on the platform
      */
     fun openLinkInBrowser(url: String, context: Any)

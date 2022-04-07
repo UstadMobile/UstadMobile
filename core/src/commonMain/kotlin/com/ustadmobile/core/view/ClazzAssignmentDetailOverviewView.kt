@@ -1,13 +1,13 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
 
 
-interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignment> {
+interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignmentWithCourseBlock> {
 
     var submittedCourseAssignmentSubmission: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
 

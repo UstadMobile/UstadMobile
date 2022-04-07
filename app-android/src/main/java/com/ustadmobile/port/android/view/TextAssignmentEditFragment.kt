@@ -161,6 +161,7 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
         mBinding = null
         mPresenter = null
         entity = null
+        aztec = null
     }
 
     override var entity: CourseAssignmentSubmission? = null

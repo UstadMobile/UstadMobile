@@ -1,5 +1,4 @@
-import com.ustadmobile.core.contentjob.SupportedContent
-import com.ustadmobile.core.view.UstadView
+package com.ustadmobile.core.view
 
 interface SelectFolderView : UstadView {
 

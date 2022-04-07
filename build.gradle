@@ -6,7 +6,7 @@ buildscript {
     ext.version_shadow = "7.1.0"
     ext.version_gradle_versions_plugin = "0.28.0"
     ext.atomicfu_version = '0.17.0'
-    ext.version_execfork = "0.1.15"
+    ext.version_execfork = "0.2.0"
     ext.version_android_adbscreenrecorder = "0.1-alpha11"
 
     repositories {
@@ -69,7 +69,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.3.54"
+version = "0.3.55"
 group = "com.ustadmobile.app"
 
 /**
@@ -79,7 +79,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 226
+    ustadVersionCode = 227
 
     version_door = "0.0.56"
     version_xmlpullparserkmp = '0.0.20'

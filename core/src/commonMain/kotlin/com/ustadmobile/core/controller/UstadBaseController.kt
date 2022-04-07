@@ -265,7 +265,7 @@ abstract class UstadBaseController<V : UstadView>(
     private fun <T: Any> NavigateForResultOptions<T>.putPresenterResultDestInfo() {
         val currentBackStackEntryVal = ustadNavController.currentBackStackEntry
         val effectiveResultKey = destinationResultKey ?: entityClass.simpleName
-        ?: throw IllegalArgumentException("putPresenterResultDestInfo: no destination key and no class name")
+            ?: throw IllegalArgumentException("putPresenterResultDestInfo: no destination key and no class name")
 
         if(currentBackStackEntryVal != null) {
             arguments.putResultDestInfo(currentBackStackEntryVal, effectiveResultKey,

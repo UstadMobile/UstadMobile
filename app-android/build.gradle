@@ -386,6 +386,7 @@ dependencies {
     //Persian-Date-Picker
     implementation 'com.github.varunasingh:Persian-Date-Picker-Dialog-Strings:primary-SNAPSHOT'
 
+    implementation 'com.ernestoyaquello.dragdropswiperecyclerview:drag-drop-swipe-recyclerview:1.1.1'
 
     //Better Link Movement Method
     implementation "me.saket:better-link-movement-method:$version_better_link_movement"

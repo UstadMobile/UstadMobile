@@ -17,6 +17,9 @@ class ClazzWithListDisplayDetails() : Clazz() {
     @Embedded
     var clazzActiveEnrolment: ClazzEnrolment? = null
 
+    @Embedded
+    var terminology: CourseTerminology? = null
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false

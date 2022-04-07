@@ -71,13 +71,19 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
             clazzEnrolmentUid = dbRule.repo.clazzEnrolmentDao.insert(this)
         }
 
-        val clazzAssignment = ClazzAssignment().apply {
+        val clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
             caTitle = "New Clazz Assignment"
             caDescription = "complete quiz"
             caRequireFileSubmission = false
-            caDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
             caClazzUid = testClazz.clazzUid
             caUid = dbRule.repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                this.cbClazzUid = testClazz.clazzUid
+                this.cbEntityUid = caUid
+                cbDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
+                this.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                this.cbUid = dbRule.repo.courseBlockDao.insert(this)
+            }
         }
 
         StatementEntity().apply {

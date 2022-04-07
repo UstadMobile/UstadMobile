@@ -48,7 +48,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                                                      DefaultNewCommentItemListener(di, context,
                                                              arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
                                                              ClazzAssignment.TABLE_ID, true))
-    : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner){
+    : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignmentWithCourseBlock>(context, arguments, view, di, lifecycleOwner){
 
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
@@ -62,19 +62,19 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         return false
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignment? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignmentWithCourseBlock? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         val clazzAssignment = db.onRepoWithFallbackToDb(2000){
-            it.clazzAssignmentDao.findByUidAsync(entityUid)
-        } ?: ClazzAssignment()
+            it.clazzAssignmentDao.findByUidWithBlockAsync(entityUid)
+        } ?: ClazzAssignmentWithCourseBlock()
 
         loadAssignment(clazzAssignment, db)
 
         return clazzAssignment
     }
 
-    private suspend fun loadAssignment(clazzAssignment: ClazzAssignment, db: UmAppDatabase) {
+    private suspend fun loadAssignment(clazzAssignment: ClazzAssignmentWithCourseBlock, db: UmAppDatabase) {
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
@@ -131,10 +131,10 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         }
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): ClazzAssignment? {
+    override fun onLoadFromJson(bundle: Map<String, String>): ClazzAssignmentWithCourseBlock? {
         super.onLoadFromJson(bundle)
 
-        val entity = safeParse(di, ClazzAssignment.serializer(), bundle[UstadEditView.ARG_ENTITY_JSON].toString())
+        val entity = safeParse(di, ClazzAssignmentWithCourseBlock.serializer(), bundle[UstadEditView.ARG_ENTITY_JSON].toString())
         presenterScope.launch {
             loadAssignment(entity, db)
         }
@@ -155,16 +155,16 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
     }
 
 
-    private fun hasPassedDeadline(course: ClazzAssignment): Boolean {
+    private fun hasPassedDeadline(course: ClazzAssignmentWithCourseBlock): Boolean {
         val currentTime = systemTimeInMillis()
         return when (course.caEditAfterSubmissionType) {
             ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_DEADLINE -> {
-                currentTime > course.caDeadlineDate
+                currentTime > (course.block?.cbDeadlineDate ?: Long.MAX_VALUE)
             }
             ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_GRACE -> {
-                currentTime > course.caGracePeriodDate
+                currentTime > (course.block?.cbGracePeriodDate ?: Long.MAX_VALUE)
             }
-            else -> currentTime > course.caDeadlineDate
+            else -> currentTime > (course.block?.cbDeadlineDate ?: Long.MAX_VALUE)
         }
     }
 

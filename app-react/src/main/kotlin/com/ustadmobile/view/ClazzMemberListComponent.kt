@@ -85,6 +85,12 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
                 field = value
             }
         }
+    override var termMap: Map<String, String>? = null
+        set(value) {
+            setState{
+                field = value
+            }
+        }
 
     private var filterByClazzUid: Long = 0
 

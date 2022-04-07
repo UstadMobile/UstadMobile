@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.impl
 
-import SelectFolderView
 import androidx.annotation.Keep
 import com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
 import com.toughra.ustadmobile.R
@@ -36,7 +35,11 @@ class ViewNameToDestMap: DestinationProvider {
             SchoolMemberListView.VIEW_NAME to UstadDestination(R.id.schoolmember_list_dest),
             ClazzAssignmentEditView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            CourseBlockEditView.VIEW_NAME to UstadDestination(R.id.course_block_edit_dest,
+            ModuleCourseBlockEditView.VIEW_NAME to UstadDestination(R.id.module_course_block_edit_dest,
+                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
+            CourseTerminologyListView.VIEW_NAME to UstadDestination(R.id.course_terminology_list_dest,
+                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
+            CourseTerminologyEditView.VIEW_NAME to UstadDestination(R.id.course_terminology_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             ClazzAssignmentDetailView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_detail_dest),
             ClazzAssignmentDetailStudentProgressView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_detail_student_progress),
@@ -100,6 +103,9 @@ class ViewNameToDestMap: DestinationProvider {
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
                 hideAccountIcon = true),
             TextAssignmentEditView.VIEW_NAME to UstadDestination(R.id.text_assignment_edit_dest,
+                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
+                    hideAccountIcon = true),
+            TextCourseBlockEditView.VIEW_NAME to UstadDestination(R.id.text_course_block_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true,
                     hideAccountIcon = true),
             SiteTermsDetailView.VIEW_NAME to UstadDestination(R.id.site_terms_detail_dest),

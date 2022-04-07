@@ -14,7 +14,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 
-class DefaultContentEntryListItemListener(var view: ContentEntryList2View? = null,
+class DefaultContentEntryListItemListener(var view: UstadView? = null,
                                           var presenter: ContentEntryList2Presenter? = null,
                                           var mListMode: ListViewMode = ListViewMode.BROWSER,
                                           var clazzUid: Long,

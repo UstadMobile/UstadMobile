@@ -14,14 +14,12 @@ import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
-import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.SelectFileView.Companion.ARG_MIMETYPE_SELECTED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -165,13 +163,19 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     fun givenClazzAssignment_whenTeacherViews_thenDontShowScoreAndPrivateComments(){
         createPerson(true)
 
-        val testEntity = ClazzAssignment().apply {
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
             caClazzUid = testClazz.clazzUid
             caRequireFileSubmission = true
             caPrivateCommentsEnabled = true
             caNumberOfFiles = 3
             caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                this.cbClazzUid = testClazz.clazzUid
+                this.cbEntityUid = caUid
+                this.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                this.cbUid = repo.courseBlockDao.insert(this)
+            }
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
@@ -199,7 +203,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         createPerson(false)
 
-        val testEntity = ClazzAssignment().apply {
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
             caClazzUid = testClazz.clazzUid
             caRequireFileSubmission = true
@@ -207,6 +211,12 @@ class ClazzAssignmentDetailOverviewPresenterTest {
             caNumberOfFiles = 3
             caFileType = ClazzAssignment.FILE_TYPE_VIDEO
             caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                this.cbClazzUid = testClazz.clazzUid
+                this.cbEntityUid = caUid
+                this.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                this.cbUid = repo.courseBlockDao.insert(this)
+            }
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
@@ -231,7 +241,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     fun givenUserClicksSubmitButton_whenClicked_thenShouldCreateStatement(){
 
         createPerson(false)
-        val testEntity = ClazzAssignment().apply {
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
             caClazzUid = testClazz.clazzUid
             caRequireFileSubmission = true
@@ -239,6 +249,12 @@ class ClazzAssignmentDetailOverviewPresenterTest {
             caNumberOfFiles = 3
             caFileType = ClazzAssignment.FILE_TYPE_VIDEO
             caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                this.cbClazzUid = testClazz.clazzUid
+                this.cbEntityUid = caUid
+                this.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                this.cbUid = repo.courseBlockDao.insert(this)
+            }
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
@@ -274,7 +290,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     fun givenUserClicksOpenFileSubmission_whenClicked_thenShouldOpen(){
 
         createPerson(false)
-        val testEntity = ClazzAssignment().apply {
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
             caClazzUid = testClazz.clazzUid
             caRequireFileSubmission = true
@@ -282,6 +298,12 @@ class ClazzAssignmentDetailOverviewPresenterTest {
             caNumberOfFiles = 3
             caFileType = ClazzAssignment.FILE_TYPE_VIDEO
             caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                this.cbClazzUid = testClazz.clazzUid
+                this.cbEntityUid = caUid
+                this.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                this.cbUid = repo.courseBlockDao.insert(this)
+            }
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
@@ -314,7 +336,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     fun givenUserClicksDeleteFileSubmission_whenClicked_thenShouldDeleteFile(){
 
         createPerson(false)
-        val testEntity = ClazzAssignment().apply {
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
             caClazzUid = testClazz.clazzUid
             caRequireFileSubmission = true
@@ -322,6 +344,12 @@ class ClazzAssignmentDetailOverviewPresenterTest {
             caNumberOfFiles = 3
             caFileType = ClazzAssignment.FILE_TYPE_VIDEO
             caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                this.cbClazzUid = testClazz.clazzUid
+                this.cbEntityUid = caUid
+                this.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                this.cbUid = repo.courseBlockDao.insert(this)
+            }
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())

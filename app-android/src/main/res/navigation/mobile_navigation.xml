@@ -135,8 +135,16 @@
 
 
     <fragment
-        android:id="@+id/course_block_edit_dest"
-        android:name="com.ustadmobile.port.android.view.CourseBlockEditFragment" />
+        android:id="@+id/module_course_block_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ModuleCourseBlockEditFragment" />
+
+    <fragment
+        android:id="@+id/course_terminology_list_dest"
+        android:name="com.ustadmobile.port.android.view.CourseTerminologyListFragment"/>
+
+    <fragment
+        android:id="@+id/course_terminology_edit_dest"
+        android:name="com.ustadmobile.port.android.view.CourseTerminologyEditFragment"/>
 
     <fragment
         android:id="@+id/clazz_assignment_edit_dest"
@@ -352,6 +360,10 @@
     <fragment
         android:id="@+id/text_assignment_edit_dest"
         android:name="com.ustadmobile.port.android.view.TextAssignmentEditFragment" />
+
+    <fragment
+        android:id="@+id/text_course_block_edit_dest"
+        android:name="com.ustadmobile.port.android.view.TextCourseBlockEditFragment" />
 
     <fragment
         android:id="@+id/register_minor_wait_for_parent_dest"

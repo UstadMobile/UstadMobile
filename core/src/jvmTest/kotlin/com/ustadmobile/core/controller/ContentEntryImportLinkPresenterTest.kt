@@ -11,6 +11,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -72,17 +73,21 @@ class ContentEntryImportLinkPresenterTest {
         val accountManager: UstadAccountManager by di.instance()
         accountManager.activeEndpoint = Endpoint(mockWebServer.url("/").toString())
 
-        presenter = ContentEntryImportLinkPresenter(context,
-            mapOf(UstadView.ARG_RESULT_DEST_KEY to resultKey,
-                UstadView.ARG_RESULT_DEST_VIEWNAME to ContentEntryImportLinkView.VIEW_NAME),
-            mockView, di)
+
     }
 
     @Test
     fun givenPresenterCreated_whenUserEntersLinkAndIsValid_thenReturnToPreviousScreen() {
+
+        presenter = ContentEntryImportLinkPresenter(context,
+            mapOf(UstadView.ARG_RESULT_DEST_KEY to resultKey,
+                UstadView.ARG_RESULT_DEST_VIEWNAME to ContentEntryEdit2View.VIEW_NAME),
+            mockView, di)
+
+
         val navController: UstadNavController = di.direct.instance()
 
-        whenever(navController.getBackStackEntry(eq(ContentEntryImportLinkView.VIEW_NAME)))
+        whenever(navController.getBackStackEntry(eq(ContentEntryEdit2View.VIEW_NAME)))
             .thenReturn(ustadBackStackEntry)
 
         val metadataResult = MetadataResult(ContentEntryWithLanguage(),EpubTypePluginCommonJvm.PLUGIN_ID)
@@ -105,6 +110,12 @@ class ContentEntryImportLinkPresenterTest {
 
     @Test
     fun givenPresenterCreated_whenUserEntersLinkAndIsInValid_thenShowError() {
+
+        presenter = ContentEntryImportLinkPresenter(context,
+            mapOf(UstadView.ARG_RESULT_DEST_KEY to resultKey,
+                UstadView.ARG_RESULT_DEST_VIEWNAME to ContentEntryImportLinkView.VIEW_NAME),
+            mockView, di)
+
 
         var response = MockResponse().setResponseCode(400)
         mockWebServer.enqueue(response)

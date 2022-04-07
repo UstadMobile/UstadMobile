@@ -8,9 +8,11 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
@@ -25,10 +27,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.instance
-import org.kodein.di.singleton
+import org.kodein.di.*
 import java.lang.Thread.sleep
 
 class ContentEntryDetailOverviewPresenterTest {
@@ -62,6 +61,8 @@ class ContentEntryDetailOverviewPresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
+
+
 
         di = DI {
             import(ustadTestRule.diModule)
@@ -121,9 +122,12 @@ class ContentEntryDetailOverviewPresenterTest {
 
         presenter.handleClickEdit()
 
-        verify(systemImpl).go(eq(ContentEntryEdit2View.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString(),
-                UstadView.ARG_LEAF to true.toString())), any())
+        val testNavController: UstadNavController = di.direct.instance()
+
+        verify(testNavController).navigate(eq(ContentEntryEdit2View.VIEW_NAME),
+            eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString(),
+            UstadView.ARG_LEAF to true.toString())), any())
+
     }
 
     @Test

@@ -5,7 +5,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.door.ObserverFnWrapper
-import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.FieldLabel
@@ -21,7 +21,7 @@ import react.setState
 import styled.css
 import styled.styledDiv
 
-class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAssignment>(mProps),
+class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAssignmentWithCourseBlock>(mProps),
     ClazzAssignmentEditView {
 
     private var mPresenter: ClazzAssignmentEditPresenter? = null
@@ -29,7 +29,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
     override val viewNames: List<String>
         get() = listOf(ClazzAssignmentEditView.VIEW_NAME)
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzAssignment>?
+    override val mEditPresenter: UstadEditPresenter<*, ClazzAssignmentWithCourseBlock>?
         get() = mPresenter
 
     private var contentList: List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> = listOf()
@@ -152,7 +152,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
             }
         }
 
-    override var entity: ClazzAssignment? = null
+    override var entity: ClazzAssignmentWithCourseBlock? = null
         get() = field
         set(value) {
             setState {
@@ -197,11 +197,11 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 label = "${startDateLabel.text}",
                                 error = startDateLabel.error,
                                 helperText = startDateLabel.errorText,
-                                value = entity?.caStartDate.toDate(true),
+                                value = entity?.block?.cbHideUntilDate.toDate(true),
                                 inputVariant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        entity?.caStartDate = it.getTime().toLong()
+                                        entity?.block?.cbHideUntilDate = it.getTime().toLong()
                                         caStartDateError = null
                                     }
                                 })
@@ -213,11 +213,11 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 label = "${startTimeLabel.text}",
                                 error = startTimeLabel.error,
                                 helperText = startTimeLabel.errorText,
-                                value = entity?.caStartDate.toDate(true),
+                                value = entity?.block?.cbHideUntilDate.toDate(true),
                                 inputVariant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        entity?.caStartDate =  it.getTime().toLong()
+                                        entity?.block?.cbHideUntilDate =  it.getTime().toLong()
                                     }
                                 })
                         }
@@ -242,11 +242,11 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 label = "${deadlineDateLabel.text}",
                                 error = deadlineDateLabel.error,
                                 helperText = deadlineDateLabel.errorText,
-                                value = entity?.caDeadlineDate.toDate(true),
+                                value = entity?.block?.cbDeadlineDate.toDate(true),
                                 inputVariant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        entity?.caDeadlineDate = it.getTime().toLong()
+                                        entity?.block?.cbDeadlineDate = it.getTime().toLong()
                                         caDeadlineError = null
                                     }
                                 })
@@ -258,11 +258,11 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 label = "${deadlineTimeLabel.text}",
                                 error = deadlineTimeLabel.error,
                                 helperText = deadlineTimeLabel.errorText,
-                                value = entity?.caDeadlineDate.toDate(true),
+                                value = entity?.block?.cbDeadlineDate.toDate(true),
                                 inputVariant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        entity?.caDeadlineDate =  it.getTime().toLong()
+                                        entity?.block?.cbDeadlineDate =  it.getTime().toLong()
                                     }
                                 })
                         }
@@ -297,11 +297,11 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                         label = "${endOfGraceLabel.text}",
                                         error = endOfGraceLabel.error,
                                         helperText = endOfGraceLabel.errorText,
-                                        value = entity?.caGracePeriodDate.toDate(true),
+                                        value = entity?.block?.cbGracePeriodDate.toDate(true),
                                         inputVariant = FormControlVariant.outlined,
                                         onChange = {
                                             setState {
-                                                entity?.caGracePeriodDate = it.getTime().toLong()
+                                                entity?.block?.cbGracePeriodDate = it.getTime().toLong()
                                                 caGracePeriodError = null
                                             }
                                         })
@@ -313,11 +313,11 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                     label = "${endOgraceTimeLabel.text}",
                                     error = endOgraceTimeLabel.error,
                                     helperText = endOgraceTimeLabel.errorText,
-                                    value = entity?.caGracePeriodDate.toDate(true),
+                                    value = entity?.block?.cbGracePeriodDate.toDate(true),
                                     inputVariant = FormControlVariant.outlined,
                                     onChange = {
                                         setState {
-                                            entity?.caGracePeriodDate = entity?.caGracePeriodDate ?: 0 + it.getTime().toLong()
+                                            entity?.block?.cbGracePeriodDate = entity?.block?.cbGracePeriodDate ?: 0 + it.getTime().toLong()
                                         }
                                     })
                             }
@@ -337,13 +337,13 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         umOutlinedInput(
                             id = penaltyLabel.id,
                             label = "${penaltyLabel.text}",
-                            value = entity?.caLateSubmissionPenalty.toString(),
+                            value = entity?.block?.cbLateSubmissionPenalty.toString(),
                             error = penaltyLabel.error,
                             type = InputType.number,
                             disabled = !fieldsEnabled,
                             onChange = {
                                 setState {
-                                    entity?.caLateSubmissionPenalty = it.toInt()
+                                    entity?.block?.cbLateSubmissionPenalty = it.toInt()
                                 }
                             }) {
                             attrs.endAdornment = umTypography("%")

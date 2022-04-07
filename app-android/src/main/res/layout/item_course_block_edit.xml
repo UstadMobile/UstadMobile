@@ -6,6 +6,7 @@
     <data>
         <import type="com.ustadmobile.core.util.TreeOneToManyJoinEditListener"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlockWithEntity"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
         <import type="com.ustadmobile.port.android.view.ClazzEditFragment"/>
 
         <variable
@@ -51,8 +52,8 @@
             android:layout_height="@dimen/dimen_24dp"
             app:tint="?colorOnIconTint"
             app:courseBlockIndent="@{block.cbIndentLevel}"
-            app:imageLookupKey="@{block.cbType}"
-            app:imageLookupMap="@{ClazzEditFragment.BLOCK_ICON_MAP}"
+            app:imageLookupKey="@{block.cbType == CourseBlock.BLOCK_CONTENT_TYPE ? block.entry.contentTypeFlag : block.cbType}"
+            app:imageLookupMap="@{ClazzEditFragment.BLOCK_WITH_ENTRY_MAP}"
             app:layout_constraintStart_toEndOf="@id/item_course_block_reorder"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -61,7 +62,7 @@
         <!-- Line 1-->
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-            android:id="@+id/item_schedule_line1_text"
+            android:id="@+id/item_course_block_line1_text"
             android:text="@{block.cbTitle}"
             android:onClick="@{() -> oneToManyJoinListener.onClickEdit(block)}"
             tools:text="Module"

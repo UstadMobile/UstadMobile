@@ -4,14 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.CourseBlockWithEntity"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
         <import type="com.ustadmobile.port.android.view.ClazzEditFragment"/>
         <import type="android.view.View"/>
 
         <variable
             name="block"
-            type="CourseBlockWithEntity" />
+            type="CourseBlockWithCompleteEntity" />
+
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ClazzDetailOverviewPresenter" />
 
     </data>
 
@@ -66,17 +70,17 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_course_block_download"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingEnd="@dimen/dimen_16dp"
-            android:paddingStart="0dp"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:layout_margin="@dimen/dimen_8dp"
             android:tint="?colorOnIconTint"
+            android:padding="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:srcCompat="@drawable/ic_file_download_black_24dp"
-            android:contentDescription="@string/download"
-            android:visibility="@{block.cbType == CourseBlock.BLOCK_CONTENT_TYPE ? View.VISIBLE : View.GONE}"
+            tools:src="@drawable/ic_arrow_drop_up_black_24dp"
+            android:onClick="@{() -> presenter.handleModuleExpandCollapseClicked(block)}"
+            app:fallbackDrawable="@{block.expanded ? @drawable/ic_arrow_drop_up_black_24dp : @drawable/ic_arrow_drop_down_black_24dp}"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

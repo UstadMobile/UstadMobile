@@ -8,10 +8,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.ClazzAssignmentDetailStudentProgressScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -71,13 +68,20 @@ class ClazzAssignmentDetailStudentProgressFragmentTest : TestCase()  {
             clazzEnrolmentUid = dbRule.repo.clazzEnrolmentDao.insert(this)
         }
 
-        val clazzAssignment = ClazzAssignment().apply {
+        val clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
             caTitle = "New Clazz Assignment"
             caDescription = "complete quiz"
-            caDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
+
             caClazzUid = testClazz.clazzUid
             caRequireFileSubmission = false
             caUid = dbRule.repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                this.cbClazzUid = testClazz.clazzUid
+                this.cbEntityUid = caUid
+                this.cbDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
+                this.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                this.cbUid = dbRule.repo.courseBlockDao.insert(this)
+            }
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,

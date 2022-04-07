@@ -35,8 +35,10 @@ import java.io.File
 interface ClazzEditFragmentEventHandler {
 
     fun onAddCourseBlockClicked()
+
+    fun handleAttendanceClicked(isChecked: Boolean)
 }
-class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(),
+class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolAndTerminology>(),
         ClazzEdit2View, ClazzEditFragmentEventHandler,
         TitleDescBottomSheetOptionSelectedListener {
 
@@ -45,7 +47,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     private var mPresenter: ClazzEdit2Presenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendarAndSchool>?
+    override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendarAndSchoolAndTerminology>?
         get() = mPresenter
 
     private var scheduleRecyclerAdapter: ScheduleRecyclerAdapter? = null
@@ -67,7 +69,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
     }
 
     private val courseBlockObserver = Observer<List<CourseBlockWithEntity>?> {
-        t -> courseBlockRecyclerAdapter?.submitList(t)
+        t -> courseBlockRecyclerAdapter?.dataSet = t
     }
 
     override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
@@ -182,7 +184,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
 
 
-    override var entity: ClazzWithHolidayCalendarAndSchool? = null
+    override var entity: ClazzWithHolidayCalendarAndSchoolAndTerminology? = null
         get() = field
         set(value) {
             mDataBinding?.clazz = value
@@ -274,12 +276,11 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
                 TitleDescBottomSheetOption(
                         requireContext().getString(R.string.assignments),
                         requireContext().getString(R.string.add_assignment_block_content_desc),
-                        CourseBlock.BLOCK_ASSIGNMENT_TYPE),
-                TitleDescBottomSheetOption(
+                        CourseBlock.BLOCK_ASSIGNMENT_TYPE)
+               /* TitleDescBottomSheetOption(
                         requireContext().getString(R.string.discussion_board),
                         requireContext().getString(R.string.add_discussion_board_desc),
-                        CourseBlock.BLOCK_DISCUSSION_TYPE),
-
+                        CourseBlock.BLOCK_DISCUSSION_TYPE),*/
         )
 
         mPresenter?.onCreate(backStackSavedState)
@@ -291,11 +292,18 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         sheet.show(childFragmentManager, sheet.tag)
     }
 
+    override fun handleAttendanceClicked(isChecked: Boolean) {
+        val clazz = mDataBinding?.clazz
+        clazz?.clazzFeatures = if(isChecked) Clazz.CLAZZ_FEATURE_ATTENDANCE else 0
+        mDataBinding?.clazz = clazz
+    }
+
     override fun onBottomSheetOptionSelected(optionSelected: TitleDescBottomSheetOption) {
         when(optionSelected.optionCode) {
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> mPresenter?.handleClickAddAssignment()
             CourseBlock.BLOCK_MODULE_TYPE -> mPresenter?.handleClickAddModule()
             CourseBlock.BLOCK_CONTENT_TYPE -> mPresenter?.handleClickAddContent()
+            CourseBlock.BLOCK_TEXT_TYPE -> mPresenter?.handleClickAddText()
         }
     }
 
@@ -319,6 +327,10 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             CourseBlock.BLOCK_CONTENT_TYPE to R.drawable.video_youtube,
             CourseBlock.BLOCK_TEXT_TYPE to R.drawable.ic_baseline_title_24
         )
+
+        @JvmField
+        val BLOCK_WITH_ENTRY_MAP = BLOCK_ICON_MAP + ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP
+
 
         val DIFF_CALLBACK_SCHEDULE: DiffUtil.ItemCallback<Schedule> = object: DiffUtil.ItemCallback<Schedule>() {
             override fun areItemsTheSame(oldItem: Schedule, newItem: Schedule): Boolean {

@@ -83,10 +83,10 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
         SELECT * 
           FROM CourseBlock 
                LEFT JOIN ClazzAssignment as assignment
-               ON assignment.caUid = CourseBlock.cbTableUid
+               ON assignment.caUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                LEFT JOIN ContentEntry as entry
-               ON entry.contentEntryUid = CourseBlock.cbTableUid
+               ON entry.contentEntryUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
          WHERE cbClazzUid = :clazzUid
            AND cbActive
@@ -95,24 +95,154 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
     abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntity>
 
     @Query("""
-        SELECT * 
+         WITH CtePermissionCheck (hasPermission) 
+            AS (SELECT EXISTS( 
+               SELECT PrsGrpMbr.groupMemberPersonUid
+                  FROM Clazz
+                       ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                          ${Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS}
+                          ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
+                 WHERE Clazz.clazzUid = :clazzUid
+                   AND PrsGrpMbr.groupMemberPersonUid = :personUid))
+
+        SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, ContentEntryParentChildJoin.*, 
+               Container.*, CourseAssignmentMark.*, (CourseBlock.cbUid NOT IN (:collapseList)) AS expanded,
+               
+               COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
+                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+                COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                
+                COALESCE((CASE WHEN StatementEntity.resultCompletion 
+                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                
+                0 AS assignmentContentWeight,
+                1 as totalContent, 
+                0 as penalty,
+                
+                (SELECT hasPermission FROM CtePermissionCheck) AS hasMetricsPermission,
+                 (SELECT COUNT(*) 
+                        FROM ClazzEnrolment 
+                        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid 
+                        AND ClazzEnrolment.clazzEnrolmentActive 
+                        AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                        AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
+                        AS totalStudents, 
+ 
+               0 AS notSubmittedStudents,
+               
+               (CASE WHEN (SELECT hasPermission 
+                          FROM CtePermissionCheck)
+                     THEN (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casStudentUid)
+                         FROM ClazzEnrolment
+                              JOIN CourseAssignmentSubmission
+                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentSubmission.casStudentUid
+                              AND ClazzAssignment.caUid = CourseAssignmentSubmission.casAssignmentUid
+                             
+                              LEFT JOIN CourseAssignmentMark
+                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
+                              AND ClazzAssignment.caUid = CourseAssignmentMark.camAssignmentUid
+                              
+                        WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                          AND ClazzEnrolment.clazzEnrolmentActive
+                          AND CourseAssignmentMark.camUid IS NULL
+                          AND ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
+                          AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
+                ELSE 0 END) AS submittedStudents,         
+               
+                (CASE WHEN (SELECT hasPermission 
+                           FROM CtePermissionCheck)
+                   THEN (SELECT COUNT(DISTINCT(CourseAssignmentMark.camStudentUid)) 
+                           FROM CourseAssignmentMark 
+                                JOIN ClazzEnrolment
+                                ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
+                                
+                          WHERE CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
+                            AND ClazzEnrolment.clazzEnrolmentActive
+                            AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                            AND ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
+                            AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
+                   ELSE 0 END) AS markedStudents,
+                   
+                   (CASE WHEN CourseAssignmentMark.camAssignmentUid IS NOT NULL 
+                             THEN ${CourseAssignmentSubmission.MARKED}
+                             ELSE ${CourseAssignmentSubmission.SUBMITTED} 
+                             END) AS fileSubmissionStatus
+                
           FROM CourseBlock 
-               LEFT JOIN ClazzAssignment as assignment
-               ON assignment.caUid = CourseBlock.cbTableUid
+          
+               LEFT JOIN CourseBlock AS parentBlock
+               ON CourseBlock.cbModuleParentBlockUid = parentBlock.cbUid
+               AND CourseBlock.cbTYpe != ${CourseBlock.BLOCK_MODULE_TYPE}
+          
+               LEFT JOIN ClazzAssignment
+               ON ClazzAssignment.caUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-               LEFT JOIN ContentEntry as entry
-               ON entry.contentEntryUid = CourseBlock.cbTableUid
+               
+               LEFT JOIN ContentEntry
+               ON ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
+               AND NOT ceInactive
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
-         WHERE cbClazzUid = :clazzUid
-           AND cbActive
-           AND NOT cbHidden
-      ORDER BY cbIndex
+               
+               LEFT JOIN ContentEntryParentChildJoin 
+               ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
+               
+               LEFT JOIN Container 
+                    ON Container.containerUid = 
+                        (SELECT containerUid 
+                           FROM Container 
+                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
+                       ORDER BY cntLastModified DESC LIMIT 1)
+                       
+              LEFT JOIN StatementEntity
+				     ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :personUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC, 
+                                        extensionProgress DESC, 
+                                        resultSuccess DESC 
+                                  LIMIT 1)         
+               LEFT JOIN CourseAssignmentMark
+                      ON camUid = (SELECT camUid 
+                                     FROM CourseAssignmentMark
+                                    WHERE camAssignmentUid = ClazzAssignment.caUid
+                                      AND camStudentUid = :personUid
+                                 ORDER BY camLct DESC
+                                    LIMIT 1)
+         WHERE CourseBlock.cbClazzUid = :clazzUid
+           AND CourseBlock.cbActive
+           AND NOT CourseBlock.cbHidden
+           AND :currentTime > CourseBlock.cbHideUntilDate     
+           AND CourseBlock.cbModuleParentBlockUid NOT IN (:collapseList)
+      ORDER BY CourseBlock.cbIndex
     """)
-    abstract fun findAllCourseBlockByClazzUidLive(clazzUid: Long): DoorDataSourceFactory<Int, CourseBlockWithEntity>
+    @QueryLiveTables(value = ["CourseBlock", "ClazzAssignment",
+        "ContentEntry", "CourseAssignmentMark","StatementEntity",
+        "Container","ContentEntryParentChildJoin","PersonGroupMember",
+        "Clazz","ScopedGrant","ClazzEnrolment","CourseAssignmentSubmission"])
+    abstract fun findAllCourseBlockByClazzUidLive(clazzUid: Long,
+                                                  personUid: Long,
+                                                  collapseList: List<Long>,
+                                                  currentTime: Long):
+            DoorDataSourceFactory<Int, CourseBlockWithCompleteEntity>
 
 
-    override suspend fun deactivateByUids(uidList: List<Long>){
+    @Query("""
+        UPDATE CourseBlock 
+           SET cbActive = :active, 
+               cbLct = :changeTime
+         WHERE cbUid = :cbUid""")
+    abstract fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
+    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
+        uidList.forEach {
+            updateActiveByUid(it, false, changeTime)
+        }
     }
 
 }

@@ -9,7 +9,7 @@ import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
-import com.ustadmobile.core.view.CourseBlockEditView
+import com.ustadmobile.core.view.ModuleCourseBlockEditView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -21,9 +21,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
-class CourseBlockEditPresenter(context: Any, args: Map<String, String>, view: CourseBlockEditView,
-                            di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadEditPresenter<CourseBlockEditView, CourseBlock>(context, args, view, di, lifecycleOwner) {
+class ModuleCourseBlockEditPresenter(context: Any, args: Map<String, String>, view: ModuleCourseBlockEditView,
+                                     di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<ModuleCourseBlockEditView, CourseBlock>(context, args, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -38,8 +38,7 @@ class CourseBlockEditPresenter(context: Any, args: Map<String, String>, view: Co
             cbUid = db.doorPrimaryKeyManager.nextIdAsync(CourseBlock.TABLE_ID)
             cbClazzUid = clazzUid
             cbType = CourseBlock.BLOCK_MODULE_TYPE
-            cbTableUid = cbUid
-            cbTableId = CourseBlock.TABLE_ID
+            cbEntityUid = cbUid
         }
 
         val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
@@ -49,11 +48,11 @@ class CourseBlockEditPresenter(context: Any, args: Map<String, String>, view: Co
         val timeZone = clazzWithSchool.effectiveTimeZone()
         view.timeZone = timeZone
 
-        if(entity.cbStartDate != 0L){
-            val startDateTimeMidnight = DateTime(entity.cbStartDate)
+        if(entity.cbHideUntilDate != 0L){
+            val startDateTimeMidnight = DateTime(entity.cbHideUntilDate)
                 .toLocalMidnight(timeZone).unixMillisLong
             view.startDate = startDateTimeMidnight
-            view.startTime = entity.cbStartDate - startDateTimeMidnight
+            view.startTime = entity.cbHideUntilDate - startDateTimeMidnight
         }else{
             view.startDate = 0L
         }
@@ -80,11 +79,11 @@ class CourseBlockEditPresenter(context: Any, args: Map<String, String>, view: Co
             val timeZone = clazzWithSchool.effectiveTimeZone()
             view.timeZone = timeZone
 
-            if(entity.cbStartDate != 0L){
-                val startDateTimeMidnight = DateTime(entity.cbStartDate)
+            if(entity.cbHideUntilDate != 0L){
+                val startDateTimeMidnight = DateTime(entity.cbHideUntilDate)
                     .toLocalMidnight(timeZone).unixMillisLong
                 view.startDate = startDateTimeMidnight
-                view.startTime = entity.cbStartDate - startDateTimeMidnight
+                view.startTime = entity.cbHideUntilDate - startDateTimeMidnight
             }else{
                 view.startDate = 0L
             }
@@ -102,7 +101,7 @@ class CourseBlockEditPresenter(context: Any, args: Map<String, String>, view: Co
             }
 
             val timeZone = view.timeZone ?: "UTC"
-            entity.cbStartDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+            entity.cbHideUntilDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
                 .localMidnight.utc.unixMillisLong + view.startTime
 
             finishWithResult(safeStringify(di,

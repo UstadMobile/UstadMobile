@@ -23,7 +23,11 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, view: ClazzMemberListView,
                                di: DI, lifecycleOwner: DoorLifecycleOwner)
@@ -34,6 +38,9 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
+
+    val json: Json by di.instance()
+
 
     var searchText: String? = null
 
@@ -59,6 +66,14 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
         view.addStudentVisible = db.clazzDao.personHasPermissionWithClazz(mLoggedInPersonUid,
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_STUDENT)
+
+        val terminology = db.courseTerminologyDao.getTerminologyForClazz(filterByClazzUid)
+        val termMap = terminology?.ctTerminology?.let {
+            json.decodeFromString(MapSerializer(String.serializer(), String.serializer()),
+                it
+            )
+        } ?: mapOf()
+        view.termMap = termMap
 
         selectedSortOption = SORT_OPTIONS[0]
         view.listFilterOptionChips = FILTER_OPTIONS.toListFilterOptions(context, di)
