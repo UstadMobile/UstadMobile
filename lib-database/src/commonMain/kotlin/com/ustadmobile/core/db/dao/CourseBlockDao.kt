@@ -1,8 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
@@ -77,6 +75,9 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
 
     @Update
     abstract suspend fun updateAsync(entity: CourseBlock): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun replaceListAsync(list: List<CourseBlock>)
 
 
     @Query("""
@@ -217,7 +218,8 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND CourseBlock.cbActive
            AND NOT CourseBlock.cbHidden
-           AND :currentTime > CourseBlock.cbHideUntilDate     
+           AND :currentTime > CourseBlock.cbHideUntilDate
+           AND :currentTime > COALESCE(parentBlock.cbHideUntilDate,0)
            AND CourseBlock.cbModuleParentBlockUid NOT IN (:collapseList)
       ORDER BY CourseBlock.cbIndex
     """)

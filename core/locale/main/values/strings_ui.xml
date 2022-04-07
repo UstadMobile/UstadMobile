@@ -329,7 +329,6 @@
     <string name="xapi_score">Score (%)</string>
     <string name="import_title_not_entered">Title not entered</string>
 
-    <string name="standard">Standard</string>
 
     <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>
@@ -400,7 +399,6 @@
     <string name="log">Log</string>
     <!-- Schedule generally refers to the schedule for a class e.g. every monday at 2pm -->
     <string name="schedule">Schedule</string>
-
     <string name="add_a_schedule">Add a schedule</string>
     <string name="edit_schedule">Edit schedule</string>
     <string name="first">first</string>
@@ -655,6 +653,11 @@
     <string name="feedback_thanks">Thank you for the feedback.</string>
     <string name="start_date">Start date</string>
     <string name="end_date">End date</string>
+
+
+    <!--
+    Used in the context of showing when a topic, post, or user was most recently active.
+    -->
     <string name="last_active">Last active</string>
     <string name="save">Save</string>
     <string name="change_password">Change Password</string>
@@ -692,9 +695,7 @@
 
     <string name="course_leader">Course leader</string>
 
-    <!-- used to show what group a member of a course would be in. The
-  %1$s% will be replaced with the number of the group-->
-    <string name="group_number" formatted="false">Group %1$s</string>
+    <string name="unassigned">Unassigned</string>
 
     <!-- plurals are used to handle different languages that require special treatment
     e.g number 0 in arabic
@@ -847,9 +848,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="after_deadline_date_error">Must be after deadline date</string>
 
     <!-- score points gained from content -->
-    <string name="points_cap">Points</string>
-    <string name="points">points</string>
-
+    <string name="points">Points</string>
     <string name="minimum_score">Minimum score</string>
     <string name="automatic">Automatic</string>
     <string name="student_marks_content">Student marks themselves</string>
@@ -887,7 +886,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <!-- Used to show three quantities and names e.g. "5 oranges, 2 apples, 3 pears". %1$d etc
     will be replaced with the number and %2$s will be replaced with the name of the item-->
     <string name="three_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d %6$s</string>
-
     <string name="marking">Marking</string>
     <string name="return_and_mark_next">Return and mark next</string>
     <string name="return_only">Return and finish</string>
@@ -928,9 +926,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <!-- This is a code that the teacher can give to students to allow them to join the class -->
     <string name="class_code">Class code</string>
-
-    <!-- This is a code that the teacher can give to students to allow them to join the course -->
-    <string name="course_code">Course code</string>
 
     <!-- Pending requests - use on classes / schools to list people who have requested to join a class / school -->
     <string name="pending_requests">Pending requests</string>
@@ -1497,12 +1492,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="group">Group</string>
 
-    <string name="add_group">Add group</string>
-
-    <string name="edit_group">Edit group</string>
-
-    <string name="new_group_set">New group set</string>
-
     <!--
     Used for an option for teachers and admins for content to stay hidden for students until
     a certain date and time.
@@ -1589,7 +1578,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="penalty_label">If completed after deadline but before end of grace period</string>
     <string name="submissions">Submissions</string>
     <string name="add_text">Add text</string>
-    <string name="edit_text">Edit text</string>
 
 
     <!--
@@ -1640,9 +1628,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <!--Module is a subunit of a course -->
     <string name="edit_module">Edit module</string>
-
-    <!--Module is a subunit of a course -->
-    <string name="add_module">Add module</string>
 
     <string name="indent">Indent</string>
 
@@ -1801,10 +1786,51 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="past_enrolments">Past enrolments</string>
 
+    <string name="standard">Standard</string>
+
+    <!-- used to show what group a member of a course would be in. The
+    %1$s% will be replaced with the number of the group e.g. Group 1, Group 2, etc-->
+    <string name="group_number" formatted="false">Group %1$s</string>
+
+    <!-- This is a code that the teacher can give to students to allow them to join the course -->
+    <string name="course_code">Course code</string>
+
+    <string name="add_group">Add group</string>
+
+    <string name="edit_group">Edit group</string>
+
+    <string name="new_group_set">New group set</string>
+
+    <string name="edit_text">Edit text</string>
+
+    <!--Module is a subunit of a course -->
+    <string name="add_module">Add module</string>
+
     <string name="add_a_new_course">Add a new course</string>
     <string name="join_existing_course">Join existing course</string>
     <string name="edit_course">Edit course</string>
     <string name="currently_enrolled">Currently enrolled</string>
     <string name="past_enrollments">Past enrollments</string>
+
+    <string name="unread">Unread</string>
+    <string name="new_chat">New chat</string>
+    <string name="new_group">New group</string>
+    <string name="chat">Chat</string>
+    <string name="you">You</string>
+
+
+    <string name="edit_topic">Edit topic</string>
+
+    <!-- As per Microsoft Terminology:
+    Post: A message that appears in a newsgroup, public folder, or other forum, such as Facebook or Twitter,
+    accessible by a number of individuals.
+     -->
+    <string name="posts">Posts</string>
+
+    <!-- As per Microsoft Terminology:
+    Post: A message that appears in a newsgroup, public folder, or other forum, such as Facebook or Twitter,
+    accessible by a number of individuals.
+     -->
+    <string name="post">Post</string>
 
 </resources>

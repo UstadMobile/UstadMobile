@@ -692,6 +692,8 @@
 
     <string name="course_leader">Course leader</string>
 
+    <string name="unassigned">Unassigned</string>
+
     <!-- used to show what group a member of a course would be in. The
   %1$s% will be replaced with the number of the group-->
     <string name="group_number" formatted="false">Group %1$s</string>
@@ -847,7 +849,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="after_deadline_date_error">Must be after deadline date</string>
 
     <!-- score points gained from content -->
-    <string name="points_cap">Points</string>
     <string name="points">points</string>
 
     <string name="minimum_score">Minimum score</string>

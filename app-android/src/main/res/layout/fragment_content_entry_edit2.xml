@@ -7,6 +7,7 @@
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
         <import type="com.ustadmobile.core.impl.ContainerStorageDir" />
+        <import type="com.ustadmobile.core.util.ext.StringExtKt"/>
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
@@ -267,7 +268,7 @@
                 android:layout_marginHorizontal="@dimen/dimen_20dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintEnabled="true"
-                app:suffixText="@string/points_cap"
+                app:suffixText="@{StringExtKt.capitalizeFirstLetter(@string/points)}"
                 app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
                 android:enabled="@{fieldsEnabled}"
                 android:visibility="@{minScoreVisible ? View.VISIBLE : View.GONE}"

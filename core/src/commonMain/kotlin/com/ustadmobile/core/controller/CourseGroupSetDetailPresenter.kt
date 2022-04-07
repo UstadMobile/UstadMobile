@@ -33,7 +33,7 @@ class CourseGroupSetDetailPresenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         val entity = db.courseGroupSetDao.findByUidAsync(entityUid)
-        val groupMemberList = db.courseGroupMemberDao.findByGroupSetAsync(
+        val groupMemberList = db.courseGroupMemberDao.findByGroupSetOrderedAsync(
             entityUid, entity?.cgsClazzUid ?: 0L)
 
         val groupMap = groupMemberList.groupBy { it.member?.cgmGroupNumber }
@@ -41,7 +41,7 @@ class CourseGroupSetDetailPresenter(context: Any,
         groupMap.entries.forEach {
             memberList.add(CourseGroupMemberPerson().apply {
                 member = CourseGroupMember().apply {
-                    cgmGroupNumber = it.key ?: 1
+                    cgmGroupNumber = it.key ?: 0
                 }
             })
             memberList.addAll(it.value)

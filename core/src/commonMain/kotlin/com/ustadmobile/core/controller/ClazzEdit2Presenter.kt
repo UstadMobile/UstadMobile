@@ -441,6 +441,18 @@ class ClazzEdit2Presenter(context: Any,
                         .toOffsetByTimezone(entity.effectiveTimeZone).localEndOfDay.utc.unixMillisLong
             }
 
+            val courseBlockList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toList() ?: listOf()
+            var currentParentBlock: CourseBlock? = null
+            courseBlockList.forEachIndexed { index, item ->
+                item.cbIndex = index
+                if(item.cbType == CourseBlock.BLOCK_MODULE_TYPE){
+                    currentParentBlock = item
+                }else if(item.cbIndentLevel != 0){
+                    item.cbModuleParentBlockUid = currentParentBlock?.cbUid ?: 0L
+                }
+            }
+            courseBlockOneToManyJoinEditHelper.liveList.sendValue(courseBlockList)
+
             repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
 
                 if((arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() ?: 0L) == 0L) {
@@ -480,9 +492,11 @@ class ClazzEdit2Presenter(context: Any,
                     txDb.clazzAssignmentDao.updateAsync(assignment)
                 }
 
-                courseBlockOneToManyJoinEditHelper.commitToDatabase(txDb.courseBlockDao){
-                    it.cbClazzUid = entity.clazzUid
-                }
+                txDb.courseBlockDao.replaceListAsync(courseBlockList)
+                txDb.courseBlockDao.deactivateByUids(
+                    courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate,
+                    systemTimeInMillis())
+
             }
 
             UmPlatformUtil.runAsync {

@@ -74,13 +74,13 @@
             android:layout_height="@dimen/dimen_40dp"
             android:layout_margin="@dimen/dimen_8dp"
             android:tint="?colorOnIconTint"
-            android:padding="8dp"
+            android:padding="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            tools:src="@drawable/ic_arrow_drop_up_black_24dp"
+            tools:src="@drawable/ic_baseline_keyboard_arrow_up_24"
             android:onClick="@{() -> presenter.handleModuleExpandCollapseClicked(block)}"
-            app:fallbackDrawable="@{block.expanded ? @drawable/ic_arrow_drop_up_black_24dp : @drawable/ic_arrow_drop_down_black_24dp}"
+            app:fallbackDrawable="@{block.expanded ? @drawable/ic_baseline_keyboard_arrow_up_24 : @drawable/ic_baseline_keyboard_arrow_down_24}"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
