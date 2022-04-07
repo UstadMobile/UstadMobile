@@ -62,8 +62,8 @@
     <string name='select_language'>Pick Language</string>
     <string name="languages">Languages</string>
     <string name="edit_language">Edit Language</string>
-    <string name="two_letter_code">Two letter code (ISO 639ï¿½1)</string>
-    <string name="three_letter_code">Three letter code (ISO 639ï¿½2)</string>
+    <string name="two_letter_code">Two letter code (ISO 639–1)</string>
+    <string name="three_letter_code">Three letter code (ISO 639–2)</string>
     <string name="languages_description">Add, remove, and modify languages used for categorizing educational content and user preferences</string>
     <string name='advanced'>Advanced</string>
     <string name='optional'>Optional</string>
@@ -183,7 +183,7 @@
     <string name="download_continue_stacked_label">Continue download</string>
     <string name="download_continue_btn_label">Continue</string>
     <string name="download_wifi_only">WiFi only</string>
-    <string name="download_calculating">Calculatingï¿½</string>
+    <string name="download_calculating">Calculating…</string>
     <string name="download_state_download"><![CDATA[<b>Download</b>]]> total of %1$s items, they will use total of %2$s on your device storage.</string>
     <string name="download_state_downloading"><![CDATA[<b>Downloading</b>]]> total of %1$s items, which will be using total of %2$s on your device storage.</string>
     <string name="download_state_downloaded"><![CDATA[<b>Downloaded</b>]]> total of %1$s items, which are using about %2$s of your device storage.</string>
@@ -254,7 +254,7 @@
     <string name="last_two_week_date_range">Last two weeks</string>
     <string name="last_month_date_range">Last month</string>
     <string name="last_three_months_date_range">Last three months</string>
-    <string name="new_custom_date_range">New custom date rangeï¿½</string>
+    <string name="new_custom_date_range">New custom date range…</string>
     <string name="selected_custom_range">Custom range:  %1$s%</string>
 
     <string name="time_range">Time Range</string>
@@ -1282,7 +1282,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="add_subject">Add subject</string>
 
     <!-- This is a title that is used when giving the user a list of options for sharing the app -->
-    <string name="share_via">Share viaï¿½</string>
+    <string name="share_via">Share via…</string>
 
     <!-- This option allows advanced users to get the app APK file so they can share it with others -->
     <string name="share_apk_file">Share APK file</string>

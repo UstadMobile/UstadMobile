@@ -217,7 +217,7 @@ fun View.setVisibilityIfSetDate(date: Long){
 
 @BindingAdapter("relativeTime")
 fun TextView.setDateWithRelativeTime(date: Long){
-    text = DateUtils.getRelativeTimeSpanString(date)
+    text = if(date != 0L){DateUtils.getRelativeTimeSpanString(date)}else{""}
 }
 
 @BindingAdapter("dateUseSpinners")
