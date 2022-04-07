@@ -849,7 +849,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="after_deadline_date_error">Must be after deadline date</string>
 
     <!-- score points gained from content -->
-    <string name="points_cap">Points</string>
     <string name="points">points</string>
 
     <string name="minimum_score">Minimum score</string>
