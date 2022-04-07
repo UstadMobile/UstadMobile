@@ -34,6 +34,7 @@ import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.entryItemImageContainer
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemDesc
 import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
+import com.ustadmobile.util.StyleManager.iframeComponentResponsiveIframe
 import com.ustadmobile.util.StyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StyleManager.mainComponentErrorPaper
 import com.ustadmobile.util.StyleManager.mainComponentProfileInnerAvatar
@@ -58,6 +59,7 @@ import mui.material.GridWrap
 import org.w3c.dom.HTMLImageElement
 import org.w3c.dom.events.Event
 import react.*
+import react.dom.attrs
 import react.dom.html.ImgHTMLAttributes
 import react.router.Route
 import react.router.Routes
@@ -857,12 +859,14 @@ fun RBuilder.renderCourseBlockTextOrModuleListItem(
     umGridContainer {
         umItem(GridSize.cells2, if(showReorder) GridSize.cells2 else GridSize.cells1, flexDirection = FlexDirection.row){
             if(showReorder){
-                umIcon("reorder",
-                    color = if(hidden) IconColor.disabled else IconColor.inherit,
-                    className = "${StyleManager.name}-dragToReorderClass"
-                ){
-                    css{
-                        marginRight = 2.spacingUnits
+                umSortableKnob {
+                    umIcon("reorder",
+                        color = if(hidden) IconColor.disabled else IconColor.inherit,
+                        className = "${StyleManager.name}-dragToReorderClass"
+                    ){
+                        css{
+                            marginRight = 2.spacingUnits
+                        }
                     }
                 }
             }
@@ -1545,5 +1549,14 @@ fun RBuilder.renderChart(
         }
 
         onChartRendered?.invoke(drawChart)
+    }
+}
+
+fun RBuilder.renderRawHtmlOnIframe(content: String?){
+    styledIframe {
+        css(iframeComponentResponsiveIframe)
+        attrs{
+            src = "data:text/html;charset=utf-8, $content"
+        }
     }
 }

@@ -7,16 +7,14 @@ import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.util.StyleManager.centerContainer
-import com.ustadmobile.util.StyleManager.iframeComponentResponsiveIframe
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.view.ext.renderRawHtmlOnIframe
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
-import react.dom.attrs
 import react.setState
 import styled.css
-import styled.styledIframe
 
 class SiteTermsDetailComponent(props: UmProps): UstadDetailComponent<SiteTerms>(props),
     SiteTermsDetailView {
@@ -63,12 +61,7 @@ class SiteTermsDetailComponent(props: UmProps): UstadDetailComponent<SiteTerms>(
             css(centerContainer)
 
             umItem(GridSize.cells9, GridSize.cells7) {
-                styledIframe {
-                    css(iframeComponentResponsiveIframe)
-                    attrs{
-                        src = "data:text/html;charset=utf-8, ${entity?.termsHtml}"
-                    }
-                }
+                renderRawHtmlOnIframe(entity?.termsHtml)
             }
         }
     }

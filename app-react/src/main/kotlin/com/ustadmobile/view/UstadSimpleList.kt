@@ -2,15 +2,12 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.util.OneToManyJoinEditListener
-import com.ustadmobile.mui.components.ListItemAlignItems
-import com.ustadmobile.mui.components.spacingUnits
-import com.ustadmobile.mui.components.umList
-import com.ustadmobile.mui.components.umListItem
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.StyleManager.listComponentContainerWithScroll
 import com.ustadmobile.util.StyleManager.listCreateNewContainer
-import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.Util
@@ -45,6 +42,8 @@ interface SimpleListProps<T>: UmProps {
     var listener: OneToManyJoinEditListener<T>?
 
     var hideDivider: Boolean
+
+    var onSortEnd: ((Int, Int) -> Unit)?
 }
 
 data class CreateNewItem(var visible: Boolean = false, var text: String = "", var onClickCreateNew: (() -> Unit)? = null)
@@ -71,9 +70,7 @@ abstract class UstadSimpleList<P: SimpleListProps<*>>(mProps: P) : UstadBaseComp
         }
     }
 
-    open fun RBuilder.renderMoreDialogOptions(){
-
-    }
+    open fun RBuilder.renderMoreDialogOptions(){}
 
     private fun RBuilder.renderItems(): ReactElement? {
         if(props.createNewItem?.visible == true && !props.createNewItem?.text.isNullOrEmpty()){
@@ -90,17 +87,34 @@ abstract class UstadSimpleList<P: SimpleListProps<*>>(mProps: P) : UstadBaseComp
             }
         }
 
-        props.entries.forEach{entry ->
-            umListItem(button = true, alignItems = ListItemAlignItems.flexStart) {
-                css{
-                    backgroundColor = Color(theme.palette.background.paper)
-                    width = 100.pct
-                }
+        props.entries.forEachIndexed{index, entry ->
+            if(props.draggable){
+                umSortableItem("key_$index"){
+                    umListItem(button = true, alignItems = ListItemAlignItems.flexStart) {
+                        css{
+                            backgroundColor = Color(StyleManager.theme.palette.background.paper)
+                            width = 100.pct
+                        }
 
-                attrs.divider = true
-                renderListItem(entry){
-                    it.stopPropagation()
-                    props.onEntryClicked?.invoke(entry)
+                        attrs.divider = true
+                        renderListItem(entry){
+                            it.stopPropagation()
+                            props.onEntryClicked?.invoke(entry)
+                        }
+                    }
+                }
+            }else {
+                umListItem(button = true, alignItems = ListItemAlignItems.flexStart) {
+                    css{
+                        backgroundColor = Color(StyleManager.theme.palette.background.paper)
+                        width = 100.pct
+                    }
+
+                    attrs.divider = true
+                    renderListItem(entry){
+                        it.stopPropagation()
+                        props.onEntryClicked?.invoke(entry)
+                    }
                 }
             }
         }
@@ -114,7 +128,7 @@ abstract class UstadSimpleList<P: SimpleListProps<*>>(mProps: P) : UstadBaseComp
                 renderItems()
             }
         }else {
-            umList {
+            umSortableList(onSortEnd = props.onSortEnd) {
                 css(horizontalList)
                 renderItems()
             }

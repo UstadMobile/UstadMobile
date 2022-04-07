@@ -263,7 +263,13 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                     }
 
                     mPresenter?.let { presenter ->
-                        renderCourseBlocks(presenter,courseBlockList.toSet().toList(),createCourse){
+
+                        renderCourseBlocks(presenter,courseBlockList.toSet().toList(),
+                            createCourse,
+                            onSortEnd = { fromIndex, toIndex ->
+                                mPresenter?.onItemMove(fromIndex, toIndex)
+                            }
+                        ){
                             mPresenter?.onClickEdit(it)
                         }
                     }
@@ -520,6 +526,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
         presenter: ClazzEdit2Presenter,
         blocks: List<CourseBlockWithEntity>,
         createNewItem: CreateNewItem = CreateNewItem(),
+        onSortEnd: (Int, Int) -> Unit,
         onEntryClicked: ((CourseBlockWithEntity) -> Unit)? = null
     ) = child(CourseBlockListComponent::class) {
         attrs.entries = blocks
@@ -527,6 +534,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
         attrs.draggable = true
         attrs.onEntryClicked = onEntryClicked
         attrs.createNewItem = createNewItem
+        attrs.onSortEnd = onSortEnd
     }
 
 }
