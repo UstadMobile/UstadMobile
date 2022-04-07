@@ -62,9 +62,9 @@ fun TextView.setChatMessageTitle(message: MessageWithPerson, loggedInPersonUid: 
 @BindingAdapter("chatMessageOrientation", "loggedInPersonUidOrientation")
 fun TextView.setChatMessagOrientation(message: MessageWithPerson, loggedInPersonUid: Long){
     if(message.messagePerson?.personUid == loggedInPersonUid){
-        gravity = Gravity.RIGHT
+        gravity = Gravity.END
     }else{
-        gravity = Gravity.LEFT
+        gravity = Gravity.START
     }
 }
 

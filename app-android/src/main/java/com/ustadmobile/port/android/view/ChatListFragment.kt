@@ -143,7 +143,12 @@ class ChatListFragment : UstadListViewFragment<Chat, ChatWithLatestMessageAndCou
 
             override fun areContentsTheSame(oldItem: ChatWithLatestMessageAndCount,
                                             newItem: ChatWithLatestMessageAndCount): Boolean {
-                return oldItem == newItem
+                return oldItem.otherPersonUid == newItem.otherPersonUid &&
+                        oldItem.unreadMessageCount == newItem.unreadMessageCount &&
+                        oldItem.latestMessageTimestamp == newItem.latestMessageTimestamp &&
+                        oldItem.latestMessage == newItem.latestMessage &&
+                        oldItem.otherPersonFirstNames == newItem.otherPersonFirstNames &&
+                        oldItem.otherPersonLastName == newItem.otherPersonLastName
             }
         }
 
