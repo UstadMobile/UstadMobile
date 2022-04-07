@@ -88,6 +88,7 @@ class CourseGroupSetEditFragment: UstadEditFragment<CourseGroupSet>(), CourseGro
         set(value){
             field = value
             courseGroupMemberEditAdapter?.submitList(value)
+            courseGroupMemberEditAdapter?.notifyDataSetChanged()
         }
     override var groupList: List<IdOption>? = null
         set(value) {

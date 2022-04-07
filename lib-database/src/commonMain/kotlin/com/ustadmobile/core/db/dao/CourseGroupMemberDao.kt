@@ -84,9 +84,24 @@ abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
                AND CourseGroupMember.cgmSetUid = :setUid
                
          WHERE clazzEnrolmentClazzUid = :clazzUid
-      ORDER BY CourseGroupMember.cgmGroupNumber, Person.firstNames
+      ORDER BY Person.firstNames
     """)
     abstract suspend fun findByGroupSetAsync(setUid: Long, clazzUid: Long): List<CourseGroupMemberPerson>
+
+    @Query("""
+        SELECT Person.*, CourseGroupMember.* 
+          FROM Person
+               JOIN ClazzEnrolment 
+               ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+               
+               LEFT JOIN CourseGroupMember
+               ON CourseGroupMember.cgmPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
+               AND CourseGroupMember.cgmSetUid = :setUid
+               
+         WHERE clazzEnrolmentClazzUid = :clazzUid
+      ORDER BY CourseGroupMember.cgmGroupNumber, Person.firstNames
+    """)
+    abstract suspend fun findByGroupSetOrderedAsync(setUid: Long, clazzUid: Long): List<CourseGroupMemberPerson>
 
     @Insert
     abstract suspend fun insertListAsync(entityList: List<CourseGroupMember>)

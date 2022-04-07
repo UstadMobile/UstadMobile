@@ -134,8 +134,21 @@ class CourseGroupSetEditPresenter(context: Any,
         }
     }
 
+    /*
+     * Shuffle the list, put into groups, change the groupNumber
+     */
     fun handleAssignRandomGroupsClicked() {
-
+        val totalGroups = view.groupList?.size ?: 4
+        var counter = 1
+        val studentList: List<CourseGroupMemberPerson> = view.memberList ?: listOf()
+        val assignedList = studentList.shuffled().groupBy { (counter++ % totalGroups)+1 }
+            .entries.flatMap {
+                it.value.forEach {  person ->
+                    person.member?.cgmGroupNumber = it.key
+                }
+                it.value
+            }.sortedBy { it.firstNames }
+        view.memberList = assignedList
     }
 
     fun handleNumberOfGroupsChanged(number: Int) {

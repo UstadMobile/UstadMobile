@@ -22,7 +22,7 @@
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/item_group_member_name"
-            android:text="@{@string/group_number(groupMember.member.cgmGroupNumber)}"
+            android:text="@{groupMember.member.cgmGroupNumber == 0 ? @string/unassigned : @string/group_number(groupMember.member.cgmGroupNumber)}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"

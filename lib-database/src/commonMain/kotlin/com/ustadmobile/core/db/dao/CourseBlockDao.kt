@@ -217,7 +217,8 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND CourseBlock.cbActive
            AND NOT CourseBlock.cbHidden
-           AND :currentTime > CourseBlock.cbHideUntilDate     
+           AND :currentTime > CourseBlock.cbHideUntilDate
+           AND :currentTime > COALESCE(parentBlock.cbHideUntilDate,0)
            AND CourseBlock.cbModuleParentBlockUid NOT IN (:collapseList)
       ORDER BY CourseBlock.cbIndex
     """)
