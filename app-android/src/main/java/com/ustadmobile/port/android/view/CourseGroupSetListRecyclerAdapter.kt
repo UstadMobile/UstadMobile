@@ -20,7 +20,6 @@ class CourseGroupSetListRecyclerAdapter(var presenter: CourseGroupSetListPresent
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseGroupSetListViewHolder {
         val itemBinding = ItemCourseGroupSetListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         itemBinding.presenter = presenter
-        itemBinding.selectablePagedListAdapter = this
         return CourseGroupSetListViewHolder(itemBinding)
     }
 

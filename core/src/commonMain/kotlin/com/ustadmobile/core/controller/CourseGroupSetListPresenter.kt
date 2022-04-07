@@ -1,14 +1,15 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.NavigateForResultOptions
-import com.ustadmobile.core.view.CourseGroupSetDetailView
-import com.ustadmobile.core.view.CourseGroupSetEditView
-import com.ustadmobile.core.view.CourseGroupSetListView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.util.ext.fallbackIndividualSet
+import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.CourseGroupSetListView.Companion.ARG_SHOW_INDIVIDUAL
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class CourseGroupSetListPresenter(
@@ -31,6 +32,9 @@ class CourseGroupSetListPresenter(
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         clazzUidFilter = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
+        val group: CourseGroupSet? = null
+        view.takeIf { arguments.containsKey(ARG_SHOW_INDIVIDUAL) }?.individualList =
+            listOf(group.fallbackIndividualSet(systemImpl, context))
         updateListOnView()
     }
 
@@ -60,13 +64,24 @@ class CourseGroupSetListPresenter(
     }
 
     override fun handleClickEntry(entry: CourseGroupSet) {
-        systemImpl.go(
-            CourseGroupSetDetailView.VIEW_NAME,
-            mapOf(
-                UstadView.ARG_ENTITY_UID to entry.cgsUid.toString(),
-                UstadView.ARG_CLAZZUID to entry.cgsClazzUid.toString()
-            ), context
-        )
+        when(mListMode){
+            ListViewMode.PICKER -> {
+                finishWithResult(
+                    safeStringify(di,
+                        ListSerializer(CourseGroupSet.serializer()),
+                        listOf(entry))
+                )
+            }
+            ListViewMode.BROWSER ->{
+                systemImpl.go(
+                    CourseGroupSetDetailView.VIEW_NAME,
+                    mapOf(
+                        UstadView.ARG_ENTITY_UID to entry.cgsUid.toString(),
+                        UstadView.ARG_CLAZZUID to entry.cgsClazzUid.toString()
+                    ), context
+                )
+            }
+        }
     }
 
 }

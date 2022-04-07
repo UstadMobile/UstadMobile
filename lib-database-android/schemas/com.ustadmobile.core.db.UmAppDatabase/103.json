@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "fd3a3c5b3216975d38b2606cade65d85",
+    "identityHash": "43874108f125a10d725ac687447de8bd",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5229,7 +5229,7 @@
       },
       {
         "tableName": "ClazzAssignment",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caSubmissionType` INTEGER NOT NULL DEFAULT 1, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caCompletionCriteria` INTEGER NOT NULL DEFAULT 100, `caRequireFileSubmission` INTEGER NOT NULL DEFAULT 1, `caFileType` INTEGER NOT NULL DEFAULT 0, `caSizeLimit` INTEGER NOT NULL DEFAULT 50, `caNumberOfFiles` INTEGER NOT NULL DEFAULT 1, `caEditAfterSubmissionType` INTEGER NOT NULL DEFAULT 0, `caMarkingType` INTEGER NOT NULL DEFAULT 1, `caRequireTextSubmission` INTEGER NOT NULL DEFAULT 1, `caTextLimitType` INTEGER NOT NULL DEFAULT 1, `caTextLimit` INTEGER NOT NULL DEFAULT 500, `caXObjectUid` INTEGER NOT NULL DEFAULT 0, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `caTitle` TEXT, `caDescription` TEXT, `caGroupUid` INTEGER NOT NULL DEFAULT 0, `caActive` INTEGER NOT NULL, `caClassCommentEnabled` INTEGER NOT NULL, `caPrivateCommentsEnabled` INTEGER NOT NULL, `caCompletionCriteria` INTEGER NOT NULL DEFAULT 100, `caRequireFileSubmission` INTEGER NOT NULL DEFAULT 1, `caFileType` INTEGER NOT NULL DEFAULT 0, `caSizeLimit` INTEGER NOT NULL DEFAULT 50, `caNumberOfFiles` INTEGER NOT NULL DEFAULT 1, `caEditAfterSubmissionType` INTEGER NOT NULL DEFAULT 0, `caMarkingType` INTEGER NOT NULL DEFAULT 1, `caRequireTextSubmission` INTEGER NOT NULL DEFAULT 1, `caTextLimitType` INTEGER NOT NULL DEFAULT 1, `caTextLimit` INTEGER NOT NULL DEFAULT 500, `caXObjectUid` INTEGER NOT NULL DEFAULT 0, `caClazzUid` INTEGER NOT NULL, `caLocalChangeSeqNum` INTEGER NOT NULL, `caMasterChangeSeqNum` INTEGER NOT NULL, `caLastChangedBy` INTEGER NOT NULL, `caLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "caUid",
@@ -5250,11 +5250,11 @@
             "notNull": false
           },
           {
-            "fieldPath": "caSubmissionType",
-            "columnName": "caSubmissionType",
+            "fieldPath": "caGroupUid",
+            "columnName": "caGroupUid",
             "affinity": "INTEGER",
             "notNull": true,
-            "defaultValue": "1"
+            "defaultValue": "0"
           },
           {
             "fieldPath": "caActive",
@@ -10163,7 +10163,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fd3a3c5b3216975d38b2606cade65d85')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '43874108f125a10d725ac687447de8bd')"
     ]
   }
 }
