@@ -326,7 +326,38 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
             }
 
             override fun areContentsTheSame(oldItem: CourseBlockWithCompleteEntity, newItem: CourseBlockWithCompleteEntity): Boolean {
-                return oldItem == newItem
+                var isSame = oldItem.cbType == newItem.cbType
+                        && oldItem.cbTitle == newItem.cbTitle
+                        && oldItem.cbDescription == newItem.cbDescription
+                        && oldItem.expanded == newItem.expanded
+                when(newItem.cbType){
+                    CourseBlock.BLOCK_CONTENT_TYPE -> {
+                        val newEntry = newItem.entry
+                        val oldEntry = oldItem.entry
+                        if(newEntry != null && oldEntry != null){
+                            isSame = isSame && ContentEntryList2Fragment.DIFF_CALLBACK
+                                .areContentsTheSame(oldEntry, newEntry)
+                        }
+                    }
+                    CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
+                        val newAssignment = newItem.assignment
+                        val oldAssignment = oldItem.assignment
+                        isSame = isSame
+                                && oldItem.cbDeadlineDate == newItem.cbDeadlineDate
+                                && oldItem.cbMaxPoints == newItem.cbMaxPoints
+                                && oldItem.cbLateSubmissionPenalty == newItem.cbLateSubmissionPenalty
+                                && oldAssignment?.caTitle == newAssignment?.caTitle
+                                && oldAssignment?.caDescription == newAssignment?.caDescription
+                                && oldAssignment?.fileSubmissionStatus == newAssignment?.fileSubmissionStatus
+
+                        val newMark = newAssignment?.mark
+                        val oldMark = oldAssignment?.mark
+                        isSame = isSame
+                                && newMark?.camPenalty == oldMark?.camPenalty
+                                && newMark?.camMark == oldMark?.camMark
+                    }
+                }
+                return isSame
             }
         }
     }

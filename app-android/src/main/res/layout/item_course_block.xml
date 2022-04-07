@@ -74,7 +74,6 @@
             android:layout_height="@dimen/dimen_40dp"
             android:layout_margin="@dimen/dimen_8dp"
             android:tint="?colorOnIconTint"
-            android:padding="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

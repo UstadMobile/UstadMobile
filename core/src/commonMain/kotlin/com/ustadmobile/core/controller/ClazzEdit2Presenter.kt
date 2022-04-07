@@ -489,9 +489,11 @@ class ClazzEdit2Presenter(context: Any,
                     txDb.clazzAssignmentDao.updateAsync(assignment)
                 }
 
-                courseBlockOneToManyJoinEditHelper.commitToDatabase(txDb.courseBlockDao){
-                    it.cbClazzUid = entity.clazzUid
-                }
+                txDb.courseBlockDao.replaceListAsync(courseBlockList)
+                txDb.courseBlockDao.deactivateByUids(
+                    courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate,
+                    systemTimeInMillis())
+
             }
 
             val coursePictureVal = view.coursePicture
