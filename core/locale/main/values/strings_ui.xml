@@ -653,6 +653,11 @@
     <string name="feedback_thanks">Thank you for the feedback.</string>
     <string name="start_date">Start date</string>
     <string name="end_date">End date</string>
+
+
+    <!--
+    Used in the context of showing when a topic, post, or user was most recently active.
+    -->
     <string name="last_active">Last active</string>
     <string name="save">Save</string>
     <string name="change_password">Change Password</string>
@@ -1775,5 +1780,51 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="past_enrolments">Past enrolments</string>
 
+    <string name="standard">Standard</string>
+
+    <!-- used to show what group a member of a course would be in. The
+    %1$s% will be replaced with the number of the group e.g. Group 1, Group 2, etc-->
+    <string name="group_number" formatted="false">Group %1$s</string>
+
+    <!-- This is a code that the teacher can give to students to allow them to join the course -->
+    <string name="course_code">Course code</string>
+
+    <string name="add_group">Add group</string>
+
+    <string name="edit_group">Edit group</string>
+
+    <string name="new_group_set">New group set</string>
+
+    <string name="edit_text">Edit text</string>
+
+    <!--Module is a subunit of a course -->
+    <string name="add_module">Add module</string>
+
+    <string name="add_a_new_course">Add a new course</string>
+    <string name="join_existing_course">Join existing course</string>
+    <string name="edit_course">Edit course</string>
+    <string name="currently_enrolled">Currently enrolled</string>
+    <string name="past_enrollments">Past enrollments</string>
+
+    <string name="unread">Unread</string>
+    <string name="new_chat">New chat</string>
+    <string name="new_group">New group</string>
+    <string name="chat">Chat</string>
+    <string name="you">You</string>
+
+
+    <string name="edit_topic">Edit topic</string>
+
+    <!-- As per Microsoft Terminology:
+    Post: A message that appears in a newsgroup, public folder, or other forum, such as Facebook or Twitter,
+    accessible by a number of individuals.
+     -->
+    <string name="posts">Posts</string>
+
+    <!-- As per Microsoft Terminology:
+    Post: A message that appears in a newsgroup, public folder, or other forum, such as Facebook or Twitter,
+    accessible by a number of individuals.
+     -->
+    <string name="post">Post</string>
 
 </resources>
