@@ -85,7 +85,7 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
                LEFT JOIN CourseAssignmentSubmissionAttachment
                ON CourseAssignmentSubmissionAttachment.casaSubmissionUid = CourseAssignmentSubmission.casUid
          WHERE casAssignmentUid = :assignmentUid
-           AND casStudentUid = :studentUid
+           AND casSubmitterUid = :studentUid
       ORDER BY casTimestamp DESC
     """)
     abstract fun getAllFileSubmissionsFromStudent(assignmentUid: Long, studentUid: Long)
@@ -102,7 +102,7 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
                        ON CourseAssignmentMark.camAssignmentUid = :assignmentUid
                        AND CourseAssignmentMark.camStudentUid = :studentUid
                  WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
-                   AND CourseAssignmentSubmission.casStudentUid = :studentUid
+                   AND CourseAssignmentSubmission.casSubmitterUid = :studentUid
                  LIMIT 1
            ),${CourseAssignmentSubmission.NOT_SUBMITTED}) AS Status
     """)
@@ -112,7 +112,7 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
         SELECT * 
           FROM CourseAssignmentSubmission
          WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
-           AND CourseAssignmentSubmission.casStudentUid = :studentUid
+           AND CourseAssignmentSubmission.casSubmitterUid = :studentUid
       ORDER BY casTimestamp DESC
          LIMIT 1
     """)

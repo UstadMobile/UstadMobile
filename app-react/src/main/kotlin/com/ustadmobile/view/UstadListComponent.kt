@@ -343,10 +343,13 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     private fun RBuilder.renderMultiColumnList(){
        umGridContainer {
+           if(showCreateNewItem){
+               renderNewItem()
+           }
 
-            if(showCreateNewItem){
-                renderNewItem()
-            }
+           if(dataListItems.isNotEmpty()){
+               renderListJoinView()
+           }
 
             if(dataListItems.isEmpty()){
                 renderEmptyList()
@@ -394,9 +397,13 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     private fun RBuilder.renderSingleColumnList(){
        umList {
-            css{ if(dataListItems.isNotEmpty()) horizontalList else horizontalListEmpty }
+           css{ if(dataListItems.isNotEmpty()) horizontalList else horizontalListEmpty }
 
-            renderNewItem(false)
+           renderNewItem(false)
+
+           if(dataListItems.isNotEmpty()){
+               renderListJoinView()
+           }
 
             if(dataListItems.isEmpty()){
                 renderEmptyList()
@@ -575,6 +582,8 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     open fun RBuilder.renderEditOptionMenu(){}
 
     open fun RBuilder.renderListHeaderView(){}
+
+    open fun RBuilder.renderListJoinView(){}
 
     open fun RBuilder.renderListFooterView(){}
 

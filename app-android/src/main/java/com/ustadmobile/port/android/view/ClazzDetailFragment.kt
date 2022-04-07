@@ -104,17 +104,16 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     companion object {
         val VIEWNAME_TO_FRAGMENT_MAP = mapOf<String, Class<out Fragment>>(
                 ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java,
-                ContentEntryList2View.VIEW_NAME to ContentEntryList2Fragment::class.java,
                 ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java,
-                ClazzLogListAttendanceView.VIEW_NAME to ClazzLogListAttendanceFragment::class.java
-
+                ClazzLogListAttendanceView.VIEW_NAME to ClazzLogListAttendanceFragment::class.java,
+                CourseGroupSetListView.VIEW_NAME to CourseGroupSetListFragment::class.java
         )
 
         val VIEWNAME_TO_TITLE_MAP = mapOf(
                 ClazzDetailOverviewView.VIEW_NAME to R.string.overview,
-                ContentEntryList2View.VIEW_NAME to R.string.content,
                 ClazzMemberListView.VIEW_NAME to R.string.members,
-                ClazzLogListAttendanceView.VIEW_NAME to R.string.attendance
+                ClazzLogListAttendanceView.VIEW_NAME to R.string.attendance,
+                CourseGroupSetListView.VIEW_NAME to R.string.groups
         )
 
     }

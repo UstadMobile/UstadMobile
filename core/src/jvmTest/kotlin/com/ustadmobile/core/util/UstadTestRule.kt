@@ -49,6 +49,7 @@ import java.nio.file.Files
 import javax.naming.InitialContext
 import kotlin.random.Random
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import kotlinx.serialization.json.Json
 
 fun DI.onActiveAccount(): DI {
     val accountManager: UstadAccountManager by instance()
@@ -119,6 +120,10 @@ class UstadTestRule(
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), Any(), di)
             }
+            bind<Json>() with singleton {
+                Json { encodeDefaults = true }
+            }
+
 
             bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
                 NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())

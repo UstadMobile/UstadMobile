@@ -65,10 +65,6 @@ class ConcatenatedInputStreamExtTest {
     fun setup() {
         di = DI {
             import(ustadTestRule.diModule)
-
-            bind<Json>() with singleton {
-                Json { encodeDefaults = true }
-            }
         }
 
         sourceDb = di.direct.on(sourceEndpoint).instance(tag = DoorTag.TAG_DB)

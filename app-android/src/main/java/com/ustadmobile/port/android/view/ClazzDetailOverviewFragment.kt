@@ -219,7 +219,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         downloadRecyclerAdapter = CourseDownloadDetailRecyclerAdapter(this)
 
         // 1
-        detailRecyclerAdapter = CourseHeaderDetailRecyclerAdapter(this, di)
+        detailRecyclerAdapter = CourseHeaderDetailRecyclerAdapter(this, di, requireContext())
 
         // 2
         scheduleHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.schedule).toString()).apply {

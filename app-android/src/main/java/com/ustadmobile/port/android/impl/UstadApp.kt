@@ -284,6 +284,12 @@ open class UstadApp : Application(), DIAware {
                     .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
                     .build())
         }
+
+        bind<Json>() with singleton {
+            Json {
+                encodeDefaults = true
+            }
+        }
     }
 
     override val di: DI by DI.lazy {

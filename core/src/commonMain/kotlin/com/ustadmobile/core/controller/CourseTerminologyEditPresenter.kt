@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.toTermMap
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.CourseTerminologyEditView
@@ -17,7 +18,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 
 class CourseTerminologyEditPresenter(
@@ -36,6 +39,8 @@ class CourseTerminologyEditPresenter(
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
+    private val json: Json by instance()
+
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): CourseTerminology? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val entity =  db.onRepoWithFallbackToDb(2000) {
@@ -48,12 +53,7 @@ class CourseTerminologyEditPresenter(
     }
 
     private fun makeTermList(terminology: CourseTerminology){
-        val termMap: Map<String,String> = terminology.ctTerminology?.let {
-            safeParse(di, MapSerializer(String.serializer(), String.serializer()), it)
-        } ?: mapOf()
-
-
-
+        val termMap = terminology.toTermMap(json, systemImpl, context)
         val termList = TerminologyKeys.TERMINOLOGY_ENTRY_MESSAGE_ID.entries.map {
             TerminologyEntry(it.key,it.value, termMap[it.key])
         }.sortedBy { it.id }

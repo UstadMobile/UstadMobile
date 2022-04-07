@@ -3,25 +3,26 @@ package com.ustadmobile.core.controller
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
+import com.ustadmobile.core.util.ext.fallbackIndividualSet
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.view.CourseGroupSetListView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
-import com.ustadmobile.lib.db.entities.ClazzWithSchool
-import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
@@ -33,20 +34,12 @@ class ClazzAssignmentEditPresenter(context: Any,
                                    di: DI)
     : UstadEditPresenter<ClazzAssignmentEditView, ClazzAssignmentWithCourseBlock>(context, arguments, view, di, lifecycleOwner) {
 
-    enum class SubmissionTypeOptions(val optionVal: Int, val messageId: Int){
-        INDIVIDUAL(ClazzAssignment.SUBMISSION_TYPE_INDIVIDUAL, MessageID.individual),
-        GROUP(ClazzAssignment.SUBMISSION_TYPE_GROUP, MessageID.group)
-    }
-    class SubmissionTypeOptionsMessageIdOption(day: SubmissionTypeOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
-
     enum class TextLimitTypeOptions(val optionVal: Int, val messageId: Int){
         WORDS(ClazzAssignment.TEXT_WORD_LIMIT, MessageID.words),
         CHARS(ClazzAssignment.TEXT_CHAR_LIMIT, MessageID.characters)
     }
     class TextLimitTypeOptionsMessageIdOption(day: TextLimitTypeOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
-
 
     enum class CompletionCriteriaOptions(val optionVal: Int, val messageId: Int){
         SUBMITTED(ClazzAssignment.COMPLETION_CRITERIA_SUBMIT, MessageID.submitted_cap),
@@ -94,6 +87,8 @@ class ClazzAssignmentEditPresenter(context: Any,
         : MessageIdOption(day.messageId, context, day.optionVal)
 
 
+    private var clazzUid: Long = 0L
+
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
@@ -101,17 +96,31 @@ class ClazzAssignmentEditPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.markingTypeOptions = MarkingTypeOptions.values().map { MarkingTypeOptionsMessageIdOption(it, context) }
-        view.submissionTypeOptions = SubmissionTypeOptions.values().map { SubmissionTypeOptionsMessageIdOption(it, context) }
         view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaOptionsMessageIdOption(it, context) }
         view.editAfterSubmissionOptions = EditAfterSubmissionOptions.values().map { EditAfterSubmissionOptionsMessageIdOption(it, context) }
         view.fileTypeOptions = FileTypeOptions.values().map { FileTypeOptionsMessageIdOption(it, context) }
         view.textLimitTypeOptions = TextLimitTypeOptions.values().map { TextLimitTypeOptionsMessageIdOption(it, context) }
     }
 
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+        observeSavedStateResult(
+            SAVEDSTATE_KEY_SUBMISSION_TYPE,
+            ListSerializer(CourseGroupSet.serializer()), CourseGroupSet::class) {
+            val group = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.caGroupUid = group.cgsUid
+            view.groupSet = group
+            view.entity = entity
+
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
+            }
+        }
+    }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignmentWithCourseBlock? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        val clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: throw IllegalArgumentException("clazzUid was not given")
+        clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: throw IllegalArgumentException("clazzUid was not given")
 
         val clazzAssignment = db.onRepoWithFallbackToDb(2000) {
             it.clazzAssignmentDao.findByUidWithBlockAsync(entityUid)
@@ -125,6 +134,10 @@ class ClazzAssignmentEditPresenter(context: Any,
                 cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
             }
         }
+
+        val group = db.courseGroupSetDao.findByUidAsync(clazzAssignment.caGroupUid)
+            .fallbackIndividualSet(systemImpl, context)
+        view.groupSet = group
 
         val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
             it.clazzDao.getClazzWithSchool(clazzAssignment.caClazzUid)
@@ -159,9 +172,14 @@ class ClazzAssignmentEditPresenter(context: Any,
         }
 
         presenterScope.launch {
-            val caClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: editEntity.caClazzUid
+
+            val group = db.courseGroupSetDao.findByUidAsync(editEntity.caGroupUid)
+                .fallbackIndividualSet(systemImpl, context)
+            view.groupSet = group
+
+            clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: editEntity.caClazzUid
             val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
-                it.clazzDao.getClazzWithSchool(caClazzUid)
+                it.clazzDao.getClazzWithSchool(clazzUid)
             } ?: ClazzWithSchool()
 
             val timeZone = clazzWithSchool.effectiveTimeZone()
@@ -232,6 +250,21 @@ class ClazzAssignmentEditPresenter(context: Any,
         }
     }
 
+    fun handleSubmissionTypeClicked(){
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null,
+                CourseGroupSetListView.VIEW_NAME,
+                CourseGroupSet::class,
+                CourseGroupSet.serializer(),
+                SAVEDSTATE_KEY_SUBMISSION_TYPE,
+                arguments = mutableMapOf(
+                    ARG_CLAZZUID to clazzUid.toString(),
+                    CourseGroupSetListView.ARG_SHOW_INDIVIDUAL to true.toString()))
+        )
+    }
+
+
     override fun handleClickSave(entity: ClazzAssignmentWithCourseBlock) {
         presenterScope.launch {
 
@@ -293,6 +326,8 @@ class ClazzAssignmentEditPresenter(context: Any,
     companion object {
 
         const val ARG_SAVEDSTATE_CONTENT = "contents"
+
+        const val SAVEDSTATE_KEY_SUBMISSION_TYPE = "submissionType"
 
     }
 

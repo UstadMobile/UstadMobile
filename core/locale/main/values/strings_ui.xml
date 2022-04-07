@@ -692,6 +692,10 @@
 
     <string name="course_leader">Course leader</string>
 
+    <!-- used to show what group a member of a course would be in. The
+  %1$s% will be replaced with the number of the group-->
+    <string name="group_number" formatted="false">Group %1$s</string>
+
     <!-- plurals are used to handle different languages that require special treatment
     e.g number 0 in arabic
     possible quantities: zero, one, two, few, many, and other.-->
@@ -883,10 +887,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <!-- Used to show three quantities and names e.g. "5 oranges, 2 apples, 3 pears". %1$d etc
     will be replaced with the number and %2$s will be replaced with the name of the item-->
     <string name="three_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d %6$s</string>
-
-    <!-- Used to show four quantities and names e.g. "5 oranges, 2 apples, 3 pears". %1$d etc
-   will be replaced with the number and %2$s will be replaced with the name of the item-->
-    <string name="four_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d %6$s, %7$d %8$s</string>
 
     <string name="marking">Marking</string>
     <string name="return_and_mark_next">Return and mark next</string>
@@ -1489,10 +1489,19 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="individual">Individual</string>
 
+
+    <string name="individual_submission">Individual submission</string>
+
     <!-- Used as an option for assignment submission: in this mode, assignments will be submitted
     by groups of students (not by each student individually)
     -->
     <string name="group">Group</string>
+
+    <string name="add_group">Add group</string>
+
+    <string name="edit_group">Edit group</string>
+
+    <string name="new_group_set">New group set</string>
 
     <!--
     Used for an option for teachers and admins for content to stay hidden for students until

@@ -7,16 +7,21 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzListCardBinding
 import com.ustadmobile.core.controller.ClazzListItemListener
 import com.ustadmobile.core.controller.TerminologyKeys
-import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.toTermMap
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.instance
 
-class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?, val di: DI)
+class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?, di: DI)
     : SelectablePagedListAdapter<ClazzWithListDisplayDetails,
         ClazzListRecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
+
+    val json: Json by di.instance()
+
+    val systemImpl: UstadMobileSystemImpl by di.instance()
 
     class ClazzList2ViewHolder(val itemBinding: ItemClazzListCardBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
@@ -32,9 +37,8 @@ class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?, val di:
         holder.itemBinding.clazz = clazz
         holder.itemView.tag = holder.itemBinding.clazz?.clazzUid
         holder.itemBinding.itemListener = itemListener
-        val termMap: Map<String, String> =  clazz?.terminology?.ctTerminology?.let {
-            safeParse(di, MapSerializer(String.serializer(), String.serializer()), "")
-        } ?: mapOf()
+
+        val termMap = clazz?.terminology.toTermMap(json, systemImpl, holder.itemView.context)
         holder.itemBinding.teacherStudentCount = """${clazz?.numTeachers ?: 0} ${termMap[TerminologyKeys.TEACHERS_KEY]}, ${clazz?.numStudents ?: 0} ${termMap[TerminologyKeys.STUDENTS_KEY]}"""
     }
 

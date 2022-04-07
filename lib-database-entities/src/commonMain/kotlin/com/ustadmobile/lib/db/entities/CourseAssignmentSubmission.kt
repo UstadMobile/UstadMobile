@@ -14,10 +14,10 @@ import kotlinx.serialization.Serializable
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
                 sqlStatements = [
-                    """REPLACE INTO CourseAssignmentSubmission(casUid, casAssignmentUid, casStudentUid, casText, casType, casTimestamp) 
-         VALUES (NEW.casUid, NEW.casAssignmentUid, NEW.casStudentUid, NEW.casText, NEW.casType, NEW.casTimestamp) 
+                    """REPLACE INTO CourseAssignmentSubmission(casUid, casAssignmentUid, casSubmitterUid, casText, casType, casTimestamp) 
+         VALUES (NEW.casUid, NEW.casAssignmentUid, NEW.casSubmitterUid, NEW.casText, NEW.casType, NEW.casTimestamp) 
          /*psql ON CONFLICT (casUid) DO UPDATE 
-         SET casUid = EXCLUDED.casUid, casAssignmentUid = EXCLUDED.casAssignmentUid, casStudentUid = EXCLUDED.casStudentUid, casText = EXCLUDED.casText, casType = EXCLUDED.casType, casTimestamp = EXCLUDED.casTimestamp
+         SET casAssignmentUid = EXCLUDED.casAssignmentUid, casSubmitterUid = EXCLUDED.casSubmitterUid, casText = EXCLUDED.casText, casType = EXCLUDED.casType, casTimestamp = EXCLUDED.casTimestamp
          */"""
                 ]
         )
@@ -30,7 +30,8 @@ open class CourseAssignmentSubmission {
 
     var casAssignmentUid: Long = 0
 
-    var casStudentUid: Long = 0
+    // change to casSubmitterUid, if individual then personUid else groupNumber
+    var casSubmitterUid: Long = 0
 
     var casText: String? = null
 

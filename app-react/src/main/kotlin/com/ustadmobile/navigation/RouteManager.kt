@@ -86,6 +86,9 @@ object RouteManager {
         UstadDestination(view = ReportFilterEditView.VIEW_NAME, component = ReportFilterEditComponent::class),
         UstadDestination(view = ContentEntryList2View.FOLDER_VIEW_NAME, component = ContentEntryListComponent::class),
         UstadDestination(view = SelectFileView.VIEW_NAME, component = SelectFileComponent::class),
+        UstadDestination(view = CourseGroupSetListView.VIEW_NAME, component = CourseGroupSetListComponent::class),
+        UstadDestination(view = CourseGroupSetEditView.VIEW_NAME, component = CourseGroupSetEditComponent::class),
+        UstadDestination(view = CourseGroupSetDetailView.VIEW_NAME, component = CourseGroupSetDetailComponent::class),
         UstadDestination(view = ReportDetailView.VIEW_NAME, component = ReportDetailComponent::class)
     )
 

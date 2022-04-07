@@ -7,6 +7,7 @@ import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.SubmissionConstants.STATUS_MAP
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
@@ -23,8 +24,8 @@ import com.ustadmobile.navigation.RouteManager.defaultDestination
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
+import com.ustadmobile.util.*
 import com.ustadmobile.util.DraftJsUtil.clean
-import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.alignEndItems
 import com.ustadmobile.util.StyleManager.alignTextToStart
@@ -43,12 +44,9 @@ import com.ustadmobile.util.StyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.StyleManager.personListItemAvatar
 import com.ustadmobile.util.StyleManager.textGrayedOut
 import com.ustadmobile.util.StyleManager.toolbarTitle
-import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.Util
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.*
-import com.ustadmobile.util.getViewNameFromUrl
 import com.ustadmobile.view.*
 import com.ustadmobile.view.ClazzEditComponent.Companion.BLOCK_ICON_MAP
 import kotlinx.browser.window
@@ -325,7 +323,9 @@ fun RBuilder.renderListItemWithLeftIconTitleAndDescription(
     title: String? = null,
     description: String? = null,
     onMainList: Boolean = false,
-    avatarVariant: AvatarVariant = AvatarVariant.circle){
+    avatarVariant: AvatarVariant = AvatarVariant.circle,
+    titleVariant: TypographyVariant = TypographyVariant.body1
+){
 
     umGridContainer {
         umItem(GridSize.cells3,  if(onMainList) GridSize.cells1 else GridSize.cells2){
@@ -337,9 +337,14 @@ fun RBuilder.renderListItemWithLeftIconTitleAndDescription(
                 if(title != null){
                     umItem(GridSize.cells12){
                         umTypography(title,
-                            variant = TypographyVariant.body1,
+                            variant = titleVariant,
                         ){
-                            css (alignTextToStart)
+                            css {
+                                +alignTextToStart
+                                if(description == null){
+                                    marginTop = 2.spacingUnits
+                                }
+                            }
                         }
                     }
                 }
@@ -839,6 +844,42 @@ fun RBuilder.renderCourseBlockAssignment(
                     }
                 }
             }
+        }
+    }
+}
+
+fun RBuilder.renderListItemWithLeftIconTitleAndOptionOnRight(
+    value: String?,
+    icon: String,
+    title: String?,
+    options: List<IdOption>?,
+    fieldLabel: FieldLabel,
+    onChange: (String) -> Unit
+){
+    umGridContainer {
+        umItem(GridSize.cells2,GridSize.cells1) {
+            umItemThumbnail(icon, avatarVariant = AvatarVariant.circle)
+        }
+
+        umItem(GridSize.cells8, GridSize.cells9) {
+            umTypography(title ?: "",
+                variant = TypographyVariant.h6) {
+                css (alignTextToStart)
+            }
+        }
+
+        umItem(GridSize.cells2) {
+            umTextFieldSelect(
+                "${fieldLabel.text}", value,
+                fieldLabel.errorText ?: "",
+                error = fieldLabel.error,
+                values = options?.map {
+                    Pair(it.optionId.toString(), it.toString())
+                }?.toList(),
+                onChange = {
+                    onChange(it)
+                }
+            )
         }
     }
 }

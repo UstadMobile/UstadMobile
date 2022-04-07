@@ -13,8 +13,8 @@ import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.TerminologyEntry
-import com.ustadmobile.lib.db.entities.CourseTerminologyWithLabel
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.MapSerializer
@@ -63,11 +63,6 @@ class CourseTerminologyEditPresenterTest {
 
         di = DI {
             import(ustadTestRule.diModule)
-            bind<Json>() with singleton {
-                Json {
-                    encodeDefaults = true
-                }
-            }
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
@@ -119,7 +114,7 @@ class CourseTerminologyEditPresenterTest {
         val db: UmAppDatabase by di.activeDbInstance()
 
         val repo: UmAppDatabase by di.activeRepoInstance()
-        val testEntity = CourseTerminologyWithLabel().apply {
+        val testEntity = CourseTerminology().apply {
             ctTitle = "Standard English"
             ctTerminology = safeStringify(di,
                 MapSerializer(String.serializer(), String.serializer()),

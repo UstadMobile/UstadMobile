@@ -57,6 +57,7 @@ import kotlin.jvm.JvmField
     PersonAuth2::class,
     UserSession::class,
     ContentJob::class, ContentJobItem::class, CourseBlock::class, CourseTerminology::class,
+    CourseGroupSet::class, CourseGroupMember::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -73,6 +74,8 @@ import kotlin.jvm.JvmField
     CourseAssignmentMarkReplicate::class,
     CourseBlockReplicate::class,
     CourseTerminologyReplicate::class,
+    CourseGroupSetReplicate::class,
+    CourseGroupMemberReplicate::class,
     ScheduleReplicate::class,
     HolidayCalendarReplicate::class,
     HolidayReplicate::class,
@@ -170,6 +173,12 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     @JsName("courseTerminologyDao")
     abstract val courseTerminologyDao: CourseTerminologyDao
+
+    @JsName("courseGroupSetDao")
+    abstract val courseGroupSetDao: CourseGroupSetDao
+
+    @JsName("courseGroupMemberDao")
+    abstract val courseGroupMemberDao: CourseGroupMemberDao
 
     @JsName("clazzEnrolmentDao")
     abstract val clazzEnrolmentDao: ClazzEnrolmentDao

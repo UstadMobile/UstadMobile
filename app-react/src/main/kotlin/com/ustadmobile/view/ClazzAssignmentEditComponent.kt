@@ -5,6 +5,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
+import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.defaultMarginTop
@@ -12,6 +13,7 @@ import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.renderListItemWithTitleAndSwitch
 import com.ustadmobile.view.ext.renderListSectionTitle
@@ -55,11 +57,15 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
     private var fileSizeLimitLabel = FieldLabel(text = getString(MessageID.size_limit))
 
-    private var fileNumberLimitLabel = FieldLabel(text = getString(MessageID.max_number_of_files))
+    private var fileNumberLimitLabel = FieldLabel(text = getString(MessageID.max_number_of_files).format(""))
 
     private var textLimitTypeLabel = FieldLabel(text = getString(MessageID.limit))
 
     private var textLimitMaxLabel = FieldLabel(text = getString(MessageID.maximum))
+
+    private var editAfterSubLabel = FieldLabel(text = getString(MessageID.edit_after_submission))
+
+    private var markedByLabel = FieldLabel(text = getString(MessageID.marked_by))
 
     override var caGracePeriodError: String? = null
         get() = field
@@ -161,6 +167,15 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                 field = newText
             }
         }
+
+    override var groupSet: CourseGroupSet? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
     override var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>? = null
         get() = field
         set(value) {
@@ -168,6 +183,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                 field = value
             }
         }
+
 
     override var fileTypeOptions: List<ClazzAssignmentEditPresenter.FileTypeOptionsMessageIdOption>?= null
         get() = field
@@ -178,14 +194,6 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
         }
 
     override var textLimitTypeOptions: List<ClazzAssignmentEditPresenter.TextLimitTypeOptionsMessageIdOption>?= null
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
-
-    override var submissionTypeOptions: List<ClazzAssignmentEditPresenter.SubmissionTypeOptionsMessageIdOption>?= null
         get() = field
         set(value) {
             setState {
@@ -208,8 +216,6 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                 field = value
             }
         }
-
-
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -345,38 +351,6 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         }
                     }
 
-                    /*umGridContainer(spacing = GridSpacing.spacing4) {
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-                            umDatePicker(
-                                label = "${endOfGraceLabel.text}",
-                                error = endOfGraceLabel.error,
-                                helperText = endOfGraceLabel.errorText,
-                                value = entity?.caGracePeriodDate.toDate(true),
-                                inputVariant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        entity?.caGracePeriodDate = it.getTime().toLong()
-                                        caGracePeriodError = null
-                                    }
-                                })
-
-                        }
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-                            umTimePicker(
-                                label = "${endOgraceTimeLabel.text}",
-                                error = endOgraceTimeLabel.error,
-                                helperText = endOgraceTimeLabel.errorText,
-                                value = entity?.caGracePeriodDate.toDate(true),
-                                inputVariant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        entity?.caGracePeriodDate = entity?.caGracePeriodDate ?: 0 + it.getTime().toLong()
-                                    }
-                                })
-                        }
-                    }*/
-
-
                     umGridContainer(columnSpacing = GridSpacing.spacing4) {
                         umItem(GridSize.cells12, GridSize.cells6 ) {
 
@@ -410,18 +384,14 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         }
                     }
 
-                    umTextFieldSelect(
-                        "${submissionTypeLabel.text}",
-                        entity?.caSubmissionType.toString(),
-                        submissionTypeLabel.errorText ?: "",
-                        error = submissionTypeLabel.error,
-                        values = submissionTypeOptions?.map {
-                            Pair(it.code.toString(), it.toString())
-                        }?.toList(),
-                        onChange = {
-                            setState {
-                                entity?.caSubmissionType = it.toInt()
-                            }
+                    umTextField(label = "${submissionTypeLabel.text}",
+                        helperText = submissionTypeLabel.errorText,
+                        value = groupSet?.cgsName,
+                        error = nameLabel.error,
+                        disabled = !fieldsEnabled,
+                        variant = FormControlVariant.outlined,
+                        onClick = {
+                            mPresenter?.handleSubmissionTypeClicked()
                         }
                     )
 
@@ -492,32 +462,6 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         }
                     }
 
-                    /*umFormControl(variant = FormControlVariant.outlined) {
-                        css{
-                            +defaultMarginTop
-                        }
-                        umInputLabel("${penaltyLabel.text}",
-                            id = penaltyLabel.id,
-                            error = penaltyLabel.error,
-                            variant = FormControlVariant.outlined,
-                            htmlFor = penaltyLabel.id)
-
-                        umOutlinedInput(
-                            id = penaltyLabel.id,
-                            label = "${penaltyLabel.text}",
-                            value = entity?.caLateSubmissionPenalty.toString(),
-                            error = penaltyLabel.error,
-                            type = InputType.number,
-                            disabled = !fieldsEnabled,
-                            onChange = {
-                                setState {
-                                    entity?.caLateSubmissionPenalty = it.toInt()
-                                }
-                            }) {
-                            attrs.endAdornment = umTypography("%")
-                        }
-                    }*/
-
                     umGridContainer(columnSpacing = GridSpacing.spacing4) {
                         umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextFieldSelect(
@@ -546,6 +490,43 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 onChange = {
                                     setState {
                                         entity?.caTextLimit = it.toInt()
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+
+                    umGridContainer(columnSpacing = GridSpacing.spacing4) {
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umTextFieldSelect(
+                                "${editAfterSubLabel.text}",
+                                entity?.caEditAfterSubmissionType.toString(),
+                                editAfterSubLabel.errorText ?: "",
+                                error = editAfterSubLabel.error,
+                                values = editAfterSubmissionOptions?.map {
+                                    Pair(it.code.toString(), it.toString())
+                                }?.toList(),
+                                onChange = {
+                                    setState {
+                                        entity?.caEditAfterSubmissionType = it.toInt()
+                                    }
+                                }
+                            )
+                        }
+
+                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                            umTextFieldSelect(
+                                "${markedByLabel.text}",
+                                entity?.caMarkingType.toString(),
+                                markedByLabel.errorText ?: "",
+                                error = markedByLabel.error,
+                                values = markingTypeOptions?.map {
+                                    Pair(it.code.toString(), it.toString())
+                                }?.toList(),
+                                onChange = {
+                                    setState {
+                                        entity?.caMarkingType = it.toInt()
                                     }
                                 }
                             )

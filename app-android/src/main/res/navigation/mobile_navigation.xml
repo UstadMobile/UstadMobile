@@ -131,6 +131,18 @@
 
 
     <fragment
+        android:id="@+id/course_group_set_list"
+        android:name="com.ustadmobile.port.android.view.CourseGroupSetListFragment" />
+
+    <fragment
+        android:id="@+id/course_group_set_edit"
+        android:name="com.ustadmobile.port.android.view.CourseGroupSetEditFragment" />
+
+    <fragment
+        android:id="@+id/course_group_set_detail"
+        android:name="com.ustadmobile.port.android.view.CourseGroupSetDetailFragment" />
+
+    <fragment
         android:id="@+id/module_course_block_edit_dest"
         android:name="com.ustadmobile.port.android.view.ModuleCourseBlockEditFragment" />
 
