@@ -2,6 +2,7 @@ package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.door.ext.hexStringToByteArray
 import com.ustadmobile.door.ext.toHexString
+import kotlin.collections.Map
 import kotlin.text.Typography.ellipsis
 
 
@@ -87,6 +88,10 @@ fun String.appendQueryArgs(vararg pairs: Pair<String, String>): String {
  */
 fun String.appendQueryArgs(args: Map<String, String>): String {
     return appendQueryArgs(args.toQueryString())
+}
+
+fun String.capitalizeFirstLetter(): String {
+    return this.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 }
 
 /**
