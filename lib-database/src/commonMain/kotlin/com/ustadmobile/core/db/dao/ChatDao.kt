@@ -82,7 +82,15 @@ abstract class ChatDao: BaseDao<Chat>{
     @Insert
     abstract suspend fun updateAsync(entity: Chat)
 
-    //TODO: Document the logic a bit
+    /**
+     * The logic in the query uses a Union. The feature expected includes displaying a list of 
+     * existing chats on the chat list screen. It also has to include all the people we havent 
+     * initiated chats with when we search by person.
+     * The first union is responsible for getting all the data relevant to existing chat for the
+     * logged in user, along with the latest message and any direct person if the chat is not a group
+     * chat.
+     * The other union is simply a query to all people.
+     */
     @Query("""
         WITH Chats AS
             (SELECT Chat.*,
@@ -140,6 +148,7 @@ abstract class ChatDao: BaseDao<Chat>{
                       FROM ChatMember c
                       LEFT JOIN Person p ON p.personUid = c.chatMemberPersonUid)
                  AND Person.firstNames||' '||Person.lastName LIKE :searchBit )
+        ORDER BY latestMessageTimestamp DESC
     """)
     abstract fun findAllChatsForUser(searchBit: String, personUid: Long)
         : DoorDataSourceFactory<Int, ChatWithLatestMessageAndCount>
