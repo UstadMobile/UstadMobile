@@ -41,6 +41,8 @@ fun RBuilder.umTextField(
     id: String? = null,
     name: String? = null,
     className: String? = null,
+    blockedCharacters: String? = null,
+    allowCapitalLetters: Boolean = true,
     onClick: (() -> Unit)? = null,
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
@@ -48,7 +50,7 @@ fun RBuilder.umTextField(
     setProps(
         this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
         id, label, margin, false, name, onChange, placeholder, required, null, null,
-        false, type, value, variant,onClick
+        false, type, value, variant,blockedCharacters,allowCapitalLetters,onClick
     )
 }
 
@@ -70,12 +72,15 @@ fun RBuilder.umTextFieldMultiLine(
     id: String? = null,
     name: String? = null,
     className: String? = null,
+    blockedValues: String? = null,
+    allowCapitalLetters: Boolean = true,
     handler: StyledHandler<UMTextFieldProps>? = null
 ) = createStyledComponent(TextField, className, handler) {
     css(defaultFullWidth)
     setProps(this, null, autoFocus,
         disabled, error, fullWidth, helperText, id, label, margin, true, name, onChange,
-        placeholder, required, rows, rowsMax, false, InputType.text, value, variant
+        placeholder, required, rows, rowsMax, false, InputType.text, value, variant,
+        blockedValues, allowCapitalLetters
     )
 }
 
@@ -142,8 +147,11 @@ private fun setProps(
     type: InputType,
     value: String?,
     variant: FormControlVariant,
+    blockedCharacters: String? = null,
+    allowCapitalLetters: Boolean = true,
     onClick: (() -> Unit)? = null,
 ) {
+    val sb = StringBuilder()
     autoComplete?.let { textField.attrs.autoComplete = it }
     textField.attrs.autoFocus = autoFocus
     textField.attrs.disabled = disabled
@@ -159,8 +167,8 @@ private fun setProps(
         if(!select){
             it.persist()
         }
-        val value = it.target.asDynamic().value
-        onChange?.invoke(value?.toString() ?: "")
+        val enteredValue = it.target.asDynamic().value
+        onChange?.invoke(enteredValue?.toString() ?: "")
     }
     placeholder?.let { textField.attrs.placeholder = it }
     textField.attrs.required = required
@@ -173,5 +181,18 @@ private fun setProps(
         onClick?.invoke()
     }
     textField.attrs.variant = variant.toString()
+    if(!allowCapitalLetters){
+        textField.attrs.onInput = {
+            val enteredValue = it.target.asDynamic().value
+            it.target.asDynamic().value = (enteredValue?.toString() ?: "").lowercase()
+        }
+    }
+    if(!blockedCharacters.isNullOrEmpty()){
+        textField.attrs.onKeyPress = {
+           if(blockedCharacters.contains(it.key)){
+               it.preventDefault()
+           }
+        }
+    }
 }
 
