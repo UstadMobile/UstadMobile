@@ -84,6 +84,4 @@ abstract class ChatMemberDao: BaseDao<ChatMember>{
     abstract suspend fun replicateOnChange()
 
 
-    @Insert
-    abstract suspend fun updateAsync(entity: ChatMember)
 }

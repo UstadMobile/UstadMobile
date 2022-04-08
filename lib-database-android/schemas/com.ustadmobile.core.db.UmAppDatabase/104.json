@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 104,
-    "identityHash": "7bf44c1de6909d8bfad49f0553582b9c",
+    "identityHash": "85dbb6c17d42db5ee00097ebfd589d73",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -10368,12 +10368,351 @@
           }
         ],
         "foreignKeys": []
+      },
+      {
+        "tableName": "CourseDiscussion",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseDiscussionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `courseDiscussionTitle` TEXT, `courseDiscussionDesc` TEXT, `courseDiscussionStartDate` INTEGER NOT NULL, `courseDiscussionLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "courseDiscussionUid",
+            "columnName": "courseDiscussionUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseDiscussionTitle",
+            "columnName": "courseDiscussionTitle",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseDiscussionDesc",
+            "columnName": "courseDiscussionDesc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseDiscussionStartDate",
+            "columnName": "courseDiscussionStartDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseDiscussionLct",
+            "columnName": "courseDiscussionLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "courseDiscussionUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseDiscussionReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseDiscussionPk` INTEGER NOT NULL, `courseDiscussionVersionId` INTEGER NOT NULL DEFAULT 0, `courseDiscussionDestination` INTEGER NOT NULL, `courseDiscussionPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`courseDiscussionPk`, `courseDiscussionDestination`))",
+        "fields": [
+          {
+            "fieldPath": "courseDiscussionPk",
+            "columnName": "courseDiscussionPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseDiscussionVersionId",
+            "columnName": "courseDiscussionVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "courseDiscussionDestination",
+            "columnName": "courseDiscussionDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseDiscussionPending",
+            "columnName": "courseDiscussionPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "courseDiscussionPk",
+            "courseDiscussionDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_CourseDiscussionReplicate_courseDiscussionPk_courseDiscussionDestination_courseDiscussionVersionId",
+            "unique": false,
+            "columnNames": [
+              "courseDiscussionPk",
+              "courseDiscussionDestination",
+              "courseDiscussionVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseDiscussionReplicate_courseDiscussionPk_courseDiscussionDestination_courseDiscussionVersionId` ON `${TABLE_NAME}` (`courseDiscussionPk`, `courseDiscussionDestination`, `courseDiscussionVersionId`)"
+          },
+          {
+            "name": "index_CourseDiscussionReplicate_courseDiscussionDestination_courseDiscussionPending",
+            "unique": false,
+            "columnNames": [
+              "courseDiscussionDestination",
+              "courseDiscussionPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseDiscussionReplicate_courseDiscussionDestination_courseDiscussionPending` ON `${TABLE_NAME}` (`courseDiscussionDestination`, `courseDiscussionPending`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "DiscussionTopic",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`discussionTopicUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `discussionTopicTitle` TEXT, `discussionTopicDesc` TEXT, `discussionTopicStartDate` INTEGER NOT NULL, `discussionTopicCourseDiscussionUid` INTEGER NOT NULL, `discussionTopicVisible` INTEGER NOT NULL, `discussionTopicArchive` INTEGER NOT NULL, `discussionTopicLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "discussionTopicUid",
+            "columnName": "discussionTopicUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discussionTopicTitle",
+            "columnName": "discussionTopicTitle",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "discussionTopicDesc",
+            "columnName": "discussionTopicDesc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "discussionTopicStartDate",
+            "columnName": "discussionTopicStartDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discussionTopicCourseDiscussionUid",
+            "columnName": "discussionTopicCourseDiscussionUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discussionTopicVisible",
+            "columnName": "discussionTopicVisible",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discussionTopicArchive",
+            "columnName": "discussionTopicArchive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discussionTopicLct",
+            "columnName": "discussionTopicLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "discussionTopicUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "DiscussionTopicReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`discussionTopicPk` INTEGER NOT NULL, `discussionTopicVersionId` INTEGER NOT NULL DEFAULT 0, `discussionTopicDestination` INTEGER NOT NULL, `discussionTopicPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`discussionTopicPk`, `discussionTopicDestination`))",
+        "fields": [
+          {
+            "fieldPath": "discussionTopicPk",
+            "columnName": "discussionTopicPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discussionTopicVersionId",
+            "columnName": "discussionTopicVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "discussionTopicDestination",
+            "columnName": "discussionTopicDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discussionTopicPending",
+            "columnName": "discussionTopicPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "discussionTopicPk",
+            "discussionTopicDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_DiscussionTopicReplicate_discussionTopicPk_discussionTopicDestination_discussionTopicVersionId",
+            "unique": false,
+            "columnNames": [
+              "discussionTopicPk",
+              "discussionTopicDestination",
+              "discussionTopicVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DiscussionTopicReplicate_discussionTopicPk_discussionTopicDestination_discussionTopicVersionId` ON `${TABLE_NAME}` (`discussionTopicPk`, `discussionTopicDestination`, `discussionTopicVersionId`)"
+          },
+          {
+            "name": "index_DiscussionTopicReplicate_discussionTopicDestination_discussionTopicPending",
+            "unique": false,
+            "columnNames": [
+              "discussionTopicDestination",
+              "discussionTopicPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DiscussionTopicReplicate_discussionTopicDestination_discussionTopicPending` ON `${TABLE_NAME}` (`discussionTopicDestination`, `discussionTopicPending`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseDiscussionTopic",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseDiscussionTopicUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `courseDiscussionTopicStartedPersonUid` INTEGER NOT NULL, `courseDiscussionTopicTitle` TEXT, `courseDiscussionTopicStartDate` INTEGER NOT NULL, `courseDiscussionTopicLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "courseDiscussionTopicUid",
+            "columnName": "courseDiscussionTopicUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseDiscussionTopicStartedPersonUid",
+            "columnName": "courseDiscussionTopicStartedPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseDiscussionTopicTitle",
+            "columnName": "courseDiscussionTopicTitle",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseDiscussionTopicStartDate",
+            "columnName": "courseDiscussionTopicStartDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseDiscussionTopicLct",
+            "columnName": "courseDiscussionTopicLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "courseDiscussionTopicUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CourseDiscussionTopicReplicate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseDiscussionTopicPk` INTEGER NOT NULL, `courseDiscussionTopicVersionId` INTEGER NOT NULL DEFAULT 0, `courseDiscussionTopicDestination` INTEGER NOT NULL, `courseDiscussionTopicPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`courseDiscussionTopicPk`, `courseDiscussionTopicDestination`))",
+        "fields": [
+          {
+            "fieldPath": "courseDiscussionTopicPk",
+            "columnName": "courseDiscussionTopicPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseDiscussionTopicVersionId",
+            "columnName": "courseDiscussionTopicVersionId",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "courseDiscussionTopicDestination",
+            "columnName": "courseDiscussionTopicDestination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseDiscussionTopicPending",
+            "columnName": "courseDiscussionTopicPending",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "courseDiscussionTopicPk",
+            "courseDiscussionTopicDestination"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_CourseDiscussionTopicReplicate_courseDiscussionTopicPk_courseDiscussionTopicDestination_courseDiscussionTopicVersionId",
+            "unique": false,
+            "columnNames": [
+              "courseDiscussionTopicPk",
+              "courseDiscussionTopicDestination",
+              "courseDiscussionTopicVersionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseDiscussionTopicReplicate_courseDiscussionTopicPk_courseDiscussionTopicDestination_courseDiscussionTopicVersionId` ON `${TABLE_NAME}` (`courseDiscussionTopicPk`, `courseDiscussionTopicDestination`, `courseDiscussionTopicVersionId`)"
+          },
+          {
+            "name": "index_CourseDiscussionTopicReplicate_courseDiscussionTopicDestination_courseDiscussionTopicPending",
+            "unique": false,
+            "columnNames": [
+              "courseDiscussionTopicDestination",
+              "courseDiscussionTopicPending"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CourseDiscussionTopicReplicate_courseDiscussionTopicDestination_courseDiscussionTopicPending` ON `${TABLE_NAME}` (`courseDiscussionTopicDestination`, `courseDiscussionTopicPending`)"
+          }
+        ],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7bf44c1de6909d8bfad49f0553582b9c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '85dbb6c17d42db5ee00097ebfd589d73')"
     ]
   }
 }

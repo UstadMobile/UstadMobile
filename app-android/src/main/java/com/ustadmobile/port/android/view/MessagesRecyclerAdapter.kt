@@ -89,7 +89,9 @@ class MessagesRecyclerAdapter(val loggedInPersonUid: Long)
                     override fun areContentsTheSame(oldItem: MessageWithPerson,
                                                     newItem: MessageWithPerson): Boolean {
                         return oldItem.messageSenderPersonUid == newItem.messageSenderPersonUid &&
-                                oldItem.messageText == newItem.messageText
+                            oldItem.messageText == newItem.messageText &&
+                            oldItem.messagePerson?.firstNames == newItem.messagePerson?.firstNames &&
+                            oldItem.messagePerson?.lastName == newItem.messagePerson?.lastName
                     }
                 }
 

@@ -71,6 +71,4 @@ abstract class MessageDao: BaseDao<Message>{
             DoorDataSourceFactory<Int, MessageWithPerson>
 
 
-    @Insert
-    abstract suspend fun updateAsync(entity: Message)
 }

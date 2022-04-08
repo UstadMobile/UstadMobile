@@ -79,8 +79,6 @@ abstract class ChatDao: BaseDao<Chat>{
     abstract suspend fun replicateOnChange()
 
 
-    @Insert
-    abstract suspend fun updateAsync(entity: Chat)
 
     /**
      * The logic in the query uses a Union. The feature expected includes displaying a list of 
@@ -160,7 +158,9 @@ abstract class ChatDao: BaseDao<Chat>{
                    ELSE Person.firstNames||' '||Person.lastName
                END AS title
         FROM Chat
-        LEFT JOIN Person ON Person.personUid =
+        LEFT JOIN Person 
+        ON CAST(Chat.isChatGroup AS INTEGER) =1
+           AND Person.personUid =
           (SELECT pp.personUid
            FROM ChatMember cm
            LEFT JOIN Person pp ON pp.personUid = cm.chatMemberPersonUid

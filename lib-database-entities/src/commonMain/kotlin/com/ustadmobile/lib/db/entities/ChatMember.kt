@@ -9,7 +9,8 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@ReplicateEntity(tableId = TABLE_ID , tracker = ChatMemberReplicate::class)
+@ReplicateEntity(tableId = TABLE_ID , tracker = ChatMemberReplicate::class,
+    priority = ReplicateEntity.HIGHEST_PRIORITY + 1)
 @Triggers(arrayOf(
     Trigger(
         name = "chatmember_remote_insert",
