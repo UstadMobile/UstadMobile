@@ -341,7 +341,7 @@ fun RBuilder.renderListItemWithLeftIconTitleAndDescription(
                         ){
                             css {
                                 +alignTextToStart
-                                if(description == null){
+                                if(description.isNullOrEmpty()){
                                     marginTop = 2.spacingUnits
                                 }
                             }
@@ -864,7 +864,10 @@ fun RBuilder.renderListItemWithLeftIconTitleAndOptionOnRight(
         umItem(GridSize.cells8, GridSize.cells9) {
             umTypography(title ?: "",
                 variant = TypographyVariant.h6) {
-                css (alignTextToStart)
+                css {
+                    +alignTextToStart
+                    marginTop = 2.spacingUnits
+                }
             }
         }
 

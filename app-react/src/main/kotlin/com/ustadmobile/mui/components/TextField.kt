@@ -159,7 +159,8 @@ private fun setProps(
         if(!select){
             it.persist()
         }
-        onChange?.invoke(it.target.asDynamic().value.toString())
+        val value = it.target.asDynamic().value
+        onChange?.invoke(value?.toString() ?: "")
     }
     placeholder?.let { textField.attrs.placeholder = it }
     textField.attrs.required = required

@@ -17,6 +17,7 @@ import com.ustadmobile.util.ext.format
 import com.ustadmobile.view.ext.renderListItemWithLeftIconTitleAndDescription
 import com.ustadmobile.view.ext.renderListSectionTitle
 import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umSpacer
 import react.RBuilder
 import react.setState
 import styled.css
@@ -63,6 +64,7 @@ class CourseGroupSetDetailComponent(props: UmProps): UstadDetailComponent<Course
                 css(horizontalList)
                 memberList?.forEach {
                     if(it.personUid == 0L){
+                        umSpacer()
                         renderListSectionTitle(getString(MessageID.group_number).format(
                             it.member?.cgmGroupNumber.toString()))
                     }else {

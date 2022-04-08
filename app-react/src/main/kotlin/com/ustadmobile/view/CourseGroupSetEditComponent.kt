@@ -22,6 +22,7 @@ import com.ustadmobile.view.ext.renderListItemWithLeftIconTitleAndOptionOnRight
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umSpacer
+import kotlinx.browser.window
 import kotlinx.css.height
 import kotlinx.css.px
 import react.RBuilder
@@ -41,6 +42,8 @@ class CourseGroupSetEditComponent (mProps: UmProps): UstadEditComponent<CourseGr
         get() = listOf(LanguageEditView.VIEW_NAME)
 
     private var groupLabel = FieldLabel(getString(MessageID.group))
+
+    private var numberOfGroups = 0;
 
 
     override var memberList: List<CourseGroupMemberPerson>? = null
@@ -66,6 +69,8 @@ class CourseGroupSetEditComponent (mProps: UmProps): UstadEditComponent<CourseGr
                 field = value
             }
         }
+
+    var groupNumberChangeTaskId = -1
 
     override var entity: CourseGroupSet? = null
         get() = field
@@ -118,9 +123,15 @@ class CourseGroupSetEditComponent (mProps: UmProps): UstadEditComponent<CourseGr
                         error = numberOfLabel.error,
                         disabled = !fieldsEnabled,
                         variant = FormControlVariant.outlined,
-                        onChange = {
-                            entity?.cgsTotalGroups = it.toInt()
-                            mPresenter?.handleNumberOfGroupsChanged(it.toInt())
+                        onChange = { nOfGroups ->
+                            val numberOfGroups = (nOfGroups.ifEmpty { "0" }).toInt()
+                            setState{
+                                entity?.cgsTotalGroups = numberOfGroups
+                            }
+                            window.clearTimeout(groupNumberChangeTaskId)
+                            groupNumberChangeTaskId = window.setTimeout({
+                                mPresenter?.handleNumberOfGroupsChanged(numberOfGroups)
+                            }, 1000)
                         }
                     )
                 }
@@ -156,6 +167,7 @@ class CourseGroupSetEditComponent (mProps: UmProps): UstadEditComponent<CourseGr
                                fieldLabel = groupLabel,
                                onChange = {
                                    memberList!![index].member?.cgmGroupNumber = it.toInt()
+                                   setState {  }
                                }
                            )
                        }
