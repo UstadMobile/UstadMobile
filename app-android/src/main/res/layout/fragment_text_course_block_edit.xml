@@ -131,6 +131,7 @@
                 android:scrollbars="vertical"
                 android:overScrollMode="always"
                 android:scrollbarStyle="insideInset"
+                app:layout_constraintHeight_min="@dimen/dimen_200dp"
                 app:historyEnable="true"
                 app:historySize="10"
                 app:textColor="?colorOnBackground"
