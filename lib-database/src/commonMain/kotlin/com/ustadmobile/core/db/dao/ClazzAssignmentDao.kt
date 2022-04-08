@@ -177,7 +177,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
              
              LEFT JOIN CourseAssignmentSubmission
              ON CourseAssignmentSubmission.casAssignmentUid = ClazzAssignment.caUid
-             AND CourseAssignmentSubmission.casStudentUid = Person.personUid
+             AND CourseAssignmentSubmission.casSubmitterUid = Person.personUid
              
              LEFT JOIN CourseAssignmentMark
              ON CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
@@ -252,10 +252,10 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
                 
                (CASE WHEN (SELECT hasPermission 
                           FROM CtePermissionCheck)
-                     THEN (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casStudentUid)
+                     THEN (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casSubmitterUid)
                          FROM ClazzEnrolment
                               JOIN CourseAssignmentSubmission
-                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentSubmission.casStudentUid
+                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentSubmission.casSubmitterUid
                               AND ClazzAssignment.caUid = CourseAssignmentSubmission.casAssignmentUid
                              
                               LEFT JOIN CourseAssignmentMark

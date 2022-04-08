@@ -177,7 +177,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             presenterScope.launch(doorMainDispatcher()) {
                 val doorUri = DoorUri.parse(uri)
                 val submission = CourseAssignmentSubmissionWithAttachment().apply {
-                    casStudentUid = accountManager.activeAccount.personUid
+                    casSubmitterUid = accountManager.activeAccount.personUid
                     casAssignmentUid = entity?.caUid ?: 0
                     casText = doorUri.getFileName(context)
                     casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
@@ -206,7 +206,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             submissionList.remove(existingSubmission)
 
             submission.casAssignmentUid = entity?.caUid ?: 0
-            submission.casStudentUid = accountManager.activeAccount.personUid
+            submission.casSubmitterUid = accountManager.activeAccount.personUid
             submissionList.add(submission)
             view.addedCourseAssignmentSubmission = submissionList
             requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null

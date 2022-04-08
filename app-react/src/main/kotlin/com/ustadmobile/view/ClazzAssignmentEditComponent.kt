@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.defaultMarginTop
@@ -119,6 +120,9 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                 field = newText
             }
         }
+    override var groupSet: CourseGroupSet?
+        get() = TODO("Not yet implemented")
+        set(value) {}
     override var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>?
         get() = TODO("Not yet implemented")
         set(value) {}
@@ -126,9 +130,6 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
         get() = TODO("Not yet implemented")
         set(value) {}
     override var textLimitTypeOptions: List<ClazzAssignmentEditPresenter.TextLimitTypeOptionsMessageIdOption>?
-        get() = TODO("Not yet implemented")
-        set(value) {}
-    override var submissionTypeOptions: List<ClazzAssignmentEditPresenter.SubmissionTypeOptionsMessageIdOption>?
         get() = TODO("Not yet implemented")
         set(value) {}
     override var completionCriteriaOptions: List<ClazzAssignmentEditPresenter.CompletionCriteriaOptionsMessageIdOption>?

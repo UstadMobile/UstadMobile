@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.toTermMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
@@ -32,6 +33,7 @@ import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -41,6 +43,8 @@ class ClazzEdit2Presenter(context: Any,
                           lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendarAndSchoolAndTerminology>(context, arguments, view,
          di, lifecycleOwner), TreeOneToManyJoinEditListener<CourseBlockWithEntity>, ItemTouchHelperListener {
+
+    private val json: Json by di.instance()
 
     private val scheduleOneToManyJoinEditHelper
             = OneToManyJoinEditHelperMp(Schedule::scheduleUid,
@@ -292,6 +296,9 @@ class ClazzEdit2Presenter(context: Any,
         } ?: listOf()
         courseBlockOneToManyJoinEditHelper.liveList.sendValue(courseBlocks)
 
+        val termMap = db.courseTerminologyDao.findByUidAsync(clazz.clazzTerminologyUid)
+            .toTermMap(json, systemImpl, context)
+
         if(clazzUid != 0L) {
             val scopedGrants = db.onRepoWithFallbackToDb(2000) {
                 it.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID, clazzUid)
@@ -310,7 +317,7 @@ class ClazzEdit2Presenter(context: Any,
             */
 
             scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
-                name = "Teachers"
+                name = termMap[TerminologyKeys.TEACHERS_KEY]
                 scopedGrant = ScopedGrant().apply {
                     sgFlags = ScopedGrant.FLAG_TEACHER_GROUP.or(FLAG_NO_DELETE)
                     sgPermissions = Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT
@@ -318,7 +325,7 @@ class ClazzEdit2Presenter(context: Any,
             })
 
             scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
-                name = "Students"
+                name = termMap[TerminologyKeys.STUDENTS_KEY]
                 scopedGrant = ScopedGrant().apply {
                     sgFlags = ScopedGrant.FLAG_STUDENT_GROUP.or(FLAG_NO_DELETE)
                     sgPermissions = Role.ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT
@@ -432,6 +439,18 @@ class ClazzEdit2Presenter(context: Any,
                         .toOffsetByTimezone(entity.effectiveTimeZone).localEndOfDay.utc.unixMillisLong
             }
 
+            val courseBlockList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toList() ?: listOf()
+            var currentParentBlock: CourseBlock? = null
+            courseBlockList.forEachIndexed { index, item ->
+                item.cbIndex = index
+                if(item.cbType == CourseBlock.BLOCK_MODULE_TYPE){
+                    currentParentBlock = item
+                }else if(item.cbIndentLevel != 0){
+                    item.cbModuleParentBlockUid = currentParentBlock?.cbUid ?: 0L
+                }
+            }
+            courseBlockOneToManyJoinEditHelper.liveList.sendValue(courseBlockList)
+
             repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
 
                 if((arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() ?: 0L) == 0L) {
@@ -470,9 +489,11 @@ class ClazzEdit2Presenter(context: Any,
                     txDb.clazzAssignmentDao.updateAsync(assignment)
                 }
 
-                courseBlockOneToManyJoinEditHelper.commitToDatabase(txDb.courseBlockDao){
-                    it.cbClazzUid = entity.clazzUid
-                }
+                txDb.courseBlockDao.replaceListAsync(courseBlockList)
+                txDb.courseBlockDao.deactivateByUids(
+                    courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate,
+                    systemTimeInMillis())
+
             }
 
             val coursePictureVal = view.coursePicture
@@ -689,11 +710,21 @@ class ClazzEdit2Presenter(context: Any,
         view.courseBlocks = courseBlockOneToManyJoinEditHelper.liveList
     }
 
+    /*
+     * Will hide or unhide the courseBlock, if block is a module, its children will also change
+     */
     override fun onClickHide(joinedEntity: CourseBlockWithEntity) {
         val newList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: return
         val foundBlock = newList.find { it.cbUid == joinedEntity.cbUid } ?: return
         foundBlock.cbHidden = !foundBlock.cbHidden
         newList[foundBlock.cbIndex] = foundBlock
+
+        if(foundBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
+            newList.forEach{
+                it.takeIf { it.cbModuleParentBlockUid == foundBlock.cbUid }
+                    ?.cbHidden = !it.cbHidden
+            }
+        }
         courseBlockOneToManyJoinEditHelper.liveList.sendValue(newList)
     }
 

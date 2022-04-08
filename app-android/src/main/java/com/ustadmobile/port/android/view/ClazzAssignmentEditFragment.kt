@@ -13,6 +13,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
+import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 
@@ -87,6 +88,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignmentWithCourseBl
         mPresenter = ClazzAssignmentEditPresenter(requireContext(), arguments.toStringMap(),
                 this, viewLifecycleOwner, di)
 
+        mBinding?.mPresenter = mPresenter
         mPresenter?.onCreate(backStackSavedState)
 
     }
@@ -194,6 +196,11 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignmentWithCourseBl
             mBinding?.timeZone = value
             field = value
         }
+    override var groupSet: CourseGroupSet? = null
+        set(value) {
+            field = value
+            mBinding?.groupSet = value
+        }
 
     override var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>? = null
         get() = field
@@ -213,12 +220,6 @@ class ClazzAssignmentEditFragment: UstadEditFragment<ClazzAssignmentWithCourseBl
         set(value) {
             field = value
             mBinding?.textLimitTypeOptions = textLimitTypeOptions
-        }
-    override var submissionTypeOptions: List<ClazzAssignmentEditPresenter.SubmissionTypeOptionsMessageIdOption>? = null
-        get() = field
-        set(value) {
-            field = value
-            mBinding?.submissionTypeOptions = value
         }
 
     override var completionCriteriaOptions: List<ClazzAssignmentEditPresenter.CompletionCriteriaOptionsMessageIdOption>? = null

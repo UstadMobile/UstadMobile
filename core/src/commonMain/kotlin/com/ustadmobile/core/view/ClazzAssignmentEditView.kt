@@ -2,6 +2,7 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
+import com.ustadmobile.lib.db.entities.CourseGroupSet
 
 
 interface ClazzAssignmentEditView: UstadEditView<ClazzAssignmentWithCourseBlock> {
@@ -23,13 +24,13 @@ interface ClazzAssignmentEditView: UstadEditView<ClazzAssignmentWithCourseBlock>
 
     var timeZone: String?
 
+    var groupSet: CourseGroupSet?
+
     var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>?
 
     var fileTypeOptions: List<ClazzAssignmentEditPresenter.FileTypeOptionsMessageIdOption>?
 
     var textLimitTypeOptions: List<ClazzAssignmentEditPresenter.TextLimitTypeOptionsMessageIdOption>?
-
-    var submissionTypeOptions: List<ClazzAssignmentEditPresenter.SubmissionTypeOptionsMessageIdOption>?
 
     var completionCriteriaOptions: List<ClazzAssignmentEditPresenter.CompletionCriteriaOptionsMessageIdOption>?
 

@@ -28,6 +28,7 @@
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, courseTerminology)}"
         app:onSelectableItemClicked="@{() -> itemListener.onClickCourseTerminology(courseTerminology)}"
         android:background="@drawable/bg_listitem"
+        android:padding="@dimen/dimen_16dp"
         >
 
         <!-- Line 1-->
@@ -38,7 +39,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_margin="@dimen/dimen_16dp"
             android:text="@{courseTerminology.ctTitle}"
             tools:text="Standard English"
             android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
