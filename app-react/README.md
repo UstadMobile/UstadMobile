@@ -6,62 +6,42 @@ This modules contains react web application, based on kotlin multi-platform idea
 Install the [Latest Node](https://nodejs.org/en/download/) on your machine since the kotlin multiplatform eco-system depends on it.
 
 ## Development
-You can now build this module by simply running the commands listed below. It will download all required
-dependencies for it to start-up. You can run on either development or production mode while doing
-development to make sure it behaves the same on both dev and production environment respectively.
+
+Build, configure and then run the http server. Development is done using the KTOR HTTP server in
+the app-ktor-server module to proxy requests as needed to the webpack development server (thus
+avoiding cross origin request issues).
 
 ```
-./gradlew app-react:browserDevelopmentRun
+./gradlew -Pskipreactproductionbundle=true app-ktor-server:shadowJar
 ```
+Note: by default the server build will include the app-react production bundle. This is not needed
+when running in development mode. It can be skipped to reduce the build time.
 
-This will create an app and it will automatically open http://localhost:8080/ in the system default
-browser. This won't really work because the react client depends on accessing the http API, which
-won't be available on this server.
-
-There are two workarounds:
-
-1)  Enable CORS and different server with browserDevelopmentRun, first set devmode = true in
-the app-ktor-server application.conf (so cross origin requests will be allowed). This will work for
-everything except content (eg epubs, videos, etc that use iframes).
+Copy app-ktor-server/src/resources/application.conf to app-ktor-server/, then edit it and uncomment
+the jsDevServer line
 
 ```
-ktor {
-    ...
-    ustad {
-        ...
-        devmode = true
-    }
+ustad {
+...
+jsDevServer = "http://localhost:8080/"
+...
 }
 ```
 
-Now start the server:
+Run the http server:
 
 ```
-./gradlew -Pskipreactproductionbundle=true app-ktor-server:shadowJar
-./runserver.sh
-```
-Note: skipreactproductionbundle will skip building the production react app that would otherwise get
-bundled into the server jar. This will make the development build much faster.
-
-Then open http://localhost:8080/#/LoginView?apiUrl=http://localhost:8087/ where 8087 is the port
-being used by the server (the default)
-
-2)  Use the [proxy](./contrib/kotlinjs-apache-debug.conf) configuration. The proxy will send api
-requests to app-ktor-server, and the rest will be handled through the development server.
-
-Start the server:
-```
-./gradlew -Pskipreactproductionbundle=true app-ktor-server:shadowJar
 ./runserver.sh
 ```
 
-Now open the port as per the proxy config, e.g. http://localhost:8091/
+Start the webpack development server:
 
-* Building and running continuously
-This will rebuild and re-run the app as you change some files
 ```
 ./gradlew app-react:browserDevelopmentRun --continuous
 ```
+
+Open a web browser on the address/port of the ktor http server e.g. http://localhost:8087/
+
 
 * Generating webpack bundle
 This is a deployable bundle, it is standalone bundle which include everything needed for the app to run.
@@ -86,7 +66,9 @@ For production purpose, below are the equivalent commands
 ```
 ./gradlew app-react:browserProductionWebpack
 ```
-### Deploying
+
+### Bundling with app-ktor-server
+
 For simplicity, the web app is packaged on server as static files, so in order to get a deployable
  bundle of server and web app just run
 
