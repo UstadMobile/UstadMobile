@@ -134,6 +134,7 @@ class ViewNameToDestMap: DestinationProvider {
             ChatListView.VIEW_NAME to UstadDestination(R.id.chat_list_home_dest),
             ChatDetailView.VIEW_NAME to UstadDestination(R.id.chat_detail_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL,
+                hideAccountIcon = true,
                 hideBottomNavigation = true),
     )
 

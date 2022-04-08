@@ -47,14 +47,14 @@ abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
          UserSession.usClientNodeId AS cgmDestination
     FROM ChangeLog
          JOIN CourseGroupMember
-           ON ChangeLog.chTableId = ${CourseGroupMember.TABLE_ID}
-                AND ChangeLog.chEntityPk = CourseGroupMember.cgmUid
+               ON ChangeLog.chTableId = ${CourseGroupMember.TABLE_ID}
+                  AND ChangeLog.chEntityPk = CourseGroupMember.cgmUid
           JOIN CourseGroupSet
-            ON CourseGroupSet.cgsClazzUid = Clazz.clazzUid       
-         JOIN Clazz 
-           ON Clazz.clazzUid = CourseGroupSet.cgsClazzUid 
-         ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-              ${Role.PERMISSION_ASSIGNMENT_SELECT}
+               ON CourseGroupSet.cgsUid = CourseGroupMember.cgmSetUid       
+          JOIN Clazz 
+               ON Clazz.clazzUid = CourseGroupSet.cgsClazzUid 
+          ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+              ${Role.PERMISSION_CLAZZ_SELECT}
               ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}  
    WHERE UserSession.usClientNodeId != (
          SELECT nodeClientId 
