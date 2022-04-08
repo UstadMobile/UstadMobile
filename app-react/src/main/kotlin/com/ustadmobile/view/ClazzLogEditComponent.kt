@@ -1,16 +1,19 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.ClazzLogEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzLogEditView
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.ext.*
+import com.ustadmobile.util.ext.DATE_FORMAT_DD_MMM_YYYY
+import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.util.ext.timeInMillsFromStartOfDay
+import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
@@ -121,7 +124,7 @@ class ClazzLogEditComponent (mProps: UmProps): UstadEditComponent<ClazzLog>(mPro
                         inputVariant = FormControlVariant.outlined,
                         onChange = {
                             setState {
-                                date = it.startOfDay(timeZone).getTime().toLong()
+                                date = it.getTime().toLong()
                                 dateFieldValue = it.getTime().toLong()
                                 dateError = null
                             }
@@ -138,11 +141,12 @@ class ClazzLogEditComponent (mProps: UmProps): UstadEditComponent<ClazzLog>(mPro
                         inputVariant = FormControlVariant.outlined,
                         onChange = {
                             setState {
-                                time = it.timeInMillsFromStartOfDay(timeZone)
+                                time = it.timeInMillsFromStartOfDay()
                                 timeFieldValue = it.getTime().toLong()
                                 timeError = null
                             }
-                        })
+                        }
+                    )
                 }
             }
         }

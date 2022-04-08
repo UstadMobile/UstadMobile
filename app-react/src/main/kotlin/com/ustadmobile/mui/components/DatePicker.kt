@@ -60,7 +60,7 @@ fun RBuilder.timePicker(
     label: String,
     onChange:(Date)-> Unit,
     value: Date? = null,
-    ampm: Boolean = false,
+    ampm: Boolean = true,
     ampmInClock: Boolean = false,
     inputFormat: String? = null,
     helperText: String? = null,
@@ -211,7 +211,7 @@ fun RBuilder.umTimePicker(
     toolbarTitle: String? = null,
     views: Array<String>? = arrayOf("hours" ,"minutes","seconds"),
     className: String? = null,
-    ampm: Boolean = true,
+    ampm: Boolean = false,
     ampmInClock: Boolean = false,
     handler: StyledHandler<UMDateTimePickerProps>? = null
 ) = LocalizationProvider{
