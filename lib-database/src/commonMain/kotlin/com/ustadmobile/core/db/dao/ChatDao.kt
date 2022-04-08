@@ -159,7 +159,7 @@ abstract class ChatDao: BaseDao<Chat>{
                END AS title
         FROM Chat
         LEFT JOIN Person 
-        ON CAST(Chat.isChatGroup AS INTEGER) =1
+        ON CAST(Chat.isChatGroup AS INTEGER) = 0
            AND Person.personUid =
           (SELECT pp.personUid
            FROM ChatMember cm
