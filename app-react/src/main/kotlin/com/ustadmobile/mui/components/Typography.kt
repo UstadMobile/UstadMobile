@@ -1,11 +1,14 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
+import kotlinx.css.WhiteSpace
+import kotlinx.css.whiteSpace
 import mui.material.Typography
 import mui.material.TypographyProps
 import react.RBuilder
 import react.ReactNode
 import styled.StyledHandler
+import styled.css
 
 @Suppress("EnumEntryName")
 enum class TypographyAlign {
@@ -44,5 +47,8 @@ fun RBuilder.umTypography(
     attrs.asDynamic().variant = variant.toString()
     text?.let {
         childList.add(ReactNode(it))
+    }
+    css{
+        whiteSpace = WhiteSpace.preLine
     }
 }

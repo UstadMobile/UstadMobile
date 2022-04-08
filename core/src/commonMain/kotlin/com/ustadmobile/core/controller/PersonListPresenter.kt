@@ -53,8 +53,14 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0L,
-                Role.PERMISSION_PERSON_INSERT)
+        return if(arguments[ARG_HIDE_PERSON_ADD] !== null){
+            false
+        }else {
+            db.entityRoleDao.userHasTableLevelPermission(
+                account?.personUid ?: 0L,
+                Role.PERMISSION_PERSON_INSERT
+            )
+        }
     }
 
     private fun updateListOnView() {
@@ -170,5 +176,7 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         )
 
         const val RESULT_PERSON_KEY = "Person"
+
+        const val ARG_HIDE_PERSON_ADD = "ArgHidePersonAdd"
     }
 }

@@ -193,6 +193,7 @@ ext {
     version_jakartamail="2.0.1"
 
     version_persian_date_picker_aliab="1.7.1"
+    version_better_link_movement="2.2.0"
 
     /*Kotlin react web app*/
     wrapperVersion = "pre.270-kotlin-1.6.0"

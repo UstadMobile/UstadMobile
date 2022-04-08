@@ -280,6 +280,21 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         paddingRight = (if(systemImpl.isRtlActive()) 60 else 0).px
     }
 
+
+    val chatInputMessageClass by css {
+        padding(2.spacingUnits)
+        transition += Transition("width", theme.transitions.duration.standard.ms, Timing.easeInOut, 0.ms)
+        width = LinearDimension("105ch")
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            width = LinearDimension("112ch")
+            focus {
+                width = LinearDimension("105ch")
+            }
+        }
+        flexGrow = 1.0
+        color = Color.inherit
+    }
+
     val mainComponentSearch by css {
         position = Position.relative
         borderRadius = theme.shape.borderRadius.px
@@ -288,6 +303,26 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
             backgroundColor =  styledModule.alpha(theme.palette.common.white, 0.25)
         }
         marginLeft = 0.px
+        width = 100.pct
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            marginLeft = 1.spacingUnits
+            width = LinearDimension("auto")
+        }
+
+        media(theme.breakpoints.down(tabletAndHighEnd)) {
+            width = 80.pct
+        }
+    }
+
+
+    val chatDetailNewMessage by css {
+        position = Position.relative
+        borderRadius = theme.shape.borderRadius.px
+        backgroundColor = styledModule.alpha(theme.palette.common.white, 0.15)
+        hover {
+            backgroundColor =  styledModule.alpha(theme.palette.common.white, 0.25)
+        }
+        marginLeft = 2.spacingUnits
         width = 100.pct
         media(theme.breakpoints.up(tabletAndHighEnd)) {
             marginLeft = 1.spacingUnits
@@ -320,6 +355,27 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val mainComponentFab by css{
         if(!systemImpl.isRtlActive()) right = 15.px
         if(systemImpl.isRtlActive()) left = 15.px
+        position = Position.fixed
+        bottom = 70.px
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            bottom = 15.px
+        }
+    }
+
+
+    val messageSendButton by css{
+        if(!systemImpl.isRtlActive()) right = 2.spacingUnits
+        if(systemImpl.isRtlActive()) left = 2.spacingUnits
+        position = Position.fixed
+        bottom = 92.px
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            bottom = 15.px
+        }
+    }
+
+    val chatMessage by css {
+        if(!systemImpl.isRtlActive()) left = 30.spacingUnits
+        if(systemImpl.isRtlActive()) right = 30.spacingUnits
         position = Position.fixed
         bottom = 70.px
         media(theme.breakpoints.up(tabletAndHighEnd)) {
