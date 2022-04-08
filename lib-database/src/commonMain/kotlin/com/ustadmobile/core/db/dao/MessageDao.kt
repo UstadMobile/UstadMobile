@@ -6,6 +6,7 @@ import androidx.room.Query
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.Chat
 import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.lib.db.entities.MessageWithPerson
 import com.ustadmobile.lib.db.entities.UserSession
@@ -18,8 +19,17 @@ abstract class MessageDao: BaseDao<Message>{
      REPLACE INTO MessageReplicate(messagePk, messageDestination)
       SELECT DISTINCT Message.messageUid AS messagePk,
              :newNodeId AS messageDestination
-        FROM Message
-       WHERE Message.messageLct != COALESCE(
+        FROM UserSession
+             JOIN Message ON
+                  ((    Message.messageTableId = ${Chat.TABLE_ID}
+                    AND Message.messageEntityUid IN
+                        (SELECT ChatMember.chatMemberChatUid 
+                          FROM ChatMember
+                         WHERE ChatMember.chatMemberPersonUid = UserSession.usPersonUid))
+                  OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM})
+       WHERE UserSession.usClientNodeId = :newNodeId
+         AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+         AND Message.messageLct != COALESCE(
              (SELECT messageVersionId
                 FROM MessageReplicate
                WHERE messagePk = Message.messageUid
@@ -30,7 +40,7 @@ abstract class MessageDao: BaseDao<Message>{
     """)
     @ReplicationRunOnNewNode
     @ReplicationCheckPendingNotificationsFor([Message::class])
-    abstract suspend fun replicateOnNewNode(@NewNodeIdParam newNodeId: Long)
+    abstract suspend fun replicateOnNewNodeChats(@NewNodeIdParam newNodeId: Long)
 
 
     @Query("""
@@ -41,8 +51,15 @@ abstract class MessageDao: BaseDao<Message>{
                  JOIN Message
                      ON ChangeLog.chTableId = ${Message.TABLE_ID}
                         AND ChangeLog.chEntityPk = Message.messageUid
-                 JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
-           WHERE UserSession.usClientNodeId != (
+                        AND Message.messageTableId = ${Chat.TABLE_ID}
+                 JOIN UserSession ON
+                      ((UserSession.usPersonUid IN 
+                           (SELECT ChatMember.chatMemberPersonUid
+                              FROM ChatMember
+                             WHERE ChatMember.chatMemberChatUid = Message.messageEntityUid))
+                       OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM})       
+           WHERE UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+             AND UserSession.usClientNodeId != (
                  SELECT nodeClientId 
                    FROM SyncNode
                   LIMIT 1)
