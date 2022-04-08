@@ -63,7 +63,8 @@ class ChatListPresenter(context: Any, arguments: Map<String, String>, view: Chat
 
         val args: Map<String, String>? = mapOf(
             ARG_GO_TO_COMPLETE to ChatDetailView.VIEW_NAME,
-            PersonListPresenter.ARG_HIDE_PERSON_ADD to "true"
+            PersonListPresenter.ARG_HIDE_PERSON_ADD to "true",
+            PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST to loggedInPersonUid.toString()
         )
         navigateForResult(
             NavigateForResultOptions(
@@ -80,17 +81,21 @@ class ChatListPresenter(context: Any, arguments: Map<String, String>, view: Chat
 
     fun handleClickCreateNewGroup(args: Map<String, String>?, destinationResultKey: String?){
         //TODO: enable multi select ?
-
-        navigateForResult(
-            NavigateForResultOptions(this,
-                null,
-                ChatDetailView.VIEW_NAME,
-                Chat::class,
-                Chat.serializer(),
-                destinationResultKey ?: CHAT_RESULT_KEY,
-                arguments = args?.toMutableMap() ?: arguments.toMutableMap()
-            )
-        )
+//        val args2: Map<String, String>? = mapOf(
+//            ARG_GO_TO_COMPLETE to ChatDetailView.VIEW_NAME,
+//            PersonListPresenter.ARG_HIDE_PERSON_ADD to "true",
+//            PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST to loggedInPersonUid.toString()
+//        )
+//        navigateForResult(
+//            NavigateForResultOptions(this,
+//                null,
+//                ChatDetailView.VIEW_NAME,
+//                Chat::class,
+//                Chat.serializer(),
+//                destinationResultKey ?: CHAT_RESULT_KEY,
+//                arguments = args2?.toMutableMap() ?: arguments.toMutableMap()
+//            )
+//        )
     }
 
     override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {

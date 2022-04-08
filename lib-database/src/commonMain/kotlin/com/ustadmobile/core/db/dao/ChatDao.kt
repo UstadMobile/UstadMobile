@@ -20,18 +20,15 @@ abstract class ChatDao: BaseDao<Chat>{
       SELECT DISTINCT Chat.chatUid AS chatPk,
              :newNodeId AS chatDestination
         FROM UserSession 
-             JOIN Chat ON Chat.chatUid IN 
-                ( (  
-                SELECT ChatMember.chatMemberChatUid 
-                  FROM ChatMember
-                 WHERE ChatMember.chatMemberPersonUid = UserSession.usPersonUid
-                 )
-                 OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM}
-                 )
-                 AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE} 
-                 
+             JOIN Chat ON 
+                  ((Chat.chatUid IN 
+                       (SELECT ChatMember.chatMemberChatUid 
+                          FROM ChatMember
+                         WHERE ChatMember.chatMemberPersonUid = UserSession.usPersonUid))
+                   OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM})
+                  AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE} 
        WHERE UserSession.usClientNodeId = :newNodeId
-       AND Chat.chatLct != COALESCE(
+         AND Chat.chatLct != COALESCE(
              (SELECT chatVersionId
                 FROM chatReplicate
                WHERE chatPk = Chat.chatUid
@@ -50,16 +47,15 @@ abstract class ChatDao: BaseDao<Chat>{
           SELECT DISTINCT Chat.chatUid AS chatUid,
                  UserSession.usClientNodeId AS chatDestination
             FROM ChangeLog
-                 JOIN chat
-                     ON ChangeLog.chTableId = ${Chat.TABLE_ID}
-                        AND ChangeLog.chEntityPk = Chat.chatUid
-                 JOIN UserSession ON UserSession.usPersonUid IN 
-                      ( (
-                      SELECT ChatMember.chatMemberPersonUid 
-                        FROM ChatMember 
-                       WHERE ChatMember.chatMemberChatUid = Chat.chatUid 
-                      ) 
-                      OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM} )
+                 JOIN Chat
+                      ON ChangeLog.chTableId = ${Chat.TABLE_ID}
+                         AND ChangeLog.chEntityPk = Chat.chatUid
+                 JOIN UserSession ON 
+                      ((UserSession.usPersonUid IN 
+                           (SELECT ChatMember.chatMemberPersonUid 
+                              FROM ChatMember 
+                             WHERE ChatMember.chatMemberChatUid = Chat.chatUid))
+                       OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM} )
                       AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
            WHERE UserSession.usClientNodeId != (
                  SELECT nodeClientId 
@@ -90,63 +86,64 @@ abstract class ChatDao: BaseDao<Chat>{
      * The other union is simply a query to all people.
      */
     @Query("""
-        WITH Chats AS
-            (SELECT Chat.*,
-                    Message.messageText AS latestMessage,
-                    Message.messageTimestamp AS latestMessageTimestamp,
-                    op.personUid AS otherPersonUid,
-                    op.firstNames AS otherPersonFirstNames,
-                    op.lastName AS otherPersonLastName,
-                    (0) AS unreadMessageCount,
+        SELECT Chat.*,
+               Message.messageText AS latestMessage,
+               Message.messageTimestamp AS latestMessageTimestamp,
+               op.personUid AS otherPersonUid,
+               op.firstNames AS otherPersonFirstNames,
+               op.lastName AS otherPersonLastName,
+               (0) AS unreadMessageCount,
         
-                 (SELECT COUNT(*)
+               (SELECT COUNT(*)
                   FROM ChatMember mm
                   WHERE mm.chatMemberChatUid = Chat.chatUid ) AS numMembers
-             FROM ChatMember
-             LEFT JOIN Chat ON Chat.chatUid = ChatMember.chatMemberChatUid
-             LEFT JOIN Message ON Message.messageUid =
-                 (SELECT messageUid
-                  FROM Message
-                  WHERE messageEntityUid = Chat.chatUid
-                      AND messageTableId = ${Chat.TABLE_ID}
-                  ORDER BY messageTimestamp DESC
-                  LIMIT 1)
-             LEFT JOIN Person op ON op.personUid =
-                 (SELECT pp.personUid
-                  FROM ChatMember cm
-                  LEFT JOIN Person pp ON pp.personUid = cm.chatMemberPersonUid
-                  WHERE cm.chatMemberChatUid = Chat.chatUid
-                      AND cm.chatMemberPersonUid != :personUid
-                      AND cm.chatMemberLeftDate = ${Long.MAX_VALUE}
-                  LIMIT 1)
-             WHERE ChatMember.chatMemberPersonUid = :personUid
-                 AND ChatMember.chatMemberLeftDate = ${Long.MAX_VALUE}
-                 AND Chat.chatUid != 0 
-                 
-             ORDER BY Message.messageTimestamp DESC)
-        SELECT Chats.*
-        FROM Chats
+          FROM ChatMember
+               LEFT JOIN Chat 
+                    ON Chat.chatUid = ChatMember.chatMemberChatUid
+               LEFT JOIN Message 
+                    ON Message.messageUid =
+                        (SELECT messageUid
+                           FROM Message
+                          WHERE messageEntityUid = Chat.chatUid
+                            AND messageTableId = ${Chat.TABLE_ID}
+                       ORDER BY messageTimestamp DESC
+                          LIMIT 1)
+               LEFT JOIN Person op 
+                    ON op.personUid =
+                       (SELECT pp.personUid
+                          FROM ChatMember cm
+                               LEFT JOIN Person pp 
+                                    ON pp.personUid = cm.chatMemberPersonUid
+                         WHERE cm.chatMemberChatUid = Chat.chatUid
+                           AND cm.chatMemberPersonUid != :personUid
+                           AND cm.chatMemberLeftDate = ${Long.MAX_VALUE}
+                         LIMIT 1)
+         WHERE ChatMember.chatMemberPersonUid = :personUid
+           AND ChatMember.chatMemberLeftDate = ${Long.MAX_VALUE}
+           AND Chat.chatUid != 0 
+        -- When in search mode we need to add all Persons who match the search to the list, even if
+        -- no chat has started
         UNION
-        SELECT *
-        FROM
-            (SELECT Chat.*,
-                    '' AS latestMessage,
+        SELECT Chat.*,
+               '' AS latestMessage,
                     0 AS latestMessageTimestamp,
                     Person.personUid AS otherPersonUid,
                     Person.firstNames AS otherPersonFirstNames,
                     Person.lastName AS otherPersonLastName,
                     0 AS unreadMessageCount,
                     0 AS numMembers
-             FROM Person
-             LEFT JOIN Chat ON Chat.chatUid = 0
-             WHERE :searchBit != '%'
-                 AND Person.personUid != :personUid
-                 AND Person.personUid NOT IN
-                     (SELECT p.personUid
-                      FROM ChatMember c
-                      LEFT JOIN Person p ON p.personUid = c.chatMemberPersonUid)
-                 AND Person.firstNames||' '||Person.lastName LIKE :searchBit )
-        ORDER BY latestMessageTimestamp DESC
+          FROM Person
+               LEFT JOIN Chat
+                    ON Chat.chatUid = 0
+         WHERE :searchBit != '%'
+           AND Person.personUid != :personUid
+           AND Person.personUid NOT IN
+               (SELECT p.personUid
+                  FROM ChatMember c
+                       LEFT JOIN Person p 
+                            ON p.personUid = c.chatMemberPersonUid)
+           AND Person.firstNames||' '||Person.lastName LIKE :searchBit 
+         ORDER BY latestMessageTimestamp DESC
     """)
     abstract fun findAllChatsForUser(searchBit: String, personUid: Long)
         : DoorDataSourceFactory<Int, ChatWithLatestMessageAndCount>
@@ -159,7 +156,7 @@ abstract class ChatDao: BaseDao<Chat>{
                END AS title
         FROM Chat
         LEFT JOIN Person 
-        ON CAST(Chat.isChatGroup AS INTEGER) =1
+        ON CAST(Chat.isChatGroup AS INTEGER) = 0
            AND Person.personUid =
           (SELECT pp.personUid
            FROM ChatMember cm

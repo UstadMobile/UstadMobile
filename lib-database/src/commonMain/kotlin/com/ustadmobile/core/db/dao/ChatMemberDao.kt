@@ -18,14 +18,12 @@ abstract class ChatMemberDao: BaseDao<ChatMember>{
              :newNodeId AS chatMemberDestination
              
         FROM UserSession
-            JOIN ChatMember ON ChatMember.chatMemberChatUid IN
-                ( (  
-                SELECT chatMemberInternal.chatMemberChatUid 
-                  FROM ChatMember chatMemberInternal
-                 WHERE chatMemberInternal.chatMemberPersonUid = UserSession.usPersonUid
-                 )
-                 OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM}
-                 )
+            JOIN ChatMember 
+                 ON ((ChatMember.chatMemberChatUid IN
+                      (SELECT chatMemberInternal.chatMemberChatUid 
+                         FROM ChatMember chatMemberInternal
+                        WHERE chatMemberInternal.chatMemberPersonUid = UserSession.usPersonUid))
+                     OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM})
                  AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE} 
        WHERE ChatMember.chatMemberLct != COALESCE(
              (SELECT chatMemberVersionId
@@ -50,19 +48,16 @@ abstract class ChatMemberDao: BaseDao<ChatMember>{
                      ON ChangeLog.chTableId = ${ChatMember.TABLE_ID}
                         AND ChangeLog.chEntityPk = ChatMember.chatMemberUid
                         
-                 JOIN UserSession ON UserSession.usPersonUid IN 
-                      ( (
-                      SELECT ChatMember.chatMemberPersonUid 
-                        FROM ChatMember 
-                       WHERE ChatMember.chatMemberChatUid IN 
-                       (
-                        SELECT chatMemberInternal.chatMemberChatUid 
-                          FROM ChatMember chatMemberInternal
-                         WHERE chatMemberInternal.chatMemberPersonUid = UserSession.usPersonUid
-                       )
-                      ) 
-                      OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM} 
-                      )
+                 JOIN UserSession ON 
+                      (UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM}
+                      OR (UserSession.usPersonUid IN 
+                           (SELECT ChatMember.chatMemberPersonUid 
+                              FROM ChatMember 
+                             WHERE ChatMember.chatMemberChatUid IN 
+                                   (SELECT ChatMemberInternal.chatMemberChatUid 
+                                      FROM ChatMember ChatMemberInternal
+                                     WHERE ChatMemberInternal.chatMemberPersonUid = 
+                                           UserSession.usPersonUid))))
                       AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
                       
                 
