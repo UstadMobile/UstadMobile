@@ -62,8 +62,8 @@
     <string name='select_language'>Pick Language</string>
     <string name="languages">Languages</string>
     <string name="edit_language">Edit Language</string>
-    <string name="two_letter_code">Two letter code (ISO 639â€“1)</string>
-    <string name="three_letter_code">Three letter code (ISO 639â€“2)</string>
+    <string name="two_letter_code">Two letter code (ISO 639–1)</string>
+    <string name="three_letter_code">Three letter code (ISO 639–2)</string>
     <string name="languages_description">Add, remove, and modify languages used for categorizing educational content and user preferences</string>
     <string name='advanced'>Advanced</string>
     <string name='optional'>Optional</string>
@@ -183,7 +183,7 @@
     <string name="download_continue_stacked_label">Continue download</string>
     <string name="download_continue_btn_label">Continue</string>
     <string name="download_wifi_only">WiFi only</string>
-    <string name="download_calculating">Calculatingâ€¦</string>
+    <string name="download_calculating">Calculating…</string>
     <string name="download_state_download"><![CDATA[<b>Download</b>]]> total of %1$s items, they will use total of %2$s on your device storage.</string>
     <string name="download_state_downloading"><![CDATA[<b>Downloading</b>]]> total of %1$s items, which will be using total of %2$s on your device storage.</string>
     <string name="download_state_downloaded"><![CDATA[<b>Downloaded</b>]]> total of %1$s items, which are using about %2$s of your device storage.</string>
@@ -254,7 +254,7 @@
     <string name="last_two_week_date_range">Last two weeks</string>
     <string name="last_month_date_range">Last month</string>
     <string name="last_three_months_date_range">Last three months</string>
-    <string name="new_custom_date_range">New custom date rangeâ€¦</string>
+    <string name="new_custom_date_range">New custom date range…</string>
     <string name="selected_custom_range">Custom range:  %1$s%</string>
 
     <string name="time_range">Time Range</string>
@@ -329,7 +329,6 @@
     <string name="xapi_score">Score (%)</string>
     <string name="import_title_not_entered">Title not entered</string>
 
-    <string name="standard">Standard</string>
 
     <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>
@@ -400,7 +399,6 @@
     <string name="log">Log</string>
     <!-- Schedule generally refers to the schedule for a class e.g. every monday at 2pm -->
     <string name="schedule">Schedule</string>
-
     <string name="add_a_schedule">Add a schedule</string>
     <string name="edit_schedule">Edit schedule</string>
     <string name="first">first</string>
@@ -655,6 +653,11 @@
     <string name="feedback_thanks">Thank you for the feedback.</string>
     <string name="start_date">Start date</string>
     <string name="end_date">End date</string>
+
+
+    <!--
+    Used in the context of showing when a topic, post, or user was most recently active.
+    -->
     <string name="last_active">Last active</string>
     <string name="save">Save</string>
     <string name="change_password">Change Password</string>
@@ -693,10 +696,6 @@
     <string name="course_leader">Course leader</string>
 
     <string name="unassigned">Unassigned</string>
-
-    <!-- used to show what group a member of a course would be in. The
-  %1$s% will be replaced with the number of the group-->
-    <string name="group_number" formatted="false">Group %1$s</string>
 
     <!-- plurals are used to handle different languages that require special treatment
     e.g number 0 in arabic
@@ -849,8 +848,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="after_deadline_date_error">Must be after deadline date</string>
 
     <!-- score points gained from content -->
-    <string name="points">points</string>
-
+    <string name="points">Points</string>
     <string name="minimum_score">Minimum score</string>
     <string name="automatic">Automatic</string>
     <string name="student_marks_content">Student marks themselves</string>
@@ -888,7 +886,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <!-- Used to show three quantities and names e.g. "5 oranges, 2 apples, 3 pears". %1$d etc
     will be replaced with the number and %2$s will be replaced with the name of the item-->
     <string name="three_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d %6$s</string>
-
     <string name="marking">Marking</string>
     <string name="return_and_mark_next">Return and mark next</string>
     <string name="return_only">Return and finish</string>
@@ -929,9 +926,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <!-- This is a code that the teacher can give to students to allow them to join the class -->
     <string name="class_code">Class code</string>
-
-    <!-- This is a code that the teacher can give to students to allow them to join the course -->
-    <string name="course_code">Course code</string>
 
     <!-- Pending requests - use on classes / schools to list people who have requested to join a class / school -->
     <string name="pending_requests">Pending requests</string>
@@ -1283,7 +1277,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="add_subject">Add subject</string>
 
     <!-- This is a title that is used when giving the user a list of options for sharing the app -->
-    <string name="share_via">Share viaâ€¦</string>
+    <string name="share_via">Share via…</string>
 
     <!-- This option allows advanced users to get the app APK file so they can share it with others -->
     <string name="share_apk_file">Share APK file</string>
@@ -1498,12 +1492,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="group">Group</string>
 
-    <string name="add_group">Add group</string>
-
-    <string name="edit_group">Edit group</string>
-
-    <string name="new_group_set">New group set</string>
-
     <!--
     Used for an option for teachers and admins for content to stay hidden for students until
     a certain date and time.
@@ -1590,7 +1578,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="penalty_label">If completed after deadline but before end of grace period</string>
     <string name="submissions">Submissions</string>
     <string name="add_text">Add text</string>
-    <string name="edit_text">Edit text</string>
 
 
     <!--
@@ -1641,9 +1628,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <!--Module is a subunit of a course -->
     <string name="edit_module">Edit module</string>
-
-    <!--Module is a subunit of a course -->
-    <string name="add_module">Add module</string>
 
     <string name="indent">Indent</string>
 
@@ -1802,10 +1786,51 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="past_enrolments">Past enrolments</string>
 
+    <string name="standard">Standard</string>
+
+    <!-- used to show what group a member of a course would be in. The
+    %1$s% will be replaced with the number of the group e.g. Group 1, Group 2, etc-->
+    <string name="group_number" formatted="false">Group %1$s</string>
+
+    <!-- This is a code that the teacher can give to students to allow them to join the course -->
+    <string name="course_code">Course code</string>
+
+    <string name="add_group">Add group</string>
+
+    <string name="edit_group">Edit group</string>
+
+    <string name="new_group_set">New group set</string>
+
+    <string name="edit_text">Edit text</string>
+
+    <!--Module is a subunit of a course -->
+    <string name="add_module">Add module</string>
+
     <string name="add_a_new_course">Add a new course</string>
     <string name="join_existing_course">Join existing course</string>
     <string name="edit_course">Edit course</string>
     <string name="currently_enrolled">Currently enrolled</string>
     <string name="past_enrollments">Past enrollments</string>
+
+    <string name="unread">Unread</string>
+    <string name="new_chat">New chat</string>
+    <string name="new_group">New group</string>
+    <string name="chat">Chat</string>
+    <string name="you">You</string>
+
+
+    <string name="edit_topic">Edit topic</string>
+
+    <!-- As per Microsoft Terminology:
+    Post: A message that appears in a newsgroup, public folder, or other forum, such as Facebook or Twitter,
+    accessible by a number of individuals.
+     -->
+    <string name="posts">Posts</string>
+
+    <!-- As per Microsoft Terminology:
+    Post: A message that appears in a newsgroup, public folder, or other forum, such as Facebook or Twitter,
+    accessible by a number of individuals.
+     -->
+    <string name="post">Post</string>
 
 </resources>

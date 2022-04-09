@@ -178,7 +178,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
            AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
            AND ( :filter != $FILTER_ACTIVE_ONLY OR (:currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime))
            AND ( :selectedSchool = 0 OR Clazz.clazzSchoolUid = :selectedSchool)
-      GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid
+      GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid, CourseTerminology.ctUid
       ORDER BY CASE :sortOrder
                WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
                ELSE 0

@@ -121,11 +121,25 @@ import kotlin.jvm.JvmField
     PersonAuth2Replicate::class,
     UserSessionReplicate::class,
     CoursePicture::class,
-    CoursePictureReplicate::class
+    CoursePictureReplicate::class,
+    Chat::class,
+    ChatMember::class,
+    Message::class,
+    MessageReplicate::class,
+    ChatReplicate::class,
+    ChatMemberReplicate::class,
+    MessageRead::class,
+    MessageReadReplicate::class,
+    CourseDiscussion::class,
+    CourseDiscussionReplicate::class,
+    DiscussionTopic::class,
+    DiscussionTopicReplicate::class,
+    CourseDiscussionTopic::class,
+    CourseDiscussionTopicReplicate::class,
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 103)
+], version = 104)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -355,6 +369,20 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     @JsName("coursePictureDao")
     abstract val coursePictureDao: CoursePictureDao
+
+    @JsName("chatDao")
+    abstract val chatDao: ChatDao
+
+    @JsName("chatMemberDao")
+    abstract val chatMemberDao: ChatMemberDao
+
+    @JsName("messageDao")
+    abstract val messageDao: MessageDao
+
+
+    @JsName("discussionTopicDao")
+    abstract val discussionTopicDao: DiscussionTopicDao
+
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

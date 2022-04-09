@@ -13,6 +13,7 @@ import androidx.databinding.InverseBindingListener
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.min
+import com.ustadmobile.lib.db.entities.ChatWithLatestMessageAndCount
 import ir.hamsaa.persiandatepicker.PersianDatePickerDialog
 import ir.hamsaa.persiandatepicker.api.PersianPickerDate
 import ir.hamsaa.persiandatepicker.api.PersianPickerListener
@@ -57,6 +58,40 @@ val Long.isSet2: Boolean
                 (this < -TWELVE_HOURS_IN_MS || this > TWELVE_HOURS_IN_MS)  &&
                 (this < (Long.MAX_VALUE - TWELVE_HOURS_IN_MS)))
     }
+
+@BindingAdapter(value = ["chatUnreadMessagesCountVisibility"])
+fun TextView.setChatCountUnreadMessagesVisibility(chat: ChatWithLatestMessageAndCount){
+    visibility = if(chat.unreadMessageCount > 0){
+        View.VISIBLE
+    }else{
+        View.INVISIBLE
+    }
+}
+
+@BindingAdapter(value = ["chatDateTimeInMillis"])
+fun TextView.setChatDateTime(timeInMillis: Long){
+
+    val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
+            ).di.direct.instance()
+    val localeString = impl.getDisplayedLocale(context)
+
+    val dateFormat = android.text.format.DateFormat.getDateFormat(context)
+
+    text = if(localeString.startsWith("ps") || localeString.startsWith("fa")){
+
+        val persianDate = PersianDateImpl()
+        persianDate.setDate(timeInMillis)
+        val text = persianDate.persianYear.toString() + "/" +
+                persianDate.persianMonth + "/" +
+                persianDate.persianDay
+
+        text
+
+
+    }else{
+        dateFormat.format(timeInMillis)
+    }
+}
 
 @BindingAdapter(value = ["dateTimeInMillis", "timeZoneId", "dateTimeInMillisMode"])
 fun TextView.setDateTime2(timeInMillis: Long, timeZoneId: String?, dateTimeInMillisMode: Int) {
@@ -182,7 +217,7 @@ fun View.setVisibilityIfSetDate(date: Long){
 
 @BindingAdapter("relativeTime")
 fun TextView.setDateWithRelativeTime(date: Long){
-    text = DateUtils.getRelativeTimeSpanString(date)
+    text = if(date != 0L){DateUtils.getRelativeTimeSpanString(date)}else{""}
 }
 
 @BindingAdapter("dateUseSpinners")

@@ -215,6 +215,7 @@ ext {
     version_npm_google_charts = "^3.0.15"
     version_npm_html_to_image = "^1.9.0"
     version_npm_date_fns = "2.27.0"
+    version_better_link_movement="2.2.0"
 
 }
 

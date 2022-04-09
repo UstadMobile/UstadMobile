@@ -2,8 +2,12 @@ package com.ustadmobile.port.android.view.binding
 
 import android.annotation.SuppressLint
 import android.text.format.DateFormat
+import android.text.format.DateUtils
+import android.text.util.Linkify
+import android.view.Gravity
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
 import com.google.android.material.chip.Chip
@@ -11,6 +15,7 @@ import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.controller.ChatDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.model.BitmaskMessageId
@@ -19,6 +24,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.VerbEntity.Companion.VERB_ANSWERED_UID
+import me.saket.bettermovementmethod.BetterLinkMovementMethod
 import java.util.*
 import java.util.concurrent.TimeUnit
 import com.soywiz.klock.DateFormat as KlockDateFormat
@@ -39,6 +45,26 @@ fun TextView.setCustomFieldHint(customField: CustomField?) {
         systemImpl.getString(customField.customFieldLabelMessageID, context)
     } else {
         ""
+    }
+}
+
+@BindingAdapter("chatMessage", "loggedInPersonUid")
+fun TextView.setChatMessageTitle(message: MessageWithPerson, loggedInPersonUid: Long){
+    if(message.messagePerson?.personUid == loggedInPersonUid){
+        text = systemImpl.getString(MessageID.you, context)
+        gravity = Gravity.END
+    }else{
+        text = message.messagePerson?.fullName()?:"" + " "
+        gravity = Gravity.START
+    }
+}
+
+@BindingAdapter("chatMessageOrientation", "loggedInPersonUidOrientation")
+fun TextView.setChatMessagOrientation(message: MessageWithPerson, loggedInPersonUid: Long){
+    if(message.messagePerson?.personUid == loggedInPersonUid){
+        gravity = Gravity.END
+    }else{
+        gravity = Gravity.START
     }
 }
 
