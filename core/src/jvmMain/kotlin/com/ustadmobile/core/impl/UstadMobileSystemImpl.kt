@@ -36,6 +36,7 @@ import java.util.*
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.getStringsXmlResource
+import com.ustadmobile.door.DoorUri
 import org.xmlpull.v1.XmlPullParserFactory
 import java.util.concurrent.ConcurrentHashMap
 
@@ -230,7 +231,7 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?){
+    actual fun openFileInDefaultViewer(context: Any, doorUri: DoorUri, mimeType: String?){
 
     }
 

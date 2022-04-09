@@ -5,10 +5,15 @@
 
     <data>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="android.view.View"/>
 
         <variable
             name="assignmentProgressSummary"
             type="com.ustadmobile.lib.db.entities.AssignmentProgressSummary" />
+
+        <variable
+            name="showMarked"
+            type="Boolean" />
 
 
     </data>
@@ -17,49 +22,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
+        android:padding="@dimen/dimen_16dp"
         android:id="@+id/item_student_assignment_progress_detail_cl"
         >
 
 
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/barrier2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierDirection="bottom"
-            tools:layout_editor_absoluteY="30dp" />
-
-
-        <View
-            android:id="@+id/guideline2"
-            android:layout_width="2dp"
-            android:layout_height="@dimen/dimen_60dp"
-            android:background="@color/text"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/guideline3"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-        <View
-            android:id="@+id/guideline3"
-            android:layout_width="2dp"
-            android:layout_height="@dimen/dimen_60dp"
-            android:background="@color/text"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_layout_not_started"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread">
 
         <TextView
             android:id="@+id/item_clazz_progress_detail_not_started_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@{`` + assignmentProgressSummary.notStartedStudents}"
+            android:text="@{`` + assignmentProgressSummary.calculateNotSubmittedStudents()}"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            app:layout_constraintStart_toStartOf="@+id/item_clazz_assignment_progress_detail_not_started_title"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="1" />
 
@@ -67,57 +50,114 @@
             android:id="@+id/item_clazz_assignment_progress_detail_not_started_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:text="@string/not_started"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_clazz_progress_detail_not_started_value" />
 
-        <TextView
-            android:id="@+id/item_clazz_assignment_progress_detail_started_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/guideline2"
+            android:layout_width="2dp"
             android:layout_marginTop="16dp"
-            android:text="@{`` + assignmentProgressSummary.calculateStartedStudents()}"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            app:layout_constraintStart_toStartOf="@+id/item_clazz_assignment_progress_detail_started_title"
+            android:layout_height="@dimen/dimen_60dp"
+            android:background="@color/text"
+            android:orientation="vertical"
+            app:layout_constraintStart_toEndOf="@id/item_layout_not_started"
+            app:layout_constraintEnd_toStartOf="@+id/item_layout_started"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_layout_started"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="2" />
+            app:layout_constraintStart_toEndOf="@id/item_layout_not_started"
+            app:layout_constraintEnd_toStartOf="@+id/item_layout_marked"
+            app:layout_constraintHorizontal_chainStyle="spread">
 
-        <TextView
-            android:id="@+id/item_clazz_assignment_progress_detail_started_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="16dp"
-            android:text="@string/started"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/guideline2"
-            app:layout_constraintTop_toBottomOf="@+id/item_clazz_assignment_progress_detail_started_value" />
+            <TextView
+                android:id="@+id/item_clazz_assignment_progress_detail_started_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@{`` + assignmentProgressSummary.submittedStudents}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="2" />
 
-        <TextView
-            android:id="@+id/item_clazz_assignment_progress_detail_completed_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            <TextView
+                android:id="@+id/item_clazz_assignment_progress_detail_started_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/submitted_cap"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_clazz_assignment_progress_detail_started_value" />
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <View
+            android:id="@+id/guideline3"
+            android:layout_width="2dp"
             android:layout_marginTop="16dp"
-            android:text="@{`` + assignmentProgressSummary.completedStudents}"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            app:layout_constraintStart_toStartOf="@+id/item_clazz_assignment_progress_detail_completed_title"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="3" />
+            android:layout_height="@dimen/dimen_60dp"
+            android:background="@color/text"
+            android:orientation="vertical"
+            app:layout_constraintStart_toEndOf="@id/item_layout_started"
+            app:layout_constraintEnd_toStartOf="@+id/item_layout_marked"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-        <TextView
-            android:id="@+id/item_clazz_assignment_progress_detail_completed_title"
+        <View
+            android:id="@+id/guideline4"
+            android:layout_width="2dp"
+            android:layout_marginTop="16dp"
+            android:layout_height="@dimen/dimen_60dp"
+            android:background="@color/text"
+            android:orientation="vertical"
+            android:visibility="@{showMarked ? View.VISIBLE : View.GONE}"
+            app:layout_constraintStart_toEndOf="@id/item_layout_started"
+            app:layout_constraintEnd_toStartOf="@+id/item_layout_marked"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_layout_marked"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="16dp"
-            android:text="@string/completed"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/guideline3"
-            app:layout_constraintTop_toBottomOf="@+id/item_clazz_assignment_progress_detail_completed_value" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_layout_started"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread">
 
+            <TextView
+                android:id="@+id/item_clazz_assignment_progress_detail_marked_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@{`` + assignmentProgressSummary.markedStudents}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="3" />
+
+            <TextView
+                android:id="@+id/item_clazz_assignment_progress_detail_marked_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/marked_cap"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_clazz_assignment_progress_detail_marked_value" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

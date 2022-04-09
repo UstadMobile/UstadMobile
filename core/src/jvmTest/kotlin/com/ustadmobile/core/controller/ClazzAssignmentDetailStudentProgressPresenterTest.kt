@@ -1,23 +1,32 @@
 
 package com.ustadmobile.core.controller
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzAssignmentDao
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.onActiveAccountDirect
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ClazzAssignmentRollUp
+import com.ustadmobile.lib.db.entities.StatementEntity
+import com.ustadmobile.lib.db.entities.VerbEntity
+import com.ustadmobile.lib.db.entities.XObjectEntity
 import com.ustadmobile.util.test.ext.insertTestClazzAssignment
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
-import org.mockito.kotlin.*
+import org.kodein.di.instance
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -54,7 +63,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
             import(ustadTestRule.diModule)
         }
         val repo: UmAppDatabase by di.activeRepoInstance()
-        assignmentRollUp = repo.insertTestClazzAssignment()
+        assignmentRollUp = repo.insertTestClazzAssignment(endpoint = di.onActiveAccountDirect().instance<UstadAccountManager>().activeEndpoint.url)
 
         repoClazzAssignmentDaoSpy = spy(repo.clazzAssignmentDao)
         whenever(repo.clazzAssignmentDao).thenReturn(repoClazzAssignmentDaoSpy)
@@ -63,7 +72,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
     @Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
-
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val presenterArgs = mutableMapOf<String, String>()
         presenterArgs[ARG_CLAZZ_ASSIGNMENT_UID] =  assignmentRollUp!!.cacheClazzAssignmentUid.toString()
         presenterArgs[ARG_PERSON_UID] = assignmentRollUp!!.cachePersonUid.toString()
@@ -76,5 +85,6 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         Assert.assertEquals("Expected entity was set on view",
                 assignmentRollUp!!.cacheClazzAssignmentUid, entityValSet.caUid)
     }
+
 
 }

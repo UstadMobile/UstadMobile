@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.CommentsWithPerson

@@ -73,7 +73,7 @@ class ClazzAssignmentDetailComponent(mProps: UmProps): UstadDetailComponent<Claz
     companion object {
         val VIEWNAME_TO_TITLE_MAP = mapOf(
             ClazzAssignmentDetailOverviewView.VIEW_NAME to MessageID.overview,
-            ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME to MessageID.student_progress,
+            ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME to MessageID.submissions,
         )
 
     }

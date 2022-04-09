@@ -7,7 +7,7 @@
     <fragment
         android:id="@+id/home_clazzlist_dest"
         android:name="com.ustadmobile.port.android.view.ClazzListFragment"
-        android:label="@string/classes" />
+        android:label="@string/courses" />
 
     <fragment
         android:id="@+id/home_personlist_dest"
@@ -53,6 +53,10 @@
 
         android:id="@+id/clazz_list_dest"
         android:name="com.ustadmobile.port.android.view.ClazzListFragment" />
+
+    <fragment
+        android:id="@+id/chat_detail_dest"
+        android:name="com.ustadmobile.port.android.view.ChatDetailFragment"/>
 
     <fragment
         android:id="@+id/clazz_detail_dest"
@@ -128,9 +132,31 @@
     <fragment
         android:id="@+id/schoolmember_list_dest"
         android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment" />
+
+
     <fragment
-        android:id="@+id/clazz_assignment_list"
-        android:name="com.ustadmobile.port.android.view.ClazzAssignmentListFragment" />
+        android:id="@+id/course_group_set_list"
+        android:name="com.ustadmobile.port.android.view.CourseGroupSetListFragment" />
+
+    <fragment
+        android:id="@+id/course_group_set_edit"
+        android:name="com.ustadmobile.port.android.view.CourseGroupSetEditFragment" />
+
+    <fragment
+        android:id="@+id/course_group_set_detail"
+        android:name="com.ustadmobile.port.android.view.CourseGroupSetDetailFragment" />
+
+    <fragment
+        android:id="@+id/module_course_block_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ModuleCourseBlockEditFragment" />
+
+    <fragment
+        android:id="@+id/course_terminology_list_dest"
+        android:name="com.ustadmobile.port.android.view.CourseTerminologyListFragment"/>
+
+    <fragment
+        android:id="@+id/course_terminology_edit_dest"
+        android:name="com.ustadmobile.port.android.view.CourseTerminologyEditFragment"/>
 
     <fragment
         android:id="@+id/clazz_assignment_edit_dest"
@@ -153,7 +179,12 @@
     <fragment
         android:id="@+id/content_entry_list_home_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
-        android:label="@string/content"/>
+        android:label="@string/library"/>
+
+    <fragment
+        android:id="@+id/chat_list_home_dest"
+        android:name="com.ustadmobile.port.android.view.ChatListFragment"
+        android:label="@string/messages"/>
 
     <fragment
         android:id="@+id/content_entry_list_select_folder"
@@ -337,6 +368,14 @@
         android:id="@+id/site_terms_edit_dest"
         android:name="com.ustadmobile.port.android.view.SiteTermsEditFragment"
         android:label="@string/edit_terms_and_policies"/>
+
+    <fragment
+        android:id="@+id/text_assignment_edit_dest"
+        android:name="com.ustadmobile.port.android.view.TextAssignmentEditFragment" />
+
+    <fragment
+        android:id="@+id/text_course_block_edit_dest"
+        android:name="com.ustadmobile.port.android.view.TextCourseBlockEditFragment" />
 
     <fragment
         android:id="@+id/register_minor_wait_for_parent_dest"

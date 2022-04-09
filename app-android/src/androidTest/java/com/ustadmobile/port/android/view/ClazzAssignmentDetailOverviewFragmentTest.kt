@@ -71,29 +71,19 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
             clazzEnrolmentUid = dbRule.repo.clazzEnrolmentDao.insert(this)
         }
 
-        val clazzAssignment = ClazzAssignment().apply {
+        val clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
             caTitle = "New Clazz Assignment"
             caDescription = "complete quiz"
-            caDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
+            caRequireFileSubmission = false
             caClazzUid = testClazz.clazzUid
             caUid = dbRule.repo.clazzAssignmentDao.insert(this)
-        }
-
-        ClazzAssignmentContentJoin().apply {
-            cacjContentUid = contentEntry.contentEntryUid
-            cacjAssignmentUid = clazzAssignment.caUid
-            cacjUid = dbRule.repo.clazzAssignmentContentJoinDao.insert(this)
-        }
-
-        ClazzAssignmentRollUp().apply {
-            this.cacheClazzAssignmentUid = clazzAssignment.caUid
-            this.cacheContentEntryUid = contentEntry.contentEntryUid
-            this.cacheContentComplete = true
-            this.cacheMaxScore = 15
-            this.cachePersonUid = 42
-            this.cacheStudentScore = 5
-            this.cacheProgress = 100
-            this.cacheUid = dbRule.repo.clazzAssignmentRollUpDao.insert(this)
+            block = CourseBlock().apply {
+                this.cbClazzUid = testClazz.clazzUid
+                this.cbEntityUid = caUid
+                cbDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
+                this.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                this.cbUid = dbRule.repo.courseBlockDao.insert(this)
+            }
         }
 
         StatementEntity().apply {
@@ -127,38 +117,9 @@ class ClazzAssignmentDetailOverviewFragmentTest : TestCase() {
                         }
 
                         deadline {
-                            containsText("May 5, 2021")
+                            containsText("May")
+                            containsText("5")
                         }
-                    }
-
-                    childWith<ClazzAssignmentDetailOverviewScreen.Content> {
-                        withDescendant { withText(contentEntry.title!!) }
-                    } perform {
-
-                        this.contentTitle{
-                            hasText(contentEntry.title!!)
-                        }
-
-                        this.score{
-                            hasText("33%")
-                        }
-                        this.scoreResults{
-                            hasText("(5/15)")
-                        }
-
-                    }
-
-                    childWith<ClazzAssignmentDetailOverviewScreen.TotalScore> {
-                        withDescendant { withText("Total score") }
-                    } perform {
-
-                        this.score{
-                            hasText("33%")
-                        }
-                        this.scoreResults{
-                            hasText("(5/15)")
-                        }
-
                     }
 
                 }

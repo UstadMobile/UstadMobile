@@ -16,6 +16,10 @@ val defaultTheme: Theme = createMuiTheme(themeOptions)
 
 val themeContext = createContext(defaultTheme)
 
+/**
+ * Extension function which helps to create consistent spacing between the elements of your UI.
+ * MUI uses a recommended 8px scaling factor by default but can be changed when creating a theme.
+ */
 val Int.spacingUnits get() = LinearDimension((defaultTheme.spacing.asDynamic()(this)).toString())
 
 @JsModule("@mui/material/styles/useTheme")

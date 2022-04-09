@@ -4,15 +4,21 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
 
-interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignment> {
+interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignmentWithCourseBlock> {
+
+    var submitMarkError: String?
 
     var person: Person?
-    var studentScore: ContentEntryStatementScoreProgress?
 
-    var clazzAssignmentContent
-            : DoorDataSourceFactory<Int, ContentWithAttemptSummary>?
+    var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
 
     var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>?
+
+    var submissionScore: CourseAssignmentMark?
+
+    var submissionStatus: Int
+
+    var markNextStudentEnabled: Boolean
 
     companion object {
         const val VIEW_NAME = "ClassAssignmentDetailStudentProgressListView"

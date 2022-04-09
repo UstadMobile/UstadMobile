@@ -1,64 +1,53 @@
 package com.ustadmobile.port.android.view
 
-import SelectFolderView
 import android.net.Uri
 import android.os.Bundle
-import android.provider.DocumentsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.documentfile.provider.DocumentFile
-import androidx.navigation.fragment.findNavController
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.controller.SelectFolderPresenter
+import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
-import org.kodein.di.instance
-import org.w3c.dom.DocumentFragment
+import com.ustadmobile.core.view.SelectFolderView
 
-class SelectFolderFragment(private val registry: ActivityResultRegistry? = null) : UstadBaseFragment() {
+class SelectFolderFragment(private val registry: ActivityResultRegistry? = null) : UstadBaseFragment(),
+    SelectFolderView {
 
-    var activityResultLauncher: ActivityResultLauncher<Uri>? = null
+    private var activityResultLauncher: ActivityResultLauncher<Uri>? = null
 
-    val systemImpl: UstadMobileSystemImpl by instance()
+    private var mPresenter: SelectFolderPresenter? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
 
         activityResultLauncher = registerForActivityResult<Uri?, Uri?>(ActivityResultContracts.OpenDocumentTree(),
-                registry ?: requireActivity().activityResultRegistry) {
+            registry ?: requireActivity().activityResultRegistry) {
 
-            when {
-                it == null -> {
-                    findNavController().popBackStack()
-                }
-                arguments?.containsKey(UstadView.ARG_RESULT_DEST_KEY) == true -> {
-                    saveResultToBackStackSavedStateHandle(listOf(it.toString()))
-                }
-                else -> {
-                    val map = arguments.toStringMap()
-                    val args = mutableMapOf<String, String>()
-                    args[ARG_URI] = it.toString()
-                    args[UstadView.ARG_POPUPTO_ON_FINISH] = SelectFolderView.VIEW_NAME
-                    args.putFromOtherMapIfPresent(map, UstadView.ARG_LEAF)
-                    args.putFromOtherMapIfPresent(map, UstadView.ARG_PARENT_ENTRY_UID)
-                    systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
-                            args, requireContext())
-                }
-            }
+            mPresenter?.handleUriSelected(it?.toString())
         }
 
+        mPresenter = SelectFolderPresenter(requireContext(),
+            arguments.toStringMap(),
+            this, di).withViewLifecycle()
+        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+
+        activityResultLauncher?.launch(null)
+
+        // ustadBaseController does not accept null as view with lifecycle
+        return View(requireContext())
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        activityResultLauncher?.launch(null)
-        return null
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter = null
+        activityResultLauncher = null
     }
+
 
 }

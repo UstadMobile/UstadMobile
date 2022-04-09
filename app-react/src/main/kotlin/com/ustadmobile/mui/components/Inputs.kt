@@ -6,6 +6,7 @@ import mui.material.Input
 import mui.material.InputProps
 import org.w3c.dom.events.Event
 import react.RBuilder
+import react.ReactElement
 import react.dom.html.InputType
 import styled.StyledHandler
 import styled.css
@@ -30,6 +31,7 @@ fun RBuilder.umInput(
     rowsMax: Int? = null,
     onChange: ((Event) -> Unit)? = null,
     className: String? = null,
+    endAdornment: ReactElement? = null,
     handler: StyledHandler<InputProps>? = null
 ) = createStyledComponent(Input, className, handler) {
     autoFocus?.let{ attrs.autoFocus = it }
@@ -41,6 +43,9 @@ fun RBuilder.umInput(
     id?.let { attrs.id = it }
     attrs.multiline = multiline
     name?.let { attrs.name = it }
+    endAdornment?.let {
+        attrs.endAdornment = it
+    }
     attrs.onChange = {
         it.persist()
         onChange?.invoke(it.nativeEvent)
@@ -52,6 +57,7 @@ fun RBuilder.umInput(
     rowsMax?.let { attrs.maxRows = it }
     attrs.type = type.toString()
     attrs.color = "#fff"
+    attrs.startAdornment = null
     value?.let { attrs.value = it }
     css {
         color = textColor

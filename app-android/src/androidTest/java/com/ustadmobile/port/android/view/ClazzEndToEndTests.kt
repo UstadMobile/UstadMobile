@@ -1,10 +1,10 @@
+/*
 package com.ustadmobile.port.android.view
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import io.github.kakaocup.kakao.common.views.KView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -16,8 +16,8 @@ import com.ustadmobile.port.android.screen.HolidayCalendarListScreen
 import com.ustadmobile.port.android.screen.MainScreen
 import com.ustadmobile.test.port.android.util.setDateWithDialog
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import io.github.kakaocup.kakao.common.views.KView
 import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.*
 
@@ -35,7 +35,7 @@ class ClazzEndToEndTests : TestCase() {
 
     @AdbScreenRecord("Given an empty class list, when the user clicks add class and " +
             "fills in form, then it should go to the new class")
-    @Test
+    //@Test
     fun givenEmptyClazzList_whenUserClicksAddAndFillsInForm_thenClassIsCreatedAndGoneInto() {
         var calendarUid = 0L
         init {
@@ -133,3 +133,4 @@ class ClazzEndToEndTests : TestCase() {
     }
 
 }
+*/

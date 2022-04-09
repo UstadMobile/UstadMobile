@@ -34,7 +34,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.createCreateNewItem
+import com.ustadmobile.view.ext.renderCreateNewItemOnList
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.window
@@ -283,7 +283,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     }
 
     private fun RBuilder.renderNewItem(multiColumn: Boolean = false){
-       if(showCreateNewItem){
+        if(showCreateNewItem){
             if(multiColumn){
                 umItem(GridSize.cells12) {
                     css{
@@ -295,7 +295,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                             stopEventPropagation(it)
                             handleClickAddNewEntry()
                         }
-                        createCreateNewItem(addNewEntryText)
+                        renderCreateNewItemOnList(addNewEntryText)
                     }
                 }
 
@@ -310,7 +310,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                             handleInviteClicked()
                         }
 
-                        createCreateNewItem(inviteNewText)
+                        renderCreateNewItemOnList(inviteNewText)
                     }
                 }
             }else {
@@ -323,7 +323,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                         stopEventPropagation(it)
                         handleClickAddNewEntry()
                     }
-                    createCreateNewItem(addNewEntryText)
+                    renderCreateNewItemOnList(addNewEntryText)
                 }
 
                 if(inviteNewText.isNotEmpty()){
@@ -333,7 +333,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                         attrs.onClick = {
                             handleInviteClicked()
                         }
-                        createCreateNewItem(inviteNewText, "")
+                        renderCreateNewItemOnList(inviteNewText, "")
                     }
                 }
             }
@@ -343,8 +343,13 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     private fun RBuilder.renderMultiColumnList(){
        umGridContainer {
+           if(showCreateNewItem){
+               renderNewItem()
+           }
 
-            renderNewItem()
+           if(dataListItems.isNotEmpty()){
+               renderListJoinView()
+           }
 
             if(dataListItems.isEmpty()){
                 renderEmptyList()
@@ -392,9 +397,13 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
 
     private fun RBuilder.renderSingleColumnList(){
        umList {
-            css{ if(dataListItems.isNotEmpty()) horizontalList else horizontalListEmpty }
+           css{ if(dataListItems.isNotEmpty()) horizontalList else horizontalListEmpty }
 
-            renderNewItem(false)
+           renderNewItem(false)
+
+           if(dataListItems.isNotEmpty()){
+               renderListJoinView()
+           }
 
             if(dataListItems.isEmpty()){
                 renderEmptyList()
@@ -573,6 +582,8 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     open fun RBuilder.renderEditOptionMenu(){}
 
     open fun RBuilder.renderListHeaderView(){}
+
+    open fun RBuilder.renderListJoinView(){}
 
     open fun RBuilder.renderListFooterView(){}
 

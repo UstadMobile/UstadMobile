@@ -15,7 +15,6 @@ import com.ustadmobile.door.doorMainDispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerializationStrategy
 import kotlin.js.JsName
 
 /**
@@ -443,7 +442,7 @@ abstract class UstadMobileSystemCommon {
          * viewname will start with a # (as it uses the REACT hash router). Therefor this string is
          * used as a divider between the endpoint URL and the view name and its view arguments
          */
-        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/index.html#"
+        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/#/"
 
         const val SUBDIR_SITEDATA_NAME = "sitedata"
 

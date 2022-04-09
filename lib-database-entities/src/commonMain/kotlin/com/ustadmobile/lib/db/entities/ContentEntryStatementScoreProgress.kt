@@ -12,6 +12,8 @@ class ContentEntryStatementScoreProgress {
 
     var resultScaled: Float = 0f
 
+    var resultWeight: Int = 0
+
     var contentComplete: Boolean = false
 
     var progress: Int = 0
@@ -24,6 +26,7 @@ class ContentEntryStatementScoreProgress {
 
     var totalCompletedContent: Int  = 0
 
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -32,10 +35,14 @@ class ContentEntryStatementScoreProgress {
 
         if (resultScore != other.resultScore) return false
         if (resultMax != other.resultMax) return false
+        if (resultScaled != other.resultScaled) return false
+        if (resultWeight != other.resultWeight) return false
         if (contentComplete != other.contentComplete) return false
         if (progress != other.progress) return false
         if (success != other.success) return false
         if (penalty != other.penalty) return false
+        if (totalContent != other.totalContent) return false
+        if (totalCompletedContent != other.totalCompletedContent) return false
 
         return true
     }
@@ -43,10 +50,14 @@ class ContentEntryStatementScoreProgress {
     override fun hashCode(): Int {
         var result = resultScore
         result = 31 * result + resultMax
+        result = 31 * result + resultScaled.hashCode()
+        result = 31 * result + resultWeight
         result = 31 * result + contentComplete.hashCode()
         result = 31 * result + progress
         result = 31 * result + success
         result = 31 * result + penalty
+        result = 31 * result + totalContent
+        result = 31 * result + totalCompletedContent
         return result
     }
 

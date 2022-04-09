@@ -4,13 +4,13 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
-import com.ustadmobile.port.android.screen.ClazzAssignmentDetailStudentProgressListScreen
+import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.screen.ClazzAssignmentDetailStudentProgressListScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
@@ -79,29 +79,18 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragmentTest : TestCase() 
             clazzEnrolmentUid = dbRule.repo.clazzEnrolmentDao.insert(this)
         }
 
-        val clazzAssignment = ClazzAssignment().apply {
+        val clazzAssignment = ClazzAssignmentWithCourseBlock().apply {
             caTitle = "New Clazz Assignment"
             caDescription = "complete quiz"
-            caDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
             caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = false
             caUid = dbRule.repo.clazzAssignmentDao.insert(this)
-        }
-
-        ClazzAssignmentContentJoin().apply {
-            cacjContentUid = contentEntry.contentEntryUid
-            cacjAssignmentUid = clazzAssignment.caUid
-            cacjUid = dbRule.repo.clazzAssignmentContentJoinDao.insert(this)
-        }
-
-        ClazzAssignmentRollUp().apply {
-            this.cacheClazzAssignmentUid = clazzAssignment.caUid
-            this.cacheContentEntryUid = contentEntry.contentEntryUid
-            this.cacheContentComplete = true
-            this.cacheMaxScore = 15
-            this.cachePersonUid = student.personUid
-            this.cacheStudentScore = 5
-            this.cacheProgress = 100
-            this.cacheUid = dbRule.repo.clazzAssignmentRollUpDao.insert(this)
+            block = CourseBlock().apply {
+                cbClazzUid = testClazz.clazzUid
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                cbEntityUid = caUid
+                cbUid = dbRule.repo.courseBlockDao.insert(this)
+            }
         }
 
         StatementEntity().apply {
@@ -135,20 +124,16 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragmentTest : TestCase() 
                 recycler{
 
                     childWith<ClazzAssignmentDetailStudentProgressListScreen.ClazzAssignmentWithMetrics> {
-                        withDescendant {  withText("Completed") }
+                        withDescendant {  withText("Marked") }
                     } perform {
 
 
                         notStartedText{
-                            hasText("0")
+                            hasText("1")
                         }
 
                         startedText{
                             hasText("0")
-                        }
-
-                        completedText{
-                            hasText("1")
                         }
 
                     }
@@ -157,19 +142,8 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragmentTest : TestCase() 
                         withTag(student.personUid)
                     } perform {
 
-                        this.attemptCount{
-                            hasText("1 attempt")
-                        }
-
                         this.personName{
                             hasText("Student A")
-                        }
-                        this.progressText{
-                            containsText("100%")
-                        }
-
-                        this.scoreText{
-                            containsText("33%")
                         }
 
                         click()

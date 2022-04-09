@@ -7,14 +7,19 @@
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="android.view.View"/>
         <import type="java.util.TimeZone"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseAssignmentMark"/>
 
         <variable
             name="clazzAssignment"
-            type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+            type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock" />
 
         <variable
             name="timeZone"
             type="String" />
+
+        <variable
+            name="submissionStatus"
+            type="CourseAssignmentMark" />
 
     </data>
 
@@ -50,7 +55,7 @@
             android:layout_marginTop="10dp"
             android:contentDescription="@string/school"
             app:tint="?colorOnIconTint"
-            app:visibleIfDateSet="@{clazzAssignment.caDeadlineDate}"
+            app:visibleIfDateSet="@{clazzAssignment.block.cbDeadlineDate}"
             android:src="@drawable/ic_event_available_black_24dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_ca_detail_description" />
@@ -64,8 +69,9 @@
             android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_marginTop="8dp"
             android:contentDescription="@string/school"
-            app:visibleIfDateSet="@{clazzAssignment.caDeadlineDate}"
-            app:textLocalDateTime="@{clazzAssignment.caDeadlineDate}"
+            android:textStyle="bold"
+            app:visibleIfDateSet="@{clazzAssignment.block.cbDeadlineDate}"
+            app:textLocalDateTime="@{clazzAssignment.block.cbDeadlineDate}"
             app:textLocalDateTimeZone="@{TimeZone.getTimeZone(timeZone)}"
             app:layout_constraintStart_toEndOf="@+id/item_ca_detail_description_icon"
             app:layout_constraintTop_toBottomOf="@+id/item_ca_detail_description"
@@ -80,12 +86,25 @@
             android:layout_marginStart="8dp"
             android:contentDescription="@string/school"
             android:text="@{timeZone}"
-            app:visibleIfDateSet="@{clazzAssignment.caDeadlineDate}"
+            android:textStyle="bold"
+            app:visibleIfDateSet="@{clazzAssignment.block.cbDeadlineDate}"
             app:layout_constraintBottom_toBottomOf="@+id/item_ca_detail_description_deadline_date"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/item_ca_detail_description_deadline_date"
             app:layout_constraintTop_toTopOf="@+id/item_ca_detail_description_deadline_date"
             tools:text="(Asia, Dubai)" />
+
+
+        <TextView
+            android:id="@+id/item_ca_detail_deadline_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:visibleIfDateSet="@{clazzAssignment.block.cbDeadlineDate}"
+            app:layout_constraintStart_toStartOf="@id/item_ca_detail_description_deadline_date"
+            app:layout_constraintTop_toBottomOf="@id/item_ca_detail_description_deadline_date"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="@string/deadline"
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -20,23 +20,21 @@ class AssignmentProgressSummaryRecyclerAdapter(progressSummary: AssignmentProgre
         set(value){
             field = value
             visible = value?.hasMetricsPermission ?: false
+            viewHolder?.itemBinding?.assignmentProgressSummary = value
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AssignmentProgressSummaryViewHolder {
-        return AssignmentProgressSummaryViewHolder(
+        viewHolder = AssignmentProgressSummaryViewHolder(
                 ItemAssignmentProgressSummaryDetailBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
+                            it.assignmentProgressSummary = assignmentProgressSummaryVal
                 })
+        return viewHolder as AssignmentProgressSummaryViewHolder
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         viewHolder = null
-    }
-
-    override fun onBindViewHolder(holder: AssignmentProgressSummaryViewHolder, position: Int) {
-        super.onBindViewHolder(holder, position)
-        holder.itemBinding.assignmentProgressSummary = assignmentProgressSummaryVal
     }
 
 }

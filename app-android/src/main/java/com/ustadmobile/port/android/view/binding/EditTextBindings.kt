@@ -4,12 +4,17 @@ import android.annotation.SuppressLint
 import android.text.InputFilter
 import android.text.Spanned
 import android.text.format.DateFormat
+import android.view.View
+import android.view.ViewConfiguration
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.TextView
+import androidx.core.view.marginBottom
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.NewCommentItemListener
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.util.ext.systemImpl
 import com.ustadmobile.lib.db.entities.*
@@ -32,6 +37,8 @@ private fun scheduleTimeToDate(msSinceMidnight: Int) : Date{
     cal.set(Calendar.MINUTE, msSinceMidnight.rem(MS_PER_HOUR) / MS_PER_MIN)
     return Date(cal.timeInMillis)
 }
+
+
 
 @BindingAdapter("scheduleText")
 fun TextView.setScheduleText(schedule: Schedule) {

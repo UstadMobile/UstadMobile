@@ -95,6 +95,14 @@ class VerbEntity() {
 
         const val VERB_ANSWERED_UID = 10007L
 
+        const val VERB_SUBMITTED_URL = "http://activitystrea.ms/schema/1.0/submit"
+
+        const val VERB_SUBMITTED_UID = 10008L
+
+        const val VERB_SCORED_URL = "http://adlnet.gov/expapi/verbs/scored"
+
+        const val VERB_SCORED_UID = 10009L
+
         val FIXED_UIDS = mapOf(VERB_PROGRESSED_URL to VERB_PROGRESSED_UID,
                 VERB_COMPLETED_URL to VERB_COMPLETED_UID,
                 VERB_PASSED_URL to VERB_PASSED_UID,
@@ -102,7 +110,9 @@ class VerbEntity() {
                 VERB_SATISFIED_URL to VERB_SATISFIED_UID,
                 VERB_ANSWERED_URL to VERB_ANSWERED_UID,
                 VERB_ATTEMPTED_URL to VERB_ATTEMPTED_UID,
-                VERB_INTERACTED_URL to VERB_INTERACTED_UID)
+                VERB_INTERACTED_URL to VERB_INTERACTED_UID,
+                VERB_SUBMITTED_URL to VERB_SUBMITTED_UID,
+                VERB_SCORED_URL to VERB_SCORED_UID)
 
     }
 

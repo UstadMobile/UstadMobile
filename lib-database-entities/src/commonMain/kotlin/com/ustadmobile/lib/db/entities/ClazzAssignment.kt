@@ -16,10 +16,10 @@ import kotlinx.serialization.Serializable
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
      sqlStatements = [
-         """REPLACE INTO ClazzAssignment(caUid, caTitle, caDescription, caDeadlineDate, caStartDate, caLateSubmissionType, caLateSubmissionPenalty, caGracePeriodDate, caActive, caClassCommentEnabled, caPrivateCommentsEnabled, caClazzUid, caLocalChangeSeqNum, caMasterChangeSeqNum, caLastChangedBy, caLct) 
-         VALUES (NEW.caUid, NEW.caTitle, NEW.caDescription, NEW.caDeadlineDate, NEW.caStartDate, NEW.caLateSubmissionType, NEW.caLateSubmissionPenalty, NEW.caGracePeriodDate, NEW.caActive, NEW.caClassCommentEnabled, NEW.caPrivateCommentsEnabled, NEW.caClazzUid, NEW.caLocalChangeSeqNum, NEW.caMasterChangeSeqNum, NEW.caLastChangedBy, NEW.caLct) 
+         """REPLACE INTO ClazzAssignment(caUid, caTitle, caDescription, caGroupUid, caActive, caClassCommentEnabled, caPrivateCommentsEnabled, caRequireFileSubmission, caFileType, caSizeLimit, caNumberOfFiles, caEditAfterSubmissionType, caMarkingType, caRequireTextSubmission, caTextLimitType, caTextLimit, caXObjectUid, caClazzUid, caLocalChangeSeqNum, caMasterChangeSeqNum, caLastChangedBy, caLct) 
+         VALUES (NEW.caUid, NEW.caTitle, NEW.caDescription, NEW.caGroupUid, NEW.caActive, NEW.caClassCommentEnabled, NEW.caPrivateCommentsEnabled, NEW.caRequireFileSubmission, NEW.caFileType, NEW.caSizeLimit, NEW.caNumberOfFiles, NEW.caEditAfterSubmissionType, NEW.caMarkingType,NEW.caRequireTextSubmission, NEW.caTextLimitType, NEW.caTextLimit, NEW.caXObjectUid, NEW.caClazzUid, NEW.caLocalChangeSeqNum, NEW.caMasterChangeSeqNum, NEW.caLastChangedBy, NEW.caLct) 
          /*psql ON CONFLICT (caUid) DO UPDATE 
-         SET caTitle = EXCLUDED.caTitle, caDescription = EXCLUDED.caDescription, caDeadlineDate = EXCLUDED.caDeadlineDate, caStartDate = EXCLUDED.caStartDate, caLateSubmissionType = EXCLUDED.caLateSubmissionType, caLateSubmissionPenalty = EXCLUDED.caLateSubmissionPenalty, caGracePeriodDate = EXCLUDED.caGracePeriodDate, caActive = EXCLUDED.caActive, caClassCommentEnabled = EXCLUDED.caClassCommentEnabled, caPrivateCommentsEnabled = EXCLUDED.caPrivateCommentsEnabled, caClazzUid = EXCLUDED.caClazzUid, caLocalChangeSeqNum = EXCLUDED.caLocalChangeSeqNum, caMasterChangeSeqNum = EXCLUDED.caMasterChangeSeqNum, caLastChangedBy = EXCLUDED.caLastChangedBy, caLct = EXCLUDED.caLct
+         SET caTitle = EXCLUDED.caTitle, caDescription = EXCLUDED.caDescription, caGroupUid = EXCLUDED.caGroupUid, caActive = EXCLUDED.caActive, caClassCommentEnabled = EXCLUDED.caClassCommentEnabled, caPrivateCommentsEnabled = EXCLUDED.caPrivateCommentsEnabled, caRequireFileSubmission = EXCLUDED.caRequireFileSubmission, caFileType = EXCLUDED.caFileType, caSizeLimit = EXCLUDED.caSizeLimit, caNumberOfFiles = EXCLUDED.caNumberOfFiles, caEditAfterSubmissionType = EXCLUDED.caEditAfterSubmissionType, caMarkingType = EXCLUDED.caMarkingType, caRequireTextSubmission = EXCLUDED.caRequireTextSubmission, caTextLimitType = EXCLUDED.caTextLimitType, caTextLimit = EXCLUDED.caTextLimit, caXObjectUid = EXCLUDED.caXObjectUid, caClazzUid = EXCLUDED.caClazzUid, caLocalChangeSeqNum = EXCLUDED.caLocalChangeSeqNum, caMasterChangeSeqNum = EXCLUDED.caMasterChangeSeqNum, caLastChangedBy = EXCLUDED.caLastChangedBy, caLct = EXCLUDED.caLct
          */"""
      ]
  )
@@ -34,21 +34,48 @@ open class ClazzAssignment {
 
     var caDescription: String? = null
 
-    var caDeadlineDate: Long = Long.MAX_VALUE
-
-    var caStartDate: Long = 0
-
-    var caLateSubmissionType: Int = 0
-
-    var caLateSubmissionPenalty: Int = 0
-
-    var caGracePeriodDate: Long = 0
+    @ColumnInfo(defaultValue = "0")
+    var caGroupUid: Long = 0
 
     var caActive: Boolean = true
 
     var caClassCommentEnabled: Boolean = true
 
     var caPrivateCommentsEnabled: Boolean = false
+
+    @Deprecated("use on courseBlock, will be removed soon")
+    @ColumnInfo(defaultValue = "100")
+    var caCompletionCriteria: Int = COMPLETION_CRITERIA_SUBMIT
+
+    @ColumnInfo(defaultValue = "1")
+    var caRequireFileSubmission: Boolean = true
+
+    @ColumnInfo(defaultValue = "0")
+    var caFileType: Int = 0
+
+    @ColumnInfo(defaultValue = "50")
+    var caSizeLimit: Int = 50
+
+    @ColumnInfo(defaultValue = "1")
+    var caNumberOfFiles: Int = 1
+
+    @ColumnInfo(defaultValue = "0")
+    var caEditAfterSubmissionType: Int = 0
+
+    @ColumnInfo(defaultValue = "1")
+    var caMarkingType: Int = MARKED_BY_COURSE_LEADER
+
+    @ColumnInfo(defaultValue = "1")
+    var caRequireTextSubmission: Boolean = true
+
+    @ColumnInfo(defaultValue = "1")
+    var caTextLimitType: Int = TEXT_WORD_LIMIT
+
+    @ColumnInfo(defaultValue = "500")
+    var caTextLimit: Int = 500
+
+    @ColumnInfo(defaultValue = "0")
+    var caXObjectUid: Long = 0
 
     @ColumnInfo(index = true)
     var caClazzUid: Long = 0
@@ -70,12 +97,32 @@ open class ClazzAssignment {
 
         const val TABLE_ID = 520
 
-        const val ASSIGNMENT_LATE_SUBMISSION_REJECT = 1
-        const val ASSIGNMENT_LATE_SUBMISSION_PENALTY = 2
-        const val ASSIGNMENT_LATE_SUBMISSION_ACCEPT = 3
+        const val SUBMISSION_TYPE_INDIVIDUAL = 1
+        const val SUBMISSION_TYPE_GROUP = 2
 
+        const val EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_DEADLINE = 1
+        const val EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_GRACE = 2
+        const val EDIT_AFTER_SUBMISSION_TYPE_NOT_ALLOWED = 3
 
+        const val MARKED_BY_COURSE_LEADER = 1
+        const val MARKED_BY_PEERS = 2
 
+        const val FILE_TYPE_ANY = 0
+        const val FILE_TYPE_DOC = 1
+        const val FILE_TYPE_IMAGE = 2
+        const val FILE_TYPE_VIDEO = 3
+        const val FILE_TYPE_AUDIO = 4
+
+        const val FILE_SUBMISSION_NOT_REQUIRED = 0
+        const val FILE_NOT_SUBMITTED = 1
+        const val FILE_SUBMITTED = 2
+        const val FILE_MARKED = 3
+
+        const val TEXT_WORD_LIMIT = 1
+        const val TEXT_CHAR_LIMIT = 2
+
+        const val COMPLETION_CRITERIA_SUBMIT = 100
+        const val COMPLETION_CRITERIA_GRADED = 102
 
     }
 

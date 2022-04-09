@@ -1,12 +1,13 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.PersonAccountEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.PersonAccountEditView
+import com.ustadmobile.core.view.PersonAccountEditView.Companion.BLOCK_CHARACTER_SET
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
@@ -162,6 +163,8 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
                                    disabled = !fieldsEnabled,
                                    helperText = usernameLabel.errorText,
                                    variant = FormControlVariant.outlined,
+                                   blockedCharacters = BLOCK_CHARACTER_SET,
+                                   allowCapitalLetters = false,
                                    onChange = {
                                        setState {
                                            entity?.username = it

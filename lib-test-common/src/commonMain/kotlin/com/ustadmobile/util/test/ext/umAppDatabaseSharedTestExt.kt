@@ -3,6 +3,7 @@ package com.ustadmobile.util.test.ext
 import com.soywiz.klock.Date
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.REL_TYPE_TRANSLATED_VERSION
@@ -18,7 +19,7 @@ private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime:
     }
 }
 
-fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false): ClazzAssignmentRollUp{
+fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false, endpoint: String): ClazzAssignmentRollUp{
 
     val testClazz = Clazz().apply {
         clazzUid = 100
@@ -30,6 +31,20 @@ fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false): ClazzAssign
         lastName = "A"
         this.admin = admin
         this.personUid = 42
+        personDao.insert(this)
+    }
+
+    val studentB = Person().apply {
+        firstNames = "B"
+        lastName = "Student"
+        personUid = 12
+        personDao.insert(this)
+    }
+
+    val studentC = Person().apply {
+        firstNames = "C"
+        lastName = "Student"
+        personUid = 13
         personDao.insert(this)
     }
 
@@ -50,13 +65,44 @@ fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false): ClazzAssign
         clazzEnrolmentUid = clazzEnrolmentDao.insert(this)
     }
 
+    val clazzEnrolmentB = ClazzEnrolment().apply {
+        clazzEnrolmentClazzUid = testClazz.clazzUid
+        clazzEnrolmentDateJoined = DateTime(2021, 5, 1).unixMillisLong
+        clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
+        clazzEnrolmentPersonUid = studentB.personUid
+        clazzEnrolmentOutcome = ClazzEnrolment.OUTCOME_IN_PROGRESS
+        clazzEnrolmentUid = clazzEnrolmentDao.insert(this)
+    }
+
+    val clazzEnrolmentC = ClazzEnrolment().apply {
+        clazzEnrolmentClazzUid = testClazz.clazzUid
+        clazzEnrolmentDateJoined = DateTime(2021, 5, 1).unixMillisLong
+        clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
+        clazzEnrolmentPersonUid = studentC.personUid
+        clazzEnrolmentOutcome = ClazzEnrolment.OUTCOME_IN_PROGRESS
+        clazzEnrolmentUid = clazzEnrolmentDao.insert(this)
+    }
+
+
     val clazzAssignment = ClazzAssignment().apply {
         caTitle = "New Clazz Assignment"
         caDescription = "complete quiz"
-        caDeadlineDate = DateTime(2021, 5, 5).unixMillisLong
+        caRequireFileSubmission = true
+        caFileType = ClazzAssignment.FILE_TYPE_ANY
         caClazzUid = testClazz.clazzUid
         caUid = clazzAssignmentDao.insert(this)
     }
+
+    val clazzAssignmentObjectId = UMFileUtil.joinPaths(endpoint,
+            "/clazzAssignment/${clazzAssignment.caUid}")
+    val xobject = XObjectEntity().apply {
+        this.objectId = clazzAssignmentObjectId
+        this.objectType = "Activity"
+    }
+    xobject.xObjectUid = xObjectDao.insert(xobject)
+    clazzAssignment.caXObjectUid = xobject.xObjectUid
+    clazzAssignmentDao.update(clazzAssignment)
+
 
     ClazzAssignmentContentJoin().apply {
         cacjContentUid = contentEntry.contentEntryUid
@@ -87,6 +133,38 @@ fun UmAppDatabase.insertTestClazzAssignment(admin: Boolean = false): ClazzAssign
         contextRegistration = randomUuid().toString()
         statementUid = statementDao.insert(this)
     }
+
+    StatementEntity().apply {
+        statementPersonUid = student.personUid
+        statementVerbUid = VerbEntity.VERB_SUBMITTED_UID
+        contextRegistration = randomUuid().toString()
+        xObjectUid = xobject.xObjectUid
+        statementUid = 100
+        statementId = "studentA"
+        statementDao.insert(this)
+    }
+
+    StatementEntity().apply {
+        statementPersonUid = studentB.personUid
+        statementVerbUid = VerbEntity.VERB_SUBMITTED_UID
+        contextRegistration = randomUuid().toString()
+        xObjectUid = xobject.xObjectUid
+        statementUid = 200
+        statementId = "studentB"
+        statementDao.insert(this)
+    }
+
+    StatementEntity().apply {
+        statementPersonUid = studentC.personUid
+        statementVerbUid = VerbEntity.VERB_SUBMITTED_UID
+        contextRegistration = randomUuid().toString()
+        xObjectUid = xobject.xObjectUid
+        statementUid = 300
+        statementId = "studentC"
+        statementDao.insert(this)
+    }
+
+
 
     return cacheClazzAssignment
 

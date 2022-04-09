@@ -693,6 +693,9 @@
     %1$s% will be replaced with the date that they started.-->
     <string name="started_date" formatted="false">Started %1$s</string>
 
+    <string name="course_leader">Course leader</string>
+
+    <string name="unassigned">Unassigned</string>
 
     <!-- plurals are used to handle different languages that require special treatment
     e.g number 0 in arabic
@@ -1480,6 +1483,9 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     must submit an assignment
     -->
     <string name="individual">Individual</string>
+
+
+    <string name="individual_submission">Individual submission</string>
 
     <!-- Used as an option for assignment submission: in this mode, assignments will be submitted
     by groups of students (not by each student individually)

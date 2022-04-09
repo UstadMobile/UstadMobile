@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import SelectFolderView
+import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
@@ -28,6 +28,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.on
 
 class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, view: ContentEntryList2View,
                                  di: DI, lifecycleOwner: DoorLifecycleOwner,
@@ -38,6 +39,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         ContentEntryListItemListener by contentEntryListItemListener, ContentEntryAddOptionsListener {
 
     private val navController: UstadNavController by instance()
+
+    private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
 
     private var contentFilter = ARG_DISPLAY_CONTENT_BY_PARENT
 
@@ -279,8 +282,16 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
 
     fun handleClickEditFolder() {
-        systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to parentEntryUid.toString()), context)
+        val args = mutableMapOf(
+            UstadView.ARG_ENTITY_UID to parentEntryUid.toString())
+
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null, ContentEntryEdit2View.VIEW_NAME,
+                ContentEntry::class,
+                ContentEntry.serializer(),
+                arguments = args)
+        )
     }
 
     fun handleClickShowHiddenItems() {
@@ -290,22 +301,34 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     override fun onClickNewFolder() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_FILE,
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to false.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(ContentEntryEdit2View.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            ContentEntryEdit2View.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickImportFile() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_FILE,
+                SelectFileView.ARG_MIMETYPE_SELECTED to
+                        pluginManager.supportedMimeTypeList.joinToString(";"),
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(SelectFileView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectFileView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickImportLink() {
@@ -314,17 +337,29 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(ContentEntryImportLinkView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            ContentEntryImportLinkView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickImportGallery() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_GALLERY,
+                SelectFileView.ARG_MIMETYPE_SELECTED to SelectFileView.SELECTION_MODE_GALLERY,
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(SelectFileView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectFileView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickAddFolder() {
@@ -333,7 +368,13 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(SelectFolderView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectFolderView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     fun handleMoveWithSelectedEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary"/>
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment"/>
+        <import type="com.ustadmobile.core.controller.SubmissionConstants"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseAssignmentSubmission"/>
+        <import type="android.view.View"/>
+        <import type="com.ustadmobile.port.android.view.ClazzAssignmentDetailStudentProgressListOverviewFragment.PersonWithAssignmentStatementDisplayListRecyclerAdapter"/>
+
+        <variable
+            name="person"
+            type="PersonWithAttemptsSummary" />
+
+        <variable
+            name="listener"
+            type="com.ustadmobile.core.controller.AttemptListListener" />
+
+        <variable
+            name="selectablePagedListAdapter"
+            type="PersonWithAssignmentStatementDisplayListRecyclerAdapter" />
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/dimen_16dp"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, person)}"
+        app:onSelectableItemClicked="@{() -> listener.onClickPersonWithStatementDisplay(person)}"
+        android:background="@drawable/bg_listitem">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/item_person_newitemicon"
+            app:imageForeignKey="@{person.personUid}"
+            app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
+            app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
+            tools:src="@drawable/ic_account_circle_black_24dp"
+            android:tint="?colorOnIconTint"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Line 1-->
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            android:paddingEnd="@dimen/dimen_5dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:id="@+id/item_person_text"
+            android:text='@{person.firstNames + " " + person.lastName}'
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/submission_status_icon"
+            android:layout_marginStart="@dimen/dimen_64dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_8dp"
+            tools:text="Bob Dylan"
+            />
+
+
+        <ImageView
+            android:id="@+id/submission_status_icon"
+            android:layout_width="@dimen/dimen_16dp"
+            android:layout_height="@dimen/dimen_16dp"
+            android:contentDescription="@string/school"
+            app:tint="?colorOnIconTint"
+            android:src="@drawable/ic_done_white_24dp"
+            android:visibility="@{person.fileSubmissionStatus == CourseAssignmentSubmission.NOT_SUBMITTED ? View.INVISIBLE : View.VISIBLE}"
+            app:imageLookupKey="@{person.fileSubmissionStatus}"
+            app:imageLookupMap="@{ClazzAssignmentDetailOverviewFragment.ASSIGNMENT_STATUS_MAP}"
+            app:layout_constraintEnd_toStartOf="@+id/item_person_file_submission_status"
+            app:layout_constraintBottom_toBottomOf="@id/item_person_file_submission_status"
+            app:layout_constraintTop_toTopOf="@id/item_person_file_submission_status"/>
+
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            android:paddingEnd="@dimen/dimen_5dp"
+            tools:text="Not started"
+            android:id="@+id/item_person_file_submission_status"
+            android:layout_width="@dimen/dimen_0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_8dp"
+            android:visibility="@{person.fileSubmissionStatus == 0 ? View.GONE : View.VISIBLE}"
+            app:textMessageIdLookupMap="@{SubmissionConstants.STATUS_MAP}"
+            app:textMessageIdLookupKey="@{person.fileSubmissionStatus}"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+
+        <ImageView
+            android:id="@+id/attempt_private_comment_image"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@drawable/ic_baseline_comment_24"
+            app:tint="?colorOnIconTint"
+            android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.latestPrivateComment)}"
+            app:layout_constraintTop_toTopOf="@+id/attempt_private_comment"
+            app:layout_constraintStart_toStartOf="@id/item_person_text"
+            app:layout_constraintBottom_toBottomOf="@id/attempt_private_comment"
+            />
+
+
+        <TextView
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:id="@+id/attempt_private_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/item_person_text"
+            app:layout_constraintStart_toEndOf="@id/attempt_private_comment_image"
+            android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.latestPrivateComment)}"
+            android:text="@{person.latestPrivateComment}"
+            android:drawablePadding="@dimen/dimen_0dp"
+            tools:text="Here is private comment" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

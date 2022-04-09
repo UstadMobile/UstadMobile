@@ -102,33 +102,33 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
 
                         }
 
-                        createInformation("login", entity?.schoolCode ?: "",
+                        renderInformationOnDetailScreen("login", entity?.schoolCode ?: "",
                             getString(MessageID.school_code)){
                             Util.copyToClipboard(entity?.schoolCode ?: "") {
                                 showSnackBar(getString(MessageID.copied_to_clipboard))
                             }
                         }
 
-                        createInformation("place", entity?.schoolAddress,
+                        renderInformationOnDetailScreen("place", entity?.schoolAddress,
                             getString(MessageID.address))
 
-                        createInformation("call", entity?.schoolPhoneNumber,
+                        renderInformationOnDetailScreen("call", entity?.schoolPhoneNumber,
                             getString(MessageID.phone_number))
 
-                        createInformation("perm_contact_calendar", entity?.holidayCalendar?.umCalendarName,
+                        renderInformationOnDetailScreen("perm_contact_calendar", entity?.holidayCalendar?.umCalendarName,
                             getString(MessageID.holiday_calendar))
 
-                        createInformation("email", entity?.schoolEmailAddress,
+                        renderInformationOnDetailScreen("email", entity?.schoolEmailAddress,
                             getString(MessageID.email)){
                             //TODO: Handle open mail link
                         }
 
-                        createInformation("language", entity?.schoolTimeZone,
+                        renderInformationOnDetailScreen("language", entity?.schoolTimeZone,
                             getString(MessageID.timezone))
 
                         if(!schoolClazzList.isNullOrEmpty()){
                             umItem(GridSize.cells12){
-                                createListSectionTitle(getString(MessageID.classes))
+                                renderListSectionTitle(getString(MessageID.classes))
                             }
 
                             schoolClazzList?.let { classes ->

@@ -1,12 +1,11 @@
 package com.ustadmobile.core.contentjob
 
-import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.door.DoorUri
 import kotlinx.coroutines.CancellationException
 
 class ContentPluginManager(val pluginList: List<ContentPlugin>) {
 
-    private val supportedMimeTypeList: List<String>
+    val supportedMimeTypeList: List<String>
 
     init{
         val pluginDuplicates = pluginList.filter { plugin ->

@@ -22,6 +22,8 @@ class PersonWithAttemptsSummary {
 
     var latestPrivateComment: String? = null
 
+    var fileSubmissionStatus: Int = 0
+
     @Embedded
     var scoreProgress: ContentEntryStatementScoreProgress? = null
 

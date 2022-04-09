@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import SelectFolderView
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.ContentPluginManager
@@ -18,18 +17,13 @@ import com.ustadmobile.core.util.ext.encodeStringMapToString
 import com.ustadmobile.core.util.ext.logErrorReport
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
-import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_URI
-import com.ustadmobile.core.view.ContentEntryImportLinkView
-import com.ustadmobile.core.view.LanguageListView
-import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
-import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
@@ -228,7 +222,9 @@ class ContentEntryEdit2Presenter(
                 entity.licenseName = view.licenceOptions?.firstOrNull {
                     it.code == entity.licenseType
                 }.toString()
+
                 val isNewEntry = entity.contentEntryUid == 0L
+
                 if (entity.contentEntryUid == 0L) {
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
 
@@ -255,8 +251,6 @@ class ContentEntryEdit2Presenter(
                 val videoDimensions = view.videoDimensions
                 val conversionParams = mapOf("compress" to view.compressionEnabled.toString(),
                         "dimensions" to "${videoDimensions.first}x${videoDimensions.second}")
-
-                val popUpTo = arguments[ARG_POPUPTO_ON_FINISH] ?: CURRENT_DEST
 
                 if (metaData != null && fromUri != null) {
 
@@ -288,7 +282,13 @@ class ContentEntryEdit2Presenter(
 
                         view.loading = false
                         view.fieldsEnabled = true
-                        systemImpl.popBack(popUpTo, popUpInclusive = true, context)
+
+
+                        finishWithResult(safeStringify(di,
+                            ListSerializer(ContentEntry.serializer()),
+                            listOf(entity))
+                        )
+
                         return@launch
 
                     } else {
@@ -319,7 +319,14 @@ class ContentEntryEdit2Presenter(
 
                         view.loading = false
                         view.fieldsEnabled = true
-                        systemImpl.popBack(popUpTo, popUpInclusive = true, context)
+
+
+                        finishWithResult(safeStringify(di,
+                            ListSerializer(ContentEntry.serializer()),
+                            listOf(entity))
+                        )
+
+
                         return@launch
 
                     }
@@ -335,7 +342,12 @@ class ContentEntryEdit2Presenter(
 
                 view.loading = false
                 view.fieldsEnabled = true
-                systemImpl.popBack(popUpTo, popUpInclusive = true, context)
+
+
+                finishWithResult(safeStringify(di,
+                    ListSerializer(ContentEntry.serializer()),
+                    listOf(entity))
+                )
 
             } else {
                 view.titleErrorEnabled = entity.title == null
@@ -394,7 +406,8 @@ class ContentEntryEdit2Presenter(
 
     override fun onClickImportFile() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_FILE,
+                SelectFileView.ARG_MIMETYPE_SELECTED to
+                        pluginManager.supportedMimeTypeList.joinToString(";"),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
 
@@ -424,7 +437,7 @@ class ContentEntryEdit2Presenter(
 
     override fun onClickImportGallery() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_GALLERY,
+                SelectFileView.ARG_MIMETYPE_SELECTED to SelectFileView.SELECTION_MODE_GALLERY,
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
 

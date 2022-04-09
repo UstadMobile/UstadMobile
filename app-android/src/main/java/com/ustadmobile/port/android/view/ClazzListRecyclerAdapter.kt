@@ -4,28 +4,42 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.ItemClazzListBinding
+import com.toughra.ustadmobile.databinding.ItemClazzListCardBinding
 import com.ustadmobile.core.controller.ClazzListItemListener
+import com.ustadmobile.core.controller.TerminologyKeys
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.toTermMap
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import kotlinx.serialization.json.Json
+import org.kodein.di.DI
+import org.kodein.di.instance
 
-class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?)
+class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?, di: DI)
     : SelectablePagedListAdapter<ClazzWithListDisplayDetails,
         ClazzListRecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
 
-    class ClazzList2ViewHolder(val itemBinding: ItemClazzListBinding)
+    val json: Json by di.instance()
+
+    val systemImpl: UstadMobileSystemImpl by di.instance()
+
+    class ClazzList2ViewHolder(val itemBinding: ItemClazzListCardBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzList2ViewHolder {
-        val itemBinding = ItemClazzListBinding.inflate(LayoutInflater.from(parent.context), parent,
+        val itemBinding = ItemClazzListCardBinding.inflate(LayoutInflater.from(parent.context), parent,
                 false)
         return ClazzList2ViewHolder(itemBinding)
     }
 
     override fun onBindViewHolder(holder: ClazzList2ViewHolder, position: Int) {
-        holder.itemBinding.clazz = getItem(position)
+        val clazz = getItem(position)
+        holder.itemBinding.clazz = clazz
         holder.itemView.tag = holder.itemBinding.clazz?.clazzUid
         holder.itemBinding.itemListener = itemListener
+
+        val termMap = clazz?.terminology.toTermMap(json, systemImpl, holder.itemView.context)
+        holder.itemBinding.teacherStudentCount = """${clazz?.numTeachers ?: 0} ${termMap[TerminologyKeys.TEACHERS_KEY]}, ${clazz?.numStudents ?: 0} ${termMap[TerminologyKeys.STUDENTS_KEY]}"""
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

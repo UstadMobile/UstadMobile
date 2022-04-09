@@ -105,12 +105,6 @@ open class UstadApp : Application(), DIAware {
                 }
         }
 
-        bind<Json>() with singleton {
-            Json {
-                encodeDefaults = true
-            }
-        }
-
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             val db = instance<UmAppDatabase>(tag = TAG_DB)
@@ -289,6 +283,12 @@ open class UstadApp : Application(), DIAware {
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
                     .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
                     .build())
+        }
+
+        bind<Json>() with singleton {
+            Json {
+                encodeDefaults = true
+            }
         }
     }
 

@@ -1,8 +1,8 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
+import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
 
 
 interface ClazzAssignmentDetailStudentProgressOverviewListView: UstadListView<PersonWithAttemptsSummary, PersonWithAttemptsSummary> {

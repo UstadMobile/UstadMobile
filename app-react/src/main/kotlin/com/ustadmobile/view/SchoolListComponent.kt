@@ -54,6 +54,7 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
     override fun onCreateView() {
         super.onCreateView()
         linearLayout = false
+        ustadComponentTitle = getString(MessageID.institution)
         fabManager?.text = getString(MessageID.school)
         mPresenter = SchoolListPresenter(this, arguments,
             this, di, this)

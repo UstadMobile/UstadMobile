@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.HolidayCalendarEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -10,12 +9,13 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.standardFormat
-import com.ustadmobile.view.ext.createListItemWithLeftIconTitleAndDescription
+import com.ustadmobile.view.ext.renderListItemWithLeftIconTitleAndDescription
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.padding
@@ -106,7 +106,7 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
                 }
             }
 
-            val newItem = CreateNewItem(true,MessageID.add_a_holiday){
+            val newItem = CreateNewItem(true,getString(MessageID.add_a_holiday)){
                 mPresenter?.holidayToManyJoinListener?.onClickEdit(Holiday())
             }
 
@@ -132,7 +132,7 @@ class HolidayListComponent(mProps: SimpleListProps<Holiday>): UstadSimpleList<Si
                 onClick.invoke(it.nativeEvent)
             }
 
-            createListItemWithLeftIconTitleAndDescription("date_range",item.holName,
+            renderListItemWithLeftIconTitleAndDescription("date_range",item.holName,
                 "${Date(item.holStartTime).standardFormat()} " +
                         "- ${Date(item.holEndTime).standardFormat()}",
                 onMainList = true

@@ -15,6 +15,8 @@ class ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer : ContentEn
     @Embedded
     var scoreProgress: ContentEntryStatementScoreProgress? = null
 
+    // TODO cleanup
+   var assignmentContentWeight: Int = 0
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -24,6 +26,7 @@ class ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer : ContentEn
         if (mostRecentContainer != other.mostRecentContainer) return false
         if (contentEntryParentChildJoin != other.contentEntryParentChildJoin) return false
         if (scoreProgress != other.scoreProgress) return false
+        if(assignmentContentWeight != other.assignmentContentWeight) return false
 
         return true
     }
@@ -33,6 +36,7 @@ class ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer : ContentEn
         result = 31 * result + (mostRecentContainer?.hashCode() ?: 0)
         result = 31 * result + (contentEntryParentChildJoin?.hashCode() ?: 0)
         result = 31 * result + (scoreProgress?.hashCode() ?: 0)
+        result = 31 * result + (assignmentContentWeight.hashCode())
         return result
     }
 

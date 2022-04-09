@@ -125,7 +125,9 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
                 SortOrderOption(MessageID.attendance, ClazzDao.SORT_ATTENDANCE_DESC, false)
         )
 
-        val FILTER_OPTIONS = listOf(MessageID.active_classes to ClazzDao.FILTER_ACTIVE_ONLY,
-                MessageID.all to 0)
+        val FILTER_OPTIONS = listOf(
+            MessageID.currently_enrolled to ClazzDao.FILTER_CURRENTLY_ENROLLED,
+            MessageID.past_enrollments to ClazzDao.FILTER_PAST_ENROLLMENTS,
+            MessageID.all to 0)
     }
 }

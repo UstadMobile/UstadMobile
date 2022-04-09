@@ -11,6 +11,7 @@ import io.ktor.utils.io.core.*
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlin.js.Date
+import com.ustadmobile.door.DoorUri
 
 /**
  * SystemImpl provides system methods for tasks such as copying files, reading
@@ -133,7 +134,7 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?) {
+    actual fun openFileInDefaultViewer(context: Any, doorUri: DoorUri, mimeType: String?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

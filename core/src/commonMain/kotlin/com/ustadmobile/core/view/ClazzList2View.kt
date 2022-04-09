@@ -8,7 +8,7 @@ interface ClazzList2View: UstadListView<Clazz, ClazzWithListDisplayDetails> {
     var newClazzListOptionVisible: Boolean
 
     companion object {
-        const val VIEW_NAME = "ClassListView"
+        const val VIEW_NAME = "Courses"
 
         const val ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST = "excludeAlreadySelectedClazzList"
     }

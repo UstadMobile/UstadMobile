@@ -42,13 +42,14 @@ enum class ChartType{
     LineChart
 }
 
-fun RBuilder.umChart(data: Array<Array<Any>>,
-                     width: Any? = "100%",
-                     height: Any? = "400px",
-                     chartType: ChartType = ChartType.ColumnChart,
-                     options: ChartOptions? = null,
-                     className: String? = null,
-                     handler: StyledHandler<GoogleChartsProps>? = null
+fun RBuilder.umChart(
+    data: Array<Array<Any>>,
+    width: Any? = "100%",
+    height: Any? = "400px",
+    chartType: ChartType = ChartType.ColumnChart,
+    options: ChartOptions? = null,
+    className: String? = null,
+    handler: StyledHandler<GoogleChartsProps>? = null
 ) = createStyledComponent(googleChartsComponent.unsafeCast<ComponentType<GoogleChartsProps>>(), className, handler) {
     attrs.width = width.toString()
     attrs.height = height.toString()

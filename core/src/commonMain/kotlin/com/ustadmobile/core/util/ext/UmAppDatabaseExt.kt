@@ -25,8 +25,8 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 fun UmAppDatabase.runPreload() {
     GlobalScope.launch { preload() }
@@ -629,7 +629,6 @@ suspend fun UmAppDatabase.validateAndUpdateContainerSize(
             containerDao.updateContainerSizeAndNumEntriesAsync(containerUid, systemTimeInMillis())
             containerDao.getContainerSizeByUid(containerUid)
         }
-
         if(containerSize != 0L)
             return containerSize
 

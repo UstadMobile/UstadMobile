@@ -47,8 +47,8 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
 
     override fun onCreateView() {
         super.onCreateView()
-        fabManager?.text = getString(MessageID.clazz)
-        ustadComponentTitle = getString(MessageID.classes)
+        fabManager?.text = getString(MessageID.course)
+        ustadComponentTitle = getString(MessageID.courses)
         linearLayout = false
         addNewEntryText = getString(MessageID.add_a_new_class)
         mPresenter = ClazzListPresenter(this, arguments, this,di,this)
@@ -163,12 +163,12 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
     override fun RBuilder.renderAddContentOptionsDialog() {
         if(showAddEntryOptions){
             val options = if(newClazzListOptionVisible){
-                listOf(UmDialogOptionItem("add",MessageID.add_a_new_class) {
+                listOf(UmDialogOptionItem("add",MessageID.add_a_new_course) {
                     mPresenter?.handleClickCreateNewFab()
                 })
             }else {
                 listOf()
-            } + listOf(UmDialogOptionItem("login",MessageID.join_existing_class){
+            } + listOf(UmDialogOptionItem("login",MessageID.join_existing_course){
                 mPresenter?.handleClickJoinClazz()
             })
 

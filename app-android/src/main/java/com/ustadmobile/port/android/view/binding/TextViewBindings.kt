@@ -1,16 +1,22 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.text.format.DateFormat
+import android.text.format.DateUtils
+import android.text.util.Linkify
+import android.view.Gravity
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
+import com.google.android.material.chip.Chip
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.controller.ChatDetailPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.model.BitmaskMessageId
 import com.ustadmobile.core.util.MessageIdOption
@@ -18,6 +24,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.VerbEntity.Companion.VERB_ANSWERED_UID
+import me.saket.bettermovementmethod.BetterLinkMovementMethod
 import java.util.*
 import java.util.concurrent.TimeUnit
 import com.soywiz.klock.DateFormat as KlockDateFormat
@@ -38,6 +45,26 @@ fun TextView.setCustomFieldHint(customField: CustomField?) {
         systemImpl.getString(customField.customFieldLabelMessageID, context)
     } else {
         ""
+    }
+}
+
+@BindingAdapter("chatMessage", "loggedInPersonUid")
+fun TextView.setChatMessageTitle(message: MessageWithPerson, loggedInPersonUid: Long){
+    if(message.messagePerson?.personUid == loggedInPersonUid){
+        text = systemImpl.getString(MessageID.you, context)
+        gravity = Gravity.RIGHT
+    }else{
+        text = message.messagePerson?.fullName()?:"" + " "
+        gravity = Gravity.LEFT
+    }
+}
+
+@BindingAdapter("chatMessageOrientation", "loggedInPersonUidOrientation")
+fun TextView.setChatMessagOrientation(message: MessageWithPerson, loggedInPersonUid: Long){
+    if(message.messagePerson?.personUid == loggedInPersonUid){
+        gravity = Gravity.END
+    }else{
+        gravity = Gravity.START
     }
 }
 
@@ -224,6 +251,12 @@ fun TextView.setResponseTextFilled(responseText: String?){
     }
 }
 
+@BindingAdapter("chipMemberRoleName")
+fun Chip.setChipMemberRoleName(clazzEnrolment: ClazzEnrolment?) {
+    text = clazzEnrolment?.roleToString(context, systemImpl) ?: ""
+}
+
+
 @BindingAdapter("memberRoleName")
 fun TextView.setMemberRoleName(clazzEnrolment: ClazzEnrolment?) {
     text = clazzEnrolment?.roleToString(context, systemImpl) ?: ""
@@ -238,6 +271,21 @@ fun TextView.setMemberEnrolmentOutcome(clazzEnrolment: ClazzEnrolmentWithLeaving
 fun TextView.setClazzEnrolmentWithClazzAndOutcome(clazzEnrolment: ClazzEnrolmentWithClazz?){
     text = "${clazzEnrolment?.clazz?.clazzName} (${clazzEnrolment?.roleToString(context, systemImpl)}) - ${clazzEnrolment?.outcomeToString(context,  systemImpl)}"
 }
+
+@BindingAdapter("fileSubmissionStatus")
+fun TextView.setFileSubmissionStatus(status: Int){
+    val statusMessageId = FILE_SUBMISSION_STATUS_TO_MESSAGEID_MAP[status] ?: 0
+    text = systemImpl.getString(statusMessageId, context)
+}
+
+
+val FILE_SUBMISSION_STATUS_TO_MESSAGEID_MAP = mapOf(
+        ClazzAssignment.FILE_NOT_SUBMITTED to MessageID.not_started,
+        ClazzAssignment.FILE_MARKED to MessageID.marked_cap,
+        ClazzAssignment.FILE_SUBMITTED to MessageID.submitted_cap
+)
+
+
 
 @BindingAdapter("showisolang")
 fun TextView.setIsoLang(language: Language){
@@ -329,6 +377,16 @@ fun TextView.setScorePercentage(scoreProgress: ContentEntryStatementScoreProgres
     // (4/5) * (1 - 20%) = penalty applied to score
     text = "${scoreProgress.calculateScoreWithPenalty()}%"
 }
+
+@BindingAdapter("scoreWithWeight")
+fun TextView.setScoreWithWeight(scoreProgress: ContentEntryStatementScoreProgress?){
+    if(scoreProgress == null){
+        return
+    }
+    text = "${scoreProgress.calculateScoreWithWeight()}%"
+}
+
+
 
 @BindingAdapter("durationMinsSecs")
 fun TextView.setDurationMinutesAndSeconds(duration: Long){
