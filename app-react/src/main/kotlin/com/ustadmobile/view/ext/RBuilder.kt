@@ -245,11 +245,14 @@ fun RBuilder.umItemThumbnail(
 }
 
 
-fun RBuilder.renderListSectionTitle(titleText: String, variant: TypographyVariant? = null){
+fun RBuilder.renderListSectionTitle(titleText: String, variant: TypographyVariant? = null, leftMargin: Int = 0){
     styledDiv {
         css{
             +defaultMarginBottom
             +defaultMarginTop
+            if(leftMargin > 0){
+                marginLeft = leftMargin.spacingUnits
+            }
         }
         umTypography(titleText, variant = variant ?: TypographyVariant.body2){
             css (alignTextToStart)
@@ -1736,7 +1739,7 @@ fun RBuilder.renderRawHtmlOnIframe(content: String?){
     styledIframe {
         css(iframeComponentResponsiveIframe)
         attrs{
-            src = "data:text/html;charset=utf-8, $content"
+            src = "data:text/html;charset=utf-8, <div style='color: white !important;'>$content</div>"
         }
     }
 }
