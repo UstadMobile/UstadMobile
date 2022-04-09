@@ -16,7 +16,6 @@ import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.renderListSectionTitle
 import com.ustadmobile.view.ext.renderRawHtmlOnIframe
@@ -48,7 +47,7 @@ class ParentalConsentManagementComponent (mProps: UmProps): UstadEditComponent<P
         get() = field
         set(value) {
             setState {
-                field = "I confirm that I am the parent or legal guardian of the following child:\\n \\n Name: Test1 123\\n Date of birth: 8-3-2018\\n \\n If I consent to my child using Ustad Mobile, then the collection of and processing of personally identifiable information will be done in compliance with the privacy policy and terms and conditions below.\\n \\n Consent can be revoked anytime by using the link that was emailed. If you choose not to consent, any data provided by your child will be deleted within 24 hours"
+                field = value
             }
         }
 
@@ -117,14 +116,14 @@ class ParentalConsentManagementComponent (mProps: UmProps): UstadEditComponent<P
                 umItem(GridSize.cells12, GridSize.cells8){
                     umGridContainer(GridSpacing.spacing4) {
                         umItem {
-                            umTypography(infoText?.clean(), variant = TypographyVariant.body1) {
+                            umTypography(infoText, variant = TypographyVariant.body1) {
                                 css{
                                     fontSize = (1.2).em
                                 }
                             }
                         }
 
-                        renderListSectionTitle(getString(MessageID.terms_and_policies))
+                        renderListSectionTitle(getString(MessageID.terms_and_policies), leftMargin = 4)
 
                         umItem {
                             css(defaultMarginTop)
