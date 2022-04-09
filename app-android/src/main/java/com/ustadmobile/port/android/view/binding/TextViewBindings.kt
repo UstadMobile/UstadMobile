@@ -52,10 +52,10 @@ fun TextView.setCustomFieldHint(customField: CustomField?) {
 fun TextView.setChatMessageTitle(message: MessageWithPerson, loggedInPersonUid: Long){
     if(message.messagePerson?.personUid == loggedInPersonUid){
         text = systemImpl.getString(MessageID.you, context)
-        gravity = Gravity.RIGHT
+        gravity = Gravity.END
     }else{
         text = message.messagePerson?.fullName()?:"" + " "
-        gravity = Gravity.LEFT
+        gravity = Gravity.START
     }
 }
 
