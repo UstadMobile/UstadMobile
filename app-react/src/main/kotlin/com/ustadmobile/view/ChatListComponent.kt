@@ -7,7 +7,9 @@ import com.ustadmobile.core.view.ChatListView
 import com.ustadmobile.lib.db.entities.Chat
 import com.ustadmobile.lib.db.entities.ChatWithLatestMessageAndCount
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.view.ext.renderListItemWithLeftIconTitleAndDescription
+import com.ustadmobile.util.ext.fromNow
+import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.ext.renderChatListItemWithCounter
 import react.RBuilder
 import react.setState
 
@@ -63,7 +65,10 @@ class ChatListComponent(mProps: UmProps): UstadListComponent<Chat, ChatWithLates
     }
 
     override fun RBuilder.renderListItem(item: ChatWithLatestMessageAndCount) {
-        renderListItemWithLeftIconTitleAndDescription("person", item.chatName, item.latestMessage)
+        renderChatListItemWithCounter(
+            item.chatName, item.latestMessage,
+            item.latestMessageTimestamp.toDate()?.fromNow(systemImpl.getDisplayedLocale(this)),
+            item.unreadMessageCount)
     }
 
     override fun handleClickEntry(entry: ChatWithLatestMessageAndCount) {

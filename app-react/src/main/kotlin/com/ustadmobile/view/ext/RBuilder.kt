@@ -29,6 +29,9 @@ import com.ustadmobile.util.DraftJsUtil.clean
 import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.alignEndItems
 import com.ustadmobile.util.StyleManager.alignTextToStart
+import com.ustadmobile.util.StyleManager.chatLeft
+import com.ustadmobile.util.StyleManager.chatMessageContent
+import com.ustadmobile.util.StyleManager.chatRight
 import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -43,6 +46,7 @@ import com.ustadmobile.util.StyleManager.mainComponentSearch
 import com.ustadmobile.util.StyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.StyleManager.personListItemAvatar
 import com.ustadmobile.util.StyleManager.textGrayedOut
+import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.StyleManager.toolbarTitle
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
@@ -130,12 +134,12 @@ fun RBuilder.umGridContainer(
     spacing: GridSpacing = GridSpacing.spacing0,
     alignContent: GridAlignContent = GridAlignContent.stretch,
     alignItems: GridAlignItems = GridAlignItems.stretch,
-    justify: GridJustify = GridJustify.flexStart,
+    direction: FlexDirection = FlexDirection.row,
     columnSpacing: GridSpacing = GridSpacing.spacing0,
     rowSpacing: GridSpacing = GridSpacing.spacing0,
     wrap: GridWrap = GridWrap.wrap, className: String? = null,
     handler: StyledHandler<GridProps>? = null) {
-    gridContainer(spacing,alignContent,alignItems,justify, wrap, columnSpacing, rowSpacing,
+    gridContainer(spacing,alignContent,alignItems,direction, wrap, columnSpacing, rowSpacing,
         handler = handler, className = className)
 }
 
@@ -883,6 +887,138 @@ fun RBuilder.renderListItemWithLeftIconTitleAndOptionOnRight(
                     onChange(it)
                 }
             )
+        }
+    }
+}
+
+fun RBuilder.renderConversationListItem(
+    left: Boolean = true,
+    messageOwner: String?,
+    message: String?,
+    systemImpl: UstadMobileSystemImpl,
+    messageTime: Long
+){
+    umGridContainer(GridSpacing.spacing1,
+        direction = if(left) FlexDirection.row
+        else FlexDirection.rowReverse) {
+        css{
+            margin(top = 2.spacingUnits)
+        }
+
+        if(left){
+            umItem(GridSize.cells1) {
+                umItemThumbnail("person", avatarVariant = AvatarVariant.circle)
+            }
+        }
+
+        umItem(GridSize.cells8) {
+            styledDiv {
+                css{
+                    textAlign = if(left)
+                        if(systemImpl.isRtlActive()) TextAlign.right else TextAlign.left
+                    else
+                        if(systemImpl.isRtlActive()) TextAlign.left else TextAlign.right
+                }
+                umTypography(message, variant = TypographyVariant.body1){
+                    css{
+                        +chatMessageContent
+                        if(left) if(systemImpl.isRtlActive()) +chatRight else +chatLeft
+                        else if(systemImpl.isRtlActive()) +chatLeft else +chatRight
+                        if(left){
+                            backgroundColor = Color(theme.palette.action.selected)
+                        }else {
+                            backgroundColor = Color(theme.palette.primary.dark)
+                            color = Color.white
+                        }
+                    }
+                }
+
+                umTypography(messageTime.toDate()?.fromNow(systemImpl.getDisplayedLocale(this)),
+                    variant = TypographyVariant.body2){
+                    css{
+                        fontSize = (0.9).em
+                        color = Color(theme.palette.action.disabled)
+                        padding(0.spacingUnits, 1.spacingUnits)
+                        margin(top = 4.px)
+                        textAlign = if(left)
+                            if(systemImpl.isRtlActive()) TextAlign.right else TextAlign.left
+                        else
+                            if(systemImpl.isRtlActive()) TextAlign.left else TextAlign.right
+                    }
+                }
+            }
+        }
+
+
+    }
+}
+
+
+fun RBuilder.renderChatListItemWithCounter(
+    userFullName: String?,
+    latestMessage: String?,
+    time: String?,
+    counter: Int = 0
+){
+    umGridContainer {
+        umItem(GridSize.cells2,GridSize.cells1) {
+            umItemThumbnail("person", avatarVariant = AvatarVariant.circle)
+        }
+
+        umItem(GridSize.cells8, GridSize.cells9) {
+            umTypography(userFullName,
+                variant = TypographyVariant.h6) {
+                css {
+                    +alignTextToStart
+                }
+            }
+
+            umTypography(latestMessage,
+                variant = TypographyVariant.body1) {
+                css {
+                    +alignTextToStart
+                    marginTop = 1.spacingUnits
+                }
+            }
+        }
+
+        umItem(GridSize.cells2, alignItems = GridAlignItems.flexEnd) {
+            umItem {
+                umTypography(time,
+                    variant = TypographyVariant.body1) {
+                    css {
+                        +alignCenterItems
+                    }
+                }
+            }
+
+            umItem {
+                css{
+                    display = Display.flex
+                    alignItems = Align.center
+                    justifyContent = JustifyContent.center
+                }
+
+                if(counter > 0){
+                    umAvatar {
+                        css{
+                            width = 3.spacingUnits
+                            height = 3.spacingUnits
+                            color = Color.white
+                            backgroundColor = Color(StyleManager.theme.palette.primary.dark)
+                        }
+
+                        umTypography("${if(counter > 9) "${9}+" else counter}",
+                            variant = TypographyVariant.body1) {
+                            css {
+                                +alignTextToStart
+                                fontSize = (0.8).em
+                            }
+                        }
+                    }
+                }
+
+            }
         }
     }
 }

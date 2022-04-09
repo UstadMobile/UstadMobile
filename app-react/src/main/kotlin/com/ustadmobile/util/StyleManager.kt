@@ -287,12 +287,13 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         width = LinearDimension("105ch")
         media(theme.breakpoints.up(tabletAndHighEnd)) {
             width = LinearDimension("112ch")
-            focus {
-                width = LinearDimension("105ch")
-            }
         }
         flexGrow = 1.0
         color = Color.inherit
+    }
+
+    val chatInputTypingMessage by css {
+        width = LinearDimension("105ch")
     }
 
     val mainComponentSearch by css {
@@ -318,9 +319,9 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val chatDetailNewMessage by css {
         position = Position.relative
         borderRadius = theme.shape.borderRadius.px
-        backgroundColor = styledModule.alpha(theme.palette.common.white, 0.15)
+        backgroundColor = styledModule.alpha(theme.palette.common.white, 0.08)
         hover {
-            backgroundColor =  styledModule.alpha(theme.palette.common.white, 0.25)
+            backgroundColor =  styledModule.alpha(theme.palette.common.white, 0.15)
         }
         marginLeft = 2.spacingUnits
         width = 100.pct
@@ -364,16 +365,16 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
 
     val messageSendButton by css{
-        if(!systemImpl.isRtlActive()) right = 2.spacingUnits
-        if(systemImpl.isRtlActive()) left = 2.spacingUnits
+        if(!systemImpl.isRtlActive()) right = 4.spacingUnits
+        if(systemImpl.isRtlActive()) left = 4.spacingUnits
         position = Position.fixed
-        bottom = 92.px
+        bottom = 9.spacingUnits
         media(theme.breakpoints.up(tabletAndHighEnd)) {
-            bottom = 15.px
+            bottom = 3.spacingUnits
         }
     }
 
-    val chatMessage by css {
+    val chatNewMessage by css {
         if(!systemImpl.isRtlActive()) left = 30.spacingUnits
         if(systemImpl.isRtlActive()) right = 30.spacingUnits
         position = Position.fixed
@@ -831,6 +832,26 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val dropZoneTxt by css {
         fontSize = 2.em
+    }
+
+    val chatMessageContent by css {
+        padding(1.spacingUnits, 2.spacingUnits)
+        borderRadius = 4.px
+        marginBottom = 4.px
+        display = Display.inlineBlock
+        wordBreak = WordBreak.breakWord
+        fontSize = (1.2).em
+    }
+
+    val chatLeft by css {
+        borderTopRightRadius = 20.px
+        borderBottomRightRadius = 20.px
+
+    }
+
+    val chatRight by css {
+        borderTopLeftRadius = 20.px
+        borderBottomLeftRadius = 20.px
     }
 
     override val di: DI

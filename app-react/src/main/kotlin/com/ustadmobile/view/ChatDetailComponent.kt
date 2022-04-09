@@ -2,30 +2,28 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.ChatDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.view.ChatDetailView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Chat
 import com.ustadmobile.lib.db.entities.MessageWithPerson
-import com.ustadmobile.mui.components.ButtonSize
-import com.ustadmobile.mui.components.FabVariant
-import com.ustadmobile.mui.components.umFab
-import com.ustadmobile.mui.components.umInput
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.targetInputValue
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.chatDetailNewMessage
-import com.ustadmobile.util.StyleManager.chatMessage
+import com.ustadmobile.util.StyleManager.chatInputTypingMessage
+import com.ustadmobile.util.StyleManager.chatNewMessage
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.messageSendButton
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
-import kotlinx.browser.document
-import kotlinx.css.Color
-import kotlinx.css.em
-import kotlinx.css.fontSize
+import com.ustadmobile.util.Util
+import com.ustadmobile.view.ext.renderConversationListItem
+import kotlinx.css.*
 import react.Props
 import react.RBuilder
 import react.setState
@@ -41,14 +39,12 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
 
     private var typedMessage = ""
 
-    private var showSendButton = false
-
     private var messages: List<MessageWithPerson> = mutableListOf()
 
     private val observer = ObserverFnWrapper<List<MessageWithPerson>>{
         if(it.isEmpty()) return@ObserverFnWrapper
         setState {
-            messages = it
+            messages = it.reversed()
         }
     }
     override var title: String?
@@ -71,6 +67,7 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
     override var entity: Chat? = null
         get() = field
         set(value) {
+            ustadComponentTitle = value?.chatTitle
             setState {
                 field = value
             }
@@ -79,23 +76,9 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
 
     override fun onCreateView() {
         super.onCreateView()
-        ustadComponentTitle = getString(MessageID.messages)
+        fabManager?.visible = false
         mPresenter = ChatDetailPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())
-        updateUiWithStateChangeDelay(1000) {
-            val messageInput = document.getElementById("um-message-input")
-            messageInput?.addEventListener("focusin", {
-                setState {
-                    showSendButton = true
-                }
-            })
-
-            messageInput?.addEventListener("focusout", {
-                setState {
-                    showSendButton = false
-                }
-            })
-        }
     }
 
     override fun RBuilder.render() {
@@ -105,13 +88,31 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                 +defaultPaddingTop
             }
 
-            styledDiv{
+            styledDiv {
+                css{
+                    margin(bottom = 10.spacingUnits)
+                }
+                messages.forEach {
+                    val fromMe = accountManager.activeAccount.personUid == it.messagePerson?.personUid
+                    renderConversationListItem(
+                        !fromMe,
+                        if(fromMe) getString(MessageID.you) else it.messagePerson?.fullName(),
+                        it.messageText,
+                        systemImpl,
+                        it.messageTimestamp
+                    )
+                }
+            }
+
+            umPaper(elevation = 16){
                 css {
                     +chatDetailNewMessage
-                    +chatMessage
+                    +chatNewMessage
+                    zIndex = 9
                 }
 
                 umInput(typedMessage,
+                    placeholder = getString(MessageID.message),
                     textColor = Color.white,
                     disableUnderline = true,
                     endAdornment = null,
@@ -126,6 +127,9 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                 ) {
                     css{
                         fontSize = (1.3).em
+                        if(typedMessage.isNotEmpty()){
+                            +chatInputTypingMessage
+                        }
                     }
                     attrs.asDynamic().inputProps = object: Props {
                         val className = "${StyleManager.name}-chatInputMessageClass"
@@ -133,13 +137,15 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                 }
             }
 
-            if(showSendButton){
+            if(typedMessage.isNotEmpty()){
                 umFab("send","",
                     id = "um-chat-send",
                     variant = FabVariant.round,
                     size = ButtonSize.large,
                     color = UMColor.secondary,
                     onClick = {
+                        Util.stopEventPropagation(it)
+                        UmPlatformUtil.log(typedMessage)
                         if(typedMessage.isNotEmpty()){
                             mPresenter?.addMessage(typedMessage)
                             setState {
