@@ -184,7 +184,9 @@ class ChatListPresenterTest {
     }
 
 
-    @Test
+    //Disabled until issue 720 is fixed as per:
+    // https://taiga.ustadmobile.com/project/mike-core-development/issue/720
+    //@Test
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()
