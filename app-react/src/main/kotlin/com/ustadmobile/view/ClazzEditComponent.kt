@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.isAttendanceEnabledAndRecorded
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorLiveData
@@ -300,11 +301,6 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                                 disabled = !fieldsEnabled,
                                 helperText = timeZoneLabel.errorText,
                                 variant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        entity?.clazzTimeZone = it
-                                    }
-                                },
                                 onClick = {
                                     mPresenter?.handleClickTimezone()
                                 }

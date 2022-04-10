@@ -1833,4 +1833,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
      -->
     <string name="post">Post</string>
 
+    <string name="type_here">Type here…</string>
+
 </resources>

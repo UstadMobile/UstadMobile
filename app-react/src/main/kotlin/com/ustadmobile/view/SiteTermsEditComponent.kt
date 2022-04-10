@@ -93,6 +93,7 @@ class SiteTermsEditComponent(props: UmProps): UstadEditComponent<SiteTermsWithLa
 
                 umMuiHtmlEditor(
                     entity?.termsHtml,
+                    label = getString(MessageID.type_here),
                     onChange = {
                         entity?.termsHtml = it
                     })

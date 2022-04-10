@@ -89,11 +89,17 @@ class TextCourseBlockEditComponent (mProps: UmProps): UstadEditComponent<CourseB
         }
 
 
+    //private val editorRef = useRef(null)
+
     override fun onCreateView() {
         super.onCreateView()
         mPresenter = TextCourseBlockEditPresenter(this, arguments, this,di,this)
         setEditTitle(MessageID.add_text, MessageID.edit_text)
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+        updateUiWithStateChangeDelay(1000) {
+            //console.log("JS-LOG", editorRef)
+            //document.getElementById("um-html-editor-editor-container").asDynamic().click()
+        }
     }
 
     override fun RBuilder.render() {
@@ -150,7 +156,10 @@ class TextCourseBlockEditComponent (mProps: UmProps): UstadEditComponent<CourseB
 
             umItem{
                 umSpacer()
-                umMuiHtmlEditor(entity?.cbDescription, onChange = {
+                umMuiHtmlEditor(
+                    entity?.cbDescription,
+                    label = getString(MessageID.type_here),
+                    onChange = {
                     entity?.cbDescription = it
                 })
             }

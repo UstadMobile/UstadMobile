@@ -20,6 +20,8 @@ private val muiHtmlEditorComponent: RComponent<MuiEditorProps, UmState> = muiHtm
 
 external interface MuiEditorProps: StyledProps {
     var defaultValue: String
+    var id: String
+    var label: String
     var toolbarButtonSize: dynamic
     var readOnly: Boolean
     var inheritFontSize: Boolean
@@ -34,6 +36,7 @@ external interface MuiEditorProps: StyledProps {
 fun RBuilder.umMuiHtmlEditor(
     value: String?,
     readOnly: Boolean = false,
+    label: String? = null,
     onSave:((data: String) -> Unit)? = null,
     onChange:(data: String) -> Unit,
     className: String? = null,
@@ -44,9 +47,13 @@ fun RBuilder.umMuiHtmlEditor(
     attrs.toolbarButtonSize = "medium"
     attrs.inheritFontSize = true
     attrs.readOnly = readOnly
+    attrs.id = "um-html-editor"
     onSave?.let{ attrs.onSave = it }
     maxLength?.let{
         attrs.maxLength = it
+    }
+    label?.let{
+        attrs.label = it
     }
     attrs.onChange = {
         onChange.invoke(convertEditorContentToHtml(it.getCurrentContent()))

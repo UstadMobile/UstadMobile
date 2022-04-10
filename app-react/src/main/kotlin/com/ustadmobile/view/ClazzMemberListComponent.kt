@@ -133,12 +133,18 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
 
     override fun RBuilder.renderListFooterView() {
         umGridContainer(rowSpacing = GridSpacing.spacing2) {
-            createMemberList(students, studentSectionHeaderText,
-                ClazzEnrolment.ROLE_STUDENT, addNewStudentText)
+            createMemberList(students,
+                studentSectionHeaderText,
+                ClazzEnrolment.ROLE_STUDENT,
+                addNewStudentText,
+                addStudentVisible)
 
             if(pendingStudents.isNotEmpty()){
-                createMemberList(pendingStudents, getString(MessageID.pending_requests),
-                    ClazzEnrolment.ROLE_STUDENT_PENDING, pending = true)
+                createMemberList(pendingStudents,
+                    getString(MessageID.pending_requests),
+                    ClazzEnrolment.ROLE_STUDENT_PENDING,
+                    showCreateNewItem = addTeacherVisible,
+                    pending = true)
             }
         }
     }
@@ -156,6 +162,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
         sectionTitle: String,
         role: Int,
         createNewLabel: String = "",
+        showCreateNewItem: Boolean = true,
         pending: Boolean = false){
 
         umGridContainer(rowSpacing = GridSpacing.spacing1) {
@@ -165,7 +172,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
             }
 
             umItem(GridSize.cells12){
-                val createNewItem = CreateNewItem(createNewLabel.isNotEmpty(), createNewLabel){
+                val createNewItem = CreateNewItem(showCreateNewItem, createNewLabel){
                     navigateToPickNewMember(role)
                 }
                 mPresenter?.let { presenter ->

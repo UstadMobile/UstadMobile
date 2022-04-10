@@ -284,16 +284,8 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val chatInputMessageClass by css {
         padding(2.spacingUnits)
         transition += Transition("width", theme.transitions.duration.standard.ms, Timing.easeInOut, 0.ms)
-        width = LinearDimension("105ch")
-        media(theme.breakpoints.up(tabletAndHighEnd)) {
-            width = LinearDimension("112ch")
-        }
         flexGrow = 1.0
         color = Color.inherit
-    }
-
-    val chatInputTypingMessage by css {
-        width = LinearDimension("105ch")
     }
 
     val mainComponentSearch by css {
@@ -315,23 +307,50 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         }
     }
 
-
-    val chatDetailNewMessage by css {
-        position = Position.relative
-        borderRadius = theme.shape.borderRadius.px
-        backgroundColor = styledModule.alpha(theme.palette.common.white, 0.08)
-        hover {
-            backgroundColor =  styledModule.alpha(theme.palette.common.white, 0.15)
+    val typingMessage by css{
+        media(theme.breakpoints.up(Breakpoint.lg)) {
+            width = 75.pct
         }
-        marginLeft = 2.spacingUnits
-        width = 100.pct
+
+        media(theme.breakpoints.down(Breakpoint.lg)) {
+            width = 80.pct
+        }
+    }
+
+    val messageSendButton by css{
+        media(theme.breakpoints.up(Breakpoint.lg)) {
+            display = Display.block
+            if(!systemImpl.isRtlActive()) right = 2.spacingUnits
+            if(systemImpl.isRtlActive()) left = 2.spacingUnits
+        }
+
+        media(theme.breakpoints.down(Breakpoint.lg)) {
+            display = Display.none
+        }
+    }
+
+    val messageContainer by css {
+        position = Position.fixed
         media(theme.breakpoints.up(tabletAndHighEnd)) {
-            marginLeft = 1.spacingUnits
-            width = LinearDimension("auto")
+            bottom = 15.px
+            width = 81.5.pct
         }
 
         media(theme.breakpoints.down(tabletAndHighEnd)) {
-            width = 80.pct
+            bottom = 70.px
+            width = 84.pct
+        }
+    }
+
+
+    val chatDetailNewMessage by css {
+        borderRadius = theme.shape.borderRadius.px
+        backgroundColor = styledModule.alpha(theme.palette.primary.dark, 0.8)
+        hover {
+            backgroundColor =  styledModule.alpha(theme.palette.primary.dark, 0.5)
+        }
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            marginRight = 3.spacingUnits
         }
     }
 
@@ -364,25 +383,6 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     }
 
 
-    val messageSendButton by css{
-        if(!systemImpl.isRtlActive()) right = 4.spacingUnits
-        if(systemImpl.isRtlActive()) left = 4.spacingUnits
-        position = Position.fixed
-        bottom = 9.spacingUnits
-        media(theme.breakpoints.up(tabletAndHighEnd)) {
-            bottom = 3.spacingUnits
-        }
-    }
-
-    val chatNewMessage by css {
-        if(!systemImpl.isRtlActive()) left = 30.spacingUnits
-        if(systemImpl.isRtlActive()) right = 30.spacingUnits
-        position = Position.fixed
-        bottom = 70.px
-        media(theme.breakpoints.up(tabletAndHighEnd)) {
-            bottom = 15.px
-        }
-    }
 
 
     val languageComponentLanguageSelectorFormControl by css {
