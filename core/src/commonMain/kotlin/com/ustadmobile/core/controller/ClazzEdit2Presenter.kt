@@ -85,8 +85,12 @@ class ClazzEdit2Presenter(context: Any,
         super.onLoadDataComplete()
 
         requireSavedStateHandle().getLiveData<String?>(RESULT_TIMEZONE_KEY).observe(lifecycleOwner) {
-            entity?.clazzTimeZone = it
+            val timezone = it ?: return@observe
+            entity?.clazzTimeZone = timezone
             view.entity = entity
+            UmPlatformUtil.run{
+                requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
+            }
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_SCHOOL, ListSerializer(School.serializer()),

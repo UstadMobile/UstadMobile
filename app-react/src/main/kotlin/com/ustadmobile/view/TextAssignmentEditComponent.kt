@@ -43,7 +43,7 @@ class TextAssignmentEditComponent (mProps: UmProps): UstadEditComponent<CourseAs
 
     var maxCharOnEditor: Int? = null
 
-    var initEditorContent = ""
+    var editorContent = ""
 
     var editorContentChangedTo: String ? = null
         get() = field
@@ -78,7 +78,7 @@ class TextAssignmentEditComponent (mProps: UmProps): UstadEditComponent<CourseAs
         get() = field
         set(value) {
             editorContentChangedTo = value?.casText
-            initEditorContent = editorContentChangedTo ?: ""
+            editorContent = editorContentChangedTo ?: ""
             field = value
         }
 
@@ -111,8 +111,9 @@ class TextAssignmentEditComponent (mProps: UmProps): UstadEditComponent<CourseAs
             }
 
             umItem{
-                umMuiHtmlEditor(initEditorContent,
+                umMuiHtmlEditor(editorContent,
                     readOnly = !editEnabled,
+                    label = getString(MessageID.type_here),
                     maxLength = maxCharOnEditor,
                     onChange = {
                         entity?.casText = it

@@ -4,9 +4,13 @@ import com.ustadmobile.mui.ext.createStyledComponent
 import kotlinx.css.color
 import mui.material.Input
 import mui.material.InputProps
+import org.w3c.dom.HTMLDivElement
+import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.ReactElement
+import react.dom.events.FormEvent
+import react.dom.events.KeyboardEvent
 import react.dom.html.InputType
 import styled.StyledHandler
 import styled.css
@@ -30,6 +34,8 @@ fun RBuilder.umInput(
     textColor: kotlinx.css.Color,
     rowsMax: Int? = null,
     onChange: ((Event) -> Unit)? = null,
+    onInput: ((FormEvent<HTMLDivElement>) -> Unit)? = null,
+    onKeyDown: ((KeyboardEvent<HTMLElement>) -> Unit)? = null,
     className: String? = null,
     endAdornment: ReactElement? = null,
     handler: StyledHandler<InputProps>? = null
@@ -61,5 +67,11 @@ fun RBuilder.umInput(
     value?.let { attrs.value = it }
     css {
         color = textColor
+    }
+    attrs.onKeyDown = {
+        onKeyDown?.invoke(it)
+    }
+    attrs.onInput = {
+        onInput?.invoke(it)
     }
 }

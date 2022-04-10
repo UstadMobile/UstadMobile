@@ -184,10 +184,11 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
                 when(item.cbType){
                     in listOf(CourseBlock.BLOCK_MODULE_TYPE,CourseBlock.BLOCK_TEXT_TYPE) -> {
                         renderCourseBlockTextOrModuleListItem(
-                            item.cbType, item.cbIndentLevel,
+                            item.cbType,
+                            item.cbIndentLevel,
                             item.cbTitle?: "",
                             showReorder = false,
-                            withAction = item.cbType == CourseBlock.BLOCK_MODULE_TYPE && item.expanded,
+                            withAction = item.cbType == CourseBlock.BLOCK_MODULE_TYPE,
                             actionIconName = if(item.expanded) "expand_less" else "expand_more",
                             description = clean(item.cbDescription ?: ""),
                             onActionClick = {

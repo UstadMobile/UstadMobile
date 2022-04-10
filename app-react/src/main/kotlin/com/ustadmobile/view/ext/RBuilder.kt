@@ -909,7 +909,7 @@ fun RBuilder.renderConversationListItem(
         }
 
         if(left){
-            umItem(GridSize.cells1) {
+            umItem(GridSize.cells2, GridSize.cells1) {
                 umItemThumbnail("person", avatarVariant = AvatarVariant.circle)
             }
         }
@@ -1038,7 +1038,7 @@ fun RBuilder.renderCourseBlockTextOrModuleListItem(
     id: String = "",
     onActionClick: ((Event) -> Unit)? = null){
     val iconName = BLOCK_ICON_MAP[blockType] ?: ""
-    UmPlatformUtil.log(hidden)
+    val leftPadding = (blockLevel * 3).spacingUnits
     umGridContainer {
         umItem(GridSize.cells2, if(showReorder) GridSize.cells2 else GridSize.cells1, flexDirection = FlexDirection.row){
             if(showReorder){
@@ -1053,7 +1053,12 @@ fun RBuilder.renderCourseBlockTextOrModuleListItem(
                     }
                 }
             }
-            umItemThumbnail(iconName, avatarVariant = AvatarVariant.circle)
+            styledDiv {
+                css {
+                    paddingLeft = leftPadding
+                }
+                umItemThumbnail(iconName, avatarVariant = AvatarVariant.circle)
+            }
         }
 
         umItem(if(withAction) GridSize.cells8 else GridSize.cells10,
@@ -1061,9 +1066,8 @@ fun RBuilder.renderCourseBlockTextOrModuleListItem(
             else GridSize.cells11){
             umGridContainer {
                 css {
-                    paddingLeft = (blockLevel * 2).spacingUnits
+                    paddingLeft = leftPadding
                 }
-
                 umItem(GridSize.cells12){
                     umTypography(title ?: "",
                         variant = TypographyVariant.body1){
@@ -1073,7 +1077,7 @@ fun RBuilder.renderCourseBlockTextOrModuleListItem(
                                 +textGrayedOut
                             }
 
-                            fontSize = (if(withAction) 1.1 else 1.2).em
+                            fontSize = (1.2).em
                         }
                     }
                 }
@@ -1088,7 +1092,7 @@ fun RBuilder.renderCourseBlockTextOrModuleListItem(
                                 if(showReorder && hidden){
                                     +textGrayedOut
                                 }
-                                fontSize = (if(withAction) 0.9 else 1).em
+                                fontSize = 1.em
                             }
                         }
                     }
