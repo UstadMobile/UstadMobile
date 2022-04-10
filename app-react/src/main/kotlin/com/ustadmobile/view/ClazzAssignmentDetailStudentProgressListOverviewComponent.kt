@@ -13,8 +13,8 @@ import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.mui.components.umDivider
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.view.ext.createPersonWithAttemptProgress
-import com.ustadmobile.view.ext.createSummaryCard
+import com.ustadmobile.view.ext.renderPersonWithAttemptProgress
+import com.ustadmobile.view.ext.renderSummaryCard
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
@@ -63,9 +63,9 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
 
     override fun RBuilder.renderListHeaderView() {
         umGridContainer(GridSpacing.spacing4) {
-            createSummaryCard(summary?.notSubmittedStudents, getString(MessageID.not_submitted_cap))
-            createSummaryCard(summary?.submittedStudents, getString(MessageID.submitted))
-            createSummaryCard(summary?.markedStudents, getString(MessageID.marked_cap))
+            renderSummaryCard(summary?.notSubmittedStudents, getString(MessageID.not_submitted_cap))
+            renderSummaryCard(summary?.submittedStudents, getString(MessageID.submitted))
+            renderSummaryCard(summary?.markedStudents, getString(MessageID.marked_cap))
             umItem(GridSize.cells12){
                 umDivider {
                     css{
@@ -78,7 +78,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
     }
 
     override fun RBuilder.renderListItem(item: PersonWithAttemptsSummary) {
-        createPersonWithAttemptProgress(item, systemImpl, false)
+        renderPersonWithAttemptProgress(item, systemImpl, false)
     }
 
     override fun handleClickEntry(entry: PersonWithAttemptsSummary) {

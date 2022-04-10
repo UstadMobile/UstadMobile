@@ -1,18 +1,17 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.dao.ChatDao
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.ext.doorPrimaryKeyManager
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Chat
+import com.ustadmobile.lib.db.entities.ChatWithLatestMessageAndCount
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 

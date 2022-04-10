@@ -61,12 +61,14 @@ class ClazzEdit2Presenter(context: Any,
     val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(repo, this,
         requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
 
+
     private val courseBlockOneToManyJoinEditHelper
-            = DefaultOneToManyJoinEditHelper(CourseBlockWithEntity::cbUid,
+            = OneToManyJoinEditHelperMp(CourseBlockWithEntity::cbUid,
             ARG_SAVEDSTATE_BLOCK,
             ListSerializer(CourseBlockWithEntity.serializer()),
             ListSerializer(CourseBlockWithEntity.serializer()),
             this,
+            requireSavedStateHandle(),
             CourseBlockWithEntity::class) {cbUid = it}
 
     override val persistenceMode: PersistenceMode
@@ -83,8 +85,12 @@ class ClazzEdit2Presenter(context: Any,
         super.onLoadDataComplete()
 
         requireSavedStateHandle().getLiveData<String?>(RESULT_TIMEZONE_KEY).observe(lifecycleOwner) {
-            entity?.clazzTimeZone = it
+            val timezone = it ?: return@observe
+            entity?.clazzTimeZone = timezone
             view.entity = entity
+            UmPlatformUtil.run{
+                requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
+            }
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_SCHOOL, ListSerializer(School.serializer()),
@@ -469,6 +475,7 @@ class ClazzEdit2Presenter(context: Any,
                     FLAG_PARENT_GROUP to entity.clazzParentsPersonGroupUid,
                 ))
 
+
                 val assignmentList = courseBlockOneToManyJoinEditHelper.entitiesToInsert.mapNotNull { it.assignment }
                 txDb.clazzAssignmentDao.insertListAsync(assignmentList)
                 txDb.clazzAssignmentDao.updateListAsync(
@@ -496,25 +503,25 @@ class ClazzEdit2Presenter(context: Any,
 
             }
 
-            val coursePictureVal = view.coursePicture
-            if(coursePictureVal != null) {
-                coursePictureVal.coursePictureClazzUid = entity.clazzUid
+            UmPlatformUtil.runAsync {
+                val coursePictureVal = view.coursePicture
+                if(coursePictureVal != null) {
+                    coursePictureVal.coursePictureClazzUid = entity.clazzUid
 
-                if(coursePictureVal.coursePictureUid == 0L) {
-                    repo.coursePictureDao.insertAsync(coursePictureVal)
-                }else {
-                    repo.coursePictureDao.updateAsync(coursePictureVal)
+                    if(coursePictureVal.coursePictureUid == 0L) {
+                        repo.coursePictureDao.insertAsync(coursePictureVal)
+                    }else {
+                        repo.coursePictureDao.updateAsync(coursePictureVal)
+                    }
                 }
             }
 
 
             val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight
-
             val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()
             clazzLogCreatorManager.requestClazzLogCreation(entity.clazzUid,
                     accountManager.activeAccount.endpointUrl,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
-
             view.loading = false
 
             //Handle the following scenario: PersonEdit (user selects to add an enrolment), ClazzList

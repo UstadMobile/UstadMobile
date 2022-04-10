@@ -3,7 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 import com.ustadmobile.mui.components.FormControlComponent
 import com.ustadmobile.util.Util
-import com.ustadmobile.view.ext.createListItemWithPersonTitleDescriptionAndAvatarOnLeft
+import com.ustadmobile.view.ext.renderListItemWithPersonTitleDescriptionAndAvatarOnLeft
 import com.ustadmobile.view.ext.umGridContainer
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -18,7 +18,7 @@ class CommentsListComponent(mProps: SimpleListProps<CommentsWithPerson>): UstadS
                 onClick.invoke(it.nativeEvent)
             }
 
-            createListItemWithPersonTitleDescriptionAndAvatarOnLeft(
+            renderListItemWithPersonTitleDescriptionAndAvatarOnLeft(
                 item.commentsPerson?.fullName() ?: "",
                 item.commentsText,
                 "person")

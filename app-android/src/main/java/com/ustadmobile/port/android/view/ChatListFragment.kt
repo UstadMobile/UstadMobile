@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemChatListItemBinding
 import com.ustadmobile.core.controller.ChatListPresenter
-import com.ustadmobile.core.controller.PersonListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap

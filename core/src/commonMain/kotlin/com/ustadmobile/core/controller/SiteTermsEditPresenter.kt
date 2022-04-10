@@ -1,13 +1,17 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.core.view.SiteTermsEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
+import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
@@ -31,6 +35,24 @@ class SiteTermsEditPresenter(context: Any,
         super.onCreate(savedState)
 
         //TODO: Set any additional fields (e.g. joinlist) on the view
+    }
+
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        observeSavedStateResult(
+            SAVEDSTATE_KEY_LANGUAGE,
+            ListSerializer(Language.serializer()), Language::class) {
+            val selectedLang = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.stLanguage = selectedLang
+            entity?.sTermsLang = selectedLang.iso_639_1_standard
+            entity?.sTermsLangUid = selectedLang.langUid
+            view.entity = entity
+            UmPlatformUtil.run{
+                requireSavedStateHandle()[SAVEDSTATE_KEY_LANGUAGE] = null
+            }
+        }
+
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): SiteTermsWithLanguage? {
@@ -63,6 +85,17 @@ class SiteTermsEditPresenter(context: Any,
         return editEntity
     }
 
+
+    fun handleClickLanguage() {
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null,
+                LanguageListView.VIEW_NAME,
+                Language::class,
+                Language.serializer(), SAVEDSTATE_KEY_LANGUAGE)
+        )
+    }
+
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
@@ -91,6 +124,7 @@ class SiteTermsEditPresenter(context: Any,
 
     companion object {
 
+        const val SAVEDSTATE_KEY_LANGUAGE = "Language"
         //TODO: Add constants for keys that would be used for any One To Many Join helpers
 
     }

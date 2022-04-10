@@ -11,8 +11,8 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.*
 import com.ustadmobile.util.ext.observeResult
-import com.ustadmobile.view.ext.createListItemWithPersonAttendanceAndPendingRequests
-import com.ustadmobile.view.ext.createListSectionTitle
+import com.ustadmobile.view.ext.renderListItemWithPersonAttendanceAndPendingRequests
+import com.ustadmobile.view.ext.renderListSectionTitle
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
@@ -97,7 +97,7 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
 
 
     override fun RBuilder.renderListItem(item: SchoolMemberWithPerson) {
-        createListItemWithPersonAttendanceAndPendingRequests(item.person?.personUid ?: 0,
+        renderListItemWithPersonAttendanceAndPendingRequests(item.person?.personUid ?: 0,
             item.person?.fullName() ?: "",
             student = roleStudent)
     }
@@ -115,7 +115,7 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
         if(roleStudent){
 
             if(pendingStudents.isNotEmpty()){
-                createListSectionTitle(getString(MessageID.pending_requests))
+                renderListSectionTitle(getString(MessageID.pending_requests))
             }
 
             child(MembersListComponent::class){
@@ -142,7 +142,7 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
 
         override fun RBuilder.renderListItem(item: SchoolMemberWithPerson, onClick: (Event) -> Unit) {
             val presenter = props.presenter as SchoolMemberListPresenter
-            createListItemWithPersonAttendanceAndPendingRequests(item.person?.personUid ?: 0,
+            renderListItemWithPersonAttendanceAndPendingRequests(item.person?.personUid ?: 0,
                 item.person?.fullName() ?: "",true,
                 onClickAccept = {
                     presenter.handleClickPendingRequest(item, true)

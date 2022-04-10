@@ -38,7 +38,7 @@ interface ClazzAssignmentEditView: UstadEditView<ClazzAssignmentWithCourseBlock>
 
     companion object {
 
-        const val VIEW_NAME = "ClassAssignmentEditView"
+        const val VIEW_NAME = "CourseAssignmentEditView"
 
     }
 

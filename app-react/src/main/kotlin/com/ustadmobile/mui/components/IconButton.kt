@@ -11,7 +11,7 @@ import styled.StyledHandler
 
 @Suppress("EnumEntryName")
 enum class IconButtonSize {
-    small, medium
+    small, medium, large
 }
 
 enum class IconEdge {
@@ -58,6 +58,7 @@ fun RBuilder.umIconButton(
         val fontSize = when (size) {
             IconButtonSize.small -> IconFontSize.small
             IconButtonSize.medium -> IconFontSize.default
+            IconButtonSize.large -> IconFontSize.large
         }
 
         umIcon(iconName, color = colorToApply, fontSize = fontSize)

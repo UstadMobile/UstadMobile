@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view.binding
 
-import android.widget.EditText
 import android.widget.ImageButton
 import androidx.databinding.BindingAdapter
 import com.ustadmobile.core.controller.NewCommentItemListener

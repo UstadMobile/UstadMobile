@@ -7,8 +7,8 @@ import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
-import com.ustadmobile.view.ext.createListItemWithLeftIconTitleAndDescription
-import com.ustadmobile.view.ext.createItemWithLeftIconTitleDescriptionAndIconBtnOnRight
+import com.ustadmobile.view.ext.renderListItemWithLeftIconTitleAndDescription
+import com.ustadmobile.view.ext.renderItemWithLeftIconTitleDescriptionAndIconBtnOnRight
 import com.ustadmobile.view.ext.umGridContainer
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -21,7 +21,7 @@ class ScopeGrantListComponent(mProps: SimpleListProps<ScopedGrantAndName>): Usta
         val permissionList = permissionListText(systemImpl, Clazz.TABLE_ID,
             item.scopedGrant?.sgPermissions ?: 0)
         if(showDelete){
-            createItemWithLeftIconTitleDescriptionAndIconBtnOnRight("admin_panel_settings",
+            renderItemWithLeftIconTitleDescriptionAndIconBtnOnRight("admin_panel_settings",
                 "delete",item.name, permissionList){ delete, event ->
                 if(delete){
                     props.listener?.onClickDelete(item)
@@ -34,7 +34,7 @@ class ScopeGrantListComponent(mProps: SimpleListProps<ScopedGrantAndName>): Usta
                 attrs.onClick = {
                     onClick.invoke(it.nativeEvent)
                 }
-                createListItemWithLeftIconTitleAndDescription("admin_panel_settings",
+                renderListItemWithLeftIconTitleAndDescription("admin_panel_settings",
                     item.name, permissionList)
             }
         }

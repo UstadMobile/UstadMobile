@@ -5,7 +5,7 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
 import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.view.ext.createPersonWithAttemptProgress
+import com.ustadmobile.view.ext.renderPersonWithAttemptProgress
 import react.RBuilder
 
 
@@ -31,7 +31,7 @@ class ContentEntryDetailAttemptsListComponent(props: UmProps): UstadListComponen
     }
 
     override fun RBuilder.renderListItem(item: PersonWithAttemptsSummary) {
-        createPersonWithAttemptProgress(item, systemImpl)
+        renderPersonWithAttemptProgress(item, systemImpl)
     }
 
     override fun handleClickEntry(entry: PersonWithAttemptsSummary) {

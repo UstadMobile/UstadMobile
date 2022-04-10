@@ -8,7 +8,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.view.ext.createPersonListItemWithNameAndUserName
+import com.ustadmobile.view.ext.renderPersonListItemWithNameAndUserName
 import react.RBuilder
 
 
@@ -41,7 +41,7 @@ class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWit
     }
 
     override fun RBuilder.renderListItem(item: PersonWithDisplayDetails) {
-        createPersonListItemWithNameAndUserName(item)
+        renderPersonListItemWithNameAndUserName(item)
     }
 
     override fun handleClickEntry(entry: PersonWithDisplayDetails) {
