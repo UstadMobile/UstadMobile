@@ -84,6 +84,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimen_8dp"
             android:text="@string/submit_grade_and_mark_next"
+            android:visibility="@{markNextStudentEnabled ? View.VISIBLE : View.GONE}"
             android:enabled="@{markGradeEnabled &amp; markNextStudentEnabled}"
             app:layout_constraintTop_toBottomOf="@id/mark_file_submission_submit_grade"
             android:onClick="@{() -> eventHandler.onSubmitGradeAndMarkNextClicked() }"
