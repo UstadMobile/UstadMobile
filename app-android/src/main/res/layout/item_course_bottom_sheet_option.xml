@@ -21,6 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_listitem"
+        android:padding="@dimen/dimen_16dp"
         android:onClick="@{() -> selectListener.onBottomSheetOptionSelected(option)}">
 
         <TextView
@@ -28,8 +29,6 @@
             android:text="@{option.title}"
             android:layout_height="wrap_content"
             android:layout_width="0dp"
-            android:layout_marginStart="@dimen/dimen_16dp"
-            android:layout_marginVertical="@dimen/dimen_16dp"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:textStyle="bold"
             app:layout_constraintTop_toTopOf="parent"
@@ -40,7 +39,6 @@
             android:text="@{option.desc}"
             android:layout_height="wrap_content"
             android:layout_width="0dp"
-            android:layout_marginStart="@dimen/dimen_16dp"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             app:layout_constraintTop_toBottomOf="@id/bottom_sheet_option_title"
             app:layout_constraintStart_toStartOf="parent"

@@ -146,35 +146,38 @@ class ClazzEdit2Presenter(context: Any,
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_ASSIGNMENT,
-            ListSerializer(ClazzAssignmentWithCourseBlock.serializer()), ClazzAssignmentWithCourseBlock::class){
+            ListSerializer(CourseBlockWithEntity.serializer()), CourseBlockWithEntity::class){
             val newAssignment = it.firstOrNull() ?: return@observeSavedStateResult
 
             val foundBlock: CourseBlockWithEntity = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.find {
-                assignment -> assignment.assignment?.caUid == newAssignment.caUid
+                assignment -> assignment.assignment?.caUid == newAssignment.assignment?.caUid
             } ?: CourseBlockWithEntity().apply {
-                cbClazzUid = newAssignment.caClazzUid
-                cbEntityUid = newAssignment.caUid
-                cbTitle = newAssignment.caTitle
+                cbClazzUid = newAssignment.cbClazzUid
+                cbEntityUid = newAssignment.assignment?.caUid ?: 0
+                cbTitle = newAssignment.assignment?.caTitle
                 cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                cbDescription = newAssignment.caDescription
+                cbDescription = newAssignment.assignment?.caDescription
                 cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
-                cbUid = newAssignment.block?.cbUid ?: db.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
-                cbHideUntilDate = newAssignment.block?.cbHideUntilDate ?: 0
-                cbDeadlineDate = newAssignment.block?.cbDeadlineDate ?: Long.MAX_VALUE
-                cbGracePeriodDate = newAssignment.block?.cbHideUntilDate ?: newAssignment.block?.cbDeadlineDate ?: Long.MAX_VALUE
-                cbLateSubmissionPenalty = newAssignment.block?.cbLateSubmissionPenalty ?: 0
-                cbMaxPoints = newAssignment.block?.cbMaxPoints ?: 10
-                assignment = newAssignment
+                cbUid = newAssignment.cbUid
+                cbHideUntilDate = newAssignment.cbHideUntilDate
+                cbDeadlineDate = newAssignment.cbDeadlineDate
+                cbGracePeriodDate = newAssignment.cbGracePeriodDate
+                cbLateSubmissionPenalty = newAssignment.cbLateSubmissionPenalty
+                cbCompletionCriteria = newAssignment.cbCompletionCriteria
+                cbMaxPoints = newAssignment.cbMaxPoints
+
+                assignment = newAssignment.assignment
             }
 
-            foundBlock.assignment = newAssignment
-            foundBlock.cbTitle = newAssignment.caTitle
-            foundBlock.cbDescription = newAssignment.caDescription
-            foundBlock.cbHideUntilDate = newAssignment.block?.cbHideUntilDate ?: 0
-            foundBlock.cbDeadlineDate = newAssignment.block?.cbDeadlineDate ?: Long.MAX_VALUE
-            foundBlock.cbGracePeriodDate = newAssignment.block?.cbHideUntilDate ?: newAssignment.block?.cbDeadlineDate ?: Long.MAX_VALUE
-            foundBlock.cbLateSubmissionPenalty = newAssignment.block?.cbLateSubmissionPenalty ?: 0
-            foundBlock.cbMaxPoints = newAssignment.block?.cbMaxPoints ?: 10
+            foundBlock.assignment = newAssignment.assignment
+            foundBlock.cbTitle = newAssignment.assignment?.caTitle
+            foundBlock.cbDescription = newAssignment.assignment?.caDescription
+            foundBlock.cbHideUntilDate = newAssignment.cbHideUntilDate
+            foundBlock.cbDeadlineDate = newAssignment.cbDeadlineDate
+            foundBlock.cbGracePeriodDate = newAssignment.cbGracePeriodDate
+            foundBlock.cbCompletionCriteria = newAssignment.cbCompletionCriteria
+            foundBlock.cbLateSubmissionPenalty = newAssignment.cbLateSubmissionPenalty
+            foundBlock.cbMaxPoints = newAssignment.cbMaxPoints
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
@@ -630,10 +633,10 @@ class ClazzEdit2Presenter(context: Any,
 
                 NavigateForResultOptions(
                         this,
-                        currentEntityValue = null,
+                        currentEntityValue = joinedEntity,
                         destinationViewName = ClazzAssignmentEditView.VIEW_NAME,
-                        entityClass = ClazzAssignmentWithCourseBlock::class,
-                        serializationStrategy = ClazzAssignmentWithCourseBlock.serializer(),
+                        entityClass = CourseBlockWithEntity::class,
+                        serializationStrategy = CourseBlockWithEntity.serializer(),
                         destinationResultKey = SAVEDSTATE_KEY_ASSIGNMENT,
                         arguments = args)
             }
