@@ -7,6 +7,7 @@ interface TextCourseBlockEditView: UstadEditView<CourseBlock> {
     var blockTitleError: String?
 
     var startDate: Long
+
     var startTime: Long
 
     var timeZone: String?

@@ -2,21 +2,18 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.view.ChatDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.GlobalScope
+import com.ustadmobile.lib.db.entities.Chat
+import com.ustadmobile.lib.db.entities.ChatMember
+import com.ustadmobile.lib.db.entities.Message
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance

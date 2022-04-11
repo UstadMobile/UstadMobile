@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.createListItemWithLeftIconTitleAndDescription
+import com.ustadmobile.view.ext.renderListItemWithLeftIconTitleAndDescription
 import react.RBuilder
 
 class HolidayCalendarListComponent(mProps: UmProps): UstadListComponent<HolidayCalendar, HolidayCalendarWithNumEntries>(mProps),
@@ -38,7 +38,7 @@ class HolidayCalendarListComponent(mProps: UmProps): UstadListComponent<HolidayC
     override fun RBuilder.renderListItem(item: HolidayCalendarWithNumEntries) {
         val titleText = getString(MessageID.num_items_with_name)
             .format(item.numEntries, getString(MessageID.holidays))
-        createListItemWithLeftIconTitleAndDescription("calendar_today",
+        renderListItemWithLeftIconTitleAndDescription("calendar_today",
             item.umCalendarName, titleText, onMainList = true
         )
     }

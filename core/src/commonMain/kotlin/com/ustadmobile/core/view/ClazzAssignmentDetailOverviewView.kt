@@ -32,7 +32,7 @@ interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignmentWith
 
     companion object {
 
-        const val VIEW_NAME = "ClassAssignmentDetailOverviewView"
+        const val VIEW_NAME = "CourseAssignmentDetailOverviewView"
 
     }
 

@@ -83,6 +83,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     private var addSubmissionAdapter: AddSubmissionListAdapter? = null
 
     private var submissionAttachmentLiveDataCourse: LiveData<PagedList<CourseAssignmentSubmissionWithAttachment>>? = null
+
     private val courseSubmissionWithAttachmentObserver = Observer<PagedList<CourseAssignmentSubmissionWithAttachment>?> {
         t -> run{
             checkMaxFilesReached(t, addedCourseAssignmentSubmission)

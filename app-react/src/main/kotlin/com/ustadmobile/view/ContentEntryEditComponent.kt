@@ -13,6 +13,7 @@ import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -200,7 +201,10 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
             umGridContainer(GridSpacing.spacing4) {
 
-                if(entity?.leaf == true){
+                val showPreviews = entity?.leaf == true && videoUri != null
+                        && (showWebPreview || showVideoPreview)
+
+                if(showPreviews){
                     umItem(GridSize.cells12, GridSize.cells4){
                         css{
                             marginTop = 12.px
@@ -246,7 +250,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
                 }
 
-                umItem(GridSize.cells12, if(entity?.leaf == true) GridSize.cells8 else GridSize.cells12){
+                umItem(GridSize.cells12, if(showPreviews) GridSize.cells8 else GridSize.cells12){
 
                     umTextField(label = "${titleLabel.text}",
                         helperText = titleLabel.errorText,
@@ -379,6 +383,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
                        if(entryMetaData != null || metadataResult != null){
                            umItem(GridSize.cells12) {
+                               css(defaultDoubleMarginTop)
                                createSwitchItem(getString(MessageID.compress), compressionEnabled){
                                    setState {
                                        compressionEnabled = !compressionEnabled

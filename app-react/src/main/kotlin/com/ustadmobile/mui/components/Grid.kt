@@ -49,6 +49,10 @@ enum class GridJustify {
     }
 }
 
+/**
+ * The Material Design responsive layout grid adapts to screen size and orientation,
+ * ensuring consistency across layouts.
+ */
 @Suppress("EnumEntryName")
 enum class GridSize(internal val sizeVal: Any) {
     cellsFalse(false),
@@ -68,6 +72,12 @@ enum class GridSize(internal val sizeVal: Any) {
     cells12(12);
 }
 
+
+/**
+ * This is used to control space between grid container children (grid items),
+ * It applies on both rowSpacing and columnSpacing properties
+ *
+ */
 enum class GridSpacing(internal val size: Int) {
     spacing0(0),
     spacing1(1),
@@ -82,12 +92,16 @@ enum class GridSpacing(internal val size: Int) {
     spacing10(10)
 }
 
-
+/**
+ * The grid creates visual consistency between layouts
+ * while allowing flexibility across a wide variety of designs.
+ * Material Design's responsive UI is based on a 12-column grid layout (GridSize cells).
+ */
 fun RBuilder.gridContainer(
     spacing: GridSpacing = GridSpacing.spacing0,
     alignContent: GridAlignContent = GridAlignContent.stretch,
     alignItems: GridAlignItems = GridAlignItems.stretch,
-    justify: GridJustify = GridJustify.flexStart,
+    direction: FlexDirection = FlexDirection.row,
     wrap: GridWrap = GridWrap.wrap,
     columnSpacing: GridSpacing? = null,
     rowSpacing: GridSpacing? = null,
@@ -97,7 +111,7 @@ fun RBuilder.gridContainer(
     attrs.asDynamic().alignContent = alignContent
     attrs.asDynamic().alignItems = alignItems
     attrs.container = true
-    attrs.asDynamic().justify = justify
+    attrs.asDynamic().direction = direction.toString()
     attrs.spacing = spacing.size.asDynamic()
     columnSpacing?.let{
         attrs.columnSpacing = it.size.asDynamic()

@@ -48,3 +48,7 @@ fun String.wordBreakLimit(numOfWords: Int = 10): String{
 fun String.toArgumentsMap(): Map<String, String>{
     return urlSearchParamsToMap(this)
 }
+
+fun String.countWords(): Int {
+    return Regex("""(\s+|(\r\n|\r|\n))""").findAll(this.trim()).count() + 1
+}

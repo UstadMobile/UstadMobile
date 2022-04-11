@@ -43,7 +43,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:onClick="@{() -> eventHandler.onAddTextClicked() }"
-            android:visibility="@{deadlinePassed ? View.GONE : View.VISIBLE}"
+            android:visibility="@{deadlinePassed || !assignment.caRequireTextSubmission ? View.GONE : View.VISIBLE}"
             />
 
         <Button

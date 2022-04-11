@@ -12,7 +12,7 @@ interface CourseTerminologyEditView: UstadEditView<CourseTerminology> {
 
     companion object {
 
-        const val VIEW_NAME = "CourseTerminologyEditEditView"
+        const val VIEW_NAME = "CourseTerminologyEditView"
 
     }
 

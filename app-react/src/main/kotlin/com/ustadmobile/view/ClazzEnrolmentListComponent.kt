@@ -19,10 +19,10 @@ import com.ustadmobile.mui.components.TypographyVariant
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
 import react.RBuilder
 import react.setState
-import kotlin.js.Date
 
 class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnrolment,
         ClazzEnrolmentWithLeavingReason>(props), ClazzEnrolmentListView {
@@ -100,7 +100,7 @@ class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnro
     override fun RBuilder.renderListHeaderView() {
         umGridContainer(rowSpacing = GridSpacing.spacing2){
             umItem(GridSize.cells12) {
-                createTopMainAction("person",
+                renderTopMainAction("person",
                     getString(MessageID.view_profile),
                     GridSize.cells6,
                     GridSize.cells2,true){
@@ -109,16 +109,17 @@ class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnro
             }
 
             umItem (GridSize.cells12){
-                createListSectionTitle(headerText, TypographyVariant.h6)
+                renderListSectionTitle(headerText, TypographyVariant.h6)
             }
         }
     }
 
     override fun RBuilder.renderListItem(item: ClazzEnrolmentWithLeavingReason) {
         umGridContainer {
-            val startEndTime = "${Date(item.clazzEnrolmentDateJoined).standardFormat()} " +
-                    "- ${Date(item.clazzEnrolmentDateLeft).standardFormat()}"
-            createListItemWithTitleDescriptionAndRightAction(
+            val startEndTime = "${item.clazzEnrolmentDateJoined.toDate()?.standardFormat()} " +
+                    "- ${item.clazzEnrolmentDateLeft.toDate(true)?.standardFormat()
+                        ?.replace("Invalid date", getString(MessageID.present))}"
+            renderListItemWithTitleDescriptionAndRightAction(
                 title = "${item.roleToString(this, systemImpl)} " +
                         "- ${item.outcomeToString(this, systemImpl)}",
                 iconName = "edit",

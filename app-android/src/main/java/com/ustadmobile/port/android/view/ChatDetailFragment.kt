@@ -6,7 +6,6 @@ import android.text.method.LinkMovementMethod
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewConfiguration
 import android.view.ViewGroup
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -24,9 +23,7 @@ import com.ustadmobile.core.view.ChatDetailView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Chat
-import com.ustadmobile.lib.db.entities.Message
 import com.ustadmobile.lib.db.entities.MessageWithPerson
-import com.ustadmobile.port.android.view.binding.setMarginBottomValue
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 import org.kodein.di.direct

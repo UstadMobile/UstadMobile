@@ -7,7 +7,8 @@
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
         <import type="android.content.Context" />
-        <import type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseBlockWithEntity"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
         <import type="com.ustadmobile.lib.db.entities.CourseGroupSet"/>
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.core.controller.ClazzAssignmentEditPresenter"/>
@@ -20,8 +21,8 @@
             type="ClazzAssignmentEditPresenter" />
 
         <variable
-            name="clazzAssignment"
-            type="ClazzAssignmentWithCourseBlock" />
+            name="blockWithAssignment"
+            type="CourseBlockWithEntity" />
 
         <variable
             name="groupSet"
@@ -165,7 +166,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:enabled="@{fieldsEnabled}"
-                    android:text="@={clazzAssignment.caTitle}" />
+                    android:text="@={blockWithAssignment.assignment.caTitle}" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -184,7 +185,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/ca_title_input">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:text="@={clazzAssignment.caDescription}"
+                    android:text="@={blockWithAssignment.assignment.caDescription}"
                     android:id="@+id/ca_edit_desc_text"
                     android:enabled="@{fieldsEnabled}"
                     android:layout_width="match_parent"
@@ -192,271 +193,28 @@
             </com.google.android.material.textfield.TextInputLayout>
 
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ca_start_date_textinput"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:errorEnabled="@{caStartDateError != null}"
-                app:errorText="@{caStartDateError}"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginVertical="@dimen/dimen_16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                tools:hint="@string/dont_show_before"
-                android:hint="@{StringExtKt.optional(context, @string/dont_show_before)}"
-                app:layout_constraintTop_toBottomOf="@+id/ca_edit_description_textinput"
-                app:layout_constraintEnd_toStartOf="@+id/ca_start_datetime_textinput">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/ca_start_date"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:cursorVisible="false"
-                    android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateTimeInMillis="@={startDate}"
-                    app:timeZoneId="@{timeZone}"
-                    app:dateTimeInMillisMode="@{0}"
-                    app:runOnClickWhenFocused="@{true}" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ca_start_datetime_textinput"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginVertical="@dimen/dimen_16dp"
-                app:layout_constraintBottom_toBottomOf="@+id/ca_start_date_textinput"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:hint="@string/time"
-                app:layout_constraintStart_toEndOf="@+id/ca_start_date_textinput"
-                app:layout_constraintTop_toTopOf="@+id/ca_start_date_textinput">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:cursorVisible="false"
-                    android:inputType="@{InputType.TYPE_NULL}"
-                    app:timeValue="@={startTime}"
-                    app:runOnClickWhenFocused="@{true}" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:id="@+id/ca_timezone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginStart="32dp"
-                android:text="@{@string/class_timezone_set(timeZone)}"
-                tools:text="Class timezone: Dubai"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ca_start_date_textinput" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ca_edit_completion_criteria"
-                app:layout_constraintStart_toStartOf="parent"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            <include
+                android:id="@+id/ca_edit_common_fields"
+                layout="@layout/item_course_block_common_detail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/completion_criteria"
-                android:layout_marginVertical="@dimen/dimen_16dp"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                app:layout_constraintTop_toBottomOf="@+id/ca_timezone">
-
-                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:selectedMessageIdOption="@={clazzAssignment.caCompletionCriteria}"
-                    app:messageIdOptions="@{completionCriteriaOptions}"
-                    />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ca_edit_max_scrore_textinput"
-                android:layout_width="@dimen/dimen_0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginVertical="@dimen/dimen_8dp"
-                android:hint="@string/maximum_points"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:hintEnabled="true"
-                app:errorEnabled="@{caMaxPointsError != null}"
-                app:errorTextColor="?colorError"
-                app:errorText="@{caMaxPointsError}"
-                android:enabled="@{fieldsEnabled}"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ca_edit_completion_criteria">
+                app:layout_constraintTop_toBottomOf="@id/ca_edit_description_textinput"
+                app:block="@={(CourseBlock)blockWithAssignment}"
+                app:timeZone="@{timeZone}"
+                app:startDate="@={startDate}"
+                app:deadlineDate="@={deadlineDate}"
+                app:deadlineTime="@={deadlineTime}"
+                app:gracePeriodDate="@={gracePeriodDate}"
+                app:gracePeriodTime="@={gracePeriodTime}"
+                app:caGracePeriodError="@{caGracePeriodError}"
+                app:caDeadlineError="@{caDeadlineError}"
+                app:caStartDateError="@{caStartDateError}"
+                app:caMaxPointsError="@{caMaxPointsError}"
+                app:completionCriteriaOptions="@{completionCriteriaOptions}"
+                app:gracePeriodVisibility="@{gracePeriodVisibility}"
+                />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/ca_edit_max_score"
-                    android:enabled="@{fieldsEnabled}"
-                    android:digits="0123456789"
-                    android:inputType="number"
-                    android:text="@={`` + clazzAssignment.block.cbMaxPoints}"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ca_deadline_date_textinput"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:errorEnabled="@{caDeadlineError != null}"
-                app:errorText="@{caDeadlineError}"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginVertical="@dimen/dimen_16dp"
-                app:endIconMode="clear_text"
-                app:layout_constraintStart_toStartOf="parent"
-                android:hint="@{StringExtKt.optional(context, @string/deadline)}"
-                tools:hint="@string/deadline"
-                app:layout_constraintTop_toBottomOf="@+id/ca_edit_max_scrore_textinput"
-                app:layout_constraintEnd_toStartOf="@+id/ca_deadline_datetime_textinput">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/ca_deadline_date"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:cursorVisible="false"
-                    android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateTimeInMillis="@={deadlineDate}"
-                    app:timeZoneId="@{timeZone}"
-                    app:dateTimeInMillisMode="@{0}"
-                    app:runOnClickWhenFocused="@{true}" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ca_deadline_datetime_textinput"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginVertical="@dimen/dimen_16dp"
-                app:errorEnabled="@{caDeadlineError != null}"
-                app:errorText="@{caDeadlineError}"
-                app:layout_constraintBottom_toBottomOf="@+id/ca_deadline_date_textinput"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:hint="@string/time"
-                app:layout_constraintStart_toEndOf="@+id/ca_deadline_date_textinput"
-                app:layout_constraintTop_toTopOf="@+id/ca_deadline_date_textinput">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:cursorVisible="false"
-                    android:inputType="@{InputType.TYPE_NULL}"
-                    app:timeValue="@={deadlineTime}"
-                    app:runOnClickWhenFocused="@{true}" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ca_grace_date_textinput"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:errorEnabled="@{caGracePeriodError != null}"
-                app:errorText="@{caGracePeriodError}"
-                android:visibility="@{gracePeriodVisibility}"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginVertical="@dimen/dimen_16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                android:hint="@string/end_of_grace_period"
-                app:layout_constraintTop_toBottomOf="@+id/ca_deadline_date_textinput"
-                app:layout_constraintEnd_toStartOf="@+id/ca_grace_datetime_textinput">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/ca_grace_date"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:cursorVisible="false"
-                    android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateTimeInMillis="@={gracePeriodDate}"
-                    app:timeZoneId="@{timeZone}"
-                    app:dateTimeInMillisMode="@{0}"
-                    app:runOnClickWhenFocused="@{true}" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ca_grace_datetime_textinput"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:errorEnabled="@{caGracePeriodError != null}"
-                app:errorText="@{caGracePeriodError}"
-                android:visibility="@{gracePeriodVisibility}"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginVertical="@dimen/dimen_16dp"
-                app:layout_constraintBottom_toBottomOf="@+id/ca_grace_date_textinput"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:hint="@string/time"
-                app:layout_constraintStart_toEndOf="@+id/ca_grace_date_textinput"
-                app:layout_constraintTop_toTopOf="@+id/ca_grace_date_textinput">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:cursorVisible="false"
-                    android:inputType="@{InputType.TYPE_NULL}"
-                    app:timeValue="@={gracePeriodTime}"
-                    app:runOnClickWhenFocused="@{true}" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ca_edit_penalty_textinput"
-                android:layout_width="@dimen/dimen_0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginVertical="@dimen/dimen_8dp"
-                android:hint="@string/late_submission_penalty"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:hintEnabled="true"
-                app:suffixText="%"
-                app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
-                android:visibility="@{gracePeriodVisibility}"
-                android:enabled="@{fieldsEnabled}"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ca_grace_date_textinput">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/ca_edit_penalty"
-                    android:enabled="@{fieldsEnabled}"
-                    android:digits="0123456789"
-                    android:inputType="number"
-                    app:minValue="@{0}"
-                    app:maxValue="@{100}"
-                    android:text="@={`` + clazzAssignment.block.cbLateSubmissionPenalty}"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-
-            <TextView
-                android:id="@+id/ca_penalty_text_label"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginStart="32dp"
-                android:layout_marginEnd="@dimen/dimen_16dp"
-                android:visibility="@{gracePeriodVisibility}"
-                android:text="@{@string/penalty_label}"
-                tools:text="If completed after deadline but before end of grace period"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ca_edit_penalty_textinput" />
 
 
             <com.google.android.material.textfield.TextInputLayout
@@ -468,7 +226,7 @@
                 android:hint="@string/submission_type"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
-                app:layout_constraintTop_toBottomOf="@+id/ca_penalty_text_label">
+                app:layout_constraintTop_toBottomOf="@+id/ca_edit_common_fields">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
@@ -489,7 +247,7 @@
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
-                android:checked="@={clazzAssignment.caRequireFileSubmission}"
+                android:checked="@={blockWithAssignment.assignment.caRequireFileSubmission}"
                 android:onCheckedChanged="@{fileRequiredListener}"
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:checked="true"
@@ -512,7 +270,7 @@
                 <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:selectedMessageIdOption="@={clazzAssignment.caFileType}"
+                    app:selectedMessageIdOption="@={blockWithAssignment.assignment.caFileType}"
                     app:messageIdOptions="@{fileTypeOptions}"
                     />
 
@@ -536,7 +294,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_file_type">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:text="@={`` + clazzAssignment.caSizeLimit}"
+                    android:text="@={`` + blockWithAssignment.assignment.caSizeLimit}"
                     android:id="@+id/ca_edit_file_size_limit_desc"
                     android:enabled="@{fieldsEnabled}"
                     android:digits="0123456789"
@@ -563,7 +321,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_file_type">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:text="@={`` + clazzAssignment.caNumberOfFiles}"
+                    android:text="@={`` + blockWithAssignment.assignment.caNumberOfFiles}"
                     android:id="@+id/ca_edit_number_of_files_desc"
                     android:enabled="@{fieldsEnabled}"
                     android:digits="0123456789"
@@ -582,7 +340,7 @@
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
-                android:checked="@={clazzAssignment.caRequireTextSubmission}"
+                android:checked="@={blockWithAssignment.assignment.caRequireTextSubmission}"
                 android:onCheckedChanged="@{textRequiredListener}"
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:checked="true"
@@ -606,7 +364,7 @@
                 <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:selectedMessageIdOption="@={clazzAssignment.caTextLimitType}"
+                    app:selectedMessageIdOption="@={blockWithAssignment.assignment.caTextLimitType}"
                     app:messageIdOptions="@{textLimitTypeOptions}"
                     />
 
@@ -631,7 +389,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/ca_edit_number_of_words_desc"
-                    android:text="@={`` + clazzAssignment.caTextLimit}"
+                    android:text="@={`` + blockWithAssignment.assignment.caTextLimit}"
                     android:enabled="@{fieldsEnabled}"
                     android:digits="0123456789"
                     android:inputType="number"
@@ -656,7 +414,7 @@
                 <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:selectedMessageIdOption="@={clazzAssignment.caEditAfterSubmissionType}"
+                    app:selectedMessageIdOption="@={blockWithAssignment.assignment.caEditAfterSubmissionType}"
                     app:messageIdOptions="@{editAfterSubmissionOptions}"
                     />
 
@@ -678,7 +436,7 @@
                 <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:selectedMessageIdOption="@={clazzAssignment.caMarkingType}"
+                    app:selectedMessageIdOption="@={blockWithAssignment.assignment.caMarkingType}"
                     app:messageIdOptions="@{markingTypeOptions}"
                     />
 
@@ -692,7 +450,7 @@
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
-                android:checked="@={clazzAssignment.caClassCommentEnabled}"
+                android:checked="@={blockWithAssignment.assignment.caClassCommentEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:checked="true"
                 android:text="@string/allow_class_comments"
@@ -704,7 +462,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
-                android:checked="@={clazzAssignment.caPrivateCommentsEnabled}"
+                android:checked="@={blockWithAssignment.assignment.caPrivateCommentsEnabled}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:text="@string/allow_private_comments_from_students"

@@ -80,10 +80,12 @@ class CourseTerminologyEditPresenter(
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        entityVal?.ctTerminology = json.encodeToString(
+   /*     entityVal?.ctTerminology = json.encodeToString(
             MapSerializer(String.serializer(), String.serializer()),
             view.terminologyTermList?.associate { it.id to it.term.toString() } ?: mapOf()
-        )
+        )*/
+        entityVal?.ctTerminology = safeStringify(di, MapSerializer(String.serializer(), String.serializer()),
+            view.terminologyTermList?.associate { it.id to it.term.toString() } ?: mapOf())
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
     }
@@ -117,10 +119,9 @@ class CourseTerminologyEditPresenter(
                 return@launch
             }
 
-            entity.ctTerminology = json.encodeToString(
+            entity.ctTerminology = safeStringify(di,
                 MapSerializer(String.serializer(), String.serializer()),
-                termList.associate { it.id to it.term.toString() }
-            )
+                termList.associate { it.id to it.term.toString() })
 
             if(entity.ctUid == 0L) {
                 entity.ctUid = repo.courseTerminologyDao.insertAsync(entity)

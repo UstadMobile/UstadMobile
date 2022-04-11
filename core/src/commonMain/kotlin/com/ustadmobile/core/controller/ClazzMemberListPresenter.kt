@@ -5,6 +5,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
+import org.kodein.di.instance
+
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.ClazzMemberListView
@@ -22,20 +24,17 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
-import org.kodein.di.instance
 
 class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, view: ClazzMemberListView,
                                di: DI, lifecycleOwner: DoorLifecycleOwner)
     : UstadListPresenter<ClazzMemberListView, PersonWithClazzEnrolmentDetails>(context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
 
+    private val json: Json by instance()
 
     private var filterByClazzUid: Long = -1
 
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
-
-    val json: Json by di.instance()
-
 
     var searchText: String? = null
 

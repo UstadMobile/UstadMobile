@@ -48,6 +48,7 @@ import io.ktor.client.features.json.*
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import org.w3c.dom.Element
 import react.RBuilder
@@ -284,4 +285,10 @@ private val diModule = DI.Module("UstadApp-React"){
     }
 
     bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerJs() }
+
+    bind<Json>() with singleton {
+        Json {
+            encodeDefaults = true
+        }
+    }
 }

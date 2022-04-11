@@ -10,7 +10,7 @@ import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.Util.stopEventPropagation
-import com.ustadmobile.view.ext.createListItemWithLeftIconTitleAndDescription
+import com.ustadmobile.view.ext.renderListItemWithLeftIconTitleAndDescription
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
@@ -79,7 +79,7 @@ class SettingsComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(pr
                                 stopEventPropagation(it)
                                 mPresenter?.goToHolidayCalendarList()
                             }
-                            createListItemWithLeftIconTitleAndDescription("date_range",
+                            renderListItemWithLeftIconTitleAndDescription("date_range",
                                 getString(MessageID.holiday_calendars),
                                 getString(MessageID.holiday_calendars_desc),
                                 onMainList = true
@@ -89,6 +89,22 @@ class SettingsComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(pr
 
                 }
 
+                if(workspaceSettingsVisible){
+                    umItem(GridSize.cells12){
+                        umListItem(button = true) {
+                            attrs.onClick = {
+                                stopEventPropagation(it)
+                                mPresenter?.handleClickWorkspace()
+                            }
+                            renderListItemWithLeftIconTitleAndDescription("account_balance",
+                                getString(MessageID.site),
+                                getString(MessageID.manage_site_settings),
+                                onMainList = true
+                            )
+                        }
+                    }
+                }
+
                 if(reasonLeavingVisible){
                     umItem(GridSize.cells12){
                         umListItem(button = true) {
@@ -96,7 +112,7 @@ class SettingsComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(pr
                                 stopEventPropagation(it)
                                 mPresenter?.handleClickLeavingReason()
                             }
-                            createListItemWithLeftIconTitleAndDescription("logout",
+                            renderListItemWithLeftIconTitleAndDescription("logout",
                                 getString(MessageID.leaving_reason),
                                 getString(MessageID.leaving_reason_manage),
                                 onMainList = true
@@ -112,7 +128,7 @@ class SettingsComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(pr
                                 stopEventPropagation(it)
                                 mPresenter?.handleClickLangList()
                             }
-                            createListItemWithLeftIconTitleAndDescription("language",
+                            renderListItemWithLeftIconTitleAndDescription("language",
                                 getString(MessageID.languages),
                                 getString(MessageID.languages_description),
                                 onMainList = true

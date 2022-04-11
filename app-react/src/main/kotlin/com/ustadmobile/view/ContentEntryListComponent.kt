@@ -16,7 +16,7 @@ import com.ustadmobile.mui.components.umMenu
 import com.ustadmobile.mui.components.umMenuItem
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.view.ext.createContentEntryListItem
+import com.ustadmobile.view.ext.renderContentEntryListItem
 import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.document
 import kotlinx.css.display
@@ -74,7 +74,7 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
         val showSelectBtn = arguments.determineListMode().toString() == ListViewMode.PICKER.toString()
                 && (arguments[ARG_SELECT_FOLDER_VISIBLE]?.toBoolean() ?: true || item.leaf)
         val showStatus = arguments.determineListMode().toString() != ListViewMode.PICKER.toString()
-        createContentEntryListItem(item,systemImpl, showSelectBtn, showStatus){
+        renderContentEntryListItem(item,systemImpl, showSelectBtn, showStatus){
             if(showSelectBtn){
                 mPresenter?.onClickSelectContentEntry(item)
             }else {

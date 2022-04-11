@@ -6,7 +6,7 @@ import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.formattedInHoursAndMinutes
-import com.ustadmobile.view.ext.createListItemWithTitleDescriptionAndRightAction
+import com.ustadmobile.view.ext.renderListItemWithTitleDescriptionAndRightAction
 import com.ustadmobile.view.ext.umGridContainer
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -35,7 +35,7 @@ class ScheduleListComponent(mProps: ScheduleListProps): UstadSimpleList<Schedule
             val startEndTime = "${Date(item.sceduleStartTime).formattedInHoursAndMinutes()} " +
                     "- ${Date(item.scheduleEndTime).formattedInHoursAndMinutes()}"
 
-            createListItemWithTitleDescriptionAndRightAction(
+            renderListItemWithTitleDescriptionAndRightAction(
                 "$scheduleDays $startEndTime",
                 "delete", props.withDelete){
                 props.listener?.onClickDelete(item)

@@ -13,7 +13,7 @@ interface CourseGroupSetEditView: UstadEditView<CourseGroupSet> {
 
     companion object {
 
-        const val VIEW_NAME = "CourseGroupSetEditEditView"
+        const val VIEW_NAME = "CourseGroupSetEditView"
 
     }
 
