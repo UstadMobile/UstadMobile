@@ -56,6 +56,11 @@ class ChatDetailPresenter(
                 chatUid,
                 loggedInPersonUid )
             view.title = chatTitle
+
+            //Lookup the chat
+            if(chatUid == 0L){
+
+            }
         }
 
 

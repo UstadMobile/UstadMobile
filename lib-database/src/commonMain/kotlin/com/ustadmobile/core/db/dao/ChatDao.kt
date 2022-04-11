@@ -171,4 +171,20 @@ abstract class ChatDao: BaseDao<Chat>{
 
 
 
+    @Query("""
+        SELECT Chat.*
+          FROM ChatMember
+          LEFT JOIN Chat ON Chat.chatUid = ChatMember.chatMemberChatUid
+         WHERE ChatMember.chatMemberPersonUid = :otherPersonUid
+           AND Chat.isChatGroup = FALSE
+           AND Chat.chatUid IN 
+               (
+                SELECT ChatMember.chatMemberChatUid
+                  FROM ChatMember
+                 WHERE ChatMember.chatMemberChatUid = Chat.chatUid
+                   AND ChatMember.chatMemberPersonUid = :loggedInPersonUid 
+               ) 
+    """)
+    abstract suspend fun getChatByOtherPerson(otherPersonUid: Long, loggedInPersonUid: Long)
+
 }
