@@ -59,8 +59,8 @@ open class ClazzAssignment {
     @ColumnInfo(defaultValue = "1")
     var caNumberOfFiles: Int = 1
 
-    @ColumnInfo(defaultValue = "0")
-    var caEditAfterSubmissionType: Int = 0
+    @ColumnInfo(defaultValue = "3")
+    var caEditAfterSubmissionType: Int = EDIT_AFTER_SUBMISSION_TYPE_NOT_ALLOWED
 
     @ColumnInfo(defaultValue = "1")
     var caMarkingType: Int = MARKED_BY_COURSE_LEADER
