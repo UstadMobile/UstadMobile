@@ -10,10 +10,7 @@ import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.*
-import com.ustadmobile.core.util.ext.createNewClazzAndGroups
-import com.ustadmobile.core.util.ext.effectiveTimeZone
-import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.ext.toTermMap
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
@@ -149,35 +146,38 @@ class ClazzEdit2Presenter(context: Any,
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_ASSIGNMENT,
-            ListSerializer(ClazzAssignmentWithCourseBlock.serializer()), ClazzAssignmentWithCourseBlock::class){
+            ListSerializer(CourseBlockWithEntity.serializer()), CourseBlockWithEntity::class){
             val newAssignment = it.firstOrNull() ?: return@observeSavedStateResult
 
             val foundBlock: CourseBlockWithEntity = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.find {
-                assignment -> assignment.assignment?.caUid == newAssignment.caUid
+                assignment -> assignment.assignment?.caUid == newAssignment.assignment?.caUid
             } ?: CourseBlockWithEntity().apply {
-                cbClazzUid = newAssignment.caClazzUid
-                cbEntityUid = newAssignment.caUid
-                cbTitle = newAssignment.caTitle
+                cbClazzUid = newAssignment.cbClazzUid
+                cbEntityUid = newAssignment.assignment?.caUid ?: 0
+                cbTitle = newAssignment.assignment?.caTitle
                 cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                cbDescription = newAssignment.caDescription
+                cbDescription = newAssignment.assignment?.caDescription
                 cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
-                cbUid = newAssignment.block?.cbUid ?: db.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
-                cbHideUntilDate = newAssignment.block?.cbHideUntilDate ?: 0
-                cbDeadlineDate = newAssignment.block?.cbDeadlineDate ?: Long.MAX_VALUE
-                cbGracePeriodDate = newAssignment.block?.cbHideUntilDate ?: newAssignment.block?.cbDeadlineDate ?: Long.MAX_VALUE
-                cbLateSubmissionPenalty = newAssignment.block?.cbLateSubmissionPenalty ?: 0
-                cbMaxPoints = newAssignment.block?.cbMaxPoints ?: 10
-                assignment = newAssignment
+                cbUid = newAssignment.cbUid
+                cbHideUntilDate = newAssignment.cbHideUntilDate
+                cbDeadlineDate = newAssignment.cbDeadlineDate
+                cbGracePeriodDate = newAssignment.cbGracePeriodDate
+                cbLateSubmissionPenalty = newAssignment.cbLateSubmissionPenalty
+                cbCompletionCriteria = newAssignment.cbCompletionCriteria
+                cbMaxPoints = newAssignment.cbMaxPoints
+
+                assignment = newAssignment.assignment
             }
 
-            foundBlock.assignment = newAssignment
-            foundBlock.cbTitle = newAssignment.caTitle
-            foundBlock.cbDescription = newAssignment.caDescription
-            foundBlock.cbHideUntilDate = newAssignment.block?.cbHideUntilDate ?: 0
-            foundBlock.cbDeadlineDate = newAssignment.block?.cbDeadlineDate ?: Long.MAX_VALUE
-            foundBlock.cbGracePeriodDate = newAssignment.block?.cbHideUntilDate ?: newAssignment.block?.cbDeadlineDate ?: Long.MAX_VALUE
-            foundBlock.cbLateSubmissionPenalty = newAssignment.block?.cbLateSubmissionPenalty ?: 0
-            foundBlock.cbMaxPoints = newAssignment.block?.cbMaxPoints ?: 10
+            foundBlock.assignment = newAssignment.assignment
+            foundBlock.cbTitle = newAssignment.assignment?.caTitle
+            foundBlock.cbDescription = newAssignment.assignment?.caDescription
+            foundBlock.cbHideUntilDate = newAssignment.cbHideUntilDate
+            foundBlock.cbDeadlineDate = newAssignment.cbDeadlineDate
+            foundBlock.cbGracePeriodDate = newAssignment.cbGracePeriodDate
+            foundBlock.cbCompletionCriteria = newAssignment.cbCompletionCriteria
+            foundBlock.cbLateSubmissionPenalty = newAssignment.cbLateSubmissionPenalty
+            foundBlock.cbMaxPoints = newAssignment.cbMaxPoints
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
@@ -633,10 +633,10 @@ class ClazzEdit2Presenter(context: Any,
 
                 NavigateForResultOptions(
                         this,
-                        currentEntityValue = null,
+                        currentEntityValue = joinedEntity,
                         destinationViewName = ClazzAssignmentEditView.VIEW_NAME,
-                        entityClass = ClazzAssignmentWithCourseBlock::class,
-                        serializationStrategy = ClazzAssignmentWithCourseBlock.serializer(),
+                        entityClass = CourseBlockWithEntity::class,
+                        serializationStrategy = CourseBlockWithEntity.serializer(),
                         destinationResultKey = SAVEDSTATE_KEY_ASSIGNMENT,
                         arguments = args)
             }
@@ -735,39 +735,90 @@ class ClazzEdit2Presenter(context: Any,
         courseBlockOneToManyJoinEditHelper.liveList.sendValue(newList)
     }
 
+
+    /*
+
+    If moving a module:
+         If destinationBlock is:
+        A block with parentModule = 0, then:
+            If module being moved is going down, then it's position in the new list is (destinationBlock + 1 + destinationBlock.numChildren)
+              If module being moved is going up, then it's destination in in the new list is destubationBlock
+
+         A block is child and end of a module:
+            Then its destination in the new list is destinationBlock.index + 1 to move below it
+        else not end of module - reject it
+
+     If moving a non-module block:
+      If destinationBlock.previous is part of a module, or is itself a module,
+            then the block being moved is assigned to that module
+                and given the same indentation (minimum indent level = 1)
+            else set module to zero and indentation to zero.
+
+     */
     override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
         val currentList = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: mutableListOf()
 
-        val fromLocation = currentList[fromPosition]
+        val movingBlock = currentList[fromPosition]
 
-        // check if its module
-        if(fromLocation.cbType == CourseBlock.BLOCK_MODULE_TYPE &&
-                fromLocation.cbModuleParentBlockUid != currentList[toPosition].cbModuleParentBlockUid){
+        val destinationBlock = currentList[toPosition]
+
+        val nextBlock = currentList.getOrNull(toPosition + 1)
+        val isChildBlock = destinationBlock.cbModuleParentBlockUid != 0L
+        val blockMovingDown = fromPosition < toPosition
+        val lastBlockInModule = destinationBlock.cbModuleParentBlockUid != nextBlock?.cbModuleParentBlockUid
+
+        // reject if moving a module, destination is a child block and not last in the block
+        if(movingBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE
+            && isChildBlock && !lastBlockInModule) {
             courseBlockOneToManyJoinEditHelper.liveList.sendValue(currentList.toList())
             return false
         }
 
+        // remove the block from the list
         currentList.removeAt(fromPosition)
-        currentList.add(toPosition, fromLocation)
 
-        val movedBlock = currentList[toPosition]
-        if(movedBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE){
-            //if module moves, move all children to new index
-            val childBlocks = currentList.filter { it.cbModuleParentBlockUid == movedBlock.cbUid }
+        if(movingBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE){
+
+            val destinationBlockChildren = currentList.filter { it.cbModuleParentBlockUid == destinationBlock.cbUid }
+            // if destination is parent block
+            if(destinationBlock.cbModuleParentBlockUid == 0L){
+                if(blockMovingDown) {
+                    // if moving downwards, and destination has children, move below the children of destination
+                    currentList.addSafelyToPosition(toPosition + destinationBlockChildren.size, movingBlock)
+                }else{
+                    currentList.add(toPosition, movingBlock)
+                }
+            }else {
+                // else, destination is child and is last child of module, move the block below it
+                currentList.addSafelyToPosition(toPosition + 1, movingBlock)
+            }
+
+            // remove all the child and move it below the destination
+            val childBlocks = currentList.filter { it.cbModuleParentBlockUid == movingBlock.cbUid }
             currentList.removeAll(childBlocks)
-            val index = currentList.indexOf(movedBlock) + 1
+            val index = currentList.indexOf(movingBlock) + 1
             currentList.addAll(index, childBlocks)
 
-        }else if(movedBlock.cbIndentLevel != 0){
+
+        }else {
             //if child moves out of module, update child to have parentBlock = 0 or find new parent
-            movedBlock.cbModuleParentBlockUid = 0
-            for(n in toPosition downTo 0){
-                if(currentList[n].cbType == CourseBlock.BLOCK_MODULE_TYPE){
-                    movedBlock.cbModuleParentBlockUid = currentList[n].cbUid
-                    break
+            currentList.add(toPosition, movingBlock)
+            val previousBlock = currentList.getOrNull(toPosition - 1)
+            when {
+                previousBlock == null -> {
+                    movingBlock.cbModuleParentBlockUid = 0
+                    movingBlock.cbIndentLevel = 0
+                }
+                previousBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE -> {
+                    movingBlock.cbModuleParentBlockUid = previousBlock.cbUid
+                    movingBlock.cbIndentLevel = 1
+                }
+                else -> {
+                    movingBlock.cbModuleParentBlockUid = previousBlock.cbModuleParentBlockUid
+                    movingBlock.cbIndentLevel = previousBlock.cbIndentLevel
                 }
             }
-            currentList[toPosition] = movedBlock
+            currentList[toPosition] = movingBlock
         }
         
         // finally update the list with new index values
