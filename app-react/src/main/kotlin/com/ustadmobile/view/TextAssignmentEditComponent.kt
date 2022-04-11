@@ -102,6 +102,10 @@ class TextAssignmentEditComponent (mProps: UmProps): UstadEditComponent<CourseAs
         mPresenter = TextAssignmentEditPresenter(this, arguments, this,
             this,di)
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+
+        updateUiWithStateChangeDelay {
+            fabManager?.visible = arguments[TextAssignmentEditView.EDIT_ENABLED].toString().toBoolean()
+        }
     }
 
     override fun RBuilder.render() {

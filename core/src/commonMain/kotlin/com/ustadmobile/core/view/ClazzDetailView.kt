@@ -11,7 +11,7 @@ interface ClazzDetailView: UstadDetailView<Clazz> {
 
         const val VIEW_NAME = "CourseDetailView"
 
-        const val ARG_TABS = "clazzTabs"
+        const val ARG_TABS = "courseTabs"
 
     }
 
