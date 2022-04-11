@@ -56,7 +56,7 @@ class FileDropZoneManager(
         dropZoneInput?.asDynamic().click()
         window.setTimeout({
             stopEventPropagation(it)
-        }, 1000)
+        }, 2000)
     }
 
     var onFileAttached: OnFileAttached? = null
