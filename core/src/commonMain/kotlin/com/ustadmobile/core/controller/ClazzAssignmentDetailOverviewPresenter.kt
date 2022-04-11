@@ -7,6 +7,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.io.ext.guessMimeType
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -194,7 +195,9 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 submissionList.add(submission)
                 view.addedCourseAssignmentSubmission = submissionList
             }
-            requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+            }
         }
 
         observeSavedStateResult(SAVED_STATE_KEY_TEXT, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
@@ -209,7 +212,9 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             submission.casSubmitterUid = accountManager.activeAccount.personUid
             submissionList.add(submission)
             view.addedCourseAssignmentSubmission = submissionList
-            requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
+            }
         }
 
     }
@@ -262,17 +267,18 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             val hasPassedDeadline = entity?.let { hasPassedDeadline(it) } ?: true
             if(hasPassedDeadline)
                 return@launch
-
             repo.courseAssignmentSubmissionDao.insertListAsync(submissionList)
             repo.courseAssignmentSubmissionAttachmentDao.insertListAsync(submissionList.mapNotNull { it.attachment })
             submissionList.clear()
             view.addedCourseAssignmentSubmission = submissionList
-            withContext(Dispatchers.Default) {
-                val assignment = view.entity ?: return@withContext
-                statementEndpoint.storeSubmitFileSubmissionStatement(
+            UmPlatformUtil.runAsync {
+                withContext(Dispatchers.Default) {
+                    val assignment = view.entity ?: return@withContext
+                    statementEndpoint.storeSubmitFileSubmissionStatement(
                         accountManager.activeAccount,
                         randomUuid().toString(),
                         assignment)
+                }
             }
         }
     }

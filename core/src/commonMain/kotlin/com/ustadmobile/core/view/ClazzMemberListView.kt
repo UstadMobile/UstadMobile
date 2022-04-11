@@ -19,7 +19,7 @@ interface ClazzMemberListView: UstadListView<PersonWithClazzEnrolmentDetails, Pe
 
         const val ARG_HIDE_CLAZZES = "hideClazzes"
 
-        const val VIEW_NAME = "ClazzMemberListView"
+        const val VIEW_NAME = "CourseMemberListView"
     }
 
 }
