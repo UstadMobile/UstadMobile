@@ -1,6 +1,12 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.SupportedContent.EPUB_EXTENSIONS
+import com.ustadmobile.core.contentjob.SupportedContent.EPUB_MIME_TYPES
+import com.ustadmobile.core.contentjob.SupportedContent.H5P_EXTENSIONS
+import com.ustadmobile.core.contentjob.SupportedContent.H5P_MIME_TYPES
+import com.ustadmobile.core.contentjob.SupportedContent.XAPI_MIME_TYPES
+import com.ustadmobile.core.contentjob.SupportedContent.ZIP_EXTENSIONS
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
@@ -12,6 +18,7 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CON
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_PARENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SHOW_ONLY_FOLDER_FILTER
+import com.ustadmobile.core.view.SelectFileView.Companion.SELECTION_MODE_GALLERY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
@@ -308,6 +315,32 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         navigateForResult(NavigateForResultOptions(
             this, null,
             ContentEntryEdit2View.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
+    }
+
+
+    fun handleOnClickAddSupportedFile(){
+        val supportedMimeTypes = mutableListOf(
+            EPUB_MIME_TYPES.joinToString(";"),
+            EPUB_EXTENSIONS.joinToString(";"),
+            XAPI_MIME_TYPES.joinToString(";"),
+            ZIP_EXTENSIONS.joinToString(";"),
+            H5P_MIME_TYPES.joinToString(";"),
+            H5P_EXTENSIONS.joinToString(";"),
+            SELECTION_MODE_GALLERY
+        ).joinToString (";")
+        val args = mutableMapOf(
+            SelectFileView.ARG_MIMETYPE_SELECTED to supportedMimeTypes,
+            ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
+            ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectFileView.VIEW_NAME,
             ContentEntry::class,
             ContentEntry.serializer(),
             arguments = args)
