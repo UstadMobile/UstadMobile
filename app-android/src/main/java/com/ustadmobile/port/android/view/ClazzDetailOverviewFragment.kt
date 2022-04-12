@@ -301,19 +301,13 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         set(value) {
             field = value
             detailRecyclerAdapter?.clazz = value
-            timeZone = value?.clazzTimeZone ?: value?.clazzSchool?.schoolTimeZone ?: "UTC"
+            courseBlockDetailRecyclerAdapter?.timeZone = value?.clazzTimeZone ?: value?.clazzSchool?.schoolTimeZone ?: "UTC"
         }
 
     override var clazzCodeVisible: Boolean
         get() = detailRecyclerAdapter?.clazzCodeVisible ?: false
         set(value) {
             detailRecyclerAdapter?.clazzCodeVisible = value
-        }
-
-    override var timeZone: String? = null
-        set(value) {
-            field = value
-            courseBlockDetailRecyclerAdapter?.timeZone = value
         }
 
     override fun onClickClassCode(code: String?) {
