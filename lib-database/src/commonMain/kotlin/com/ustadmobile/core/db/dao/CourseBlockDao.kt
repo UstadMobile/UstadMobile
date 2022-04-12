@@ -213,9 +213,12 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                                   LIMIT 1) 
                                   
                LEFT JOIN CourseAssignmentSubmission
-               ON CourseAssignmentSubmission.casAssignmentUid = ClazzAssignment.caUid
-               AND CourseAssignmentSubmission.casSubmitterUid = :personUid                    
-                                         
+                ON casUid = (SELECT casUid 
+                                     FROM CourseAssignmentSubmission
+                                    WHERE casAssignmentUid = ClazzAssignment.caUid
+                                      AND casSubmitterUid = :personUid
+                                 ORDER BY casTimestamp DESC
+                                    LIMIT 1)
                                           
                LEFT JOIN CourseAssignmentMark
                       ON camUid = (SELECT camUid 

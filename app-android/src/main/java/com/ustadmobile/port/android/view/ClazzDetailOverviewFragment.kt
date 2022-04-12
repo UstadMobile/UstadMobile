@@ -34,6 +34,7 @@ import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -105,6 +106,20 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
     ): PagedListAdapter<CourseBlockWithCompleteEntity,
             RecyclerView.ViewHolder>(COURSE_BLOCK_DIFF_UTIL) {
 
+        var timeZone: String? = null
+            set(value){
+                field = value
+                boundViewHolders.forEach {
+                    when(it){
+                        is AssignmentCourseBlockViewHolder -> {
+                            it.binding.timeZoneId = value
+                        }
+                    }
+                }
+            }
+
+        private val boundViewHolders = mutableSetOf<RecyclerView.ViewHolder>()
+
         private val accountManager: UstadAccountManager by di.instance()
 
         private val appDatabase: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
@@ -121,6 +136,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             val block = getItem(position)
+            boundViewHolders += holder
             when(block?.cbType){
                 CourseBlock.BLOCK_MODULE_TYPE -> {
                     val moduleHolder = (holder as ModuleCourseBlockViewHolder)
@@ -130,16 +146,18 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                 CourseBlock.BLOCK_TEXT_TYPE -> (holder as TextCourseBlockViewHolder).binding.block = block
                 CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                     val assignmentHolder = (holder as AssignmentCourseBlockViewHolder)
-                    assignmentHolder.binding.assignment = block?.assignment
+                    assignmentHolder.binding.assignment = block.assignment
                     assignmentHolder.binding.block = block
                     assignmentHolder.binding.presenter = mPresenter
+                    assignmentHolder.binding.timeZoneId = timeZone
+                    assignmentHolder.binding.dateTimeMode = MODE_START_OF_DAY
                 }
                 CourseBlock.BLOCK_CONTENT_TYPE -> {
                     val entryHolder = (holder as ContentEntryListRecyclerAdapter.ContentEntryListViewHolder)
-                    val entry = block?.entry
+                    val entry = block.entry
                     entryHolder.itemBinding.contentEntry = entry
                     entryHolder.itemBinding.itemListener = mPresenter
-                    entryHolder.itemBinding.indentLevel = block?.cbIndentLevel?:0
+                    entryHolder.itemBinding.indentLevel = block.cbIndentLevel
                     if(entry != null) {
                         holder.downloadJobItemLiveData = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
                             appDatabase.contentEntryDao.statusForContentEntryList(entry.contentEntryUid)
@@ -176,6 +194,10 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                     parent, false))
             }
 
+        }
+
+        override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+            boundViewHolders -= holder
         }
     }
 
@@ -279,12 +301,19 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         set(value) {
             field = value
             detailRecyclerAdapter?.clazz = value
+            timeZone = value?.clazzTimeZone ?: value?.clazzSchool?.schoolTimeZone ?: "UTC"
         }
 
     override var clazzCodeVisible: Boolean
         get() = detailRecyclerAdapter?.clazzCodeVisible ?: false
         set(value) {
             detailRecyclerAdapter?.clazzCodeVisible = value
+        }
+
+    override var timeZone: String? = null
+        set(value) {
+            field = value
+            courseBlockDetailRecyclerAdapter?.timeZone = value
         }
 
     override fun onClickClassCode(code: String?) {
