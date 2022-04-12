@@ -282,6 +282,7 @@ class ClazzEdit2Presenter(context: Any,
             newClazz.clazzUid = db.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)
             newClazz.clazzName = ""
             newClazz.isClazzActive = true
+            newClazz.clazzStartTime = systemTimeInMillis()
             newClazz.clazzTimeZone = getDefaultTimeZoneId()
             newClazz.clazzSchoolUid = arguments[ARG_SCHOOL_UID]?.toLong() ?: 0L
             newClazz.school = db.schoolDao.takeIf { newClazz.clazzSchoolUid != 0L }?.findByUidAsync(newClazz.clazzSchoolUid)
