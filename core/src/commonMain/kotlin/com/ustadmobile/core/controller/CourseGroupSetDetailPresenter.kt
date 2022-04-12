@@ -36,12 +36,12 @@ class CourseGroupSetDetailPresenter(context: Any,
         val groupMemberList = db.courseGroupMemberDao.findByGroupSetOrderedAsync(
             entityUid, entity?.cgsClazzUid ?: 0L)
 
-        val groupMap = groupMemberList.groupBy { it.member?.cgmGroupNumber }
+        val groupMap = groupMemberList.groupBy { it.member?.cgmGroupNumber ?: 0 }
         val memberList = mutableListOf<CourseGroupMemberPerson>()
         groupMap.entries.forEach {
             memberList.add(CourseGroupMemberPerson().apply {
                 member = CourseGroupMember().apply {
-                    cgmGroupNumber = it.key ?: 0
+                    cgmGroupNumber = it.key
                 }
             })
             memberList.addAll(it.value)
