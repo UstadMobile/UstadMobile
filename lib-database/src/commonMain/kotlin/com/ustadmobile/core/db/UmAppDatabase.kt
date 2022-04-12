@@ -379,6 +379,9 @@ abstract class UmAppDatabase : DoorDatabase() {
     @JsName("messageDao")
     abstract val messageDao: MessageDao
 
+    @JsName("messageReadDao")
+    abstract val messageReadDao: MessageReadDao
+
 
     @JsName("discussionTopicDao")
     abstract val discussionTopicDao: DiscussionTopicDao

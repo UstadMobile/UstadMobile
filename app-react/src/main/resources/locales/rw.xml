@@ -36,7 +36,7 @@
     <string name="new_tab">Kugaragaza ku kadirishya gashya</string>
     <string name="loading">Iri kwihembeera</string>
     <string name="deleting">Iri gusibwa</string>
-    <string name="new_custom_date_range">Urutonde rushya rwamatariki y\'ibikorwaâ€¦</string>
+    <string name="new_custom_date_range">Urutonde rushya rwamatariki y\'ibikorwa…</string>
     <string name="error_opening_file">Idosiye yanze gufunguka:</string>
     <string name="logout">Sohokamo</string>
     <string name="confirm_password">Emeza ijambobanga</string>
@@ -68,7 +68,7 @@
     <string name="xapi_options_series">Uruhererekane</string>
     <string name="xapi_options_visual_type">Ubwoko bw\'imfashanyigisho</string>
     <string name="open">Fungura</string>
-    <string name="download_calculating">Irikubaraâ€¦</string>
+    <string name="download_calculating">Irikubara…</string>
     <string name="download_state_download"><b>Kurura/dawunirodinga</b>Igiteranyo cya%1$s ibyakuruwe, birakoresha umwanya uhwanye na%2$s ku bubiko bw\'igikoresho cyawe.</string>
     <string name="select_subtitle_video">Hitamo umutwe w\'ururimi</string>
     <string name="download_state_downloading"><b>Iri gukurura/kudawunirodinga</b>igiteranyo cya%1$scyibikururwa, ari byo biribize kuba bikoresha umwanya wa %2$s kububiko bw\'igikoresho cyawe.</string>
@@ -389,7 +389,7 @@
     <string name="add_file">Shyira Idosiye</string>
     <string name="share_apk_file">Ohereza idosiye ya APK</string>
     <string name="add_subject">Shyiramo umutwe w\'amagambo</string>
-    <string name="share_via">Ohereza ukoreshejeâ€¦</string>
+    <string name="share_via">Ohereza ukoresheje…</string>
     <string name="recommended_for_advanced_users">Birashishikarizwa abakoresha porogaramu bisumbuyeho mubumenyi</string>
     <string name="app_store_link">Ilinki y\'ububiko bw\'amaporogaramu</string>
     <string name="everything_works_offline">Buri kimwe gikora nta interineti.</string>

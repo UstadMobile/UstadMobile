@@ -42,6 +42,11 @@ open class MessageRead() {
     var messageReadMessageUid: Long = 0
 
 
+    constructor(personUid: Long, messageUid: Long) : this() {
+        messageReadPersonUid = personUid
+        messageReadMessageUid = messageUid
+    }
+
     @LastChangedTime
     @ReplicationVersionId
     var messageReadLct: Long = 0

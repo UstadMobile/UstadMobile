@@ -92,7 +92,20 @@ abstract class ChatDao: BaseDao<Chat>{
                op.personUid AS otherPersonUid,
                op.firstNames AS otherPersonFirstNames,
                op.lastName AS otherPersonLastName,
-               (0) AS unreadMessageCount,
+               (
+				SELECT COUNT(*) 
+				  FROM Message 
+				 WHERE Message.messageTableId = ${Chat.TABLE_ID} 
+				   AND Message.messageEntityUid = Chat.chatUid 
+				   AND Message.messageSenderPersonUid != :personUid
+				   AND Message.messageTimestamp > coalesce((
+						SELECT MessageRead.messageReadLct FROM MessageRead 
+						WHERE MessageRead.messageReadPersonUid = :personUid
+						AND MessageRead.messageReadMessageUid = Message.messageUid 
+				      ), 0)
+					
+				
+			   ) AS unreadMessageCount,
         
                (SELECT COUNT(*)
                   FROM ChatMember mm
@@ -176,7 +189,7 @@ abstract class ChatDao: BaseDao<Chat>{
           FROM ChatMember
           LEFT JOIN Chat ON Chat.chatUid = ChatMember.chatMemberChatUid
          WHERE ChatMember.chatMemberPersonUid = :otherPersonUid
-           AND Chat.isChatGroup = FALSE
+           AND Chat.isChatGroup = 0
            AND Chat.chatUid IN 
                (
                 SELECT ChatMember.chatMemberChatUid
@@ -185,6 +198,6 @@ abstract class ChatDao: BaseDao<Chat>{
                    AND ChatMember.chatMemberPersonUid = :loggedInPersonUid 
                ) 
     """)
-    abstract suspend fun getChatByOtherPerson(otherPersonUid: Long, loggedInPersonUid: Long)
+    abstract suspend fun getChatByOtherPerson(otherPersonUid: Long, loggedInPersonUid: Long): Chat?
 
 }

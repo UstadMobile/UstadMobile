@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.annotation.SuppressLint
+import android.graphics.Typeface
 import android.text.format.DateFormat
 import android.text.format.DateUtils
 import android.text.util.Linkify
@@ -65,6 +66,12 @@ fun TextView.setChatMessagOrientation(message: MessageWithPerson, loggedInPerson
         gravity = Gravity.END
     }else{
         gravity = Gravity.START
+    }
+
+    if(message.messageRead == null && message.messagePerson?.personUid != loggedInPersonUid){
+        setTypeface(typeface, Typeface.BOLD)
+    }else{
+        setTypeface(typeface, Typeface.NORMAL)
     }
 }
 

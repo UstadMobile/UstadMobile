@@ -9,8 +9,14 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemMessageListBinding
 import com.ustadmobile.core.controller.ChatDetailPresenter
+import com.ustadmobile.core.util.EventCollator
+import com.ustadmobile.lib.db.entities.MessageRead
 import com.ustadmobile.lib.db.entities.MessageWithPerson
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.saket.bettermovementmethod.BetterLinkMovementMethod
 
 
@@ -20,7 +26,9 @@ class MessagesRecyclerAdapter(val loggedInPersonUid: Long)
 
     var presenter: ChatDetailPresenter? = null
 
-    class MessageWithPersonViewHolder(val binding: ItemMessageListBinding)
+
+    class MessageWithPersonViewHolder(val binding: ItemMessageListBinding,
+                                      var messageReadJob: Job? = null)
         : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageWithPersonViewHolder {
@@ -34,6 +42,8 @@ class MessagesRecyclerAdapter(val loggedInPersonUid: Long)
 
 
     override fun onBindViewHolder(holder: MessageWithPersonViewHolder, position: Int) {
+        holder.messageReadJob?.cancel()
+
         if(itemCount > 0 ) {
 
             val message = getItem(position)
@@ -43,6 +53,27 @@ class MessagesRecyclerAdapter(val loggedInPersonUid: Long)
 
             holder.binding.itemCommentsListLine2Text.text = message?.messageText
             addMovement(holder.binding.itemCommentsListLine2Text, holder.itemView.context)
+
+
+            //if message is unread
+            holder.messageReadJob = GlobalScope.launch {
+                delay(1000)
+
+                //GO and run the insert
+                if(message?.messageRead == null && message?.messageUid != null){
+                    presenter?.updateMessageRead(MessageRead(loggedInPersonUid, message.messageUid))
+
+                }
+
+
+                //TODO: Consider an event collator
+//                val collator = EventCollator<MessageRead>(200){
+//                    readMessages:List<MessageRead> ->
+//                        presenter?.updateMessageReadList(readMessages)
+//                }
+//                collator.send()
+                holder.messageReadJob = null
+            }
 
         }
     }

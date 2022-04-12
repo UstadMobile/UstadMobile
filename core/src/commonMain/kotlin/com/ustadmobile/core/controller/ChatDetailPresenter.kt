@@ -14,6 +14,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Chat
 import com.ustadmobile.lib.db.entities.ChatMember
 import com.ustadmobile.lib.db.entities.Message
+import com.ustadmobile.lib.db.entities.MessageRead
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -44,9 +45,12 @@ class ChatDetailPresenter(
         super.onCreate(savedState)
         chatUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         otherPersonUid = arguments[ARG_PERSON_UID]?.toLong() ?: 0L
-        view.messageList = repo.messageDao.findAllMessagesByChatUid(chatUid, Chat.TABLE_ID)
-
         loggedInPersonUid = accountManager.activeAccount.personUid
+
+        view.messageList =
+            repo.messageDao.findAllMessagesByChatUid(chatUid, Chat.TABLE_ID, loggedInPersonUid)
+
+
 
         presenterScope.launch{
             val chatTitle = repo.chatDao.getTitleChat(
@@ -56,6 +60,12 @@ class ChatDetailPresenter(
 
             //Lookup the chat
             if(chatUid == 0L){
+                chatUid =
+                    repo.chatDao.getChatByOtherPerson(otherPersonUid, loggedInPersonUid)?.chatUid?:0L
+                view.messageList = repo.messageDao.findAllMessagesByChatUid(
+                    chatUid,
+                    Chat.TABLE_ID,
+                    loggedInPersonUid)
 
             }
         }
@@ -118,7 +128,27 @@ class ChatDetailPresenter(
             }
 
             if (updateListNeeded) {
-                view.messageList = repo.messageDao.findAllMessagesByChatUid(chatUid, Chat.TABLE_ID)
+                view.messageList = repo.messageDao.findAllMessagesByChatUid(
+                    chatUid,
+                    Chat.TABLE_ID,
+                    loggedInPersonUid)
+            }
+
+        }
+    }
+
+    fun updateMessageRead(messageRead: MessageRead){
+        presenterScope.launch {
+            repo.withDoorTransactionAsync(UmAppDatabase::class){ txRepo ->
+                txRepo.messageReadDao.insertAsync(messageRead)
+            }
+        }
+    }
+
+    fun updateMessageReadList(messageReadList: List<MessageRead>){
+        presenterScope.launch {
+            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+                txRepo.messageReadDao.insertList(messageReadList)
             }
 
         }

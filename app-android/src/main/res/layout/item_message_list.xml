@@ -62,7 +62,6 @@
                 android:layout_marginBottom="@dimen/dimen_16dp"
                 android:paddingStart="0dp"
                 android:paddingEnd="16dp"
-
                 app:chatMessageOrientation="@{message}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/item_comments_list_line3_text"

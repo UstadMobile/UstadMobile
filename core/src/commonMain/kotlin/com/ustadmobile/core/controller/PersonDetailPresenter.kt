@@ -91,6 +91,12 @@ class PersonDetailPresenter(context: Any,
         }
     }
 
+    fun handleClickChat(){
+        val personUid = view.entity?.personUid ?: return
+        val args = mapOf(UstadView.ARG_PERSON_UID to personUid.toString())
+        systemImpl.go(ChatDetailView.VIEW_NAME, args, context)
+    }
+
     companion object {
         const val SAVEDSTATE_KEY_PERSON = "Person"
     }
