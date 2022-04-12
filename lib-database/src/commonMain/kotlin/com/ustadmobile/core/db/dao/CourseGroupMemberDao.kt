@@ -78,6 +78,7 @@ abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
           FROM Person
                JOIN ClazzEnrolment 
                ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+               AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                
                LEFT JOIN CourseGroupMember
                ON CourseGroupMember.cgmPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
