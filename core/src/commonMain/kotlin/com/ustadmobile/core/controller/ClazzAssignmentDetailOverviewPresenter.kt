@@ -7,6 +7,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.io.ext.guessMimeType
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -142,6 +143,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 safeParseList(di, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
                 CourseAssignmentSubmissionWithAttachment::class, bundle[SAVED_STATE_ADD_SUBMISSION_LIST]
                 ?: ""))
+        view.addedCourseAssignmentSubmission = submissionList
 
         return entity
     }
@@ -194,7 +196,9 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 submissionList.add(submission)
                 view.addedCourseAssignmentSubmission = submissionList
             }
-            requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+            }
         }
 
         observeSavedStateResult(SAVED_STATE_KEY_TEXT, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
@@ -209,7 +213,9 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             submission.casSubmitterUid = accountManager.activeAccount.personUid
             submissionList.add(submission)
             view.addedCourseAssignmentSubmission = submissionList
-            requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
+            }
         }
 
     }
