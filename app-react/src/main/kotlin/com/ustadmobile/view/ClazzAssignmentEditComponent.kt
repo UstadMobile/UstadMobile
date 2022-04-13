@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
+import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.FieldLabel
@@ -24,7 +24,7 @@ import react.setState
 import styled.css
 import styled.styledDiv
 
-class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAssignmentWithCourseBlock>(mProps),
+class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBlockWithEntity>(mProps),
     ClazzAssignmentEditView {
 
     private var mPresenter: ClazzAssignmentEditPresenter? = null
@@ -32,7 +32,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
     override val viewNames: List<String>
         get() = listOf(ClazzAssignmentEditView.VIEW_NAME)
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzAssignmentWithCourseBlock>?
+    override val mEditPresenter: UstadEditPresenter<*, CourseBlockWithEntity>?
         get() = mPresenter
 
     private var nameLabel = FieldLabel(text = getString(MessageID.title))
@@ -225,7 +225,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
             }
         }
 
-    override var entity: ClazzAssignmentWithCourseBlock? = null
+    override var entity: CourseBlockWithEntity? = null
         get() = field
         set(value) {
             setState {
@@ -252,13 +252,13 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
                     umTextField(label = "${nameLabel.text}",
                         helperText = nameLabel.errorText,
-                        value = entity?.caTitle,
+                        value = entity?.assignment?.caTitle,
                         error = nameLabel.error,
                         disabled = !fieldsEnabled,
                         variant = FormControlVariant.outlined,
                         onChange = {
                             setState {
-                                entity?.caTitle = it
+                                entity?.assignment?.caTitle = it
                                 caTitleError = null
                             }
                         }
@@ -266,13 +266,13 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
                     umTextField(label = "${descriptionLabel.text}",
                         helperText = descriptionLabel.errorText,
-                        value = entity?.caDescription,
+                        value = entity?.assignment?.caDescription,
                         error = descriptionLabel.error,
                         disabled = !fieldsEnabled,
                         variant = FormControlVariant.outlined,
                         onChange = {
                             setState {
-                                entity?.caDescription = it
+                                entity?.assignment?.caDescription = it
                             }
                         }
                     )
@@ -319,7 +319,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
                             umTextFieldSelect(
                                 "${completionCriteriaLabel.text}",
-                                entity?.block?.cbCompletionCriteria.toString(),
+                                entity?.cbCompletionCriteria.toString(),
                                 completionCriteriaLabel.errorText ?: "",
                                 error = completionCriteriaLabel.error,
                                 values = completionCriteriaOptions?.map {
@@ -327,7 +327,8 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 }?.toList(),
                                 onChange = {
                                     setState {
-                                        entity?.block?.cbCompletionCriteria = it.toInt()
+                                        entity?.cbCompletionCriteria = it.toInt()
+                                        completionCriteriaLabel.errorText = null
                                     }
                                 }
                             )
@@ -337,13 +338,13 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextField(label = "${maxPointsLabel.text}",
                                 helperText = maxPointsLabel.errorText,
-                                value = entity?.block?.cbMaxPoints.toString(),
+                                value = entity?.cbMaxPoints.toString(),
                                 error = maxPointsLabel.error,
                                 disabled = !fieldsEnabled,
                                 variant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        entity?.block?.cbMaxPoints = it.toInt()
+                                        entity?.cbMaxPoints = it.toInt()
                                         caMaxPointsError = null
                                     }
                                 })
@@ -396,9 +397,9 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
                     umItem {
                         css(defaultMarginTop)
-                        renderListItemWithTitleAndSwitch(getString(MessageID.require_file_submission), entity?.caRequireFileSubmission ?: false){
+                        renderListItemWithTitleAndSwitch(getString(MessageID.require_file_submission), entity?.assignment?.caRequireFileSubmission ?: false){
                             setState {
-                                entity?.caRequireFileSubmission = !(entity?.caRequireFileSubmission ?: false)
+                                entity?.assignment?.caRequireFileSubmission = !(entity?.assignment?.caRequireFileSubmission ?: false)
                             }
                         }
                     }
@@ -407,7 +408,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         umItem(GridSize.cells12, GridSize.cells4 ) {
                             umTextFieldSelect(
                                 "${fileTypeLabel.text}",
-                                entity?.caFileType.toString(),
+                                entity?.assignment?.caFileType.toString(),
                                 fileTypeLabel.errorText ?: "",
                                 error = fileTypeLabel.error,
                                 values = fileTypeOptions?.map {
@@ -415,7 +416,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 }?.toList(),
                                 onChange = {
                                     setState {
-                                        entity?.caFileType = it.toInt()
+                                        entity?.assignment?.caFileType = it.toInt()
                                     }
                                 }
                             )
@@ -424,13 +425,13 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         umItem(GridSize.cells12, GridSize.cells4 ) {
                             umTextField(label = "${fileSizeLimitLabel.text}",
                                 helperText = fileSizeLimitLabel.errorText,
-                                value = entity?.caSizeLimit.toString(),
+                                value = entity?.assignment?.caSizeLimit.toString(),
                                 error = fileSizeLimitLabel.error,
                                 disabled = !fieldsEnabled,
                                 variant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        entity?.caSizeLimit = it.toInt()
+                                        entity?.assignment?.caSizeLimit = it.toInt()
                                     }
                                 }
                             )
@@ -439,13 +440,13 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         umItem(GridSize.cells12, GridSize.cells4 ) {
                             umTextField(label = "${fileNumberLimitLabel.text}",
                                 helperText = fileNumberLimitLabel.errorText,
-                                value = entity?.caNumberOfFiles.toString(),
+                                value = entity?.assignment?.caNumberOfFiles.toString(),
                                 error = fileNumberLimitLabel.error,
                                 disabled = !fieldsEnabled,
                                 variant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        entity?.caNumberOfFiles = it.toInt()
+                                        entity?.assignment?.caNumberOfFiles = it.toInt()
                                     }
                                 }
                             )
@@ -454,9 +455,9 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
                     umItem {
                         css(defaultMarginTop)
-                        renderListItemWithTitleAndSwitch(getString(MessageID.require_text_submission), entity?.caRequireTextSubmission ?: false){
+                        renderListItemWithTitleAndSwitch(getString(MessageID.require_text_submission), entity?.assignment?.caRequireTextSubmission ?: false){
                             setState {
-                                entity?.caRequireTextSubmission = !(entity?.caRequireTextSubmission ?: false)
+                                entity?.assignment?.caRequireTextSubmission = !(entity?.assignment?.caRequireTextSubmission ?: false)
                             }
                         }
                     }
@@ -465,7 +466,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextFieldSelect(
                                 "${textLimitTypeLabel.text}",
-                                entity?.caTextLimitType.toString(),
+                                entity?.assignment?.caTextLimitType.toString(),
                                 textLimitTypeLabel.errorText ?: "",
                                 error = textLimitTypeLabel.error,
                                 values = textLimitTypeOptions?.map {
@@ -473,7 +474,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 }?.toList(),
                                 onChange = {
                                     setState {
-                                        entity?.caTextLimitType = it.toInt()
+                                        entity?.assignment?.caTextLimitType = it.toInt()
                                     }
                                 }
                             )
@@ -482,13 +483,13 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextField(label = "${textLimitMaxLabel.text}",
                                 helperText = textLimitMaxLabel.errorText,
-                                value = entity?.caTextLimit.toString(),
+                                value = entity?.assignment?.caTextLimit.toString(),
                                 error = textLimitMaxLabel.error,
                                 disabled = !fieldsEnabled,
                                 variant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        entity?.caTextLimit = it.toInt()
+                                        entity?.assignment?.caTextLimit = it.toInt()
                                     }
                                 }
                             )
@@ -500,7 +501,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextFieldSelect(
                                 "${editAfterSubLabel.text}",
-                                entity?.caEditAfterSubmissionType.toString(),
+                                entity?.assignment?.caEditAfterSubmissionType.toString(),
                                 editAfterSubLabel.errorText ?: "",
                                 error = editAfterSubLabel.error,
                                 values = editAfterSubmissionOptions?.map {
@@ -508,7 +509,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 }?.toList(),
                                 onChange = {
                                     setState {
-                                        entity?.caEditAfterSubmissionType = it.toInt()
+                                        entity?.assignment?.caEditAfterSubmissionType = it.toInt()
                                     }
                                 }
                             )
@@ -517,7 +518,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                         umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextFieldSelect(
                                 "${markedByLabel.text}",
-                                entity?.caMarkingType.toString(),
+                                entity?.assignment?.caMarkingType.toString(),
                                 markedByLabel.errorText ?: "",
                                 error = markedByLabel.error,
                                 values = markingTypeOptions?.map {
@@ -525,7 +526,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 }?.toList(),
                                 onChange = {
                                     setState {
-                                        entity?.caMarkingType = it.toInt()
+                                        entity?.assignment?.caMarkingType = it.toInt()
                                     }
                                 }
                             )
@@ -534,18 +535,18 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
                     umItem {
                         css(defaultMarginTop)
-                        renderListItemWithTitleAndSwitch(getString(MessageID.allow_class_comments), entity?.caClassCommentEnabled ?: false){
+                        renderListItemWithTitleAndSwitch(getString(MessageID.allow_class_comments), entity?.assignment?.caClassCommentEnabled ?: false){
                             setState {
-                                entity?.caClassCommentEnabled = !(entity?.caClassCommentEnabled ?: false)
+                                entity?.assignment?.caClassCommentEnabled = !(entity?.assignment?.caClassCommentEnabled ?: false)
                             }
                         }
                     }
 
                     umItem {
                         renderListItemWithTitleAndSwitch(getString(MessageID.allow_private_comments_from_students),
-                            entity?.caPrivateCommentsEnabled ?: false){
+                            entity?.assignment?.caPrivateCommentsEnabled ?: false){
                             setState {
-                                entity?.caPrivateCommentsEnabled = !(entity?.caPrivateCommentsEnabled ?: false)
+                                entity?.assignment?.caPrivateCommentsEnabled = !(entity?.assignment?.caPrivateCommentsEnabled ?: false)
                             }
                         }
                     }

@@ -9,6 +9,7 @@
         <import type="android.view.View" />
         <import type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock"/>
         <import type="com.ustadmobile.port.android.view.SubmissionAdapter"/>
+        <import type="android.text.Html"/>
 
         <variable
             name="showFiles"
@@ -79,7 +80,7 @@
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
-            android:text="@{fileSubmission.casText}"
+            android:text="@{Html.fromHtml(fileSubmission.casText)}"
             android:maxLines="3"
             android:ellipsize="end"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"

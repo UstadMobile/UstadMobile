@@ -143,6 +143,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 safeParseList(di, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
                 CourseAssignmentSubmissionWithAttachment::class, bundle[SAVED_STATE_ADD_SUBMISSION_LIST]
                 ?: ""))
+        view.addedCourseAssignmentSubmission = submissionList
 
         return entity
     }

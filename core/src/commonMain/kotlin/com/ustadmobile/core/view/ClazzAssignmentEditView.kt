@@ -1,11 +1,11 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
+import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 
 
-interface ClazzAssignmentEditView: UstadEditView<ClazzAssignmentWithCourseBlock> {
+interface ClazzAssignmentEditView: UstadEditView<CourseBlockWithEntity> {
 
     var caGracePeriodError: String?
     var caDeadlineError: String?

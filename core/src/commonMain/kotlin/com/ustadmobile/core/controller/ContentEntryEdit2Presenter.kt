@@ -185,8 +185,9 @@ class ContentEntryEdit2Presenter(
             }
             view.fileImportErrorVisible = false
             view.loading = false
-
-            requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
+            }
         }
 
         observeSavedStateResult(

@@ -156,7 +156,7 @@
             android:contentDescription="@string/school"
             app:tint="?colorOnIconTint"
             android:src="@drawable/ic_done_white_24dp"
-            android:visibility="@{assignment.progressSummary.hasMetricsPermission ? View.GONE : View.VISIBLE}"
+            android:visibility="@{assignment.progressSummary.hasMetricsPermission || assignment.fileSubmissionStatus == 0 ? View.GONE : View.VISIBLE}"
             app:imageLookupKey="@{assignment.fileSubmissionStatus}"
             app:imageLookupMap="@{ClazzAssignmentDetailOverviewFragment.ASSIGNMENT_STATUS_MAP}"
             app:layout_constraintStart_toStartOf="@+id/item_block_line1_text"
