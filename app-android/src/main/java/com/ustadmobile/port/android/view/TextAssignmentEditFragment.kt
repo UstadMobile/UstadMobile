@@ -14,6 +14,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentAssignmentTextEditBinding
 import com.ustadmobile.core.controller.TextAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.util.ext.countWords
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.TextAssignmentEditView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
@@ -52,7 +53,7 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 // this is kept in beforeTextChanged to stop user from typing more words
                 val editText = aztec?.visualEditor ?: return
-                val length = if(limitType == ClazzAssignment.TEXT_WORD_LIMIT) countWords(s.toString()) else s.toString().length
+                val length = if(limitType == ClazzAssignment.TEXT_WORD_LIMIT) s.toString().countWords() else s.toString().length
 
                 if (length > charWordLimit) {
                     setCharLimit(editText, editText.text.length)
@@ -90,7 +91,7 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
                     else requireContext().getString(R.string.words)
 
             val text = entity?.casText ?: ""
-            val wordsLength = if(limitType == ClazzAssignment.TEXT_WORD_LIMIT) countWords(text) else text.length
+            val wordsLength = if(limitType == ClazzAssignment.TEXT_WORD_LIMIT) text.countWords() else text.length
             // count == 0 means a new word is going to start
             mBinding?.wordLimit?.text = "$wordsLength/$charWordLimit $limitTypeText"
 
@@ -111,12 +112,6 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
         }
 
         return super.onOptionsItemSelected(item)
-    }
-
-    private fun countWords(s: String): Int {
-        val trim = s.trim()
-        return if (trim.isEmpty()) 0 else trim.split(" ").size
-        // separate string around spaces
     }
 
     private var filter: InputFilter? = null
@@ -174,7 +169,7 @@ class TextAssignmentEditFragment: UstadEditFragment<CourseAssignmentSubmission>(
                 aztec?.visualEditor?.fromHtml(termsHtmlVal)
 
             val text = value?.casText ?: ""
-            val wordsLength = if(limitType == ClazzAssignment.TEXT_WORD_LIMIT) countWords(text) else text.length
+            val wordsLength = if(limitType == ClazzAssignment.TEXT_WORD_LIMIT) text.countWords() else text.length
             // count == 0 means a new word is going to start
             mBinding?.wordLimit?.text = "$wordsLength/$charWordLimit $limitTypeText"
         }
