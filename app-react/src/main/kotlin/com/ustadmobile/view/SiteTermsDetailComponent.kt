@@ -31,7 +31,7 @@ class SiteTermsDetailComponent(props: UmProps): UstadDetailComponent<SiteTerms>(
         get() = field
         set(value) {
             field = value
-            updateUiWithStateChangeDelay(STATE_CHANGE_DELAY * 5) {
+            updateUiWithStateChangeDelay(MAX_STATE_CHANGE_DELAY_TIME * 2) {
                 fabManager?.visible = value
             }
         }

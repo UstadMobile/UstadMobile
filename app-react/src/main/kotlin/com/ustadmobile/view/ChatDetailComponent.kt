@@ -28,7 +28,6 @@ import react.Props
 import react.RBuilder
 import react.setState
 import styled.css
-import styled.styledDiv
 
 class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props), ChatDetailView {
 
@@ -90,7 +89,7 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                 +defaultPaddingTop
             }
 
-            styledDiv {
+            umItem {
                 css{
                     margin(bottom = 10.spacingUnits)
                 }

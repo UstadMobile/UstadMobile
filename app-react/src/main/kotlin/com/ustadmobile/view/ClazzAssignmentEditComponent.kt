@@ -319,7 +319,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
 
                             umTextFieldSelect(
                                 "${completionCriteriaLabel.text}",
-                                entity?.caCompletionCriteria.toString(),
+                                entity?.block?.cbCompletionCriteria.toString(),
                                 completionCriteriaLabel.errorText ?: "",
                                 error = completionCriteriaLabel.error,
                                 values = completionCriteriaOptions?.map {
@@ -327,8 +327,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<ClazzAss
                                 }?.toList(),
                                 onChange = {
                                     setState {
-                                        entity?.caCompletionCriteria = it.toInt()
-                                        completionCriteriaOptions = null
+                                        entity?.block?.cbCompletionCriteria = it.toInt()
                                     }
                                 }
                             )

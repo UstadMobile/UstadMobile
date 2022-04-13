@@ -3,20 +3,27 @@ package com.ustadmobile.navigation
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.door.ext.toUrlQueryString
 import com.ustadmobile.navigation.RouteManager.firstDestination
 import com.ustadmobile.redux.ReduxAppStateManager
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxNavStackState
 import com.ustadmobile.util.getViewNameFromUrl
 import kotlinx.browser.window
+import kotlin.js.Date
 
-class NavControllerJs: UstadNavController {
+class NavControllerJs : UstadNavController {
 
     private val navStack: MutableList<UstadBackStackEntryJs> = ReduxAppStateManager.getCurrentState().navStack.stack
 
     override val currentBackStackEntry: UstadBackStackEntry?
         get() = navStack.lastOrNull()
+
+    init {
+        window.onpopstate = {
+            console.log("JS-LOG", it)
+        }
+    }
 
     override fun getBackStackEntry(viewName: String): UstadBackStackEntry? {
         return navStack.lastOrNull { it.viewName == viewName }
@@ -29,7 +36,8 @@ class NavControllerJs: UstadNavController {
             return
         }
 
-        var splitIndex = navStack.indexOfLast { it.viewName == viewName } + 1
+        val indexToPopTo = navStack.indexOfLast { it.viewName == viewName }
+        var splitIndex = indexToPopTo + 1
 
         if(inclusive)
             splitIndex--
@@ -38,15 +46,16 @@ class NavControllerJs: UstadNavController {
             navStack.removeAll(navStack.subList(splitIndex, navStack.size))
             dispatch(ReduxNavStackState(navStack))
         }
-
         currentBackStackEntry?.let { entry ->
-            navigateInternal(entry.viewName, entry.arguments, false)
+            navigateInternal(entry.viewName, entry.arguments.toMutableMap(),(navStack.size - indexToPopTo) * -1)
         }
     }
 
-    override fun navigate(viewName: String,
-                          args: Map<String, String>,
-                          goOptions: UstadMobileSystemCommon.UstadGoOptions) {
+    override fun navigate(
+        viewName: String,
+        args: Map<String, String>,
+        goOptions: UstadMobileSystemCommon.UstadGoOptions
+    ) {
         if(viewName.isEmpty()){
             navigateUp()
             return
@@ -59,17 +68,25 @@ class NavControllerJs: UstadNavController {
         if(popUpToViewName != null)
             popBackStack(popUpToViewName, goOptions.popUpToInclusive)
 
-        navigateInternal(viewName, args, goOptions.popUpToViewName?.isNotEmpty() == true)
+        navigateInternal(viewName, args.toMutableMap(),  0)
     }
 
-    private fun navigateInternal(viewName: String, args: Map<String, String>, hasOption: Boolean = false){
+    private fun navigateInternal(
+        viewName: String,
+        args: MutableMap<String, String>,
+        stepsToGoBackInHistory: Int = 0
+    ){
+        val backIdArg = mapOf("backstackId" to Date().getTime().toString())
         val params = when {
-            args.isEmpty() -> ""
-            else -> "?${UMFileUtil.mapToQueryString(args)}"
+            args.isEmpty() -> "?${backIdArg.toUrlQueryString()}"
+            else -> {
+                args.putAll(backIdArg)
+                "?${args.toUrlQueryString()}"
+            }
         }
 
-        if(hasOption){
-            window.location.replace("#/$viewName$params")
+        if(stepsToGoBackInHistory != 0){
+            window.history.go(stepsToGoBackInHistory)
         }else{
             window.location.assign("#/$viewName$params")
         }

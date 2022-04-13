@@ -83,7 +83,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
         }
 
     private fun updateSubmitButtonVisibility(){
-        updateUiWithStateChangeDelay(STATE_CHANGE_DELAY * 2) {
+        updateUiWithStateChangeDelay(MAX_STATE_CHANGE_DELAY_TIME) {
             fabManager?.visible = !hasPassedDeadline
                     && !addedCourseAssignmentSubmission.isNullOrEmpty()
         }
