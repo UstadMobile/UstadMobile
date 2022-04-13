@@ -4,10 +4,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ext.toDeepLink
-import com.ustadmobile.core.view.ClazzAssignmentDetailView
-import com.ustadmobile.core.view.ClazzDetailOverviewView
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -100,6 +97,15 @@ class ClazzDetailOverviewPresenter(
         ustadNavController.navigate(
             ClazzAssignmentDetailView.VIEW_NAME,
             mapOf(ARG_ENTITY_UID to assignment.caUid.toString()))
+    }
+
+    fun handleClickTextBlock(courseBlock: CourseBlockWithCompleteEntity){
+        val args = mutableMapOf<String, String>()
+        args[HtmlTextViewDetailView.DISPLAY_TEXT] = courseBlock.cbDescription ?: ""
+        args[HtmlTextViewDetailView.DISPLAY_TITLE] = courseBlock.cbTitle ?: ""
+
+        ustadNavController.navigate(
+            HtmlTextViewDetailView.VIEW_NAME, args)
     }
 
     fun handleDownloadAllClicked() {

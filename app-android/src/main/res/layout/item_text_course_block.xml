@@ -14,12 +14,17 @@
             name="block"
             type="CourseBlockWithCompleteEntity" />
 
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ClazzDetailOverviewPresenter" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
+        android:onClick="@{() -> presenter.handleClickTextBlock(block)}"
         app:courseBlockIndent="@{block.cbIndentLevel}">
 
 

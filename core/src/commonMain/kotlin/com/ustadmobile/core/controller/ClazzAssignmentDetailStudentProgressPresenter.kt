@@ -7,11 +7,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
+import com.ustadmobile.core.view.HtmlTextViewDetailView
 import com.ustadmobile.core.view.SessionListView
-import com.ustadmobile.core.view.TextAssignmentEditView
-import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
@@ -28,15 +26,27 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map<String, String>, view: ClazzAssignmentDetailStudentProgressView,
-                                                    di: DI, lifecycleOwner: DoorLifecycleOwner,
-                                                    val newPrivateCommentListener: DefaultNewCommentItemListener =
-                                                            DefaultNewCommentItemListener(di, context,
-                                                                    arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0L,
-                                                                    ClazzAssignment.TABLE_ID, false,
-                                                                    arguments[ARG_PERSON_UID]?.toLong() ?: 0L))
-    : UstadDetailPresenter<ClazzAssignmentDetailStudentProgressView, ClazzAssignmentWithCourseBlock>(context, arguments, view, di, lifecycleOwner),
-        NewCommentItemListener by newPrivateCommentListener, ContentWithAttemptListener {
+class ClazzAssignmentDetailStudentProgressPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: ClazzAssignmentDetailStudentProgressView,
+    di: DI,
+    lifecycleOwner: DoorLifecycleOwner,
+    val newPrivateCommentListener: DefaultNewCommentItemListener =
+        DefaultNewCommentItemListener(
+            di,
+            context,
+            arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0L,
+            ClazzAssignment.TABLE_ID,
+            false,
+            arguments[ARG_PERSON_UID]?.toLong() ?: 0L)
+) : UstadDetailPresenter<ClazzAssignmentDetailStudentProgressView, ClazzAssignmentWithCourseBlock>(
+    context,
+    arguments,
+    view,
+    di,
+    lifecycleOwner
+), NewCommentItemListener by newPrivateCommentListener, ContentWithAttemptListener {
 
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
@@ -118,10 +128,10 @@ class ClazzAssignmentDetailStudentProgressPresenter(context: Any, arguments: Map
             if(submissionCourse.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
 
                 val args = mutableMapOf<String, String>()
-                args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON,
-                        CourseAssignmentSubmissionWithAttachment.serializer(), submissionCourse)
-                args[TextAssignmentEditView.EDIT_ENABLED] = isEditable.toString()
-                systemImpl.go(TextAssignmentEditView.VIEW_NAME, args, context)
+                args[HtmlTextViewDetailView.DISPLAY_TEXT] = submissionCourse.casText ?: ""
+
+                ustadNavController.navigate(
+                    HtmlTextViewDetailView.VIEW_NAME, args)
 
             }else if(submissionCourse.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE) {
                 val attachment = submissionCourse.attachment ?: return@launch
