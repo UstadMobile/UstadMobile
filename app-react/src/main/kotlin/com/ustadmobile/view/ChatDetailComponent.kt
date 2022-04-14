@@ -68,9 +68,13 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
     override var entity: Chat? = null
         get() = field
         set(value) {
-            ustadComponentTitle = value?.chatTitle
             setState {
                 field = value
+            }
+            if(value?.chatTitle != null){
+                updateUiWithStateChangeDelay {
+                    ustadComponentTitle = value.chatTitle
+                }
             }
         }
 

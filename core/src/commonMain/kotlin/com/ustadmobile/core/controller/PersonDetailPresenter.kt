@@ -79,6 +79,12 @@ class PersonDetailPresenter(context: Any,
         )
     }
 
+    fun handleClickChat(){
+        systemImpl.go(ChatDetailView.VIEW_NAME,
+            mapOf(ARG_ENTITY_UID to (arguments[ARG_ENTITY_UID]?.toLong() ?: 0L).toString()),
+            context)
+    }
+
     fun handleClickManageParentalConsent() {
         val ppjUid = entityLiveData?.getValue()?.parentJoin?.ppjUid ?: 0
 
