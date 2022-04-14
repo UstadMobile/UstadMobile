@@ -72,6 +72,17 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>{
     abstract fun getListOfTopicsByDiscussion(discussionUid: Long)
         : DoorDataSourceFactory<Int, DiscussionTopicListDetail>
 
+    @Query("""
+        SELECT DiscussionTopic.*
+          FROM DiscussionTopic
+         WHERE DiscussionTopic.discussionTopicCourseDiscussionUid IN 
+                (SELECT CourseDiscussion.courseDiscussionUid 
+                   FROM CourseDiscussion
+                  WHERE CourseDiscussion.courseDiscussionClazzUid = :clazzUid ) 
+                        
+    """)
+    abstract suspend fun getTopicsByClazz(clazzUid: Long)
+        : List<DiscussionTopic>
 
 
 }

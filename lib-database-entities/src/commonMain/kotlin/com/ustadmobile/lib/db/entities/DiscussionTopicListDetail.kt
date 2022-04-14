@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class DiscussionTopicListDetail() : DiscussionTopic() {
 
+    //TODO: Rename to posts
     var numThreads: Int = 0
 
     var lastActiveTimestamp: Long = 0

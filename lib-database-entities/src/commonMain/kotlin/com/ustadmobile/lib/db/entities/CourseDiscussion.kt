@@ -45,6 +45,7 @@ open class CourseDiscussion() {
 
     var courseDiscussionClazzUid: Long = 0
 
+    //TODO: Get rid of this
     var courseDiscussionStartDate: Long = 0
 
     @LastChangedTime

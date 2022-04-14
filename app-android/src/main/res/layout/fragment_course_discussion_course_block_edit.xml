@@ -91,9 +91,9 @@
                     android:id="@+id/fragment_course_discussion_course_block_edit_desc_tiet"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@={block.cbDescription}"
-                    tools:hint="@string/description"
-                    android:hint="@{StringExtKt.optional(context, @string/description)}" />
+                    android:text="@={block.courseDiscussion.courseDiscussionDesc}"
+                    android:hint="@string/description"
+                     />
             </com.google.android.material.textfield.TextInputLayout>
 
 

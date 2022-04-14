@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
-import com.ustadmobile.lib.db.entities.CourseDiscussion
 
 interface CourseDiscussionEditView: UstadEditView<CourseBlockWithEntity> {
 

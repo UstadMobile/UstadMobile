@@ -80,7 +80,7 @@ class CourseDiscussionEditPresenter(context: Any,
         presenterScope.launch {
 
 
-            clazzUid = editEntity.assignment?.caClazzUid ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
+            clazzUid = editEntity.courseDiscussion?.courseDiscussionClazzUid ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
             val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
                 it.clazzDao.getClazzWithSchool(clazzUid)
             } ?: ClazzWithSchool()

@@ -41,6 +41,8 @@ class ChatDetailPresenter(
 
     var loggedInPersonUid: Long = 0
 
+    val ps = presenterScope
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         chatUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
@@ -80,14 +82,11 @@ class ChatDetailPresenter(
     fun handleClickLink(link: String){
         val systemImpl: UstadMobileSystemImpl by instance()
         if(link.contains(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
-            val endpointUrl =
-                link.substringBefore(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER)
-                    .requirePostfix("/")
+
             val viewUri =
                 link.substringAfter(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER)
 
-            //TODO: call systemImpl go with args
-            systemImpl.go(viewUri, mapOf(), context)
+            systemImpl.goToViewLink(viewUri, context)
         }else{
 
             //Send link to android system

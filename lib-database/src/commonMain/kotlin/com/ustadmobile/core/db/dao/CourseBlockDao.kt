@@ -95,7 +95,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
            AND cbActive
       ORDER BY cbIndex
           """)
-    abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntity>
+    abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntityDb>
 
     @Query("""
          WITH CtePermissionCheck (hasPermission) 
