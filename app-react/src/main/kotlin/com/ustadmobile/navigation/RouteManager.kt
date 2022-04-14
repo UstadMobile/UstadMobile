@@ -80,6 +80,7 @@ object RouteManager {
         UstadDestination(view = ClazzAssignmentDetailStudentProgressView.VIEW_NAME, component = ClazzAssignmentDetailStudentProgressComponent::class),
         UstadDestination(view = SessionListView.VIEW_NAME, component = SessionListComponent::class, showSearch = true),
         UstadDestination(view = TextAssignmentEditView.VIEW_NAME, component = TextAssignmentEditComponent::class),
+        UstadDestination(view = HtmlTextViewDetailView.VIEW_NAME, component = HtmlTextViewComponent::class),
         UstadDestination(view = SelectFileView.VIEW_NAME, component = SelectFileComponent::class),
         UstadDestination(view = StatementListView.VIEW_NAME, component = StatementListComponent::class),
         UstadDestination(view = ReportTemplateListView.VIEW_NAME, component = ReportTemplateListComponent::class),

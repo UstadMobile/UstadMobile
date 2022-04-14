@@ -251,16 +251,20 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         FROM PersonGroupMember
         ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
         
-         WHERE
-         PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-         AND PersonGroupMember.groupMemberActive 
-        AND Person.personUid IN (SELECT clazzEnrolmentPersonUid FROM ClazzEnrolment 
-        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid AND ClazzEnrolment.clazzEnrolmentActive 
-        AND ClazzEnrolment.clazzEnrolmentRole = :roleId AND (:filter != $FILTER_ACTIVE_ONLY 
-        OR (:currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
-        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
-        GROUP BY Person.personUid
-        ORDER BY CASE(:sortOrder)
+         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+           AND PersonGroupMember.groupMemberActive 
+           AND Person.personUid IN (SELECT clazzEnrolmentPersonUid 
+                                      FROM ClazzEnrolment 
+                                     WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                                       AND ClazzEnrolment.clazzEnrolmentActive 
+                                       AND ClazzEnrolment.clazzEnrolmentRole = :roleId 
+                                       AND (:filter != $FILTER_ACTIVE_ONLY 
+                                        OR (:currentTime 
+                                            BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+                                            AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
+          AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+     GROUP BY Person.personUid
+     ORDER BY CASE(:sortOrder)
                 WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
                 WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
                 ELSE ''

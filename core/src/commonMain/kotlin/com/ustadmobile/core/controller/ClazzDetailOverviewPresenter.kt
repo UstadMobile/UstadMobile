@@ -99,6 +99,15 @@ class ClazzDetailOverviewPresenter(
             mapOf(ARG_ENTITY_UID to assignment.caUid.toString()))
     }
 
+    fun handleClickTextBlock(courseBlock: CourseBlockWithCompleteEntity){
+        val args = mutableMapOf<String, String>()
+        args[HtmlTextViewDetailView.DISPLAY_TEXT] = courseBlock.cbDescription ?: ""
+        args[HtmlTextViewDetailView.DISPLAY_TITLE] = courseBlock.cbTitle ?: ""
+
+        ustadNavController.navigate(
+            HtmlTextViewDetailView.VIEW_NAME, args)
+    }
+
     fun handleDownloadAllClicked() {
 
     }

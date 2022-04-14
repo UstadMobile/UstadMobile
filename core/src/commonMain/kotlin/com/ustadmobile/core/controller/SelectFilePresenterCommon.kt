@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.UstadView
@@ -32,7 +33,8 @@ class SelectFilePresenterCommon(
                         it,true)
                 }
             }
-            (arguments[UstadView.ARG_RESULT_DEST_VIEWNAME] == ContentEntryEdit2View.VIEW_NAME) -> {
+            (arguments[UstadView.ARG_RESULT_DEST_VIEWNAME] == ContentEntryEdit2View.VIEW_NAME)
+                    || arguments[UstadView.ARG_RESULT_DEST_VIEWNAME] == ClazzAssignmentDetailView.VIEW_NAME -> {
                 finishWithResult(
                     safeStringify(di,
                     ListSerializer(String.serializer()),

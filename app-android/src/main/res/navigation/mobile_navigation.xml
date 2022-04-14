@@ -383,6 +383,10 @@
         android:name="com.ustadmobile.port.android.view.TextCourseBlockEditFragment" />
 
     <fragment
+        android:id="@+id/text_html_view_detail_dest"
+        android:name="com.ustadmobile.port.android.view.HtmlTextViewFragment" />
+
+    <fragment
         android:id="@+id/register_minor_wait_for_parent_dest"
         android:name="com.ustadmobile.port.android.view.RegisterMinorWaitForParentFragment"
         android:label="@string/almost_done"/>

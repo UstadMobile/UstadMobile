@@ -7,16 +7,14 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.io.ext.guessMimeType
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
-import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
-import com.ustadmobile.core.view.SelectFileView
-import com.ustadmobile.core.view.TextAssignmentEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.TextAssignmentEditView.Companion.EDIT_ENABLED
-import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
@@ -142,6 +140,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 safeParseList(di, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
                 CourseAssignmentSubmissionWithAttachment::class, bundle[SAVED_STATE_ADD_SUBMISSION_LIST]
                 ?: ""))
+        view.addedCourseAssignmentSubmission = submissionList
 
         return entity
     }
@@ -194,7 +193,9 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 submissionList.add(submission)
                 view.addedCourseAssignmentSubmission = submissionList
             }
-            requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
+            }
         }
 
         observeSavedStateResult(SAVED_STATE_KEY_TEXT, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
@@ -209,7 +210,9 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             submission.casSubmitterUid = accountManager.activeAccount.personUid
             submissionList.add(submission)
             view.addedCourseAssignmentSubmission = submissionList
-            requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
+            }
         }
 
     }
@@ -222,19 +225,28 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
     fun handleOpenSubmission(courseSubmission: CourseAssignmentSubmissionWithAttachment, canEdit: Boolean){
         presenterScope.launch {
             if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
-
-                val args = mutableMapOf<String, String>()
-                args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON,
-                        CourseAssignmentSubmissionWithAttachment.serializer(), courseSubmission)
-                args[EDIT_ENABLED] = canEdit.toString()
                 if(canEdit){
+
+                    val args = mutableMapOf<String, String>()
+                    args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON,
+                        CourseAssignmentSubmissionWithAttachment.serializer(), courseSubmission)
+                    args[EDIT_ENABLED] = canEdit.toString()
+
                     navigateForResult(
-                            NavigateForResultOptions(this@ClazzAssignmentDetailOverviewPresenter,
-                                    courseSubmission, TextAssignmentEditView.VIEW_NAME, CourseAssignmentSubmission::class,
-                                    CourseAssignmentSubmission.serializer(), SAVED_STATE_KEY_TEXT,
-                                    arguments = args))
+                            NavigateForResultOptions(
+                                this@ClazzAssignmentDetailOverviewPresenter,
+                                courseSubmission,
+                                TextAssignmentEditView.VIEW_NAME,
+                                CourseAssignmentSubmission::class,
+                                CourseAssignmentSubmission.serializer(),
+                                SAVED_STATE_KEY_TEXT,
+                                arguments = args))
                 }else{
-                    systemImpl.go(TextAssignmentEditView.VIEW_NAME, args, context)
+                    val args = mutableMapOf<String, String>()
+                    args[HtmlTextViewDetailView.DISPLAY_TEXT] = courseSubmission.casText ?: ""
+
+                    ustadNavController.navigate(
+                        HtmlTextViewDetailView.VIEW_NAME, args)
                 }
 
             }else if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE){

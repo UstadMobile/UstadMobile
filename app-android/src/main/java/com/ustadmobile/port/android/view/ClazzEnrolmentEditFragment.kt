@@ -44,6 +44,7 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
 
         mPresenter = ClazzEnrolmentEditPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di).withViewLifecycle()
+        mBinding?.presenter = mPresenter
 
         return rootView
     }

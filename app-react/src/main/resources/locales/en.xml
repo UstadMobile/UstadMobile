@@ -1835,4 +1835,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="type_here">Type here…</string>
 
+    <!-- used to display as an error when text is above the character or word limit -->
+    <string name="error_too_long_text">Text too long</string>
+
 </resources>

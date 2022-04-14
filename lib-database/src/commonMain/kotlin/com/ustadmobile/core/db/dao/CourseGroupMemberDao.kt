@@ -78,6 +78,8 @@ abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
           FROM Person
                JOIN ClazzEnrolment 
                ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+               AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+               AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
                
                LEFT JOIN CourseGroupMember
                ON CourseGroupMember.cgmPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
@@ -93,6 +95,8 @@ abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
           FROM Person
                JOIN ClazzEnrolment 
                ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+               AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
+               AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
                
                LEFT JOIN CourseGroupMember
                ON CourseGroupMember.cgmPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
