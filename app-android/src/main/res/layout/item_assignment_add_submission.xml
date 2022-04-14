@@ -53,7 +53,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/dimen_10dp"
-        app:onSelectableItemClicked="@{() -> eventHandler.onClickOpenSubmission(fileSubmission, notSubmitted)}"
+        app:onSelectableItemClicked="@{() -> eventHandler.onClickOpenSubmission(fileSubmission, notSubmitted &amp; !hasPassedDeadline)}"
         android:visibility="@{showFiles ? View.VISIBLE : View.GONE}"
         android:tag="@{fileSubmission.casUid}">
 

@@ -66,6 +66,23 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findEntryWithLanguageByEntryId")
     abstract suspend fun findEntryWithLanguageByEntryIdAsync(entryUuid: Long): ContentEntryWithLanguage?
 
+    @Query("""
+        SELECT ContentEntry.*, 
+               Language.*,
+               CourseBlock.*
+          FROM ContentEntry
+               LEFT JOIN Language 
+               ON Language.langUid = ContentEntry.primaryLanguageUid 
+               
+               LEFT JOIN CourseBlock
+               ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+               AND CourseBlock.cbEntityUid = :entityUid
+               
+         WHERE ContentEntry.contentEntryUid = :entityUid       
+    """)
+    @JsName("findEntryWithBlockAndLanguageByUidAsync")
+    abstract suspend fun findEntryWithBlockAndLanguageByUidAsync(entityUid: Long): ContentEntryWithBlockAndLanguage?
+
     @Query(ENTRY_WITH_CONTAINER_QUERY)
     abstract suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer?
 

@@ -7,25 +7,25 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_PARENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SHOW_ONLY_FOLDER_FILTER
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -253,6 +253,31 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         return false
     }
 
+    fun handleEntrySelectedFromPicker(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+        if(arguments.containsKey(ContentEntryEdit2View.BLOCK_REQUIRED)){
+            val args = mutableMapOf<String, String>()
+            args[ARG_LEAF] = true.toString()
+            args[ARG_PARENT_ENTRY_UID] = parentEntryUid.toString()
+            args[ARG_ENTITY_UID] = entry.contentEntryUid.toString()
+            args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
+            args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
+
+            navigateForResult(
+                NavigateForResultOptions(
+                    this, null,
+                    ContentEntryEdit2View.VIEW_NAME,
+                    ContentEntryWithBlockAndLanguage::class,
+                    ContentEntryWithBlockAndLanguage.serializer(),
+                    arguments = args
+                )
+            )
+        }else{
+            finishWithResult(
+                safeStringify(di, ListSerializer(ContentEntry.serializer()), listOf(entry))
+            )
+        }
+    }
+
     override fun handleClickCreateNewFab() {
         when (contentFilter) {
             ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
@@ -321,10 +346,12 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+        args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
+        args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
 
         navigateForResult(NavigateForResultOptions(
             this, null,
-            SelectFileView.VIEW_NAME,
+            SelectExtractFileView.VIEW_NAME,
             ContentEntry::class,
             ContentEntry.serializer(),
             arguments = args)
@@ -336,6 +363,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+        args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
+        args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
 
         navigateForResult(NavigateForResultOptions(
             this, null,
@@ -352,10 +381,12 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+        args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
+        args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
 
         navigateForResult(NavigateForResultOptions(
             this, null,
-            SelectFileView.VIEW_NAME,
+            SelectExtractFileView.VIEW_NAME,
             ContentEntry::class,
             ContentEntry.serializer(),
             arguments = args)

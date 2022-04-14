@@ -68,6 +68,7 @@ class ViewNameToDestMap: DestinationProvider {
             LeavingReasonEditView.VIEW_NAME to UstadDestination(R.id.leaving_reason_edit,
                     hideAccountIcon = true),
             SelectFileView.VIEW_NAME to UstadDestination(R.id.select_file_view),
+            SelectExtractFileView.VIEW_NAME to UstadDestination(R.id.select_extract_file_view),
             SelectFolderView.VIEW_NAME to UstadDestination(R.id.select_folder_view),
             ContentEntryImportLinkView.VIEW_NAME to UstadDestination(R.id.import_link_view),
             VideoContentView.VIEW_NAME to UstadDestination(R.id.video_content),

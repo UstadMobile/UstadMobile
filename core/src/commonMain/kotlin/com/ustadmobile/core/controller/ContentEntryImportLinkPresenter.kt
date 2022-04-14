@@ -10,7 +10,9 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.BLOCK_REQUIRED
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
@@ -68,6 +70,8 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                                 MetadataResult.serializer(), data)
                         args.putFromOtherMapIfPresent(arguments, ARG_LEAF)
                         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
+                        args.putFromOtherMapIfPresent(arguments, BLOCK_REQUIRED)
+                        args.putFromOtherMapIfPresent(arguments, UstadView.ARG_CLAZZUID)
 
                         navigateForResult(
                             NavigateForResultOptions(
