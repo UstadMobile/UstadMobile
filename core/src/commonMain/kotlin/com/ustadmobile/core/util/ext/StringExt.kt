@@ -98,3 +98,7 @@ fun String.capitalizeFirstLetter(): String {
  * Validate email address using regular expressions
  */
 expect fun String?.validEmail(): Boolean
+
+fun String.countWords(): Int {
+    return Regex("""(\s+|(\r\n|\r|\n))""").findAll(this.trim()).count() + 1
+}

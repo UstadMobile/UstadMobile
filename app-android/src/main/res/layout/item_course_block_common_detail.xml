@@ -7,12 +7,18 @@
 
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="android.text.InputType" />
+        <import type="android.view.View"/>
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
 
         <variable
             name="block"
             type="CourseBlock" />
+
+        <variable
+            name="minScoreVisible"
+            type="boolean" />
 
         <variable
             name="timeZone"
@@ -65,6 +71,10 @@
         <variable
             name="gracePeriodVisibility"
             type="int" />
+
+        <variable
+            name="completionCriteriaListener"
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
     </data>
 
@@ -141,19 +151,48 @@
             android:id="@+id/ca_edit_completion_criteria"
             app:layout_constraintStart_toStartOf="parent"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="@string/completion_criteria"
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
+            app:layout_constraintEnd_toStartOf="@+id/course_block_min_score"
             app:layout_constraintTop_toBottomOf="@+id/ca_timezone">
 
             <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:onMessageIdOptionSelected="@{completionCriteriaListener}"
                 app:messageIdOptions="@{completionCriteriaOptions}"
                 app:selectedMessageIdOption="@={block.cbCompletionCriteria}"
                 />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:id="@+id/course_block_min_score"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_20dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:hintEnabled="true"
+            app:suffixText="@string/points"
+            app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
+            android:visibility="@{minScoreVisible ? View.VISIBLE : View.GONE}"
+            app:layout_constraintWidth_percent="0.3"
+            app:layout_constraintStart_toEndOf="@id/ca_edit_completion_criteria"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ca_timezone">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ca_edit_min_score"
+                android:digits="0123456789"
+                android:inputType="number"
+                android:text="@={`` + block.cbMaxPoints}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

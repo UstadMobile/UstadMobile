@@ -305,6 +305,11 @@
         />
 
     <fragment
+        android:id="@+id/select_extract_file_view"
+        android:name="com.ustadmobile.port.android.view.SelectExtractFileFragment"
+        />
+
+    <fragment
         android:id="@+id/select_folder_view"
         android:name="com.ustadmobile.port.android.view.SelectFolderFragment"/>
 
@@ -376,6 +381,10 @@
     <fragment
         android:id="@+id/text_course_block_edit_dest"
         android:name="com.ustadmobile.port.android.view.TextCourseBlockEditFragment" />
+
+    <fragment
+        android:id="@+id/text_html_view_detail_dest"
+        android:name="com.ustadmobile.port.android.view.HtmlTextViewFragment" />
 
     <fragment
         android:id="@+id/register_minor_wait_for_parent_dest"

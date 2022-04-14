@@ -86,9 +86,15 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                LEFT JOIN ClazzAssignment as assignment
                ON assignment.caUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+               
                LEFT JOIN ContentEntry as entry
                ON entry.contentEntryUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+               
+               LEFT JOIN Language
+               ON Language.langUid = entry.primaryLanguageUid
+                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+               
          WHERE cbClazzUid = :clazzUid
            AND cbActive
       ORDER BY cbIndex
@@ -167,10 +173,13 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                             AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
                    ELSE 0 END) AS markedStudents,
                    
-                   (CASE WHEN CourseAssignmentMark.camAssignmentUid IS NOT NULL 
-                             THEN ${CourseAssignmentSubmission.MARKED}
-                             ELSE ${CourseAssignmentSubmission.SUBMITTED} 
-                             END) AS fileSubmissionStatus
+                   COALESCE((CASE WHEN CourseAssignmentMark.camUid IS NOT NULL 
+                          THEN ${CourseAssignmentSubmission.MARKED} 
+                          WHEN CourseAssignmentSubmission.casUid IS NOT NULL 
+                          THEN ${CourseAssignmentSubmission.SUBMITTED} 
+                          ELSE ${CourseAssignmentSubmission.NOT_SUBMITTED} END), 
+                               ${CourseAssignmentSubmission.NOT_SUBMITTED}) AS fileSubmissionStatus
+                
                 
           FROM CourseBlock 
           
@@ -207,7 +216,16 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                                ORDER BY resultScoreScaled DESC, 
                                         extensionProgress DESC, 
                                         resultSuccess DESC 
-                                  LIMIT 1)         
+                                  LIMIT 1) 
+                                  
+               LEFT JOIN CourseAssignmentSubmission
+                ON casUid = (SELECT casUid 
+                                     FROM CourseAssignmentSubmission
+                                    WHERE casAssignmentUid = ClazzAssignment.caUid
+                                      AND casSubmitterUid = :personUid
+                                 ORDER BY casTimestamp DESC
+                                    LIMIT 1)
+                                          
                LEFT JOIN CourseAssignmentMark
                       ON camUid = (SELECT camUid 
                                      FROM CourseAssignmentMark
