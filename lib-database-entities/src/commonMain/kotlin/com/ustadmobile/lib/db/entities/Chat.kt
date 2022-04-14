@@ -19,11 +19,11 @@ import kotlinx.serialization.Serializable
         events = [Trigger.Event.INSERT],
         sqlStatements = [
             """
-                REPLACE INTO Chat(chatUid, chatStartDate, chatTitle, isChatGroup, chatLct)
-                VALUES(NEW.chatUid, NEW.chatStartDate, NEW.chatTitle, NEW.isChatGroup, NEW.chatLct)
+                REPLACE INTO Chat(chatUid, chatStartDate, chatTitle, chatGroup, chatLct)
+                VALUES(NEW.chatUid, NEW.chatStartDate, NEW.chatTitle, NEW.chatGroup, NEW.chatLct)
                 /*psql ON CONFLICT (chatUid) DO UPDATE 
                 SET chatStartDate = EXCLUDED.chatStartDate, chatTitle = EXCLUDED.chatTitle, 
-                isChatGroup = EXCLUDED.isChatGroup, chatLct = EXCLUDED.chatLct 
+                chatGroup = EXCLUDED.chatGroup, chatLct = EXCLUDED.chatLct 
                 */
             """
         ]
@@ -38,18 +38,17 @@ open class Chat() {
 
     var chatTitle: String? = null
 
-    //TODO: Refactor to chatGroup
-    var isChatGroup: Boolean = false
+    var chatGroup: Boolean = false
 
     constructor(title: String, isGroup: Boolean, startDate: Long):this(){
         chatTitle = title
-        isChatGroup = isGroup
+        chatGroup = isGroup
         chatStartDate = startDate
     }
 
     constructor(title: String, isGroup: Boolean):this(){
         chatTitle = title
-        isChatGroup = isGroup
+        chatGroup = isGroup
         chatStartDate = systemTimeInMillis()
     }
 

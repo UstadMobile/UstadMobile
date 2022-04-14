@@ -582,6 +582,21 @@ class ClazzEdit2Presenter(context: Any,
             arguments = args))
     }
 
+    fun handleClickAddDiscussion(){
+        var args = mutableMapOf<String, String>()
+        args[UstadView.ARG_CLAZZUID] = entity?.clazzUid.toString()
+
+        navigateForResult(NavigateForResultOptions(
+            this,
+            currentEntityValue = null,
+            destinationViewName = CourseDiscussionEditView.VIEW_NAME,
+            entityClass = CourseDiscussion::class,
+            serializationStrategy = CourseDiscussion.serializer(),
+            destinationResultKey = ARG_SAVEDSTATE_TEXT,
+            arguments = args))
+
+    }
+
     fun handleClickAddText(){
         val args = mutableMapOf<String, String>()
         args[UstadView.ARG_CLAZZUID] = entity?.clazzUid.toString()
@@ -617,6 +632,8 @@ class ClazzEdit2Presenter(context: Any,
         const val SAVEDSTATE_KEY_FEATURES = "ClazzFeatures"
 
         const val SAVEDSTATE_KEY_TERMINOLOGY ="ClazzTerminology"
+
+        const val SAVEDSTATE_KEY_DISCUSSION = "CourseDiscussion"
 
     }
 
@@ -679,6 +696,26 @@ class ClazzEdit2Presenter(context: Any,
                     destinationResultKey = ARG_SAVEDSTATE_TEXT,
                     arguments = args)
             }
+            CourseBlock.BLOCK_DISCUSSION_TYPE -> {
+                val args = mutableMapOf<String, String>()
+                args[UstadView.ARG_CLAZZUID] =
+                    (joinedEntity.courseDiscussion?.courseDiscussionClazzUid ?: entity?.clazzUid ?: 0L)
+                        .toString()
+                args[UstadView.ARG_ENTITY_UID] =
+                    (joinedEntity.courseDiscussion?.courseDiscussionUid?: 0L).toString()
+
+
+                NavigateForResultOptions(
+                    this,
+                    currentEntityValue = joinedEntity,
+                    destinationViewName = CourseDiscussionEditView.VIEW_NAME,
+                    entityClass = CourseBlockWithEntity::class,
+                    serializationStrategy = CourseBlockWithEntity.serializer(),
+                    destinationResultKey = SAVEDSTATE_KEY_DISCUSSION,
+                    arguments = args)
+
+            }
+
             else -> return
         }
 

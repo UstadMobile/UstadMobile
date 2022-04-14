@@ -164,12 +164,12 @@ abstract class ChatDao: BaseDao<Chat>{
 
     @Query("""
         SELECT CASE
-                   WHEN Chat.isChatGroup THEN Chat.chatTitle
+                   WHEN Chat.chatGroup THEN Chat.chatTitle
                    ELSE Person.firstNames||' '||Person.lastName
                END AS title
         FROM Chat
         LEFT JOIN Person 
-        ON CAST(Chat.isChatGroup AS INTEGER) = 0
+        ON CAST(Chat.chatGroup AS INTEGER) = 0
            AND Person.personUid =
           (SELECT pp.personUid
            FROM ChatMember cm
@@ -189,7 +189,7 @@ abstract class ChatDao: BaseDao<Chat>{
           FROM ChatMember
           LEFT JOIN Chat ON Chat.chatUid = ChatMember.chatMemberChatUid
          WHERE ChatMember.chatMemberPersonUid = :otherPersonUid
-           AND Chat.isChatGroup = 0
+           AND Chat.chatGroup = 0
            AND Chat.chatUid IN 
                (
                 SELECT ChatMember.chatMemberChatUid

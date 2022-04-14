@@ -85,6 +85,8 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
           FROM CourseBlock 
                LEFT JOIN ClazzAssignment as assignment
                ON assignment.caUid = CourseBlock.cbEntityUid
+               LEFT JOIN CourseDiscussion as courseDiscussion
+               ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                LEFT JOIN ContentEntry as entry
                ON entry.contentEntryUid = CourseBlock.cbEntityUid
@@ -108,6 +110,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
 
         SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, ContentEntryParentChildJoin.*, 
                Container.*, CourseAssignmentMark.*, (CourseBlock.cbUid NOT IN (:collapseList)) AS expanded,
+               CourseDiscussion.*, 
                
                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                 COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
@@ -187,6 +190,10 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                AND NOT ceInactive
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                
+               LEFT JOIN CourseDiscussion 
+                      ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
+                     AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
+               
                LEFT JOIN ContentEntryParentChildJoin 
                ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
                
@@ -214,7 +221,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                                     WHERE camAssignmentUid = ClazzAssignment.caUid
                                       AND camStudentUid = :personUid
                                  ORDER BY camLct DESC
-                                    LIMIT 1)
+                                    LIMIT 1)       
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND CourseBlock.cbActive
            AND NOT CourseBlock.cbHidden

@@ -12,6 +12,9 @@ class CourseBlockWithEntity: CourseBlock() {
     @Embedded
     var entry: ContentEntry? = null
 
+    @Embedded
+    var courseDiscussion: CourseDiscussion? = null
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false

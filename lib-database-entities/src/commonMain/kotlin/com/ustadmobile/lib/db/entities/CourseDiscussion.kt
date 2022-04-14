@@ -19,13 +19,15 @@ import kotlinx.serialization.Serializable
             """
                 REPLACE INTO CourseDiscussion(courseDiscussionUid, 
                 courseDiscussionStartDate, courseDiscussionTitle, 
-                courseDiscussionDesc, courseDiscussionLct)
+                courseDiscussionDesc, courseDiscussionClazzUid,  courseDiscussionLct)
                 VALUES(NEW.courseDiscussionUid, NEW.courseDiscussionStartDate, 
-                NEW.courseDiscussionTitle, NEW.courseDiscussionDesc, NEW.courseDiscussionLct)
+                NEW.courseDiscussionTitle, NEW.courseDiscussionDesc, NEW.courseDiscussionClazzUid,
+                 NEW.courseDiscussionLct)
                 /*psql ON CONFLICT (courseDiscussionUid) DO UPDATE 
                 SET courseDiscussionTitle = EXCLUDED.courseDiscussionTitle, 
                 courseDiscussionDesc = EXCLUDED.courseDiscussionDesc, 
                 courseDiscussionStartDate = EXCLUDED.courseDiscussionStartDate, 
+                courseDiscussionClazzUid = EXCLUDED.courseDiscussionClazzUid,
                 courseDiscussionLct = EXCLUDED.courseDiscussionLct 
                 */
             """
@@ -40,6 +42,8 @@ open class CourseDiscussion() {
     var courseDiscussionTitle: String? = null
 
     var courseDiscussionDesc: String? = null
+
+    var courseDiscussionClazzUid: Long = 0
 
     var courseDiscussionStartDate: Long = 0
 

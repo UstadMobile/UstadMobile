@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "40ec34b2bed8bb946feedbea141e9d7b",
+    "identityHash": "76c78ca8011ee4b23569685c42df5471",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -10161,7 +10161,7 @@
       },
       {
         "tableName": "Chat",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chatUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chatStartDate` INTEGER NOT NULL, `chatTitle` TEXT, `isChatGroup` INTEGER NOT NULL, `chatLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chatUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chatStartDate` INTEGER NOT NULL, `chatTitle` TEXT, `chatGroup` INTEGER NOT NULL, `chatLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "chatUid",
@@ -10182,8 +10182,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "isChatGroup",
-            "columnName": "isChatGroup",
+            "fieldPath": "chatGroup",
+            "columnName": "chatGroup",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -10601,7 +10601,7 @@
       },
       {
         "tableName": "CourseDiscussion",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseDiscussionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `courseDiscussionTitle` TEXT, `courseDiscussionDesc` TEXT, `courseDiscussionStartDate` INTEGER NOT NULL, `courseDiscussionLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseDiscussionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `courseDiscussionTitle` TEXT, `courseDiscussionDesc` TEXT, `courseDiscussionClazzUid` INTEGER NOT NULL, `courseDiscussionStartDate` INTEGER NOT NULL, `courseDiscussionLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "courseDiscussionUid",
@@ -10620,6 +10620,12 @@
             "columnName": "courseDiscussionDesc",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "courseDiscussionClazzUid",
+            "columnName": "courseDiscussionClazzUid",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "courseDiscussionStartDate",
@@ -10942,7 +10948,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '40ec34b2bed8bb946feedbea141e9d7b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '76c78ca8011ee4b23569685c42df5471')"
     ]
   }
 }
