@@ -73,10 +73,8 @@ object BrowserTabTracker {
         }
         dispatch(getCurrentState().navStack)
         window.onbeforeunload = {
-            console.log("JS-LOG", window.performance.navigation.type)
             localStorage.removeItem(KEY_ACTIVE_TAB)
-            //localStorage.removeItem(KEY_STATE_STORAGE)
-            "hello"
+            null
         }
     }
 
