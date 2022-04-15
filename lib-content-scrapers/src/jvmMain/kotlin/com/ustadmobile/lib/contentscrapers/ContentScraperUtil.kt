@@ -62,10 +62,6 @@ import java.io.InputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.logging.Level
 import java.util.regex.Pattern
@@ -104,6 +100,7 @@ import org.openqa.selenium.Proxy
 import org.openqa.selenium.remote.CapabilityType
 import java.lang.IllegalArgumentException
 import java.net.*
+import java.time.*
 import java.time.temporal.TemporalQuery
 import kotlin.system.exitProcess
 
@@ -197,15 +194,15 @@ object ContentScraperUtil {
                     continue
                 }
 
-                content.parent().html(downloadAllResources(videoHtml, destinationDir, baseUrl))
+                content.parent()?.html(downloadAllResources(videoHtml, destinationDir, baseUrl))
                 continue
             } else if (url.contains("youtube")) {
                 // content.parent().html("We cannot download youtube content, please watch using the link below <p></p><a href=" + url + "\"><img src=\"video-thumbnail.jpg\"/></a>");
-                content.parent().html("")
+                content.parent()?.html("")
                 continue
             } else if (url.contains(ScraperConstants.slideShareLink)) {
                 // content.html("We cannot download slideshare content, please watch using the link below <p></p><img href=" + url + "\" src=\"video-thumbnail.jpg\"/>");
-                content.parent().html("")
+                content.parent()?.html("")
                 continue
             }
 
@@ -1216,7 +1213,7 @@ object ContentScraperUtil {
      * @return Chrome Driver with Log enabled
      */
     fun setupLogIndexChromeDriver(): ChromeDriver {
-        val d = DesiredCapabilities.chrome()
+        val d = DesiredCapabilities()
         d.setCapability("opera.arguments", "-screenwidth 411 -screenheight 731")
 
         val logPrefs = LoggingPreferences()
@@ -1227,7 +1224,7 @@ object ContentScraperUtil {
     }
 
     fun setupChromeDriverWithSeleniumProxy(seleniumProxy: Proxy): ChromeDriver {
-        val d = DesiredCapabilities.chrome()
+        val d = DesiredCapabilities()
         d.setCapability("opera.arguments", "-screenwidth 411 -screenheight 731")
         d.setCapability(CapabilityType.PROXY, seleniumProxy)
 
@@ -1270,7 +1267,7 @@ object ContentScraperUtil {
 
         val driver = setupLogIndexChromeDriver()
 
-        val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
+        val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM)
         waitForJSandJQueryToLoad(waitDriver)
         waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#login-signup-root")))
 
@@ -1298,7 +1295,7 @@ object ContentScraperUtil {
         driver.findElement(By.cssSelector("div input#password")).sendKeys(CK12_PASS)
 
         driver.findElement(By.cssSelector("div.loginsubmitwrap input.btn")).click()
-        val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
+        val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM)
         waitForJSandJQueryToLoad(waitDriver)
         clearChromeConsoleLog(driver)
 

@@ -201,9 +201,7 @@ class ContentEntryEdit2Presenter(
             presenterScope.launch(doorMainDispatcher()) {
                 val entry = handleMetadataResult(metadata)
                 // back from navigate import
-                arguments[ARG_ENTITY_UID]?.let { uid ->
-                    entry.contentEntryUid = uid.toLong()
-                }
+                entry.contentEntryUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
                 view.entity = entry
             }
             UmPlatformUtil.run {

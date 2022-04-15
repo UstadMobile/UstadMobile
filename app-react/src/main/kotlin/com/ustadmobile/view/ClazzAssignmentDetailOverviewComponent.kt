@@ -321,7 +321,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                                         onMainList = true
                                     ) { secondary, _ ->
                                         if (secondary) mPresenter?.handleDeleteSubmission(submission)
-                                        if(!secondary) mPresenter?.handleOpenSubmission(submission, true)
+                                        if(!secondary) mPresenter?.handleOpenSubmission(submission/*, true*/)
                                     }
                                 }
                             }

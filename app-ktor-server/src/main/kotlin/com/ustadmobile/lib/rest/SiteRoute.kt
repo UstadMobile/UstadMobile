@@ -11,13 +11,14 @@ import io.ktor.routing.get
 import io.ktor.routing.route
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import org.kodein.di.on
 
 fun Route.SiteRoute() {
     route("Site") {
         get("verify") {
-            val _di = di()
+            val _di = closestDI()
             val db: UmAppDatabase by _di.on(call).instance(tag = DoorTag.TAG_DB)
 
             //Make sure the repo has been initialized

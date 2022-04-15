@@ -147,9 +147,9 @@ class ContentEntryEdit2Fragment(
     private fun prepareVideoFromFile(filePath: String) {
         val uri = Uri.parse(filePath)
         val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(requireContext(), "UstadMobile")
-        val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(uri)
-        player?.prepare(mediaSource)
+//        val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+//                .createMediaSource(uri)
+//        player?.prepare(mediaSource)
     }
 
     private fun prepareVideoFromWeb(filePath: String){

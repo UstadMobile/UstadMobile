@@ -222,8 +222,12 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         view.addedCourseAssignmentSubmission = submissionList
     }
 
-    fun handleOpenSubmission(courseSubmission: CourseAssignmentSubmissionWithAttachment, canEdit: Boolean){
+    fun handleOpenSubmission(
+        courseSubmission: CourseAssignmentSubmissionWithAttachment,
+        //canEdit: Boolean
+    ){
         presenterScope.launch {
+            val canEdit = false
             if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
                 if(canEdit){
 

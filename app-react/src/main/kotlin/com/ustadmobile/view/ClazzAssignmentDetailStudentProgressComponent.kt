@@ -279,7 +279,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                                 umListItem {
                                     attrs.onClick = {
                                         Util.stopEventPropagation(it)
-                                        mPresenter?.onClickOpenSubmission(submission, false)
+                                        mPresenter?.onClickOpenSubmission(submission/*, false*/)
                                     }
                                     renderListItemWithLeftIconTitleAndDescription(
                                         "class",

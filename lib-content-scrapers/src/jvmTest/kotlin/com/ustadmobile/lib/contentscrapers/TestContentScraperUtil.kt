@@ -94,7 +94,8 @@ class TestContentScraperUtil {
 
         val doc = Jsoup.parse(convertedHtml)
         val image = doc.select("img").first()
-        Assert.assertTrue("Img Src is pointing to relative path", image.attr("src").equals(resourceLocation.name + "/media_test1picture.webp", ignoreCase = true))
+        Assert.assertTrue("Img Src is pointing to relative path",
+            image?.attr("src").equals(resourceLocation.name + "/media_test1picture.webp", ignoreCase = true) ?: false)
     }
 
 

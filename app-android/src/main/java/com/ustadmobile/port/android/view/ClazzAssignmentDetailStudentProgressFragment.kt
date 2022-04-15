@@ -250,8 +250,8 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         // cant delete here
     }
 
-    override fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment, isEditable: Boolean) {
-        mPresenter?.onClickOpenSubmission(submissionCourse, isEditable)
+    override fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment) {
+        mPresenter?.onClickOpenSubmission(submissionCourse)
     }
 
 }

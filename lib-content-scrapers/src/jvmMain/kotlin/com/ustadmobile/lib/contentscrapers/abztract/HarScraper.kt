@@ -24,7 +24,7 @@ import net.lightbody.bmp.core.har.HarEntry
 import net.lightbody.bmp.core.har.HarRequest
 import net.lightbody.bmp.core.har.HarResponse
 import net.lightbody.bmp.proxy.CaptureType
-import org.apache.http.client.utils.DateUtils
+import org.apache.hc.client5.http.utils.DateUtils
 import org.kodein.di.DI
 import org.openqa.selenium.InvalidArgumentException
 import org.openqa.selenium.JavascriptExecutor
@@ -103,7 +103,7 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
             throw IllegalArgumentException(e)
         }
 
-        val waitDriver = WebDriverWait(chromeDriver, ScraperConstants.TIME_OUT_SELENIUM.toLong())
+        val waitDriver = WebDriverWait(chromeDriver, ScraperConstants.TIME_OUT_SELENIUM)
         waitForJSandJQueryToLoad(waitDriver)
         waitCondition?.invoke(waitDriver)
         proxy.waitForQuiescence(30, 3, TimeUnit.SECONDS)
