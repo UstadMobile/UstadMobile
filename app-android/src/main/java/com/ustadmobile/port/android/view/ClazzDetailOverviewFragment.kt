@@ -143,7 +143,11 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                     moduleHolder.binding.block = block
                     moduleHolder.binding.presenter = mPresenter
                 }
-                CourseBlock.BLOCK_TEXT_TYPE -> (holder as TextCourseBlockViewHolder).binding.block = block
+                CourseBlock.BLOCK_TEXT_TYPE -> {
+                    val textHolder = (holder as TextCourseBlockViewHolder)
+                    textHolder.binding.block = block
+                    textHolder.binding.presenter = mPresenter
+                }
                 CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                     val assignmentHolder = (holder as AssignmentCourseBlockViewHolder)
                     assignmentHolder.binding.assignment = block.assignment

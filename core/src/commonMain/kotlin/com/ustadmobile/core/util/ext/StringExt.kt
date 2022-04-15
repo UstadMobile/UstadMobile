@@ -2,7 +2,6 @@ package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.door.ext.hexStringToByteArray
 import com.ustadmobile.door.ext.toHexString
-import kotlin.collections.Map
 import kotlin.text.Typography.ellipsis
 
 
@@ -98,3 +97,7 @@ fun String.capitalizeFirstLetter(): String {
  * Validate email address using regular expressions
  */
 expect fun String?.validEmail(): Boolean
+
+fun String.countWords(): Int {
+    return Regex("""(\s+|(\r\n|\r|\n))""").findAll(this.trim()).count() + 1
+}
