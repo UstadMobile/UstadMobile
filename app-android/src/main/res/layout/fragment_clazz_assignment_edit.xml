@@ -203,6 +203,7 @@
                 app:block="@={(CourseBlock)blockWithAssignment}"
                 app:timeZone="@{timeZone}"
                 app:startDate="@={startDate}"
+                app:startTime="@={startTime}"
                 app:deadlineDate="@={deadlineDate}"
                 app:deadlineTime="@={deadlineTime}"
                 app:gracePeriodDate="@={gracePeriodDate}"
@@ -213,6 +214,7 @@
                 app:caMaxPointsError="@{caMaxPointsError}"
                 app:completionCriteriaOptions="@{completionCriteriaOptions}"
                 app:gracePeriodVisibility="@{gracePeriodVisibility}"
+                app:minScoreVisible="@{false}"
                 />
 
 

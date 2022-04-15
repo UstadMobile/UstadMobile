@@ -15,10 +15,10 @@ import kotlinx.serialization.Serializable
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
                 sqlStatements = [
-                    """REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints, cbIndex, cbClazzUid, cbActive,cbHidden, cbEntityUid, cbLct) 
-         VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbModuleParentBlockUid, NEW.cbTitle, NEW.cbDescription, NEW.cbCompletionCriteria, NEW.cbHideUntilDate, NEW.cbDeadlineDate, NEW.cbLateSubmissionPenalty, NEW.cbGracePeriodDate, NEW.cbMaxPoints, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbHidden, NEW.cbEntityUid, NEW.cbLct) 
+                    """REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints,cbMinPoints, cbIndex, cbClazzUid, cbActive,cbHidden, cbEntityUid, cbLct) 
+         VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbModuleParentBlockUid, NEW.cbTitle, NEW.cbDescription, NEW.cbCompletionCriteria, NEW.cbHideUntilDate, NEW.cbDeadlineDate, NEW.cbLateSubmissionPenalty, NEW.cbGracePeriodDate, NEW.cbMaxPoints,NEW.cbMinPoints, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbHidden, NEW.cbEntityUid, NEW.cbLct) 
          /*psql ON CONFLICT (cbUid) DO UPDATE 
-         SET cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbModuleParentBlockUid = EXCLUDED.cbModuleParentBlockUid, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbCompletionCriteria = EXCLUDED.cbCompletionCriteria, cbHideUntilDate = EXCLUDED.cbHideUntilDate,cbDeadlineDate = EXCLUDED.cbDeadlineDate, cbLateSubmissionPenalty = EXCLUDED.cbLateSubmissionPenalty, cbGracePeriodDate= EXCLUDED.cbGracePeriodDate, cbMaxPoints = EXCLUDED.cbMaxPoints, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbHidden = EXCLUDED.cbHidden, cbEntityUid = EXCLUDED.cbEntityUid, cbLct = EXCLUDED.cbLct
+         SET cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbModuleParentBlockUid = EXCLUDED.cbModuleParentBlockUid, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbCompletionCriteria = EXCLUDED.cbCompletionCriteria, cbHideUntilDate = EXCLUDED.cbHideUntilDate,cbDeadlineDate = EXCLUDED.cbDeadlineDate, cbLateSubmissionPenalty = EXCLUDED.cbLateSubmissionPenalty, cbGracePeriodDate= EXCLUDED.cbGracePeriodDate, cbMaxPoints = EXCLUDED.cbMaxPoints, cbMinPoints = EXCLUDED.cbMinPoints, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbHidden = EXCLUDED.cbHidden, cbEntityUid = EXCLUDED.cbEntityUid, cbLct = EXCLUDED.cbLct
          */"""
                 ]
         )
@@ -55,6 +55,8 @@ open class CourseBlock {
 
     var cbMaxPoints: Int = 10
 
+    var cbMinPoints: Int = 0
+
     var cbIndex: Int = 0
 
     @ColumnInfo(index = true)
@@ -85,43 +87,4 @@ open class CourseBlock {
         const val BLOCK_DISCUSSION_TYPE = 105
 
     }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as CourseBlock
-
-        if (cbUid != other.cbUid) return false
-        if (cbType != other.cbType) return false
-        if (cbIndentLevel != other.cbIndentLevel) return false
-        if (cbModuleParentBlockUid != other.cbModuleParentBlockUid) return false
-        if (cbTitle != other.cbTitle) return false
-        if (cbDescription != other.cbDescription) return false
-        if (cbIndex != other.cbIndex) return false
-        if (cbClazzUid != other.cbClazzUid) return false
-        if (cbActive != other.cbActive) return false
-        if (cbHidden != other.cbHidden) return false
-        if (cbEntityUid != other.cbEntityUid) return false
-        if (cbLct != other.cbLct) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = cbUid.hashCode()
-        result = 31 * result + cbType
-        result = 31 * result + cbIndentLevel
-        result = 31 * result + cbModuleParentBlockUid.hashCode()
-        result = 31 * result + (cbTitle?.hashCode() ?: 0)
-        result = 31 * result + (cbDescription?.hashCode() ?: 0)
-        result = 31 * result + cbIndex
-        result = 31 * result + cbClazzUid.hashCode()
-        result = 31 * result + cbActive.hashCode()
-        result = 31 * result + cbHidden.hashCode()
-        result = 31 * result + cbEntityUid.hashCode()
-        result = 31 * result + cbLct.hashCode()
-        return result
-    }
-
 }

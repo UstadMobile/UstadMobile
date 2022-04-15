@@ -1,13 +1,12 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.FieldLabel
@@ -29,12 +28,12 @@ import react.setState
 import styled.css
 import styled.styledDiv
 
-class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEntryWithLanguage>(mProps),
+class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEntryWithBlockAndLanguage>(mProps),
     ContentEntryEdit2View {
 
     private var mPresenter: ContentEntryEdit2Presenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ContentEntryWithLanguage>?
+    override val mEditPresenter: UstadEditPresenter<*, ContentEntryWithBlockAndLanguage>?
         get() = mPresenter
 
     override val viewNames: List<String>
@@ -55,14 +54,6 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
     private var completionLabel = FieldLabel(text = getString(MessageID.completion_criteria))
 
     private var licenseLabel = FieldLabel(text = getString(MessageID.licence))
-
-    override var showCompletionCriteria: Boolean = false
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
 
     override var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>? = null
         get() = field
@@ -115,13 +106,6 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
             }
         }
 
-    override var entryMetaData: ImportedContentEntryMetaData? = null
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
     override var metadataResult: MetadataResult? = null
         get() = field
         set(value) {
@@ -162,6 +146,83 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                 field = value
             }
         }
+    override var caGracePeriodError: String? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var caDeadlineError: String? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var caStartDateError: String? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var caMaxPointsError: String? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var startDate: Long = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var startTime: Long = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var deadlineDate: Long = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var deadlineTime: Long = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var gracePeriodDate: Long = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var gracePeriodTime: Long = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var timeZone: String? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -171,7 +232,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
             }
         }
 
-    override var entity: ContentEntryWithLanguage? = null
+    override var entity: ContentEntryWithBlockAndLanguage? = null
         get() = field
         set(value) {
             setState {
@@ -280,7 +341,8 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                     }
 
 
-                    if(showCompletionCriteria){
+                    // TODO show with courseBlockFields
+                    if(false){
                         umGridContainer(GridSpacing.spacing4) {
 
                             umItem(GridSize.cells12, GridSize.cells6 ) {
@@ -381,7 +443,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
                     umGridContainer(GridSpacing.spacing4) {
 
-                       if(entryMetaData != null || metadataResult != null){
+                       if(metadataResult != null){
                            umItem(GridSize.cells12) {
                                css(defaultDoubleMarginTop)
                                createSwitchItem(getString(MessageID.compress), compressionEnabled){

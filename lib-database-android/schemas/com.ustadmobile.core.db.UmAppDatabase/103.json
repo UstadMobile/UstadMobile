@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "40ec34b2bed8bb946feedbea141e9d7b",
+    "identityHash": "f6b913a8b487d90d9d662275b59de81d",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6124,7 +6124,7 @@
       },
       {
         "tableName": "CourseBlock",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbModuleParentBlockUid` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbCompletionCriteria` INTEGER NOT NULL, `cbHideUntilDate` INTEGER NOT NULL, `cbDeadlineDate` INTEGER NOT NULL, `cbLateSubmissionPenalty` INTEGER NOT NULL, `cbGracePeriodDate` INTEGER NOT NULL, `cbMaxPoints` INTEGER NOT NULL, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbHidden` INTEGER NOT NULL, `cbEntityUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cbType` INTEGER NOT NULL, `cbIndentLevel` INTEGER NOT NULL, `cbModuleParentBlockUid` INTEGER NOT NULL, `cbTitle` TEXT, `cbDescription` TEXT, `cbCompletionCriteria` INTEGER NOT NULL, `cbHideUntilDate` INTEGER NOT NULL, `cbDeadlineDate` INTEGER NOT NULL, `cbLateSubmissionPenalty` INTEGER NOT NULL, `cbGracePeriodDate` INTEGER NOT NULL, `cbMaxPoints` INTEGER NOT NULL, `cbMinPoints` INTEGER NOT NULL, `cbIndex` INTEGER NOT NULL, `cbClazzUid` INTEGER NOT NULL, `cbActive` INTEGER NOT NULL, `cbHidden` INTEGER NOT NULL, `cbEntityUid` INTEGER NOT NULL, `cbLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cbUid",
@@ -6195,6 +6195,12 @@
           {
             "fieldPath": "cbMaxPoints",
             "columnName": "cbMaxPoints",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cbMinPoints",
+            "columnName": "cbMinPoints",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -10942,7 +10948,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '40ec34b2bed8bb946feedbea141e9d7b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f6b913a8b487d90d9d662275b59de81d')"
     ]
   }
 }
