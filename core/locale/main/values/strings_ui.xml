@@ -1838,4 +1838,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!-- used to display as an error when text is above the character or word limit -->
     <string name="error_too_long_text">Text too long</string>
 
+    <string name="add_discussion">Add discussion</string>
+    <string name="edit_discussion">Edit discussion</string>
+
 </resources>

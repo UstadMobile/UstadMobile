@@ -134,8 +134,9 @@ import kotlin.jvm.JvmField
     CourseDiscussionReplicate::class,
     DiscussionTopic::class,
     DiscussionTopicReplicate::class,
-    CourseDiscussionTopic::class,
-    CourseDiscussionTopicReplicate::class,
+    DiscussionPost::class,
+    DiscussionPostReplicate::class
+
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
@@ -382,10 +383,14 @@ abstract class UmAppDatabase : DoorDatabase() {
     @JsName("messageReadDao")
     abstract val messageReadDao: MessageReadDao
 
+    @JsName("courseDiscussionDao")
+    abstract val courseDiscussionDao: CourseDiscussionDao
 
     @JsName("discussionTopicDao")
     abstract val discussionTopicDao: DiscussionTopicDao
 
+    @JsName("discussionPostDao")
+    abstract val discussionPostDao: DiscussionPostDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

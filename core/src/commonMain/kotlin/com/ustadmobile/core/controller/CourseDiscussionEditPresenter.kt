@@ -6,15 +6,12 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
-import com.ustadmobile.core.util.ext.fallbackIndividualSet
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.CourseDiscussionEditView
-import com.ustadmobile.core.view.CourseDiscussionTopicEditView
+import com.ustadmobile.core.view.DiscussionTopicEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -72,7 +69,6 @@ class CourseDiscussionEditPresenter(context: Any,
                 courseDiscussion = CourseDiscussion().apply {
                     courseDiscussionUid = cbEntityUid
                     courseDiscussionClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
-                    courseDiscussionStartDate = systemTimeInMillis()
                 }
             }
         }
@@ -127,13 +123,18 @@ class CourseDiscussionEditPresenter(context: Any,
 
     }
 
+    fun handleClickTopic(discussionTopic: DiscussionTopic){
+        //TODO: Go to Topic edit
+
+    }
+
     fun handleClickAddTopic(){
         navigateForResult(
             NavigateForResultOptions(this,
                 null,
-                CourseDiscussionTopicEditView.VIEW_NAME,
-                CourseDiscussionTopic::class,
-                CourseDiscussionTopic.serializer(),
+                DiscussionTopicEditView.VIEW_NAME,
+                DiscussionTopic::class,
+                DiscussionTopic.serializer(),
                 SAVEDSTATE_KEY_DISCUSSION_TOPIC,
                 arguments = mutableMapOf(
                     ARG_CLAZZUID to clazzUid.toString()

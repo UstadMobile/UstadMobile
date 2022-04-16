@@ -36,6 +36,10 @@
             type="long" />
 
         <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.CourseDiscussionEditPresenter" />
+
+        <variable
             name="scheduleOneToManyListener"
             type="OneToManyJoinEditListener&lt;DiscussionTopic&gt;" />
 
@@ -152,7 +156,7 @@
                 android:id="@+id/fragment_course_discussion_edit_add_new_topic_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:onClickNew="@{() -> scheduleOneToManyListener.onClickNew()}"
+                app:onClickNew="@{() -> presenter.handleClickAddTopic()}"
                 app:createNewText="@{@string/add_topic}"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_course_discussion_course_block_edit_datetime_til"
                 app:layout_constraintStart_toStartOf="parent" />

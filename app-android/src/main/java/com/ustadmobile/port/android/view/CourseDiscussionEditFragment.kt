@@ -34,16 +34,18 @@ class CourseDiscussionEditFragment: UstadEditFragment<CourseBlockWithEntity>(),
             rootView = it.root
         }
 
-        mPresenter = CourseDiscussionEditPresenter(requireContext(),
-            arguments.toStringMap(), this, viewLifecycleOwner, di).withViewLifecycle()
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.add, R.string.edit)
+        setEditFragmentTitle(R.string.add_discussion, R.string.edit_discussion)
+
+        mPresenter = CourseDiscussionEditPresenter(requireContext(),
+            arguments.toStringMap(), this, viewLifecycleOwner, di).withViewLifecycle()
+
+        mBinding?.presenter = mPresenter
+        mPresenter?.onCreate(backStackSavedState)
     }
 
     override fun onDestroyView() {

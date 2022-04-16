@@ -20,18 +20,21 @@ import kotlinx.serialization.Serializable
                 REPLACE INTO DiscussionTopic(discussionTopicUid, 
                 discussionTopicTitle, discussionTopicDesc, 
                 discussionTopicStartDate, discussionTopicCourseDiscussionUid,
-                discussionTopicVisible, discussionTopicArchive, discussionTopicLct)
+                discussionTopicVisible, discussionTopicArchive, discussionTopicStartedPersonUid,
+                discussionTopicLct)
                 VALUES(NEW.discussionTopicUid, 
                 NEW.discussionTopicTitle, NEW.discussionTopicDesc, 
                 NEW.discussionTopicStartDate, NEW.discussionTopicCourseDiscussionUid,
-                NEW.discussionTopicVisible, NEW.discussionTopicArchive, NEW.discussionTopicLct)
+                NEW.discussionTopicVisible, NEW.discussionTopicArchive, 
+                NEW.discussionTopicStartedPersonUid, NEW.discussionTopicLct)
                 /*psql ON CONFLICT (discussionTopicUid) DO UPDATE 
                 SET discussionTopicTitle = EXCLUDED.discussionTopicTitle, 
                 discussionTopicDesc = EXCLUDED.discussionTopicDesc, 
                 discussionTopicStartDate = EXCLUDED.discussionTopicStartDate, 
                 discussionTopicCourseDiscussionUid = EXCLUDED.discussionTopicCourseDiscussionUid, 
                 discussionTopicVisible = EXCLUDED.discussionTopicVisible, 
-                discussionTopicArchive = EXCLUDED.discussionTopicArchive, 
+                discussionTopicArchive = EXCLUDED.discussionTopicArchive,
+                discussionTopicStartedPersonUid = EXCLUDED.discussionTopicStartedPersonUid,
                 discussionTopicLct = EXCLUDED.discussionTopicLct
                 
                 */
@@ -55,6 +58,9 @@ open class DiscussionTopic() {
     var discussionTopicVisible: Boolean = true
 
     var discussionTopicArchive: Boolean = false
+
+    //The person who started this topic
+    var discussionTopicStartedPersonUid: Long = 0
 
     @LastChangedTime
     @ReplicationVersionId

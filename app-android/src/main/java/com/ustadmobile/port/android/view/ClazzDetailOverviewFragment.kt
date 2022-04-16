@@ -176,8 +176,10 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
                 CourseBlock.BLOCK_DISCUSSION_TYPE -> {
                     val discussionHolder = (holder as DiscussionCourseBlockViewHolder)
+                    discussionHolder.binding.discussion = block.courseDiscussion
                     discussionHolder.binding.block = block
                     discussionHolder.binding.presenter = mPresenter
+
 
                 }
             }
@@ -396,6 +398,12 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                         isSame = isSame
                                 && newMark?.camPenalty == oldMark?.camPenalty
                                 && newMark?.camMark == oldMark?.camMark
+                    }
+
+                    CourseBlock.BLOCK_DISCUSSION_TYPE -> {
+                        val newDiscussion = newItem.courseDiscussion
+                        val oldDiscussion = oldItem.courseDiscussion
+                        //TODO
                     }
                 }
                 return isSame

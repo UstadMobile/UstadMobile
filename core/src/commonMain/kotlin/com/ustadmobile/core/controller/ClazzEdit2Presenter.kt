@@ -567,6 +567,20 @@ class   ClazzEdit2Presenter(context: Any,
                     txDb.clazzAssignmentDao.updateAsync(assignment)
                 }
 
+                val discussions = courseBlockOneToManyJoinEditHelper.entitiesToInsert.mapNotNull {
+                    it.courseDiscussion }
+
+                txDb.courseDiscussionDao.insertListAsync(discussions)
+                txDb.courseDiscussionDao.updateListAsync(
+                    courseBlockOneToManyJoinEditHelper.entitiesToUpdate
+                        .mapNotNull { it.courseDiscussion })
+                txDb.courseDiscussionDao.deactivateByUids(
+                    courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate, systemTimeInMillis())
+
+                //TODO: Work with Topics
+
+
+
                 txDb.courseBlockDao.replaceListAsync(courseBlockList)
                 txDb.courseBlockDao.deactivateByUids(
                     courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate,

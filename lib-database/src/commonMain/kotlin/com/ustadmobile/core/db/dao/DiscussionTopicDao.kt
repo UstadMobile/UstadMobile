@@ -34,25 +34,25 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>{
 
 
     @Query("""
-        REPLACE INTO chatReplicate(chatPk, chatDestination)
-          SELECT DISTINCT Chat.chatUid AS chatUid,
-                 UserSession.usClientNodeId AS chatDestination
+        REPLACE INTO DiscussionTopicReplicate(discussionTopicPk, discussionTopicDestination)
+          SELECT DISTINCT DiscussionTopic.discussionTopicUid AS discussionTopicUid,
+                 UserSession.usClientNodeId AS discussionTopicDestination
             FROM ChangeLog
-                 JOIN chat
-                     ON ChangeLog.chTableId = ${Chat.TABLE_ID}
-                        AND ChangeLog.chEntityPk = Chat.chatUid
+                 JOIN DiscussionTopic
+                     ON ChangeLog.chTableId = ${DiscussionTopic.TABLE_ID}
+                        AND ChangeLog.chEntityPk = DiscussionTopic.discussionTopicUid
                  JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
            WHERE UserSession.usClientNodeId != (
                  SELECT nodeClientId 
                    FROM SyncNode
                   LIMIT 1)
-             AND Chat.chatLct != COALESCE(
-                 (SELECT chatVersionId
-                    FROM chatReplicate
-                   WHERE chatPk = Chat.chatUid
-                     AND chatDestination = UserSession.usClientNodeId), 0)
-         /*psql ON CONFLICT(chatPk, chatDestination) DO UPDATE
-             SET chatPending = true
+             AND DiscussionTopic.discussionTopicLct != COALESCE(
+                 (SELECT discussionTopicVersionId
+                    FROM discussionTopicReplicate
+                   WHERE discussionTopicPk = DiscussionTopic.discussionTopicUid
+                     AND DiscussionTopicDestination = UserSession.usClientNodeId), 0)
+         /*psql ON CONFLICT(discussionTopicPk, discussionTopicDestination) DO UPDATE
+             SET discussionTopicPending = true
           */               
     """)
     @ReplicationRunOnChange([DiscussionTopic::class])
