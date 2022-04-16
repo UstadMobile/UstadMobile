@@ -127,7 +127,6 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
-                implementation "com.github.UstadMobile.retriever:retriever-runtime:$version_retriever"
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
