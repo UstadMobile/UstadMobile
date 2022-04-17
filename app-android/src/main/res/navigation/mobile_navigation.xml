@@ -172,6 +172,10 @@
         android:name="com.ustadmobile.port.android.view.ClazzAssignmentEditFragment" />
 
     <fragment
+        android:id="@+id/course_discussion_detail_dest"
+        android:name="com.ustadmobile.port.android.view.CourseDiscussionDetailFragment" />
+
+    <fragment
         android:id="@+id/clazz_assignment_detail_dest"
         android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailFragment"/>
 

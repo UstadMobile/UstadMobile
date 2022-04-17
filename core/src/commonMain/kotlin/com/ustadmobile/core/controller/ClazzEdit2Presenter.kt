@@ -789,7 +789,6 @@ class   ClazzEdit2Presenter(context: Any,
                 args[UstadView.ARG_ENTITY_UID] =
                     (joinedEntity.courseDiscussion?.courseDiscussionUid?: 0L).toString()
 
-
                 NavigateForResultOptions(
                     this,
                     currentEntityValue = joinedEntity,

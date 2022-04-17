@@ -2,7 +2,10 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.CourseDiscussion
 import com.ustadmobile.lib.db.entities.UserSession
 
@@ -71,5 +74,14 @@ abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<
     }
 
 
+
+    @Query("""
+        SELECT CourseDiscussion.* 
+          FROM CourseDiscussion
+         WHERE CourseDiscussion.courseDiscussionUid = :courseDiscussionUid 
+           AND CourseDiscussion.courseDiscussionActive = 1 
+         
+         """)
+    abstract fun getCourseDiscussionByUid(courseDiscussionUid: Long): DoorLiveData<CourseDiscussion?>
 
 }

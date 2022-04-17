@@ -60,13 +60,15 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>{
     abstract suspend fun replicateOnChange()
 
 
-
+    //TODO
     @Query("""
         SELECT DiscussionTopic.*,
-                0 as numThreads,
+                0 as numPosts,
                 0 as lastActiveTimestamp
           FROM DiscussionTopic     
          WHERE DiscussionTopic.discussionTopicCourseDiscussionUid = :discussionUid 
+           AND DiscussionTopic.discussionTopicVisible = 1
+           AND DiscussionTopic.discussionTopicArchive = 0
       ORDER BY DiscussionTopic.discussionTopicStartDate DESC
     """)
     abstract fun getListOfTopicsByDiscussion(discussionUid: Long)

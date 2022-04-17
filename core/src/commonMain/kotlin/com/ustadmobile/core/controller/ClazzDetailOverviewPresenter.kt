@@ -112,9 +112,12 @@ class ClazzDetailOverviewPresenter(
 
     }
 
+    /**
+     * Goes to CourseDiscussion's Detail screen not edit
+     */
     fun handleClickCourseDiscussion(courseDiscussion: CourseDiscussion){
         ustadNavController.navigate(
-            CourseDiscussionEditView.VIEW_NAME,
+            CourseDiscussionDetailView.VIEW_NAME,
             mapOf(ARG_ENTITY_UID to courseDiscussion.courseDiscussionUid.toString())
         )
     }

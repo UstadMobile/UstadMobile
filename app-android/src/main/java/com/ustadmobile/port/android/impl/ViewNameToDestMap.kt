@@ -41,6 +41,8 @@ class ViewNameToDestMap: DestinationProvider {
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             DiscussionTopicEditView.VIEW_NAME to UstadDestination(R.id.course_discussion_topic_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
+            CourseDiscussionDetailView.VIEW_NAME to UstadDestination(R.id.course_discussion_detail_dest,
+                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             CourseTerminologyListView.VIEW_NAME to UstadDestination(R.id.course_terminology_list_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
             CourseTerminologyEditView.VIEW_NAME to UstadDestination(R.id.course_terminology_edit_dest,
