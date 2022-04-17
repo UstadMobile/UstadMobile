@@ -12,6 +12,7 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.UstadAntilog
 import com.ustadmobile.core.util.defaultJsonSerializer
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.view.ContainerMounter
@@ -59,7 +60,7 @@ import react.setState
 
 fun main() {
     defaultJsonSerializer()
-    Napier.base(DebugAntilog())
+    Napier.base(UstadAntilog())
 
     window.onload = {
         render(document.getElementById("root")){
