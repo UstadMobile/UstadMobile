@@ -3,11 +3,9 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Chat
-import com.ustadmobile.lib.db.entities.DiscussionTopic
-import com.ustadmobile.lib.db.entities.DiscussionTopicListDetail
-import com.ustadmobile.lib.db.entities.UserSession
+import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
@@ -85,6 +83,16 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>{
     """)
     abstract suspend fun getTopicsByClazz(clazzUid: Long)
         : List<DiscussionTopic>
+
+
+    @Query("""
+        SELECT DiscussionTopic.*
+          FROM DiscussionTopic
+         WHERE DiscussionTopic.discussionTopicCourseDiscussionUid = :discussionTopicUid
+         
+         """)
+    abstract fun getDiscussionTopicByUid(discussionTopicUid: Long): DoorLiveData<DiscussionTopic?>
+
 
 
 }

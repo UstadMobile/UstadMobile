@@ -2,8 +2,11 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.DiscussionPost
+import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
+import com.ustadmobile.lib.db.entities.DiscussionTopicListDetail
 import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
@@ -57,6 +60,23 @@ abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     abstract suspend fun replicateOnChange()
 
 
+    //TODO
+    @Query("""
+        SELECT DiscussionPost.*,
+            '' as authorPersonFirstNames,
+            '' as authorPersonLastName,
+            '' as postLatestMessage,
+            0 as postRepliesCount, 
+            0 as postLatestMessageTimestamp
+             
+          FROM DiscussionPost     
+         WHERE DiscussionPost.discussionPostDiscussionTopicUid = :discussionTopicUid
+           AND DiscussionPost.discussionPostVisible = 1
+           AND DiscussionPost.discussionPostArchive = 0
+      ORDER BY DiscussionPost.discussionPostStartDate DESC
+    """)
+    abstract fun getPostsByDiscussionTopic(discussionTopicUid: Long)
+            : DoorDataSourceFactory<Int, DiscussionPostWithDetails>
 
     
 

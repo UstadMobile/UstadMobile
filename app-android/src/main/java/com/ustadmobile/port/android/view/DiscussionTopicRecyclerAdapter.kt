@@ -12,7 +12,7 @@ import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 class DiscussionTopicListDetailViewHolder(val itemBinding: ItemDiscussionTopicListDetailBinding)
     : RecyclerView.ViewHolder(itemBinding.root)
 
-class DiscussionTopicListDetailRecyclerAdapter(var presenter: CourseDiscussionDetailPresenter?)
+class DiscussionTopicRecyclerAdapter(var presenter: CourseDiscussionDetailPresenter?)
     : SelectablePagedListAdapter<DiscussionTopicListDetail,
         DiscussionTopicListDetailViewHolder>(DIFF_CALLBACK) {
 

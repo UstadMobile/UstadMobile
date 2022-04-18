@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.CourseDiscussionDetailView
+import com.ustadmobile.core.view.DiscussionTopicDetailView
 import com.ustadmobile.core.view.DiscussionTopicEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -46,6 +47,13 @@ class CourseDiscussionDetailPresenter(
     }
 
 
+    fun onClickAddTopic(){
+        val args = mutableMapOf<String, String>()
+
+        ustadNavController.navigate(
+            DiscussionTopicEditView.VIEW_NAME, args)
+    }
+
 
 
     fun onClickTopic(discussionTopic: DiscussionTopicListDetail){
@@ -54,7 +62,7 @@ class CourseDiscussionDetailPresenter(
         args[ARG_ENTITY_UID] = discussionTopic.discussionTopicUid.toString() ?: ""
 
         ustadNavController.navigate(
-            DiscussionTopicEditView.VIEW_NAME, args)
+            DiscussionTopicDetailView.VIEW_NAME, args)
     }
 
     fun onClickDeleteTopic(discussionTopic: DiscussionTopicListDetail){

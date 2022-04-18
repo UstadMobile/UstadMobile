@@ -55,11 +55,12 @@ class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
     private var repo: UmAppDatabase? = null
 
 
-    private var topicsRecyclerAdapter: DiscussionTopicListDetailRecyclerAdapter? = null
+    private var topicsRecyclerAdapter: DiscussionTopicRecyclerAdapter? = null
 
     private val topicsObserver = Observer<PagedList<DiscussionTopicListDetail>?> {
             t -> topicsRecyclerAdapter?.submitList(t)
     }
+
 
 
     override var topics: DoorDataSourceFactory<Int, DiscussionTopicListDetail>? = null
@@ -82,6 +83,8 @@ class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
         mBinding = FragmentCourseDiscussionDetailBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
+            it.fragmentCourseDiscussionDetailRv
+
         }
 
         detailMergerRecyclerView =
@@ -103,8 +106,13 @@ class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
                  di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
+
+        mBinding?.fragmentCourseDiscussionDetailAddTopicEfab?.setOnClickListener {
+            mPresenter?.onClickAddTopic()
+        }
+
         // 3
-        topicsRecyclerAdapter = DiscussionTopicListDetailRecyclerAdapter(mPresenter)
+        topicsRecyclerAdapter = DiscussionTopicRecyclerAdapter(mPresenter)
 
 
         detailMergerRecyclerAdapter = ConcatAdapter(descriptionRecyclerAdapter,

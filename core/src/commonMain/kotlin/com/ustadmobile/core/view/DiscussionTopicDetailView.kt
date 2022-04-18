@@ -1,13 +1,10 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.lib.db.entities.CourseDiscussion
-import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
-import com.ustadmobile.lib.db.entities.DiscussionTopicListDetail
-import com.ustadmobile.lib.db.entities.MessageWithPerson
+import com.ustadmobile.lib.db.entities.*
 
 
-interface DiscussionTopicDetailView: UstadDetailView<CourseDiscussion> {
+interface DiscussionTopicDetailView: UstadDetailView<DiscussionTopic> {
 
 
     var posts: DoorDataSourceFactory<Int, DiscussionPostWithDetails>?

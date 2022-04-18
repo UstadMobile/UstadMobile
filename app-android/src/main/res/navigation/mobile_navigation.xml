@@ -158,6 +158,10 @@
         android:id="@+id/course_discussion_topic_edit_dest"
         android:name="com.ustadmobile.port.android.view.DiscussionTopicEditFragment" />
 
+<fragment
+        android:id="@+id/discussion_topic_detail_dest"
+        android:name="com.ustadmobile.port.android.view.DiscussionTopicDetailFragment" />
+
 
     <fragment
         android:id="@+id/course_terminology_list_dest"
