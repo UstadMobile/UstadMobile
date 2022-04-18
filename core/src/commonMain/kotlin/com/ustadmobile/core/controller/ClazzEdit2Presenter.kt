@@ -577,8 +577,8 @@ class ClazzEdit2Presenter(context: Any,
                 this,
                 currentEntityValue = null,
                 destinationViewName = ClazzAssignmentEditView.VIEW_NAME,
-                entityClass = ClazzAssignmentWithCourseBlock::class,
-                serializationStrategy = ClazzAssignmentWithCourseBlock.serializer(),
+                entityClass = CourseBlockWithEntity::class,
+                serializationStrategy = CourseBlockWithEntity.serializer(),
                 destinationResultKey = SAVEDSTATE_KEY_ASSIGNMENT,
                 arguments = args))
     }
