@@ -34,7 +34,7 @@ data class UstadUrlComponents(
         fun parse(url: String) : UstadUrlComponents {
             val dividerIndex = url.indexOf("/#/")
             if(dividerIndex == -1)
-                throw IllegalArgumentException("Not a valid UstadUrl")
+                throw IllegalArgumentException("Not a valid UstadUrl: $url")
 
             //Endpoint should include the trailing /
             val endpoint = url.substring(0, dividerIndex + 1).removeSuffix("umapp/")
