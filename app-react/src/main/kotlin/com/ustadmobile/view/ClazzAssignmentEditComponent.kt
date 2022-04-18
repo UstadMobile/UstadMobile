@@ -63,7 +63,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
 
     private var textLimitMaxLabel = FieldLabel(text = getString(MessageID.maximum))
 
-    private var editAfterSubLabel = FieldLabel(text = getString(MessageID.edit_after_submission))
+    private var submissionPolicyLabel = FieldLabel(text = getString(MessageID.submission_policy))
 
     private var markedByLabel = FieldLabel(text = getString(MessageID.marked_by))
 
@@ -499,10 +499,10 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                     umGridContainer(columnSpacing = GridSpacing.spacing4) {
                         umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextFieldSelect(
-                                "${editAfterSubLabel.text}",
+                                "${submissionPolicyLabel.text}",
                                 entity?.assignment?.caSubmissionPolicy.toString(),
-                                editAfterSubLabel.errorText ?: "",
-                                error = editAfterSubLabel.error,
+                                submissionPolicyLabel.errorText ?: "",
+                                error = submissionPolicyLabel.error,
                                 values = submissionPolicyOptions?.map {
                                     Pair(it.code.toString(), it.toString())
                                 }?.toList(),

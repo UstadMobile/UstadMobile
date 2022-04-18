@@ -1849,4 +1849,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="enrolment_policy">Enrolment policy</string>
 
+    <string name="submission_policy">Submission policy</string>
+
 </resources>

@@ -406,7 +406,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="@string/edit_after_submission"
+                android:hint="@string/submission_policy"
                 android:layout_marginVertical="@dimen/dimen_8dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
