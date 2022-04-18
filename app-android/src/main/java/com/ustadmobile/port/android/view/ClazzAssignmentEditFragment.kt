@@ -12,7 +12,6 @@ import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.port.android.view.binding.isSet
@@ -189,12 +188,13 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             mBinding?.groupSet = value
         }
 
-    override var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>? = null
+    override var submissionPolicyOptions: List<ClazzAssignmentEditPresenter.SubmissionPolicyOptionsMessageIdOption>? = null
         get() = field
         set(value) {
             field = value
-            mBinding?.editAfterSubmissionOptions = value
+            mBinding?.submissionPolicy = value
         }
+
     override var fileTypeOptions: List<ClazzAssignmentEditPresenter.FileTypeOptionsMessageIdOption>? = null
         get() = field
         set(value) {

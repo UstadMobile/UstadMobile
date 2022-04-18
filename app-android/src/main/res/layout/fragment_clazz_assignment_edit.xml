@@ -87,7 +87,7 @@
             type="String" />
 
         <variable
-            name="editAfterSubmissionOptions"
+            name="submissionPolicy"
             type="java.util.List&lt;IdOption&gt;"/>
 
         <variable
@@ -416,8 +416,8 @@
                 <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:selectedMessageIdOption="@={blockWithAssignment.assignment.caEditAfterSubmissionType}"
-                    app:messageIdOptions="@{editAfterSubmissionOptions}"
+                    app:selectedMessageIdOption="@={blockWithAssignment.assignment.caSubmissionPolicy}"
+                    app:messageIdOptions="@{submissionPolicy}"
                     />
 
             </com.google.android.material.textfield.TextInputLayout>

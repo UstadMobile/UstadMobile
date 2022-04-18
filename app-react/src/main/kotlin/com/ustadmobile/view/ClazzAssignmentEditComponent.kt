@@ -176,14 +176,13 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
             }
         }
 
-    override var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>? = null
+    override var submissionPolicyOptions: List<ClazzAssignmentEditPresenter.SubmissionPolicyOptionsMessageIdOption>? = null
         get() = field
         set(value) {
             setState {
                 field = value
             }
         }
-
 
     override var fileTypeOptions: List<ClazzAssignmentEditPresenter.FileTypeOptionsMessageIdOption>?= null
         get() = field
@@ -501,15 +500,15 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                         umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextFieldSelect(
                                 "${editAfterSubLabel.text}",
-                                entity?.assignment?.caEditAfterSubmissionType.toString(),
+                                entity?.assignment?.caSubmissionPolicy.toString(),
                                 editAfterSubLabel.errorText ?: "",
                                 error = editAfterSubLabel.error,
-                                values = editAfterSubmissionOptions?.map {
+                                values = submissionPolicyOptions?.map {
                                     Pair(it.code.toString(), it.toString())
                                 }?.toList(),
                                 onChange = {
                                     setState {
-                                        entity?.assignment?.caEditAfterSubmissionType = it.toInt()
+                                        entity?.assignment?.caSubmissionPolicy = it.toInt()
                                     }
                                 }
                             )

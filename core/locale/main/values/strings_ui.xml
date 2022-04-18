@@ -1838,4 +1838,15 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!-- used to display as an error when text is above the character or word limit -->
     <string name="error_too_long_text">Text too long</string>
 
+    <string name="managed_enrolment">Managed - must be invited or approved</string>
+
+    <!-- used to display as an error when is editing an assignment with text or file submission turned off-->
+    <string name="text_file_submission_error">Must use text and/or file submission</string>
+
+    <string name="submit_all_at_once_submission_policy">Must submit all at once</string>
+
+    <string name="multiple_submission_allowed_submission_policy">Can make multiple submissions</string>
+
+    <string name="enrolment_policy">Enrolment policy</string>
+
 </resources>

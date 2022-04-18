@@ -48,18 +48,15 @@ class ClazzAssignmentEditPresenter(context: Any,
         : MessageIdOption(day.messageId, context, day.optionVal)
 
 
-    enum class EditAfterSubmissionOptions(val optionVal: Int, val messageId: Int) {
-        ALLOWED_DEADLINE(ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_DEADLINE,
-                MessageID.allowed_till_deadline),
-        ALLOWED_GRACE(ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_GRACE,
-                MessageID.allowed_till_grace),
-        NOT_ALLOWED(ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_NOT_ALLOWED,
-                MessageID.not_allowed)
+    enum class SubmissionPolicyOptions(val optionVal: Int, val messageId: Int) {
+        SUBMIT_ALL_AT_ONCE(ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE,
+                MessageID.submit_all_at_once_submission_policy),
+        MULTIPLE_SUBMISSIONS(ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED,
+                MessageID.multiple_submission_allowed_submission_policy),
     }
 
-    class  EditAfterSubmissionOptionsMessageIdOption(day: EditAfterSubmissionOptions, context: Any)
+    class  SubmissionPolicyOptionsMessageIdOption(day: SubmissionPolicyOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
-
 
     enum class FileTypeOptions(val optionVal: Int, val messageId: Int) {
         ANY(ClazzAssignment.FILE_TYPE_ANY,
@@ -96,7 +93,7 @@ class ClazzAssignmentEditPresenter(context: Any,
         super.onCreate(savedState)
         view.markingTypeOptions = MarkingTypeOptions.values().map { MarkingTypeOptionsMessageIdOption(it, context) }
         view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaOptionsMessageIdOption(it, context) }
-        view.editAfterSubmissionOptions = EditAfterSubmissionOptions.values().map { EditAfterSubmissionOptionsMessageIdOption(it, context) }
+        view.submissionPolicyOptions = SubmissionPolicyOptions.values().map { SubmissionPolicyOptionsMessageIdOption(it, context) }
         view.fileTypeOptions = FileTypeOptions.values().map { FileTypeOptionsMessageIdOption(it, context) }
         view.textLimitTypeOptions = TextLimitTypeOptions.values().map { TextLimitTypeOptionsMessageIdOption(it, context) }
     }
@@ -262,6 +259,11 @@ class ClazzAssignmentEditPresenter(context: Any,
                 foundError = true
             }else{
                 view.caGracePeriodError = null
+            }
+
+            if(entity.assignment?.caRequireTextSubmission == false && entity.assignment?.caRequireFileSubmission == false){
+                foundError = true
+                view.showSnackBar(systemImpl.getString(MessageID.text_file_submission_error, context))
             }
 
 
