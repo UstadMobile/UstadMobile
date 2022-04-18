@@ -46,13 +46,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.android.di
+import org.kodein.di.android.closestDI
 import org.kodein.di.instance
 
 
 class SplashScreenActivity : AppCompatActivity(), SplashScreenView, DIAware  {
 
-    override val di: DI by di()
+    override val di: DI by closestDI()
 
     private val systemImpl: UstadMobileSystemImpl by instance()
 

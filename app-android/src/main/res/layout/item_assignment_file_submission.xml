@@ -56,7 +56,7 @@
         android:padding="@dimen/dimen_10dp"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, fileSubmission)}"
-        app:onSelectableItemClicked="@{() -> eventHandler.onClickOpenSubmission(fileSubmission, notSubmitted)}"
+        app:onSelectableItemClicked="@{() -> eventHandler.onClickOpenSubmission(fileSubmission)}"
         android:visibility="@{showFiles ? View.VISIBLE : View.GONE}"
         android:tag="@{fileSubmission.casUid}">
 

@@ -11,14 +11,14 @@ import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.AboutView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.CompletableDeferred
-import org.kodein.di.android.di
 import org.kodein.di.DIAware
+import org.kodein.di.android.closestDI
 
 class AboutActivity : UstadBaseActivity(), AboutView, DIAware {
 
     private lateinit var mAboutPresenter: AboutPresenter
 
-    override val di by di()
+    override val di by closestDI()
 
     //There isn't really any loading done here
     override var loading: Boolean

@@ -5,13 +5,13 @@ import android.util.AttributeSet
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.CustomFieldValueOption
 import org.kodein.di.DI
-import org.kodein.di.android.di
+import org.kodein.di.android.closestDI
 import org.kodein.di.direct
 import org.kodein.di.instance
 
 class CustomFieldAutoCompleteTextView : DropDownListAutoCompleteTextView<CustomFieldValueOption> {
 
-    private val di: DI by di(context)
+    private val di: DI by closestDI()
 
     private val customFieldValueOptionAdapter = object: DropDownListAutoCompleteAdapter<CustomFieldValueOption> {
         override fun getId(item: CustomFieldValueOption) = item.customFieldValueOptionUid

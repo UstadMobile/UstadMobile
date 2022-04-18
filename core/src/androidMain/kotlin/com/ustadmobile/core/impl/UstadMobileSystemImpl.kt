@@ -53,7 +53,6 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toFile
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
-import org.kodein.di.android.di
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.*
@@ -107,7 +106,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
        suspend fun getFile(): String {
             val apkFile = File(context.applicationInfo.sourceDir)
             //TODO: replace this with something from appconfig.properties
-            val di: DI by di(context)
+            val di: DI by closestDI(context)
             val impl : UstadMobileSystemImpl = di.direct.instance()
 
             val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context) + "-" +

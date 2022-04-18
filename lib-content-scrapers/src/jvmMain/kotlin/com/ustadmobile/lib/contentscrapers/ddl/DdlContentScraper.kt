@@ -9,6 +9,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM_SECS
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.HarScraper
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
@@ -89,7 +90,7 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
                     var fileEntry: HarEntry? = null
 
                     var counterRequest = 0
-                    while (fileEntry == null && counterRequest < TIME_OUT_SELENIUM) {
+                    while (fileEntry == null && counterRequest < TIME_OUT_SELENIUM_SECS) {
                         fileEntry = proxy.har.log.entries.find { harEntry ->
                             harEntry.request.url == fileUrl.toString()
                         }
@@ -111,7 +112,7 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
 
 
                     var counterResponse = 0
-                    while (fileEntry.response.content.text.isNullOrEmpty() && counterResponse < TIME_OUT_SELENIUM) {
+                    while (fileEntry.response.content.text.isNullOrEmpty() && counterResponse < TIME_OUT_SELENIUM_SECS) {
                         Thread.sleep(1000)
                         counterResponse++
                     }

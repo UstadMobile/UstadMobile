@@ -123,7 +123,8 @@ class ClazzAssignmentDetailStudentProgressPresenter(
         return clazzAssignment
     }
 
-    fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment, isEditable: Boolean){
+    fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment){
+        val isEditable = false
         presenterScope.launch {
             if(submissionCourse.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
 
@@ -155,7 +156,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
 
 
     fun onClickSubmitGrade(grade: Int): Boolean {
-        if(grade < 0 || (grade > entity?.block?.cbMaxPoints ?: 0)){
+        if(grade < 0 || (grade > (entity?.block?.cbMaxPoints ?: 0))){
            // to highlight the textfield to show error
             view.submitMarkError = " "
             return false

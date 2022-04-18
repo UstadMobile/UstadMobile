@@ -108,10 +108,10 @@ class IndexPhetContentScraper {
 
         for (simulation in simulationList) {
 
-            val path = simulation.parent().attr("href")
+            val path = simulation.parent()?.attr("href")
             val simulationUrl = URL(url, path).toString()
             val title = simulationUrl.substring(simulationUrl.lastIndexOf("/") + 1)
-            val thumbnail = simulation.parent().selectFirst("img").attr("src")
+            val thumbnail = simulation.parent()?.selectFirst("img")?.attr("src")
 
             val scraper = PhetContentScraper(simulationUrl,
                     destinationDirectory, containerDir)
@@ -135,7 +135,7 @@ class IndexPhetContentScraper {
                 }
 
                 val categoryList = scraper.getCategoryRelations(contentEntryDao, englishLang)
-                val translationList = scraper.getTranslations(destinationDirectory!!, contentEntryDao, thumbnail, languageDao, languageVariantDao)
+                val translationList = scraper.getTranslations(destinationDirectory!!, contentEntryDao, thumbnail ?: "", languageDao, languageVariantDao)
 
                 // TODO remove all categories that no longer exist
                 // TODO remove all categories that dont belong in a phet simulation anymore

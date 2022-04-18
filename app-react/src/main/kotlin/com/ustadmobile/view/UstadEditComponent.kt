@@ -44,4 +44,9 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
             }
         }, MAX_STATE_CHANGE_DELAY_TIME)
     }
+
+    override fun onDestroyView() {
+        mEditPresenter?.saveStateToNavController()
+        super.onDestroyView()
+    }
 }

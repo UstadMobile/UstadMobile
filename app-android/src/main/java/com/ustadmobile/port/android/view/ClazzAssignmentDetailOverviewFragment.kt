@@ -349,8 +349,8 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         mPresenter?.handleDeleteSubmission(submissionCourse)
     }
 
-    override fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment, isEditable: Boolean){
-        mPresenter?.handleOpenSubmission(submissionCourse, isEditable)
+    override fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment){
+        mPresenter?.handleOpenSubmission(submissionCourse)
     }
 
     companion object {

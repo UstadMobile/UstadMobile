@@ -4,6 +4,8 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.waitForJSandJQueryToLoad
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM_SECS
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper.Companion.ERROR_TYPE_CONTENT_NOT_FOUND
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper.Companion.ERROR_TYPE_LINK_NOT_FOUND
 import io.github.bonigarcia.wdm.WebDriverManager
@@ -17,6 +19,7 @@ import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.remote.CapabilityType
 import org.openqa.selenium.support.ui.WebDriverWait
+import java.time.Duration
 
 
 abstract class HarIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntry, runUid, sqiUid, contentEntryUid, endpoint, di) {
@@ -52,7 +55,7 @@ abstract class HarIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, co
             throw IllegalArgumentException(e)
         }
 
-        val waitDriver = WebDriverWait(chromeDriver, ScraperConstants.TIME_OUT_SELENIUM.toLong())
+        val waitDriver = WebDriverWait(chromeDriver, TIME_OUT_SELENIUM)
         waitForJSandJQueryToLoad(waitDriver)
         waitCondition?.invoke(waitDriver)
 
@@ -63,7 +66,7 @@ abstract class HarIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, co
             var fileEntry: HarEntry? = null
 
             var counterRequest = 0
-            while (fileEntry == null && counterRequest < ScraperConstants.TIME_OUT_SELENIUM) {
+            while (fileEntry == null && counterRequest < TIME_OUT_SELENIUM_SECS) {
 
                 fileEntry = proxy.har.log.entries.find { harEntry ->
                     harEntry.request.url.contains(regex)
@@ -80,7 +83,7 @@ abstract class HarIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, co
 
 
             var counterResponse = 0
-            while (fileEntry.response.content.text.isNullOrEmpty() && counterResponse < ScraperConstants.TIME_OUT_SELENIUM) {
+            while (fileEntry.response.content.text.isNullOrEmpty() && counterResponse < TIME_OUT_SELENIUM_SECS) {
                 Thread.sleep(1000)
                 counterResponse++
             }
