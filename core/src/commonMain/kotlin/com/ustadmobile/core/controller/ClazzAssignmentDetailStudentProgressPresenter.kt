@@ -9,10 +9,8 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.HtmlTextViewDetailView
-import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.attachments.retrieveAttachment
@@ -46,7 +44,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
     view,
     di,
     lifecycleOwner
-), NewCommentItemListener by newPrivateCommentListener, ContentWithAttemptListener {
+), NewCommentItemListener by newPrivateCommentListener {
 
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
@@ -124,7 +122,6 @@ class ClazzAssignmentDetailStudentProgressPresenter(
     }
 
     fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment){
-        val isEditable = false
         presenterScope.launch {
             if(submissionCourse.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
 
@@ -197,13 +194,6 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                 mapOf(ARG_PERSON_UID to nextStudentToMark.toString(),
                         ARG_CLAZZ_ASSIGNMENT_UID to selectedClazzAssignmentUid.toString(),
                         ARG_CLAZZUID to selectedClazzUid.toString()), context)
-    }
-
-    override fun onClickContentWithAttempt(contentWithAttemptSummary: ContentWithAttemptSummary) {
-        val args =  mapOf(
-                ARG_CONTENT_ENTRY_UID to contentWithAttemptSummary.contentEntryUid.toString(),
-                ARG_PERSON_UID to selectedPersonUid.toString())
-        systemImpl.go(SessionListView.VIEW_NAME, args, context)
     }
 
 }
