@@ -26,9 +26,6 @@ class LeavingReasonEditComponent (mProps: UmProps): UstadEditComponent<LeavingRe
     override val mEditPresenter: UstadEditPresenter<*, LeavingReason>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(LeavingReasonEditView.VIEW_NAME)
-
     private var reasonTitle = FieldLabel(text = getString(MessageID.description))
 
     override var reasonTitleError: String? = null

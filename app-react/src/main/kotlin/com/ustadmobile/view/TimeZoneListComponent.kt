@@ -25,9 +25,6 @@ class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmStat
 
     private var timeZoneList: List<TimeZone> = TimeZonesUtil.getTimeZones()
 
-    override val viewNames: List<String>
-        get() = listOf(TimeZoneListView.VIEW_NAME)
-
     override fun onCreateView() {
         super.onCreateView()
         ustadComponentTitle = getString(MessageID.timezone)

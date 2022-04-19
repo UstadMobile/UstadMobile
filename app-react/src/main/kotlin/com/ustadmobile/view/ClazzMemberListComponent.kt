@@ -38,9 +38,6 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
     override val listPresenter: UstadListPresenter<*, in PersonWithClazzEnrolmentDetails>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzMemberListView.VIEW_NAME)
-
     private var addNewStudentText = getString(MessageID.add_a_student)
 
     private var teacherSectionHeaderText = getString(MessageID.teachers_literal)

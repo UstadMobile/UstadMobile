@@ -27,6 +27,7 @@ import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_PARENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -400,7 +401,7 @@ class ClazzEdit2Presenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity ?: return
+        val entityVal = view.entity ?: return
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                     entityVal)
     }

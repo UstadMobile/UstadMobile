@@ -42,9 +42,6 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
 
     private var translations: List<ContentEntryRelatedEntryJoinWithLanguage> = listOf()
 
-    override val viewNames: List<String>
-        get() = listOf(ContentEntryDetailOverviewView.VIEW_NAME)
-
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter

@@ -30,9 +30,6 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzDao
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME)
-
     override val listPresenter: UstadListPresenter<*, in PersonWithAttemptsSummary>?
         get() = mPresenter
 

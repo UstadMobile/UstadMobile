@@ -39,9 +39,6 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzDao
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzList2View.VIEW_NAME)
-
     override val listPresenter: UstadListPresenter<*, in ClazzWithListDisplayDetails>?
         get() = mPresenter
 

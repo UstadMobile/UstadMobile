@@ -42,9 +42,6 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
 
     private var usernameLabel = FieldLabel(getString(MessageID.username))
 
-    override val viewNames: List<String>
-        get() = listOf(PersonAccountEditView.VIEW_NAME)
-
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {

@@ -24,9 +24,6 @@ class ChatListComponent(mProps: UmProps): UstadListComponent<Chat, ChatWithLates
     override val listPresenter: UstadListPresenter<*, in ChatWithLatestMessageAndCount>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ChatListView.VIEW_NAME)
-
     override fun onCreateView() {
         super.onCreateView()
         ustadComponentTitle = getString(MessageID.messages)

@@ -3,7 +3,6 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.TextCourseBlockEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.view.LanguageEditView
 import com.ustadmobile.core.view.TextCourseBlockEditView
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.mui.components.*
@@ -28,9 +27,6 @@ class TextCourseBlockEditComponent (mProps: UmProps): UstadEditComponent<CourseB
 
     override val mEditPresenter: UstadEditPresenter<*, CourseBlock>?
         get() = mPresenter
-
-    override val viewNames: List<String>
-        get() = listOf(LanguageEditView.VIEW_NAME)
 
     private var titleLabel = FieldLabel(text = getString(MessageID.title))
 

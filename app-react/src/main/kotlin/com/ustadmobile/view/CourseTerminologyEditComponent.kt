@@ -31,9 +31,6 @@ class CourseTerminologyEditComponent (mProps: UmProps): UstadEditComponent<Cours
     override val mEditPresenter: UstadEditPresenter<*, CourseTerminology>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(CourseTerminologyEditView.VIEW_NAME)
-
     private var titleLabel = FieldLabel(text = getString(MessageID.name))
 
     override var titleErrorText: String? = null

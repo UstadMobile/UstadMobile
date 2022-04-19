@@ -29,8 +29,6 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(m
 
     private lateinit var selectedTabTitle: String
 
-    override val viewNames: List<String>? = null
-
     private val tabChangeListener:(Any)-> Unit = {
         setState {
             updateUrl(it.toString())

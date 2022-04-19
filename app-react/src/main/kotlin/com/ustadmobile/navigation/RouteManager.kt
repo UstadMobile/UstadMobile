@@ -3,6 +3,7 @@ package com.ustadmobile.navigation
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.*
 import com.ustadmobile.view.*
+import kotlin.reflect.KClass
 
 /**
  * Manages all route functionalities like defining the routes and find destinations
@@ -95,6 +96,14 @@ object RouteManager {
         UstadDestination(view = ReportDetailView.VIEW_NAME, component = ReportDetailComponent::class)
     )
 
+    private val componentClassToViewNamesMap: Map<KClass<*>, List<String>> by lazy {
+        destinationList.groupBy {
+            it.component
+        }.entries.associate { entry ->
+            entry.key to entry.value.map { it.view }
+        }
+    }
+
     /**
      * Default destination to navigate to when destination is not specified
      */
@@ -120,4 +129,12 @@ object RouteManager {
             it.view == view
         }
     }
+
+    /**
+     * Get a list of the viewnames that belong to any given component class.
+     */
+    fun lookupViewNamesByComponent(componentClass: KClass<*>) : List<String>? {
+        return componentClassToViewNamesMap[componentClass]
+    }
+
 }
