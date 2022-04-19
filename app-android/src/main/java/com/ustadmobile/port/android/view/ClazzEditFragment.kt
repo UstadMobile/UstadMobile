@@ -316,7 +316,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mDataBinding?.activityClazzEditCourseBlockRecyclerview?.adapter = null
         mDataBinding?.activityClazzEditScheduleRecyclerview?.adapter = null
         mDataBinding = null
         scheduleRecyclerView = null
