@@ -37,9 +37,6 @@ class SelectFileComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
 
     private var fileDropZoneManager: FileDropZoneManager? = null
 
-    override val viewNames: List<String>
-        get() = listOf(SelectFileView.VIEW_NAME)
-
     private var selectedFiles: List<File> = listOf()
         get() = field
         set(value) {

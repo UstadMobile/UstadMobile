@@ -27,9 +27,6 @@ class CourseGroupSetDetailComponent(props: UmProps): UstadDetailComponent<Course
 
     private var mPresenter: CourseGroupSetDetailPresenter? = null
 
-    override val viewNames: List<String>
-        get() = listOf(CourseGroupSetDetailView.VIEW_NAME)
-
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 

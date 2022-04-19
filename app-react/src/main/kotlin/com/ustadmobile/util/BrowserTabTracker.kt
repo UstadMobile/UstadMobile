@@ -35,12 +35,13 @@ object BrowserTabTracker {
             field = value
         }
 
+    @Deprecated("This should not be used now that the nav stack manages its own persistence")
     var navStackState: ReduxNavStackState
         get() {
             val tabStateList = getStoredTabStateList()
             val navState = ReduxNavStackState()
             tabStateList.map {
-                navState.stack.add(UstadBackStackEntryJs(it.viewName, it.arguments))
+                navState.stack.add(UstadBackStackEntryJs(it.viewName, it.arguments, ""))
             }
             return navState
         }

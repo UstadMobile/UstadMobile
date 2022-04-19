@@ -20,9 +20,6 @@ class HtmlTextViewComponent(mProps: UmProps): UstadDetailComponent<String>(mProp
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(HtmlTextViewDetailView.VIEW_NAME)
-
     override fun onCreateView() {
         super.onCreateView()
         mPresenter = HtmlTextViewDetailPresenter(this, arguments, this,

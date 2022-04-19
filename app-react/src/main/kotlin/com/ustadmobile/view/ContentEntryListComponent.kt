@@ -43,10 +43,6 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
     override val displayTypeRepo: Any?
         get() = dbRepo?.contentEntryDao
 
-    override val viewNames: List<String>
-        get() = listOf(ContentEntryList2View.VIEW_NAME_HOME, ContentEntryList2View.VIEW_NAME,
-            ContentEntryList2View.FOLDER_VIEW_NAME)
-
     override var editOptionVisible: Boolean = false
         get() = field
         set(value) {

@@ -34,9 +34,6 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzAssignmentDetailOverviewView.VIEW_NAME)
-
     private var classComments: List<CommentsWithPerson> = listOf()
 
     private var privateComments: List<CommentsWithPerson> = listOf()
@@ -127,8 +124,23 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                 field = value
             }
         }
+    override var addTextSubmissionVisible: Boolean = false
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var addFileSubmissionVisible: Boolean = false
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
 
-    override var hasPassedDeadline: Boolean = false
+    // TODO remove
+    var hasPassedDeadline: Boolean = false
         get() = field
         set(value) {
             setState {
@@ -137,7 +149,8 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
             updateSubmitButtonVisibility()
         }
 
-    override var maxNumberOfFilesSubmission: Int = 0
+    // TODO remove
+    var maxNumberOfFilesSubmission: Int = 0
         get() = field
         set(value) {
             setState {

@@ -16,7 +16,11 @@
             type="Boolean" />
 
         <variable
-            name="showAddFile"
+            name="addFileVisible"
+            type="Boolean" />
+
+        <variable
+            name="addTextVisible"
             type="Boolean" />
 
         <variable
@@ -43,7 +47,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:onClick="@{() -> eventHandler.onAddTextClicked() }"
-            android:visibility="@{deadlinePassed || !assignment.caRequireTextSubmission ? View.GONE : View.VISIBLE}"
+            android:visibility="@{addTextVisible ? View.VISIBLE : View.GONE}"
             />
 
         <Button
@@ -51,7 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/submission_add_text_button"
-            android:visibility="@{showAddFile ? View.VISIBLE : View.GONE}"
+            android:visibility="@{addFileVisible ? View.VISIBLE : View.GONE}"
             android:onClick="@{() -> eventHandler.onAddFileClicked()}"
             android:text="@string/add_file"
             />
@@ -62,7 +66,7 @@
             android:layout_width="@dimen/dimen_0dp"
             android:layout_height="wrap_content"
             android:layout_marginVertical="@dimen/dimen_8dp"
-            android:visibility="@{showAddFile ? View.VISIBLE : View.GONE}"
+            android:visibility="@{addFileVisible ? View.VISIBLE : View.GONE}"
             android:text="@string/file_type_chosen"
             tools:text="Type:"
             app:layout_constraintStart_toStartOf="@id/submission_add_file_button"
@@ -77,7 +81,7 @@
             tools:text="Document"
             android:layout_marginVertical="@dimen/dimen_8dp"
             android:layout_marginStart="@dimen/dimen_8dp"
-            android:visibility="@{showAddFile ? View.VISIBLE : View.GONE}"
+            android:visibility="@{addFileVisible ? View.VISIBLE : View.GONE}"
             app:textMessageIdLookupKey="@{assignment.caFileType}"
             app:textMessageIdLookupMap="@{SubmissionConstants.FILE_TYPE_MAP}"
             app:layout_constraintStart_toEndOf="@id/item_file_type_label"
@@ -90,7 +94,7 @@
             android:layout_width="@dimen/dimen_0dp"
             android:layout_height="wrap_content"
             android:layout_marginVertical="@dimen/dimen_8dp"
-            android:visibility="@{showAddFile ? View.VISIBLE : View.GONE}"
+            android:visibility="@{addFileVisible ? View.VISIBLE : View.GONE}"
             android:text="@{@string/max_number_of_files(assignment.caNumberOfFiles)}"
             tools:text="Maximum number of files: 2"
             android:layout_marginStart="@dimen/dimen_24dp"

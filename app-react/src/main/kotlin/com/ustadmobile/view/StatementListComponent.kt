@@ -33,9 +33,6 @@ class StatementListComponent(props: UmProps): UstadListComponent<StatementWithSe
     override val displayTypeRepo: Any?
         get() = dbRepo?.statementDao
 
-    override val viewNames: List<String>
-        get() = listOf(StatementListView.VIEW_NAME)
-
     override fun RBuilder.renderListItem(item: StatementWithSessionDetailDisplay) {
         umGridContainer {
             val padding = LinearDimension("4px")

@@ -28,9 +28,6 @@ class JoinWithCodeComponent (mProps: UmProps): UstadBaseComponent<UmProps, UmSta
 
     private var mPresenter: JoinWithCodePresenter? = null
 
-    override val viewNames: List<String>
-        get() = listOf(JoinWithCodeView.VIEW_NAME)
-
     var buttonEnabled = true
 
     var entityType = ""

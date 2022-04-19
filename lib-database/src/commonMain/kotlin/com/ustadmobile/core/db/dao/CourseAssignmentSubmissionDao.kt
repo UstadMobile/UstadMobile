@@ -92,6 +92,23 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
             : DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>
 
     @Query("""
+        SELECT Count(casUid)
+          FROM CourseAssignmentSubmission
+         WHERE casAssignmentUid = :assignmentUid
+           AND casSubmitterUid = :studentUid
+           AND casType = ${CourseAssignmentSubmission.SUBMISSION_TYPE_FILE}
+    """)
+    abstract suspend fun countFileSubmissionFromStudent(assignmentUid: Long, studentUid: Long): Int
+
+    @Query("""
+        SELECT Count(casUid)
+          FROM CourseAssignmentSubmission
+         WHERE casAssignmentUid = :assignmentUid
+           AND casSubmitterUid = :studentUid
+    """)
+    abstract suspend fun countSubmissionsFromStudent(assignmentUid: Long, studentUid: Long): Int
+
+    @Query("""
            SELECT COALESCE((
                 SELECT (CASE WHEN CourseAssignmentMark.camAssignmentUid IS NOT NULL 
                              THEN ${CourseAssignmentSubmission.MARKED}

@@ -53,8 +53,6 @@ data class CreateNewItem(var visible: Boolean = false, var text: String = "", va
  */
 abstract class UstadSimpleList<P: SimpleListProps<*>>(mProps: P) : UstadBaseComponent<P,UmState>(mProps){
 
-    override val viewNames: List<String>? = null
-
     override fun RBuilder.render() {
         styledDiv {
             css{

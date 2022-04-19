@@ -22,9 +22,6 @@ class ReportTemplateListComponent(props: UmProps): UstadListComponent<Report,
     override val displayTypeRepo: Any?
         get() = dbRepo?.reportDao
 
-    override val viewNames: List<String>
-        get() = listOf(ReportTemplateListView.VIEW_NAME)
-
 
     override fun onCreateView() {
         super.onCreateView()

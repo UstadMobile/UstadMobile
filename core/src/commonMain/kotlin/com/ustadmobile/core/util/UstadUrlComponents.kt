@@ -27,6 +27,14 @@ data class UstadUrlComponents(
         }.toMap()
     }
 
+    val viewUri: String by lazy {
+        if(queryString.isEmpty()) {
+            viewName
+        }else {
+            "$viewName?$queryString"
+        }
+    }
+
     companion object {
 
         private const val DIVIDER = "/#/"
@@ -40,16 +48,16 @@ data class UstadUrlComponents(
             val endpoint = url.substring(0, dividerIndex + 1).removeSuffix("umapp/")
             val queryIndex = url.indexOf("?", startIndex = dividerIndex)
             val viewName: String
-            val args: String
+            val queryString: String
             if(queryIndex == -1 || queryIndex == (url.length -1)) {
                 viewName = url.substring(dividerIndex + DIVIDER.length).removeSuffix("?")
-                args = ""
+                queryString = ""
             }else {
                 viewName = url.substring(dividerIndex + DIVIDER.length, queryIndex)
-                args = url.substring(queryIndex + 1)
+                queryString = url.substring(queryIndex + 1)
             }
 
-            return UstadUrlComponents(endpoint, viewName, args)
+            return UstadUrlComponents(endpoint, viewName, queryString)
         }
     }
 

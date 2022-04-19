@@ -35,14 +35,6 @@ class SubmissionAdapter(
             viewHolder?.binding?.assignment = value
         }
 
-    var hasPassedDeadline: Boolean = false
-        set(value){
-            if(field == value)
-                return
-            field = value
-            viewHolder?.binding?.hasPassedDeadline = value
-        }
-
     var isSubmitted: Boolean = false
         set(value){
             if(field == value)
@@ -64,7 +56,6 @@ class SubmissionAdapter(
                     it.eventHandler = itemListener
                     it.showFiles = visible
                     it.notSubmitted = !isSubmitted
-                    it.hasPassedDeadline = hasPassedDeadline
                     it.dateTimeMode = MODE_START_OF_DAY
                     it.timeZoneId = "UTC"
                 })
@@ -98,8 +89,6 @@ class SubmissionAdapter(
                                 && oldItem.casText == newItem.casText
                                 && oldItem.casType == newItem.casType
                                 && oldItem.attachment?.casaMd5 == newItem.attachment?.casaMd5
-                                && oldItem.attachment?.casaMimeType == newItem.attachment?.casaMimeType
-                                && oldItem.attachment?.casaSize == newItem.attachment?.casaSize
                                 && oldItem.attachment?.casaUri == newItem.attachment?.casaUri
                     }
                 }
