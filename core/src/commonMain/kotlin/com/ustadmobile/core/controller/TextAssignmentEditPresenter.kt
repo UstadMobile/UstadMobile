@@ -38,6 +38,7 @@ class TextAssignmentEditPresenter(context: Any,
         }else {
             CourseAssignmentSubmission().apply {
                 casAssignmentUid = bundle[TextAssignmentEditView.ASSIGNMENT_ID]?.toLongOrNull() ?: 0L
+                casSubmitterUid = accountManager.activeAccount.personUid
                 casType = CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT
                 casUid = db.doorPrimaryKeyManager.nextId(CourseAssignmentSubmission.TABLE_ID)
             }

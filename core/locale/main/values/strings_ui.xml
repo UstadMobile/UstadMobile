@@ -1851,4 +1851,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="submission_policy">Submission policy</string>
 
+    <!-- used to display as an error if student tries to submit assignment more than once -->
+    <string name="submission_already_made">Submission already made</string>
+
 </resources>

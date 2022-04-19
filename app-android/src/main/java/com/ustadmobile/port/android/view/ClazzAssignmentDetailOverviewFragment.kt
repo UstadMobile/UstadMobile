@@ -86,7 +86,6 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
     private val courseSubmissionWithAttachmentObserver = Observer<PagedList<CourseAssignmentSubmissionWithAttachment>?> {
         t -> run{
-            checkMaxFilesReached(t, addedCourseAssignmentSubmission)
             submissionHeaderAdapter?.visible = t.isNotEmpty()
             submittedSubmissionAdapter?.submitList(t)
         }
@@ -114,7 +113,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         addSubmissionButtonsAdapter = AddSubmissionButtonsAdapter(this)
 
         // 4
-        addSubmissionAdapter = AddSubmissionListAdapter(this).also {
+        addSubmissionAdapter = AddSubmissionListAdapter(fileSubmissionEditListener).also {
             it.isSubmitted = false
         }
 
@@ -232,16 +231,9 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         set(value) {
             field = value
             submitButtonAdapter?.hasFilesToSubmit = value?.isNotEmpty() ?: false
-            checkMaxFilesReached(submittedSubmissionAdapter?.currentList, value)
             addSubmissionAdapter?.submitList(value)
             addSubmissionAdapter?.notifyDataSetChanged()
         }
-
-    fun checkMaxFilesReached(submittedList: List<CourseAssignmentSubmissionWithAttachment>?, addedList: List<CourseAssignmentSubmissionWithAttachment>?){
-        val sizeOfSubmitted = submittedList?.filter { it.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE }?.size ?: 0
-        val sizeOfAddedList = addedList?.filter { it.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE }?.size ?: 0
-        addSubmissionButtonsAdapter?.maxFilesReached = (sizeOfAddedList + sizeOfSubmitted) >= maxNumberOfFilesSubmission
-    }
 
     override var timeZone: String? = null
         get() = field
@@ -271,6 +263,11 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         }
 
     override var showPrivateComments: Boolean = false
+        set(value){
+            field = value
+            newPrivateCommentRecyclerAdapter?.visible = showPrivateComments
+            privateCommentsHeadingRecyclerAdapter?.visible = showPrivateComments
+        }
 
     override var showSubmission: Boolean = false
         set(value){
@@ -282,15 +279,17 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             submissionStatusHeaderAdapter?.visible = value
         }
 
-    override var hasPassedDeadline: Boolean = false
+    override var addTextSubmissionVisible: Boolean = false
         set(value) {
             field = value
-            submittedSubmissionAdapter?.hasPassedDeadline = value
-            addSubmissionButtonsAdapter?.deadlinePassed = value
-            submitButtonAdapter?.deadlinePassed = value
+            addSubmissionButtonsAdapter?.addTextVisible = value
         }
 
-    override var maxNumberOfFilesSubmission: Int = 0
+    override var addFileSubmissionVisible: Boolean = false
+        set(value) {
+            field = value
+            addSubmissionButtonsAdapter?.addFileVisible = value
+        }
 
     override var submissionMark: CourseAssignmentMark? = null
         set(value) {
@@ -315,9 +314,6 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             addSubmissionAdapter?.assignment = value
 
             detailRecyclerAdapter?.visible = true
-
-            newPrivateCommentRecyclerAdapter?.visible = showPrivateComments
-            privateCommentsHeadingRecyclerAdapter?.visible = showPrivateComments
 
             newClassCommentRecyclerAdapter?.visible = value?.caClassCommentEnabled ?: false
             classCommentsHeadingRecyclerAdapter?.visible = value?.caClassCommentEnabled ?: false
@@ -345,6 +341,19 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
                 accountManager.activeAccount.personUid, listener)
         sendCommentSheet.show(childFragmentManager, sendCommentSheet.tag)
     }
+
+    var fileSubmissionEditListener = object: FileSubmissionListItemListener {
+
+        override fun onClickDeleteSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment) {
+            mPresenter?.handleDeleteSubmission(submissionCourse)
+        }
+
+        override fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment) {
+            mPresenter?.handleEditSubmission(submissionCourse)
+        }
+
+    }
+
 
     override fun onClickDeleteSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment) {
         mPresenter?.handleDeleteSubmission(submissionCourse)

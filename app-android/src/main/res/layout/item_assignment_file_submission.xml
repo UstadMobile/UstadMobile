@@ -24,10 +24,6 @@
             type="ClazzAssignmentWithCourseBlock" />
 
         <variable
-            name="hasPassedDeadline"
-            type="Boolean" />
-
-        <variable
             name="dateTimeMode"
             type="Integer"/>
 
@@ -145,7 +141,7 @@
             android:padding="@dimen/dimen_8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:srcCompat="@drawable/ic_delete_black_24dp"
-            android:visibility="@{notSubmitted &amp; !hasPassedDeadline ? View.VISIBLE : View.GONE}"
+            android:visibility="@{notSubmitted ? View.VISIBLE : View.GONE}"
             android:contentDescription="@string/delete"
             android:onClick="@{() -> eventHandler.onClickDeleteSubmission(fileSubmission)}"/>
 

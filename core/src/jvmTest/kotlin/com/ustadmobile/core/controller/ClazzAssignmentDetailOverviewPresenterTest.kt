@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzAssignmentDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
@@ -126,16 +127,23 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     }
 
     @Test
-    fun givenClazzAssignment_whenStudentViews_thenShowScoreWithPrivateComments(){
+    fun givenStudentWithNoSubmissionGivenYet_whenShown_thenShowNoSubmissionStatusAndAddFileTextWithComments(){
         createPerson(false)
 
-        val testEntity = ClazzAssignment().apply {
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
             caClazzUid = testClazz.clazzUid
             caRequireFileSubmission = true
+            caRequireTextSubmission = true
             caPrivateCommentsEnabled = true
             caNumberOfFiles = 3
             caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                cbClazzUid = caClazzUid
+                cbEntityUid = caUid
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                cbUid = repo.courseBlockDao.insert(this)
+            }
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
@@ -148,19 +156,454 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         //wait for the entity value to be set
         mockView.captureLastEntityValue()
 
-        verify(mockView, timeout(1000).times(2)).showSubmission = eq(true)
-        verify(mockView, timeout(1000).times(2)).maxNumberOfFilesSubmission = eq(3)
-        verify(mockView, timeout(1000).times(2)).hasPassedDeadline = eq(false)
+        verify(mockView, timeout(1000).times(2)).addTextSubmissionVisible = eq(true)
+        verify(mockView, timeout(1000).times(2)).addFileSubmissionVisible = eq(true)
         verify(mockView, timeout(5000).times(2)).submittedCourseAssignmentSubmission = any()
         verify(mockView, timeout(1000).times(2)).submissionStatus = eq(0)
         verify(mockView, timeout(1000).times(2)).submissionMark = eq(null)
         verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(true)
-        verify(mockView, timeout(1000).times(0)).clazzAssignmentClazzComments
+        verify(mockView, timeout(1000).times(2)).clazzAssignmentClazzComments = any()
 
     }
 
     @Test
-    fun givenClazzAssignment_whenTeacherViews_thenDontShowScoreAndPrivateComments(){
+    fun givenStudentWithSubmissionNotMarkedAndNoMultipleSubmission_whenShown_thenDontShowAddFileTextWithSubmittedStatus(){
+        createPerson(false)
+
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caRequireTextSubmission = true
+            caPrivateCommentsEnabled = true
+            caNumberOfFiles = 3
+            caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                cbClazzUid = caClazzUid
+                cbEntityUid = caUid
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                cbUid = repo.courseBlockDao.insert(this)
+            }
+        }
+
+        val courseSubmission =  CourseAssignmentSubmission().apply{
+            casAssignmentUid = testEntity.caUid
+            casSubmitterUid = loggedInPersonUid
+            casText = "Test Text"
+            casType = CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT
+            casUid = repo.courseAssignmentSubmissionDao.insert(this)
+        }
+
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+            mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        //wait for the entity value to be set
+        mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).addTextSubmissionVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).addFileSubmissionVisible = eq(false)
+        verify(mockView, timeout(5000).times(2)).submittedCourseAssignmentSubmission = any()
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.SUBMITTED)
+        verify(mockView, timeout(1000).times(2)).submissionMark = eq(null)
+        verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(true)
+        verify(mockView, timeout(1000).times(2)).clazzAssignmentClazzComments = any()
+
+    }
+
+
+    @Test
+    fun givenStudentWithSubmissionNotMarkedAndMultipleSubmissionPolicy_whenShown_thenShowAddFileTextWithSubmittedStatus(){
+
+        createPerson(false)
+
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caRequireTextSubmission = true
+            caPrivateCommentsEnabled = true
+            caNumberOfFiles = 3
+            caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED
+            caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                cbClazzUid = caClazzUid
+                cbEntityUid = caUid
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                cbUid = repo.courseBlockDao.insert(this)
+            }
+        }
+
+        val courseSubmission =  CourseAssignmentSubmission().apply{
+            casAssignmentUid = testEntity.caUid
+            casSubmitterUid = loggedInPersonUid
+            casText = "Test Text"
+            casType = CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT
+            casUid = repo.courseAssignmentSubmissionDao.insert(this)
+        }
+
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+            mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        //wait for the entity value to be set
+        mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).addTextSubmissionVisible = eq(true)
+        verify(mockView, timeout(1000).times(2)).addFileSubmissionVisible = eq(true)
+        verify(mockView, timeout(5000).times(2)).submittedCourseAssignmentSubmission = any()
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.SUBMITTED)
+        verify(mockView, timeout(1000).times(2)).submissionMark = eq(null)
+        verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(true)
+        verify(mockView, timeout(1000).times(2)).clazzAssignmentClazzComments = any()
+
+    }
+
+    @Test
+    fun givenStudentWithNoSubmissionAndSubmitAllAtOncePolicy_whenSubmissionMadeOnAnotherDeviceAndUserClicksSubmit_thenShowErrorMessage(){
+
+        createPerson(false)
+
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caRequireTextSubmission = true
+            caPrivateCommentsEnabled = true
+            caNumberOfFiles = 3
+            caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                cbClazzUid = caClazzUid
+                cbEntityUid = caUid
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                cbUid = repo.courseBlockDao.insert(this)
+            }
+        }
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+            mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        //wait for the entity value to be set
+        mockView.captureLastEntityValue()
+
+        val courseSubmission =  CourseAssignmentSubmission().apply{
+            casAssignmentUid = testEntity.caUid
+            casSubmitterUid = loggedInPersonUid
+            casText = "Test Text"
+            casType = CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT
+            casUid = repo.courseAssignmentSubmissionDao.insert(this)
+        }
+
+        presenter.handleSubmitButtonClicked()
+
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+        verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.submission_already_made, context)), any(), any())
+
+    }
+
+
+    @Test
+    fun givenStudentWithNoSubmission_whenClickSubmitAndDeadlinePassed_thenShowErrorMessage(){
+
+        createPerson(false)
+
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caRequireTextSubmission = true
+            caPrivateCommentsEnabled = true
+            caNumberOfFiles = 3
+            caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                cbClazzUid = caClazzUid
+                cbEntityUid = caUid
+                cbDeadlineDate = DateTime(2022, 1,1).unixMillisLong
+                cbGracePeriodDate = DateTime(2022, 1,1).unixMillisLong
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                cbUid = repo.courseBlockDao.insert(this)
+            }
+        }
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+            mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        //wait for the entity value to be set
+        mockView.captureLastEntityValue()
+
+        presenter.handleSubmitButtonClicked()
+
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+        verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.submission_already_made, context)), any(), any())
+
+    }
+
+    @Test
+    fun givenStudentWithSubmissionMarkedAndSingleSubmissionPolicy_whenShown_thenShowMarkedStatusWithNoAddTextFileButtons(){
+
+        createPerson(false)
+
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caRequireTextSubmission = true
+            caPrivateCommentsEnabled = true
+            caNumberOfFiles = 3
+            caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                cbClazzUid = caClazzUid
+                cbEntityUid = caUid
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                cbUid = repo.courseBlockDao.insert(this)
+            }
+        }
+
+        val courseSubmission =  CourseAssignmentSubmission().apply{
+            casAssignmentUid = testEntity.caUid
+            casSubmitterUid = loggedInPersonUid
+            casText = "Test Text"
+            casType = CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT
+            casUid = repo.courseAssignmentSubmissionDao.insert(this)
+        }
+
+        val mark = CourseAssignmentMark().apply {
+            camMark = 10
+            camAssignmentUid = testEntity.caUid
+            camStudentUid = loggedInPersonUid
+            camUid = repo.courseAssignmentMarkDao.insert(this)
+        }
+
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+            mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        //wait for the entity value to be set
+        mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).addTextSubmissionVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).addFileSubmissionVisible = eq(false)
+        verify(mockView, timeout(5000).times(2)).submittedCourseAssignmentSubmission = any()
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.MARKED)
+        verify(mockView, timeout(1000).times(2)).submissionMark = argThat {
+            this.camUid == mark.camUid
+        }
+        verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(true)
+        verify(mockView, timeout(1000).times(2)).clazzAssignmentClazzComments = any()
+
+    }
+
+    @Test
+    fun givenStudentWithSubmissionMarkedAndMultipleSubmissionPolicy_whenShown_thenShowMarkedStatusAndAddTextFileButtons(){
+
+        createPerson(false)
+
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caRequireTextSubmission = true
+            caPrivateCommentsEnabled = true
+            caNumberOfFiles = 3
+            caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED
+            caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                cbClazzUid = caClazzUid
+                cbEntityUid = caUid
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                cbUid = repo.courseBlockDao.insert(this)
+            }
+        }
+
+        val courseSubmission =  CourseAssignmentSubmission().apply{
+            casAssignmentUid = testEntity.caUid
+            casSubmitterUid = loggedInPersonUid
+            casText = "Test Text"
+            casType = CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT
+            casUid = repo.courseAssignmentSubmissionDao.insert(this)
+        }
+
+        val mark = CourseAssignmentMark().apply {
+            camMark = 10
+            camAssignmentUid = testEntity.caUid
+            camStudentUid = loggedInPersonUid
+            camUid = repo.courseAssignmentMarkDao.insert(this)
+        }
+
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+            mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        //wait for the entity value to be set
+        mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).addTextSubmissionVisible = eq(true)
+        verify(mockView, timeout(1000).times(2)).addFileSubmissionVisible = eq(true)
+        verify(mockView, timeout(5000).times(2)).submittedCourseAssignmentSubmission = any()
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.MARKED)
+        verify(mockView, timeout(1000).times(2)).submissionMark = argThat {
+            this.camUid == mark.camUid
+        }
+        verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(true)
+        verify(mockView, timeout(1000).times(2)).clazzAssignmentClazzComments = any()
+
+    }
+
+
+    @Test
+    fun givenStudentWithNoSubmissionAndSingleSubmitPolicy_whenClickSubmitSubmission_thenSubmitAndHideAddTextFile(){
+
+        createPerson(false)
+
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caRequireTextSubmission = true
+            caPrivateCommentsEnabled = true
+            caNumberOfFiles = 3
+            caSubmissionPolicy = ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE
+            caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                cbClazzUid = caClazzUid
+                cbEntityUid = caUid
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                cbUid = repo.courseBlockDao.insert(this)
+            }
+        }
+
+        val courseSubmission =  CourseAssignmentSubmissionWithAttachment().apply{
+            casAssignmentUid = testEntity.caUid
+            casSubmitterUid = loggedInPersonUid
+            casText = "Test Text"
+            casType = CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT
+            casUid = 123
+        }
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+            mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        //wait for the entity value to be set
+        mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).addTextSubmissionVisible = eq(true)
+        verify(mockView, timeout(1000).times(2)).addFileSubmissionVisible = eq(true)
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.NOT_SUBMITTED)
+
+        presenter.submissionList.add(courseSubmission)
+
+        presenter.handleSubmitButtonClicked()
+
+        verify(mockView, timeout(1000).times(1)).addTextSubmissionVisible = eq(false)
+        verify(mockView, timeout(1000).times(1)).addFileSubmissionVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.SUBMITTED)
+
+    }
+
+    @Test
+    fun givenStudentWithPrivateCommentsDisabled_whenShown_thenShowNoPrivateComments(){
+        createPerson(false)
+
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caRequireTextSubmission = true
+            caPrivateCommentsEnabled = false
+            caNumberOfFiles = 3
+            caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                cbClazzUid = caClazzUid
+                cbEntityUid = caUid
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                cbUid = repo.courseBlockDao.insert(this)
+            }
+        }
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+            mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        //wait for the entity value to be set
+        mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(false)
+
+    }
+
+    @Test
+    fun givenStudentWithPrivateCommentsEnaled_whenShown_thenShowPrivateComments(){
+        createPerson(false)
+
+        val testEntity = ClazzAssignmentWithCourseBlock().apply {
+            //set variables here
+            caClazzUid = testClazz.clazzUid
+            caRequireFileSubmission = true
+            caRequireTextSubmission = true
+            caPrivateCommentsEnabled = true
+            caNumberOfFiles = 3
+            caUid = repo.clazzAssignmentDao.insert(this)
+            block = CourseBlock().apply {
+                cbClazzUid = caClazzUid
+                cbEntityUid = caUid
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                cbUid = repo.courseBlockDao.insert(this)
+            }
+        }
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
+
+        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
+            mockLifecycleOwner, di)
+
+        presenter.onCreate(null)
+
+        //wait for the entity value to be set
+        mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(true)
+
+    }
+
+
+
+    @Test
+    fun givenUserIsNotStudent_whenShown_dontShowPrivateCommentsSubmissionStatusScoreAndAddFileText(){
         createPerson(true)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
@@ -190,13 +633,17 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         verify(mockView, timeout(1000)).showPrivateComments = eq(false)
         verify(mockView, timeout(1000)).showSubmission = eq(false)
-        verify(mockView, timeout(1000).times(0)).maxNumberOfFilesSubmission
-        verify(mockView, timeout(1000).times(0)).hasPassedDeadline
+        verify(mockView, timeout(1000).times(0)).addFileSubmissionVisible
+        verify(mockView, timeout(1000).times(0)).addTextSubmissionVisible
         verify(mockView, timeout(1000).times(0)).submittedCourseAssignmentSubmission
         verify(mockView, timeout(1000).times(0)).submissionMark
+        verify(mockView, timeout(1000).times(0)).submissionStatus
         verify(mockView, timeout(1000).times(0)).clazzAssignmentClazzComments
 
     }
+
+
+
 
     @Test
     fun givenUserClicksAddFile_whenClicked_thenGoToSelectFileView(){
@@ -233,56 +680,6 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         val testNavController: UstadNavController by di.instance()
         verify(testNavController).navigate(SelectFileView.VIEW_NAME,
                 mapOf(ARG_MIMETYPE_SELECTED to SelectFileView.SELECTION_MODE_VIDEO))
-
-    }
-
-    // TODO flaky only on jenkins
-    //@Test
-    fun givenUserClicksSubmitButton_whenClicked_thenShouldCreateStatement(){
-
-        createPerson(false)
-        val testEntity = ClazzAssignmentWithCourseBlock().apply {
-            //set variables here
-            caClazzUid = testClazz.clazzUid
-            caRequireFileSubmission = true
-            caPrivateCommentsEnabled = true
-            caNumberOfFiles = 3
-            caFileType = ClazzAssignment.FILE_TYPE_VIDEO
-            caUid = repo.clazzAssignmentDao.insert(this)
-            block = CourseBlock().apply {
-                this.cbClazzUid = testClazz.clazzUid
-                this.cbEntityUid = caUid
-                this.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                this.cbUid = repo.courseBlockDao.insert(this)
-            }
-        }
-
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
-
-        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
-                mockLifecycleOwner, di)
-
-        presenter.onCreate(null)
-
-        whenever(mockView.entity).thenReturn(testEntity)
-
-        mockView.captureLastEntityValue()
-
-        val fileSubmissionDaoSpy = spy(repo.courseAssignmentSubmissionAttachmentDao)
-        doReturn(fileSubmissionDaoSpy).`when`(repo).courseAssignmentSubmissionAttachmentDao
-
-        presenter.handleSubmitButtonClicked()
-
-        verifyBlocking(fileSubmissionDaoSpy, timeout(1000)){
-            insertListAsync(any())
-        }
-
-
-        verifyBlocking(xapiStatementEndpointImpl, timeout(1000)){
-            storeStatements(any(),
-                any(), any(), any())
-        }
-
 
     }
 
@@ -331,55 +728,4 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
 
     }
-
-    @Test
-    fun givenUserClicksDeleteFileSubmission_whenClicked_thenShouldDeleteFile(){
-
-        createPerson(false)
-        val testEntity = ClazzAssignmentWithCourseBlock().apply {
-            //set variables here
-            caClazzUid = testClazz.clazzUid
-            caRequireFileSubmission = true
-            caPrivateCommentsEnabled = true
-            caNumberOfFiles = 3
-            caFileType = ClazzAssignment.FILE_TYPE_VIDEO
-            caUid = repo.clazzAssignmentDao.insert(this)
-            block = CourseBlock().apply {
-                this.cbClazzUid = testClazz.clazzUid
-                this.cbEntityUid = caUid
-                this.cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                this.cbUid = repo.courseBlockDao.insert(this)
-            }
-        }
-
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.caUid.toString())
-
-        val presenter = ClazzAssignmentDetailOverviewPresenter(context, presenterArgs, mockView,
-                mockLifecycleOwner, di)
-
-        presenter.onCreate(null)
-
-        whenever(mockView.entity).thenReturn(testEntity)
-
-        mockView.captureLastEntityValue()
-
-        val afs = CourseAssignmentSubmissionWithAttachment().apply {
-            attachment?.casaUri = "dummyUri"
-        }
-
-        val fileSubmissionDaoSpy = spy(repo.courseAssignmentSubmissionAttachmentDao)
-        doReturn(fileSubmissionDaoSpy).`when`(repo).courseAssignmentSubmissionAttachmentDao
-
-        presenter.handleDeleteSubmission(afs)
-
-        verify(mockView).addedCourseAssignmentSubmission = eq(listOf())
-
-
-    }
-
-
-
-
-
-
 }
