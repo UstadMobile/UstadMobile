@@ -33,6 +33,7 @@ import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
+import kotlin.jvm.JvmStatic
 
 
 class ClazzAssignmentDetailOverviewPresenter(context: Any,
@@ -331,6 +332,11 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
 
 
     companion object {
+
+        @JvmStatic
+        val SUBMISSION_POLICY_OPTIONS = mapOf(
+            ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED to MessageID.multiple_submission_allowed_submission_policy,
+            ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE to MessageID.submit_all_at_once_submission_policy)
 
         const val SAVED_STATE_KEY_URI = "URI"
 

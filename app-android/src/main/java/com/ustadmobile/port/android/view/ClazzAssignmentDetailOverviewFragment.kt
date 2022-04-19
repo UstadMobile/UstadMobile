@@ -360,7 +360,14 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         val ASSIGNMENT_STATUS_MAP = mapOf(
                 CourseAssignmentSubmission.NOT_SUBMITTED to R.drawable.ic_done_white_24dp,
                 CourseAssignmentSubmission.SUBMITTED to R.drawable.ic_done_white_24dp,
-                CourseAssignmentSubmission.MARKED to R.drawable.ic_baseline_done_all_24)
+                CourseAssignmentSubmission.MARKED to R.drawable.ic_baseline_done_all_24
+        )
+
+        @JvmField
+        val SUBMISSION_POLICY_MAP = mapOf(
+            ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE to R.drawable.ic_baseline_task_alt_24,
+            ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED to R.drawable.ic_baseline_add_task_24,
+        )
 
 
     }

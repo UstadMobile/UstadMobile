@@ -57,6 +57,8 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
     private var terminologyLabel = FieldLabel(text = getString(MessageID.terminology))
 
+    private var enrolmentPolicyLabel = FieldLabel(text = getString(MessageID.enrolment_policy))
+
     private var scheduleList: List<Schedule> = listOf()
 
     private var courseBlockList: List<CourseBlockWithEntity> = listOf()
@@ -345,6 +347,21 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                             }
                         }
                     }
+
+                    umTextFieldSelect(
+                        "${enrolmentPolicyLabel.text}",
+                        entity?.clazzEnrolmentPolicy.toString(),
+                        enrolmentPolicyLabel.errorText ?: "",
+                        error = enrolmentPolicyLabel.error,
+                        values = enrolmentPolicyOptions?.map {
+                            Pair(it.code.toString(), it.toString())
+                        }?.toList(),
+                        onChange = {
+                            setState {
+                                entity?.clazzEnrolmentPolicy = it.toInt()
+                            }
+                        }
+                    )
 
 
                     umTextField(label = "${terminologyLabel.text}",
