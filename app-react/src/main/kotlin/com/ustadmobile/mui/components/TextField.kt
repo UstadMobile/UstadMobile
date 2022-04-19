@@ -151,7 +151,6 @@ private fun setProps(
     allowCapitalLetters: Boolean = true,
     onClick: (() -> Unit)? = null,
 ) {
-    val sb = StringBuilder()
     autoComplete?.let { textField.attrs.autoComplete = it }
     textField.attrs.autoFocus = autoFocus
     textField.attrs.disabled = disabled

@@ -3,7 +3,8 @@
 This modules contains react web application, based on kotlin multi-platform idea as it uses kotlin-wrappers to build UI based on MUI library
 
 ## Prerequisites
-Install the [Latest Node](https://nodejs.org/en/download/) on your machine since the kotlin multiplatform eco-system depends on it.
+Install [Node 14x](https://nodejs.org/en/download/) on your machine since Kotlin/JS depends on it
+to build.
 
 ## Development
 

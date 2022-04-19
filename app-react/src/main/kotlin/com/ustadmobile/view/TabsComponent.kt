@@ -1,6 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ACTIVE_TAB_INDEX
+import com.ustadmobile.door.ext.toUrlQueryString
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.navigation.RouteManager.lookupDestinationName
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -9,6 +10,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.getViewNameFromUrl
 import com.ustadmobile.util.urlSearchParamsToMap
+import kotlinx.browser.window
 import kotlinx.css.*
 import react.RBuilder
 import react.setState
@@ -41,7 +43,7 @@ class  TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(m
         val params = urlSearchParamsToMap().toMutableMap()
         if(params[ARG_ACTIVE_TAB_INDEX] ?:0 == index) return
         params[ARG_ACTIVE_TAB_INDEX] = index.toString()
-        systemImpl.go("${getViewNameFromUrl()}",params, this)
+        window.location.replace("#/${getViewNameFromUrl()}?${params.toUrlQueryString()}")
     }
 
     override fun UmState.init(props: TabsProps) {

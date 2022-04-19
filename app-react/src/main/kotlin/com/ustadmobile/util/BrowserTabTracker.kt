@@ -72,8 +72,9 @@ object BrowserTabTracker {
             onExtraTabDetected(true)
         }
         dispatch(getCurrentState().navStack)
-        window.onunload = {
+        window.onbeforeunload = {
             localStorage.removeItem(KEY_ACTIVE_TAB)
+            null
         }
     }
 

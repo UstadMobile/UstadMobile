@@ -24,6 +24,7 @@ external interface MuiEditorProps: StyledProps {
     var label: String
     var toolbarButtonSize: dynamic
     var readOnly: Boolean
+    var toolbar: Boolean
     var inheritFontSize: Boolean
     var maxLength: Int
     var onSave:(data: String) -> Unit
@@ -36,9 +37,10 @@ external interface MuiEditorProps: StyledProps {
 fun RBuilder.umMuiHtmlEditor(
     value: String?,
     readOnly: Boolean = false,
+    toolbar: Boolean = true,
     label: String? = null,
     onSave:((data: String) -> Unit)? = null,
-    onChange:(data: String) -> Unit,
+    onChange:((data: String) -> Unit)? = null,
     className: String? = null,
     maxLength: Int? = null,
     handler: StyledHandler<MuiEditorProps>? = null
@@ -55,7 +57,8 @@ fun RBuilder.umMuiHtmlEditor(
     label?.let{
         attrs.label = it
     }
+    attrs.toolbar = toolbar
     attrs.onChange = {
-        onChange.invoke(convertEditorContentToHtml(it.getCurrentContent()))
+        onChange?.invoke(convertEditorContentToHtml(it.getCurrentContent()))
     }
 }

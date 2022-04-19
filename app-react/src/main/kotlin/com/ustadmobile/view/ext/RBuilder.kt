@@ -8,7 +8,6 @@ import com.ustadmobile.core.controller.SubmissionConstants.STATUS_MAP
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
@@ -51,8 +50,12 @@ import com.ustadmobile.util.StyleManager.toolbarTitle
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.*
-import com.ustadmobile.view.*
+import com.ustadmobile.view.ChartOptions
+import com.ustadmobile.view.ChartType
+import com.ustadmobile.view.ClazzAssignmentDetailOverviewComponent.Companion.ASSIGNMENT_STATUS_MAP
 import com.ustadmobile.view.ClazzEditComponent.Companion.BLOCK_ICON_MAP
+import com.ustadmobile.view.ContentEntryListComponent
+import com.ustadmobile.view.umChart
 import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
@@ -656,6 +659,77 @@ fun RBuilder.renderPersonWithAttemptProgress(
     }
 }
 
+
+fun RBuilder.renderAssignmentSubmittedProgress(
+    item: PersonWithAttemptsSummary,
+    systemImpl: UstadMobileSystemImpl,
+    onMainList: Boolean = false){
+    umGridContainer{
+        val padding = LinearDimension("4px")
+        css{
+            padding(top = padding, bottom = padding)
+        }
+
+        umItem(GridSize.cells3, if(onMainList) GridSize.cells1 else GridSize.cells2){
+            umProfileAvatar(item.personUid, "person")
+        }
+
+        umItem(GridSize.cells6, if(onMainList) GridSize.cells8 else GridSize.cells7){
+            umGridContainer {
+                umItem(GridSize.cells12){
+                    umTypography("${item.firstNames} ${item.lastName}",
+                        variant = TypographyVariant.h6){
+                        css (alignTextToStart)
+                    }
+                }
+
+                if(!item.latestPrivateComment.isNullOrEmpty()){
+                    umItem(GridSize.cells12, flexDirection = FlexDirection.row){
+                        styledSpan {
+                            css {
+                                padding(right = 4.spacingUnits)
+                            }
+                            umIcon("comment", fontSize = IconFontSize.small){
+                                css{
+                                    marginTop = 1.px
+                                }
+                            }
+                        }
+
+                        umTypography(item.latestPrivateComment,
+                            variant = TypographyVariant.body2,
+                            paragraph = true){
+                            css(alignTextToStart)
+                        }
+                    }
+                }
+            }
+        }
+
+        if(item.fileSubmissionStatus != 0){
+            umItem(GridSize.cells3, flexDirection = FlexDirection.row){
+                styledSpan {
+                    css {
+                        padding(right = 1.spacingUnits)
+                    }
+                    umIcon("check", fontSize = IconFontSize.small){
+                        css{
+                            marginTop = 1.px
+                        }
+                    }
+                }
+
+                umTypography(systemImpl.getString(
+                    STATUS_MAP[item.fileSubmissionStatus] ?: 0, this),
+                    variant = TypographyVariant.body2,
+                    paragraph = true){
+                    css(alignTextToStart)
+                }
+            }
+        }
+    }
+}
+
 fun RBuilder.renderPersonListItemWithNameAndUserName(item: Person){
     umGridContainer(GridSpacing.spacing5) {
         val padding = LinearDimension("4px")
@@ -823,16 +897,15 @@ fun RBuilder.renderCourseBlockAssignment(
                         }
                     }
 
-                    if(item.assignment?.progressSummary?.hasMetricsPermission == true){
+                    if(item.assignment?.progressSummary?.hasMetricsPermission == false
+                        || item.assignment?.fileSubmissionStatus != 0){
 
                         styledSpan {
 
                             css{
                                 padding(right = 1.spacingUnits)
                             }
-                            umIcon(
-                                ClazzAssignmentDetailOverviewComponent.ASSIGNMENT_STATUS_MAP[item.assignment?.fileSubmissionStatus
-                                    ?: 0] ?: "",
+                            umIcon(ASSIGNMENT_STATUS_MAP[item.assignment?.fileSubmissionStatus ?: 0] ?: "",
                                 fontSize = IconFontSize.small
                             ) {
                                 css {
@@ -840,13 +913,26 @@ fun RBuilder.renderCourseBlockAssignment(
                                 }
                             }
                         }
-                        styledSpan {
-                            umTypography(systemImpl.getString(
-                                STATUS_MAP[item.assignment?.fileSubmissionStatus ?: 0]?: 0, this),
-                                variant = TypographyVariant.body1,
-                                paragraph = true){
-                                css(alignTextToStart)
-                            }
+
+                        umTypography(systemImpl.getString(
+                            STATUS_MAP[item.assignment?.fileSubmissionStatus ?: 0]?: 0, this),
+                            variant = TypographyVariant.body1,
+                            paragraph = true){
+                            css(alignTextToStart)
+                        }
+                    }
+
+                    if(item.assignment?.progressSummary?.hasMetricsPermission == true){
+                        umTypography(systemImpl.getString(MessageID.three_num_items_with_name_with_comma,this)
+                            .format("${item.assignment?.progressSummary?.calculateNotSubmittedStudents()}",
+                                systemImpl.getString(MessageID.not_submitted_cap, this),
+                                "${item.assignment?.progressSummary?.submittedStudents}",
+                                systemImpl.getString(MessageID.submitted_cap,this),
+                                "${item.assignment?.progressSummary?.markedStudents}",
+                                systemImpl.getString(MessageID.marked, this)),
+                            variant = TypographyVariant.body1,
+                            paragraph = true){
+                            css(alignTextToStart)
                         }
                     }
                 }
@@ -1538,33 +1624,6 @@ fun RBuilder.renderContentEntryListItem(
     }
 }
 
-
-fun RBuilder.renderCreateCommentSection(label: String,onClick: () -> Unit){
-    umItem(GridSize.cells12, flexDirection = FlexDirection.row){
-        styledSpan {
-            css{
-                padding(right = 4.spacingUnits)
-            }
-            umIcon("person"){
-                css {
-                    marginTop = LinearDimension("20px")
-                }
-            }
-        }
-
-        umItem(GridSize.cells11){
-            umTextField(
-                disabled = true,
-                label = label,
-                variant = FormControlVariant.outlined){
-                attrs.onClick = {
-                    onClick.invoke()
-                }
-            }
-        }
-
-    }
-}
 
 private fun RBuilder.iconProgress(progress: ContentEntryStatementScoreProgress?): String{
     return when (progress?.isContentComplete()) {

@@ -92,6 +92,11 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                LEFT JOIN ContentEntry as entry
                ON entry.contentEntryUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+               
+               LEFT JOIN Language
+               ON Language.langUid = entry.primaryLanguageUid
+                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+               
          WHERE cbClazzUid = :clazzUid
            AND cbActive
       ORDER BY cbIndex

@@ -13,7 +13,7 @@ import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.mui.components.umDivider
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.view.ext.renderPersonWithAttemptProgress
+import com.ustadmobile.view.ext.renderAssignmentSubmittedProgress
 import com.ustadmobile.view.ext.renderSummaryCard
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -78,7 +78,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
     }
 
     override fun RBuilder.renderListItem(item: PersonWithAttemptsSummary) {
-        renderPersonWithAttemptProgress(item, systemImpl, false)
+        renderAssignmentSubmittedProgress(item, systemImpl, false)
     }
 
     override fun handleClickEntry(entry: PersonWithAttemptsSummary) {

@@ -79,6 +79,12 @@ class PersonDetailPresenter(context: Any,
         )
     }
 
+    fun handleClickChat(){
+        systemImpl.go(ChatDetailView.VIEW_NAME,
+            mapOf(ARG_ENTITY_UID to (arguments[ARG_ENTITY_UID]?.toLong() ?: 0L).toString()),
+            context)
+    }
+
     fun handleClickManageParentalConsent() {
         val ppjUid = entityLiveData?.getValue()?.parentJoin?.ppjUid ?: 0
 
@@ -89,12 +95,6 @@ class PersonDetailPresenter(context: Any,
         }else {
             view.showSnackBar(systemImpl.getString(MessageID.error, context))
         }
-    }
-
-    fun handleClickChat(){
-        val personUid = view.entity?.personUid ?: return
-        val args = mapOf(UstadView.ARG_PERSON_UID to personUid.toString())
-        systemImpl.go(ChatDetailView.VIEW_NAME, args, context)
     }
 
     companion object {

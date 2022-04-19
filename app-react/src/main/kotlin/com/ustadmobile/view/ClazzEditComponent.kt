@@ -3,7 +3,6 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.isAttendanceEnabledAndRecorded
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorLiveData
@@ -143,11 +142,22 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
             }
         }
 
+    override var enrolmentPolicyOptions: List<ClazzEdit2Presenter.EnrolmentPolicyOptionsMessageIdOption>? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+
     override var entity: ClazzWithHolidayCalendarAndSchoolAndTerminology? = null
         get() = field
         set(value) {
             if(value?.clazzName != null){
-                ustadComponentTitle = value.clazzName
+                updateUiWithStateChangeDelay {
+                    ustadComponentTitle = value.clazzName
+                }
             }
 
             setState{

@@ -70,7 +70,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
             field = value
             window.setTimeout({
                dispatch(ReduxToolbarState(title = ustadComponentTitle))
-            }, STATE_CHANGE_DELAY)
+            }, MIN_STATE_CHANGE_DELAY_TIME)
         }
 
     override var loading: Boolean = false
@@ -185,7 +185,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
      * Update state with a delay to make sure we are not updating
      * state when a component is still building
      */
-    fun updateUiWithStateChangeDelay(timeOutInMills: Int = STATE_CHANGE_DELAY, block:() -> Unit){
+    fun updateUiWithStateChangeDelay(timeOutInMills: Int = MIN_STATE_CHANGE_DELAY_TIME, block:() -> Unit){
         window.setTimeout(block, timeOutInMills)
     }
 
@@ -207,9 +207,16 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     companion object {
 
         /**
-         * Delay time in mills which waits for the state changes to complete before applying to the UI
+         * Minimum delay time in mills for the state changes to complete before applying to the UI
          * to avoid state update while rendering
          */
-        const val STATE_CHANGE_DELAY = 200
+        const val MIN_STATE_CHANGE_DELAY_TIME = 200
+
+
+        /**
+         * Maximum delay time in mills for the state changes to complete before applying to the UI
+         * to avoid state update while rendering
+         */
+        const val MAX_STATE_CHANGE_DELAY_TIME = 500
     }
 }

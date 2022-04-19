@@ -2,7 +2,6 @@ package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.door.ext.hexStringToByteArray
 import com.ustadmobile.door.ext.toHexString
-import kotlin.collections.Map
 import kotlin.text.Typography.ellipsis
 
 

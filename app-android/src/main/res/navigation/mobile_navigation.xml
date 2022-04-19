@@ -322,6 +322,11 @@
         />
 
     <fragment
+        android:id="@+id/select_extract_file_view"
+        android:name="com.ustadmobile.port.android.view.SelectExtractFileFragment"
+        />
+
+    <fragment
         android:id="@+id/select_folder_view"
         android:name="com.ustadmobile.port.android.view.SelectFolderFragment"/>
 

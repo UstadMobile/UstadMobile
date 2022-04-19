@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ListViewMode
@@ -33,7 +32,7 @@ class DefaultContentEntryListItemListener(var view: UstadView? = null,
             }
 
             mListMode == ListViewMode.PICKER && entry.leaf -> {
-                presenter?.finishWithResult(safeStringify(di, serializationStrategy, listOf(entry)))
+                presenter?.handleEntrySelectedFromPicker(entry)
             }
 
             mListMode == ListViewMode.BROWSER -> {
@@ -56,7 +55,7 @@ class DefaultContentEntryListItemListener(var view: UstadView? = null,
 
         presenter?.handleMoveWithSelectedEntry(entry)
 
-        presenter?.finishWithResult(safeStringify(di, serializationStrategy, listOf(entry)))
+        presenter?.handleEntrySelectedFromPicker(entry)
     }
 
     override fun onClickDownloadContentEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {

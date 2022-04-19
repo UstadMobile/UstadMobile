@@ -57,6 +57,17 @@ class   ClazzEdit2Presenter(context: Any,
 
     private val json: Json by di.instance()
 
+    enum class EnrolmentPolicyOptions(val optionVal: Int, val messageId: Int) {
+        OPEN(Clazz.CLAZZ_ENROLMENT_POLICY_OPEN,
+            MessageID.open_enrolment),
+        INVITE(Clazz.CLAZZ_ENROLMENT_POLICY_WITH_LINK,
+            MessageID.managed_enrolment),
+    }
+
+    class  EnrolmentPolicyOptionsMessageIdOption(day: EnrolmentPolicyOptions, context: Any)
+        : MessageIdOption(day.messageId, context, day.optionVal)
+
+
     private val scheduleOneToManyJoinEditHelper
             = OneToManyJoinEditHelperMp(Schedule::scheduleUid,
             ARG_SAVEDSTATE_SCHEDULES,
@@ -91,6 +102,7 @@ class   ClazzEdit2Presenter(context: Any,
         view.clazzSchedules = scheduleOneToManyJoinEditHelper.liveList
         view.scopedGrants = scopedGrantOneToManyHelper.liveList
         view.courseBlocks = courseBlockOneToManyJoinEditHelper.liveList
+        view.enrolmentPolicyOptions = EnrolmentPolicyOptions.values().map { EnrolmentPolicyOptionsMessageIdOption(it, context) }
     }
 
     override fun onLoadDataComplete() {
@@ -203,7 +215,7 @@ class   ClazzEdit2Presenter(context: Any,
 
         observeSavedStateResult(
             SAVEDSTATE_KEY_CONTENT,
-            ListSerializer(ContentEntry.serializer()), ContentEntry::class) {
+            ListSerializer(ContentEntryWithBlockAndLanguage.serializer()), ContentEntryWithBlockAndLanguage::class) {
             val newContent = it.firstOrNull() ?: return@observeSavedStateResult
 
             val foundBlock: CourseBlockWithEntity =
@@ -216,13 +228,33 @@ class   ClazzEdit2Presenter(context: Any,
                     cbType = CourseBlock.BLOCK_CONTENT_TYPE
                     cbDescription = newContent.description
                     cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
-                    cbUid = db.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
+                    cbUid = newContent.block?.cbUid ?: db.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
+
+                    cbHideUntilDate = newContent.block?.cbHideUntilDate ?: 0
+                    cbDeadlineDate = newContent.block?.cbDeadlineDate ?: Long.MAX_VALUE
+                    cbGracePeriodDate = newContent.block?.cbGracePeriodDate ?: Long.MAX_VALUE
+                    cbLateSubmissionPenalty = newContent.block?.cbLateSubmissionPenalty ?: 0
+                    cbCompletionCriteria = newContent.block?.cbCompletionCriteria ?: 0
+                    cbMaxPoints = newContent.block?.cbMaxPoints ?: 10
+                    cbMinPoints = newContent.block?.cbMinPoints ?: 0
+
                     entry = newContent
+                    language = newContent.language
                 }
 
             foundBlock.entry = newContent
+            foundBlock.language = newContent.language
+
             foundBlock.cbTitle = newContent.title
             foundBlock.cbDescription = newContent.description
+
+            foundBlock.cbHideUntilDate = newContent.block?.cbHideUntilDate ?: 0
+            foundBlock.cbDeadlineDate = newContent.block?.cbDeadlineDate ?: Long.MAX_VALUE
+            foundBlock.cbGracePeriodDate = newContent.block?.cbGracePeriodDate ?: Long.MAX_VALUE
+            foundBlock.cbLateSubmissionPenalty = newContent.block?.cbLateSubmissionPenalty ?: 0
+            foundBlock.cbCompletionCriteria = newContent.block?.cbCompletionCriteria ?: 0
+            foundBlock.cbMaxPoints = newContent.block?.cbMaxPoints ?: 10
+            foundBlock.cbMinPoints = newContent.block?.cbMinPoints ?: 0
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
@@ -650,8 +682,8 @@ class   ClazzEdit2Presenter(context: Any,
                 this,
                 currentEntityValue = null,
                 destinationViewName = ClazzAssignmentEditView.VIEW_NAME,
-                entityClass = ClazzAssignmentWithCourseBlock::class,
-                serializationStrategy = ClazzAssignmentWithCourseBlock.serializer(),
+                entityClass = CourseBlockWithEntity::class,
+                serializationStrategy = CourseBlockWithEntity.serializer(),
                 destinationResultKey = SAVEDSTATE_KEY_ASSIGNMENT,
                 arguments = args))
     }
@@ -661,14 +693,16 @@ class   ClazzEdit2Presenter(context: Any,
             ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
                 ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
             UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString(),
-            ContentEntryList2View.ARG_SELECT_FOLDER_VISIBLE to false.toString()
+            ContentEntryList2View.ARG_SELECT_FOLDER_VISIBLE to false.toString(),
+            UstadView.ARG_CLAZZUID to entity?.clazzUid.toString(),
+            ContentEntryEdit2View.BLOCK_REQUIRED to true.toString()
         )
 
         navigateForResult(NavigateForResultOptions(
             this, null,
             ContentEntryList2View.VIEW_NAME,
-            ContentEntry::class,
-            ContentEntry.serializer(),
+            ContentEntryWithBlockAndLanguage::class,
+            ContentEntryWithBlockAndLanguage.serializer(),
             SAVEDSTATE_KEY_CONTENT,
             arguments = args)
         )
@@ -764,15 +798,50 @@ class   ClazzEdit2Presenter(context: Any,
                         arguments = args)
             }
             CourseBlock.BLOCK_CONTENT_TYPE -> {
+
+                val entry = joinedEntity.entry ?: return
+
+                val entity = ContentEntryWithBlockAndLanguage().apply {
+                    contentEntryUid = entry.contentEntryUid
+                    title = entry.title
+                    description = entry.description
+                    author = entry.author
+                    publisher = entry.publisher
+                    licenseType = entry.licenseType
+                    licenseName = entry.licenseName
+                    licenseUrl = entry.licenseUrl
+                    sourceUrl = entry.sourceUrl
+                    thumbnailUrl = entry.thumbnailUrl
+                    lastModified = entry.lastModified
+                    primaryLanguageUid = entry.primaryLanguageUid
+                    languageVariantUid = entry.languageVariantUid
+                    contentFlags = entry.contentFlags
+                    leaf = entry.leaf
+                    publik = entry.publik
+                    ceInactive = entry.ceInactive
+                    contentTypeFlag = entry.contentTypeFlag
+                    contentOwner = entry.contentOwner
+                    contentEntryLocalChangeSeqNum = entry.contentEntryLocalChangeSeqNum
+                    contentEntryMasterChangeSeqNum = entry.contentEntryMasterChangeSeqNum
+                    contentEntryLastChangedBy = entry.contentEntryLastChangedBy
+                    contentEntryLct = entry.contentEntryLct
+
+                    block = joinedEntity
+                    language = joinedEntity.language
+                }
+
+
                 NavigateForResultOptions(
-                    this, null,
+                    this, entity,
                     ContentEntryEdit2View.VIEW_NAME,
-                    ContentEntry::class,
-                    ContentEntry.serializer(),
+                    ContentEntryWithBlockAndLanguage::class,
+                    ContentEntryWithBlockAndLanguage.serializer(),
                     SAVEDSTATE_KEY_CONTENT,
                     arguments = mutableMapOf(
                         UstadView.ARG_ENTITY_UID to joinedEntity.entry?.contentEntryUid.toString(),
-                        UstadView.ARG_LEAF to true.toString()))
+                        UstadView.ARG_LEAF to true.toString(),
+                        UstadView.ARG_CLAZZUID to joinedEntity.cbClazzUid.toString(),
+                        ContentEntryEdit2View.BLOCK_REQUIRED to true.toString()))
             }
             CourseBlock.BLOCK_MODULE_TYPE -> {
                 val args = mutableMapOf<String, String>()

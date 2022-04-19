@@ -192,7 +192,6 @@ core/locale/localconfig
 #localconfig copied into Android assets by Gradle
 app-android/src/main/assets/locale
 
-
 #MacOS annoying .DS_Store
 .DS_Store
 
@@ -234,6 +233,8 @@ app-ktor-server/src/main/resources/umapp
 app-react-e2e-test/data
 app-react-e2e-test/src/test/resources/admin.txt
 
-#Kotlin yarn.lock
-kotlin-js-store/yarn.lock
+#localconfig copied into web resources by Gradle
+app-react/src/main/resources/locales
+
+
 

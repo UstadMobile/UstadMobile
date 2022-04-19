@@ -19,7 +19,7 @@ interface ClazzLogEditView: UstadEditView<ClazzLog> {
 
     companion object {
 
-        const val VIEW_NAME = "ClassLogEditView"
+        const val VIEW_NAME = "CourseLogEditView"
 
     }
 

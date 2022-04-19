@@ -24,7 +24,7 @@ fun UstadMobileSystemCommon.UstadGoOptions.toNavOptions(droidNavController: NavC
         val popUpToDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
             droidNavController.currentDestination?.id ?: 0
         }else if(popUpToViewName == UstadView.ROOT_DEST) {
-            droidNavController.graph.startDestination
+            droidNavController.graph.startDestinationId
         }else {
             destinationProvider.lookupDestinationName(popUpToViewName)
                 ?.destinationId ?: 0

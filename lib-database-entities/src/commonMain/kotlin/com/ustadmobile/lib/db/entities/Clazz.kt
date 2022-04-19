@@ -58,8 +58,8 @@ open class Clazz() {
 
     var clazzSchoolUid : Long = 0L
 
-    @ColumnInfo(defaultValue = "100")
-    var clazzEnrolmentPolicy = CLAZZ_ENROLMENT_POLICY_WITH_LINK
+    @ColumnInfo(defaultValue = "102")
+    var clazzEnrolmentPolicy = CLAZZ_ENROLMENT_POLICY_OPEN
 
     @ColumnInfo(defaultValue = "${('e'.code shl(8)) + 'n'.code}")
     var clazzTerminologyUid: Long = (('e'.code shl(8)) + 'n'.code).toLong()
