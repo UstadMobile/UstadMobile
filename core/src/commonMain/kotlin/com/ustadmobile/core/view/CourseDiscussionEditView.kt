@@ -1,6 +1,8 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
+import com.ustadmobile.lib.db.entities.DiscussionTopic
 
 interface CourseDiscussionEditView: UstadEditView<CourseBlockWithEntity> {
 
@@ -10,6 +12,8 @@ interface CourseDiscussionEditView: UstadEditView<CourseBlockWithEntity> {
     var startTime: Long
 
     var timeZone: String?
+
+    var topics: DoorMutableLiveData<List<DiscussionTopic>>?
 
     companion object {
 

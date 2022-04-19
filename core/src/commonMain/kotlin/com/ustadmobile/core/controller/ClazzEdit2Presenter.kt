@@ -311,6 +311,9 @@ class   ClazzEdit2Presenter(context: Any,
                 cbMaxPoints = newDiscussion.cbMaxPoints
 
                 courseDiscussion = newDiscussion.courseDiscussion
+
+                topics = newDiscussion.topics
+                topicUidsToRemove = newDiscussion.topicUidsToRemove
             }
 
             foundBlock.courseDiscussion = newDiscussion.courseDiscussion
@@ -322,6 +325,9 @@ class   ClazzEdit2Presenter(context: Any,
             foundBlock.cbCompletionCriteria = newDiscussion.cbCompletionCriteria
             foundBlock.cbLateSubmissionPenalty = newDiscussion.cbLateSubmissionPenalty
             foundBlock.cbMaxPoints = newDiscussion.cbMaxPoints
+
+            foundBlock.topics = newDiscussion.topics
+            foundBlock.topicUidsToRemove = newDiscussion.topicUidsToRemove
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
@@ -577,9 +583,24 @@ class   ClazzEdit2Presenter(context: Any,
                 txDb.courseDiscussionDao.deactivateByUids(
                     courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate, systemTimeInMillis())
 
-                //TODO: Work with Topics
 
 
+                val cbWithTopics: List<CourseBlockWithEntity> = courseBlockList.filter{
+                    it.topics != null
+                }
+                //TODO: Fix this
+                val topicsToInsert = cbWithTopics.flatMap { it.topics!! }
+
+
+                txDb.discussionTopicDao.insertListAsync(topicsToInsert)
+
+                //TODO: Fix this
+                val topicUidsToDelete = courseBlockList.filter{it.topicUidsToRemove != null}
+                    .flatMap{
+                        it.topicUidsToRemove!!
+                    }
+
+                txDb.discussionTopicDao.deactivateByUids(topicUidsToDelete, systemTimeInMillis())
 
                 txDb.courseBlockDao.replaceListAsync(courseBlockList)
                 txDb.courseBlockDao.deactivateByUids(

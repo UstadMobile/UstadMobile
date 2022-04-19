@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
-abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>{
+abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<DiscussionTopic>{
 
     @Query("""
      REPLACE INTO DiscussionTopicReplicate(discussionTopicPk, discussionTopicDestination)
@@ -92,6 +92,20 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>{
          
          """)
     abstract fun getDiscussionTopicByUid(discussionTopicUid: Long): DoorLiveData<DiscussionTopic?>
+
+
+    @Query("""
+        UPDATE DiscussionTopic 
+           SET discussionTopicVisible = :active, 
+               discussionTopicLct = :changeTime
+         WHERE discussionTopicUid = :uid""")
+    abstract fun updateActiveByUid(uid: Long, active: Boolean,  changeTime: Long)
+
+    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
+        uidList.forEach {
+            updateActiveByUid(it, false, changeTime)
+        }
+    }
 
 
 

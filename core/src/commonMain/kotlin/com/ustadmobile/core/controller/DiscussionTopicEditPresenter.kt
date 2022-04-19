@@ -27,15 +27,27 @@ class DiscussionTopicEditPresenter(context: Any,
 
     private var clazzUid: Long = 0L
     private var courseDiscussionUid: Long = 0L
+    private var persistMode: Boolean = false
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
 
 
+//    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): DiscussionTopic? {
+//        super.onLoadEntityFromDb(db)
+//
+//        persistMode = arguments.containsKey(ARG_TOPIC_PERSIST)
+//
+//
+//
+//    }
+
     override fun onLoadFromJson(bundle: Map<String, String>): DiscussionTopic {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
+
+        persistMode = bundle.containsKey(ARG_TOPIC_PERSIST)
 
         val editEntity = if (entityJsonStr != null) {
              safeParse(di, DiscussionTopic.serializer(), entityJsonStr)
@@ -84,14 +96,34 @@ class DiscussionTopicEditPresenter(context: Any,
             view.fieldsEnabled = false
 
 
-            finishWithResult(safeStringify(di,
-                            ListSerializer(DiscussionTopic.serializer()),
-                            listOf(entity)))
+            if(persistMode){
 
+                repo.discussionTopicDao.insertAsync(entity)
+                finishWithResult(
+                    safeStringify(
+                        di,
+                        ListSerializer(DiscussionTopic.serializer()),
+                        listOf(entity)
+                    )
+                )
+            }else {
+
+                finishWithResult(
+                    safeStringify(
+                        di,
+                        ListSerializer(DiscussionTopic.serializer()),
+                        listOf(entity)
+                    )
+                )
+            }
             view.loading = false
             view.fieldsEnabled = true
 
         }
+    }
+
+    companion object{
+        const val ARG_TOPIC_PERSIST = "ArgTopicPersist"
     }
 
 

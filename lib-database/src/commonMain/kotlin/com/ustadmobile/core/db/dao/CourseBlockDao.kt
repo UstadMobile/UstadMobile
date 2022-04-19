@@ -85,9 +85,10 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
           FROM CourseBlock 
                LEFT JOIN ClazzAssignment as assignment
                ON assignment.caUid = CourseBlock.cbEntityUid
+               AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                LEFT JOIN CourseDiscussion as courseDiscussion
                ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
-               AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+               AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
                LEFT JOIN ContentEntry as entry
                ON entry.contentEntryUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}

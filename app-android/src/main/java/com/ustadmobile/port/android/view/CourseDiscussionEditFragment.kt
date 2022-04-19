@@ -11,7 +11,12 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CourseDiscussionEditView
+import com.ustadmobile.door.DoorMutableLiveData
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
+import com.ustadmobile.lib.db.entities.DiscussionTopic
 
 class CourseDiscussionEditFragment: UstadEditFragment<CourseBlockWithEntity>(),
     CourseDiscussionEditView {
@@ -23,7 +28,8 @@ class CourseDiscussionEditFragment: UstadEditFragment<CourseBlockWithEntity>(),
     override val mEditPresenter: UstadEditPresenter<*, CourseBlockWithEntity>?
         get() = mPresenter
 
-
+    private var topicsRecyclerAdapter: DiscussionTopicSimpleRecyclerAdapter? = null
+    private var topicsRecyclerView: RecyclerView? = null
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
@@ -33,6 +39,8 @@ class CourseDiscussionEditFragment: UstadEditFragment<CourseBlockWithEntity>(),
             false).also {
             rootView = it.root
         }
+
+        topicsRecyclerView = rootView.findViewById(R.id.fragment_course_discussion_edit_topics_rv)
 
         return rootView
     }
@@ -44,6 +52,11 @@ class CourseDiscussionEditFragment: UstadEditFragment<CourseBlockWithEntity>(),
         mPresenter = CourseDiscussionEditPresenter(requireContext(),
             arguments.toStringMap(), this, viewLifecycleOwner, di).withViewLifecycle()
 
+        topicsRecyclerAdapter = DiscussionTopicSimpleRecyclerAdapter(mPresenter)
+
+        topicsRecyclerView?.adapter = topicsRecyclerAdapter
+        topicsRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+
         mBinding?.presenter = mPresenter
         mPresenter?.onCreate(backStackSavedState)
     }
@@ -53,6 +66,7 @@ class CourseDiscussionEditFragment: UstadEditFragment<CourseBlockWithEntity>(),
         mBinding = null
         mPresenter = null
         entity = null
+        topicsRecyclerAdapter = null
     }
 
     override var loading: Boolean = false
@@ -93,6 +107,20 @@ class CourseDiscussionEditFragment: UstadEditFragment<CourseBlockWithEntity>(),
         set(value) {
             mBinding?.timeZone = value
             field = value
+        }
+
+
+
+
+    private val topicsObserver = Observer<List<DiscussionTopic>> {
+            t -> topicsRecyclerAdapter?.submitList(t)
+    }
+
+    override var topics: DoorMutableLiveData<List<DiscussionTopic>>? = null
+        set(value) {
+            field?.removeObserver(topicsObserver)
+            field = value
+            value?.observe(this, topicsObserver)
         }
 
 

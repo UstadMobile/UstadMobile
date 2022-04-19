@@ -6,6 +6,8 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -38,17 +40,58 @@ class CourseDiscussionEditPresenter(context: Any,
 
     private var clazzUid: Long = 0L
 
+
+    private val topicsOneToManyJoinEditHelper
+            = OneToManyJoinEditHelperMp(DiscussionTopic::discussionTopicUid,
+        ARG_SAVEDSTATE_DISCUSSION_TOPIC,
+        ListSerializer(DiscussionTopic.serializer()),
+        ListSerializer(DiscussionTopic.serializer()),
+        this,
+        requireSavedStateHandle(),
+        DiscussionTopic::class) {discussionTopicUid = it}
+
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
 
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+        view.topics = topicsOneToManyJoinEditHelper.liveList
 
     }
 
     override fun onLoadDataComplete() {
         super.onLoadDataComplete()
+
+
+        observeSavedStateResult(
+            SAVEDSTATE_KEY_DISCUSSION_TOPIC,
+            ListSerializer(DiscussionTopic.serializer()), DiscussionTopic::class){
+            val newTopic = it.firstOrNull() ?: return@observeSavedStateResult
+
+            val foundTopic: DiscussionTopic = topicsOneToManyJoinEditHelper.liveList.getValue()?.find {
+                    topic -> topic.discussionTopicUid == newTopic.discussionTopicUid
+            } ?: DiscussionTopic().apply{
+                discussionTopicStartDate = systemTimeInMillis()
+                discussionTopicCourseDiscussionUid = arguments[ARG_ENTITY_UID]?.toLong()
+                    ?: db.doorPrimaryKeyManager.nextId(CourseDiscussion.TABLE_ID)
+                discussionTopicStartedPersonUid = accountManager.activeAccount.personUid
+                discussionTopicTitle = newTopic.discussionTopicTitle
+                discussionTopicDesc  = newTopic.discussionTopicDesc
+            }
+
+            foundTopic.discussionTopicCourseDiscussionUid = arguments[ARG_ENTITY_UID]?.toLong()
+                ?: db.doorPrimaryKeyManager.nextId(CourseDiscussion.TABLE_ID)
+
+            foundTopic.discussionTopicTitle = newTopic.discussionTopicTitle
+            foundTopic.discussionTopicDesc  = newTopic.discussionTopicDesc
+
+            topicsOneToManyJoinEditHelper.onEditResult(foundTopic)
+
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_DISCUSSION_TOPIC] = null
+            }
+        }
 
     }
 
@@ -72,6 +115,9 @@ class CourseDiscussionEditPresenter(context: Any,
                 }
             }
         }
+
+        topicsOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
+
 
         presenterScope.launch {
 
@@ -123,6 +169,12 @@ class CourseDiscussionEditPresenter(context: Any,
 
     }
 
+    fun handleClickDeleteTopic(discussionTopic: DiscussionTopic){
+
+        //TODO
+
+    }
+
     fun handleClickTopic(discussionTopic: DiscussionTopic){
         //TODO: Go to Topic edit
 
@@ -166,6 +218,11 @@ class CourseDiscussionEditPresenter(context: Any,
             view.fieldsEnabled = false
 
 
+            entity.topics = topicsOneToManyJoinEditHelper.entitiesToInsert +
+                    topicsOneToManyJoinEditHelper.entitiesToUpdate
+
+            entity.topicUidsToRemove = topicsOneToManyJoinEditHelper.primaryKeysToDeactivate
+
             finishWithResult(safeStringify(di,
                             ListSerializer(CourseBlockWithEntity.serializer()),
                             listOf(entity)))
@@ -182,6 +239,8 @@ class CourseDiscussionEditPresenter(context: Any,
     companion object {
 
         const val SAVEDSTATE_KEY_DISCUSSION_TOPIC = "DiscussionTopic"
+
+        const val ARG_SAVEDSTATE_DISCUSSION_TOPIC = "ArgSavedStateDiscussionTopic"
 
     }
 
