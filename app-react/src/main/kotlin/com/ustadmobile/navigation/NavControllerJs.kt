@@ -27,7 +27,7 @@ import kotlin.math.min
  * internal stack entry was popped that means we won't be able to sync histories any more
  * and the state will be destroyed. So, all saved data will be lost.
  */
-class NavControllerJs (): UstadNavController {
+class NavControllerJs: UstadNavController {
 
     private val logPrefix = "NavControllerJs: "
 
@@ -38,8 +38,15 @@ class NavControllerJs (): UstadNavController {
      */
     private val navStack: MutableList<UstadBackStackEntryJs> = mutableListOf()
 
+    /**
+     * Use the current location href to find the correct back stack entry. popstate and hashchange
+     * might happen after the page already changed.
+     */
     override val currentBackStackEntry: UstadBackStackEntry?
-        get() = navStack.lastOrNull()
+        get() {
+            val currentViewUri = UstadUrlComponents.parse(window.location.href).viewUri
+            return navStack.lastOrNull { it.jsViewUri == currentViewUri }
+        }
 
 
     init {
@@ -75,11 +82,8 @@ class NavControllerJs (): UstadNavController {
     internal fun handleHashChange(newUrl: String, oldUrl: String?) {
         val currentState = window.history.state?.asJsObject()
         try {
-            val urlComponents = UstadUrlComponents.parse(newUrl)
-
             if(currentState == null) {
                 //The user went forward. Save the index into the history state.
-                navStack += UstadBackStackEntryJs(urlComponents.viewName, urlComponents.arguments)
                 window.history.replaceState(jsObject {
                     asDynamic().index = (navStack.size - 1)
                 }, "")
@@ -144,24 +148,18 @@ class NavControllerJs (): UstadNavController {
         if(popUpToViewName != null)
             popBackStack(popUpToViewName, goOptions.popUpToInclusive)
 
-        navigateInternal(viewName, args.toMutableMap(),  0)
-    }
+        // The new back stack entry must be added to the stack immediately. The hashchange event
+        // will happen after the new component is already mounted (causing the new component to
+        // save it's data to saved state handle for the previous entry).
 
-    private fun navigateInternal(
-        viewName: String,
-        args: MutableMap<String, String>,
-        stepsToGoBackInHistory: Int = 0
-    ){
         val params = when {
             args.isEmpty() -> ""
             else -> "?${args.toUrlQueryString()}"
         }
+        val viewUri = "$viewName$params"
+        navStack += UstadBackStackEntryJs(viewName, args, viewUri)
 
-        if(stepsToGoBackInHistory < 0){
-            window.history.go(stepsToGoBackInHistory)
-        }else{
-            window.location.assign("#/$viewName$params")
-        }
+        window.location.assign("#/$viewUri")
     }
 
     fun navigateUp(): Boolean {
@@ -169,10 +167,4 @@ class NavControllerJs (): UstadNavController {
         return true
     }
 
-    companion object {
-
-        const val PREFIX_STORAGE_KEY = "session_stack_"
-
-        const val KEY_LAST_SHOWN_POSITION = "last_shown_position"
-    }
 }
