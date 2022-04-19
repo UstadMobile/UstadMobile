@@ -31,9 +31,6 @@ import styled.css
 
 class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props), ChatDetailView {
 
-    override val viewNames: List<String>
-        get() = listOf(ChatDetailView.VIEW_NAME)
-
     private var mPresenter: ChatDetailPresenter? = null
 
     private var typedMessage = ""

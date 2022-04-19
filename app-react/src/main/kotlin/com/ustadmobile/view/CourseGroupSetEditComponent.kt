@@ -5,7 +5,6 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.view.CourseGroupSetEditView
-import com.ustadmobile.core.view.LanguageEditView
 import com.ustadmobile.lib.db.entities.CourseGroupMemberPerson
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.mui.components.*
@@ -37,9 +36,6 @@ class CourseGroupSetEditComponent (mProps: UmProps): UstadEditComponent<CourseGr
 
     override val mEditPresenter: UstadEditPresenter<*, CourseGroupSet>?
         get() = mPresenter
-
-    override val viewNames: List<String>
-        get() = listOf(LanguageEditView.VIEW_NAME)
 
     private var groupLabel = FieldLabel(getString(MessageID.group))
 

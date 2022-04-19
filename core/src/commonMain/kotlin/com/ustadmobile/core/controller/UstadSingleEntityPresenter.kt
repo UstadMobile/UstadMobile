@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadSingleEntityView
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.*
 import kotlinx.serialization.DeserializationStrategy
 import org.kodein.di.*
@@ -73,11 +74,14 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
         }
 
         if(mapWithEntityJson != null && mapWithEntityJson[ARG_ENTITY_JSON] != null) {
+            Napier.d("SingleEntityPresenter: Json present in args or savedstate. " +
+                "Load from JSON: ${mapWithEntityJson[ARG_ENTITY_JSON]}")
             entity = onLoadFromJson(mapWithEntityJson)
             view.entity = entity
             (view as? UstadEditView<*>)?.fieldsEnabled = true
             onLoadDataComplete()
         }else if(persistenceMode == PersistenceMode.DB) {
+            Napier.d("SingleEntityPresenter: Load from DB")
             view.loading = true
             (view as? UstadEditView<*>)?.fieldsEnabled = false
             presenterScope.launch {
@@ -92,6 +96,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                     onLoadDataComplete()
                 }catch(e: Exception) {
                     if(e !is CancellationException) {
+                        Napier.e("UstadSingleEntityPresenter: load exception", e)
                         if(isStarted){
                             navigateToErrorScreen(e)
                         }else{
@@ -101,11 +106,13 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                 }
             }
         }else if(persistenceMode == PersistenceMode.JSON){
+            Napier.d("UstadSingleEntityPresenter: PersistenceMode = JSON, load")
             entity = onLoadFromJson(arguments)
             view.entity = entity
             (view as? UstadEditView<*>)?.fieldsEnabled = true
             onLoadDataComplete()
         }else if(persistenceMode == PersistenceMode.LIVEDATA) {
+            Napier.d("UstadSingleEntityPresenter: PersistenceMode = LiveData, load")
             entityLiveData = onLoadLiveData(repo)
             view.loading = true
             if(entityLiveData != null) {

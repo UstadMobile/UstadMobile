@@ -17,9 +17,6 @@ class LeavingReasonListComponent(props: UmProps): UstadListComponent<LeavingReas
     override val displayTypeRepo: Any?
         get() = dbRepo?.leavingReasonDao
 
-    override val viewNames: List<String>
-        get() = listOf(LeavingReasonListView.VIEW_NAME)
-
     override val listPresenter: UstadListPresenter<*, in LeavingReason>?
         get() = mPresenter
 

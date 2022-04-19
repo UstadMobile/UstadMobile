@@ -29,9 +29,6 @@ class SessionListComponent(props: UmProps): UstadListComponent<PersonWithSession
     override val displayTypeRepo: Any?
         get() = dbRepo?.userSessionDao
 
-    override val viewNames: List<String>
-        get() = listOf(SessionListView.VIEW_NAME)
-
 
     override fun RBuilder.renderListItem(item: PersonWithSessionsDisplay) {
         umGridContainer {

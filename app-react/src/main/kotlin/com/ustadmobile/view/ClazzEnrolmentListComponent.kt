@@ -32,9 +32,6 @@ class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnro
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzEnrolmentDao
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzEnrolmentListView.VIEW_NAME)
-
     private var selectedPersonUid: Long = 0
 
     private var headerText = ""

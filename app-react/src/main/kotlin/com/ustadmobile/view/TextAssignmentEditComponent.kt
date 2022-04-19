@@ -28,9 +28,6 @@ class TextAssignmentEditComponent (mProps: UmProps): UstadEditComponent<CourseAs
     override val mEditPresenter: UstadEditPresenter<*, CourseAssignmentSubmission>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(TextAssignmentEditView.VIEW_NAME)
-
     var limitType = ClazzAssignment.TEXT_CHAR_LIMIT
 
     private var limitTypeText = ""

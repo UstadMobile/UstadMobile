@@ -43,9 +43,6 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
 
     private var markLabel = FieldLabel(text = getString(MessageID.points ))
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzAssignmentDetailStudentProgressView.VIEW_NAME)
-
     private var privateComments: List<CommentsWithPerson> = listOf()
 
     private var contents : List<ContentWithAttemptSummary> = listOf()

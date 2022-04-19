@@ -47,9 +47,6 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
 
     private var minorRegistrationModeEnabled = false
 
-    override val viewNames: List<String>
-        get() = listOf(PersonEditView.VIEW_NAME, PersonEditView.VIEW_NAME_REGISTER)
-
     override var genderOptions: List<MessageIdOption>? = null
         get() = field
         set(value) {

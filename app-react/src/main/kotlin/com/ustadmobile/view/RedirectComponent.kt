@@ -10,9 +10,6 @@ class RedirectComponent (props: UmProps): UstadBaseComponent<UmProps, UmState>(p
 
     private var mPresenter: RedirectPresenter? = null
 
-    override val viewNames: List<String>
-        get() = listOf(RedirectView.VIEW_NAME)
-
     override fun onCreateView() {
         super.onCreateView()
         val args = arguments.toMutableMap()

@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.nav.viewUri
 import com.ustadmobile.core.util.ext.isAttendanceEnabledAndRecorded
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorLiveData
@@ -21,6 +22,7 @@ import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
+import io.github.aakira.napier.Napier
 import kotlinx.browser.document
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
@@ -37,9 +39,6 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
     override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendarAndSchoolAndTerminology>?
         get() = mPresenter
-
-    override val viewNames: List<String>
-        get() = listOf(ClazzEdit2View.VIEW_NAME)
 
     private var nameLabel = FieldLabel(text = getString(MessageID.name ))
 
@@ -152,6 +151,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
             }
 
             setState{
+                Napier.d("ClazzEdit: entity set to name=${value?.clazzName}")
                 field = value
                 attandenceEnabled = value?.isAttendanceEnabledAndRecorded() == true
             }
@@ -162,7 +162,11 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
         setEditTitle(MessageID.add_a_new_course, MessageID.edit_course)
         mPresenter = ClazzEdit2Presenter(this, arguments, this,
             di, this)
-        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+        val currentBackStackEntry = navController.currentBackStackEntry
+        val backStackUri = currentBackStackEntry?.viewUri
+        val stateArgs = navController.currentBackStackEntrySavedStateMap()
+        Napier.d("ClazzEdit: backStackUri=$backStackUri state = ${stateArgs.entries.joinToString { "${it.key}=${it.value}" }}")
+        mPresenter?.onCreate(stateArgs)
     }
 
     override fun RBuilder.render() {

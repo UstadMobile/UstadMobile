@@ -6,6 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -13,11 +14,13 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.navigation.NavControllerJs
+import com.ustadmobile.navigation.RouteManager
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxSnackBarState
 import com.ustadmobile.redux.ReduxToolbarState
 import com.ustadmobile.util.*
+import io.github.aakira.napier.Napier
 import kotlinx.atomicfu.atomic
 import kotlinx.browser.window
 import kotlinx.coroutines.Runnable
@@ -50,15 +53,29 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
 
     protected lateinit var arguments: Map<String, String>
 
-    protected abstract val viewNames: List<String>?
-
     private val lifecycleStatus = atomic(0)
 
     private var hashChangeListener:(Event) -> Unit = { (it as HashChangeEvent)
-        //Refresh component as arguments changes and prevent loading it multiple times
-        if(viewNames?.indexOf(getViewNameFromUrl(it.newURL)) != -1){
-            arguments = urlSearchParamsToMap()
-            onCreateView()
+        //Refresh component as argument changes and prevent loading it multiple times
+        // This is needed when one view links to the same view (e.g. with different args such as
+        // browsing folders etc).
+
+        val viewNamesVal = RouteManager.lookupViewNamesByComponent(this::class)
+
+        if(viewNamesVal != null){
+            try {
+                val newUstadUrl = UstadUrlComponents.parse(it.newURL)
+
+                if(viewNamesVal.indexOf(newUstadUrl.viewName) != -1  &&
+                        viewNamesVal.indexOf(UstadUrlComponents.parse(it.oldURL).viewName) != -1) {
+                    Napier.d("UstadBaseComponent: hashChange: trigger onCreateView " +
+                        "(oldUrl=${it.oldURL} newUrl=${it.newURL})")
+                    arguments = newUstadUrl.arguments
+                    onCreateView()
+                }
+            }catch(e: IllegalArgumentException) {
+                Napier.d("old or new url on hash change was not an ustad url:", e)
+            }
         }
     }
 
@@ -103,6 +120,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     }
 
     override fun componentDidMount() {
+        Napier.d("UstadBaseComponent: componentDidMount: ${this::class.simpleName}")
         for(observer in lifecycleObservers){
             observer.onStart(this)
         }
@@ -120,6 +138,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     }
 
     override fun componentDidUpdate(prevProps: P, prevState: S, snapshot: Any) {
+        Napier.d("UstadBaseComponent: componentDidUpdate: ${this::class.simpleName}")
         val propsDidChange = props.asDynamic().arguments != js("undefined")
                 && !props.asDynamic().arguments.values.equals(prevProps.asDynamic().arguments.values)
         val activeSession = systemImpl.getAppPref(UstadAccountManager.ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
@@ -132,6 +151,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
          * This will check and make sure the component has changed by checking if the props has changed
          */
         if(propsDidChange || refreshPage){
+            Napier.d("UstadBaseComponent: componentDidUpdate: CHANGED: ${this::class.simpleName}")
             if(propsDidChange){
                 arguments = props.asDynamic().arguments as Map<String, String>
             }
@@ -190,6 +210,8 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     }
 
     override fun componentWillUnmount() {
+        Napier.d("UstadBaseComponent: componentWillUnmount: ${this::class.simpleName}")
+
         for(observer in lifecycleObservers){
             observer.onStop(this)
         }

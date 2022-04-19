@@ -34,9 +34,6 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzAssignmentDetailOverviewView.VIEW_NAME)
-
     private var classComments: List<CommentsWithPerson> = listOf()
 
     private var privateComments: List<CommentsWithPerson> = listOf()

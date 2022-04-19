@@ -34,9 +34,6 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
 
     private var mPresenter: AccountListPresenter? = null
 
-    override val viewNames: List<String>
-        get() = listOf(AccountListView.VIEW_NAME)
-
     private var mCurrentStoredAccounts: List<UserSessionWithPersonAndEndpoint>? = null
 
     private var mActiveAccount: UserSessionWithPersonAndEndpoint? = null

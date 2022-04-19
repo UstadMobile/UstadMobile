@@ -21,9 +21,6 @@ class SiteTermsDetailComponent(props: UmProps): UstadDetailComponent<SiteTerms>(
 
     private var mPresenter: SiteTermsDetailPresenter? = null
 
-    override val viewNames: List<String>
-        get() = listOf(SiteTermsDetailView.VIEW_NAME)
-
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 

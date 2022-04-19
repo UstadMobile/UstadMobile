@@ -22,9 +22,6 @@ import styled.styledDiv
 
 class SiteDetailComponent(props: UmProps): UstadDetailComponent<Site>(props), SiteDetailView {
 
-    override val viewNames: List<String>
-        get() = listOf(SiteDetailView.VIEW_NAME)
-
     private var mPresenter: SiteDetailPresenter? = null
 
     override val detailPresenter: UstadDetailPresenter<*, *>?

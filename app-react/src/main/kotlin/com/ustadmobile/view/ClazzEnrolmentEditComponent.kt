@@ -32,9 +32,6 @@ class ClazzEnrolmentEditComponent (mProps: UmProps): UstadEditComponent<ClazzEnr
     override val mEditPresenter: UstadEditPresenter<*, ClazzEnrolmentWithLeavingReason>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzEnrolmentEditView.VIEW_NAME)
-
     private var startDateLabel = FieldLabel(text = getString(MessageID.start_date))
 
     private var endDateLabel = FieldLabel(text = getString(MessageID.end_date))

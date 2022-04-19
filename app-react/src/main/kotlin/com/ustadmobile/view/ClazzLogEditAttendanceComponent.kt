@@ -41,9 +41,6 @@ class ClazzLogEditAttendanceComponent (mProps: UmProps): UstadEditComponent<Claz
     override val mEditPresenter: UstadEditPresenter<*, ClazzLog>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzLogEditAttendanceView.VIEW_NAME)
-
     private var disablePrevBtn = false
 
     private var disableNextBtn = false
