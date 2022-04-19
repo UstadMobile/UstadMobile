@@ -26,7 +26,7 @@ interface ClazzAssignmentEditView: UstadEditView<CourseBlockWithEntity> {
 
     var groupSet: CourseGroupSet?
 
-    var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>?
+    var submissionPolicyOptions: List<ClazzAssignmentEditPresenter.SubmissionPolicyOptionsMessageIdOption>?
 
     var fileTypeOptions: List<ClazzAssignmentEditPresenter.FileTypeOptionsMessageIdOption>?
 

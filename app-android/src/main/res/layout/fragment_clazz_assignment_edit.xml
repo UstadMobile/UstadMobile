@@ -87,7 +87,7 @@
             type="String" />
 
         <variable
-            name="editAfterSubmissionOptions"
+            name="submissionPolicy"
             type="java.util.List&lt;IdOption&gt;"/>
 
         <variable
@@ -406,7 +406,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="@string/edit_after_submission"
+                android:hint="@string/submission_policy"
                 android:layout_marginVertical="@dimen/dimen_8dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
@@ -416,8 +416,8 @@
                 <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:selectedMessageIdOption="@={blockWithAssignment.assignment.caEditAfterSubmissionType}"
-                    app:messageIdOptions="@{editAfterSubmissionOptions}"
+                    app:selectedMessageIdOption="@={blockWithAssignment.assignment.caSubmissionPolicy}"
+                    app:messageIdOptions="@{submissionPolicy}"
                     />
 
             </com.google.android.material.textfield.TextInputLayout>

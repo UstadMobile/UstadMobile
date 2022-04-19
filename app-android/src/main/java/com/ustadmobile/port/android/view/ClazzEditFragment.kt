@@ -100,6 +100,13 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
             mDataBinding?.clazzStartDateError = value
         }
 
+
+    override var enrolmentPolicyOptions: List<ClazzEdit2Presenter.EnrolmentPolicyOptionsMessageIdOption>? = null
+        set(value){
+            field = value
+            mDataBinding?.enrolmentPolicy = value
+        }
+
     override var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>? = null
         set(value) {
             field?.removeObserver(scopedGrantListObserver)

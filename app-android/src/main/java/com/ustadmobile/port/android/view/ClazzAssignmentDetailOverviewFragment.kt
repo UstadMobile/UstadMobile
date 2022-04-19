@@ -312,6 +312,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             submissionStatusHeaderAdapter?.assignment = value
             submittedSubmissionAdapter?.assignment = value
             addSubmissionButtonsAdapter?.assignment = value
+            addSubmissionAdapter?.assignment = value
 
             detailRecyclerAdapter?.visible = true
 

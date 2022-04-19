@@ -43,6 +43,17 @@ class ClazzEdit2Presenter(context: Any,
 
     private val json: Json by di.instance()
 
+    enum class EnrolmentPolicyOptions(val optionVal: Int, val messageId: Int) {
+        OPEN(Clazz.CLAZZ_ENROLMENT_POLICY_OPEN,
+            MessageID.open_enrolment),
+        INVITE(Clazz.CLAZZ_ENROLMENT_POLICY_WITH_LINK,
+            MessageID.managed_enrolment),
+    }
+
+    class  EnrolmentPolicyOptionsMessageIdOption(day: EnrolmentPolicyOptions, context: Any)
+        : MessageIdOption(day.messageId, context, day.optionVal)
+
+
     private val scheduleOneToManyJoinEditHelper
             = OneToManyJoinEditHelperMp(Schedule::scheduleUid,
             ARG_SAVEDSTATE_SCHEDULES,
@@ -76,6 +87,7 @@ class ClazzEdit2Presenter(context: Any,
         view.clazzSchedules = scheduleOneToManyJoinEditHelper.liveList
         view.scopedGrants = scopedGrantOneToManyHelper.liveList
         view.courseBlocks = courseBlockOneToManyJoinEditHelper.liveList
+        view.enrolmentPolicyOptions = EnrolmentPolicyOptions.values().map { EnrolmentPolicyOptionsMessageIdOption(it, context) }
     }
 
     override fun onLoadDataComplete() {
@@ -565,8 +577,8 @@ class ClazzEdit2Presenter(context: Any,
                 this,
                 currentEntityValue = null,
                 destinationViewName = ClazzAssignmentEditView.VIEW_NAME,
-                entityClass = ClazzAssignmentWithCourseBlock::class,
-                serializationStrategy = ClazzAssignmentWithCourseBlock.serializer(),
+                entityClass = CourseBlockWithEntity::class,
+                serializationStrategy = CourseBlockWithEntity.serializer(),
                 destinationResultKey = SAVEDSTATE_KEY_ASSIGNMENT,
                 arguments = args))
     }

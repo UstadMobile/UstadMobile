@@ -63,7 +63,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
 
     private var textLimitMaxLabel = FieldLabel(text = getString(MessageID.maximum))
 
-    private var editAfterSubLabel = FieldLabel(text = getString(MessageID.edit_after_submission))
+    private var submissionPolicyLabel = FieldLabel(text = getString(MessageID.submission_policy))
 
     private var markedByLabel = FieldLabel(text = getString(MessageID.marked_by))
 
@@ -176,14 +176,13 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
             }
         }
 
-    override var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>? = null
+    override var submissionPolicyOptions: List<ClazzAssignmentEditPresenter.SubmissionPolicyOptionsMessageIdOption>? = null
         get() = field
         set(value) {
             setState {
                 field = value
             }
         }
-
 
     override var fileTypeOptions: List<ClazzAssignmentEditPresenter.FileTypeOptionsMessageIdOption>?= null
         get() = field
@@ -500,16 +499,16 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                     umGridContainer(columnSpacing = GridSpacing.spacing4) {
                         umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextFieldSelect(
-                                "${editAfterSubLabel.text}",
-                                entity?.assignment?.caEditAfterSubmissionType.toString(),
-                                editAfterSubLabel.errorText ?: "",
-                                error = editAfterSubLabel.error,
-                                values = editAfterSubmissionOptions?.map {
+                                "${submissionPolicyLabel.text}",
+                                entity?.assignment?.caSubmissionPolicy.toString(),
+                                submissionPolicyLabel.errorText ?: "",
+                                error = submissionPolicyLabel.error,
+                                values = submissionPolicyOptions?.map {
                                     Pair(it.code.toString(), it.toString())
                                 }?.toList(),
                                 onChange = {
                                     setState {
-                                        entity?.assignment?.caEditAfterSubmissionType = it.toInt()
+                                        entity?.assignment?.caSubmissionPolicy = it.toInt()
                                     }
                                 }
                             )
