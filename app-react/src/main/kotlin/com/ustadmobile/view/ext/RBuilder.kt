@@ -50,8 +50,12 @@ import com.ustadmobile.util.StyleManager.toolbarTitle
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.*
-import com.ustadmobile.view.*
+import com.ustadmobile.view.ChartOptions
+import com.ustadmobile.view.ChartType
+import com.ustadmobile.view.ClazzAssignmentDetailOverviewComponent.Companion.ASSIGNMENT_STATUS_MAP
 import com.ustadmobile.view.ClazzEditComponent.Companion.BLOCK_ICON_MAP
+import com.ustadmobile.view.ContentEntryListComponent
+import com.ustadmobile.view.umChart
 import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
@@ -893,16 +897,15 @@ fun RBuilder.renderCourseBlockAssignment(
                         }
                     }
 
-                    if(item.assignment?.progressSummary?.hasMetricsPermission == true){
+                    if(item.assignment?.progressSummary?.hasMetricsPermission == false
+                        || item.assignment?.fileSubmissionStatus != 0){
 
                         styledSpan {
 
                             css{
                                 padding(right = 1.spacingUnits)
                             }
-                            umIcon(
-                                ClazzAssignmentDetailOverviewComponent.ASSIGNMENT_STATUS_MAP[item.assignment?.fileSubmissionStatus
-                                    ?: 0] ?: "",
+                            umIcon(ASSIGNMENT_STATUS_MAP[item.assignment?.fileSubmissionStatus ?: 0] ?: "",
                                 fontSize = IconFontSize.small
                             ) {
                                 css {
@@ -910,13 +913,26 @@ fun RBuilder.renderCourseBlockAssignment(
                                 }
                             }
                         }
-                        styledSpan {
-                            umTypography(systemImpl.getString(
-                                STATUS_MAP[item.assignment?.fileSubmissionStatus ?: 0]?: 0, this),
-                                variant = TypographyVariant.body1,
-                                paragraph = true){
-                                css(alignTextToStart)
-                            }
+
+                        umTypography(systemImpl.getString(
+                            STATUS_MAP[item.assignment?.fileSubmissionStatus ?: 0]?: 0, this),
+                            variant = TypographyVariant.body1,
+                            paragraph = true){
+                            css(alignTextToStart)
+                        }
+                    }
+
+                    if(item.assignment?.progressSummary?.hasMetricsPermission == true){
+                        umTypography(systemImpl.getString(MessageID.three_num_items_with_name_with_comma,this)
+                            .format("${item.assignment?.progressSummary?.calculateNotSubmittedStudents()}",
+                                systemImpl.getString(MessageID.not_submitted_cap, this),
+                                "${item.assignment?.progressSummary?.submittedStudents}",
+                                systemImpl.getString(MessageID.submitted_cap,this),
+                                "${item.assignment?.progressSummary?.markedStudents}",
+                                systemImpl.getString(MessageID.marked, this)),
+                            variant = TypographyVariant.body1,
+                            paragraph = true){
+                            css(alignTextToStart)
                         }
                     }
                 }

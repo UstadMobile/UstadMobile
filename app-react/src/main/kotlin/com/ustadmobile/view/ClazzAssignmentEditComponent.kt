@@ -327,7 +327,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                                 onChange = {
                                     setState {
                                         entity?.cbCompletionCriteria = it.toInt()
-                                        completionCriteriaOptions = null
+                                        completionCriteriaLabel.errorText = null
                                     }
                                 }
                             )

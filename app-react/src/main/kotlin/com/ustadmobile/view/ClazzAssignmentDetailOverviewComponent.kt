@@ -83,7 +83,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
         }
 
     private fun updateSubmitButtonVisibility(){
-        updateUiWithStateChangeDelay(STATE_CHANGE_DELAY * 2) {
+        updateUiWithStateChangeDelay(MAX_STATE_CHANGE_DELAY_TIME) {
             fabManager?.visible = !hasPassedDeadline
                     && !addedCourseAssignmentSubmission.isNullOrEmpty()
         }
@@ -321,7 +321,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                                         onMainList = true
                                     ) { secondary, _ ->
                                         if (secondary) mPresenter?.handleDeleteSubmission(submission)
-                                        if(!secondary) mPresenter?.handleOpenSubmission(submission/*, true*/)
+                                        if(!secondary) mPresenter?.handleOpenSubmission(submission)
                                     }
                                 }
                             }

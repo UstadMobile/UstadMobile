@@ -4,19 +4,26 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadBackStackEntry
+import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.waitForListToBeSet
+import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.LanguageEditView
 import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Language
+import kotlinx.serialization.builtins.ListSerializer
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 
 /**
@@ -39,6 +46,8 @@ class LanguageListPresenterTest {
 
     private lateinit var repoLanguageDaoSpy: LanguageDao
 
+    private lateinit var testNavController: UstadNavController
+
     private lateinit var di: DI
 
     @Before
@@ -51,6 +60,7 @@ class LanguageListPresenterTest {
         di = DI {
             import(ustadTestRule.diModule)
         }
+        testNavController = di.direct.instance()
         val repo: UmAppDatabase by di.activeRepoInstance()
         context = Any()
         repoLanguageDaoSpy = spy(repo.languageDao)
@@ -59,13 +69,6 @@ class LanguageListPresenterTest {
 
     @Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
-        val repo: UmAppDatabase by di.activeRepoInstance()
-        val testEntity = Language().apply {
-            //set variables here
-            name = "English"
-            langUid = repo.languageDao.insert(this)
-        }
-
         val presenterArgs = mapOf<String,String>()
         val presenter = LanguageListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
@@ -81,7 +84,6 @@ class LanguageListPresenterTest {
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
 
         val repo: UmAppDatabase by di.activeRepoInstance()
-        val systemImpl: UstadMobileSystemImpl by di.instance()
         val testEntity = Language().apply {
             //set variables here
             name = "German"
@@ -96,8 +98,7 @@ class LanguageListPresenterTest {
 
         presenter.handleClickEntry(testEntity)
 
-        verify(systemImpl, timeout(5000)).go(eq(LanguageEditView.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to testEntity.langUid.toString())), any())
+        verify(testNavController, timeout(2000)).navigate(eq(LanguageEditView.VIEW_NAME), any(), any())
 
     }
 

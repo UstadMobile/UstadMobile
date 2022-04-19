@@ -72,7 +72,7 @@ class SelectFileComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                         }
                     }
                 }
-            }, STATE_CHANGE_DELAY)
+            }, MIN_STATE_CHANGE_DELAY_TIME)
         }
 
     override var noFileSelectedError: String? = null

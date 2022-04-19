@@ -28,7 +28,6 @@ import react.Props
 import react.RBuilder
 import react.setState
 import styled.css
-import styled.styledDiv
 
 class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props), ChatDetailView {
 
@@ -69,9 +68,13 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
     override var entity: Chat? = null
         get() = field
         set(value) {
-            ustadComponentTitle = value?.chatTitle
             setState {
                 field = value
+            }
+            if(value?.chatTitle != null){
+                updateUiWithStateChangeDelay {
+                    ustadComponentTitle = value.chatTitle
+                }
             }
         }
 
@@ -90,7 +93,7 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                 +defaultPaddingTop
             }
 
-            styledDiv {
+            umItem {
                 css{
                     margin(bottom = 10.spacingUnits)
                 }

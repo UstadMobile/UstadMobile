@@ -103,9 +103,9 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                             entity?.phoneNum != null){
 
                         }
-                        renderTopMainAction("message",getString(MessageID.text), GridSize.cells4, GridSize.cells2,
+                        renderTopMainAction("message",getString(MessageID.chat), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
-
+                            mPresenter?.handleClickChat()
                         }
                         renderTopMainAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
                             entity?.emailAddr != null){
