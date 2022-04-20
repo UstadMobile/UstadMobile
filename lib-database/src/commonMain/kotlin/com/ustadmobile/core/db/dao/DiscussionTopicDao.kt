@@ -1,6 +1,8 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
@@ -79,6 +81,8 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
                 (SELECT CourseDiscussion.courseDiscussionUid 
                    FROM CourseDiscussion
                   WHERE CourseDiscussion.courseDiscussionClazzUid = :clazzUid ) 
+          AND DiscussionTopic.discussionTopicVisible = 1
+          AND DiscussionTopic.discussionTopicArchive = 0
                         
     """)
     abstract suspend fun getTopicsByClazz(clazzUid: Long)
@@ -88,7 +92,7 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
     @Query("""
         SELECT DiscussionTopic.*
           FROM DiscussionTopic
-         WHERE DiscussionTopic.discussionTopicCourseDiscussionUid = :discussionTopicUid
+         WHERE DiscussionTopic.discussionTopicUid = :discussionTopicUid
          
          """)
     abstract fun getDiscussionTopicByUid(discussionTopicUid: Long): DoorLiveData<DiscussionTopic?>
@@ -108,5 +112,7 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
     }
 
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun replaceListAsync(list: List<DiscussionTopic>)
 
 }

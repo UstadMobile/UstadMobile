@@ -106,11 +106,6 @@ class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
                  di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
-
-        mBinding?.fragmentCourseDiscussionDetailAddTopicEfab?.setOnClickListener {
-            mPresenter?.onClickAddTopic()
-        }
-
         // 3
         topicsRecyclerAdapter = DiscussionTopicRecyclerAdapter(mPresenter)
 

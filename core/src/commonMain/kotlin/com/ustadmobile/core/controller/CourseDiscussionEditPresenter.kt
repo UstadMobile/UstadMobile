@@ -72,6 +72,8 @@ class CourseDiscussionEditPresenter(context: Any,
             val foundTopic: DiscussionTopic = topicsOneToManyJoinEditHelper.liveList.getValue()?.find {
                     topic -> topic.discussionTopicUid == newTopic.discussionTopicUid
             } ?: DiscussionTopic().apply{
+                //Creating a new one from newTopic
+                discussionTopicUid = newTopic.discussionTopicUid
                 discussionTopicStartDate = systemTimeInMillis()
                 discussionTopicCourseDiscussionUid = arguments[ARG_ENTITY_UID]?.toLong()
                     ?: db.doorPrimaryKeyManager.nextId(CourseDiscussion.TABLE_ID)
@@ -83,14 +85,14 @@ class CourseDiscussionEditPresenter(context: Any,
             foundTopic.discussionTopicCourseDiscussionUid = arguments[ARG_ENTITY_UID]?.toLong()
                 ?: db.doorPrimaryKeyManager.nextId(CourseDiscussion.TABLE_ID)
 
+            //Any updated title desc
             foundTopic.discussionTopicTitle = newTopic.discussionTopicTitle
             foundTopic.discussionTopicDesc  = newTopic.discussionTopicDesc
 
             topicsOneToManyJoinEditHelper.onEditResult(foundTopic)
 
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_DISCUSSION_TOPIC] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_DISCUSSION_TOPIC] = null
+
         }
 
     }
@@ -116,14 +118,15 @@ class CourseDiscussionEditPresenter(context: Any,
             }
         }
 
-        //topicsOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
-        editEntity.topics?.let { topicsOneToManyJoinEditHelper.liveList.sendValue(it) }
 
+        topicsOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
 
+        topicsOneToManyJoinEditHelper.liveList.sendValue(editEntity.topics ?: listOf())
         presenterScope.launch {
 
 
-            clazzUid = editEntity.courseDiscussion?.courseDiscussionClazzUid ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
+            clazzUid = editEntity.courseDiscussion?.courseDiscussionClazzUid
+                ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
             val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
                 it.clazzDao.getClazzWithSchool(clazzUid)
             } ?: ClazzWithSchool()
@@ -141,6 +144,7 @@ class CourseDiscussionEditPresenter(context: Any,
         val entityVal = entity
         if (entityVal != null) {
             saveDateTimeIntoEntity(entityVal)
+            entityVal.topics = topicsOneToManyJoinEditHelper.liveList.getValue()
         }
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
@@ -193,6 +197,7 @@ class CourseDiscussionEditPresenter(context: Any,
     }
 
     fun handleClickAddTopic(){
+
         navigateForResult(
             NavigateForResultOptions(this,
                 null,
@@ -200,9 +205,7 @@ class CourseDiscussionEditPresenter(context: Any,
                 DiscussionTopic::class,
                 DiscussionTopic.serializer(),
                 SAVEDSTATE_KEY_DISCUSSION_TOPIC,
-                arguments = mutableMapOf(
-                    ARG_CLAZZUID to clazzUid.toString()
-                )
+                arguments = arguments.toMutableMap()
         ))
     }
 

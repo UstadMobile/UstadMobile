@@ -165,10 +165,12 @@
                 android:id="@+id/fragment_course_discussion_edit_topics_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:listitem="@layout/item_discussion_edit_topic"
-                tools:itemCount="2"
+                android:layout_marginBottom="64dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_course_discussion_edit_add_new_topic_button"
-                app:layout_constraintStart_toStartOf="parent" />
+                tools:itemCount="2"
+                tools:listitem="@layout/item_discussion_edit_topic" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

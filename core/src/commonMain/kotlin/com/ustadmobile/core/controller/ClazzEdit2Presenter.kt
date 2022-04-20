@@ -606,6 +606,7 @@ class   ClazzEdit2Presenter(context: Any,
                     txDb.clazzAssignmentDao.updateAsync(assignment)
                 }
 
+                //TODO: Use replace with onconflict strategy replace
                 val discussions = courseBlockOneToManyJoinEditHelper.entitiesToInsert.mapNotNull {
                     it.courseDiscussion }
 
@@ -619,20 +620,15 @@ class   ClazzEdit2Presenter(context: Any,
 
                 //Save Discussion Topic
 
-                val cbWithTopics: List<CourseBlockWithEntity> = courseBlockList.filter{
-                    it.topics != null
-                }
-                //TODO: Fix this
-                val topicsToInsert = cbWithTopics.flatMap { it.topics!! }
+                val tti : List<DiscussionTopic> = courseBlockList.mapNotNull{
+                    it.topics
+                }.flatten()
 
 
-                txDb.discussionTopicDao.insertListAsync(topicsToInsert)
+                txDb.discussionTopicDao.replaceListAsync(tti)
 
-                //TODO: Fix this
-                val topicUidsToDelete = courseBlockList.filter{it.topicUidsToRemove != null}
-                    .flatMap{
-                        it.topicUidsToRemove!!
-                    }
+                val topicUidsToDelete: List<Long> = courseBlockList.mapNotNull{it.topicUidsToRemove }
+                    .flatten()
 
                 txDb.discussionTopicDao.deactivateByUids(topicUidsToDelete, systemTimeInMillis())
 

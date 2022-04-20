@@ -74,7 +74,6 @@ abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<
     }
 
 
-
     @Query("""
         SELECT CourseDiscussion.* 
           FROM CourseDiscussion

@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.DiscussionTopicEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.DiscussionTopic
 import kotlinx.coroutines.launch
@@ -25,42 +26,25 @@ class DiscussionTopicEditPresenter(context: Any,
                                                                             di,
                                                                             lifecycleOwner) {
 
-    private var clazzUid: Long = 0L
-    private var courseDiscussionUid: Long = 0L
-    private var persistMode: Boolean = false
-
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
 
-
-//    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): DiscussionTopic? {
-//        super.onLoadEntityFromDb(db)
-//
-//        persistMode = arguments.containsKey(ARG_TOPIC_PERSIST)
-//
-//
-//
-//    }
 
     override fun onLoadFromJson(bundle: Map<String, String>): DiscussionTopic {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
 
-        persistMode = bundle.containsKey(ARG_TOPIC_PERSIST)
-
         val editEntity = if (entityJsonStr != null) {
              safeParse(di, DiscussionTopic.serializer(), entityJsonStr)
         }else{
             DiscussionTopic().apply {
-                //discussionTopicUid = db.doorPrimaryKeyManager.nextId(DiscussionTopic.TABLE_ID)
+                discussionTopicUid = db.doorPrimaryKeyManager.nextId(DiscussionTopic.TABLE_ID)
                 discussionTopicStartDate = systemTimeInMillis()
 
             }
 
         }
-        clazzUid = editEntity.discussionTopicCourseDiscussionUid
-
         return editEntity
     }
 
@@ -68,62 +52,37 @@ class DiscussionTopicEditPresenter(context: Any,
         super.onSaveInstanceState(savedState)
         val entityVal = entity
 
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
-
 
 
     override fun handleClickSave(entity: DiscussionTopic) {
         presenterScope.launch {
 
 
-            var foundError = false
             if (entity.discussionTopicTitle.isNullOrEmpty()) {
                 view.blockTitleError =
                     systemImpl.getString(MessageID.field_required_prompt, context)
-                foundError = true
+                return@launch
             }else{
                 view.blockTitleError = null
             }
 
-            if(foundError){
-                return@launch
-            }
-            
-
             view.loading = true
             view.fieldsEnabled = false
 
-
-            if(persistMode){
-
-                repo.discussionTopicDao.insertAsync(entity)
-                finishWithResult(
-                    safeStringify(
-                        di,
-                        ListSerializer(DiscussionTopic.serializer()),
-                        listOf(entity)
-                    )
+            finishWithResult(
+                safeStringify(
+                    di,
+                    ListSerializer(DiscussionTopic.serializer()),
+                    listOf(entity)
                 )
-            }else {
+            )
 
-                finishWithResult(
-                    safeStringify(
-                        di,
-                        ListSerializer(DiscussionTopic.serializer()),
-                        listOf(entity)
-                    )
-                )
-            }
             view.loading = false
             view.fieldsEnabled = true
 
         }
-    }
-
-    companion object{
-        const val ARG_TOPIC_PERSIST = "ArgTopicPersist"
     }
 
 
