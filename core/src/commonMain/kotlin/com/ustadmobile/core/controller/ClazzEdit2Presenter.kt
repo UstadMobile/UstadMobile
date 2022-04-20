@@ -617,6 +617,7 @@ class   ClazzEdit2Presenter(context: Any,
                     courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate, systemTimeInMillis())
 
 
+                //Save Discussion Topic
 
                 val cbWithTopics: List<CourseBlockWithEntity> = courseBlockList.filter{
                     it.topics != null

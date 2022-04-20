@@ -116,7 +116,8 @@ class CourseDiscussionEditPresenter(context: Any,
             }
         }
 
-        topicsOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
+        //topicsOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
+        editEntity.topics?.let { topicsOneToManyJoinEditHelper.liveList.sendValue(it) }
 
 
         presenterScope.launch {
@@ -160,7 +161,7 @@ class CourseDiscussionEditPresenter(context: Any,
 
     }
 
-    fun saveDateTimeIntoEntity(entity: CourseBlockWithEntity){
+    private fun saveDateTimeIntoEntity(entity: CourseBlockWithEntity){
         val timeZone = view.timeZone ?: "UTC"
 
         entity.cbHideUntilDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
@@ -171,13 +172,24 @@ class CourseDiscussionEditPresenter(context: Any,
 
     fun handleClickDeleteTopic(discussionTopic: DiscussionTopic){
 
-        //TODO
+        //TODO check
+        topicsOneToManyJoinEditHelper.onDeactivateEntity(discussionTopic)
 
     }
 
     fun handleClickTopic(discussionTopic: DiscussionTopic){
-        //TODO: Go to Topic edit
-
+        //TODO: Check
+        navigateForResult(
+            NavigateForResultOptions(this,
+                discussionTopic,
+                DiscussionTopicEditView.VIEW_NAME,
+                DiscussionTopic::class,
+                DiscussionTopic.serializer(),
+                SAVEDSTATE_KEY_DISCUSSION_TOPIC,
+                arguments = mutableMapOf(
+                    ARG_CLAZZUID to clazzUid.toString()
+                )
+            ))
     }
 
     fun handleClickAddTopic(){
