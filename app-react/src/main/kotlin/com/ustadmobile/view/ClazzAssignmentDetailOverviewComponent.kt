@@ -76,15 +76,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
             setState {
                 field = value
             }
-            updateSubmitButtonVisibility()
         }
-
-    private fun updateSubmitButtonVisibility(){
-        updateUiWithStateChangeDelay(MAX_STATE_CHANGE_DELAY_TIME) {
-            fabManager?.visible = !hasPassedDeadline
-                    && !addedCourseAssignmentSubmission.isNullOrEmpty()
-        }
-    }
 
     override var timeZone: String? = null
         get() = field
@@ -139,25 +131,6 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
             }
         }
 
-    // TODO remove
-    var hasPassedDeadline: Boolean = false
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-            updateSubmitButtonVisibility()
-        }
-
-    // TODO remove
-    var maxNumberOfFilesSubmission: Int = 0
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
-
     override var submissionMark: CourseAssignmentMark? = null
         get() = field
         set(value) {
@@ -193,12 +166,6 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
         }
     }
 
-    private fun isMaxFilesReached(): Boolean {
-        val sizeOfSubmitted = courseAssignmentSubmissions.filter { it.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE }?.size ?: 0
-        val sizeOfAddedList = addedCourseAssignmentSubmission?.filter { it.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE }?.size ?: 0
-        return (sizeOfAddedList + sizeOfSubmitted) >= maxNumberOfFilesSubmission
-    }
-
     override fun RBuilder.render() {
         if(entity == null) return
         styledDiv {
@@ -214,39 +181,53 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                     }
                 }
 
-                if(showSubmission){
-                    val date = entity?.block?.cbDeadlineDate.toDate();
-                    val dateTime = if(date != null) "${entity?.block?.cbDeadlineDate.toDate()?.fullDateFormat()} " +
-                            "- ${entity?.block?.cbDeadlineDate.toDate()?.formattedInHoursAndMinutes()} " else ""
 
+                val date = entity?.block?.cbDeadlineDate.toDate();
+                if(date != null) {
+                    val dateTime = "${date.fullDateFormat()} - ${date.formattedInHoursAndMinutes()} "
                     renderInformationOnDetailScreen("event_available","$dateTime(${timeZone})",
                         getString(MessageID.deadline),
                         shrink = true
                     )
+                }
 
-                    if(submissionStatus == CourseAssignmentSubmission.NOT_SUBMITTED){
-                        renderInformationOnDetailScreen("check",
+                renderInformationOnDetailScreen(SUBMISSION_POLICY_MAP[entity?.caSubmissionPolicy],
+                    getString(ClazzAssignmentDetailOverviewPresenter.SUBMISSION_POLICY_OPTIONS[entity?.caSubmissionPolicy] ?: 0),
+                    getString(MessageID.submission_policy),
+                    shrink = true
+                )
+
+
+                if(showSubmission){
+
+                    renderInformationOnDetailScreen(
+                        if(submissionStatus == CourseAssignmentSubmission.NOT_SUBMITTED) null
+                            else ASSIGNMENT_STATUS_MAP[submissionStatus],
                             getString(SubmissionConstants.STATUS_MAP[submissionStatus] ?: 0),
                             getString(MessageID.status),
+                            shrink = true
+                    )
+
+                    val mark = submissionMark
+                    if(mark != null){
+
+                        val marks = getString(MessageID.points).format("${mark.camMark} / ${entity?.block?.cbMaxPoints}")
+
+                        val penalty = if(mark.camPenalty != 0)
+                            " ${getString(MessageID.late_penalty).format(entity?.block?.cbLateSubmissionPenalty ?: "")}"
+                        else
+                            ""
+
+                        renderInformationOnDetailScreen("emoji_events",
+                            "$marks$penalty",
+                            getString(MessageID.xapi_result_header),
                             shrink = true
                         )
                     }
 
-                    val marks = if(submissionStatus == CourseAssignmentSubmission.NOT_SUBMITTED && submissionMark?.camMark != null)
-                        getString(MessageID.points).format("${submissionMark?.camMark} / ${entity?.block?.cbMaxPoints}")
-                    else ""
-                    val penalty = if(submissionMark?.camPenalty != 0) " ${getString(MessageID.late_penalty).format(entity?.block?.cbLateSubmissionPenalty ?: "")}"
-                    else ""
-                    renderInformationOnDetailScreen("emoji_events",
-                        "$marks$penalty",
-                        getString(MessageID.xapi_result_header),
-                        shrink = true
-                    )
-
                     umGridContainer(GridSpacing.spacing4) {
                         css(defaultDoubleMarginTop)
-                        val canAddFile = (entity?.caRequireFileSubmission ?: false) && !(isMaxFilesReached() || hasPassedDeadline)
-                        if(!hasPassedDeadline){
+                        if(addTextSubmissionVisible){
                             umItem(GridSize.cells12, GridSize.cells4){
                                 umButton(getString(MessageID.add_text),
                                     variant = ButtonVariant.contained,
@@ -262,7 +243,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                             }
                         }
 
-                        if(canAddFile){
+                        if(addFileSubmissionVisible){
                             umItem(GridSize.cells12, GridSize.cells6){
                                 umItem(GridSize.cells12, GridSize.cells6){
                                     umButton(getString(MessageID.add_file),
@@ -282,7 +263,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
 
                         umSpacer(top = 2.spacingUnits)
 
-                        if(canAddFile){
+                        if(addFileSubmissionVisible){
                             umItem(flexDirection = FlexDirection.row) {
                                 styledSpan {
                                     css{
@@ -339,7 +320,24 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                                 }
                             }
                         }
+
+                        umGridContainer(GridSpacing.spacing4) {
+                            umItem(GridSize.cells12, GridSize.cells4){
+                                umButton(getString(MessageID.submit),
+                                    variant = ButtonVariant.contained,
+                                    onClick = {
+                                        mPresenter?.handleSubmitButtonClicked()
+                                    }){
+                                    css {
+                                        +StyleManager.defaultFullWidth
+                                        +defaultDoubleMarginTop
+                                        height = 50.px
+                                    }
+                                }
+                            }
+                        }
                     }
+
 
                     if(!courseAssignmentSubmissions.isNullOrEmpty()){
                         umSpacer(top = 2.spacingUnits)
@@ -410,5 +408,12 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
             CourseAssignmentSubmission.NOT_SUBMITTED to "timer",
             CourseAssignmentSubmission.SUBMITTED to "done",
             CourseAssignmentSubmission.MARKED to "done_all")
+
+        val SUBMISSION_POLICY_MAP = mapOf(
+            ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE to "task_alt",
+            ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED to "add_task",
+        )
+
+
     }
 }

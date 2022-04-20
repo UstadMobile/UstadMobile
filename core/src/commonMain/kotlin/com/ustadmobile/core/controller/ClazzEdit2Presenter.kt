@@ -27,7 +27,6 @@ import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_PARENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer

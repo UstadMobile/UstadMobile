@@ -5,7 +5,6 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.storeMarkedStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.HtmlTextViewDetailView
@@ -161,9 +160,8 @@ class ClazzAssignmentDetailStudentProgressPresenter(
         val person = view.person ?: return false
         val assignment = view.entity ?: return false
         presenterScope.launch {
-            val clazzAssignmentObjectId = UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
-                    "/clazzAssignment/${selectedClazzAssignmentUid}")
-            val statement = repo.statementDao.findSubmittedStatementFromStudent(person.personUid, clazzAssignmentObjectId)
+            val statement = repo.statementDao.findSubmittedStatementFromStudent(
+                person.personUid, assignment.caXObjectUid)
             if(statement == null){
                 view.submitMarkError = " "
                 return@launch
