@@ -20,7 +20,9 @@ import com.ustadmobile.door.DoorUri
  *
  * @author mike, kileha3
  */
-actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFactory): UstadMobileSystemCommon() {
+actual open class UstadMobileSystemImpl(
+    private val xppFactory: XmlPullParserFactory,
+): UstadMobileSystemCommon() {
 
     private val messageIdMapFlipped: Map<String, Int> by lazy {
         MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
@@ -34,7 +36,7 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
         set(value) {
             val xpp = xppFactory.newPullParser()
             xpp.setInputString(value.second)
-            defaultStringsXml = StringsXml(xpp,xppFactory,messageIdMapFlipped, value.first)
+            defaultStringsXml = StringsXml(xpp,xppFactory, messageIdMapFlipped, value.first)
             field = value
         }
 
@@ -42,7 +44,7 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
         set(value) {
             val xpp = xppFactory.newPullParser()
             xpp.setInputString(value.second)
-            foreignStringXml = StringsXml(xpp,xppFactory,messageIdMapFlipped, value.first, defaultStringsXml)
+            foreignStringXml = StringsXml(xpp,xppFactory, messageIdMapFlipped, value.first, defaultStringsXml)
             field = value
         }
 
@@ -62,7 +64,7 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
      * @return System locale
      */
     actual override fun getSystemLocale(context: Any): String {
-        return "${window.navigator.language}.UTF-8"
+        return systemLocale
     }
 
     /**
@@ -138,16 +140,6 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    actual companion object {
-
-        /**
-         * Get an instance of the system implementation - relies on the platform
-         * specific factory method
-         *
-         * @return A singleton instance
-         */
-        actual var instance: UstadMobileSystemImpl =  UstadMobileSystemImpl(XmlPullParserFactory.newInstance())
-    }
 
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
@@ -174,5 +166,25 @@ actual open class UstadMobileSystemImpl(private val xppFactory: XmlPullParserFac
      */
     actual fun openLinkInBrowser(url: String, context: Any) {
         window.open(url, "_blank")
+    }
+
+    actual companion object {
+
+        /**
+         * Locale functions are provided here because Javascript needs to load resource XML files
+         * asynchronously before SystemImpl is initialized.
+         */
+        private val systemLocale: String
+            get() = "${window.navigator.language}.UTF-8"
+
+        val displayedLocale: String
+            get() {
+                val localePref = localStorage.getItem(PREFKEY_LOCALE) ?: LOCALE_USE_SYSTEM
+                return if(localePref == LOCALE_USE_SYSTEM) {
+                    systemLocale.substring(0, 2)
+                }else {
+                    localePref
+                }
+            }
     }
 }

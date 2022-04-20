@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadAntilog
 import com.ustadmobile.core.util.defaultJsonSerializer
 import com.ustadmobile.core.util.ext.getOrPut
@@ -79,7 +80,7 @@ fun main() {
 
             val defaultStrings = Util.loadAssetsAsText(defaultAssetPath)
 
-            val localeCode = "en"
+            val localeCode = UstadMobileSystemImpl.displayedLocale
             val defaultLocale = "en"
             if(localeCode != defaultLocale){
                 val currentAssetPath = "locales/$localeCode.xml"

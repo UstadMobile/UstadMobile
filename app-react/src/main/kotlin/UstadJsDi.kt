@@ -41,7 +41,7 @@ internal fun ustadJsDi(
     defaultStrings: String,
 ) = DI {
     bind<UstadMobileSystemImpl>() with singleton {
-        UstadMobileSystemImpl.instance.also { impl ->
+        UstadMobileSystemImpl(XmlPullParserFactory.newInstance()).also { impl ->
             appConfigs.forEach {
                 val value = when(it.key){
                     AppConfig.KEY_API_URL -> apiUrl

@@ -35,11 +35,15 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 
 
-class ClazzEdit2Presenter(context: Any,
-                          arguments: Map<String, String>, view: ClazzEdit2View,  di : DI,
-                          lifecycleOwner: DoorLifecycleOwner)
-    : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendarAndSchoolAndTerminology>(context, arguments, view,
-         di, lifecycleOwner), TreeOneToManyJoinEditListener<CourseBlockWithEntity>, ItemTouchHelperListener {
+class ClazzEdit2Presenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: ClazzEdit2View,
+    di : DI,
+    lifecycleOwner: DoorLifecycleOwner
+) : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendarAndSchoolAndTerminology>(
+    context, arguments, view, di, lifecycleOwner
+), TreeOneToManyJoinEditListener<CourseBlockWithEntity>, ItemTouchHelperListener {
 
     private val json: Json by di.instance()
 
@@ -50,8 +54,8 @@ class ClazzEdit2Presenter(context: Any,
             MessageID.managed_enrolment),
     }
 
-    class  EnrolmentPolicyOptionsMessageIdOption(day: EnrolmentPolicyOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class  EnrolmentPolicyOptionsMessageIdOption(day: EnrolmentPolicyOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di)
 
 
     private val scheduleOneToManyJoinEditHelper
@@ -87,7 +91,9 @@ class ClazzEdit2Presenter(context: Any,
         view.clazzSchedules = scheduleOneToManyJoinEditHelper.liveList
         view.scopedGrants = scopedGrantOneToManyHelper.liveList
         view.courseBlocks = courseBlockOneToManyJoinEditHelper.liveList
-        view.enrolmentPolicyOptions = EnrolmentPolicyOptions.values().map { EnrolmentPolicyOptionsMessageIdOption(it, context) }
+        view.enrolmentPolicyOptions = EnrolmentPolicyOptions.values().map {
+            EnrolmentPolicyOptionsMessageIdOption(it, context, di)
+        }
     }
 
     override fun onLoadDataComplete() {
@@ -537,15 +543,8 @@ class ClazzEdit2Presenter(context: Any,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
             view.loading = false
 
-            //Handle the following scenario: PersonEdit (user selects to add an enrolment), ClazzList
-            // ClazzEdit, EnrolmentEdit
-            if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
-                systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
-                        arguments.plus(UstadView.ARG_CLAZZUID to entity.clazzUid.toString()),
-                        context)
-            }else{
-                onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity, ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer())
-            }
+            onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity,
+                ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer())
         }
     }
 

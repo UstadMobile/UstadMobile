@@ -46,8 +46,8 @@ class ReportFilterEditPresenter(
         ENROLMENT_LEAVING_REASON(ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON, MessageID.class_enrolment_leaving)
     }
 
-    class FieldMessageIdOption(day: FieldOption, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class FieldMessageIdOption(day: FieldOption, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class ConditionOption(val optionVal: Int, val messageId: Int) {
         IS_CONDITION(ReportFilter.CONDITION_IS, MessageID.condition_is),
@@ -59,8 +59,8 @@ class ReportFilterEditPresenter(
         NOT_IN_LIST_CONDITION(ReportFilter.CONDITION_NOT_IN_LIST, MessageID.condition_not_in_list)
     }
 
-    class ConditionMessageIdOption(day: ConditionOption, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class ConditionMessageIdOption(day: ConditionOption, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class ContentCompletionStatusOption(val optionVal: Int, val messageId: Int) {
         COMPLETED(StatementEntity.CONTENT_COMPLETE, MessageID.completed),
@@ -68,8 +68,8 @@ class ReportFilterEditPresenter(
         FAILED(StatementEntity.CONTENT_FAILED, MessageID.failed)
     }
 
-    class ContentCompletionStatusMessageIdOption(day: ContentCompletionStatusOption, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class ContentCompletionStatusMessageIdOption(day: ContentCompletionStatusOption, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di)
 
 
     enum class FilterValueType {
@@ -105,7 +105,7 @@ class ReportFilterEditPresenter(
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.fieldOptions = FieldOption.values().map { FieldMessageIdOption(it, context) }
+        view.fieldOptions = FieldOption.values().map { FieldMessageIdOption(it, context, di) }
         view.uidAndLabelList = uidAndLabelOneToManyHelper.liveList
     }
 
@@ -116,10 +116,10 @@ class ReportFilterEditPresenter(
         val entity = safeParse(di, ReportFilter.serializer(), entityJsonStr)
 
         if (entity.reportFilterField != 0) {
-            handleFieldOptionSelected(FieldOption.values().map { FieldMessageIdOption(it, context) }.find { it.code == entity.reportFilterField } as MessageIdOption)
+            handleFieldOptionSelected(FieldOption.values().map { FieldMessageIdOption(it, context, di) }.find { it.code == entity.reportFilterField } as MessageIdOption)
         }
         if (entity.reportFilterCondition != 0) {
-            handleConditionOptionSelected(ConditionOption.values().map { ConditionMessageIdOption(it, context) }.find { it.code == entity.reportFilterCondition } as MessageIdOption)
+            handleConditionOptionSelected(ConditionOption.values().map { ConditionMessageIdOption(it, context, di) }.find { it.code == entity.reportFilterCondition } as MessageIdOption)
         }
         uidAndLabelOneToManyHelper.onLoadFromJsonSavedState(bundle)
 
@@ -159,31 +159,34 @@ class ReportFilterEditPresenter(
             ReportFilter.FIELD_PERSON_GENDER -> {
 
                 view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
-                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
+                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context, di) }
 
                 view.valueType = FilterValueType.DROPDOWN
                 view.dropDownValueOptions = genderMap
-                        .map { MessageIdOption(it.value, context, it.key) }
+                        .map { MessageIdOption(it.value, context, it.key, di) }
             }
 
             ReportFilter.FIELD_PERSON_AGE -> {
 
                 view.conditionsOptions = listOf(ConditionOption.GREATER_THAN_CONDITION,
-                        ConditionOption.LESS_THAN_CONDITION, ConditionOption.BETWEEN_CONDITION).map { ConditionMessageIdOption(it, context) }
+                        ConditionOption.LESS_THAN_CONDITION, ConditionOption.BETWEEN_CONDITION
+                ).map {
+                    ConditionMessageIdOption(it, context, di)
+                }
                 view.valueType = FilterValueType.INTEGER
 
             }
             ReportFilter.FIELD_CONTENT_COMPLETION -> {
 
-                view.conditionsOptions = listOf(ConditionOption.IS_CONDITION).map { ConditionMessageIdOption(it, context) }
+                view.conditionsOptions = listOf(ConditionOption.IS_CONDITION).map { ConditionMessageIdOption(it, context, di) }
                 view.valueType = FilterValueType.DROPDOWN
                 view.dropDownValueOptions = ContentCompletionStatusOption.values()
-                        .map { ContentCompletionStatusMessageIdOption(it, context) }
+                        .map { ContentCompletionStatusMessageIdOption(it, context, di) }
             }
             ReportFilter.FIELD_CONTENT_ENTRY -> {
 
                 view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
-                        ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context) }
+                        ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context, di) }
                 view.valueType = FilterValueType.LIST
                 view.createNewFilter = systemImpl.getString(MessageID.add_content_filter, context)
 
@@ -191,19 +194,19 @@ class ReportFilterEditPresenter(
             ReportFilter.FIELD_ATTENDANCE_PERCENTAGE, ReportFilter.FIELD_CONTENT_PROGRESS -> {
 
                 view.conditionsOptions = listOf(ConditionOption.BETWEEN_CONDITION)
-                        .map { ConditionMessageIdOption(it, context) }
+                        .map { ConditionMessageIdOption(it, context, di) }
                 view.valueType = FilterValueType.BETWEEN
             }
             ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME -> {
                 view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
-                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
+                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context, di) }
                 view.valueType = FilterValueType.DROPDOWN
                 view.dropDownValueOptions = OUTCOME_TO_MESSAGE_ID_MAP.map {
-                    MessageIdOption(it.value, context, it.key) }
+                    MessageIdOption(it.value, context, it.key, di) }
             }
             ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON -> {
                 view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
-                        ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context) }
+                        ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context, di) }
                 view.valueType = FilterValueType.LIST
                 view.createNewFilter = systemImpl.getString(MessageID.add_leaving_reason, context)
             }

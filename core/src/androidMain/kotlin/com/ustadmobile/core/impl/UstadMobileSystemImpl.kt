@@ -497,16 +497,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
 
 
-        /**
-         * Get an instance of the system implementation - relies on the platform
-         * specific factory method
-         *
-         * @return A singleton instance
-         */
-        @JvmStatic
-        @Deprecated("This old static getter should not be used! Use DI instead!")
-        actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
-
     }
 
 
