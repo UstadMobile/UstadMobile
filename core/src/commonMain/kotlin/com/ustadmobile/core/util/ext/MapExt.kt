@@ -64,16 +64,19 @@ fun <K, V> MutableMap<K, V>.putIfNotAlreadySet(key: K, keyVal: V) {
  * When the user goes from fragment a to b, and then b to c, c saves the result to the backstackentry
  * of a directly (e.g. when the user is presented with a list, and then chooses to create a new entity).
  */
-fun MutableMap<String, String>.putResultDestInfo(backState: UstadBackStackEntry,
-                                          destinationResultKey: String,
-                                          overwriteDest: Boolean = false) {
+fun MutableMap<String, String>.putResultDestInfo(
+    backState: UstadBackStackEntry,
+    destinationResultKey: String,
+    overwriteDest: Boolean = false
+) {
     val backStateArgs = backState.arguments
-    put(UstadView.ARG_RESULT_DEST_VIEWNAME,
-        backStateArgs.takeIf{ !overwriteDest }?.get(UstadView.ARG_RESULT_DEST_VIEWNAME)
-            ?: backState.viewName)
-    put(UstadView.ARG_RESULT_DEST_KEY,
-        backStateArgs.takeIf{ !overwriteDest }?.get(UstadView.ARG_RESULT_DEST_KEY)
-            ?: destinationResultKey)
+    val effectiveDestViewName = backStateArgs.takeIf{ !overwriteDest }
+        ?.get(UstadView.ARG_RESULT_DEST_VIEWNAME) ?: backState.viewName
+    put(UstadView.ARG_RESULT_DEST_VIEWNAME, effectiveDestViewName)
+
+    val effectiveDestinationKey = backStateArgs.takeIf{ !overwriteDest }
+        ?.get(UstadView.ARG_RESULT_DEST_KEY) ?: destinationResultKey
+    put(UstadView.ARG_RESULT_DEST_KEY, effectiveDestinationKey)
 }
 
 /**

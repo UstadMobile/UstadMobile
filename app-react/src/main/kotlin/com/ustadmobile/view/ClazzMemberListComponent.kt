@@ -151,7 +151,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
     }
 
     override fun handleClickAddNewEntry() {
-        navigateToPickNewMember(ClazzEnrolment.ROLE_TEACHER)
+        mPresenter?.handlePickNewMemberClicked(ClazzEnrolment.ROLE_TEACHER)
     }
 
     private fun RBuilder.createMemberList(
@@ -170,7 +170,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
 
             umItem(GridSize.cells12){
                 val createNewItem = CreateNewItem(showCreateNewItem, createNewLabel){
-                    navigateToPickNewMember(role)
+                    mPresenter?.handlePickNewMemberClicked(role)
                 }
                 mPresenter?.let { presenter ->
                     renderMembers(presenter,members, createNewItem, pending){ entry ->
@@ -179,24 +179,6 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
                 }
             }
         }
-    }
-
-    private fun navigateToPickNewMember(role: Int) {
-        val args = mutableMapOf(
-            PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
-            UstadView.ARG_FILTER_BY_ENROLMENT_ROLE to role.toString(),
-            UstadView.ARG_CLAZZUID to (arguments[UstadView.ARG_CLAZZUID] ?: "-1"),
-            UstadView.ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME,
-            UstadView.ARG_POPUPTO_ON_FINISH to ClazzMemberListView.VIEW_NAME,
-            ClazzMemberListView.ARG_HIDE_CLAZZES to true.toString(),
-            UstadView.ARG_SAVE_TO_DB to true.toString()).also {
-
-            if(role == ClazzEnrolment.ROLE_STUDENT){
-                it[UstadView.ARG_CODE_TABLE] = Clazz.TABLE_ID.toString()
-            }
-        }
-
-        mPresenter?.handlePickNewMemberClicked(args)
     }
 
     override fun onDestroyView() {
