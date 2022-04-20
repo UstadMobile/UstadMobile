@@ -90,9 +90,9 @@ fun XapiStatementEndpoint.storeCompletedStatement(account: UmAccount, entry: Con
     storeStatements(listOf(statement), "", entry.contentEntryUid, clazzUid)
 }
 
-fun XapiStatementEndpoint.storeSubmitFileSubmissionStatement(account: UmAccount,
-                                                             contextRegistration: String,
-                                                             assignment: ClazzAssignment
+fun XapiStatementEndpoint.storeSubmitSubmissionStatement(account: UmAccount,
+                                                         contextRegistration: String,
+                                                         assignment: ClazzAssignment
 ){
 
     val statement = Statement().apply {

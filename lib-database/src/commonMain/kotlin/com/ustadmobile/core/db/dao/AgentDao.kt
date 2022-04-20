@@ -74,4 +74,13 @@ abstract class AgentDao :BaseDao<AgentEntity> {
             "OR agentMbox_sha1sum = :sha1 OR (agentAccountName = :account AND agentHomePage = :homepage)")
     abstract fun getAgentByAnyId(openId: String? = "", mbox: String? = "", account: String? = "", homepage: String? = "", sha1: String? = ""): AgentEntity?
 
+
+    @Query("""
+        SELECT agentUid
+          FROM AgentEntity
+         WHERE agentAccountName = :username 
+           AND agentHomePage = :endpoint
+    """)
+    abstract suspend fun getAgentUidFromPerson(endpoint: String, username: String): Long
+
 }
