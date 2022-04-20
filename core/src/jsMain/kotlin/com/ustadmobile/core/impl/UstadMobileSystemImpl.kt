@@ -5,9 +5,6 @@ import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
-import io.ktor.client.request.*
-import io.ktor.utils.io.charsets.*
-import io.ktor.utils.io.core.*
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlin.js.Date
@@ -19,42 +16,46 @@ import com.ustadmobile.door.DoorUri
  *
  *
  * @author mike, kileha3
+ * @param defaultStringsXmlStr The string of the strings_ui.xml file for English (must be loaded
+ *        (asynchronously in advance)
+ * @param displayLocaleStringsXmlStr The String of the strings_ui.xml file for the display locale
+ *        if the display locale is not English.
  */
 actual open class UstadMobileSystemImpl(
     private val xppFactory: XmlPullParserFactory,
+    private val navController: UstadNavController,
+    defaultStringsXmlStr: String,
+    displayLocaleStringsXmlStr: String?
 ): UstadMobileSystemCommon() {
 
     private val messageIdMapFlipped: Map<String, Int> by lazy {
         MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
     }
 
-    private lateinit var defaultStringsXml: StringsXml
+    private val defaultStringsXml: StringsXml
 
-    private var foreignStringXml: StringsXml? = null
+    private val displayLocaleStringsXml: StringsXml?
 
-    var defaultTranslations: Pair<String,String> = Pair("","")
-        set(value) {
-            val xpp = xppFactory.newPullParser()
-            xpp.setInputString(value.second)
-            defaultStringsXml = StringsXml(xpp,xppFactory, messageIdMapFlipped, value.first)
-            field = value
+    init {
+        val defaultXpp = xppFactory.newPullParser()
+        defaultXpp.setInputString(defaultStringsXmlStr)
+        defaultStringsXml = StringsXml(defaultXpp, xppFactory, messageIdMapFlipped, "en")
+
+        displayLocaleStringsXml = if(displayLocaleStringsXmlStr != null) {
+            val foreignXpp = xppFactory.newPullParser()
+            foreignXpp.setInputString(displayLocaleStringsXmlStr)
+            StringsXml(foreignXpp, xppFactory, messageIdMapFlipped,
+                displayedLocale, defaultStringsXml)
+        }else {
+            null
         }
-
-    var currentTranslations: Pair<String,String> = Pair("","")
-        set(value) {
-            val xpp = xppFactory.newPullParser()
-            xpp.setInputString(value.second)
-            foreignStringXml = StringsXml(xpp,xppFactory, messageIdMapFlipped, value.first, defaultStringsXml)
-            field = value
-        }
-
-    lateinit var navController: UstadNavController
+    }
 
     /**
      * Get a string for use in the UI
      */
     actual override fun getString(messageCode: Int, context: Any): String {
-        return (foreignStringXml ?: defaultStringsXml)[messageCode]
+        return (displayLocaleStringsXml ?: defaultStringsXml)[messageCode]
     }
 
 

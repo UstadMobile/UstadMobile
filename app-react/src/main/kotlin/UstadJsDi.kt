@@ -37,11 +37,13 @@ internal fun ustadJsDi(
     dbNodeIdAndAuth: NodeIdAndAuth,
     appConfigs: HashMap<String, String>,
     apiUrl: String,
-    defaultAssetPath: String,
-    defaultStrings: String,
+    defaultStringsXmlStr: String,
+    displayLocaleStringsXmlStr: String?,
 ) = DI {
     bind<UstadMobileSystemImpl>() with singleton {
-        UstadMobileSystemImpl(XmlPullParserFactory.newInstance()).also { impl ->
+        UstadMobileSystemImpl(XmlPullParserFactory.newInstance(), instance(),
+            defaultStringsXmlStr, displayLocaleStringsXmlStr
+        ).also { impl ->
             appConfigs.forEach {
                 val value = when(it.key){
                     AppConfig.KEY_API_URL -> apiUrl
@@ -49,10 +51,6 @@ internal fun ustadJsDi(
                 }
                 impl.setAppPref(it.key, value, this)
             }
-
-            impl.defaultTranslations = Pair(defaultAssetPath , defaultStrings)
-            impl.currentTranslations = Pair(defaultAssetPath , defaultStrings)
-            impl.navController = instance()
         }
     }
 
