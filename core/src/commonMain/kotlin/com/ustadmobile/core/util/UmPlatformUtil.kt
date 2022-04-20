@@ -2,6 +2,7 @@ package com.ustadmobile.core.util
 
 import kotlinx.coroutines.CoroutineScope
 
+@Deprecated("DONT USE THIS. Logs should be via Napier. ")
 expect object UmPlatformUtil {
 
     var isWeb: Boolean

@@ -76,6 +76,8 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
         outState.putAll(mutableMapOf<String, String>().apply { mEditPresenter?.onSaveInstanceState(this) }.toBundle())
     }
 
+    @Deprecated("This should not be used. Saving to the state handle should be done in " +
+        "multiplatform code by the presenter.")
     protected open fun onSaveStateToBackStackStateHandle() = mEditPresenter?.saveStateToCurrentBackStackStateHandle(findNavController())
 
 }

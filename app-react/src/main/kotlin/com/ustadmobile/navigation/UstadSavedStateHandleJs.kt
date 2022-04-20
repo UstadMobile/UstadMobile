@@ -20,4 +20,10 @@ class UstadSavedStateHandleJs: UstadSavedStateHandle {
             DoorMutableLiveData(null)
         }.unsafeCast<DoorMutableLiveData<T>>()
     }
+
+    fun dumpToString(): String {
+        return mLiveData.entries.map { it.key to it.value?.getValue() }
+            .joinToString { "${it.first}=${it.second}" }
+    }
+
 }

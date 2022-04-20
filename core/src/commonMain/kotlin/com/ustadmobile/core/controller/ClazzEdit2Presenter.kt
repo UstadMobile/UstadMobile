@@ -98,9 +98,7 @@ class ClazzEdit2Presenter(context: Any,
             val timezone = it ?: return@observe
             entity?.clazzTimeZone = timezone
             view.entity = entity
-            UmPlatformUtil.run{
-                requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
-            }
+            requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_SCHOOL, ListSerializer(School.serializer()),
@@ -109,9 +107,7 @@ class ClazzEdit2Presenter(context: Any,
             entity?.school = school
             entity?.clazzSchoolUid = school.schoolUid
             view.entity = entity
-            UmPlatformUtil.run{
-                requireSavedStateHandle()[SAVEDSTATE_KEY_SCHOOL] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_SCHOOL] = null
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_HOLIDAYCALENDAR,
@@ -120,9 +116,7 @@ class ClazzEdit2Presenter(context: Any,
             entity?.holidayCalendar = calendar
             entity?.clazzHolidayUMCalendarUid = calendar.umCalendarUid
             view.entity = entity
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
         }
 
         observeSavedStateResult(
@@ -132,9 +126,7 @@ class ClazzEdit2Presenter(context: Any,
             entity?.clazzTerminologyUid = terminology.ctUid
             entity?.terminology = terminology
             view.entity = entity
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_TERMINOLOGY] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_TERMINOLOGY] = null
         }
 
         observeSavedStateResult(
@@ -143,9 +135,7 @@ class ClazzEdit2Presenter(context: Any,
             val timeZone = it.firstOrNull() ?: return@observeSavedStateResult
             entity?.clazzTimeZone = timeZone
             view.entity = entity
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
-            }
+            requireSavedStateHandle()[RESULT_TIMEZONE_KEY] = null
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_FEATURES,
@@ -153,9 +143,7 @@ class ClazzEdit2Presenter(context: Any,
             val wrapper = it.firstOrNull() ?: return@observeSavedStateResult
             entity?.clazzFeatures = wrapper.longValue
             view.entity = entity
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_FEATURES] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_FEATURES] = null
         }
 
         observeSavedStateResult(SAVEDSTATE_KEY_ASSIGNMENT,
@@ -194,9 +182,8 @@ class ClazzEdit2Presenter(context: Any,
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_ASSIGNMENT] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_ASSIGNMENT] = null
+
         }
 
         observeSavedStateResult(
@@ -244,10 +231,7 @@ class ClazzEdit2Presenter(context: Any,
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_CONTENT] = null
-            }
-
+            requireSavedStateHandle()[SAVEDSTATE_KEY_CONTENT] = null
         }
 
         observeSavedStateResult(ARG_SAVEDSTATE_MODULE,
@@ -273,9 +257,7 @@ class ClazzEdit2Presenter(context: Any,
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[ARG_SAVEDSTATE_MODULE] = null
-            }
+            requireSavedStateHandle()[ARG_SAVEDSTATE_MODULE] = null
         }
         observeSavedStateResult(ARG_SAVEDSTATE_TEXT,
             ListSerializer(CourseBlock.serializer()), CourseBlock::class){
@@ -300,9 +282,7 @@ class ClazzEdit2Presenter(context: Any,
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[ARG_SAVEDSTATE_TEXT] = null
-            }
+            requireSavedStateHandle()[ARG_SAVEDSTATE_TEXT] = null
         }
     }
 

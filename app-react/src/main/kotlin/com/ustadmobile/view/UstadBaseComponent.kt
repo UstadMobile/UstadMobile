@@ -41,7 +41,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
 
     var database: UmAppDatabase? = null
 
-    lateinit var navController: NavControllerJs
+    val navController: UstadNavController by instance()
 
     protected var showAddEntryOptions = false
 
@@ -108,8 +108,6 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
             onFabClicked()
         }
         lifecycleStatus.value = DoorLifecycleObserver.STARTED
-        val umController: UstadNavController by instance()
-        navController = umController as NavControllerJs
         database = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
     }
 
