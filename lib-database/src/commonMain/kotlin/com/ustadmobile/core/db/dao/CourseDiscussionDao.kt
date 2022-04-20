@@ -1,11 +1,11 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.CourseDiscussion
 import com.ustadmobile.lib.db.entities.UserSession
 
@@ -82,5 +82,10 @@ abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<
          
          """)
     abstract fun getCourseDiscussionByUid(courseDiscussionUid: Long): DoorLiveData<CourseDiscussion?>
+
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun replaceListAsync(list: List<CourseDiscussion>)
 
 }

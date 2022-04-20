@@ -37,37 +37,33 @@
 
         <!-- Line 1-->
         <TextView
-            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/item_schedule_line1_text"
-            android:text="@{discussionTopic.discussionTopicTitle}"
-            tools:text="Topic 1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/item_schedule_secondary_menu_imageview"
-            android:layout_marginStart="@dimen/dimen_64dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="@dimen/dimen_16dp"
-            android:layout_marginBottom="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_16dp"
-            />
+            android:text="@{discussionTopic.discussionTopicTitle}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_discussion_topic_list_detail"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Topic 1" />
 
         <!-- Line 2-->
-        <!-- TODO: Create line 2 binding -->
         <TextView
-            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:id="@+id/item_schedule_line2_text"
-            android:text="@{discussionTopic.discussionTopicDesc}"
-            tools:text="Posts: 5, Last active: 17/April/2022"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            app:discussionTopicDetailText="@{discussionTopic}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/item_schedule_line1_text"
             app:layout_constraintTop_toBottomOf="@+id/item_schedule_line1_text"
-            app:layout_constraintEnd_toStartOf="@+id/item_schedule_secondary_menu_imageview"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="@dimen/dimen_16dp"
-            android:layout_marginEnd="@dimen/dimen_16dp"
-            />
+            tools:text="Posts: 5, Last active: 17/April/2022" />
 
 
 

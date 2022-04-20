@@ -49,6 +49,17 @@ fun TextView.setCustomFieldHint(customField: CustomField?) {
     }
 }
 
+@BindingAdapter("discussionTopicDetailText")
+fun TextView.setDiscussionTopicDetailText(discussionPostWithDetails: DiscussionTopicListDetail){
+    //Posts: 10 Last active: 02/Feb/2022
+
+    val postsText = systemImpl.getString(MessageID.posts, context)
+    val dateFormat = DateFormat.getDateFormat(context)
+    val lastActiveDate = if (discussionPostWithDetails.lastActiveTimestamp > 0)
+        dateFormat.format(discussionPostWithDetails.lastActiveTimestamp) else ""
+    text = postsText + ": " + discussionPostWithDetails.numPosts + " " + lastActiveDate
+}
+
 @BindingAdapter("chatMessage", "loggedInPersonUid")
 fun TextView.setChatMessageTitle(message: MessageWithPerson, loggedInPersonUid: Long){
     if(message.messagePerson?.personUid == loggedInPersonUid){

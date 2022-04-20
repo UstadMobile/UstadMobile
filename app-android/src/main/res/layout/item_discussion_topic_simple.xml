@@ -41,9 +41,6 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Topic 1" />
 
-        <!-- Line 2-->
-        <!-- TODO: Create line 2 binding -->
-
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_schedule_secondary_menu_imageview"

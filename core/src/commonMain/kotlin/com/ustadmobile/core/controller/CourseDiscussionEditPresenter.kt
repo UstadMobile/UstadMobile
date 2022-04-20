@@ -175,14 +175,10 @@ class CourseDiscussionEditPresenter(context: Any,
     }
 
     fun handleClickDeleteTopic(discussionTopic: DiscussionTopic){
-
-        //TODO check
         topicsOneToManyJoinEditHelper.onDeactivateEntity(discussionTopic)
-
     }
 
     fun handleClickTopic(discussionTopic: DiscussionTopic){
-        //TODO: Check
         navigateForResult(
             NavigateForResultOptions(this,
                 discussionTopic,

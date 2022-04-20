@@ -606,14 +606,13 @@ class   ClazzEdit2Presenter(context: Any,
                     txDb.clazzAssignmentDao.updateAsync(assignment)
                 }
 
-                //TODO: Use replace with onconflict strategy replace
-                val discussions = courseBlockOneToManyJoinEditHelper.entitiesToInsert.mapNotNull {
-                    it.courseDiscussion }
-
-                txDb.courseDiscussionDao.insertListAsync(discussions)
-                txDb.courseDiscussionDao.updateListAsync(
-                    courseBlockOneToManyJoinEditHelper.entitiesToUpdate
-                        .mapNotNull { it.courseDiscussion })
+                txDb.courseDiscussionDao.replaceListAsync(
+                    courseBlockOneToManyJoinEditHelper.entitiesToInsert.mapNotNull {
+                        it.courseDiscussion
+                    } +
+                    courseBlockOneToManyJoinEditHelper.entitiesToUpdate.mapNotNull {
+                        it.courseDiscussion
+                    })
                 txDb.courseDiscussionDao.deactivateByUids(
                     courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate, systemTimeInMillis())
 

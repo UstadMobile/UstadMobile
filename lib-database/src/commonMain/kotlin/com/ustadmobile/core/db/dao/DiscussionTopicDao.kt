@@ -60,11 +60,17 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
     abstract suspend fun replicateOnChange()
 
 
-    //TODO
+    //TODO: Get timestamp
     @Query("""
         SELECT DiscussionTopic.*,
-                0 as numPosts,
-                0 as lastActiveTimestamp
+                ( 
+                    SELECT COUNT(*) 
+                      FROM DiscussionPost 
+                     WHERE DiscussionPost.discussionPostDiscussionTopicUid = DiscussionTopic.discussionTopicUid
+                ) as numPosts,
+                (
+                    0
+                )as lastActiveTimestamp
           FROM DiscussionTopic     
          WHERE DiscussionTopic.discussionTopicCourseDiscussionUid = :discussionUid 
            AND DiscussionTopic.discussionTopicVisible = 1

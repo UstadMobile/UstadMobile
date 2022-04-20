@@ -60,16 +60,37 @@ abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     abstract suspend fun replicateOnChange()
 
 
-    //TODO
     @Query("""
         SELECT DiscussionPost.*,
-            '' as authorPersonFirstNames,
-            '' as authorPersonLastName,
-            '' as postLatestMessage,
-            0 as postRepliesCount, 
-            0 as postLatestMessageTimestamp
+            Person.firstNames as authorPersonFirstNames,
+            Person.lastName as authorPersonLastName,
+            (
+                SELECT Message.messageText 
+                  FROM Message 
+                 WHERE Message.messageTableId = ${DiscussionPost.TABLE_ID}
+                   AND Message.messageEntityUid = DiscussionPost.discussionPostUid 
+                 ORDER BY messageTimestamp 
+                  DESC LIMIT 1
+            ) AS postLatestMessage,
+            (
+                SELECT COUNT(*) 
+                  FROM Message
+                 WHERE Message.messageTableId = ${DiscussionPost.TABLE_ID}
+                   AND Message.messageEntityUid = DiscussionPost.discussionPostUid 
+                   
+            ) AS postRepliesCount, 
+            
+            (
+                SELECT Message.messageTimestamp 
+                  FROM Message 
+                 WHERE Message.messageTableId = ${DiscussionPost.TABLE_ID}
+                   AND Message.messageEntityUid = DiscussionPost.discussionPostUid 
+                 ORDER BY messageTimestamp 
+                  DESC LIMIT 1
+            ) AS postLatestMessageTimestamp
              
           FROM DiscussionPost     
+          LEFT JOIN Person ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
          WHERE DiscussionPost.discussionPostDiscussionTopicUid = :discussionTopicUid
            AND DiscussionPost.discussionPostVisible = 1
            AND DiscussionPost.discussionPostArchive = 0
