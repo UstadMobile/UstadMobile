@@ -234,17 +234,6 @@ abstract class UstadMobileSystemCommon {
     abstract fun getSystemLocale(context: Any): String
 
     /**
-     * Provide language UI directionality
-     * @return TRUE if the UI direction is RTL otherwise it's FALSE
-     */
-    open fun isRtlActive(): Boolean {
-        val languages = getAppPref(AppConfig.KEY_RTL_LANGUAGES, this)
-        return languages?.split(",")?.firstOrNull{it == getDisplayedLocale(this)} != null
-    }
-
-
-
-    /**
      * Provides the language code of the currently active locale. This is different to getLocale. If
      * the locale is currently set to LOCALE_USE_SYSTEM then that language will be resolved and the
      * code returned.

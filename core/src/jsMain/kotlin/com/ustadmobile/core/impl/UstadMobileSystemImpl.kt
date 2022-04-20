@@ -169,11 +169,19 @@ actual open class UstadMobileSystemImpl(
         window.open(url, "_blank")
     }
 
+    /**
+     * Provide language UI directionality
+     * @return TRUE if the UI direction is RTL otherwise it's FALSE
+     */
+    fun isRtlActive(): Boolean {
+        return displayedLocale in UstadMobileConstants.RTL_LANGUAGES
+    }
+
     actual companion object {
 
         /**
          * Locale functions are provided here because Javascript needs to load resource XML files
-         * asynchronously before SystemImpl is initialized.
+         * asynchronously before SystemImpl is instantiated.
          */
         private val systemLocale: String
             get() = "${window.navigator.language}.UTF-8"
