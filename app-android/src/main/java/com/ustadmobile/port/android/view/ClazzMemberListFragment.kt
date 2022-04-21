@@ -101,11 +101,11 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
     private var filterByClazzUid: Long = 0
 
     private val mOnClickAddStudent: View.OnClickListener = View.OnClickListener {
-        navigateToPickNewMember(ClazzEnrolment.ROLE_STUDENT)
+        mPresenter?.handlePickNewMemberClicked(ClazzEnrolment.ROLE_STUDENT)
     }
 
     private val mOnClickAddTeacher: View.OnClickListener = View.OnClickListener {
-        navigateToPickNewMember(ClazzEnrolment.ROLE_TEACHER)
+        mPresenter?.handlePickNewMemberClicked(ClazzEnrolment.ROLE_TEACHER)
     }
 
     override var addTeacherVisible: Boolean = false
@@ -214,25 +214,6 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fabManager?.visible = false
-    }
-
-    private fun navigateToPickNewMember(role: Int) {
-
-        val bundle = bundleOf(
-                ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
-                ARG_FILTER_BY_ENROLMENT_ROLE to role.toString(),
-                ARG_CLAZZUID to (arguments?.get(ARG_CLAZZUID) ?: "-1"),
-                ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME,
-                ARG_POPUPTO_ON_FINISH to ClazzMemberListView.VIEW_NAME,
-                ARG_HIDE_CLAZZES to true.toString(),
-                ARG_SAVE_TO_DB to true.toString()).also {
-
-            if(role == ClazzEnrolment.ROLE_STUDENT){
-                it.putString(ARG_CODE_TABLE,Clazz.TABLE_ID.toString())
-            }
-        }
-
-        mPresenter?.handlePickNewMemberClicked(bundle.toStringMap())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

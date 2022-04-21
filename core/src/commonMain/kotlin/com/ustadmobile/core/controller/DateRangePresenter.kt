@@ -40,23 +40,22 @@ class DateRangePresenter(context: Any,
                 MessageID.year)
     }
 
-    class RelUnitMessageIdOption(day: RelUnitOption, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class RelUnitMessageIdOption(day: RelUnitOption, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
 
     enum class RelToOption(val optionVal: Int, val messageId: Int) {
-        DAY(Moment.TODAY_REL_TO,
-                MessageID.today),
+        DAY(Moment.TODAY_REL_TO, MessageID.today),
     }
 
-    class RelToMessageIdOption(day: RelToOption, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class RelToMessageIdOption(day: RelToOption, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        view.relToOptions =  RelToOption.values().map { RelToMessageIdOption(it, context) }
-        view.relUnitOptions = RelUnitOption.values().map { RelUnitMessageIdOption(it, context) }
+        view.relToOptions =  RelToOption.values().map { RelToMessageIdOption(it, context, di) }
+        view.relUnitOptions = RelUnitOption.values().map { RelUnitMessageIdOption(it, context, di) }
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): DateRangeMoment? {

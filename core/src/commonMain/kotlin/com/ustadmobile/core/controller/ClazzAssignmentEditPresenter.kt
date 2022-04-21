@@ -37,15 +37,15 @@ class ClazzAssignmentEditPresenter(context: Any,
         WORDS(ClazzAssignment.TEXT_WORD_LIMIT, MessageID.words),
         CHARS(ClazzAssignment.TEXT_CHAR_LIMIT, MessageID.characters)
     }
-    class TextLimitTypeOptionsMessageIdOption(day: TextLimitTypeOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class TextLimitTypeOptionsMessageIdOption(day: TextLimitTypeOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class CompletionCriteriaOptions(val optionVal: Int, val messageId: Int){
         SUBMITTED(ClazzAssignment.COMPLETION_CRITERIA_SUBMIT, MessageID.submitted_cap),
         GRADED(ClazzAssignment.COMPLETION_CRITERIA_GRADED, MessageID.graded)
     }
-    class CompletionCriteriaOptionsMessageIdOption(day: CompletionCriteriaOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class CompletionCriteriaOptionsMessageIdOption(day: CompletionCriteriaOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
 
     enum class SubmissionPolicyOptions(val optionVal: Int, val messageId: Int) {
@@ -55,8 +55,8 @@ class ClazzAssignmentEditPresenter(context: Any,
                 MessageID.multiple_submission_allowed_submission_policy),
     }
 
-    class  SubmissionPolicyOptionsMessageIdOption(day: SubmissionPolicyOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class  SubmissionPolicyOptionsMessageIdOption(day: SubmissionPolicyOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class FileTypeOptions(val optionVal: Int, val messageId: Int) {
         ANY(ClazzAssignment.FILE_TYPE_ANY,
@@ -71,16 +71,16 @@ class ClazzAssignmentEditPresenter(context: Any,
                 MessageID.audio)
     }
 
-    class  FileTypeOptionsMessageIdOption(day: FileTypeOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class  FileTypeOptionsMessageIdOption(day: FileTypeOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
 
     enum class MarkingTypeOptions(val optionVal: Int, val messageId: Int){
         TEACHER(ClazzAssignment.MARKED_BY_COURSE_LEADER, MessageID.course_leader),
         PEERS(ClazzAssignment.MARKED_BY_PEERS, MessageID.peers)
     }
-    class MarkingTypeOptionsMessageIdOption(day: MarkingTypeOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class MarkingTypeOptionsMessageIdOption(day: MarkingTypeOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
 
     private var clazzUid: Long = 0L
@@ -91,11 +91,11 @@ class ClazzAssignmentEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.markingTypeOptions = MarkingTypeOptions.values().map { MarkingTypeOptionsMessageIdOption(it, context) }
-        view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaOptionsMessageIdOption(it, context) }
-        view.submissionPolicyOptions = SubmissionPolicyOptions.values().map { SubmissionPolicyOptionsMessageIdOption(it, context) }
-        view.fileTypeOptions = FileTypeOptions.values().map { FileTypeOptionsMessageIdOption(it, context) }
-        view.textLimitTypeOptions = TextLimitTypeOptions.values().map { TextLimitTypeOptionsMessageIdOption(it, context) }
+        view.markingTypeOptions = MarkingTypeOptions.values().map { MarkingTypeOptionsMessageIdOption(it, context, di) }
+        view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaOptionsMessageIdOption(it, context, di) }
+        view.submissionPolicyOptions = SubmissionPolicyOptions.values().map { SubmissionPolicyOptionsMessageIdOption(it, context, di) }
+        view.fileTypeOptions = FileTypeOptions.values().map { FileTypeOptionsMessageIdOption(it, context, di) }
+        view.textLimitTypeOptions = TextLimitTypeOptions.values().map { TextLimitTypeOptionsMessageIdOption(it, context, di) }
     }
 
     override fun onLoadDataComplete() {

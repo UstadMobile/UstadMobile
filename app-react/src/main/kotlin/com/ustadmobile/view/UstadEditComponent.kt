@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
+import io.github.aakira.napier.Napier
 import kotlinx.browser.window
 
 abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps), UstadEditView<T> {
@@ -15,6 +16,7 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
 
     override fun onCreateView() {
+        Napier.d("UstadEditComponent: navController viewName = ${navController.currentBackStackEntry?.viewName} ")
         super.onCreateView()
         val fabLabelText = if(mEditPresenter?.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB) {
             getString(MessageID.save)
@@ -43,10 +45,5 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
                 getString(newTitleId)
             }
         }, MAX_STATE_CHANGE_DELAY_TIME)
-    }
-
-    override fun onDestroyView() {
-        mEditPresenter?.saveStateToNavController()
-        super.onDestroyView()
     }
 }

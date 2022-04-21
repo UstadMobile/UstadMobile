@@ -62,26 +62,30 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
 
     private val onLoadCompletedListeners: MutableList<OnLoadDataCompletedListener> = concurrentSafeListOf()
 
+    private val logPrefix = "UstadSingleEntityPresenter(${this::class.simpleName}): "
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         val mapWithEntityJson = if(savedState?.containsKey(ARG_ENTITY_JSON) == true) {
+            Napier.d("$logPrefix found savedState contains ARG_ENTITY_JSON")
             savedState
         }else if(arguments.containsKey(ARG_ENTITY_JSON)){
+            Napier.d("$logPrefix arguments contain $ARG_ENTITY_JSON")
             arguments
         }else {
             null
         }
 
         if(mapWithEntityJson != null && mapWithEntityJson[ARG_ENTITY_JSON] != null) {
-            Napier.d("SingleEntityPresenter: Json present in args or savedstate. " +
+            Napier.d("$logPrefix Json present in args or savedstate. " +
                 "Load from JSON: ${mapWithEntityJson[ARG_ENTITY_JSON]}")
             entity = onLoadFromJson(mapWithEntityJson)
             view.entity = entity
             (view as? UstadEditView<*>)?.fieldsEnabled = true
             onLoadDataComplete()
         }else if(persistenceMode == PersistenceMode.DB) {
-            Napier.d("SingleEntityPresenter: Load from DB")
+            Napier.d("$logPrefix Load from DB")
             view.loading = true
             (view as? UstadEditView<*>)?.fieldsEnabled = false
             presenterScope.launch {
@@ -96,7 +100,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                     onLoadDataComplete()
                 }catch(e: Exception) {
                     if(e !is CancellationException) {
-                        Napier.e("UstadSingleEntityPresenter: load exception", e)
+                        Napier.e("$logPrefix load exception", e)
                         if(isStarted){
                             navigateToErrorScreen(e)
                         }else{
@@ -106,13 +110,13 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
                 }
             }
         }else if(persistenceMode == PersistenceMode.JSON){
-            Napier.d("UstadSingleEntityPresenter: PersistenceMode = JSON, load")
+            Napier.d("$logPrefix PersistenceMode = JSON, load")
             entity = onLoadFromJson(arguments)
             view.entity = entity
             (view as? UstadEditView<*>)?.fieldsEnabled = true
             onLoadDataComplete()
         }else if(persistenceMode == PersistenceMode.LIVEDATA) {
-            Napier.d("UstadSingleEntityPresenter: PersistenceMode = LiveData, load")
+            Napier.d("$logPrefix PersistenceMode = LiveData, load")
             entityLiveData = onLoadLiveData(repo)
             view.loading = true
             if(entityLiveData != null) {

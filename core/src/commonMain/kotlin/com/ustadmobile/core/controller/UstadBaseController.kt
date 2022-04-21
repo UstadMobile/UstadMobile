@@ -232,7 +232,6 @@ abstract class UstadBaseController<V : UstadView>(
         val stateHandle = ustadNavController.currentBackStackEntry?.savedStateHandle
         if(stateHandle != null) {
             stateMap.forEach {
-                UmPlatformUtil.log("${it.key} ${it.value}")
                 stateHandle[it.key] = it.value
             }
         }

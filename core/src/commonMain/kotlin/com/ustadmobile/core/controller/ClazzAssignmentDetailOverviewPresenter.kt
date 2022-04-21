@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
-import com.ustadmobile.core.contentformats.xapi.endpoints.storeSubmitFileSubmissionStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
@@ -26,9 +25,7 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
@@ -302,7 +299,6 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         presenterScope.launch {
             val hasPassedDeadline = entity?.let { hasPassedDeadline(it) } ?: true
             if(hasPassedDeadline) {
-                // TODO mew message for passing deadline
                 view.showSnackBar(systemImpl.getString(MessageID.submission_already_made, context))
                 return@launch
             }
@@ -327,16 +323,24 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             view.addedCourseAssignmentSubmission = submissionList
 
             entity?.let { checkCanAddFileOrText(it) }
+            
 
-            UmPlatformUtil.runAsync {
-                withContext(Dispatchers.Default) {
-                    val assignment = view.entity ?: return@withContext
-                    statementEndpoint.storeSubmitFileSubmissionStatement(
-                        accountManager.activeAccount,
-                        randomUuid().toString(),
-                        assignment)
-                }
+            val agentPersonUid = repo.agentDao.getAgentUidFromPerson(
+                accountManager.activeAccount.endpointUrl, accountManager.activeAccount.username ?: "")
+
+            val submitStatement = StatementEntity().apply {
+                statementVerbUid = VerbEntity.VERB_SUBMITTED_UID
+                statementPersonUid = accountManager.activeAccount.personUid
+                statementClazzUid = entity?.caClazzUid ?: 0
+                xObjectUid = entity?.caXObjectUid ?: 0
+                agentUid = agentPersonUid
+                contextRegistration = randomUuid().toString()
+                timestamp = systemTimeInMillis()
+                stored = systemTimeInMillis()
+                fullStatement = "" // TODO
             }
+            repo.statementDao.insertAsync(submitStatement)
+
         }
     }
 

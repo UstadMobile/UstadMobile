@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.roleToString
+import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
@@ -18,7 +19,6 @@ import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.StyleManager.maxLines
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.roundTo
 import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.view.ext.statusCircleIndicator
 import com.ustadmobile.view.ext.umEntityAvatar

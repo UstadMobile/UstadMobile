@@ -14,9 +14,10 @@ repositories {
 kotlin {
     js(LEGACY) {
         browser {
-            //Specify distribution bundle output directory
+            //Specify distribution bundle output directory - this is used by app-ktor-server as a
+            // resource directory
             distribution {
-                directory = project.file("build/generated/source/umwebapp")
+                directory = project.file("build/dist-web/umapp")
             }
 
             binaries.executable()
@@ -78,45 +79,3 @@ dependencies {
     implementation "io.github.aakira:napier:$version_napier"
 }
 
-
-task copyWebAppBundleToJar(dependsOn: ":app-react:browserDistribution") {
-    inputs.files("./src/main/kotlin/*.kt")
-    onlyIf {
-        /*
-         Only run this task if the input files have been updated since the task was last run.
-         upToDateWhen was not having the expected effect.
-         */
-        long inputLastModified = 0L
-
-        rootProject.fileTree(dir: "app-react/src/main/kotlin", include: "**/*.kt").each() { File file ->
-            if (file.lastModified() > inputLastModified)
-                inputLastModified = file.lastModified()
-        }
-        File outputFile = project.file("build/generated/source/umwebapp/app-react.js")
-        return inputLastModified < outputFile.lastModified()
-    }
-
-    doLast{
-        copy {
-            from project.file("build/generated/source/umwebapp").path
-            into rootProject.file("app-ktor-server/src/main/resources/umapp").path
-        }
-    }
-}
-
-task deleteWebAppBundleFromJar{
-    doLast{
-        def webAppBundleDir = rootProject.file("app-ktor-server/src/main/resources/umapp")
-        if(webAppBundleDir.exists()){
-            delete webAppBundleDir
-        }
-    }
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name.startsWith("clean")) {
-        task.dependsOn(deleteWebAppBundleFromJar)
-    }
-}
-
-tasks.findByPath(":app-ktor-server:shadowJar").mustRunAfter ":app-react:copyWebAppBundleToJar"

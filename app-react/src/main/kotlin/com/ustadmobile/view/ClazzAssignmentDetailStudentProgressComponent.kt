@@ -117,8 +117,15 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
             }
         }
 
-    override var markNextStudentEnabled: Boolean = false
+    override var markNextStudentVisible: Boolean = false
         get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    override var submitButtonVisible: Boolean = false
         set(value) {
             setState {
                 field = value
@@ -210,13 +217,15 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                         }
                     }
 
-                    if(submissions.isNotEmpty()){
+                    if(submitButtonVisible){
                         umItem(GridSize.cells12, GridSize.cells4) {
-                            umButton(getString(MessageID.submit_grade),
+                            umButton(if(submissionScore == null)
+                                getString(MessageID.submit_grade)
+                                else getString(MessageID.update_grade),
                                 variant = ButtonVariant.contained,
                                 onClick = {
                                     if(markGrade.isNotEmpty()){
-                                        mPresenter?.onClickSubmitGrade(markGrade.toInt())
+                                        mPresenter?.onClickSubmitGrade(markGrade.toFloat())
                                     }
                                 }){
                                 css {
@@ -228,13 +237,16 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                         }
                     }
 
-                    if(markNextStudentEnabled && submissions.isNotEmpty()){
+                    if(markNextStudentVisible){
                         umItem(GridSize.cells12, GridSize.cells4) {
-                            umButton(getString(MessageID.submit_grade_and_mark_next),
+                            umButton(
+                                if(submissionScore == null)
+                                getString(MessageID.submit_grade_and_mark_next)
+                                else getString(MessageID.update_grade_and_mark_next),
                                 variant = ButtonVariant.contained,
                                 onClick = {
                                     if(markGrade.isNotEmpty()){
-                                        mPresenter?.onClickSubmitGradeAndMarkNext(markGrade.toInt())
+                                        mPresenter?.onClickSubmitGradeAndMarkNext(markGrade.toFloat())
                                     }
                                 }){
                                 css {

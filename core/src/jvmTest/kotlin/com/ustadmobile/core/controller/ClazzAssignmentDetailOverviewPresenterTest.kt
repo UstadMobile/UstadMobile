@@ -388,7 +388,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         }
 
         val mark = CourseAssignmentMark().apply {
-            camMark = 10
+            camMark = 10f
             camAssignmentUid = testEntity.caUid
             camStudentUid = loggedInPersonUid
             camUid = repo.courseAssignmentMarkDao.insert(this)
@@ -448,7 +448,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         }
 
         val mark = CourseAssignmentMark().apply {
-            camMark = 10
+            camMark = 10f
             camAssignmentUid = testEntity.caUid
             camStudentUid = loggedInPersonUid
             camUid = repo.courseAssignmentMarkDao.insert(this)

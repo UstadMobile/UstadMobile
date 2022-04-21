@@ -74,7 +74,7 @@ open class UstadApp : Application(), DIAware {
         import(commonJvmDiModule)
 
         bind<UstadMobileSystemImpl>() with singleton {
-            UstadMobileSystemImpl.instance
+            UstadMobileSystemImpl()
         }
 
         bind<UstadAccountManager>() with singleton {

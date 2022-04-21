@@ -93,14 +93,14 @@ class ContentEntryEdit2Presenter(
                 MessageID.student_marks_content)
     }
 
-    class CompletionCriteriaMessageIdOption(day: CompletionCriteriaOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class CompletionCriteriaMessageIdOption(day: CompletionCriteriaOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
 
     private var parentEntryUid: Long = 0
 
-    class LicenceMessageIdOptions(licence: LicenceOptions, context: Any)
-        : MessageIdOption(licence.messageId, context, licence.optionVal)
+    class LicenceMessageIdOptions(licence: LicenceOptions, context: Any, di: DI)
+        : MessageIdOption(licence.messageId, context, licence.optionVal, di = di)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -109,8 +109,10 @@ class ContentEntryEdit2Presenter(
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
-        view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaMessageIdOption(it, context) }
+        view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context, di) }
+        view.completionCriteriaOptions = CompletionCriteriaOptions.values().map {
+            CompletionCriteriaMessageIdOption(it, context, di)
+        }
         parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0
         presenterScope.launch(doorMainDispatcher()) {
             view.storageOptions = containerStorageManager.storageList

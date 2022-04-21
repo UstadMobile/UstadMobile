@@ -4,6 +4,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileConstants
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadAntilog
 import com.ustadmobile.core.util.defaultJsonSerializer
 import com.ustadmobile.core.util.ext.getOrPut
@@ -77,19 +79,26 @@ fun main() {
             val appConfigs = Util.loadFileContentAsMap<HashMap<String, String>>("appconfig.json")
             Napier.d("Index: loaded appConfig")
 
-            val defaultStrings = Util.loadAssetsAsText(defaultAssetPath)
-
-            val localeCode = "en"
-            val defaultLocale = "en"
-            if(localeCode != defaultLocale){
-                val currentAssetPath = "locales/$localeCode.xml"
-                val currentStrings = Util.loadAssetsAsText(currentAssetPath)
+            val defaultStringsXmlStr = Util.loadAssetsAsText(defaultAssetPath)
+            val displayedLocale = UstadMobileSystemImpl.displayedLocale
+            val foreignStringXmlStr = if(displayedLocale != "en") {
+                Util.loadAssetsAsText("locales/$displayedLocale.xml")
+            }else {
+                null
             }
 
-            val di = ustadJsDi(dbBuilt, dbNodeIdAndAuth, appConfigs, apiUrl, defaultAssetPath,
-                defaultStrings)
+            val rootElement = document.getElementById("root")
+            val rootDirectionAttrVal = if(displayedLocale in UstadMobileConstants.RTL_LANGUAGES) {
+                "rtl"
+            }else {
+                "ltr"
+            }
+            rootElement?.setAttribute("dir", rootDirectionAttrVal)
 
-            render(document.getElementById("root")){
+            val di = ustadJsDi(dbBuilt, dbNodeIdAndAuth, appConfigs, apiUrl, defaultStringsXmlStr,
+                foreignStringXmlStr)
+
+            render(rootElement){
                 val theme = createAppTheme()
                 provider(createStore(ReduxThemeState(theme))){
                     umThemeProvider(theme){
