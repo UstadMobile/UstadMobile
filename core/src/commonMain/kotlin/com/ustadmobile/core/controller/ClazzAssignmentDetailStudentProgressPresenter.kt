@@ -1,24 +1,26 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
-import com.ustadmobile.core.contentformats.xapi.endpoints.storeMarkedStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
+import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.HtmlTextViewDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
+import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -68,15 +70,6 @@ class ClazzAssignmentDetailStudentProgressPresenter(
         selectedClazzAssignmentUid = arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0
         selectedClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0
         super.onCreate(savedState)
-        presenterScope.launch {
-            repo.clazzAssignmentRollUpDao.cacheBestStatements(
-                    selectedClazzUid, selectedClazzAssignmentUid,
-                    selectedPersonUid)
-            nextStudentToMark = repo.courseAssignmentMarkDao.findNextStudentToMarkForAssignment(
-                    selectedClazzAssignmentUid, selectedPersonUid)
-            view.markNextStudentEnabled = nextStudentToMark != 0L
-        }
-
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzAssignmentWithCourseBlock? {
@@ -109,6 +102,14 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                 .observeWithLifecycleOwner(lifecycleOwner){
                     view.submissionStatus = it ?: 0
                 }
+
+        val submissionCount = repo.courseAssignmentSubmissionDao.countSubmissionsFromStudent(clazzAssignment.caUid, selectedPersonUid)
+        val submitButtonVisible = submissionCount > 0
+        view.submitButtonVisible = submitButtonVisible
+
+        nextStudentToMark = repo.courseAssignmentMarkDao.findNextStudentToMarkForAssignment(
+            selectedClazzAssignmentUid, selectedPersonUid)
+        view.markNextStudentVisible = submitButtonVisible && nextStudentToMark != 0L
 
 
         if(clazzAssignment.caPrivateCommentsEnabled){
@@ -151,47 +152,96 @@ class ClazzAssignmentDetailStudentProgressPresenter(
     }
 
 
-    fun onClickSubmitGrade(grade: Int): Boolean {
-        if(grade < 0 || (grade > (entity?.block?.cbMaxPoints ?: 0))){
+    fun onClickSubmitGrade(grade: Float): Boolean {
+        val maxPoints = entity?.block?.cbMaxPoints ?: 10
+        if(grade < 0 || (grade > maxPoints)){
            // to highlight the textfield to show error
-            view.submitMarkError = " "
+            view.submitMarkError = systemImpl.getString(
+                MessageID.grade_out_of_range, context)
+                .replace("%1\$s", maxPoints.toString())
             return false
         }
+
         val person = view.person ?: return false
         val assignment = view.entity ?: return false
         presenterScope.launch {
-            val statement = repo.statementDao.findSubmittedStatementFromStudent(
-                person.personUid, assignment.caXObjectUid)
-            if(statement == null){
-                view.submitMarkError = " "
-                return@launch
-            }
-            db.courseAssignmentMarkDao.insertAsync(CourseAssignmentMark().apply {
-                camStudentUid = person.personUid
-                camAssignmentUid = assignment.caUid
-                camMark = grade
-                camPenalty = if(statement.timestamp > (assignment.block?.cbDeadlineDate ?: 0)) assignment.block?.cbLateSubmissionPenalty ?: 0 else 0
-            })
-            withContext(Dispatchers.Default) {
-                statementEndpoint.storeMarkedStatement(
-                    accountManager.activeAccount,
-                        person, randomUuid().toString(),
-                        grade, assignment, statement)
+
+            repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                val lastSubmission = txDb.courseAssignmentSubmissionDao.findLastSubmissionFromStudent(
+                    person.personUid, assignment.caUid) ?: return@withDoorTransactionAsync
+
+                val penalty = (assignment.block?.cbLateSubmissionPenalty ?: 0)
+                val gradeAfterPenalty: Float = if(lastSubmission.casTimestamp > (assignment.block?.cbDeadlineDate ?: 0)){
+                    val reducedGrade = grade * penalty / 100
+                    (grade - reducedGrade).roundTo(2)
+                }else{
+                    grade.roundTo(2)
+                }
+                txDb.courseAssignmentMarkDao.insertAsync(CourseAssignmentMark().apply {
+                    camStudentUid = person.personUid
+                    camAssignmentUid = assignment.caUid
+                    camMark = gradeAfterPenalty
+                    camPenalty = if(lastSubmission.casTimestamp > (assignment.block?.cbDeadlineDate ?: 0)) penalty else 0
+                })
+
                 view.showSnackBar(systemImpl.getString(MessageID.saved, context))
+
+                val statement = txDb.statementDao.findSubmittedStatementFromStudent(
+                    person.personUid, assignment.caXObjectUid)
+                if(statement == null){
+                    // TODO error to server if no statmenet
+                    return@withDoorTransactionAsync
+                }
+                val agentPersonUid = txDb.agentDao.getAgentUidFromPerson(
+                    accountManager.activeAccount.endpointUrl, person.username ?: "")
+
+                val teacherAgentUid = txDb.agentDao.getAgentUidFromPerson(
+                    accountManager.activeAccount.endpointUrl, accountManager.activeAccount.username ?: "")
+
+                val statementRef = XObjectEntity().apply {
+                    objectId = statement.statementId
+                    objectType = "StatementRef"
+                    objectStatementRefUid = statement.statementUid
+                    xObjectUid = txDb.xObjectDao.insertAsync(this)
+                }
+
+                val scoreStatement = StatementEntity().apply {
+                    statementVerbUid = VerbEntity.VERB_SCORED_UID
+                    statementPersonUid = person.personUid
+                    statementClazzUid = selectedClazzUid
+                    xObjectUid = statementRef.xObjectUid
+                    agentUid = agentPersonUid
+                    contextRegistration = randomUuid().toString()
+                    instructorUid = teacherAgentUid
+                    resultCompletion = true
+                    resultSuccess = StatementEntity.RESULT_SUCCESS
+                    resultScoreRaw = gradeAfterPenalty.toLong()
+                    resultScoreMax = maxPoints.toLong()
+                    resultScoreScaled = (gradeAfterPenalty.toFloat() / (resultScoreMax))
+                    timestamp = systemTimeInMillis()
+                    stored = systemTimeInMillis()
+                    fullStatement = "" // TODO
+                }
+                txDb.statementDao.insertAsync(scoreStatement)
+
             }
+
         }
         return true
     }
 
-    fun onClickSubmitGradeAndMarkNext(grade: Int) {
+    fun onClickSubmitGradeAndMarkNext(grade: Float) {
         val isValid = onClickSubmitGrade(grade)
         if(!isValid){
             return
         }
-        systemImpl.go(ClazzAssignmentDetailStudentProgressView.VIEW_NAME,
-                mapOf(ARG_PERSON_UID to nextStudentToMark.toString(),
+        systemImpl.go(
+            ClazzAssignmentDetailStudentProgressView.VIEW_NAME,
+            mapOf(ARG_PERSON_UID to nextStudentToMark.toString(),
                         ARG_CLAZZ_ASSIGNMENT_UID to selectedClazzAssignmentUid.toString(),
-                        ARG_CLAZZUID to selectedClazzUid.toString()), context)
+                        ARG_CLAZZUID to selectedClazzUid.toString()),
+            context,
+            UstadMobileSystemCommon.UstadGoOptions(CURRENT_DEST, true))
     }
 
 }

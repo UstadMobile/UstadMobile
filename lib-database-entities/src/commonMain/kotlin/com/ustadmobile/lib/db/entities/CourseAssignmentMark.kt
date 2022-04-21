@@ -32,7 +32,7 @@ class CourseAssignmentMark {
 
     var camStudentUid: Long = 0
 
-    var camMark: Int = 0
+    var camMark: Float = 0f
 
     var camPenalty: Int = 0
 

@@ -63,7 +63,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     private var submissionAttachmentLiveDataCourse: LiveData<PagedList<CourseAssignmentSubmissionWithAttachment>>? = null
     private val fileSubmissionObserver = Observer<PagedList<CourseAssignmentSubmissionWithAttachment>?> {
         t -> run {
-        markSubmissionAdapter?.markGradeEnabled = !t.isEmpty()
+        markSubmissionAdapter?.markStudentVisible = !t.isEmpty()
         submissionAdapter?.submitList(t)
     }
     }
@@ -193,10 +193,16 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             field = value
         }
 
-    override var markNextStudentEnabled: Boolean = false
+    override var markNextStudentVisible: Boolean = false
         set(value) {
             field = value
-            markSubmissionAdapter?.markNextStudentEnabled = value
+            markSubmissionAdapter?.markNextStudentVisible = value
+        }
+
+    override var submitButtonVisible: Boolean = false
+        set(value) {
+            field = value
+            markSubmissionAdapter?.markStudentVisible = value
         }
 
     override var submitMarkError: String? = null
@@ -217,6 +223,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         set(value) {
             field = value
             submissionStatusHeaderAdapter?.courseAssignmentMark = value
+            markSubmissionAdapter?.mark = value
         }
 
     override var submissionStatus: Int = 0

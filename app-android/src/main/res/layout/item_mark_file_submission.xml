@@ -13,15 +13,19 @@
             type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock" />
 
         <variable
+            name="mark"
+            type="com.ustadmobile.lib.db.entities.CourseAssignmentMark" />
+
+        <variable
             name="errorText"
             type="String" />
 
         <variable
-            name="markNextStudentEnabled"
+            name="markNextStudentVisible"
             type="Boolean" />
 
         <variable
-            name="markGradeEnabled"
+            name="markStudentVisible"
             type="Boolean" />
 
         <variable
@@ -57,8 +61,8 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/mark_file_submission_mark"
-                android:digits="0123456789"
-                android:inputType="number"
+                android:digits="0123456789."
+                android:inputType="numberDecimal"
                 android:imeOptions="actionDone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -73,9 +77,10 @@
             app:layout_constraintTop_toBottomOf="@id/mark_file_submission_text_input"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:enabled="@{markGradeEnabled}"
+            tools:text="@string/submit_grade"
+            android:visibility="@{markStudentVisible ? View.VISIBLE : View.GONE}"
             android:onClick="@{() -> eventHandler.onSubmitGradeClicked()}"
-            android:text="@string/submit_grade"
+            android:text="@{mark == null ? @string/submit_grade : @string/update_grade}"
             />
 
         <Button
@@ -83,9 +88,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimen_8dp"
-            android:text="@string/submit_grade_and_mark_next"
-            android:visibility="@{markNextStudentEnabled ? View.VISIBLE : View.GONE}"
-            android:enabled="@{markGradeEnabled &amp; markNextStudentEnabled}"
+            tools:text="@string/submit_grade_and_mark_next"
+            android:text="@{mark == null ? @string/submit_grade_and_mark_next : @string/update_grade_and_mark_next}"
+            android:visibility="@{markNextStudentVisible ? View.VISIBLE : View.GONE}"
+            android:enabled="@{markNextStudentVisible}"
             app:layout_constraintTop_toBottomOf="@id/mark_file_submission_submit_grade"
             android:onClick="@{() -> eventHandler.onSubmitGradeAndMarkNextClicked() }"
             />

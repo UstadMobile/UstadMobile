@@ -1,4 +1,4 @@
-package com.ustadmobile.util.ext
+package com.ustadmobile.core.util.ext
 
 import kotlin.math.pow
 import kotlin.math.roundToInt

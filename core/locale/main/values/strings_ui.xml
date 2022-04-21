@@ -1854,4 +1854,17 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!-- used to display as an error if student tries to submit assignment more than once -->
     <string name="submission_already_made">Submission already made</string>
 
+    <!-- used to display as an error when the teacher submits a grade thats greater than the maximum grade-->
+    <string name="grade_out_of_range">Grade must be between 0 and %1$s</string>
+
+    <!--
+   Button for the teacher to update their grade for an assignment submission
+   -->
+    <string name="update_grade">Update grade</string>
+
+    <!--
+    Button for a teacher to update their grade for an assignment submission, and then move to marking
+    the next submission.
+    -->
+    <string name="update_grade_and_mark_next">Update grade and mark next</string>
 </resources>
