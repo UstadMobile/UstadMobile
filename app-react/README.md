@@ -1,6 +1,7 @@
 # app-react
 
-This modules contains react web application, based on kotlin multi-platform idea as it uses kotlin-wrappers to build UI based on MUI library
+This modules contains react web application, based on kotlin multi-platform idea as it uses
+kotlin-wrappers to build UI based on MUI library
 
 ## Prerequisites
 Install [Node 14x](https://nodejs.org/en/download/) on your machine since Kotlin/JS depends on it
@@ -10,8 +11,11 @@ to build.
 
 Build, configure and then run the http server. Development is done using the KTOR HTTP server in
 the app-ktor-server module to proxy requests as needed to the webpack development server (thus
-avoiding cross origin request issues).
+avoiding cross origin request issues). The webpack development server runs on port 8080 by default.
+This avoids cross-origin request (CORS) issues.
 
+The server can be built using the normal Gradle build. If you want to build only the server on its
+own, you can run:
 ```
 ./gradlew -Pskipreactproductionbundle=true app-ktor-server:shadowJar
 ```
@@ -32,13 +36,13 @@ jsDevServer = "http://localhost:8080/"
 Run the http server:
 
 ```
-./runserver.sh
+$ ./runserver.sh
 ```
 
-Start the webpack development server:
+Start the webpack development server (in another terminal):
 
 ```
-./gradlew app-react:browserDevelopmentRun --continuous
+$ ./gradlew app-react:browserDevelopmentRun --continuous
 ```
 
 Open a web browser on the address/port of the ktor http server e.g. http://localhost:8087/
@@ -47,8 +51,10 @@ Open a web browser on the address/port of the ktor http server e.g. http://local
 * Generating webpack bundle
 This is a deployable bundle, it is standalone bundle which include everything needed for the app to run.
 ```
-./gradlew app-react:browserDevelopmentWebpack
+$ ./gradlew app-react:browserDevelopmentWebpack
 ```
+
+### C
 
 ## Production
 For production purpose, below are the equivalent commands
@@ -68,7 +74,7 @@ For production purpose, below are the equivalent commands
 ./gradlew app-react:browserProductionWebpack
 ```
 
-### Bundling with app-ktor-server
+### Production bundling with app-ktor-server
 
 For simplicity, the web app is packaged on server as static files, so in order to get a deployable
  bundle of server and web app just run
@@ -77,6 +83,7 @@ For simplicity, the web app is packaged on server as static files, so in order t
 ./gradlew app-ktor-server:shadowJar
 ./runserver.sh
 ```
+
 This will run ``` app-react:generateProductionBundle ``` which prepare and packages the web app into a server's jar
 file.  After you build and start the server, you can simply open http://localhost:8087/ in the
 web browser. See the [INSTALL](../INSTALL.md) for production installation instructions.
