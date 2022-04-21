@@ -9,7 +9,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
@@ -21,19 +20,14 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.runBlocking
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.*
 import org.mockito.kotlin.*
-import java.net.URI
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -128,7 +122,8 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
     fun createPersonAndSubmitStatement(
         isAdmin: Boolean,
-        studentId: Long
+        studentId: Long,
+        submitSubmission: Boolean = !isAdmin
     ): Person {
         val student = Person().apply {
             admin = isAdmin
@@ -155,7 +150,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
             agentUid = repo.agentDao.insert(this)
         }
 
-        if(!isAdmin){
+        if(submitSubmission){
             CourseAssignmentSubmission().apply {
                 casSubmitterUid = studentId
                 casType = CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT
@@ -184,18 +179,25 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
     @Test
     fun givenNoSubmissionFromStudent_whenShown_DontShowSubmitGradeAndPoints() {
-        val repo: UmAppDatabase by di.activeRepoInstance()
-        val presenterArgs = mutableMapOf<String, String>()
-        presenterArgs[ARG_CLAZZ_ASSIGNMENT_UID] =  assignmentRollUp!!.cacheClazzAssignmentUid.toString()
-        presenterArgs[ARG_PERSON_UID] = assignmentRollUp!!.cachePersonUid.toString()
-        val presenter = ClazzAssignmentDetailStudentProgressPresenter(context,
-                presenterArgs, mockView, di, mockLifecycleOwner)
+        createPersonAndSubmitStatement(false , 1, false)
+
+        val presenterArgs = mapOf(
+            UstadView.ARG_PERSON_UID to 1.toString(),
+            ARG_CLAZZ_ASSIGNMENT_UID to testEntity.caUid.toString(),
+            UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()
+        )
+
+        val presenter = ClazzAssignmentDetailStudentProgressPresenter(context, presenterArgs, mockView,
+            di, mockLifecycleOwner)
+
         presenter.onCreate(null)
 
-        //eg. verify the correct DAO method was called and was set on the view
-        val entityValSet = mockView.captureLastEntityValue()!!
-        Assert.assertEquals("Expected entity was set on view",
-                assignmentRollUp!!.cacheClazzAssignmentUid, entityValSet.caUid)
+        mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).markNextStudentVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submitButtonVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submissionScore = eq(null)
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(0)
     }
 
     @Test
@@ -216,9 +218,9 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         mockView.captureLastEntityValue()
 
         verify(mockView, timeout(1000).times(2)).markNextStudentVisible = eq(false)
-        verify(mockView, timeout(1000).times(2)).submitButtonVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submitButtonVisible = eq(true)
         verify(mockView, timeout(1000).times(2)).submissionScore = eq(null)
-        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(0)
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.SUBMITTED)
 
     }
 

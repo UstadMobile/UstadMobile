@@ -11,6 +11,7 @@ import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
+import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.RegisterAgeRedirectView
