@@ -257,7 +257,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
            SET cbActive = :active, 
                cbLct = :changeTime
          WHERE cbUid = :cbUid""")
-    abstract fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
+    abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
     override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
         uidList.forEach {

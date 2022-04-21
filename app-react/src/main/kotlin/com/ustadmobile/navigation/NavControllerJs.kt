@@ -8,7 +8,6 @@ import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toUrlQueryString
 import io.github.aakira.napier.Napier
-import kotlinext.js.asJsObject
 import kotlinext.js.jsObject
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -38,6 +37,9 @@ class NavControllerJs: UstadNavController {
      */
     private val navStack: MutableList<UstadBackStackEntryJs> = mutableListOf()
 
+    internal val currentStackIndex
+        get() = navStack.size - 1
+
     /**
      * Use the current location href to find the correct back stack entry. popstate and hashchange
      * might happen after the page already changed.
@@ -48,9 +50,38 @@ class NavControllerJs: UstadNavController {
             return navStack.lastOrNull { it.jsViewUri == currentViewUri }
         }
 
+    /**
+     * When a navigation event occurs that is going to another destination AND popping off the stack,
+     * we need to call history.go(-steps), *wait* for the hash to change, and then initiate forward
+     * navigation to the final viewUri. This often happens when a user completes a task of some kind
+     * (e.g. after adding a person/course etc, the system will navigate to the detail view for the
+     * object just created. If the user clicks back, they should go back to the list, not the edit
+     * view.)
+     *
+     * This is required to ensure that the browser's history state and our own remain in sync.
+     */
+    private var pendingNavigation: String? = null
 
     init {
         Napier.d("$logPrefix: init")
+
+        //Put the current location into the navstack as the starting point (unless something is already in storage)
+        var initUrlComponents: UstadUrlComponents
+        try {
+            initUrlComponents = UstadUrlComponents.parse(window.location.href)
+        }catch (e: Exception) {
+            initUrlComponents = UstadUrlComponents(window.location.href, RedirectView.VIEW_NAME, "")
+        }
+
+        //Set the initial stack
+        navStack += UstadBackStackEntryJs(initUrlComponents.viewName, initUrlComponents.arguments,
+            initUrlComponents.viewUri)
+        window.history.replaceState(jsObject {
+            asDynamic().index = 0
+        }, "")
+
+        Napier.d("$logPrefix: init: navStack = ${dumpNavStackToString()}")
+
         window.addEventListener("pageshow", {
             console.log("$logPrefix: pageshow: ${document.location}")
             handleHashChange(window.location.href, null)
@@ -80,26 +111,40 @@ class NavControllerJs: UstadNavController {
 
     @Suppress("MemberVisibilityCanBePrivate") //Will be used in testing
     internal fun handleHashChange(newUrl: String, oldUrl: String?) {
-        val currentState = window.history.state?.asJsObject()
         try {
-            if(currentState == null) {
+            val currentState = window.history.state
+            val newStackIndex =  if(currentState != null) currentState.asDynamic().index else -1
+            val newStackIndexVal : Int = if(newStackIndex != js("undefined"))
+                newStackIndex.unsafeCast<Int>()
+            else
+                -1
+
+            if(newStackIndexVal == -1) {
                 //The user went forward. Save the index into the history state.
                 window.history.replaceState(jsObject {
                     asDynamic().index = (navStack.size - 1)
                 }, "")
-                Napier.d("$logPrefix: push $newUrl index=${navStack.size} onto stack. " +
-                    "Stack=(${dumpNavStackToString()})")
+                Napier.d("$logPrefix: user went forward to $newUrl . " +
+                    "stack=(${dumpNavStackToString()})")
             }else {
                 //The user went back. If this was done internally, the internal nav stack would
                 // already be adjusted. If the user went back using browser navigation, then
                 // we need to adjust the internal nav stack.
-                val newStackIndex: Int = window.history.state.asDynamic().index.unsafeCast<Int>()
-                Napier.d("$logPrefix: user went back. New stack index = $newStackIndex")
+                Napier.d("$logPrefix: user went back. New stack index = $newStackIndexVal")
 
                 //pop off everything that was on top (if anything)
-                popOffNavStackFrom(newStackIndex + 1)
+                popOffNavStackFrom(newStackIndexVal + 1)
 
                 Napier.d("$logPrefix new stack = (${dumpNavStackToString()})")
+
+                val pendingNavVal = pendingNavigation
+                if(pendingNavVal != null) {
+                    //run pending navigation
+                    pendingNavigation = null
+                    Napier.d("$logPrefix : run pending navigation to $pendingNavVal" +
+                        " stack=${dumpNavStackToString()}")
+                    window.location.replace("#/${pendingNavVal}")
+                }
             }
         }catch(e: Exception) {
             Napier.d("$logPrefix Not an ustad url: ignoring $newUrl")
@@ -110,9 +155,9 @@ class NavControllerJs: UstadNavController {
         return navStack.lastOrNull { it.viewName == viewName }
     }
 
-    override fun popBackStack(viewName: String, inclusive: Boolean) {
+    private fun calcNumStepsToGoBack(viewName: String, inclusive: Boolean) : Int{
         val resolvedPopViewname = when(viewName) {
-            UstadView.ROOT_DEST -> RedirectView.VIEW_NAME
+            UstadView.ROOT_DEST -> navStack.firstOrNull()?.viewName ?: RedirectView.VIEW_NAME
             UstadView.CURRENT_DEST -> navStack.lastOrNull()?.viewName ?: RedirectView.VIEW_NAME
             else -> viewName
         }
@@ -122,16 +167,20 @@ class NavControllerJs: UstadNavController {
         //When popping off the stack, we are always at the top of the stack
         // e.g. currentIndex must equal (navStack.size-1)
         val deltaIndex = (navStack.size - 1) - viewNameIndex
-        val numToGoBack = min(if(inclusive) {
+        return min(if(inclusive) {
             deltaIndex + 1
         }else {
             deltaIndex
         }, navStack.size)
+    }
+
+    override fun popBackStack(viewName: String, inclusive: Boolean) {
+        val numToGoBack = calcNumStepsToGoBack(viewName, inclusive)
 
         // Remove from the internal nav stack.
-        Napier.d("$logPrefix: popBackStack to: $viewName (inclusive = $inclusive) " +
-            "go back $numToGoBack steps")
         popOffNavStackFrom(navStack.size - numToGoBack)
+        Napier.d("$logPrefix: POPBACKSTACK to: '$viewName' (inclusive = $inclusive) " +
+            "go back $numToGoBack steps navStack=${dumpNavStackToString()}")
         if(numToGoBack != 0) {
             window.history.go(numToGoBack * -1)
         }
@@ -142,27 +191,53 @@ class NavControllerJs: UstadNavController {
         args: Map<String, String>,
         goOptions: UstadMobileSystemCommon.UstadGoOptions
     ) {
-        Napier.d("$logPrefix navigate to $viewName popUpTo='${goOptions.popUpToViewName}' " +
+        Napier.d("$logPrefix NAVIGATE to $viewName popUpTo='${goOptions.popUpToViewName}' " +
             "(inclusive=${goOptions.popUpToInclusive})")
         val popUpToViewName = goOptions.popUpToViewName
-        if(popUpToViewName != null)
-            popBackStack(popUpToViewName, goOptions.popUpToInclusive)
 
-        // The new back stack entry must be added to the stack immediately. The hashchange event
-        // will happen after the new component is already mounted (causing the new component to
-        // save it's data to saved state handle for the previous entry).
+        val stepsToGoBack = if(popUpToViewName != null) {
+            calcNumStepsToGoBack(popUpToViewName, goOptions.popUpToInclusive)
+        }else {
+            0
+        }
 
         val params = when {
             args.isEmpty() -> ""
             else -> "?${args.toUrlQueryString()}"
         }
         val viewUri = "$viewName$params"
-        navStack += UstadBackStackEntryJs(viewName, args, viewUri)
 
-        window.location.assign("#/$viewUri")
+        val newBackStackEntry = UstadBackStackEntryJs(viewName, args, viewUri)
+        if(stepsToGoBack == 0) {
+            // We can go directly to the new destination.
+            // The new back stack entry must be added to the stack immediately. The hashchange event
+            // will happen after the new component is already mounted (causing the new component to
+            // save it's data to saved state handle for the previous entry).
+            navStack += newBackStackEntry
+            Napier.d("UstadNavController: navigate directly to #/$viewUri " +
+                "navStack=${dumpNavStackToString()}")
+            window.location.assign("#/$viewUri")
+        }else if(stepsToGoBack == 1) {
+            //we can use window.location.replace to replace the current location in the history state.
+            // no need to use history.go(-n).
+            navStack[currentStackIndex] = newBackStackEntry
+            Napier.d("UstadNavController: navigate using location.replace to #/$viewUri " +
+                "navStack=${dumpNavStackToString()}")
+            window.location.replace("#/$viewUri")
+        } else {
+            //We need to popoff entries from the stack, then, once that is complete, go to the new
+            // destination. See note on pendingNavigation var.
+            pendingNavigation = viewUri
+            popOffNavStackFrom(navStack.size - stepsToGoBack)
+            navStack += newBackStackEntry
+            Napier.d("UstadNavController: popoff, then navigate using replace. " +
+                "Go ${stepsToGoBack-1} steps back first. navStack=${dumpNavStackToString()}")
+            window.history.go(-(stepsToGoBack-1))
+        }
     }
 
     fun navigateUp(): Boolean {
+        Napier.d("$logPrefix: NAVIGATEUP")
         window.history.go(-1)
         return true
     }
