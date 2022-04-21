@@ -17,7 +17,7 @@ kotlin {
             //Specify distribution bundle output directory - this is used by app-ktor-server as a
             // resource directory
             distribution {
-                directory = project.file("build/dist-web/umwebapp")
+                directory = project.file("build/dist-web/umapp")
             }
 
             binaries.executable()
