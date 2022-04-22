@@ -266,6 +266,36 @@ class NavControllerJsTest {
         navControllerJs.unplug()
     }
 
+    @Test
+    fun givenEmptyState_whenNavigateForwardThenBackwardThenForward_shouldRetainState() = GlobalScope.promise {
+        waitForHashChange("EditView1") {
+            window.location.replace("#/EditView1")
+        }
+
+        val navControllerJs = NavControllerJs(TEST_SEPARATOR)
+        waitForHashChange("EditView2") {
+            navControllerJs.navigate("EditView2", mapOf())
+        }
+
+        navControllerJs.currentBackStackEntry?.savedStateHandle?.set("pageNum", "2")
+
+        waitForHashChange("EditView1") {
+            window.history.go(-1)
+        }
+
+        waitForHashChange("EditView2") {
+            window.history.go(1)
+        }
+
+        assertEquals("2",
+            navControllerJs.currentBackStackEntry?.savedStateHandle?.get("pageNum"),
+            "Retrieve expected back stack entry after navigating forward")
+
+        navControllerJs.unplug()
+
+    }
+
+
 
     companion object {
 
