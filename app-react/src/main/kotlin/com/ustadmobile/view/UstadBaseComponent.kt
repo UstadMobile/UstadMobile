@@ -13,7 +13,6 @@ import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.navigation.NavControllerJs
 import com.ustadmobile.navigation.RouteManager
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
@@ -136,7 +135,6 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     }
 
     override fun componentDidUpdate(prevProps: P, prevState: S, snapshot: Any) {
-        Napier.d("UstadBaseComponent: componentDidUpdate: ${this::class.simpleName}")
         val propsDidChange = props.asDynamic().arguments != js("undefined")
                 && !props.asDynamic().arguments.values.equals(prevProps.asDynamic().arguments.values)
         val activeSession = systemImpl.getAppPref(UstadAccountManager.ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
@@ -148,7 +146,9 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
          * are mounted once and when trying to re-mount it's componentDidUpdate is triggered.
          * This will check and make sure the component has changed by checking if the props has changed
          */
-        if(propsDidChange || refreshPage){
+        //22/Apr/22: refreshPage was causing RedirectComponent to run twice.
+        // This may need checked.
+        if(propsDidChange/* || refreshPage*/){
             Napier.d("UstadBaseComponent: componentDidUpdate: CHANGED: ${this::class.simpleName}")
             if(propsDidChange){
                 arguments = props.asDynamic().arguments as Map<String, String>
@@ -208,8 +208,6 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     }
 
     override fun componentWillUnmount() {
-        Napier.d("UstadBaseComponent: componentWillUnmount: ${this::class.simpleName}")
-
         for(observer in lifecycleObservers){
             observer.onStop(this)
         }
