@@ -1,4 +1,4 @@
-package com.ustadmobile.util.ext
+package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.door.DoorLifecycleOwner

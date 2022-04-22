@@ -9,7 +9,6 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toUrlQueryString
 import io.github.aakira.napier.Napier
 import kotlinext.js.jsObject
-import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.events.Event
 import kotlin.math.max
