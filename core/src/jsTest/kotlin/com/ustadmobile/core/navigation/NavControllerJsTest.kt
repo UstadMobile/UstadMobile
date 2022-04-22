@@ -2,6 +2,7 @@ package com.ustadmobile.core.navigation
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.defaultJsonSerializer
+import com.ustadmobile.core.view.UstadView
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.browser.window
@@ -169,6 +170,102 @@ class NavControllerJsTest {
 
         navControllerJs.unplug()
     }
+
+    //Make sure the first page in the stack is handled correctly
+    @Test
+    fun givenOpenedOnStartPage_thenNavigateAndGoBack_dataShouldBeSaved() = GlobalScope.promise {
+        waitForHashChange("ViewName0") {
+            window.location.replace("#/ViewName0")
+        }
+
+        val navControllerJs = NavControllerJs(TEST_SEPARATOR)
+        navControllerJs.currentBackStackEntry?.savedStateHandle?.set("pageNum", "0")
+
+        waitForHashChange("ViewName1") {
+            navControllerJs.navigate("ViewName1", mapOf())
+        }
+
+        waitForHashChange("ViewName0") {
+            window.history.go(-1)
+        }
+
+        assertEquals("0",
+            navControllerJs.currentBackStackEntry?.savedStateHandle?.get("pageNum"),
+            "State saved by first page in stack is retrieved as expected")
+        navControllerJs.unplug()
+    }
+
+    /**
+     * Simulate the navigation that would be expected when the user goes from a list view
+     * to create a new item. Navigate from List to Edit. Navigate from Edit to Detail (where
+     * popoffto=CURRENT_DEST, inclusive=true). Then go back. Should wind up at the ListView
+     */
+    @Test
+    fun givenNavigateWithPopUpToCurrentDest_thenGoBack_shouldGoBackToFirstDest() = GlobalScope.promise {
+        waitForHashChange("ListView") {
+            window.location.replace("#/ListView")
+        }
+
+        val navControllerJs = NavControllerJs(TEST_SEPARATOR)
+        navControllerJs.currentBackStackEntry?.savedStateHandle?.set("pageNum", "0")
+
+        waitForHashChange("EditView") {
+            navControllerJs.navigate("Editview", mapOf())
+        }
+
+        waitForHashChange("DetailView") {
+            navControllerJs.navigate("DetailView", mapOf(),
+                UstadMobileSystemCommon.UstadGoOptions(popUpToViewName = UstadView.CURRENT_DEST, popUpToInclusive = true))
+        }
+
+        //Now go back - should wind up back at the list view, not the edit view
+        waitForHashChange("ListView") {
+            window.history.go(-1)
+        }
+
+        assertTrue(window.location.href.endsWith("#/ListView"),
+            "Location has now returned to ListView")
+
+        assertEquals("0",
+            navControllerJs.currentBackStackEntry?.savedStateHandle?.get("pageNum"),
+            "Got expected save state value")
+
+        navControllerJs.unplug()
+    }
+
+    //Simulate returning a result - make sure data goes to the right place.
+    @Test
+    fun givenNavigatedForward_whenSaveToPrevBackStack_thenPopBackStackShouldGetSavedValue() = GlobalScope.promise {
+        waitForHashChange("EditView1") {
+            window.location.replace("#/EditView1")
+        }
+
+        val navControllerJs = NavControllerJs(TEST_SEPARATOR)
+
+        //E.g. navigate to another picker list
+        waitForHashChange("ListView") {
+            navControllerJs.navigate("ListView", mapOf())
+        }
+
+        //E.g. navigate to creating something new
+        waitForHashChange("EditView2") {
+            navControllerJs.navigate("EditView2", mapOf())
+        }
+
+        val editView1Handle = navControllerJs.getBackStackEntry("EditView1")
+        editView1Handle?.savedStateHandle?.set("returnedVal", "42")
+
+        waitForHashChange("EditView1") {
+            navControllerJs.popBackStack("EditView1", false)
+        }
+
+        assertEquals("42",
+            navControllerJs.currentBackStackEntry?.savedStateHandle?.get("returnedVal"),
+            "Returned value was found in back state handle as expected")
+
+        navControllerJs.unplug()
+    }
+
 
     companion object {
 
