@@ -12,7 +12,7 @@ import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.navigation.NavControllerJs
+import com.ustadmobile.core.navigation.NavControllerJs
 import com.ustadmobile.redux.ReduxAppStateManager
 import com.ustadmobile.redux.ReduxThemeState
 import com.ustadmobile.util.ContainerMounterJs

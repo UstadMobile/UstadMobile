@@ -1,4 +1,4 @@
-package com.ustadmobile.navigation
+package com.ustadmobile.core.navigation
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
@@ -11,6 +11,7 @@ import io.github.aakira.napier.Napier
 import kotlinext.js.jsObject
 import kotlinx.browser.document
 import kotlinx.browser.window
+import org.w3c.dom.events.Event
 import kotlin.math.max
 import kotlin.math.min
 
@@ -25,8 +26,13 @@ import kotlin.math.min
  * This  is due to the reason that, browser can use forward button to navigate and if our
  * internal stack entry was popped that means we won't be able to sync histories any more
  * and the state will be destroyed. So, all saved data will be lost.
+ *
+ * @param ustadUrlDivider Normally the endpoint server and the viewname / args are separated by /#/
+ * however on testing this might be different.
  */
-class NavControllerJs: UstadNavController {
+class NavControllerJs(
+    private val ustadUrlDivider: String = UstadUrlComponents.DEFAULT_DIVIDER
+): UstadNavController {
 
     private val logPrefix = "NavControllerJs: "
 
@@ -46,7 +52,7 @@ class NavControllerJs: UstadNavController {
      */
     override val currentBackStackEntry: UstadBackStackEntry?
         get() {
-            val currentViewUri = UstadUrlComponents.parse(window.location.href).viewUri
+            val currentViewUri = UstadUrlComponents.parse(window.location.href, ustadUrlDivider).viewUri
             return navStack.lastOrNull { it.jsViewUri == currentViewUri }
         }
 
@@ -62,13 +68,19 @@ class NavControllerJs: UstadNavController {
      */
     private var pendingNavigation: String? = null
 
+    private val hashChangeListener : (Event) -> Unit = {
+        console.log("$logPrefix: hashchange new=${it.asDynamic().newURL} old=${it.asDynamic().oldURL} ")
+        handleHashChange(it.asDynamic().newURL.unsafeCast<String>(),
+            it.asDynamic().oldURL.unsafeCast<String>())
+    }
+
     init {
         Napier.d("$logPrefix: init")
 
         //Put the current location into the navstack as the starting point (unless something is already in storage)
         var initUrlComponents: UstadUrlComponents
         try {
-            initUrlComponents = UstadUrlComponents.parse(window.location.href)
+            initUrlComponents = UstadUrlComponents.parse(window.location.href, ustadUrlDivider)
         }catch (e: Exception) {
             initUrlComponents = UstadUrlComponents(window.location.href, RedirectView.VIEW_NAME, "")
         }
@@ -82,16 +94,7 @@ class NavControllerJs: UstadNavController {
 
         Napier.d("$logPrefix: init: navStack = ${dumpNavStackToString()}")
 
-        window.addEventListener("pageshow", {
-            console.log("$logPrefix: pageshow: ${document.location}")
-            handleHashChange(window.location.href, null)
-        })
-
-        window.addEventListener("hashchange", {
-            console.log("$logPrefix: hashchange new=${it.asDynamic().newURL} old=${it.asDynamic().oldURL} ")
-            handleHashChange(it.asDynamic().newURL.unsafeCast<String>(),
-                it.asDynamic().oldURL.unsafeCast<String>())
-        })
+        window.addEventListener("hashchange", hashChangeListener)
     }
 
     private fun dumpNavStackToString() = navStack.joinToString { it.viewName }
@@ -240,6 +243,14 @@ class NavControllerJs: UstadNavController {
         Napier.d("$logPrefix: NAVIGATEUP")
         window.history.go(-1)
         return true
+    }
+
+    /**
+     * This is not normally needed, but is needed for testing which runs in a single context to
+     * avoid any conflicts.
+     */
+    fun unplug() {
+        window.removeEventListener("hashchange", hashChangeListener)
     }
 
 }

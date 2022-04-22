@@ -16,7 +16,7 @@ import io.ktor.http.*
 data class UstadUrlComponents(
     val endpoint: String,
     val viewName: String,
-    val queryString: String
+    val queryString: String,
 ) {
 
     val arguments: Map<String, String> by lazy(LazyThreadSafetyMode.NONE) {
@@ -37,10 +37,10 @@ data class UstadUrlComponents(
 
     companion object {
 
-        private const val DIVIDER = "/#/"
+        const val DEFAULT_DIVIDER = "/#/"
 
-        fun parse(url: String) : UstadUrlComponents {
-            val dividerIndex = url.indexOf("/#/")
+        fun parse(url: String, divider: String = DEFAULT_DIVIDER) : UstadUrlComponents {
+            val dividerIndex = url.indexOf(divider)
             if(dividerIndex == -1)
                 throw IllegalArgumentException("Not a valid UstadUrl: $url")
 
@@ -50,10 +50,10 @@ data class UstadUrlComponents(
             val viewName: String
             val queryString: String
             if(queryIndex == -1 || queryIndex == (url.length -1)) {
-                viewName = url.substring(dividerIndex + DIVIDER.length).removeSuffix("?")
+                viewName = url.substring(dividerIndex + divider.length).removeSuffix("?")
                 queryString = ""
             }else {
-                viewName = url.substring(dividerIndex + DIVIDER.length, queryIndex)
+                viewName = url.substring(dividerIndex + divider.length, queryIndex)
                 queryString = url.substring(queryIndex + 1)
             }
 

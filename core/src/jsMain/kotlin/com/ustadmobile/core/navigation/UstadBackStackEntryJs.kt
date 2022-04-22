@@ -1,4 +1,4 @@
-package com.ustadmobile.navigation
+package com.ustadmobile.core.navigation
 
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle

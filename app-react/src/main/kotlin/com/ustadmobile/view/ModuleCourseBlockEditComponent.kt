@@ -3,11 +3,10 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.ModuleCourseBlockEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.ModuleCourseBlockEditView
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.navigation.UstadSavedStateHandleJs
+import com.ustadmobile.core.navigation.UstadSavedStateHandleJs
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
 import com.ustadmobile.util.UmProps

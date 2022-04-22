@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
-import com.ustadmobile.navigation.NavControllerJs
+import com.ustadmobile.core.navigation.NavControllerJs
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState

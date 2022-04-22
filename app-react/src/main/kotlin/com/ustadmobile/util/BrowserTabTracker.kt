@@ -1,6 +1,6 @@
 package com.ustadmobile.util
 
-import com.ustadmobile.navigation.UstadBackStackEntryJs
+import com.ustadmobile.core.navigation.UstadBackStackEntryJs
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxNavStackState
