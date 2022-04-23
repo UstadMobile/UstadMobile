@@ -1295,4 +1295,7 @@
     <string name="library">Китобхона</string>
     <string name="course_comments">Шарҳҳои курс</string>
     <string name="onboarding_stay_organized_headline">Муташаккил бимонед</string>
+    <string name="connect">пайваст кунед</string>
+    <string name="upload">Бор кунед</string>
+    <string name="selected_file_summary">Интихобшуда</string>
 </resources>
