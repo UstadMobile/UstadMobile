@@ -13,7 +13,8 @@ class ViewNameToDestMap: DestinationProvider {
     private val destinationMap = mapOf(
             ClazzEdit2View.VIEW_NAME to UstadDestination(R.id.clazz_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
-            ClazzList2View.VIEW_NAME to UstadDestination(R.id.home_clazzlist_dest),
+            ClazzList2View.VIEW_NAME_HOME to UstadDestination(R.id.home_clazzlist_dest),
+            ClazzList2View.VIEW_NAME to UstadDestination(R.id.clazz_list_dest),
             ClazzDetailView.VIEW_NAME to UstadDestination(R.id.clazz_detail_dest),
             HolidayEditView.VIEW_NAME to UstadDestination(R.id.holiday_edit_dest),
             HolidayCalendarListView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_list_dest),
@@ -32,6 +33,7 @@ class ViewNameToDestMap: DestinationProvider {
             SchoolDetailOverviewView.VIEW_NAME to UstadDestination(R.id.school_detail_overview_dest),
             PersonDetailView.VIEW_NAME to UstadDestination(R.id.person_detail_dest),
             PersonListView.VIEW_NAME to UstadDestination(R.id.person_list_dest),
+            PersonListView.VIEW_NAME_HOME to UstadDestination(R.id.home_personlist_dest),
             SchoolMemberListView.VIEW_NAME to UstadDestination(R.id.schoolmember_list_dest),
             ClazzAssignmentEditView.VIEW_NAME to UstadDestination(R.id.clazz_assignment_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideAccountIcon = true),
