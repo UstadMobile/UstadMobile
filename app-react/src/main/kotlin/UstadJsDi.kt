@@ -123,7 +123,7 @@ internal fun ustadJsDi(
     }
 
     bind<UstadNavController>() with singleton {
-        NavControllerJs()
+        NavControllerJs(json = instance())
     }
 
     bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{

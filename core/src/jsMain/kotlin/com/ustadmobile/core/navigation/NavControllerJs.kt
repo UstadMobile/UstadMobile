@@ -9,7 +9,9 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toUrlQueryString
 import io.github.aakira.napier.Napier
 import kotlinext.js.jsObject
+import kotlinx.browser.sessionStorage
 import kotlinx.browser.window
+import kotlinx.serialization.json.Json
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.History
 import org.w3c.dom.events.Event
@@ -24,7 +26,9 @@ import kotlin.math.min
  * however on testing this might be different.
  */
 class NavControllerJs(
-    private val ustadUrlDivider: String = UstadUrlComponents.DEFAULT_DIVIDER
+    private val ustadUrlDivider: String = UstadUrlComponents.DEFAULT_DIVIDER,
+    private val storagePrefix: String = "ustadnav_",
+    private val json: Json
 ): UstadNavController {
 
     private val logPrefix = "NavControllerJs: "
@@ -74,6 +78,12 @@ class NavControllerJs(
             window.history.replaceState(newStateObj, "")
         }
 
+    private fun saveStackSizeAndIndex() {
+        sessionStorage.setItem("$storagePrefix.$SUBKEY_STACKSIZE", navStack.size.toString())
+        sessionStorage.setItem("$storagePrefix.$SUBKEY_STACKINDEX", currentStackIndex.toString())
+    }
+
+
 
     /**
      * Use the current location href to find the correct back stack entry. popstate and hashchange
@@ -105,20 +115,33 @@ class NavControllerJs(
     init {
         Napier.d("$logPrefix: init")
 
-        //Put the current location into the navstack as the starting point (unless something is already in storage)
-        var initUrlComponents: UstadUrlComponents
-        try {
-            initUrlComponents = UstadUrlComponents.parse(window.location.href, ustadUrlDivider)
-        }catch (e: Exception) {
-            initUrlComponents = UstadUrlComponents(window.location.href, RedirectView.VIEW_NAME, "")
+        val storedStackSize = sessionStorage.getItem("$storagePrefix.$SUBKEY_STACKSIZE")?.toInt() ?: 0
+
+        if(storedStackSize == 0) {
+            Napier.d("$logPrefix: creating new stack")
+            //Put the current location into the navstack as the starting point (unless something is already in storage)
+            var initUrlComponents: UstadUrlComponents
+            try {
+                initUrlComponents = UstadUrlComponents.parse(window.location.href, ustadUrlDivider)
+            }catch (e: Exception) {
+                initUrlComponents = UstadUrlComponents(window.location.href, RedirectView.VIEW_NAME, "")
+            }
+
+            //Set the initial stack
+            navStack += UstadBackStackEntryJs(initUrlComponents.viewName, initUrlComponents.arguments,
+                initUrlComponents.viewUri, "$storagePrefix.$SUBKEY_STACKITEMS.0", json)
+            window.history.stateIndex = 0
+            saveStackSizeAndIndex()
+
+            Napier.d("$logPrefix: init: navStack = ${dumpNavStackToString()}")
+        }else {
+            Napier.d("$logPrefix: loading stack from session storage")
+            //rebuild the stack
+            for(i in 0 until storedStackSize) {
+                navStack.add(UstadBackStackEntryJs.loadFromSessionStorage(
+                        "$storagePrefix.$SUBKEY_STACKITEMS.$i", json))
+            }
         }
-
-        //Set the initial stack
-        navStack += UstadBackStackEntryJs(initUrlComponents.viewName, initUrlComponents.arguments,
-            initUrlComponents.viewUri)
-        window.history.stateIndex = 0
-
-        Napier.d("$logPrefix: init: navStack = ${dumpNavStackToString()}")
 
         window.addEventListener("hashchange", hashChangeListener)
     }
@@ -146,6 +169,14 @@ class NavControllerJs(
             navStack.removeAt(i)
             Napier.d("$logPrefix: remove ${currentEntry.viewName}")
         }
+    }
+
+    /**
+     * Generates the next storage key for the stack. The default index assumes that the entry has not
+     * yet been added to the stack
+     */
+    private fun stackStorageKey(index: Int) : String {
+        return "$storagePrefix.$SUBKEY_STACKITEMS.${navStack.size}"
     }
 
     @Suppress("MemberVisibilityCanBePrivate") //Will be used in testing
@@ -232,7 +263,7 @@ class NavControllerJs(
         }
         val viewUri = "$viewName$params"
 
-        val newBackStackEntry = UstadBackStackEntryJs(viewName, args, viewUri)
+        val currentStackIndexVal = currentStackIndex
         if(stepsToGoBack == 0) {
             // We can go directly to the new destination.
             // The new back stack entry must be added to the stack immediately. The hashchange event
@@ -240,15 +271,21 @@ class NavControllerJs(
             // save it's data to saved state handle for the previous entry).
 
             //If there is anything in the forward history, now is the time to remove it from the stack
-            popOffNavStackFrom(currentStackIndex + 1)
+            popOffNavStackFrom(currentStackIndexVal + 1)
+            val newBackStackEntry = UstadBackStackEntryJs(viewName, args, viewUri,
+                stackStorageKey(currentStackIndexVal + 1), json)
             navStack += newBackStackEntry
+            saveStackSizeAndIndex()
             Napier.d("UstadNavController: navigate directly to #/$viewUri " +
                 "navStack=${dumpNavStackToString()}")
             window.location.assign("#/$viewUri")
         }else if(stepsToGoBack == 1) {
             //we can use window.location.replace to replace the current location in the history state.
             // no need to use history.go(-n).
-            navStack[currentStackIndex] = newBackStackEntry
+            sessionStorage.removeItem(stackStorageKey(currentStackIndexVal))
+            navStack[currentStackIndex] = UstadBackStackEntryJs(viewName, args, viewUri,
+                stackStorageKey(currentStackIndexVal), json)
+            saveStackSizeAndIndex()
             Napier.d("UstadNavController: navigate using location.replace to #/$viewUri " +
                 "navStack=${dumpNavStackToString()}")
             window.location.replace("#/$viewUri")
@@ -257,7 +294,9 @@ class NavControllerJs(
             // destination. See note on pendingNavigation var.
             pendingNavigation = viewUri
             popOffNavStackFrom(navStack.size - stepsToGoBack)
-            navStack += newBackStackEntry
+            navStack += UstadBackStackEntryJs(viewName, args, viewUri,
+                stackStorageKey(navStack.size), json)
+            saveStackSizeAndIndex()
             Napier.d("UstadNavController: popoff, then navigate using replace. " +
                 "Go ${stepsToGoBack-1} steps back first. navStack=${dumpNavStackToString()}")
             window.history.go(-(stepsToGoBack-1))
@@ -276,6 +315,14 @@ class NavControllerJs(
      */
     fun unplug() {
         window.removeEventListener("hashchange", hashChangeListener)
+    }
+
+    companion object {
+        private const val SUBKEY_STACKITEMS = "stackitems"
+
+        private const val SUBKEY_STACKSIZE = "stacksize"
+
+        private const val SUBKEY_STACKINDEX = "stackindex"
     }
 
 }

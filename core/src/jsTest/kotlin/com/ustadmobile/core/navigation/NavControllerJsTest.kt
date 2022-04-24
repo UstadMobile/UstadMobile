@@ -7,16 +7,23 @@ import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.browser.window
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
 import kotlin.test.*
 
 class NavControllerJsTest {
 
+    private lateinit var json: Json
+
     @BeforeTest
     fun init(){
         defaultJsonSerializer()
         Napier.base(DebugAntilog())
+        json = Json {
+            encodeDefaults = true
+            ignoreUnknownKeys = true
+        }
     }
 
     /**
@@ -58,7 +65,7 @@ class NavControllerJsTest {
             window.location.assign("#/ViewName1")
         }
 
-        val navControllerJs = NavControllerJs(TEST_SEPARATOR)
+        val navControllerJs = NavControllerJs(TEST_SEPARATOR, "umnav1", json)
         navControllerJs.currentBackStackEntry!!.savedStateHandle.set("answer", "42")
 
         waitForHashChange("ViewName2") {
@@ -82,7 +89,7 @@ class NavControllerJsTest {
             window.location.assign("#/ViewName3")
         }
 
-        val navControllerJs = NavControllerJs(TEST_SEPARATOR)
+        val navControllerJs = NavControllerJs(TEST_SEPARATOR, "umnav2", json)
         navControllerJs.currentBackStackEntry!!.savedStateHandle.set("answer", "42")
 
         waitForHashChange("ViewName4") {
@@ -102,7 +109,7 @@ class NavControllerJsTest {
             window.location.assign("#/ViewName0")
         }
 
-        val navControllerJs = NavControllerJs(TEST_SEPARATOR)
+        val navControllerJs = NavControllerJs(TEST_SEPARATOR, "umnav3", json)
         for(i in 1 .. 3) {
             waitForHashChange("ViewName$i") {
                 navControllerJs.navigate("ViewName$i", mapOf())
@@ -136,7 +143,7 @@ class NavControllerJsTest {
             window.location.assign("#/ViewName0")
         }
 
-        val navControllerJs = NavControllerJs(TEST_SEPARATOR)
+        val navControllerJs = NavControllerJs(TEST_SEPARATOR, "umnav4", json)
         for(i in 1 .. 3) {
             waitForHashChange("ViewName$i") {
                 navControllerJs.navigate("ViewName$i", mapOf())
@@ -178,7 +185,7 @@ class NavControllerJsTest {
             window.location.replace("#/ViewName0")
         }
 
-        val navControllerJs = NavControllerJs(TEST_SEPARATOR)
+        val navControllerJs = NavControllerJs(TEST_SEPARATOR, "umnav5", json)
         navControllerJs.currentBackStackEntry?.savedStateHandle?.set("pageNum", "0")
 
         waitForHashChange("ViewName1") {
@@ -206,7 +213,7 @@ class NavControllerJsTest {
             window.location.replace("#/ListView")
         }
 
-        val navControllerJs = NavControllerJs(TEST_SEPARATOR)
+        val navControllerJs = NavControllerJs(TEST_SEPARATOR, "umnav6", json)
         navControllerJs.currentBackStackEntry?.savedStateHandle?.set("pageNum", "0")
 
         waitForHashChange("EditView") {
@@ -240,7 +247,7 @@ class NavControllerJsTest {
             window.location.replace("#/EditView1")
         }
 
-        val navControllerJs = NavControllerJs(TEST_SEPARATOR)
+        val navControllerJs = NavControllerJs(TEST_SEPARATOR, "umnav7", json)
 
         //E.g. navigate to another picker list
         waitForHashChange("ListView") {
@@ -272,7 +279,7 @@ class NavControllerJsTest {
             window.location.replace("#/EditView1")
         }
 
-        val navControllerJs = NavControllerJs(TEST_SEPARATOR)
+        val navControllerJs = NavControllerJs(TEST_SEPARATOR, "umnav8", json)
         waitForHashChange("EditView2") {
             navControllerJs.navigate("EditView2", mapOf())
         }
@@ -296,6 +303,35 @@ class NavControllerJsTest {
     }
 
 
+
+    @Test
+    fun givenNavStateSaved_whenNewNavControllerCreatedWithSameStorageKey_thenShouldRetainValues() = GlobalScope.promise {
+        waitForHashChange("ViewName1") {
+            window.location.assign("#/ViewName1")
+        }
+
+        val navControllerJs1 = NavControllerJs(TEST_SEPARATOR, "umnav_restore_test",
+            json)
+        navControllerJs1.currentBackStackEntry!!.savedStateHandle.set("answer", "42")
+
+        waitForHashChange("ViewName2") {
+            navControllerJs1.navigate("ViewName2", mapOf())
+        }
+
+        navControllerJs1.unplug()
+
+        val navControllerJs2 = NavControllerJs(TEST_SEPARATOR, "umnav_restore_test",
+            json)
+
+        waitForHashChange("ViewName1") {
+            window.history.go(-1)
+        }
+
+        val answer = navControllerJs2.currentBackStackEntry!!.savedStateHandle.get<String>("answer")
+        assertEquals("42", answer, "Value saved is retrieved")
+
+        navControllerJs2.unplug()
+    }
 
     companion object {
 
