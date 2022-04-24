@@ -228,7 +228,6 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         val entityLiveDataObserverVal = entityLiveDataObserver
         val entityLiveDataVal = entityLiveData
         if(entityLiveDataObserverVal != null && entityLiveDataVal != null) {
@@ -236,5 +235,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
         }
         entityLiveData = null
         entityLiveDataObserver = null
+
+        super.onDestroy()
     }
 }

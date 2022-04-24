@@ -94,7 +94,7 @@ class ClazzDetailOverviewPresenter(
     }
 
     fun handleClickAssignment(assignment: ClazzAssignment){
-        ustadNavController.navigate(
+        requireNavController().navigate(
             ClazzAssignmentDetailView.VIEW_NAME,
             mapOf(ARG_ENTITY_UID to assignment.caUid.toString()))
     }
@@ -104,7 +104,7 @@ class ClazzDetailOverviewPresenter(
         args[HtmlTextViewDetailView.DISPLAY_TEXT] = courseBlock.cbDescription ?: ""
         args[HtmlTextViewDetailView.DISPLAY_TITLE] = courseBlock.cbTitle ?: ""
 
-        ustadNavController.navigate(
+        requireNavController().navigate(
             HtmlTextViewDetailView.VIEW_NAME, args)
     }
 

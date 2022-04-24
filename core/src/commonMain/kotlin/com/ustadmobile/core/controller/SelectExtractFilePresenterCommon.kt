@@ -51,9 +51,8 @@ class SelectExtractFilePresenterCommon(
     fun handleUriSelected(uri: String?){
 
         if(uri == null) {
-            ustadNavController.currentBackStackEntry?.viewName?.let {
-                ustadNavController.popBackStack(
-                    it,true)
+            requireNavController().currentBackStackEntry?.viewName?.let {
+                requireNavController().popBackStack(it,true)
             }
             return
         }

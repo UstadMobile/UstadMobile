@@ -303,10 +303,11 @@ class EpubContentPresenter(context: Any,
 
 
     override fun onDestroy() {
-        super.onDestroy()
         if (mountedPath.isNotEmpty()) suspend {
             mountHandler.unMountContainer(mountedEndpoint, mountedPath)
         }
+
+        super.onDestroy()
     }
 
     companion object {
