@@ -119,7 +119,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         val clazzEnrolment = ClazzEnrolment().apply {
             clazzEnrolmentPersonUid = student.personUid
             clazzEnrolmentClazzUid = testClazz.clazzUid
-            clazzEnrolmentRole = if(isAdmin) ClazzEnrolment.ROLE_TEACHER else ClazzEnrolment.ROLE_STUDENT
+            clazzEnrolmentRole = role
             clazzEnrolmentOutcome = ClazzEnrolment.OUTCOME_IN_PROGRESS
             clazzEnrolmentUid = repo.clazzEnrolmentDao.insert(this)
         }

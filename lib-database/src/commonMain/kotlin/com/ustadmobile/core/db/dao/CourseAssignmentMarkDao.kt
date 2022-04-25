@@ -88,6 +88,10 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
          SELECT COALESCE((
             SELECT clazzEnrolmentPersonUid
               FROM ClazzEnrolment
+                  JOIN CourseAssignmentSubmission
+                  ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentSubmission.casSubmitterUid
+                  AND CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+              
                    LEFT JOIN CourseAssignmentMark
                    ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
                    AND CourseAssignmentMark.camAssignmentUid = :assignmentUid
