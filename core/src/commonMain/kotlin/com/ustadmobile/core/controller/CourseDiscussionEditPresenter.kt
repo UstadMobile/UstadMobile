@@ -75,15 +75,14 @@ class CourseDiscussionEditPresenter(context: Any,
                 //Creating a new one from newTopic
                 discussionTopicUid = newTopic.discussionTopicUid
                 discussionTopicStartDate = systemTimeInMillis()
-                discussionTopicCourseDiscussionUid = arguments[ARG_ENTITY_UID]?.toLong()
-                    ?: db.doorPrimaryKeyManager.nextId(CourseDiscussion.TABLE_ID)
+                discussionTopicCourseDiscussionUid = entity?.cbEntityUid?:0L
                 discussionTopicStartedPersonUid = accountManager.activeAccount.personUid
                 discussionTopicTitle = newTopic.discussionTopicTitle
                 discussionTopicDesc  = newTopic.discussionTopicDesc
             }
 
-            foundTopic.discussionTopicCourseDiscussionUid = arguments[ARG_ENTITY_UID]?.toLong()
-                ?: db.doorPrimaryKeyManager.nextId(CourseDiscussion.TABLE_ID)
+//            foundTopic.discussionTopicCourseDiscussionUid = arguments[ARG_ENTITY_UID]?.toLong()
+//                ?: db.doorPrimaryKeyManager.nextId(CourseDiscussion.TABLE_ID)
 
             //Any updated title desc
             foundTopic.discussionTopicTitle = newTopic.discussionTopicTitle
@@ -108,8 +107,7 @@ class CourseDiscussionEditPresenter(context: Any,
             CourseBlockWithEntity().apply {
                 cbUid = db.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
                 cbClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
-                cbEntityUid =  arguments[ARG_ENTITY_UID]?.toLong()
-                    ?: db.doorPrimaryKeyManager.nextId(CourseDiscussion.TABLE_ID)
+                cbEntityUid =  db.doorPrimaryKeyManager.nextId(CourseDiscussion.TABLE_ID)
                 cbType = CourseBlock.BLOCK_DISCUSSION_TYPE
                 courseDiscussion = CourseDiscussion().apply {
                     courseDiscussionUid = cbEntityUid

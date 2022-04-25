@@ -92,8 +92,8 @@ abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
           FROM DiscussionPost     
           LEFT JOIN Person ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
          WHERE DiscussionPost.discussionPostDiscussionTopicUid = :discussionTopicUid
-           AND DiscussionPost.discussionPostVisible = 1
-           AND DiscussionPost.discussionPostArchive = 0
+           AND CAST(DiscussionPost.discussionPostVisible AS INTEGER) = 1
+           AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 0
       ORDER BY DiscussionPost.discussionPostStartDate DESC
     """)
     abstract fun getPostsByDiscussionTopic(discussionTopicUid: Long)

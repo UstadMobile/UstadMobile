@@ -20,11 +20,7 @@ abstract class MessageReadDao: BaseDao<MessageRead>{
      REPLACE INTO MessageReadReplicate(messageReadPk, messageReadDestination)
       SELECT DISTINCT MessageRead.messageReadUid AS messageReadPk,
              :newNodeId AS messageReadDestination
-        FROM UserSession
-             JOIN MessageRead ON
-                MessageRead.messageReadPersonUid = UserSession.usPersonUid
-                AND MessageRead.messageReadMessageUid = Message.messageUid
-             
+        FROM UserSession 
               JOIN Message ON
                   ((    Message.messageTableId = ${Chat.TABLE_ID}
                     AND Message.messageEntityUid IN
@@ -32,6 +28,10 @@ abstract class MessageReadDao: BaseDao<MessageRead>{
                           FROM ChatMember
                          WHERE ChatMember.chatMemberPersonUid = UserSession.usPersonUid))
                   OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM})
+                  
+              JOIN MessageRead 
+                   ON MessageRead.messageReadMessageUid = Message.messageUid
+                   
        WHERE UserSession.usClientNodeId = :newNodeId
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
          AND MessageRead.messageReadLct != COALESCE(
@@ -55,19 +55,16 @@ abstract class MessageReadDao: BaseDao<MessageRead>{
             FROM ChangeLog
             
                  JOIN MessageRead 
-                      ON MessageRead.messageReadPersonUid = UserSession.usPersonUid
-                         AND MessageRead.messageReadMessageUid = Message.messageUid
-                 JOIN Message
-                     ON ChangeLog.chTableId = ${Message.TABLE_ID}
-                        AND ChangeLog.chEntityPk = Message.messageUid
-                        AND Message.messageTableId = ${Chat.TABLE_ID}
+                      ON MessageRead.messageReadUid = ChangeLog.chEntityPk
+                         AND ChangeLog.chTableId = ${MessageRead.TABLE_ID}
+                         
+
                  JOIN UserSession ON
                       ((UserSession.usPersonUid IN 
                            (SELECT ChatMember.chatMemberPersonUid
                               FROM ChatMember
-                             WHERE ChatMember.chatMemberChatUid = Message.messageEntityUid))
+                             WHERE ChatMember.chatMemberChatUid = MessageRead.messageReadEntityUid))
                        OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM})
-                   
                    
            WHERE UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
              AND UserSession.usClientNodeId != (

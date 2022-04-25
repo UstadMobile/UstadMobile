@@ -78,7 +78,7 @@ abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<
         SELECT CourseDiscussion.* 
           FROM CourseDiscussion
          WHERE CourseDiscussion.courseDiscussionUid = :courseDiscussionUid 
-           AND CourseDiscussion.courseDiscussionActive = 1 
+           AND CAST(CourseDiscussion.courseDiscussionActive AS INTEGER) = 1 
          
          """)
     abstract fun getCourseDiscussionByUid(courseDiscussionUid: Long): DoorLiveData<CourseDiscussion?>

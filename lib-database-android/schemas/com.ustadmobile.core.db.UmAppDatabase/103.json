@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "b4f68607b6f812301bea5be593b0cd39",
+    "identityHash": "64bd6645ca5352833c099d74c52e4cd2",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -10507,7 +10507,7 @@
       },
       {
         "tableName": "MessageRead",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`messageReadUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `messageReadPersonUid` INTEGER NOT NULL, `messageReadMessageUid` INTEGER NOT NULL, `messageReadLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`messageReadUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `messageReadPersonUid` INTEGER NOT NULL, `messageReadMessageUid` INTEGER NOT NULL, `messageReadEntityUid` INTEGER NOT NULL, `messageReadLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "messageReadUid",
@@ -10524,6 +10524,12 @@
           {
             "fieldPath": "messageReadMessageUid",
             "columnName": "messageReadMessageUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "messageReadEntityUid",
+            "columnName": "messageReadEntityUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -10985,7 +10991,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b4f68607b6f812301bea5be593b0cd39')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '64bd6645ca5352833c099d74c52e4cd2')"
     ]
   }
 }

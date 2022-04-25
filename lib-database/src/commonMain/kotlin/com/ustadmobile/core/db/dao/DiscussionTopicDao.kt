@@ -73,8 +73,8 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
                 )as lastActiveTimestamp
           FROM DiscussionTopic     
          WHERE DiscussionTopic.discussionTopicCourseDiscussionUid = :discussionUid 
-           AND DiscussionTopic.discussionTopicVisible = 1
-           AND DiscussionTopic.discussionTopicArchive = 0
+           AND CAST(DiscussionTopic.discussionTopicVisible AS INTEGER) = 1
+           AND CAST(DiscussionTopic.discussionTopicArchive AS INTEGER) = 0
       ORDER BY DiscussionTopic.discussionTopicStartDate DESC
     """)
     abstract fun getListOfTopicsByDiscussion(discussionUid: Long)
@@ -87,8 +87,8 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
                 (SELECT CourseDiscussion.courseDiscussionUid 
                    FROM CourseDiscussion
                   WHERE CourseDiscussion.courseDiscussionClazzUid = :clazzUid ) 
-          AND DiscussionTopic.discussionTopicVisible = 1
-          AND DiscussionTopic.discussionTopicArchive = 0
+          AND CAST(DiscussionTopic.discussionTopicVisible AS INTEGER) = 1
+          AND CAST(DiscussionTopic.discussionTopicArchive AS INTEGER)  = 0
                         
     """)
     abstract suspend fun getTopicsByClazz(clazzUid: Long)

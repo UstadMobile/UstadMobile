@@ -189,7 +189,7 @@ abstract class ChatDao: BaseDao<Chat>{
           FROM ChatMember
           LEFT JOIN Chat ON Chat.chatUid = ChatMember.chatMemberChatUid
          WHERE ChatMember.chatMemberPersonUid = :otherPersonUid
-           AND Chat.chatGroup = 0
+           AND CAST(Chat.chatGroup AS INTEGER) = 0
            AND Chat.chatUid IN 
                (
                 SELECT ChatMember.chatMemberChatUid

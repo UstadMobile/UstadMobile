@@ -56,7 +56,10 @@ class MessagesRecyclerAdapter(
         }?.messageReadJob = presenterScope?.launch {
             delay(1000)
             //GO and run the insert
-            presenter?.updateMessageRead(MessageRead(loggedInPersonUid, message?.messageUid?:0))
+            presenter?.updateMessageRead(
+                MessageRead(loggedInPersonUid, message?.messageUid?:0,
+                    message?.messageEntityUid?:0L)
+            )
 
             //TODO: Consider an event collator
 //                val collator = EventCollator<MessageRead>(200){
