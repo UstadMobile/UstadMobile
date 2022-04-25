@@ -807,8 +807,9 @@ fun RBuilder.renderCourseBlockAssignment(
     withAction: Boolean = false, ){
     umGridContainer{
         val padding = LinearDimension("4px")
+        val leftPadding = (item.cbIndentLevel * 3).spacingUnits
         css{
-            padding(top = padding, bottom = padding)
+            padding(top = padding, bottom = padding, left = leftPadding)
         }
 
         umItem(GridSize.cells2, GridSize.cells1){
@@ -1522,9 +1523,16 @@ fun RBuilder.renderContentEntryListItem(
     downloaded: Boolean = true,
     onClick: ((ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit)? = null,
     mainList: Boolean = true,
+    block: CourseBlockWithCompleteEntity? = null,
     onSecondaryAction: (() -> Unit)? = null){
 
     umGridContainer(columnSpacing = GridSpacing.spacing4) {
+
+        val leftPadding = ((block?.cbIndentLevel ?: 0) * 3).spacingUnits
+        css{
+            padding(left = leftPadding)
+        }
+
         if(onClick != null){
             attrs.onClick = {
                 stopEventPropagation(it)
