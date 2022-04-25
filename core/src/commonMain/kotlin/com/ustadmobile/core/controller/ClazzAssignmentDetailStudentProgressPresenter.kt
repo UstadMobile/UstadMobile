@@ -95,7 +95,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
             )
         }
 
-        db.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(clazzAssignment.caUid, selectedPersonUid)
+        db.courseAssignmentMarkDao.getMarkOfAssignmentForStudentLiveData(clazzAssignment.caUid, selectedPersonUid)
                     .observeWithLifecycleOwner(lifecycleOwner){
                         view.submissionScore = it
                     }

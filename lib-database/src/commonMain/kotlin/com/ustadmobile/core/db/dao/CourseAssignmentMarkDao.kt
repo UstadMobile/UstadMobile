@@ -82,7 +82,18 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
       ORDER BY camLct DESC
          LIMIT 1
     """)
-    abstract fun getMarkOfAssignmentForStudent(assignmentUid: Long, studentUid: Long): DoorLiveData<CourseAssignmentMark?>
+    abstract fun getMarkOfAssignmentForStudentLiveData(assignmentUid: Long, studentUid: Long): DoorLiveData<CourseAssignmentMark?>
+
+    @Query("""
+        SELECT * 
+          FROM CourseAssignmentMark
+         WHERE camAssignmentUid = :assignmentUid
+           AND camStudentUid = :studentUid
+      ORDER BY camLct DESC
+         LIMIT 1
+    """)
+    abstract fun getMarkOfAssignmentForStudent(assignmentUid: Long, studentUid: Long): CourseAssignmentMark?
+
 
     @Query("""
          SELECT COALESCE((

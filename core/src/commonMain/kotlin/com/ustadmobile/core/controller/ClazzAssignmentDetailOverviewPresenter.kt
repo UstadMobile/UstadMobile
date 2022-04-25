@@ -109,7 +109,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                         view.submissionStatus = it ?: 0
                     }
 
-            db.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(
+            db.courseAssignmentMarkDao.getMarkOfAssignmentForStudentLiveData(
                     clazzAssignment.caUid, loggedInPersonUid)
                     .observeWithLifecycleOwner(lifecycleOwner){
                         view.submissionMark = it
