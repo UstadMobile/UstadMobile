@@ -29,7 +29,6 @@ import react.RBuilder
 import react.setState
 import styled.css
 import styled.styledDiv
-import kotlin.js.Date
 
 class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPersonParentJoin>(mProps),
     PersonDetailView {
@@ -227,8 +226,8 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                 val title = "${item.clazz?.clazzName} (${item.roleToString(this, systemImpl)}) " +
                         "- ${item.outcomeToString(this,  systemImpl)}"
 
-                val enrollmentPeriod = "${Date(item.clazzEnrolmentDateJoined).standardFormat()} " +
-                        "- ${Date(item.clazzEnrolmentDateLeft).standardFormat()}"
+                val enrollmentPeriod = "${item.clazzEnrolmentDateJoined.toDate()?.standardFormat()} " +
+                        "- ${item.clazzEnrolmentDateLeft.toDate(true)?.standardFormat() ?: getString(MessageID.present)}"
 
 
                 renderListItemWithAttendance("people", title, enrollmentPeriod,
