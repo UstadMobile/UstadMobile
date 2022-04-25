@@ -1867,4 +1867,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     the next submission.
     -->
     <string name="update_grade_and_mark_next">Update grade and mark next</string>
+
+
+    <string name="deadline_has_passed">Deadline has passed</string>
 </resources>

@@ -126,7 +126,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         submitSubmission: Boolean = !isAdmin
     ): Person {
         val student = Person().apply {
-            admin = isAdmin
+            admin = false
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
@@ -257,7 +257,8 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
             this.camMark == 5f
         }
-        verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.saved, context)), any(), any())
+        verify(mockView, timeout(1000)).showSnackBar(
+            eq(systemImpl.getString(MessageID.saved, context)), any(), any())
 
 
     }
@@ -297,7 +298,8 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
             this.camMark == 4f
         }
-        verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.saved, context)), any(), any())
+        verify(mockView, timeout(1000)).showSnackBar(
+            eq(systemImpl.getString(MessageID.saved, context)), any(), any())
 
     }
 

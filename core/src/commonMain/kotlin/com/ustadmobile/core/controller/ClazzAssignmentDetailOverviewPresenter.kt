@@ -6,7 +6,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.io.ext.guessMimeType
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -204,9 +203,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 entity?.let { assignment -> checkCanAddFileOrText(assignment) }
 
             }
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
-            }
+            requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
         }
 
         observeSavedStateResult(SAVED_STATE_KEY_TEXT, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
@@ -222,9 +219,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
 
             submissionList.add(submission)
             view.addedCourseAssignmentSubmission = submissionList
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
-            }
+            requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
         }
 
     }
@@ -299,7 +294,8 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         presenterScope.launch {
             val hasPassedDeadline = entity?.let { hasPassedDeadline(it) } ?: true
             if(hasPassedDeadline) {
-                view.showSnackBar(systemImpl.getString(MessageID.submission_already_made, context))
+                // TODO change to deadline_has_passed
+                view.showSnackBar(systemImpl.getString(MessageID.deadline_has_passed, context))
                 return@launch
             }
 
@@ -317,34 +313,35 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
             repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
                 txDb.courseAssignmentSubmissionDao.insertListAsync(submissionList)
                 txDb.courseAssignmentSubmissionAttachmentDao.insertListAsync(submissionList.mapNotNull { it.attachment })
-            }
 
-            submissionList.clear()
-            view.addedCourseAssignmentSubmission = submissionList
+                submissionList.clear()
+                view.addedCourseAssignmentSubmission = submissionList
 
-            entity?.let { checkCanAddFileOrText(it) }
-            
-            val agentPerson = repo.agentDao.getAgentFromPersonUsername(
-                accountManager.activeAccount.endpointUrl, accountManager.activeAccount.username ?: "")
-                ?: AgentEntity().apply {
-                    agentPersonUid = accountManager.activeAccount.personUid
-                    agentAccountName = accountManager.activeAccount.username
-                    agentHomePage = accountManager.activeAccount.endpointUrl
-                    agentUid = repo.agentDao.insertAsync(this)
+                entity?.let { checkCanAddFileOrText(it) }
+
+                val agentPerson = txDb.agentDao.getAgentFromPersonUsername(
+                    accountManager.activeAccount.endpointUrl,
+                    accountManager.activeAccount.username ?: ""
+                ) ?: AgentEntity().apply {
+                        agentPersonUid = accountManager.activeAccount.personUid
+                        agentAccountName = accountManager.activeAccount.username
+                        agentHomePage = accountManager.activeAccount.endpointUrl
+                        agentUid = txDb.agentDao.insertAsync(this)
                 }
 
-            val submitStatement = StatementEntity().apply {
-                statementVerbUid = VerbEntity.VERB_SUBMITTED_UID
-                statementPersonUid = accountManager.activeAccount.personUid
-                statementClazzUid = entity?.caClazzUid ?: 0
-                xObjectUid = entity?.caXObjectUid ?: 0
-                agentUid = agentPerson.agentUid
-                contextRegistration = randomUuid().toString()
-                timestamp = systemTimeInMillis()
-                stored = systemTimeInMillis()
-                fullStatement = "" // TODO
+                val submitStatement = StatementEntity().apply {
+                    statementVerbUid = VerbEntity.VERB_SUBMITTED_UID
+                    statementPersonUid = accountManager.activeAccount.personUid
+                    statementClazzUid = entity?.caClazzUid ?: 0
+                    xObjectUid = entity?.caXObjectUid ?: 0
+                    agentUid = agentPerson.agentUid
+                    contextRegistration = randomUuid().toString()
+                    timestamp = systemTimeInMillis()
+                    stored = systemTimeInMillis()
+                    fullStatement = "" // TODO
+                }
+                txDb.statementDao.insertAsync(submitStatement)
             }
-            repo.statementDao.insertAsync(submitStatement)
 
         }
     }

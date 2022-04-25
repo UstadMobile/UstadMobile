@@ -5,6 +5,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.getOs
+import com.ustadmobile.core.impl.getOsVersion
+import com.ustadmobile.core.impl.nav.viewUri
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
@@ -20,6 +23,7 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -189,7 +193,17 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                 val statement = txDb.statementDao.findSubmittedStatementFromStudent(
                     person.personUid, assignment.caXObjectUid)
                 if(statement == null){
-                    // TODO error to server if no statmenet
+                    val message = "no submission statement for $selectedPersonUid for assignment $selectedClazzAssignmentUid"
+                    txDb.errorReportDao.insertAsync(ErrorReport().apply {
+                        errorCode = 404
+                        severity = ErrorReport.SEVERITY_ERROR
+                        this.message = message
+                        osVersion = getOsVersion()
+                        operatingSys = getOs()
+                        timestamp = systemTimeInMillis()
+                        presenterUri = ustadNavController?.currentBackStackEntry?.viewUri
+                    })
+                    Napier.e("Course Student Progress - $message")
                     return@withDoorTransactionAsync
                 }
                 val agentPerson = txDb.agentDao.getAgentFromPersonUsername(
@@ -229,7 +243,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                     resultSuccess = StatementEntity.RESULT_SUCCESS
                     resultScoreRaw = gradeAfterPenalty.toLong()
                     resultScoreMax = maxPoints.toLong()
-                    resultScoreScaled = (gradeAfterPenalty.toFloat() / (resultScoreMax))
+                    resultScoreScaled = (gradeAfterPenalty / (resultScoreMax))
                     timestamp = systemTimeInMillis()
                     stored = systemTimeInMillis()
                     fullStatement = "" // TODO

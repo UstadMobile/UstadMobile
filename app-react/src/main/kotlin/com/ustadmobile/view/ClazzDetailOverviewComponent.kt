@@ -200,7 +200,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
 
                     CourseBlock.BLOCK_CONTENT_TYPE -> {
                         item.entry?.let {
-                            renderContentEntryListItem(it,systemImpl, block = item)
+                            renderContentEntryListItem(it,systemImpl, showStatus= true, block = item)
                         }
                     }
                 }
