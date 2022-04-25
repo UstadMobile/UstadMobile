@@ -1,6 +1,5 @@
 package com.ustadmobile.util
 
-import com.ustadmobile.navigation.UstadBackStackEntryJs
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxNavStackState
@@ -41,7 +40,9 @@ object BrowserTabTracker {
             val tabStateList = getStoredTabStateList()
             val navState = ReduxNavStackState()
             tabStateList.map {
-                navState.stack.add(UstadBackStackEntryJs(it.viewName, it.arguments, ""))
+//This is no longer used. Pending check with original developer.
+//                navState.stack.add(UstadBackStackEntryJs(it.viewName, it.arguments, "",
+//                    "ustadnav", null, saveToStorageOnInit = false))
             }
             return navState
         }

@@ -254,8 +254,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
             rootView = it.root
         }
 
-        detailMergerRecyclerView =
-            rootView.findViewById(R.id.fragment_course_detail_overview)
+        detailMergerRecyclerView = rootView.findViewById(R.id.fragment_course_detail_overview)
 
         // 1
         downloadRecyclerAdapter = CourseDownloadDetailRecyclerAdapter(this)
@@ -276,11 +275,16 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
             mPresenter, viewLifecycleOwner, di)
 
 
+        return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         val accountManager: UstadAccountManager by instance()
         repo = di.direct.on(accountManager.activeAccount).instance(tag = TAG_REPO)
         mPresenter = ClazzDetailOverviewPresenter(requireContext(), arguments.toStringMap(), this,
-                 di, viewLifecycleOwner).withViewLifecycle()
+            di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         courseBlockDetailRecyclerAdapter?.mPresenter = mPresenter
@@ -291,12 +295,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
-
-
-        return rootView
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

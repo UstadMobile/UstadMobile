@@ -22,8 +22,8 @@ class SelectFolderPresenter(
 
         when {
             uri == null -> {
-                ustadNavController.currentBackStackEntry?.viewName?.let {
-                    ustadNavController.popBackStack(
+                requireNavController().currentBackStackEntry?.viewName?.let {
+                    requireNavController().popBackStack(
                         it,true)
                 }
             }

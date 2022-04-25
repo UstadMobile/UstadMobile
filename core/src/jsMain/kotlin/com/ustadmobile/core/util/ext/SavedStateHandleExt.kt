@@ -1,8 +1,8 @@
-package com.ustadmobile.util.ext
+package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.navigation.UstadSavedStateHandleJs
+import com.ustadmobile.core.navigation.UstadSavedStateHandleJs
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json

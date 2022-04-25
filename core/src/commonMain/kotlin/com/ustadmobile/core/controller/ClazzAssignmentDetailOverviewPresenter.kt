@@ -268,7 +268,7 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 val args = mutableMapOf<String, String>()
                 args[HtmlTextViewDetailView.DISPLAY_TEXT] = courseSubmission.casText ?: ""
 
-                ustadNavController.navigate(
+                requireNavController().navigate(
                     HtmlTextViewDetailView.VIEW_NAME, args)
 
             }else if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE){
