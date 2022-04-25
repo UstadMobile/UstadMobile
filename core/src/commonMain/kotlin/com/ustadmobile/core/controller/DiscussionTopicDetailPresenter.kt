@@ -67,7 +67,7 @@ class DiscussionTopicDetailPresenter(
         val args = mutableMapOf<String, String>()
         args[ARG_ENTITY_UID] = discussionPost.discussionPostUid.toString() ?: ""
 
-        ustadNavController.navigate(
+        ustadNavController?.navigate(
             DiscussionPostDetailView.VIEW_NAME, args)
     }
 

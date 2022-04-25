@@ -51,7 +51,7 @@ class CourseDiscussionDetailPresenter(
 
         val args = mutableMapOf<String, String>()
         args[ARG_ENTITY_UID] = discussionTopic.discussionTopicUid.toString() ?: ""
-        ustadNavController.navigate(
+        ustadNavController?.navigate(
             DiscussionTopicDetailView.VIEW_NAME, args)
     }
 
