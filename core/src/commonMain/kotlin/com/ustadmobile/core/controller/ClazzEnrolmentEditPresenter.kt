@@ -103,9 +103,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
             entity?.leavingReason = reason
             entity?.clazzEnrolmentLeavingReasonUid = reason.leavingReasonUid
             view.entity = entity
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_LEAVING_REASON] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_LEAVING_REASON] = null
         }
 
     }

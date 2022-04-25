@@ -107,10 +107,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             entity?.assignment?.caGroupUid = group.cgsUid
             view.groupSet = group
             view.entity = entity
-
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
         }
     }
 

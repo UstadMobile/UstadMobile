@@ -239,9 +239,8 @@ class ReportEditPresenter(context: Any,
 
             entityVal?.reportSeriesWithFiltersList = newSeriesList.toList()
             view.entity = entityVal
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[RESULT_REPORT_FILTER_KEY] = null
-            }
+            requireSavedStateHandle()[RESULT_REPORT_FILTER_KEY] = null
+
         }
 
 
@@ -250,9 +249,7 @@ class ReportEditPresenter(context: Any,
             ListSerializer(DateRangeMoment.serializer()), DateRangeMoment::class) {
             val dateRangeMoment = it.firstOrNull() ?: return@observeSavedStateResult
             handleAddCustomRange(dateRangeMoment)
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[RESULT_DATE_RANGE_KEY] = null
-            }
+            requireSavedStateHandle()[RESULT_DATE_RANGE_KEY] = null
         }
     }
 
