@@ -48,6 +48,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:visibility="@{markStudentVisible ? View.VISIBLE : View.GONE}"
             android:hint="@{StringExtKt.capitalizeFirstLetter(@string/points)}"
             app:suffixText="@{&quot;/&quot; + assignment.block.cbMaxPoints}"
             app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"

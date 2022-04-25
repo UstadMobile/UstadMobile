@@ -76,11 +76,11 @@ abstract class AgentDao :BaseDao<AgentEntity> {
 
 
     @Query("""
-        SELECT agentUid
+        SELECT *
           FROM AgentEntity
          WHERE agentAccountName = :username 
            AND agentHomePage = :endpoint
     """)
-    abstract suspend fun getAgentUidFromPerson(endpoint: String, username: String): Long
+    abstract suspend fun getAgentFromPersonUsername(endpoint: String, username: String): AgentEntity?
 
 }

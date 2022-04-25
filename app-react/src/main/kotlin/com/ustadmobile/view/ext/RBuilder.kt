@@ -881,7 +881,7 @@ fun RBuilder.renderCourseBlockAssignment(
                     }
 
 
-                    if(item.assignment?.mark != null && item.assignment?.mark?.camPenalty != null){
+                    if(item.assignment?.mark != null && item.assignment?.mark?.camPenalty != 0){
                         styledSpan {
                             css {
                                 padding(right = 4.spacingUnits)
@@ -898,19 +898,23 @@ fun RBuilder.renderCourseBlockAssignment(
                         }
                     }
 
-                    if(item.assignment?.progressSummary?.hasMetricsPermission == false
-                        || item.assignment?.fileSubmissionStatus != 0){
+                    if(item.assignment?.progressSummary?.hasMetricsPermission == false){
 
-                        styledSpan {
+                        if(item.assignment?.fileSubmissionStatus != 0) {
 
-                            css{
-                                padding(right = 1.spacingUnits)
-                            }
-                            umIcon(ASSIGNMENT_STATUS_MAP[item.assignment?.fileSubmissionStatus ?: 0] ?: "",
-                                fontSize = IconFontSize.small
-                            ) {
+                            styledSpan {
+
                                 css {
-                                    marginTop = 1.px
+                                    padding(right = 1.spacingUnits)
+                                }
+                                umIcon(
+                                    ASSIGNMENT_STATUS_MAP[item.assignment?.fileSubmissionStatus
+                                        ?: 0] ?: "",
+                                    fontSize = IconFontSize.small
+                                ) {
+                                    css {
+                                        marginTop = 1.px
+                                    }
                                 }
                             }
                         }

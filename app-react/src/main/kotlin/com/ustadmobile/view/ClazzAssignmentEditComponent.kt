@@ -340,7 +340,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                                 variant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        entity?.cbMaxPoints = it.toInt()
+                                        entity?.cbMaxPoints = it.toIntOrNull() ?: 0
                                         caMaxPointsError = null
                                     }
                                 })
@@ -442,7 +442,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                                 variant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        entity?.assignment?.caNumberOfFiles = it.toInt()
+                                        entity?.assignment?.caNumberOfFiles = it.toIntOrNull() ?: 0
                                     }
                                 }
                             )
@@ -485,7 +485,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                                 variant = FormControlVariant.outlined,
                                 onChange = {
                                     setState {
-                                        entity?.assignment?.caTextLimit = it.toInt()
+                                        entity?.assignment?.caTextLimit = it.toIntOrNull() ?: 0
                                     }
                                 }
                             )

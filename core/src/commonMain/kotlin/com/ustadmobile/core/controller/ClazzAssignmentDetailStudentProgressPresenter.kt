@@ -192,11 +192,23 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                     // TODO error to server if no statmenet
                     return@withDoorTransactionAsync
                 }
-                val agentPersonUid = txDb.agentDao.getAgentUidFromPerson(
+                val agentPerson = txDb.agentDao.getAgentFromPersonUsername(
                     accountManager.activeAccount.endpointUrl, person.username ?: "")
+                    ?: AgentEntity().apply {
+                        agentPersonUid = accountManager.activeAccount.personUid
+                        agentAccountName = person.username
+                        agentHomePage = accountManager.activeAccount.endpointUrl
+                        agentUid = txDb.agentDao.insertAsync(this)
+                    }
 
-                val teacherAgentUid = txDb.agentDao.getAgentUidFromPerson(
+                val teacherAgent = txDb.agentDao.getAgentFromPersonUsername(
                     accountManager.activeAccount.endpointUrl, accountManager.activeAccount.username ?: "")
+                    ?: AgentEntity().apply {
+                        agentPersonUid = accountManager.activeAccount.personUid
+                        agentAccountName = accountManager.activeAccount.username
+                        agentHomePage = accountManager.activeAccount.endpointUrl
+                        agentUid = txDb.agentDao.insertAsync(this)
+                    }
 
                 val statementRef = XObjectEntity().apply {
                     objectId = statement.statementId
@@ -210,9 +222,9 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                     statementPersonUid = person.personUid
                     statementClazzUid = selectedClazzUid
                     xObjectUid = statementRef.xObjectUid
-                    agentUid = agentPersonUid
+                    agentUid = agentPerson.agentUid
                     contextRegistration = randomUuid().toString()
-                    instructorUid = teacherAgentUid
+                    instructorUid = teacherAgent.agentUid
                     resultCompletion = true
                     resultSuccess = StatementEntity.RESULT_SUCCESS
                     resultScoreRaw = gradeAfterPenalty.toLong()

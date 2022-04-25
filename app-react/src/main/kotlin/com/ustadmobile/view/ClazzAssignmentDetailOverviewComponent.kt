@@ -211,7 +211,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                     val mark = submissionMark
                     if(mark != null){
 
-                        val marks = getString(MessageID.points).format("${mark.camMark} / ${entity?.block?.cbMaxPoints}")
+                        val marks = "${mark.camMark} / ${entity?.block?.cbMaxPoints} ${getString(MessageID.points)}"
 
                         val penalty = if(mark.camPenalty != 0)
                             " ${getString(MessageID.late_penalty).format(entity?.block?.cbLateSubmissionPenalty ?: "")}"

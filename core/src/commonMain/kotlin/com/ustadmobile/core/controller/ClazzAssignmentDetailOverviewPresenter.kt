@@ -324,16 +324,21 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
 
             entity?.let { checkCanAddFileOrText(it) }
             
-
-            val agentPersonUid = repo.agentDao.getAgentUidFromPerson(
+            val agentPerson = repo.agentDao.getAgentFromPersonUsername(
                 accountManager.activeAccount.endpointUrl, accountManager.activeAccount.username ?: "")
+                ?: AgentEntity().apply {
+                    agentPersonUid = accountManager.activeAccount.personUid
+                    agentAccountName = accountManager.activeAccount.username
+                    agentHomePage = accountManager.activeAccount.endpointUrl
+                    agentUid = repo.agentDao.insertAsync(this)
+                }
 
             val submitStatement = StatementEntity().apply {
                 statementVerbUid = VerbEntity.VERB_SUBMITTED_UID
                 statementPersonUid = accountManager.activeAccount.personUid
                 statementClazzUid = entity?.caClazzUid ?: 0
                 xObjectUid = entity?.caXObjectUid ?: 0
-                agentUid = agentPersonUid
+                agentUid = agentPerson.agentUid
                 contextRegistration = randomUuid().toString()
                 timestamp = systemTimeInMillis()
                 stored = systemTimeInMillis()
