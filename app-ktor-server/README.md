@@ -11,11 +11,11 @@ in both production and development environment. It is built as KTOR server.
 ./gradlew app-ktor-server:shadowJar
 ```
 
-By default the Javascript (app-react) version will be built and bundled in the static resources
-directory. If you don't need this, it can be skipped by using
+By default the Javascript (app-react) version will not be built and bundled in the static resources
+directory. When building for production use:
 
 ```
-./gradlew app-ktor-server:shadowJar -Pskipreactproductionbundle=true
+./gradlew app-ktor-server:shadowJar -Pktorbundleproductionjs=true
 ```
 
 This builds the server jar which can be found in app-ktor-server/build/libs/ustad-server-all.jar .
