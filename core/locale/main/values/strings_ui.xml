@@ -1827,4 +1827,66 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
      -->
     <string name="post">Post</string>
 
+    <!-- Used in the context of assignments. E.g. each person in the class submits their own assignment,
+         not in groups.
+    -->
+    <string name="individual_submission">Individual submission</string>
+
+    <!-- Shown next to students who are not assigned to any group -->
+    <string name="unassigned">Unassigned</string>
+
+    <!-- used to display as an error when text is above the character or word limit -->
+    <string name="error_too_long_text">Text too long</string>
+
+    <!-- Used as an option for the course enrolment policy. When this option is selected, enrolment
+         is managed by the teacher or admin, and students must be invited or approved to join
+     -->
+    <string name="managed_enrolment">Managed - must be invited or approved</string>
+
+    <!-- used to display as an error when is editing an assignment with text or file submission turned off-->
+    <string name="text_file_submission_error">Must use text and/or file submission</string>
+
+    <!-- Used as an option on assignments. When selected, students must submit their assignment all
+         together at one time -->
+    <string name="submit_all_at_once_submission_policy">Must submit all at once</string>
+
+    <!-- Used as an option on assignments. When selected, students can submit their assignment in
+         multiple submissions (e.g. they can revise it)
+    -->
+    <string name="multiple_submission_allowed_submission_policy">Can make multiple submissions</string>
+
+    <!-- Used on course options to select enrolment policy for a course e.g. open, managed etc. -->
+    <string name="enrolment_policy">Enrolment policy</string>
+
+    <!-- Used on assignment options to select the policy for assignment submission -->
+    <string name="submission_policy">Submission policy</string>
+
+    <!-- Used to display as an error if student tries to submit assignment more than once when this
+         has been set as not allowed by the teacher or course admin
+     -->
+    <string name="submission_already_made">Submission already made</string>
+
+
+    <!-- used to display as an error when the teacher submits a grade thats greater than the maximum grade-->
+    <string name="grade_out_of_range">Grade must be between 0 and %1$s</string>
+
+    <!--
+    Button for the teacher to update their grade for an assignment submission
+    -->
+    <string name="update_grade">Update grade</string>
+
+    <!--
+    Button for a teacher to update their grade for an assignment submission, and then move to marking
+    the next submission.
+    -->
+    <string name="update_grade_and_mark_next">Update grade and mark next</string>
+
+
+    <!-- Used when adding a discussion block to a course -->
+    <string name="add_discussion">Add discussion</string>
+
+    <!-- Used when editing the options for a discussion block on a course -->
+    <string name="edit_discussion">Edit discussion</string>
+
+
 </resources>
