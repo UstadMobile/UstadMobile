@@ -29,12 +29,19 @@ https://github.com/UstadMobile/UstadMobile.git and wait for the project to impor
 * __Build it__ :
 Linux command line:
 ```
-./gradlew build
+./gradlew -Pktorbundleproductionjs=true build
 ```
 Windows command line:
 ```
-gradlew build
+gradlew  -Pktorbundleproductionjs=true build
 ```
+
+If you see compilation errors regarding MessageID, this seems to be caused by a gradle dependency
+ordering issue. Run:
+```
+gradlew core:prepareLocale
+```
+Then try again (Sorry).
 
 Start the server:
 
