@@ -442,20 +442,26 @@ class ClazzEdit2Presenter(
     }
 
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchoolAndTerminology) {
+        if(!view.fieldsEnabled)
+            return
+
+        view.fieldsEnabled = false
+
         presenterScope.launch {
 
             if (entity.clazzStartTime == 0L) {
                 view.clazzStartDateError = systemImpl.getString(MessageID.field_required_prompt, context)
+                view.fieldsEnabled = true
                 return@launch
             }
 
             if (entity.clazzEndTime <= entity.clazzStartTime) {
                 view.clazzEndDateError = systemImpl.getString(MessageID.end_is_before_start_error, context)
+                view.fieldsEnabled = true
                 return@launch
             }
 
             view.loading = true
-            view.fieldsEnabled = false
 
             entity.clazzStartTime = DateTime(entity.clazzStartTime)
                     .toOffsetByTimezone(entity.effectiveTimeZone).localMidnight.utc.unixMillisLong

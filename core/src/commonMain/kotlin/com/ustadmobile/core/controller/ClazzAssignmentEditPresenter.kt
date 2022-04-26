@@ -225,6 +225,12 @@ class ClazzAssignmentEditPresenter(context: Any,
 
 
     override fun handleClickSave(entity: CourseBlockWithEntity) {
+        if(!view.fieldsEnabled)
+            //Do nothing - prevent anger clicks
+            return
+
+        view.loading = true
+        view.fieldsEnabled = false
         presenterScope.launch {
 
             saveDateTimeIntoEntity(entity)
@@ -263,14 +269,11 @@ class ClazzAssignmentEditPresenter(context: Any,
                 view.showSnackBar(systemImpl.getString(MessageID.text_file_submission_error, context))
             }
 
-
             if(foundError){
+                view.loading = false
+                view.fieldsEnabled = true
                 return@launch
             }
-            
-
-            view.loading = true
-            view.fieldsEnabled = false
 
             // if grace period is not set, set the date to equal the deadline
             if(entity.cbGracePeriodDate == Long.MAX_VALUE){
@@ -282,7 +285,6 @@ class ClazzAssignmentEditPresenter(context: Any,
                             listOf(entity)))
 
             view.loading = false
-            view.fieldsEnabled = true
 
         }
     }
