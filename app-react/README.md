@@ -45,8 +45,8 @@ Start the webpack development server (in another terminal):
 $ ./gradlew app-react:browserDevelopmentRun --continuous
 ```
 
-Open a web browser on the address/port of the ktor http server e.g. http://localhost:8087/
-
+This will open a browser window that will attempt to connect to port 8080. Close it or ignore it,
+then open a new browser tab on the address/port of the ktor http server e.g. http://localhost:8087/
 
 * Generating webpack bundle
 This is a deployable bundle, it is standalone bundle which include everything needed for the app to run.

@@ -41,6 +41,11 @@ class ContainerEntryFile() {
 
     var lastModified: Long = 0
 
+    /**
+     * The Sub Resource Integrity (SRI) String e.g. sha384-base64
+     */
+    var cefIntegrity: String? = null
+
     constructor(md5: String, totalSize: Long, compressedSize: Long, compression: Int, lastModified: Long) : this() {
         this.cefMd5 = md5
         this.ceTotalSize = totalSize

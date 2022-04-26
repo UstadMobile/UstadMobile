@@ -29,10 +29,12 @@ https://github.com/UstadMobile/UstadMobile.git and wait for the project to impor
 * __Build it__ :
 Linux command line:
 ```
+./graldew core:prepareLocale
 ./gradlew build
 ```
 Windows command line:
 ```
+gradlew core:prepareLocale
 gradlew build
 ```
 
