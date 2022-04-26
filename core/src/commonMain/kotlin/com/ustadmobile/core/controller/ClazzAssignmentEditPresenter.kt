@@ -7,7 +7,6 @@ import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.fallbackIndividualSet
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -195,8 +194,10 @@ class ClazzAssignmentEditPresenter(context: Any,
     fun saveDateTimeIntoEntity(entity: CourseBlockWithEntity){
         val timeZone = view.timeZone ?: "UTC"
 
-        entity.cbHideUntilDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+        if(view.startDate != 0L){
+            entity.cbHideUntilDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
                 .localMidnight.utc.unixMillisLong + view.startTime
+        }
 
         if(view.deadlineDate != Long.MAX_VALUE){
             entity.cbDeadlineDate = DateTime(view.deadlineDate).toOffsetByTimezone(timeZone)
@@ -225,6 +226,12 @@ class ClazzAssignmentEditPresenter(context: Any,
 
 
     override fun handleClickSave(entity: CourseBlockWithEntity) {
+        if(!view.fieldsEnabled)
+            //Do nothing - prevent anger clicks
+            return
+
+        view.loading = true
+        view.fieldsEnabled = false
         presenterScope.launch {
 
             saveDateTimeIntoEntity(entity)
@@ -263,14 +270,11 @@ class ClazzAssignmentEditPresenter(context: Any,
                 view.showSnackBar(systemImpl.getString(MessageID.text_file_submission_error, context))
             }
 
-
             if(foundError){
+                view.loading = false
+                view.fieldsEnabled = true
                 return@launch
             }
-            
-
-            view.loading = true
-            view.fieldsEnabled = false
 
             // if grace period is not set, set the date to equal the deadline
             if(entity.cbGracePeriodDate == Long.MAX_VALUE){
@@ -282,7 +286,6 @@ class ClazzAssignmentEditPresenter(context: Any,
                             listOf(entity)))
 
             view.loading = false
-            view.fieldsEnabled = true
 
         }
     }

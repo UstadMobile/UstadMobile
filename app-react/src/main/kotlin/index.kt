@@ -3,6 +3,7 @@ import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -33,6 +34,8 @@ import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
 import react.RBuilder
 import react.RComponent
 import react.dom.render
@@ -97,6 +100,9 @@ fun main() {
 
             val di = ustadJsDi(dbBuilt, dbNodeIdAndAuth, appConfigs, apiUrl, defaultStringsXmlStr,
                 foreignStringXmlStr)
+
+            val systemImpl = di.direct.instance<UstadMobileSystemImpl>()
+            document.title = systemImpl.getString(MessageID.app_name, Any())
 
             render(rootElement){
                 val theme = createAppTheme()

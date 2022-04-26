@@ -94,9 +94,11 @@ class TextCourseBlockEditPresenter(context: Any, args: Map<String, String>, view
 
     override fun handleClickSave(entity: CourseBlock) {
         //Remove any previous error messages
+        view.fieldsEnabled = false
         presenterScope.launch {
             if(entity.cbTitle.isNullOrEmpty()){
                 view.blockTitleError = systemImpl.getString(MessageID.field_required_prompt, context)
+                view.fieldsEnabled = true
                 return@launch
             }
 
@@ -109,7 +111,6 @@ class TextCourseBlockEditPresenter(context: Any, args: Map<String, String>, view
                 listOf(entity)))
 
             view.loading = false
-            view.fieldsEnabled = true
         }
 
     }

@@ -15,13 +15,6 @@ the app-ktor-server module to proxy requests as needed to the webpack developmen
 avoiding cross-origin request (CORS) issues). The webpack development server runs on port 8080 by
 default.
 
-The server can be built using the normal Gradle build. Because the Javascript client files are
-provided via the webpack development server when running in development mode, you can also build the
-KTOR HTTP server without the production bundle (which is faster):
-```
-./gradlew -Pskipreactproductionbundle=true app-ktor-server:shadowJar
-```
-
 Copy app-ktor-server/src/resources/application.conf to app-ktor-server/, then edit it and uncomment
 the jsDevServer line
 
@@ -35,14 +28,19 @@ jsDevServer = "http://localhost:8080/"
 
 Run the http server:
 
+On Linux:
 ```
 $ ./runserver.sh
+```
+On Windows:
+```
+$ runserver.bat
 ```
 
 Start the webpack development server (in another terminal):
 
 ```
-$ ./gradlew app-react:browserDevelopmentRun --continuous
+$ gradlew app-react:browserDevelopmentRun --continuous
 ```
 
 This will open a browser window that will attempt to connect to port 8080. Close it or ignore it,
@@ -51,13 +49,14 @@ then open a new browser tab on the address/port of the ktor http server e.g. htt
 * Generating webpack bundle
 This is a deployable bundle, it is standalone bundle which include everything needed for the app to run.
 ```
-$ ./gradlew app-react:browserDevelopmentWebpack
+$ gradlew app-react:browserDevelopmentWebpack
 ```
 
 ### Production bundling with app-ktor-server
 
-By default when the KTOR HTTP server is built this web client application will be included as a
-static resource automatically.
+The production Javascript bundle will only be include with app-ktor-server if the ktorbundleproductionjs
+argument is set as follows:
 
-
-
+```
+$ gradlew app-ktor-server:shadowJar -Pktorbundleproductionjs=true
+```

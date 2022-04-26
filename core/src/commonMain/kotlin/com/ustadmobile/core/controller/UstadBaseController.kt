@@ -278,6 +278,8 @@ abstract class UstadBaseController<V : UstadView>(
             destBackStackEntry?.savedStateHandle?.set(saveToKey, result)
 
             requireNavController().popBackStack(saveToViewName, false)
+        }else {
+            requireNavController().popBackStack(UstadView.CURRENT_DEST, true)
         }
     }
 

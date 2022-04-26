@@ -25,6 +25,9 @@ import com.ustadmobile.core.util.test.waitUntil
 import org.kodein.di.DI
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.mockEditView
+import com.ustadmobile.core.util.verifyFieldsEnabled
+
 
 
 /**
@@ -50,7 +53,7 @@ class @BaseFileName@PresenterTest {
 
     @Before
     fun setup() {
-        mockView = mock { }
+        mockView = mockEditView { }
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
@@ -84,6 +87,7 @@ class @BaseFileName@PresenterTest {
         //TODO: Make some changes (e.g. as the user would do using data binding
         //e.g. initialEntity.someNameField = "Bob"
 
+        mockView.verifyFieldsEnabled()
         presenter.handleClickSave(initialEntity)
 
         val existingEntitiesLive = clientDbRule.db.@Entity_VariableName@Dao.findAllLive()
@@ -121,6 +125,7 @@ class @BaseFileName@PresenterTest {
         //Make some changes to the entity (e.g. as the user would do using data binding)
         //e.g. initialEntity!!.someName = "New Spelling Clazz"
 
+        mockView.verfiyFieldsEnabled()
         presenter.handleClickSave(initialEntity)
 
         runBlocking {

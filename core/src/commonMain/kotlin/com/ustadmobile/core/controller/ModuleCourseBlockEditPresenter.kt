@@ -94,9 +94,13 @@ class ModuleCourseBlockEditPresenter(context: Any, args: Map<String, String>, vi
 
     override fun handleClickSave(entity: CourseBlock) {
         //Remove any previous error messages
+        view.fieldsEnabled = false
+        view.loading = true
         presenterScope.launch {
             if(entity.cbTitle.isNullOrEmpty()){
                 view.blockTitleError = systemImpl.getString(MessageID.field_required_prompt, context)
+                view.fieldsEnabled = true
+                view.loading = false
                 return@launch
             }
 
@@ -109,7 +113,6 @@ class ModuleCourseBlockEditPresenter(context: Any, args: Map<String, String>, vi
                     listOf(entity)))
 
             view.loading = false
-            view.fieldsEnabled = true
         }
 
     }
