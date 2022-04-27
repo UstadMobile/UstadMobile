@@ -21,12 +21,12 @@ import kotlinx.serialization.Serializable
                 discussionTopicTitle, discussionTopicDesc, 
                 discussionTopicStartDate, discussionTopicCourseDiscussionUid,
                 discussionTopicVisible, discussionTopicArchive, discussionTopicStartedPersonUid,
-                discussionTopicLct)
+                discussionTopicIndex, discussionTopicLct)
                 VALUES(NEW.discussionTopicUid, 
                 NEW.discussionTopicTitle, NEW.discussionTopicDesc, 
                 NEW.discussionTopicStartDate, NEW.discussionTopicCourseDiscussionUid,
                 NEW.discussionTopicVisible, NEW.discussionTopicArchive, 
-                NEW.discussionTopicStartedPersonUid, NEW.discussionTopicLct)
+                NEW.discussionTopicStartedPersonUid, NEW.discussionTopicIndex, NEW.discussionTopicLct)
                 /*psql ON CONFLICT (discussionTopicUid) DO UPDATE 
                 SET discussionTopicTitle = EXCLUDED.discussionTopicTitle, 
                 discussionTopicDesc = EXCLUDED.discussionTopicDesc, 
@@ -35,6 +35,7 @@ import kotlinx.serialization.Serializable
                 discussionTopicVisible = EXCLUDED.discussionTopicVisible, 
                 discussionTopicArchive = EXCLUDED.discussionTopicArchive,
                 discussionTopicStartedPersonUid = EXCLUDED.discussionTopicStartedPersonUid,
+                discussionTopicIndex = EXCLUDED.discussionTopicIndex,
                 discussionTopicLct = EXCLUDED.discussionTopicLct
                 
                 */
@@ -61,6 +62,8 @@ open class DiscussionTopic() {
 
     //The person who started this topic
     var discussionTopicStartedPersonUid: Long = 0
+
+    var discussionTopicIndex: Int = 0
 
     @LastChangedTime
     @ReplicationVersionId

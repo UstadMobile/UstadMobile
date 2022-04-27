@@ -75,7 +75,7 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
          WHERE DiscussionTopic.discussionTopicCourseDiscussionUid = :discussionUid 
            AND CAST(DiscussionTopic.discussionTopicVisible AS INTEGER) = 1
            AND CAST(DiscussionTopic.discussionTopicArchive AS INTEGER) = 0
-      ORDER BY DiscussionTopic.discussionTopicStartDate DESC
+      ORDER BY DiscussionTopic.discussionTopicIndex
     """)
     abstract fun getListOfTopicsByDiscussion(discussionUid: Long)
         : DoorDataSourceFactory<Int, DiscussionTopicListDetail>

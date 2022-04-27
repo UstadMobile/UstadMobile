@@ -165,12 +165,25 @@
                 android:id="@+id/fragment_course_discussion_edit_topics_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:layout_marginBottom="64dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_course_discussion_edit_add_new_topic_button"
                 tools:itemCount="2"
                 tools:listitem="@layout/item_discussion_edit_topic" />
+
+
+            <com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
+                android:id="@+id/fragment_course_discussion_course_block_edit_topic_list_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_course_discussion_edit_add_new_topic_button"
+                tools:itemCount="4"
+                tools:listitem="@layout/item_discussion_topic_simple_draggable" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

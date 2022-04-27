@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "64bd6645ca5352833c099d74c52e4cd2",
+    "identityHash": "bbf5bce29879e49335ae8e7d77052cbf",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -10727,7 +10727,7 @@
       },
       {
         "tableName": "DiscussionTopic",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`discussionTopicUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `discussionTopicTitle` TEXT, `discussionTopicDesc` TEXT, `discussionTopicStartDate` INTEGER NOT NULL, `discussionTopicCourseDiscussionUid` INTEGER NOT NULL, `discussionTopicVisible` INTEGER NOT NULL, `discussionTopicArchive` INTEGER NOT NULL, `discussionTopicStartedPersonUid` INTEGER NOT NULL, `discussionTopicLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`discussionTopicUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `discussionTopicTitle` TEXT, `discussionTopicDesc` TEXT, `discussionTopicStartDate` INTEGER NOT NULL, `discussionTopicCourseDiscussionUid` INTEGER NOT NULL, `discussionTopicVisible` INTEGER NOT NULL, `discussionTopicArchive` INTEGER NOT NULL, `discussionTopicStartedPersonUid` INTEGER NOT NULL, `discussionTopicIndex` INTEGER NOT NULL, `discussionTopicLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "discussionTopicUid",
@@ -10774,6 +10774,12 @@
           {
             "fieldPath": "discussionTopicStartedPersonUid",
             "columnName": "discussionTopicStartedPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discussionTopicIndex",
+            "columnName": "discussionTopicIndex",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -10991,7 +10997,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '64bd6645ca5352833c099d74c52e4cd2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bbf5bce29879e49335ae8e7d77052cbf')"
     ]
   }
 }

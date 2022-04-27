@@ -37,7 +37,8 @@ import org.kodein.di.instance
 fun CourseBlockWithEntityDb.asCourseBlockWithEntity(topicList: List<DiscussionTopic>):
         CourseBlockWithEntity {
     val relevantTopics: List<DiscussionTopic> = topicList.filter {
-        it.discussionTopicCourseDiscussionUid == this.courseDiscussion?.courseDiscussionUid }
+        it.discussionTopicCourseDiscussionUid == this.courseDiscussion?.courseDiscussionUid
+    }.sortedBy { it.discussionTopicIndex }
 
     val courseBlockWithEntity = CourseBlockWithEntity()
     courseBlockWithEntity.createFromDb(this)

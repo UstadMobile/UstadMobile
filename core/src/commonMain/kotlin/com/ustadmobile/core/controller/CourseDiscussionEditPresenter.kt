@@ -14,6 +14,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.CourseDiscussionEditView
 import com.ustadmobile.core.view.DiscussionTopicEditView
+import com.ustadmobile.core.view.ItemTouchHelperListener
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -36,7 +37,8 @@ class CourseDiscussionEditPresenter(context: Any,
                                                                             arguments,
                                                                             view,
                                                                             di,
-                                                                            lifecycleOwner) {
+                                                                            lifecycleOwner),
+    ItemTouchHelperListener {
 
     private var clazzUid: Long = 0L
 
@@ -56,7 +58,7 @@ class CourseDiscussionEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.topics = topicsOneToManyJoinEditHelper.liveList
+        view.topicList = topicsOneToManyJoinEditHelper.liveList
 
     }
 
@@ -80,9 +82,6 @@ class CourseDiscussionEditPresenter(context: Any,
                 discussionTopicTitle = newTopic.discussionTopicTitle
                 discussionTopicDesc  = newTopic.discussionTopicDesc
             }
-
-//            foundTopic.discussionTopicCourseDiscussionUid = arguments[ARG_ENTITY_UID]?.toLong()
-//                ?: db.doorPrimaryKeyManager.nextId(CourseDiscussion.TABLE_ID)
 
             //Any updated title desc
             foundTopic.discussionTopicTitle = newTopic.discussionTopicTitle
@@ -242,6 +241,35 @@ class CourseDiscussionEditPresenter(context: Any,
         }
     }
 
+    override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
+        //TODO: check this
+
+        // 1. Get the list of topics
+
+        //2. Find the topic with fromPosition
+
+        //3. Update the topic with new Position (toPosition)
+
+        val currentList = topicsOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: mutableListOf()
+
+        val movingBlock = currentList[fromPosition]
+
+        currentList.remove(movingBlock)
+        currentList.add(toPosition, movingBlock)
+
+        // finally update the list with new index values
+        currentList.forEachIndexed{ index , item ->
+            item.discussionTopicIndex = index
+        }
+
+        topicsOneToManyJoinEditHelper.liveList.sendValue(currentList.toList())
+
+        return true
+    }
+
+    override fun onItemDismiss(position: Int) {
+        //Does nothing
+    }
 
 
 

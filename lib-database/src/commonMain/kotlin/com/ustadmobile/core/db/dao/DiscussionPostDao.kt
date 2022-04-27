@@ -2,12 +2,10 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.DiscussionPost
-import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
-import com.ustadmobile.lib.db.entities.DiscussionTopicListDetail
-import com.ustadmobile.lib.db.entities.UserSession
+import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
@@ -99,7 +97,38 @@ abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
     abstract fun getPostsByDiscussionTopic(discussionTopicUid: Long)
             : DoorDataSourceFactory<Int, DiscussionPostWithDetails>
 
-    
 
+    @Query("""
+        SELECT DiscussionPost.discussionPostTitle 
+          FROM DiscussionPost 
+         WHERE DiscussionPost.discussionPostUid = :postUid
+    """)
+    abstract suspend fun getPostTitle(postUid: Long): String?
+
+    @Query("""
+        SELECT * 
+         FROM DiscussionPost
+        WHERE DiscussionPost.discussionPostUid = :uid
+    """)
+    abstract suspend fun findByUid(uid: Long): DiscussionPost?
+
+
+    @Query("""
+        SELECT DiscussionPost.*,
+            Person.firstNames as authorPersonFirstNames,
+            Person.lastName as authorPersonLastName,
+            '' AS postLatestMessage,
+            '' AS postRepliesCount, 
+            DiscussionPost.discussionPostLct AS postLatestMessageTimestamp
+             
+          FROM DiscussionPost     
+          LEFT JOIN Person ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
+         WHERE DiscussionPost.discussionPostUid = :uid
+           
+    """)
+    abstract suspend fun findWithDetailsByUid(uid: Long): DiscussionPostWithDetails?
+
+    @Update
+    abstract suspend fun updateAsync(entity: DiscussionPost): Int
 
 }

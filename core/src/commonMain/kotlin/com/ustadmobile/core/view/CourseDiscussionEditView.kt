@@ -13,7 +13,7 @@ interface CourseDiscussionEditView: UstadEditView<CourseBlockWithEntity> {
 
     var timeZone: String?
 
-    var topics: DoorMutableLiveData<List<DiscussionTopic>>?
+    var topicList: DoorMutableLiveData<List<DiscussionTopic>>?
 
     companion object {
 

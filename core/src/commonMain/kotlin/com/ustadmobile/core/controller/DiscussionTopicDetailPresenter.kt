@@ -50,13 +50,18 @@ class DiscussionTopicDetailPresenter(
 
 
     fun onClickAddPost() {
+        val topicUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         navigateForResult(
             NavigateForResultOptions(
                 this, null,
                 DiscussionPostEditView.VIEW_NAME,
                 DiscussionPost::class,
                 DiscussionPost.serializer(),
-                RESULT_NEW_POST
+                RESULT_NEW_POST,
+                arguments = mutableMapOf(
+                    DiscussionPostEditPresenter.ARG_DISCUSSION_TOPIC_UID to
+                            topicUid.toString()
+                )
             )
         )
     }

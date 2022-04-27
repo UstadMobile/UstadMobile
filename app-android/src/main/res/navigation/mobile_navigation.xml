@@ -179,6 +179,14 @@
         android:id="@+id/course_discussion_detail_dest"
         android:name="com.ustadmobile.port.android.view.CourseDiscussionDetailFragment" />
 
+ <fragment
+        android:id="@+id/discussion_post_edit_dest"
+        android:name="com.ustadmobile.port.android.view.DiscussionPostEditFragment" />
+
+ <fragment
+        android:id="@+id/discussion_post_detail_dest"
+        android:name="com.ustadmobile.port.android.view.DiscussionPostDetailFragment" />
+
     <fragment
         android:id="@+id/clazz_assignment_detail_dest"
         android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailFragment"/>

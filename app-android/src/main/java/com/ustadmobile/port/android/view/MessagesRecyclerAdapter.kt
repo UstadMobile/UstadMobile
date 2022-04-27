@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemMessageListBinding
-import com.ustadmobile.core.controller.ChatDetailPresenter
+import com.ustadmobile.core.controller.MessagesPresenter
 import com.ustadmobile.lib.db.entities.MessageRead
 import com.ustadmobile.lib.db.entities.MessageWithPerson
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -18,7 +18,7 @@ import me.saket.bettermovementmethod.BetterLinkMovementMethod
 class MessagesRecyclerAdapter(
     val loggedInPersonUid: Long,
     private val presenterScope: CoroutineScope?,
-    private val presenter: ChatDetailPresenter?
+    private val presenter: MessagesPresenter?
 ): SelectablePagedListAdapter<MessageWithPerson,
         MessagesRecyclerAdapter.MessageWithPersonViewHolder>(DIFF_CALLBACK_COMMENTS) {
 
