@@ -10,33 +10,43 @@ import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.io.ByteArrayInputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import com.ustadmobile.door.ext.openInputStream
 import org.kodein.di.DI
 import com.ustadmobile.core.contentformats.har.HarEntry
+import com.ustadmobile.core.io.ChecksumResults
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.ext.maxQueryParamListSize
 import kotlinx.coroutines.NonCancellable
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import java.io.*
+import java.security.MessageDigest
 import java.util.*
+import java.util.zip.CRC32
+import com.ustadmobile.retriever.io.NullOutputStream
 
-actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
-                                                   recursive: Boolean, context:Any, di: DI,
-                                                   addOptions: ContainerAddOptions) {
+actual suspend fun UmAppDatabase.addDirToContainer(
+    containerUid: Long,
+    dirUri: DoorUri,
+    recursive: Boolean,
+    context:Any,
+    di: DI,
+    addOptions: ContainerAddOptions
+) {
 
     val repo = this as? DoorDatabaseRepository
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase
+    val md5Digest = MessageDigest.getInstance("MD5")
+    val sha256Digest = MessageDigest.getInstance("SHA-256")
+    val crc32 = CRC32()
 
     dirUri.toFile().listFiles()?.forEach { childFile ->
         withContext(NonCancellable) {
             db.addFileToContainerInternal(containerUid, childFile, recursive, addOptions,
-                        "", context = context, di = di)
+                        "", context = context, di = di, md5Digest = md5Digest,
+                sha256Digest = sha256Digest, crc32 = crc32)
         }
     }
 
@@ -55,9 +65,15 @@ actual suspend fun UmAppDatabase.addFileToContainer(
     val repo = this as? DoorDatabaseRepository
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase
+
+    val md5Digest = MessageDigest.getInstance("MD5")
+    val sha256Digest = MessageDigest.getInstance("SHA-256")
+    val crc32 = CRC32()
+
     withContext(NonCancellable) {
         db.addFileToContainerInternal(containerUid, fileUri.toFile(), false,
-                addOptions, "", pathInContainer, context, di)
+                addOptions, "", pathInContainer, context, di = di, md5Digest = md5Digest,
+            sha256Digest = sha256Digest, crc32 = crc32)
         containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(
             containerUid, getSystemTimeInMillis())
     }
@@ -87,6 +103,9 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(
     relativePathPrefix: String,
     fixedPath: String? = null,
     context: Any,
+    md5Digest: MessageDigest,
+    sha256Digest: MessageDigest,
+    crc32: CRC32,
     di: DI
 ) {
 
@@ -103,20 +122,19 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(
         val compress = addOptions.compressionFilter.shouldCompress(entryPath,
                 file.toDoorUri().guessMimeType(context, di))
 
-        val md5Sum = withContext(Dispatchers.IO) {
-            if(compress) {
-                file.gzipAndGetMd5(tmpFile)
-            }else if(addOptions.moveFiles) {
-                file.md5Sum
+        val checksums: ChecksumResults = withContext(Dispatchers.IO) {
+            if(addOptions.moveFiles) {
+                file.copyToAndGetDigests(NullOutputStream(), false, md5Digest, sha256Digest, crc32)
             }else {
-                file.copyAndGetMd5(tmpFile)
+                file.copyToAndGetDigests(tmpFile, compress, md5Digest, sha256Digest, crc32)
             }
+
         }
 
-        val md5Hex = md5Sum.toHexString()
+        val md5Hex = checksums.md5.toHexString()
 
         //check if we already have this file in the database
-        var containerFile = containerEntryFileDao.findEntryByMd5Sum(md5Sum.encodeBase64())
+        var containerFile = containerEntryFileDao.findEntryByMd5Sum(checksums.md5.encodeBase64())
 
         if(containerFile == null) {
             val finalDestFile = File(containerUidFolder, md5Hex)
@@ -129,7 +147,9 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(
             }
 
             containerFile = finalDestFile.toContainerEntryFile(totalSize = file.length(),
-                    md5Sum =  md5Sum, gzipped = compress).apply {
+                    md5Sum =  checksums.md5, gzipped = compress).apply {
+                this.cefIntegrity = "sha256-" + checksums.sha256.encodeBase64()
+                this.cefCrc32 = checksums.crc32
                 this.cefUid = containerEntryFileDao.insertAsync(this)
             }
         }
@@ -148,7 +168,8 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(
             withContext(NonCancellable) {
                 addFileToContainerInternal(containerUid, childFile, true, addOptions,
                         relativePathPrefix = "$relativePathPrefix${file.name}/",
-                        context = context, di = di)
+                        context = context, di = di, md5Digest = md5Digest,
+                        sha256Digest = sha256Digest, crc32 = crc32)
             }
         }
     }
@@ -234,7 +255,9 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(
         val md5Sum: ByteArray,
         val pathInContainer: String,
         val isCompressed: Boolean,
-        val uncompressedSize: Long
+        val uncompressedSize: Long,
+        val sha256: ByteArray,
+        val crc32: Long,
     ) {
         val md5Base64: String by lazy(LazyThreadSafetyMode.NONE) {
             md5Sum.encodeBase64()
@@ -245,6 +268,9 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(
         val storageDirFile = addOptions.storageDirUri.toFile()
         val containerDir = File(storageDirFile, containerUid.toString())
         containerDir.takeIf { !it.exists() } ?.mkdirs()
+        val sha256MessageDigest = MessageDigest.getInstance("SHA-256")
+        val md5MessageDigest = MessageDigest.getInstance("MD5")
+        val crc32 = CRC32()
 
         val zipFilesToAdd = mutableListOf<FileToAdd>()
         zipInputStream.use { zipIn ->
@@ -261,8 +287,13 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(
 
                 val entryTmpFile = File(containerDir, "${fileCounter++}.tmp")
                 val useGzip = addOptions.compressionFilter.shouldCompress(nameInZip, null)
-                val entryMd5 = zipIn.writeToFileAndGetMd5(entryTmpFile, useGzip)
-                zipFilesToAdd += FileToAdd(entryTmpFile, entryMd5, nameInZip, useGzip, zipEntry.size)
+                val checksumResults: ChecksumResults= zipIn.copyToAndGetDigests(entryTmpFile, useGzip, md5MessageDigest,
+                    sha256MessageDigest, crc32)
+                zipFilesToAdd += FileToAdd(entryTmpFile, checksumResults.md5, nameInZip, useGzip,
+                    zipEntry.size, checksumResults.sha256, checksumResults.crc32)
+                md5MessageDigest.reset()
+                sha256MessageDigest.reset()
+                crc32.reset()
             }
         }
 
@@ -297,6 +328,8 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(
                 ceCompressedSize = destFile.length()
                 ceTotalSize = fileToAdd.uncompressedSize
                 cefPath = destFile.absolutePath
+                cefIntegrity = "sha256-" + fileToAdd.sha256.encodeBase64()
+                cefCrc32 = fileToAdd.crc32
             }
         }
 

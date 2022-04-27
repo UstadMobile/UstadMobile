@@ -122,6 +122,7 @@ suspend fun UmAppDatabase.initAdminUser(
     }
 }
 
+
 fun UmAppDatabase.ktorInitRepo(di: DI) {
     insertDefaultSite()
     insertCourseTerminology(di)

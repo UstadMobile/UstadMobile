@@ -222,5 +222,13 @@ abstract class ContentJobItemDao {
     """)
     abstract suspend fun findAllContainersByJobUid(jobUid: Long): List<Long>
 
+    @Query("""
+        SELECT EXISTS(
+               SELECT ContentJobItem.*
+                 FROM ContentJobItem
+                WHERE cjiPluginId = :pluginId) 
+    """)
+    abstract suspend fun hasContentJobItemWithPluginId(pluginId: Int): Boolean
+
 
 }

@@ -2,9 +2,13 @@ package com.ustadmobile.core.io.ext
 import java.io.File
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.io.ChecksumResults
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import okhttp3.internal.closeQuietly
+import java.io.FileInputStream
 import java.io.IOException
+import java.io.OutputStream
+import java.security.MessageDigest
+import java.util.zip.CRC32
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPInputStream.GZIP_MAGIC
 
@@ -63,3 +67,30 @@ fun File.isGzipped(): Boolean{
         return nread == 2 && signature[0] == GZIP_MAGIC.toByte() && signature[1] == (GZIP_MAGIC shr 8).toByte()
     }
 }
+
+@Suppress("BlockingMethodInNonBlockingContext")
+suspend fun File.copyToAndGetDigests(
+    destination: OutputStream,
+    gzip: Boolean,
+    md5MessageDigest: MessageDigest,
+    sha256MessageDigest: MessageDigest,
+    crc32: CRC32,
+) : ChecksumResults {
+    return FileInputStream(this).use { inStream ->
+        inStream.copyToAndGetDigests(destination, gzip, md5MessageDigest, sha256MessageDigest, crc32)
+    }
+}
+
+@Suppress("BlockingMethodInNonBlockingContext")
+suspend fun File.copyToAndGetDigests(
+    destination: File,
+    gzip: Boolean,
+    md5MessageDigest: MessageDigest,
+    sha256MessageDigest: MessageDigest,
+    crc32: CRC32,
+) : ChecksumResults {
+    return FileInputStream(this).use { inStream ->
+        inStream.copyToAndGetDigests(destination, gzip, md5MessageDigest, sha256MessageDigest, crc32)
+    }
+}
+

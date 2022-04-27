@@ -20,6 +20,7 @@ import org.kodein.di.DI
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.IOException
 import java.util.zip.*
 
 class UmAppDatabaseContainerIoExtTest {
@@ -89,18 +90,23 @@ class UmAppDatabaseContainerIoExtTest {
         lateinit var entry: ZipEntry
         ZipInputStream(FileInputStream(zip)).use { zipIn ->
             while(zipIn.nextEntry?.also { entry = it } != null) {
-                val containerEntryBytes = db.containerEntryDao
-                    .openEntryInputStream(containerUid, entry.name)?.readBytes()
-                val containerEntryWithFile = db.containerEntryDao.findByPathInContainer(
-                    containerUid, entry.name)
-                val entryFile = File(containerEntryWithFile!!.containerEntryFile!!.cefPath!!)
-                Assert.assertEquals("Compressed size is the size of actual file for ${entry.name}",
-                    entryFile.length(), containerEntryWithFile!!.containerEntryFile!!.ceCompressedSize)
-                Assert.assertEquals("Uncompressed size matches for ${entry.name}",
-                    containerEntryBytes!!.size.toLong(),
-                    containerEntryWithFile!!.containerEntryFile!!.ceTotalSize)
-                Assert.assertArrayEquals("Entry bytes are the same for ${entry.name}",
-                    zipIn.readBytes(), containerEntryBytes)
+                try {
+                    val containerEntryBytes = db.containerEntryDao
+                        .openEntryInputStream(containerUid, entry.name)?.readBytes()
+                    val containerEntryWithFile = db.containerEntryDao.findByPathInContainer(
+                        containerUid, entry.name)
+                    val entryFile = File(containerEntryWithFile!!.containerEntryFile!!.cefPath!!)
+                    Assert.assertEquals("Compressed size is the size of actual file for ${entry.name}",
+                        entryFile.length(), containerEntryWithFile!!.containerEntryFile!!.ceCompressedSize)
+                    Assert.assertEquals("Uncompressed size matches for ${entry.name}",
+                        containerEntryBytes!!.size.toLong(),
+                        containerEntryWithFile!!.containerEntryFile!!.ceTotalSize)
+                    Assert.assertArrayEquals("Entry bytes are the same for ${entry.name}",
+                        zipIn.readBytes(), containerEntryBytes)
+                }catch(e: Exception) {
+                    throw IOException("Could not read ${entry.name}", e)
+                }
+
             }
         }
     }

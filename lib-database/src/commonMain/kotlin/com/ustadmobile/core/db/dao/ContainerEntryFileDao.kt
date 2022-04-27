@@ -124,6 +124,23 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefMd5 = :md5Sum")
     abstract suspend fun findEntryByMd5Sum(md5Sum: String): ContainerEntryFile?
 
+
+    @Query("""
+        SELECT ContainerEntryFile.*
+          FROM ContainerEntryFile
+         WHERE ContainerEntryFile.cefIntegrity IS NULL 
+         LIMIT :limit
+    """)
+    abstract suspend fun findEntriesWithoutIntegrity(limit: Int): List<ContainerEntryFile>
+
+
+    @Query("""
+        UPDATE ContainerEntryFile
+           SET cefIntegrity = :integrity
+         WHERE cefUid = :cefUid
+    """)
+    abstract suspend fun updateIntegrity(cefUid: Long, integrity: String)
+
     companion object {
 
         const val ENDPOINT_CONCATENATEDFILES = "ConcatenatedContainerFiles"
