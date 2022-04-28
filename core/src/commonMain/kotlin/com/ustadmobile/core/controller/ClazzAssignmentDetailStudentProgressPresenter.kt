@@ -5,9 +5,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.getOs
-import com.ustadmobile.core.impl.getOsVersion
-import com.ustadmobile.core.impl.nav.viewUri
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.util.ext.roundTo
@@ -21,10 +18,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.withDoorTransactionAsync
-import com.ustadmobile.door.util.randomUuid
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -201,67 +195,67 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                 view.showSnackBar(systemImpl.getString(MessageID.saved, context))
 
                 // TODO needs to change to check for group instead of student
-                val statement = txDb.statementDao.findSubmittedStatementFromStudent(
-                    selectedSubmitterUid, assignment.caXObjectUid)
-                if(statement == null){
-                    val message = "no submission statement for $selectedSubmitterUid for assignment $selectedClazzAssignmentUid"
-                    txDb.errorReportDao.insertAsync(ErrorReport().apply {
-                        errorCode = 404
-                        severity = ErrorReport.SEVERITY_ERROR
-                        this.message = message
-                        osVersion = getOsVersion()
-                        operatingSys = getOs()
-                        timestamp = systemTimeInMillis()
-                        presenterUri = ustadNavController?.currentBackStackEntry?.viewUri
-                    })
-                    Napier.e("Course Student Progress - $message")
-                    return@withDoorTransactionAsync
-                }
-                // get group username
-                val agentPerson = txDb.agentDao.getAgentFromPersonUsername(
-                    accountManager.activeAccount.endpointUrl, "")
-                    ?: AgentEntity().apply {
-                        agentPersonUid = accountManager.activeAccount.personUid
-                        agentAccountName = ""
-                        agentHomePage = accountManager.activeAccount.endpointUrl
-                        agentUid = txDb.agentDao.insertAsync(this)
-                    }
+                /*  val statement = txDb.statementDao.findSubmittedStatementFromStudent(
+                   selectedSubmitterUid, assignment.caXObjectUid)
+               if(statement == null){
+                   val message = "no submission statement for $selectedSubmitterUid for assignment $selectedClazzAssignmentUid"
+                   txDb.errorReportDao.insertAsync(ErrorReport().apply {
+                       errorCode = 404
+                       severity = ErrorReport.SEVERITY_ERROR
+                       this.message = message
+                       osVersion = getOsVersion()
+                       operatingSys = getOs()
+                       timestamp = systemTimeInMillis()
+                       presenterUri = ustadNavController?.currentBackStackEntry?.viewUri
+                   })
+                   Napier.e("Course Student Progress - $message")
+                   return@withDoorTransactionAsync
+               }
+               // TODO get group username
+               val agentPerson = txDb.agentDao.getAgentFromPersonUsername(
+                   accountManager.activeAccount.endpointUrl, "")
+                   ?: AgentEntity().apply {
+                       agentPersonUid = accountManager.activeAccount.personUid
+                       agentAccountName = ""
+                       agentHomePage = accountManager.activeAccount.endpointUrl
+                       agentUid = txDb.agentDao.insertAsync(this)
+                   }
 
-                val teacherAgent = txDb.agentDao.getAgentFromPersonUsername(
-                    accountManager.activeAccount.endpointUrl, accountManager.activeAccount.username ?: "")
-                    ?: AgentEntity().apply {
-                        agentPersonUid = accountManager.activeAccount.personUid
-                        agentAccountName = accountManager.activeAccount.username
-                        agentHomePage = accountManager.activeAccount.endpointUrl
-                        agentUid = txDb.agentDao.insertAsync(this)
-                    }
+               val teacherAgent = txDb.agentDao.getAgentFromPersonUsername(
+                   accountManager.activeAccount.endpointUrl, accountManager.activeAccount.username ?: "")
+                   ?: AgentEntity().apply {
+                       agentPersonUid = accountManager.activeAccount.personUid
+                       agentAccountName = accountManager.activeAccount.username
+                       agentHomePage = accountManager.activeAccount.endpointUrl
+                       agentUid = txDb.agentDao.insertAsync(this)
+                   }
 
-                val statementRef = XObjectEntity().apply {
-                    objectId = statement.statementId
-                    objectType = "StatementRef"
-                    objectStatementRefUid = statement.statementUid
-                    xObjectUid = txDb.xObjectDao.insertAsync(this)
-                }
+               val statementRef = XObjectEntity().apply {
+                   objectId = statement.statementId
+                   objectType = "StatementRef"
+                   objectStatementRefUid = statement.statementUid
+                   xObjectUid = txDb.xObjectDao.insertAsync(this)
+               }
 
-                // check statementPersonUid for group
-                val scoreStatement = StatementEntity().apply {
-                    statementVerbUid = VerbEntity.VERB_SCORED_UID
-                    statementPersonUid = selectedSubmitterUid
-                    statementClazzUid = selectedClazzUid
-                    xObjectUid = statementRef.xObjectUid
-                    agentUid = agentPerson.agentUid
-                    contextRegistration = randomUuid().toString()
-                    instructorUid = teacherAgent.agentUid
-                    resultCompletion = true
-                    resultSuccess = StatementEntity.RESULT_SUCCESS
-                    resultScoreRaw = gradeAfterPenalty.toLong()
-                    resultScoreMax = maxPoints.toLong()
-                    resultScoreScaled = (gradeAfterPenalty / (resultScoreMax))
-                    timestamp = systemTimeInMillis()
-                    stored = systemTimeInMillis()
-                    fullStatement = "" // TODO
-                }
-                txDb.statementDao.insertAsync(scoreStatement)
+               // check statementPersonUid for group
+               val scoreStatement = StatementEntity().apply {
+                   statementVerbUid = VerbEntity.VERB_SCORED_UID
+                   statementPersonUid = selectedSubmitterUid
+                   statementClazzUid = selectedClazzUid
+                   xObjectUid = statementRef.xObjectUid
+                   agentUid = agentPerson.agentUid
+                   contextRegistration = randomUuid().toString()
+                   instructorUid = teacherAgent.agentUid
+                   resultCompletion = true
+                   resultSuccess = StatementEntity.RESULT_SUCCESS
+                   resultScoreRaw = gradeAfterPenalty.toLong()
+                   resultScoreMax = maxPoints.toLong()
+                   resultScoreScaled = (gradeAfterPenalty / (resultScoreMax))
+                   timestamp = systemTimeInMillis()
+                   stored = systemTimeInMillis()
+                   fullStatement = "" // TODO
+               }
+               txDb.statementDao.insertAsync(scoreStatement)*/
 
             }
 

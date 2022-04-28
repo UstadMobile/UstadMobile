@@ -21,7 +21,6 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.withDoorTransactionAsync
-import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.launch
@@ -361,7 +360,8 @@ class ClazzAssignmentDetailOverviewPresenter(
 
                 entity?.let { checkCanAddFileOrText(it) }
 
-                val agentPerson = txDb.agentDao.getAgentFromPersonUsername(
+                // TODO need to handle groups
+               /* val agentPerson = txDb.agentDao.getAgentFromPersonUsername(
                     accountManager.activeAccount.endpointUrl,
                     accountManager.activeAccount.username ?: ""
                 ) ?: AgentEntity().apply {
@@ -382,7 +382,7 @@ class ClazzAssignmentDetailOverviewPresenter(
                     stored = systemTimeInMillis()
                     fullStatement = "" // TODO
                 }
-                txDb.statementDao.insertAsync(submitStatement)
+                txDb.statementDao.insertAsync(submitStatement)*/
             }
 
             submissionList.clear()
