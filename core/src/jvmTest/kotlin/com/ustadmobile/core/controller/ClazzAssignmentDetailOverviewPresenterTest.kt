@@ -609,7 +609,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
 
     @Test
-    fun givenUserNotAssignedInGroup_whenShown_displayErrorAndDontShowSubmitAndAddTextFileButtons(){
+    fun givenUserNotAssignedInGroup_whenShown_displayErrorAndDontShowSubmitAndAddTextFileButtonsAndPrivateOff(){
         createPerson(ClazzEnrolment.ROLE_STUDENT)
 
         val group = CourseGroupSet().apply {
@@ -653,7 +653,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         verify(mockView, timeout(1000).times(2)).addFileSubmissionVisible = eq(false)
         verify(mockView, timeout(5000).times(2)).submittedCourseAssignmentSubmission = any()
         verify(mockView, timeout(1000).times(2)).submissionStatus = eq(0)
-        verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(true)
+        verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(false)
         verify(mockView, timeout(1000).times(2)).clazzAssignmentClazzComments = any()
 
     }
