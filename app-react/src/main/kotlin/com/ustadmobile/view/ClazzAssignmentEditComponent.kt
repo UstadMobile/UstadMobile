@@ -14,7 +14,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.renderBlockCommonFields
+import com.ustadmobile.view.ext.renderCourseBlockCommonFields
 import com.ustadmobile.view.ext.renderListItemWithTitleAndSwitch
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -306,7 +306,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                         }
                     )
 
-                    renderBlockCommonFields(entity,
+                    renderCourseBlockCommonFields(entity,
                         doNotShowBeforeLabel, startDate, startTimeLabel,
                         dateSet = {
                             setState{

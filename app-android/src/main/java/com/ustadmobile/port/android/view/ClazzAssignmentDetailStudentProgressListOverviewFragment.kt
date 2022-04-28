@@ -8,33 +8,33 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemAssignmentDetailAttemptBinding
-import com.ustadmobile.core.controller.AttemptListListener
 import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressOverviewListPresenter
+import com.ustadmobile.core.controller.SubmissionSummaryListener
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
-import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
+import com.ustadmobile.lib.db.entities.PersonGroupAssignmentSummary
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
-class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewFragment<PersonWithAttemptsSummary, PersonWithAttemptsSummary>(),
+class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewFragment<PersonGroupAssignmentSummary, PersonGroupAssignmentSummary>(),
         ClazzAssignmentDetailStudentProgressOverviewListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
 
     private var progressSummaryAdapter: AssignmentProgressSummaryRecyclerAdapter? = null
     private var mPresenter: ClazzAssignmentDetailStudentProgressOverviewListPresenter? = null
 
-    override val listPresenter: UstadListPresenter<*, in PersonWithAttemptsSummary>?
+    override val listPresenter: UstadListPresenter<*, in PersonGroupAssignmentSummary>?
         get() = mPresenter
 
     override var autoMergeRecyclerViewAdapter: Boolean = false
 
 
-    class PersonWithAssignmentStatementDisplayListRecyclerAdapter(var listener: AttemptListListener?):
-            SelectablePagedListAdapter<PersonWithAttemptsSummary,
+    class PersonWithAssignmentStatementDisplayListRecyclerAdapter(var listener: SubmissionSummaryListener?):
+            SelectablePagedListAdapter<PersonGroupAssignmentSummary,
                     PersonWithAssignmentStatementDisplayListRecyclerAdapter
                     .PersonWithStatementDisplayListViewHolder>(DIFF_CALLBACK) {
 
@@ -50,7 +50,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
         override fun onBindViewHolder(holder: PersonWithStatementDisplayListViewHolder, position: Int) {
             val item = getItem(position)
             holder.itemBinding.person = item
-            holder.itemView.tag = item?.personUid
+            holder.itemView.tag = item?.submitterUid
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
@@ -117,16 +117,18 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
         }
 
     companion object {
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<PersonWithAttemptsSummary> = object
-            : DiffUtil.ItemCallback<PersonWithAttemptsSummary>() {
-            override fun areItemsTheSame(oldItem: PersonWithAttemptsSummary,
-                                         newItem: PersonWithAttemptsSummary): Boolean {
-                return oldItem.personUid == newItem.personUid
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<PersonGroupAssignmentSummary> = object
+            : DiffUtil.ItemCallback<PersonGroupAssignmentSummary>() {
+            override fun areItemsTheSame(oldItem: PersonGroupAssignmentSummary,
+                                         newItem: PersonGroupAssignmentSummary): Boolean {
+                return oldItem.submitterUid == newItem.submitterUid
             }
 
-            override fun areContentsTheSame(oldItem: PersonWithAttemptsSummary,
-                                            newItem: PersonWithAttemptsSummary): Boolean {
-                return oldItem == newItem
+            override fun areContentsTheSame(oldItem: PersonGroupAssignmentSummary,
+                                            newItem: PersonGroupAssignmentSummary): Boolean {
+                return oldItem.name == newItem.name
+                        && oldItem.latestPrivateComment == newItem.latestPrivateComment
+                        && oldItem.fileSubmissionStatus == newItem.fileSubmissionStatus
             }
         }
     }

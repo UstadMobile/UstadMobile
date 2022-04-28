@@ -98,9 +98,6 @@ open class ClazzAssignment {
 
         const val TABLE_ID = 520
 
-        const val SUBMISSION_TYPE_INDIVIDUAL = 1
-        const val SUBMISSION_TYPE_GROUP = 2
-
         const val SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE = 1
         const val SUBMISSION_POLICY_MULTIPLE_ALLOWED = 2
 

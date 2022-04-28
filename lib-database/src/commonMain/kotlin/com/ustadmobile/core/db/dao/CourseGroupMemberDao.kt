@@ -107,6 +107,15 @@ abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
     """)
     abstract suspend fun findByGroupSetOrderedAsync(setUid: Long, clazzUid: Long): List<CourseGroupMemberPerson>
 
+    @Query("""
+        SELECT * 
+          FROM CourseGroupMember
+         WHERE cgmPersonUid = :studentUid 
+          AND cgmSetUid = :groupSetUid
+         LIMIT 1
+    """)
+    abstract suspend fun findByPersonUid(groupSetUid: Long, studentUid: Long): CourseGroupMember?
+
     @Insert
     abstract suspend fun insertListAsync(entityList: List<CourseGroupMember>)
 

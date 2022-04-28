@@ -110,8 +110,8 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                           ${Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS}
                           ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
                  WHERE Clazz.clazzUid = :clazzUid
-                   AND PrsGrpMbr.groupMemberPersonUid = :personUid))
-
+                   AND PrsGrpMbr.groupMemberPersonUid = :personUid))    
+                 
         SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, ContentEntryParentChildJoin.*, 
                Container.*, CourseAssignmentMark.*, (CourseBlock.cbUid NOT IN (:collapseList)) AS expanded,
                
@@ -130,6 +130,8 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                 0 as penalty,
                 
                 (SELECT hasPermission FROM CtePermissionCheck) AS hasMetricsPermission,
+                
+             
                  (SELECT COUNT(*) 
                         FROM ClazzEnrolment 
                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid 
@@ -149,7 +151,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                               AND ClazzAssignment.caUid = CourseAssignmentSubmission.casAssignmentUid
                              
                               LEFT JOIN CourseAssignmentMark
-                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
+                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camSubmitterUid
                               AND ClazzAssignment.caUid = CourseAssignmentMark.camAssignmentUid
                               
                         WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
@@ -161,10 +163,10 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                
                 (CASE WHEN (SELECT hasPermission 
                            FROM CtePermissionCheck)
-                   THEN (SELECT COUNT(DISTINCT(CourseAssignmentMark.camStudentUid)) 
+                   THEN (SELECT COUNT(DISTINCT(CourseAssignmentMark.camSubmitterUid)) 
                            FROM CourseAssignmentMark 
                                 JOIN ClazzEnrolment
-                                ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
+                                ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camSubmitterUid
                                 
                           WHERE CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
                             AND ClazzEnrolment.clazzEnrolmentActive
@@ -230,7 +232,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                       ON camUid = (SELECT camUid 
                                      FROM CourseAssignmentMark
                                     WHERE camAssignmentUid = ClazzAssignment.caUid
-                                      AND camStudentUid = :personUid
+                                      AND camSubmitterUid = :personUid
                                  ORDER BY camLct DESC
                                     LIMIT 1)
          WHERE CourseBlock.cbClazzUid = :clazzUid

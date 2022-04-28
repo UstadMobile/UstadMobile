@@ -662,7 +662,7 @@ fun RBuilder.renderPersonWithAttemptProgress(
 
 
 fun RBuilder.renderAssignmentSubmittedProgress(
-    item: PersonWithAttemptsSummary,
+    item: PersonGroupAssignmentSummary,
     systemImpl: UstadMobileSystemImpl,
     onMainList: Boolean = false){
     umGridContainer{
@@ -672,13 +672,13 @@ fun RBuilder.renderAssignmentSubmittedProgress(
         }
 
         umItem(GridSize.cells3, if(onMainList) GridSize.cells1 else GridSize.cells2){
-            umProfileAvatar(item.personUid, "person")
+            umProfileAvatar(item.submitterUid, "person")
         }
 
         umItem(GridSize.cells6, if(onMainList) GridSize.cells8 else GridSize.cells7){
             umGridContainer {
                 umItem(GridSize.cells12){
-                    umTypography("${item.firstNames} ${item.lastName}",
+                    umTypography("${item.name}",
                         variant = TypographyVariant.h6){
                         css (alignTextToStart)
                     }
@@ -1471,7 +1471,10 @@ fun RBuilder.renderTopMainAction(
    }
 }
 
-fun RBuilder.renderBlockCommonFields(
+/**
+ *
+ */
+fun RBuilder.renderCourseBlockCommonFields(
     block: CourseBlock?,
     doNotShowBeforeLabel: FieldLabel,
     startDate: Long,
@@ -1502,6 +1505,7 @@ fun RBuilder.renderBlockCommonFields(
 
     umGridContainer(columnSpacing = GridSpacing.spacing4) {
         umItem(GridSize.cells12, GridSize.cells6 ) {
+
 
             umDatePicker(
                 label = "${doNotShowBeforeLabel.text}",

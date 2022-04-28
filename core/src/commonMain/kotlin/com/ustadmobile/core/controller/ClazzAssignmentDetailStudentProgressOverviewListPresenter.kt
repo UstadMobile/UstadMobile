@@ -1,24 +1,22 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.controller.ContentEntryDetailAttemptsListPresenter.Companion.SORT_OPTIONS
-import com.ustadmobile.core.db.dao.StatementDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
-import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.PersonGroupAssignmentSummary
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, arguments: Map<String, String>,
                                                                 view: ClazzAssignmentDetailStudentProgressOverviewListView,
                                                                 di: DI, lifecycleOwner: DoorLifecycleOwner)
     : UstadListPresenter<ClazzAssignmentDetailStudentProgressOverviewListView,
-        PersonWithAttemptsSummary>(context, arguments, view, di, lifecycleOwner), AttemptListListener,
+        PersonGroupAssignmentSummary>(context, arguments, view, di, lifecycleOwner), SubmissionSummaryListener,
         OnSortOptionSelected, OnSearchSubmitted{
 
     private var clazzUid: Long = -1
@@ -35,11 +33,6 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
         selectedSortOption = SORT_OPTIONS[0]
         mLoggedInPersonUid = accountManager.activeAccount.personUid
         updateListOnView()
-        presenterScope.launch {
-            repo.clazzAssignmentRollUpDao.cacheBestStatements(
-                    clazzUid, clazzAssignmentUid,
-                    0)
-        }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -47,15 +40,13 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
     }
 
     private fun updateListOnView() {
-        view.progressSummary = repo.clazzAssignmentDao.getStudentsProgressOnAssignment(
-                clazzUid,
-                mLoggedInPersonUid, clazzAssignmentUid,
-                Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
+        view.progressSummary = repo.clazzAssignmentDao.getProgressSummaryForAssignment(
+                clazzAssignmentUid, clazzUid, "")
 
-        view.list = repo.clazzAssignmentDao.getAttemptSummaryForStudentsInAssignment(
-                clazzAssignmentUid, clazzUid,
-                mLoggedInPersonUid, searchText.toQueryLikeParam(),
-                selectedSortOption?.flag ?: StatementDao.SORT_FIRST_NAME_ASC)
+        view.list = repo.clazzAssignmentDao.getSubmitterListForAssignment(
+            clazzAssignmentUid, clazzUid,
+            systemImpl.getString(MessageID.group_number, context).replace("%1\$s",""),
+            searchText.toQueryLikeParam())
 
     }
 
@@ -73,9 +64,9 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
         updateListOnView()
     }
 
-    override fun onClickPersonWithStatementDisplay(personWithAttemptsSummary: PersonWithAttemptsSummary) {
+    override fun onClickPerson(personWithAttemptsSummary: PersonGroupAssignmentSummary) {
         systemImpl.go(ClazzAssignmentDetailStudentProgressView.VIEW_NAME,
-                mapOf(UstadView.ARG_PERSON_UID to personWithAttemptsSummary.personUid.toString(),
+                mapOf(UstadView.ARG_SUBMITER_UID to personWithAttemptsSummary.submitterUid.toString(),
                 UstadView.ARG_CLAZZ_ASSIGNMENT_UID to clazzAssignmentUid.toString(),
                 UstadView.ARG_CLAZZUID to clazzUid.toString()), context)
     }

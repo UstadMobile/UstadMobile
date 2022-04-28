@@ -1870,4 +1870,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
 
     <string name="deadline_has_passed">Deadline has passed</string>
+
+    <!-- used to display as an error to the user when he is not assigned in a group for an assignment -->
+    <string name="unassigned_error">Can\'t submit: you\'re enroled in the course, but not assigned to a group</string>
 </resources>

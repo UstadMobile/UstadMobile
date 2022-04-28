@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "5fdb065dffadba2c8f762304e3fddd6b",
+    "identityHash": "c773e3a01de18a6a8b8c26c8e26f2d6f",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -4156,7 +4156,7 @@
       },
       {
         "tableName": "Comments",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`commentsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `commentsText` TEXT, `commentsEntityType` INTEGER NOT NULL, `commentsEntityUid` INTEGER NOT NULL, `commentsPublic` INTEGER NOT NULL, `commentsStatus` INTEGER NOT NULL, `commentsPersonUid` INTEGER NOT NULL, `commentsToPersonUid` INTEGER NOT NULL, `commentsFlagged` INTEGER NOT NULL, `commentsInActive` INTEGER NOT NULL, `commentsDateTimeAdded` INTEGER NOT NULL, `commentsDateTimeUpdated` INTEGER NOT NULL, `commentsMCSN` INTEGER NOT NULL, `commentsLCSN` INTEGER NOT NULL, `commentsLCB` INTEGER NOT NULL, `commentsLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`commentsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `commentsText` TEXT, `commentsEntityType` INTEGER NOT NULL, `commentsEntityUid` INTEGER NOT NULL, `commentsPublic` INTEGER NOT NULL, `commentsStatus` INTEGER NOT NULL, `commentsPersonUid` INTEGER NOT NULL, `commentsToPersonUid` INTEGER NOT NULL, `commentSubmitterUid` INTEGER NOT NULL, `commentsFlagged` INTEGER NOT NULL, `commentsInActive` INTEGER NOT NULL, `commentsDateTimeAdded` INTEGER NOT NULL, `commentsDateTimeUpdated` INTEGER NOT NULL, `commentsMCSN` INTEGER NOT NULL, `commentsLCSN` INTEGER NOT NULL, `commentsLCB` INTEGER NOT NULL, `commentsLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "commentsUid",
@@ -4203,6 +4203,12 @@
           {
             "fieldPath": "commentsToPersonUid",
             "columnName": "commentsToPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentSubmitterUid",
+            "columnName": "commentSubmitterUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -5473,7 +5479,7 @@
       },
       {
         "tableName": "CourseAssignmentSubmission",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`casUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `casAssignmentUid` INTEGER NOT NULL, `casSubmitterUid` INTEGER NOT NULL, `casText` TEXT, `casType` INTEGER NOT NULL, `casTimestamp` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`casUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `casAssignmentUid` INTEGER NOT NULL, `casSubmitterUid` INTEGER NOT NULL, `casSubmitterPersonUid` INTEGER NOT NULL, `casText` TEXT, `casType` INTEGER NOT NULL, `casTimestamp` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "casUid",
@@ -5490,6 +5496,12 @@
           {
             "fieldPath": "casSubmitterUid",
             "columnName": "casSubmitterUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "casSubmitterPersonUid",
+            "columnName": "casSubmitterPersonUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -5579,7 +5591,7 @@
       },
       {
         "tableName": "CourseAssignmentMark",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`camUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `camAssignmentUid` INTEGER NOT NULL, `camStudentUid` INTEGER NOT NULL, `camMark` REAL NOT NULL, `camPenalty` INTEGER NOT NULL, `camLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`camUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `camAssignmentUid` INTEGER NOT NULL, `camSubmitterUid` INTEGER NOT NULL, `camMark` REAL NOT NULL, `camPenalty` INTEGER NOT NULL, `camLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "camUid",
@@ -5594,8 +5606,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "camStudentUid",
-            "columnName": "camStudentUid",
+            "fieldPath": "camSubmitterUid",
+            "columnName": "camSubmitterUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -10949,7 +10961,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5fdb065dffadba2c8f762304e3fddd6b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c773e3a01de18a6a8b8c26c8e26f2d6f')"
     ]
   }
 }

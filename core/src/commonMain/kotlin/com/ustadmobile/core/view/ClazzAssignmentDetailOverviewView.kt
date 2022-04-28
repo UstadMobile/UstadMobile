@@ -30,6 +30,8 @@ interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignmentWith
 
     var submissionStatus: Int
 
+    var unassignedError: String?
+
     companion object {
 
         const val VIEW_NAME = "CourseAssignmentDetailOverviewView"

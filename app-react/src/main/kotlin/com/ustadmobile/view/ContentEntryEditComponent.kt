@@ -21,7 +21,7 @@ import com.ustadmobile.util.StyleManager.switchMargin
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.view.ext.renderBlockCommonFields
+import com.ustadmobile.view.ext.renderCourseBlockCommonFields
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.*
@@ -51,7 +51,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
     private var languageLabel = FieldLabel(text = getString(MessageID.language))
 
-    private var doNotShowBeforeLabel = FieldLabel(text = getString(MessageID.dont_show_before).clean())
+    private val doNotShowBeforeLabel = FieldLabel(text = getString(MessageID.dont_show_before).clean())
 
     private var startTimeLabel = FieldLabel(text = getString(MessageID.time))
 
@@ -378,7 +378,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                     }
 
                     if(entity?.block != null){
-                        renderBlockCommonFields(entity?.block,
+                        renderCourseBlockCommonFields(entity?.block,
                             doNotShowBeforeLabel, startDate, startTimeLabel,
                             dateSet = {
                                 setState{
