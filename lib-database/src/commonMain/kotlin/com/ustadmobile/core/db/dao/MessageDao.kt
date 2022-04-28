@@ -6,10 +6,7 @@ import androidx.room.Query
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Chat
-import com.ustadmobile.lib.db.entities.Message
-import com.ustadmobile.lib.db.entities.MessageWithPerson
-import com.ustadmobile.lib.db.entities.UserSession
+import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
@@ -21,12 +18,29 @@ abstract class MessageDao: BaseDao<Message>{
              :newNodeId AS messageDestination
         FROM UserSession
              JOIN Message ON
-                  ((    Message.messageTableId = ${Chat.TABLE_ID}
-                    AND Message.messageEntityUid IN
-                        (SELECT ChatMember.chatMemberChatUid 
-                          FROM ChatMember
-                         WHERE ChatMember.chatMemberPersonUid = UserSession.usPersonUid))
-                  OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM})
+                  (
+                    (    Message.messageTableId = ${Chat.TABLE_ID}
+                     AND Message.messageEntityUid IN
+                        (   SELECT ChatMember.chatMemberChatUid 
+                              FROM ChatMember
+                             WHERE ChatMember.chatMemberPersonUid = UserSession.usPersonUid
+                         )
+                    )
+                 
+                     OR    
+                       (    Message.messageTableId = ${DiscussionPost.TABLE_ID}
+                        AND Message.messageEntityUid IN 
+                            (
+                            SELECT ChatMember.chatMemberChatUid 
+                              FROM ChatMember
+                             WHERE ChatMember.chatMemberPersonUid = UserSession.usPersonUid
+                            )
+                        )
+                     
+                     OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM}
+                )
+                  
+                  
        WHERE UserSession.usClientNodeId = :newNodeId
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
          AND Message.messageLct != COALESCE(
@@ -51,7 +65,8 @@ abstract class MessageDao: BaseDao<Message>{
                  JOIN Message
                      ON ChangeLog.chTableId = ${Message.TABLE_ID}
                         AND ChangeLog.chEntityPk = Message.messageUid
-                        AND Message.messageTableId = ${Chat.TABLE_ID}
+                        AND (Message.messageTableId = ${Chat.TABLE_ID}
+                         OR Message.messageTableId = ${DiscussionPost.TABLE_ID})
                  JOIN UserSession ON
                       ((UserSession.usPersonUid IN 
                            (SELECT ChatMember.chatMemberPersonUid

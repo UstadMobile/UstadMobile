@@ -62,21 +62,28 @@ fun TextView.setDiscussionTopicDetailText(discussionPostWithDetails: DiscussionT
 
 @BindingAdapter("chatMessage", "loggedInPersonUid")
 fun TextView.setChatMessageTitle(message: MessageWithPerson, loggedInPersonUid: Long){
+
     if(message.messagePerson?.personUid == loggedInPersonUid){
         text = systemImpl.getString(MessageID.you, context)
-        gravity = Gravity.END
+        if(message.messageTableId == Chat.TABLE_ID){
+            gravity = Gravity.END
+        }
     }else{
         text = message.messagePerson?.fullName()?:"" + " "
-        gravity = Gravity.START
+        if(message.messageTableId == Chat.TABLE_ID) {
+            gravity = Gravity.START
+        }
     }
 }
 
 @BindingAdapter("chatMessageOrientation", "loggedInPersonUidOrientation")
 fun TextView.setChatMessagOrientation(message: MessageWithPerson, loggedInPersonUid: Long){
-    if(message.messagePerson?.personUid == loggedInPersonUid){
-        gravity = Gravity.END
-    }else{
-        gravity = Gravity.START
+    if(message.messageTableId == Chat.TABLE_ID) {
+        gravity = if (message.messagePerson?.personUid == loggedInPersonUid) {
+            Gravity.END
+        } else {
+            Gravity.START
+        }
     }
 
     if(message.messageRead == null && message.messagePerson?.personUid != loggedInPersonUid){
