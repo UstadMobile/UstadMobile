@@ -162,18 +162,25 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                 }
 
                 umItem {
-                    renderInformationOnDetailScreen("check",
+
+                    renderInformationOnDetailScreen(
+                        if(submissionStatus == CourseAssignmentSubmission.NOT_SUBMITTED) null
+                        else ClazzAssignmentDetailOverviewComponent.ASSIGNMENT_STATUS_MAP[submissionStatus],
                         getString(SubmissionConstants.STATUS_MAP[submissionStatus] ?: 0),
                         getString(MessageID.status),
                         shrink = true
                     )
 
-                    if(submissionScore != null){
-                        val marks = if(submissionStatus == CourseAssignmentSubmission.NOT_SUBMITTED && submissionScore?.camMark != null)
-                            getString(MessageID.points).format("${submissionScore?.camMark} / ${entity?.block?.cbMaxPoints}")
-                        else ""
-                        val penalty = if(submissionScore?.camPenalty != 0) " ${getString(MessageID.late_penalty).format(entity?.block?.cbLateSubmissionPenalty ?: "")}"
-                        else ""
+                    val mark = submissionScore
+                    if(mark != null){
+
+                        val marks = "${mark.camMark} / ${entity?.block?.cbMaxPoints} ${getString(MessageID.points)}"
+
+                        val penalty = if(mark.camPenalty != 0)
+                            " ${getString(MessageID.late_penalty).format(entity?.block?.cbLateSubmissionPenalty ?: "")}"
+                        else
+                            ""
+
                         renderInformationOnDetailScreen("emoji_events",
                             "$marks$penalty",
                             getString(MessageID.xapi_result_header),
@@ -184,40 +191,43 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
 
                 umGridContainer(GridSpacing.spacing4) {
                     css(defaultDoubleMarginTop)
-                    umItem(GridSize.cells12, GridSize.cells4) {
-                        umFormControl(variant = FormControlVariant.outlined) {
-                            css{
-                                +StyleManager.defaultMarginTop
-                            }
-                            umInputLabel("${markLabel.text}",
-                                id = markLabel.id,
-                                error = markLabel.error,
-                                variant = FormControlVariant.outlined,
-                                htmlFor = markLabel.id)
-                            umOutlinedInput(
-                                id = markLabel.id,
-                                value = markGrade,
-                                label = markLabel.text,
-                                error = markLabel.error,
-                                type =  InputType.number,
-                                onChange = {
-                                    setState {
-                                        markGrade = it
-                                        submitMarkError = null
-                                    }
-                                }) {
-                                attrs.endAdornment = umTypography("/10", variant = TypographyVariant.h6)
 
-                            }
-                            markLabel.errorText?.let { error ->
-                                umFormHelperText(error){
-                                    css(StyleManager.errorTextClass)
+                    if(submitButtonVisible){
+
+                        umItem(GridSize.cells12, GridSize.cells4) {
+                            umFormControl(variant = FormControlVariant.outlined) {
+                                css{
+                                    +StyleManager.defaultMarginTop
+                                }
+                                umInputLabel("${markLabel.text}",
+                                    id = markLabel.id,
+                                    error = markLabel.error,
+                                    variant = FormControlVariant.outlined,
+                                    htmlFor = markLabel.id)
+                                umOutlinedInput(
+                                    id = markLabel.id,
+                                    value = markGrade,
+                                    label = markLabel.text,
+                                    error = markLabel.error,
+                                    type =  InputType.number,
+                                    onChange = {
+                                        setState {
+                                            markGrade = it
+                                            submitMarkError = null
+                                        }
+                                    }) {
+                                    attrs.endAdornment = umTypography("/${entity?.block?.cbMaxPoints ?: 10}", variant = TypographyVariant.h6)
+
+                                }
+                                markLabel.errorText?.let { error ->
+                                    umFormHelperText(error){
+                                        css(StyleManager.errorTextClass)
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    if(submitButtonVisible){
+
                         umItem(GridSize.cells12, GridSize.cells4) {
                             umButton(if(submissionScore == null)
                                 getString(MessageID.submit_grade)

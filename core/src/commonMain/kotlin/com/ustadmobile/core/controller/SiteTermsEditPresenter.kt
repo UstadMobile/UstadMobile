@@ -48,9 +48,7 @@ class SiteTermsEditPresenter(context: Any,
             entity?.sTermsLang = selectedLang.iso_639_1_standard
             entity?.sTermsLangUid = selectedLang.langUid
             view.entity = entity
-            UmPlatformUtil.run{
-                requireSavedStateHandle()[SAVEDSTATE_KEY_LANGUAGE] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_LANGUAGE] = null
         }
 
     }

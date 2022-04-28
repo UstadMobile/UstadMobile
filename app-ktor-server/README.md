@@ -4,18 +4,11 @@
 This modules contains server application, responsible for handling all HTTP requests 
 in both production and development environment. It is built as KTOR server.
 
-# Running
+# Development running:
 
 1. Build the fat jar:
 ```
-./gradlew app-ktor-server:shadowJar
-```
-
-By default the Javascript (app-react) version will be built and bundled in the static resources
-directory. If you don't need this, it can be skipped by using
-
-```
-./gradlew app-ktor-server:shadowJar -Pskipreactproductionbundle=true
+$ gradlew app-ktor-server:shadowJar
 ```
 
 This builds the server jar which can be found in app-ktor-server/build/libs/ustad-server-all.jar .
@@ -31,10 +24,10 @@ cp src/jvmMain/resources/application.conf ./
 
 ```
 # Linux
-./runserver.sh
+$ ./runserver.sh
 
 #Windows
-runserver.bat
+$ runserver.bat
 ```
 
 Or use the Java command
@@ -50,3 +43,14 @@ The application can be debugged using the same as any other standalone JAR using
 Studio or IntelliJ, Go to  run, debug, configurations and then add a "remote" configuration.
 
 See [INSTALL.md](../INSTALL.md) for recommendations on production configuration.
+
+#Production build
+
+By default the Javascript (app-react) version will not be built and bundled in the static resources
+directory (because this will slow down development including building jvm tests etc). When building
+the server for production, use -Pktorbundleproductionjs to include the app-react web app as a
+static resource:
+
+```
+./gradlew app-ktor-server:shadowJar -Pktorbundleproductionjs=true
+```

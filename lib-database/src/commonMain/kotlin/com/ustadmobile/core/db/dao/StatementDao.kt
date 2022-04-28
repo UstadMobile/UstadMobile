@@ -277,6 +277,15 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     """)
     abstract suspend fun findSubmittedStatementFromStudent(studentUid: Long, assignmentObjectUid: Long): StatementEntity?
 
+    @Query("""
+        SELECT * 
+          FROM StatementEntity
+         WHERE statementPersonUid = :studentUid
+           AND statementVerbUid = ${VerbEntity.VERB_SCORED_UID}
+      ORDER BY timestamp                
+    """)
+    abstract fun findScoreStatementForStudent(studentUid: Long): StatementEntity?
+
 
     @Query("""
         SELECT MIN(timestamp) AS startDate, 

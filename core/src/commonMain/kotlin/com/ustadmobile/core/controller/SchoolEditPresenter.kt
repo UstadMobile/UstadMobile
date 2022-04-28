@@ -55,9 +55,8 @@ class SchoolEditPresenter(context: Any,
             entity?.holidayCalendar = calendar
             entity?.schoolHolidayCalendarUid = calendar.umCalendarUid
             view.entity = entity
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_HOLIDAYCALENDAR] = null
+
         }
 
         observeSavedStateResult(
@@ -66,9 +65,8 @@ class SchoolEditPresenter(context: Any,
             val timeZone = it.firstOrNull() ?: return@observeSavedStateResult
             entity?.schoolTimeZone = timeZone
             view.entity = entity
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[TimeZoneListPresenter.RESULT_TIMEZONE_KEY] = null
-            }
+            requireSavedStateHandle()[TimeZoneListPresenter.RESULT_TIMEZONE_KEY] = null
+
         }
     }
 

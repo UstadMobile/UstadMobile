@@ -28,6 +28,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.*
 import org.mockito.kotlin.*
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -126,7 +129,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         submitSubmission: Boolean = !isAdmin
     ): Person {
         val student = Person().apply {
-            admin = isAdmin
+            admin = false
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
@@ -257,7 +260,18 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
             this.camMark == 5f
         }
-        verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.saved, context)), any(), any())
+
+        val mark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, 1)
+        assertNotNull(mark)
+        assertEquals(5f, mark.camMark, "Mark matches")
+
+        val scoreStatement = repo.statementDao.findScoreStatementForStudent(1)
+        assertNotNull(scoreStatement)
+        assertEquals(5L, scoreStatement.resultScoreRaw, "score statement matches mark")
+
+
+        verify(mockView, timeout(1000)).showSnackBar(
+            eq(systemImpl.getString(MessageID.saved, context)), any(), any())
 
 
     }
@@ -297,7 +311,18 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
             this.camMark == 4f
         }
-        verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.saved, context)), any(), any())
+
+        val mark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, 1)
+        assertNotNull(mark)
+        assertEquals(4f, mark.camMark, "Mark matches")
+
+        val scoreStatement = repo.statementDao.findScoreStatementForStudent(1)
+        assertNotNull(scoreStatement)
+        assertEquals(4L, scoreStatement.resultScoreRaw, "score statement matches mark")
+
+
+        verify(mockView, timeout(1000)).showSnackBar(
+            eq(systemImpl.getString(MessageID.saved, context)), any(), any())
 
     }
 
@@ -361,12 +386,26 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         whenever(mockView.person).thenReturn(student)
         whenever(mockView.entity).thenReturn(entity)
 
+
+        val noMark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, 1)
+        assertNull(noMark)
+
         presenter.onClickSubmitGradeAndMarkNext(5f)
 
         verify(mockView, timeout(1000).atLeastOnce()).submissionStatus = eq(CourseAssignmentSubmission.MARKED)
         verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
             this.camMark == 5f
         }
+
+        val mark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, 1)
+        assertNotNull(mark)
+        assertEquals(5f, mark.camMark, "Mark matches")
+
+        val scoreStatement = repo.statementDao.findScoreStatementForStudent(1)
+        assertNotNull(scoreStatement)
+        assertEquals(5L, scoreStatement.resultScoreRaw, "score statement matches mark")
+
+
         verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.saved, context)), any(), any())
         verify(systemImpl, timeout(1000)).go(eq(ClazzAssignmentDetailStudentProgressView.VIEW_NAME),
             eq(mapOf(ARG_PERSON_UID to 2.toString(),

@@ -206,9 +206,8 @@ class ContentEntryEdit2Presenter(
                 entry.contentEntryUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
                 view.entity = entry
             }
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
-            }
+            requireSavedStateHandle()[SAVED_STATE_KEY_METADATA] = null
+
 
             view.fileImportErrorVisible = false
             view.loading = false
@@ -221,9 +220,7 @@ class ContentEntryEdit2Presenter(
             entity?.language = language
             entity?.primaryLanguageUid = language.langUid
             view.entity = entity
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_LANGUAGE] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_LANGUAGE] = null
         }
 
 

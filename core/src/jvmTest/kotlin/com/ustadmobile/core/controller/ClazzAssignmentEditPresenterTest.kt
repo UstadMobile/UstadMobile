@@ -10,6 +10,8 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.mockEditView
+import com.ustadmobile.core.util.verifyFieldsEnabled
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
@@ -54,7 +56,7 @@ class ClazzAssignmentEditPresenterTest {
 
     @Before
     fun setup() {
-        mockView = mock { }
+        mockView = mockEditView { }
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
@@ -108,6 +110,7 @@ class ClazzAssignmentEditPresenterTest {
         whenever(mockView.deadlineDate).thenReturn(Long.MAX_VALUE)
         whenever(mockView.gracePeriodDate).thenReturn(Long.MAX_VALUE)
 
+        mockView.verifyFieldsEnabled()
         presenter.handleClickSave(initialEntity)
 
         verify(testNavController, timeout(1000)).popBackStack(ClazzEdit2View.VIEW_NAME, false)
@@ -157,6 +160,7 @@ class ClazzAssignmentEditPresenterTest {
         whenever(mockView.deadlineDate).thenReturn(Long.MAX_VALUE)
         whenever(mockView.gracePeriodDate).thenReturn(Long.MAX_VALUE)
 
+        mockView.verifyFieldsEnabled()
         presenter.handleClickSave(initialEntity)
 
         verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.text_file_submission_error, context)), any(), any())
@@ -185,6 +189,7 @@ class ClazzAssignmentEditPresenterTest {
         whenever(mockView.deadlineDate).thenReturn(Long.MAX_VALUE)
         whenever(mockView.gracePeriodDate).thenReturn(Long.MAX_VALUE)
 
+        mockView.verifyFieldsEnabled()
         presenter.handleClickSave(initialEntity)
 
         verify(mockView, timeout(1000)).caMaxPointsError = eq(systemImpl.getString(MessageID.field_required_prompt, context))
@@ -215,6 +220,7 @@ class ClazzAssignmentEditPresenterTest {
         whenever(mockView.deadlineDate).thenReturn(DateTime(2021, 5, 1).unixMillisLong)
         whenever(mockView.gracePeriodDate).thenReturn(Long.MAX_VALUE)
 
+        mockView.verifyFieldsEnabled()
         presenter.handleClickSave(initialEntity)
 
         verify(mockView, timeout(1000)).caDeadlineError = eq(systemImpl.getString(MessageID.end_is_before_start_error, context))
@@ -245,6 +251,7 @@ class ClazzAssignmentEditPresenterTest {
         whenever(mockView.deadlineDate).thenReturn(DateTime(2021, 5, 1).unixMillisLong)
         whenever(mockView.gracePeriodDate).thenReturn(DateTime(2021, 4, 1).unixMillisLong)
 
+        mockView.verifyFieldsEnabled()
         presenter.handleClickSave(initialEntity)
 
         verify(mockView, timeout(1000)).caGracePeriodError = eq(systemImpl.getString(MessageID.after_deadline_date_error, context))

@@ -330,11 +330,6 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                                 disabled = !fieldsEnabled,
                                 helperText = holidayCalenderLabel.errorText,
                                 variant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        clazzEndDateError = null
-                                    }
-                                },
                                 onClick = {
                                     mPresenter?.handleHolidayCalendarClicked()
                                 }

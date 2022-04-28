@@ -30,7 +30,7 @@ open class CourseAssignmentSubmission {
 
     var casAssignmentUid: Long = 0
 
-    // change to casSubmitterUid, if individual then personUid else groupNumber
+    // if individual then personUid else groupNumber
     var casSubmitterUid: Long = 0
 
     var casText: String? = null

@@ -6,6 +6,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
@@ -18,7 +19,9 @@ import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.switchMargin
 import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.view.ext.renderBlockCommonFields
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.*
@@ -48,9 +51,25 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
     private var languageLabel = FieldLabel(text = getString(MessageID.language))
 
-    private var completionLabel = FieldLabel(text = getString(MessageID.completion_criteria))
+    private var doNotShowBeforeLabel = FieldLabel(text = getString(MessageID.dont_show_before).clean())
+
+    private var startTimeLabel = FieldLabel(text = getString(MessageID.time))
+
+    private var deadlineDateLabel = FieldLabel(text = getStringWithOptionalLabel(MessageID.deadline))
+
+    private var deadlineTimeLabel = FieldLabel(text = getString(MessageID.time))
+
+    private var gracePeriodDateLabel = FieldLabel(text = getStringWithOptionalLabel(MessageID.end_of_grace_period))
+
+    private var gracePeriodTimeLabel = FieldLabel(text = getString(MessageID.time))
+
+    private var completionCriteriaLabel = FieldLabel(text = getString(MessageID.completion_criteria))
+
+    private var penaltyLabel = FieldLabel(text = getString(MessageID.late_submission_penalty))
 
     private var licenseLabel = FieldLabel(text = getString(MessageID.licence))
+
+    private var maxPointsLabel = FieldLabel(text = getString(MessageID.maximum_points))
 
     override var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>? = null
         get() = field
@@ -213,6 +232,15 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                 field = value
             }
         }
+
+    private var gracePeriodVisiblity: Boolean = false
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+
     override var timeZone: String? = null
         get() = field
         set(value) {
@@ -229,11 +257,23 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
             }
         }
 
+    var minScoreVisible: Boolean = false
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
     override var entity: ContentEntryWithBlockAndLanguage? = null
         get() = field
         set(value) {
             setState {
                 field = value
+                if(value?.block?.cbDeadlineDate != Long.MAX_VALUE){
+                    gracePeriodVisiblity = true
+                }
+                minScoreVisible = value?.block?.cbCompletionCriteria == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
             }
         }
 
@@ -337,43 +377,48 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                         css(StyleManager.defaultFullWidth)
                     }
 
-
-                    // TODO show with courseBlockFields
-                    if(false){
-                        umGridContainer(GridSpacing.spacing4) {
-
-                            umItem(GridSize.cells12, GridSize.cells6 ) {
-                                umTextFieldSelect(
-                                    label = "${completionLabel.text}",
-                                    value =  entity?.completionCriteria.toString(),
-                                    error = completionLabel.error,
-                                    values = completionCriteriaOptions?.map {
-                                        Pair(it.code.toString(), it.toString())
-                                    }?.toList(),
-                                    onChange = {
-                                        setState {
-                                            entity?.completionCriteria = it.toInt()
-                                        }
-                                    }
-                                )
-                            }
-
-                            umItem(GridSize.cells12, GridSize.cells6 ) {
-
-                                umTextField(label = "${minScoreLabel.text}",
-                                    value = "${entity?.minScore}",
-                                    error = minScoreLabel.error, disabled = !fieldsEnabled,
-                                    helperText = minScoreLabel.errorText,
-                                    variant = FormControlVariant.outlined,
-                                    onChange = {
-                                        setState {
-                                            entity?.minScore = if(it.isEmpty()) 0 else it.toInt()
-                                        }
-                                    })
-
-                            }
-                        }
+                    if(entity?.block != null){
+                        renderBlockCommonFields(entity?.block,
+                            doNotShowBeforeLabel, startDate, startTimeLabel,
+                            dateSet = {
+                                setState{
+                                    startDate = it.getTime().toLong()
+                                    caStartDateError = null
+                                }
+                            }, timeZone, completionCriteriaLabel, completionCriteriaOptions,
+                            completionCriteriaSet = {
+                                setState {
+                                    entity?.block?.cbCompletionCriteria = it
+                                    completionCriteriaLabel.errorText = null
+                                    minScoreVisible = it == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
+                                }
+                            }, maxPointsLabel, maxPointsSet = {
+                                setState {
+                                    entity?.block?.cbMaxPoints = it
+                                    caMaxPointsError = null
+                                }
+                            }, deadlineDateLabel, deadlineTimeLabel, deadlineDate,
+                            deadlineDateSet = {
+                                setState{
+                                    deadlineDate = it.getTime().toLong()
+                                    caDeadlineError = null
+                                    gracePeriodVisiblity = true
+                                }
+                            }, gracePeriodDateLabel, gracePeriodTimeLabel, gracePeriodDate, gracePeriodVisiblity,
+                            gracePeriodSet = {
+                                gracePeriodDate = it.getTime().toLong()
+                                caGracePeriodError = null
+                            }, penaltyLabel, penaltySet = {
+                                setState{
+                                    entity?.block?.cbLateSubmissionPenalty = it
+                                }
+                            }, getString(MessageID.penalty_label),
+                            minScoreVisible, minScoreLabel,
+                            minPointsSet = {
+                                entity?.block?.cbMinPoints = it
+                            })
                     }
+
 
                     umTextField(label = "${authorLabel.text}",
                         value = entity?.author,

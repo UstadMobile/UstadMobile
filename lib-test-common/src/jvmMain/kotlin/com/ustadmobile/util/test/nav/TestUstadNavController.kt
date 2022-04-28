@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import java.lang.Integer.max
 import java.util.concurrent.CopyOnWriteArrayList
 
 class TestUstadNavController(override val di: DI) : UstadNavController, DIAware{
@@ -23,7 +24,7 @@ class TestUstadNavController(override val di: DI) : UstadNavController, DIAware{
         if(inclusive)
             splitIndex--
 
-        navStack.removeAll(navStack.subList(splitIndex, navStack.size))
+        navStack.removeAll(navStack.subList(max(0, splitIndex), navStack.size))
     }
 
     override fun navigate(

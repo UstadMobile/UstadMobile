@@ -27,6 +27,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
+import io.github.aakira.napier.Napier
 
 internal fun UmAppDatabase.insertDefaultSite() {
     val (db, repo) = requireDbAndRepo()
@@ -117,7 +118,7 @@ suspend fun UmAppDatabase.initAdminUser(
                 ScopedGrant.ALL_ENTITIES)
 
         adminPassFile.writeText(adminPass)
-        println("Saved admin password to ${adminPassFile.absolutePath}")
+        Napier.i("Saved admin password to ${adminPassFile.absolutePath}")
     }
 }
 

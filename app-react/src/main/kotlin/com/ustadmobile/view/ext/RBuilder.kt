@@ -807,8 +807,9 @@ fun RBuilder.renderCourseBlockAssignment(
     withAction: Boolean = false, ){
     umGridContainer{
         val padding = LinearDimension("4px")
+        val leftPadding = (item.cbIndentLevel * 3).spacingUnits
         css{
-            padding(top = padding, bottom = padding)
+            padding(top = padding, bottom = padding, left = leftPadding)
         }
 
         umItem(GridSize.cells2, GridSize.cells1){
@@ -881,7 +882,7 @@ fun RBuilder.renderCourseBlockAssignment(
                     }
 
 
-                    if(item.assignment?.mark != null && item.assignment?.mark?.camPenalty != null){
+                    if(item.assignment?.mark != null && item.assignment?.mark?.camPenalty != 0){
                         styledSpan {
                             css {
                                 padding(right = 4.spacingUnits)
@@ -898,19 +899,23 @@ fun RBuilder.renderCourseBlockAssignment(
                         }
                     }
 
-                    if(item.assignment?.progressSummary?.hasMetricsPermission == false
-                        || item.assignment?.fileSubmissionStatus != 0){
+                    if(item.assignment?.progressSummary?.hasMetricsPermission == false){
 
-                        styledSpan {
+                        if(item.assignment?.fileSubmissionStatus != 0) {
 
-                            css{
-                                padding(right = 1.spacingUnits)
-                            }
-                            umIcon(ASSIGNMENT_STATUS_MAP[item.assignment?.fileSubmissionStatus ?: 0] ?: "",
-                                fontSize = IconFontSize.small
-                            ) {
+                            styledSpan {
+
                                 css {
-                                    marginTop = 1.px
+                                    padding(right = 1.spacingUnits)
+                                }
+                                umIcon(
+                                    ASSIGNMENT_STATUS_MAP[item.assignment?.fileSubmissionStatus
+                                        ?: 0] ?: "",
+                                    fontSize = IconFontSize.small
+                                ) {
+                                    css {
+                                        marginTop = 1.px
+                                    }
                                 }
                             }
                         }
@@ -1466,6 +1471,197 @@ fun RBuilder.renderTopMainAction(
    }
 }
 
+fun RBuilder.renderBlockCommonFields(
+    block: CourseBlock?,
+    doNotShowBeforeLabel: FieldLabel,
+    startDate: Long,
+    startTimeLabel: FieldLabel,
+    dateSet: (Date) -> Unit,
+    timeZone: String?,
+    completionCriteriaLabel: FieldLabel,
+    completionCriteriaOptions: List<IdOption>?,
+    completionCriteriaSet: (Int) -> Unit,
+    maxPointsLabel: FieldLabel,
+    maxPointsSet: (Int) -> Unit,
+    deadlineDateLabel: FieldLabel,
+    deadlineTimeLabel: FieldLabel,
+    deadlineDate: Long,
+    deadlineDateSet: (Date) -> Unit,
+    gracePeriodDateLabel: FieldLabel,
+    gracePeriodTimeLabel: FieldLabel,
+    gracePeriodDate: Long,
+    gracePeriodVisiblity: Boolean,
+    gracePeriodSet: (Date) -> Unit,
+    penaltyLabel: FieldLabel,
+    penaltySet: (Int) -> Unit,
+    penaltyLabelString: String,
+    minScoreVisible: Boolean,
+    minPointsLabel: FieldLabel? = null,
+    minPointsSet: ((Int) -> Unit)? = null
+){
+
+    umGridContainer(columnSpacing = GridSpacing.spacing4) {
+        umItem(GridSize.cells12, GridSize.cells6 ) {
+
+            umDatePicker(
+                label = "${doNotShowBeforeLabel.text}",
+                error = doNotShowBeforeLabel.error,
+                helperText = doNotShowBeforeLabel.errorText,
+                value = startDate.toDate(true),
+                inputVariant = FormControlVariant.outlined,
+                onChange = {
+                    dateSet.invoke(it)
+                })
+
+        }
+
+        umItem(GridSize.cells12, GridSize.cells6 ) {
+            umTimePicker(
+                label = "${startTimeLabel.text}",
+                error = startTimeLabel.error,
+                helperText = startTimeLabel.errorText,
+                value = startDate.toDate(true),
+                inputVariant = FormControlVariant.outlined,
+                onChange = {
+                    dateSet.invoke(it)
+                })
+        }
+    }
+
+    umItem {
+        renderListSectionTitle(timeZone ?: "", TypographyVariant.h6)
+    }
+
+    umGridContainer(columnSpacing = GridSpacing.spacing4) {
+
+        umItem(GridSize.cells12, if(minScoreVisible) GridSize.cells6 else null) {
+
+            umTextFieldSelect(
+                "${completionCriteriaLabel.text}",
+                block?.cbCompletionCriteria.toString(),
+                completionCriteriaLabel.errorText ?: "",
+                error = completionCriteriaLabel.error,
+                values = completionCriteriaOptions?.map {
+                    Pair(it.optionId.toString(), it.toString())
+                }?.toList(),
+                onChange = {
+                    completionCriteriaSet.invoke(it.toIntOrNull() ?: 0)
+                }
+            )
+
+        }
+
+        if(minScoreVisible) {
+            umItem(GridSize.cells12, GridSize.cells6) {
+                umTextField(label = "${minPointsLabel?.text}",
+                    helperText = minPointsLabel?.errorText,
+                    value = block?.cbMinPoints.toString(),
+                    error = minPointsLabel?.error ?: false,
+                    variant = FormControlVariant.outlined,
+                    onChange = {
+                        minPointsSet?.invoke(it.toIntOrNull() ?: 0)
+                    })
+            }
+        }
+    }
+
+
+    umItem(GridSize.cells12) {
+        umTextField(label = "${maxPointsLabel.text}",
+            helperText = maxPointsLabel.errorText,
+            value = block?.cbMaxPoints.toString(),
+            error = maxPointsLabel.error,
+            variant = FormControlVariant.outlined,
+            onChange = {
+                maxPointsSet.invoke(it.toIntOrNull() ?: 0)
+            })
+    }
+
+    umGridContainer(columnSpacing = GridSpacing.spacing4) {
+        umItem(GridSize.cells12, GridSize.cells6 ) {
+
+            umDatePicker(
+                label = "${deadlineDateLabel.text}",
+                error = deadlineDateLabel.error,
+                helperText = deadlineDateLabel.errorText,
+                value = deadlineDate.toDate(true),
+                inputVariant = FormControlVariant.outlined,
+                onChange = {
+                    deadlineDateSet.invoke(it)
+                })
+
+        }
+
+        umItem(GridSize.cells12, GridSize.cells6 ) {
+            umTimePicker(
+                label = "${deadlineTimeLabel.text}",
+                error = deadlineTimeLabel.error,
+                helperText = deadlineTimeLabel.errorText,
+                value = deadlineDate.toDate(true),
+                inputVariant = FormControlVariant.outlined,
+                onChange = {
+                    deadlineDateSet.invoke(it)
+                })
+        }
+
+    }
+
+    if(gracePeriodVisiblity) {
+
+        umGridContainer(columnSpacing = GridSpacing.spacing4) {
+            umItem(GridSize.cells12, GridSize.cells6) {
+
+                umDatePicker(
+                    label = "${gracePeriodDateLabel.text}",
+                    error = gracePeriodDateLabel.error,
+                    helperText = gracePeriodDateLabel.errorText,
+                    value = gracePeriodDate.toDate(true),
+                    inputVariant = FormControlVariant.outlined,
+                    onChange = {
+                        gracePeriodSet.invoke(it)
+                    })
+
+            }
+
+            umItem(GridSize.cells12, GridSize.cells6) {
+                umTimePicker(
+                    label = "${gracePeriodTimeLabel.text}",
+                    error = gracePeriodTimeLabel.error,
+                    helperText = gracePeriodTimeLabel.errorText,
+                    value = gracePeriodDate.toDate(true),
+                    inputVariant = FormControlVariant.outlined,
+                    onChange = {
+                        gracePeriodSet.invoke(it)
+                    })
+            }
+
+
+            umItem(GridSize.cells12, GridSize.cells4) {
+                umTextField(label = "${penaltyLabel.text}",
+                    helperText = penaltyLabel.errorText,
+                    value = block?.cbLateSubmissionPenalty.toString(),
+                    error = penaltyLabel.error,
+                    variant = FormControlVariant.outlined,
+                    onChange = {
+                        penaltySet.invoke(it.toIntOrNull() ?: 0)
+                    }
+                )
+            }
+
+            umItem {
+                renderListSectionTitle(
+                    penaltyLabelString,
+                    TypographyVariant.body2
+                )
+            }
+        }
+    }
+
+
+
+}
+
+
 fun RBuilder.renderListItemWithTitleAndSwitch(title: String, enabled: Boolean, onClick: (Event) -> Unit){
     umGridContainer {
         attrs.onClick = {
@@ -1518,9 +1714,16 @@ fun RBuilder.renderContentEntryListItem(
     downloaded: Boolean = true,
     onClick: ((ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit)? = null,
     mainList: Boolean = true,
+    block: CourseBlockWithCompleteEntity? = null,
     onSecondaryAction: (() -> Unit)? = null){
 
     umGridContainer(columnSpacing = GridSpacing.spacing4) {
+
+        val leftPadding = ((block?.cbIndentLevel ?: 0) * 3).spacingUnits
+        css{
+            padding(left = leftPadding)
+        }
+
         if(onClick != null){
             attrs.onClick = {
                 stopEventPropagation(it)

@@ -106,9 +106,9 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         //TODO: insert any entities required for all tests
     }
 
-    fun createPerson(isAdmin: Boolean) {
+    fun createPerson(role: Int) {
         val student = Person().apply {
-            admin = isAdmin
+            admin = false
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
@@ -119,7 +119,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         val clazzEnrolment = ClazzEnrolment().apply {
             clazzEnrolmentPersonUid = student.personUid
             clazzEnrolmentClazzUid = testClazz.clazzUid
-            clazzEnrolmentRole = if(isAdmin) ClazzEnrolment.ROLE_TEACHER else ClazzEnrolment.ROLE_STUDENT
+            clazzEnrolmentRole = role
             clazzEnrolmentOutcome = ClazzEnrolment.OUTCOME_IN_PROGRESS
             clazzEnrolmentUid = repo.clazzEnrolmentDao.insert(this)
         }
@@ -128,7 +128,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
     @Test
     fun givenStudentWithNoSubmissionGivenYet_whenShown_thenShowNoSubmissionStatusAndAddFileTextWithComments(){
-        createPerson(false)
+        createPerson(ClazzEnrolment.ROLE_STUDENT)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
@@ -168,7 +168,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
     @Test
     fun givenStudentWithSubmissionNotMarkedAndNoMultipleSubmission_whenShown_thenDontShowAddFileTextWithSubmittedStatus(){
-        createPerson(false)
+        createPerson(ClazzEnrolment.ROLE_STUDENT)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
@@ -220,7 +220,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     @Test
     fun givenStudentWithSubmissionNotMarkedAndMultipleSubmissionPolicy_whenShown_thenShowAddFileTextWithSubmittedStatus(){
 
-        createPerson(false)
+        createPerson(ClazzEnrolment.ROLE_STUDENT)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
@@ -271,7 +271,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     @Test
     fun givenStudentWithNoSubmissionAndSubmitAllAtOncePolicy_whenSubmissionMadeOnAnotherDeviceAndUserClicksSubmit_thenShowErrorMessage(){
 
-        createPerson(false)
+        createPerson(ClazzEnrolment.ROLE_STUDENT)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
@@ -311,7 +311,9 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         presenter.handleSubmitButtonClicked()
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
-        verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.submission_already_made, context)), any(), any())
+        verify(mockView, timeout(1000)).showSnackBar(
+            eq(systemImpl.getString(MessageID.submission_already_made, context)), 
+            any(), any())
 
     }
 
@@ -319,7 +321,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     @Test
     fun givenStudentWithNoSubmission_whenClickSubmitAndDeadlinePassed_thenShowErrorMessage(){
 
-        createPerson(false)
+        createPerson(ClazzEnrolment.ROLE_STUDENT)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
@@ -352,15 +354,18 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         presenter.handleSubmitButtonClicked()
 
+
         val systemImpl: UstadMobileSystemImpl by di.instance()
-        verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.submission_already_made, context)), any(), any())
+        verify(mockView, timeout(1000)).showSnackBar(
+            eq(systemImpl.getString(MessageID.deadline_has_passed, context)),
+            any(), any())
 
     }
 
     @Test
     fun givenStudentWithSubmissionMarkedAndSingleSubmissionPolicy_whenShown_thenShowMarkedStatusWithNoAddTextFileButtons(){
 
-        createPerson(false)
+        createPerson(ClazzEnrolment.ROLE_STUDENT)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
@@ -420,7 +425,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     @Test
     fun givenStudentWithSubmissionMarkedAndMultipleSubmissionPolicy_whenShown_thenShowMarkedStatusAndAddTextFileButtons(){
 
-        createPerson(false)
+        createPerson(ClazzEnrolment.ROLE_STUDENT)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
@@ -481,7 +486,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     @Test
     fun givenStudentWithNoSubmissionAndSingleSubmitPolicy_whenClickSubmitSubmission_thenSubmitAndHideAddTextFile(){
 
-        createPerson(false)
+        createPerson(ClazzEnrolment.ROLE_STUDENT)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
@@ -534,7 +539,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
     @Test
     fun givenStudentWithPrivateCommentsDisabled_whenShown_thenShowNoPrivateComments(){
-        createPerson(false)
+        createPerson(ClazzEnrolment.ROLE_STUDENT)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
@@ -562,13 +567,14 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         //wait for the entity value to be set
         mockView.captureLastEntityValue()
 
-        verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(false)
+        verify(mockView, timeout(1000).times(2))
+            .showPrivateComments = eq(false)
 
     }
 
     @Test
     fun givenStudentWithPrivateCommentsEnaled_whenShown_thenShowPrivateComments(){
-        createPerson(false)
+        createPerson(ClazzEnrolment.ROLE_STUDENT)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
@@ -596,7 +602,8 @@ class ClazzAssignmentDetailOverviewPresenterTest {
         //wait for the entity value to be set
         mockView.captureLastEntityValue()
 
-        verify(mockView, timeout(1000).times(2)).showPrivateComments = eq(true)
+        verify(mockView, timeout(1000).times(2))
+            .showPrivateComments = eq(true)
 
     }
 
@@ -604,7 +611,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
     @Test
     fun givenUserIsNotStudent_whenShown_dontShowPrivateCommentsSubmissionStatusScoreAndAddFileText(){
-        createPerson(true)
+        createPerson(ClazzEnrolment.ROLE_TEACHER)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
@@ -648,7 +655,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     @Test
     fun givenUserClicksAddFile_whenClicked_thenGoToSelectFileView(){
 
-        createPerson(false)
+        createPerson(ClazzEnrolment.ROLE_STUDENT)
 
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
@@ -686,7 +693,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
     @Test
     fun givenUserClicksOpenFileSubmission_whenClicked_thenShouldOpen(){
 
-        createPerson(false)
+        createPerson(ClazzEnrolment.ROLE_STUDENT)
         val testEntity = ClazzAssignmentWithCourseBlock().apply {
             //set variables here
             caClazzUid = testClazz.clazzUid
