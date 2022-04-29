@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.DiscussionPostDetailView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -38,9 +39,12 @@ class DiscussionPostDetailPresenter(
 
     val ps = presenterScope
 
+    var clazzUid: Long = 0
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         postUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         loggedInPersonUid = accountManager.activeAccount.personUid
 
         //Get replies
@@ -53,11 +57,10 @@ class DiscussionPostDetailPresenter(
             val postTitle = repo.discussionPostDao.getPostTitle(
                 postUid )
             view.title = postTitle
+            view.entity = repo.discussionPostDao.findWithDetailsByUid(postUid)
 
         }
-        presenterScope.launch {
-            view.entity = repo.discussionPostDao.findWithDetailsByUid(postUid)
-        }
+
     }
 
     /**
@@ -93,7 +96,7 @@ class DiscussionPostDetailPresenter(
                         DiscussionPost.TABLE_ID,
                         postUid,
                         message,
-                        systemTimeInMillis()
+                        clazzUid
                     )
                 )
 

@@ -78,7 +78,6 @@ class CourseDiscussionEditPresenter(context: Any,
                 discussionTopicUid = newTopic.discussionTopicUid
                 discussionTopicStartDate = systemTimeInMillis()
                 discussionTopicCourseDiscussionUid = entity?.cbEntityUid?:0L
-                discussionTopicStartedPersonUid = accountManager.activeAccount.personUid
                 discussionTopicTitle = newTopic.discussionTopicTitle
                 discussionTopicDesc  = newTopic.discussionTopicDesc
             }
@@ -86,6 +85,7 @@ class CourseDiscussionEditPresenter(context: Any,
             //Any updated title desc
             foundTopic.discussionTopicTitle = newTopic.discussionTopicTitle
             foundTopic.discussionTopicDesc  = newTopic.discussionTopicDesc
+            foundTopic.discussionTopicClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
 
             topicsOneToManyJoinEditHelper.onEditResult(foundTopic)
 
@@ -242,13 +242,6 @@ class CourseDiscussionEditPresenter(context: Any,
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
-        //TODO: check this
-
-        // 1. Get the list of topics
-
-        //2. Find the topic with fromPosition
-
-        //3. Update the topic with new Position (toPosition)
 
         val currentList = topicsOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: mutableListOf()
 

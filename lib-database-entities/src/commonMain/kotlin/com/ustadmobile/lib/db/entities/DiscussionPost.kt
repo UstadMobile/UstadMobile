@@ -20,13 +20,13 @@ import kotlinx.serialization.Serializable
                 REPLACE INTO DiscussionPost(discussionPostUid, 
                 discussionPostTitle, discussionPostMessage, discussionPostStartDate, 
                 discussionPostDiscussionTopicUid, discussionPostVisible, discussionPostArchive, 
-                discussionPostStartedPersonUid, discussionPostLct)
+                discussionPostStartedPersonUid, discussionPostClazzUid, discussionPostLct)
                 
               
                 VALUES(NEW.discussionPostUid, 
                 NEW.discussionPostTitle, NEW.discussionPostMessage, NEW.discussionPostStartDate, 
                 NEW.discussionPostDiscussionTopicUid, NEW.discussionPostVisible, NEW.discussionPostArchive, 
-                NEW.discussionPostStartedPersonUid, NEW.discussionPostLct)
+                NEW.discussionPostStartedPersonUid, NEW.discussionPostClazzUid, NEW.discussionPostLct)
                 
                 
                 /*psql ON CONFLICT (discussionPostUid) DO UPDATE 
@@ -37,6 +37,7 @@ import kotlinx.serialization.Serializable
                 discussionPostVisible = EXCLUDED.discussionPostVisible , 
                 discussionPostArchive = EXCLUDED.discussionPostArchive , 
                 discussionPostStartedPersonUid = EXCLUDED.discussionPostStartedPersonUid , 
+                discussionPostClazzUid = EXCLUDED.discussionPostClazzUid, 
                 discussionPostLct = EXCLUDED.discussionPostLct
                 
                 */
@@ -63,6 +64,8 @@ open class DiscussionPost() {
 
     //The person who started this post
     var discussionPostStartedPersonUid: Long = 0
+
+    var discussionPostClazzUid: Long = 0
 
     @LastChangedTime
     @ReplicationVersionId

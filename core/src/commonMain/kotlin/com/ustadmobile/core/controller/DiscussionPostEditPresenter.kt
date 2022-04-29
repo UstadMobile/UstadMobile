@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -26,10 +27,12 @@ class DiscussionPostEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
     private var topicUid: Long = 0L
+    private var clazzUid: Long = 0L
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): DiscussionPost? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         topicUid = arguments[ARG_DISCUSSION_TOPIC_UID]?.toLong()?:0L
+        clazzUid = arguments[ARG_CLAZZUID]?.toLong()?:0L
 
         val discussionPost = withTimeoutOrNull(2000) {
             db.discussionPostDao.findByUid(entityUid)
@@ -69,7 +72,9 @@ class DiscussionPostEditPresenter(context: Any,
                 entity.discussionPostDiscussionTopicUid = topicUid
                 entity.discussionPostStartDate = systemTimeInMillis()
                 entity.discussionPostUid = repo.discussionPostDao.insertAsync(entity)
+                entity.discussionPostClazzUid = clazzUid
             }else {
+                entity.discussionPostClazzUid = clazzUid
                 repo.discussionPostDao.updateAsync(entity)
             }
 

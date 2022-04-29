@@ -20,13 +20,13 @@ import kotlinx.serialization.Serializable
                 REPLACE INTO DiscussionTopic(discussionTopicUid, 
                 discussionTopicTitle, discussionTopicDesc, 
                 discussionTopicStartDate, discussionTopicCourseDiscussionUid,
-                discussionTopicVisible, discussionTopicArchive, discussionTopicStartedPersonUid,
-                discussionTopicIndex, discussionTopicLct)
+                discussionTopicVisible, discussionTopicArchive,
+                discussionTopicIndex, discussionTopicClazzUid, discussionTopicLct)
                 VALUES(NEW.discussionTopicUid, 
                 NEW.discussionTopicTitle, NEW.discussionTopicDesc, 
                 NEW.discussionTopicStartDate, NEW.discussionTopicCourseDiscussionUid,
-                NEW.discussionTopicVisible, NEW.discussionTopicArchive, 
-                NEW.discussionTopicStartedPersonUid, NEW.discussionTopicIndex, NEW.discussionTopicLct)
+                NEW.discussionTopicVisible, NEW.discussionTopicArchive,
+                 NEW.discussionTopicIndex, NEW.discussionTopicClazzUid, NEW.discussionTopicLct)
                 /*psql ON CONFLICT (discussionTopicUid) DO UPDATE 
                 SET discussionTopicTitle = EXCLUDED.discussionTopicTitle, 
                 discussionTopicDesc = EXCLUDED.discussionTopicDesc, 
@@ -34,8 +34,8 @@ import kotlinx.serialization.Serializable
                 discussionTopicCourseDiscussionUid = EXCLUDED.discussionTopicCourseDiscussionUid, 
                 discussionTopicVisible = EXCLUDED.discussionTopicVisible, 
                 discussionTopicArchive = EXCLUDED.discussionTopicArchive,
-                discussionTopicStartedPersonUid = EXCLUDED.discussionTopicStartedPersonUid,
                 discussionTopicIndex = EXCLUDED.discussionTopicIndex,
+                discussionTopicClazzUid = EXCLUDED.discussionTopicClazzUid,
                 discussionTopicLct = EXCLUDED.discussionTopicLct
                 
                 */
@@ -60,10 +60,9 @@ open class DiscussionTopic() {
 
     var discussionTopicArchive: Boolean = false
 
-    //The person who started this topic
-    var discussionTopicStartedPersonUid: Long = 0
-
     var discussionTopicIndex: Int = 0
+
+    var discussionTopicClazzUid: Long = 0
 
     @LastChangedTime
     @ReplicationVersionId

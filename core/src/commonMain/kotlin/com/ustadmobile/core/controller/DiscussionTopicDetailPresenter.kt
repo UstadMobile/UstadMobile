@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.core.view.DiscussionTopicDetailView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -29,6 +30,8 @@ class DiscussionTopicDetailPresenter(
     )
 {
 
+    private var clazzUid: Long = 0
+
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.LIVEDATA
 
@@ -38,6 +41,7 @@ class DiscussionTopicDetailPresenter(
 
     override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<DiscussionTopic?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
 
         view.posts = repo.discussionPostDao.getPostsByDiscussionTopic(entityUid)
 
@@ -51,6 +55,7 @@ class DiscussionTopicDetailPresenter(
 
     fun onClickAddPost() {
         val topicUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+
         navigateForResult(
             NavigateForResultOptions(
                 this, null,
@@ -60,7 +65,8 @@ class DiscussionTopicDetailPresenter(
                 RESULT_NEW_POST,
                 arguments = mutableMapOf(
                     DiscussionPostEditPresenter.ARG_DISCUSSION_TOPIC_UID to
-                            topicUid.toString()
+                            topicUid.toString(),
+                    ARG_CLAZZUID to clazzUid.toString()
                 )
             )
         )
@@ -71,17 +77,10 @@ class DiscussionTopicDetailPresenter(
 
         val args = mutableMapOf<String, String>()
         args[ARG_ENTITY_UID] = discussionPost.discussionPostUid.toString() ?: ""
+        args[ARG_CLAZZUID] = clazzUid.toString()
 
         ustadNavController?.navigate(
             DiscussionPostDetailView.VIEW_NAME, args)
-    }
-
-    fun onClickDeletePost(discussionPost: DiscussionPostWithDetails){
-        //Update topic
-        repo.discussionPostDao.update(discussionPost.apply {
-            discussionPostArchive = true
-            discussionPostVisible = false
-        })
     }
 
     companion object{

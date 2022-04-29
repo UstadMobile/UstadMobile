@@ -40,6 +40,7 @@ class DiscussionTopicEditPresenter(context: Any,
         }else{
             DiscussionTopic().apply {
                 discussionTopicUid = db.doorPrimaryKeyManager.nextId(DiscussionTopic.TABLE_ID)
+
                 discussionTopicStartDate = systemTimeInMillis()
 
             }

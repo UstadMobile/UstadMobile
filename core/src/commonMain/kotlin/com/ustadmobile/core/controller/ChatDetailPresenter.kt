@@ -119,8 +119,7 @@ class ChatDetailPresenter(
                         loggedInPersonUid,
                         Chat.TABLE_ID,
                         chatUid,
-                        message,
-                        systemTimeInMillis()
+                        message
                     )
                 )
 

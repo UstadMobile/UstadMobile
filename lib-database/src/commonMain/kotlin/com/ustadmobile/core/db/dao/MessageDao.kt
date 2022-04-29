@@ -17,6 +17,15 @@ abstract class MessageDao: BaseDao<Message>{
       SELECT DISTINCT Message.messageUid AS messagePk,
              :newNodeId AS messageDestination
         FROM UserSession
+        
+              JOIN PersonGroupMember 
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+                    
+              ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                  ${Role.PERMISSION_CLAZZ_SELECT} 
+              ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
+                  
+                  
              JOIN Message ON
                   (
                     (    Message.messageTableId = ${Chat.TABLE_ID}
@@ -26,18 +35,14 @@ abstract class MessageDao: BaseDao<Message>{
                              WHERE ChatMember.chatMemberPersonUid = UserSession.usPersonUid
                          )
                     )
-                 
-                     OR    
-                       (    Message.messageTableId = ${DiscussionPost.TABLE_ID}
-                        AND Message.messageEntityUid IN 
-                            (
-                            SELECT ChatMember.chatMemberChatUid 
-                              FROM ChatMember
-                             WHERE ChatMember.chatMemberPersonUid = UserSession.usPersonUid
-                            )
-                        )
+                    
+                    OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM}
+                    
+                    OR    
+                       (    Message.messageClazzUid = Clazz.clazzUid 
+                        AND Message.messageTableId = ${DiscussionPost.TABLE_ID} )
                      
-                     OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM}
+                 
                 )
                   
                   
@@ -62,17 +67,45 @@ abstract class MessageDao: BaseDao<Message>{
           SELECT DISTINCT Message.messageUid AS messageUid,
                  UserSession.usClientNodeId AS messageDestination
             FROM ChangeLog
+            
                  JOIN Message
                      ON ChangeLog.chTableId = ${Message.TABLE_ID}
                         AND ChangeLog.chEntityPk = Message.messageUid
                         AND (Message.messageTableId = ${Chat.TABLE_ID}
                          OR Message.messageTableId = ${DiscussionPost.TABLE_ID})
-                 JOIN UserSession ON
-                      ((UserSession.usPersonUid IN 
+                         
+                 JOIN Clazz 
+                      ON Clazz.clazzUid = Message.messageClazzUid
+                  
+                 JOIN ScopedGrant
+                      ON ((ScopedGrant.sgTableId = ${ScopedGrant.ALL_TABLES}
+                                AND ScopedGrant.sgEntityUid = ${ScopedGrant.ALL_ENTITIES})
+                            OR (ScopedGrant.sgTableId = ${Clazz.TABLE_ID}
+                                AND ScopedGrant.sgEntityUid = Clazz.clazzUid)
+                            OR (ScopedGrant.sgTableId = ${School.TABLE_ID}
+                                AND ScopedGrant.sgEntityUid = Clazz.clazzSchoolUid))
+                         AND (ScopedGrant.sgPermissions & 1) > 0
+                         
+                 JOIN PersonGroupMember AS PrsGrpMbr
+                   ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
+    
+                 JOIN UserSession
+                   ON 
+                      (UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
+                      AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE }
+                      
+                      ) 
+                      OR
+                      (
+                        (UserSession.usPersonUid IN 
                            (SELECT ChatMember.chatMemberPersonUid
                               FROM ChatMember
-                             WHERE ChatMember.chatMemberChatUid = Message.messageEntityUid))
-                       OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM})       
+                             WHERE ChatMember.chatMemberChatUid = Message.messageEntityUid)
+                        )
+                        OR UserSession.usSessionType = ${UserSession.TYPE_UPSTREAM}
+                      )       
+                       
+                      
            WHERE UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
              AND UserSession.usClientNodeId != (
                  SELECT nodeClientId 

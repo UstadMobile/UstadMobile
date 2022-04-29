@@ -19,14 +19,16 @@ import kotlinx.serialization.Serializable
         sqlStatements = [
             """
                 REPLACE INTO Message(messageUid, messageSenderPersonUid, messageTableId, 
-                messageEntityUid, messageText, messageTimestamp, messageLct)
+                messageEntityUid, messageText, messageTimestamp, messageClazzUid, messageLct)
                 VALUES(NEW.messageUid, NEW.messageSenderPersonUid, NEW.messageTableId, 
-                NEW.messageEntityUid, NEW.messageText, NEW.messageTimestamp, NEW.messageLct)
+                NEW.messageEntityUid, NEW.messageText, NEW.messageTimestamp, NEW.messageClazzUid, 
+                NEW.messageLct)
                 /*psql ON CONFLICT (messageUid) DO UPDATE 
                 SET messageSenderPersonUid = EXCLUDED.messageSenderPersonUid, 
                 messageTableId = EXCLUDED.messageTableId, 
                 messageEntityUid = EXCLUDED.messageEntityUid, 
                 messageText = EXCLUDED.messageText, messageTimestamp = EXCLUDED.messageTimestamp,
+                messageClazzUid = EXCLUDED.messageClazzUid,
                 messageLct = EXCLUDED.messageLct
                 */
             """
@@ -48,16 +50,19 @@ open class Message() {
 
     var messageTimestamp: Long = 0
 
+    var messageClazzUid: Long = 0
+
     @LastChangedTime
     @ReplicationVersionId
     var messageLct: Long = 0
 
-    constructor(personUid: Long, table: Int, entityUid: Long, text: String, time: Long) : this() {
+    constructor(personUid: Long, table: Int, entityUid: Long, text: String, clazzUid: Long ) : this() {
         messageSenderPersonUid = personUid
         messageTableId = table
         messageEntityUid = entityUid
         messageText = text
-        messageTimestamp = time
+        messageTimestamp = systemTimeInMillis()
+        messageClazzUid = clazzUid
     }
 
     constructor(personUid: Long, table: Int, entityUid: Long, text: String) : this() {

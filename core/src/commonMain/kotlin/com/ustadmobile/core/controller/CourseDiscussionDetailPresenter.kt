@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.CourseDiscussionDetailView
 import com.ustadmobile.core.view.DiscussionTopicDetailView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -51,6 +52,7 @@ class CourseDiscussionDetailPresenter(
 
         val args = mutableMapOf<String, String>()
         args[ARG_ENTITY_UID] = discussionTopic.discussionTopicUid.toString() ?: ""
+        args[ARG_CLAZZUID] = discussionTopic.discussionTopicClazzUid.toString()
         ustadNavController?.navigate(
             DiscussionTopicDetailView.VIEW_NAME, args)
     }
