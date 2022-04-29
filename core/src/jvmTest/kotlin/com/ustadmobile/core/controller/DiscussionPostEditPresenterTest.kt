@@ -48,12 +48,10 @@ class DiscussionPostEditPresenterTest {
 
         val repo: UmAppDatabase by di.activeRepoInstance()
 
-        repoDiscussionPostDaoSpy = spy(repo.chatDao)
-        whenever(repo.chatDao).thenReturn(repoChatDaoSpy)
+        repoDiscussionPostDaoSpy = spy(repo.discussionPostDao)
+        whenever(repo.discussionPostDao).thenReturn(repoDiscussionPostDaoSpy)
 
 
-        repoMessageDaoSpy = spy(repo.messageDao)
-        whenever(repo.messageDao).thenReturn(repoMessageDaoSpy)
     }
 
 
