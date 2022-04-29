@@ -9,7 +9,7 @@ import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 
 class AssignmentProgressSummaryRecyclerAdapter(progressSummary: AssignmentProgressSummary?)
-    : SingleItemRecyclerViewAdapter<AssignmentProgressSummaryRecyclerAdapter.AssignmentProgressSummaryViewHolder>() {
+    : SingleItemRecyclerViewAdapter<AssignmentProgressSummaryRecyclerAdapter.AssignmentProgressSummaryViewHolder>(true) {
 
     class AssignmentProgressSummaryViewHolder(var itemBinding: ItemAssignmentProgressSummaryDetailBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
@@ -19,7 +19,6 @@ class AssignmentProgressSummaryRecyclerAdapter(progressSummary: AssignmentProgre
     var assignmentProgressSummaryVal: AssignmentProgressSummary? = progressSummary
         set(value){
             field = value
-            visible = value?.hasMetricsPermission ?: false
             viewHolder?.itemBinding?.assignmentProgressSummary = value
         }
 

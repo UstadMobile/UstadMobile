@@ -303,6 +303,12 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             submissionStatusHeaderAdapter?.assignmentStatus = value
         }
 
+    override var unassignedError: String? = null
+        set(value) {
+            field = value
+            submitButtonAdapter?.unassignedError = value
+        }
+
     override var entity: ClazzAssignmentWithCourseBlock? = null
         get() = field
         set(value) {

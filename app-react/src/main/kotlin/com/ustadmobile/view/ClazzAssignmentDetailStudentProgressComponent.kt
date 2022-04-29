@@ -77,12 +77,12 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
             }
         }
 
-    override var person: Person? = null
+    override var submitterName: String? = null
         get() = field
         set(value) {
             setState {
                 field = value
-                ustadComponentTitle = value?.fullName()
+                ustadComponentTitle = value
             }
         }
     override var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
