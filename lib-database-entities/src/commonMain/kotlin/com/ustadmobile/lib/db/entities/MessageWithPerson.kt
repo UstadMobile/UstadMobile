@@ -11,5 +11,8 @@ class MessageWithPerson : Message() {
     @Embedded
     var messagePerson: Person ? = null
 
+    @Embedded
+    var messageRead: MessageRead? = null
+
 
 }

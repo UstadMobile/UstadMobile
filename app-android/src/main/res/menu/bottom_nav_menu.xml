@@ -3,12 +3,6 @@
 
     <!-- Add Feed -->
 
-<!--    <item-->
-<!--        android:id="@+id/home_schoollist_dest"-->
-<!--        android:visible="false"-->
-<!--        android:icon="@drawable/ic_school_black_24dp"-->
-<!--        android:title="@string/schools" />-->
-
     <item
         android:id="@+id/home_clazzlist_dest"
         android:icon="@drawable/ic_school_black_24dp"

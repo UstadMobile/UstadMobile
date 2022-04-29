@@ -188,7 +188,8 @@ class ChatDetailPresenterTest {
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoMessageDaoSpy, timeout(5000)).findAllMessagesByChatUid(
-                eq(chatTestUserPersonOne!!.chatUid), eq(Chat.TABLE_ID))
+                eq(chatTestUserPersonOne!!.chatUid), eq(Chat.TABLE_ID),
+            eq(0L))
         verify(mockView, timeout(5000)).messageList = any()
         //TODO: Check list
 

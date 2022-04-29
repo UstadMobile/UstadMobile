@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.core.util.OneToManyJoinEditListener"/>
+        <import type="com.ustadmobile.lib.db.entities.DiscussionTopic"/>
+
+        <variable
+            name="discussionTopic"
+            type="DiscussionTopic" />
+
+        <variable
+            name="mPresenter"
+            type="com.ustadmobile.core.controller.CourseDiscussionEditPresenter" />
+
+        <variable
+            name="oneToManyJoinListener"
+            type="OneToManyJoinEditListener&lt;DiscussionTopic&gt;" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="@{() -> oneToManyJoinListener.onClickEdit(discussionTopic)}"
+        android:background="?attr/selectableItemBackground"
+        >
+
+        <!-- Line 1-->
+        <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:id="@+id/item_schedule_line1_text"
+            android:text="@{discussionTopic.discussionTopicTitle}"
+            tools:text="Topic 1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/item_schedule_secondary_menu_imageview"
+            android:layout_marginStart="@dimen/dimen_64dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_16dp"
+            />
+
+        <!-- Line 2-->
+        <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            android:id="@+id/item_schedule_line2_text"
+            android:text="@{discussionTopic.discussionTopicDesc}"
+            tools:text="Topic Discussion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@+id/item_schedule_line1_text"
+            app:layout_constraintTop_toBottomOf="@+id/item_schedule_line1_text"
+            app:layout_constraintEnd_toStartOf="@+id/item_schedule_secondary_menu_imageview"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_16dp"
+            />
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_schedule_secondary_menu_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/dimen_16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_delete_black_24dp"
+            app:tint="?colorOnIconTint"
+            android:contentDescription="@string/delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:onClick="@{() -> oneToManyJoinListener.onClickDelete(discussionTopic)}" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

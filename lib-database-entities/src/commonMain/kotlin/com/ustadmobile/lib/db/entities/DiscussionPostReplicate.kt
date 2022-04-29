@@ -13,25 +13,25 @@ import kotlin.Long
 import kotlinx.serialization.Serializable
 
 @Entity(
-  primaryKeys = arrayOf("courseDiscussionTopicPk", "courseDiscussionTopicDestination"),
-  indices = arrayOf(Index(value = arrayOf("courseDiscussionTopicPk", "courseDiscussionTopicDestination",
-    "courseDiscussionTopicVersionId")),
-  Index(value = arrayOf("courseDiscussionTopicDestination", "courseDiscussionTopicPending")))
+  primaryKeys = arrayOf("discussionPostPk", "discussionPostDestination"),
+  indices = arrayOf(Index(value = arrayOf("discussionPostPk", "discussionPostDestination",
+    "discussionPostVersionId")),
+  Index(value = arrayOf("discussionPostDestination", "discussionPostPending")))
 
 )
 @Serializable
-public class CourseDiscussionTopicReplicate {
+public class DiscussionPostReplicate {
   @ReplicationEntityForeignKey
-  public var courseDiscussionTopicPk: Long = 0
+  public var discussionPostPk: Long = 0
 
   @ColumnInfo(defaultValue = "0")
   @ReplicationVersionId
-  public var courseDiscussionTopicVersionId: Long = 0
+  public var discussionPostVersionId: Long = 0
 
   @ReplicationDestinationNodeId
-  public var courseDiscussionTopicDestination: Long = 0
+  public var discussionPostDestination: Long = 0
 
   @ColumnInfo(defaultValue = "1")
   @ReplicationPending
-  public var courseDiscussionTopicPending: Boolean = true
+  public var discussionPostPending: Boolean = true
 }

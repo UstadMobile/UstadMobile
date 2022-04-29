@@ -1838,6 +1838,7 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!-- used to display as an error when text is above the character or word limit -->
     <string name="error_too_long_text">Text too long</string>
 
+
     <string name="managed_enrolment">Managed - must be invited or approved</string>
 
     <!-- used to display as an error when is editing an assignment with text or file submission turned off-->
@@ -1853,6 +1854,9 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <!-- used to display as an error if student tries to submit assignment more than once -->
     <string name="submission_already_made">Submission already made</string>
+
+    <string name="add_discussion">Add discussion</string>
+    <string name="edit_discussion">Edit discussion</string>
 
     <!-- used to display as an error when the teacher submits a grade thats greater than the maximum grade-->
     <string name="grade_out_of_range">Grade must be between 0 and %1$s</string>

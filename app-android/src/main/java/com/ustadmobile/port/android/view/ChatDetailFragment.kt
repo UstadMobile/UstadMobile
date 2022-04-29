@@ -65,10 +65,14 @@ class ChatDetailFragment: UstadBaseFragment(), ChatDetailView, ChatDetailFragmen
 
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
-        messagesRecyclerAdapter = MessagesRecyclerAdapter(accountManager.activeAccount.personUid)
+        mPresenter = ChatDetailPresenter(requireContext(), arguments.toStringMap(), this,
+            di, viewLifecycleOwner)
 
-        val stackedLayoutManager: LinearLayoutManager = LinearLayoutManager(requireContext())
-        //stackedLayoutManager.stackFromEnd = true
+
+        messagesRecyclerAdapter = MessagesRecyclerAdapter(accountManager.activeAccount.personUid,
+            mPresenter?.ps, mPresenter)
+
+        val stackedLayoutManager = LinearLayoutManager(requireContext())
         stackedLayoutManager.reverseLayout = true
 
         mBinding = FragmentChatDetailBinding.inflate(inflater, container, false).also {
@@ -81,12 +85,7 @@ class ChatDetailFragment: UstadBaseFragment(), ChatDetailView, ChatDetailFragmen
             }
             it.fragmentChatDetailMessageEt.movementMethod = LinkMovementMethod.getInstance()
         }
-
-        mPresenter = ChatDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
-
-        messagesRecyclerAdapter?.presenter = mPresenter
-
+        
         return rootView
     }
 

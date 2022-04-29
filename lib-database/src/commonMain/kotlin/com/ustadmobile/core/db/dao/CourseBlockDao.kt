@@ -86,7 +86,9 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                LEFT JOIN ClazzAssignment as assignment
                ON assignment.caUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-               
+               LEFT JOIN CourseDiscussion as courseDiscussion
+               ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
+               AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
                LEFT JOIN ContentEntry as entry
                ON entry.contentEntryUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
@@ -99,7 +101,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
            AND cbActive
       ORDER BY cbIndex
           """)
-    abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntity>
+    abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntityDb>
 
     @Query("""
          WITH CtePermissionCheck (hasPermission) 
@@ -110,10 +112,11 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                           ${Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS}
                           ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
                  WHERE Clazz.clazzUid = :clazzUid
-                   AND PrsGrpMbr.groupMemberPersonUid = :personUid))    
-                 
-        SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, ContentEntryParentChildJoin.*, 
+                   AND PrsGrpMbr.groupMemberPersonUid = :personUid))
+
+        SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, CourseDiscussion.*, ContentEntryParentChildJoin.*, 
                Container.*, CourseAssignmentMark.*, (CourseBlock.cbUid NOT IN (:collapseList)) AS expanded,
+               
                
                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                 COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
@@ -198,6 +201,10 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                AND NOT ceInactive
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
                
+               LEFT JOIN CourseDiscussion 
+                      ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
+                     AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
+               
                LEFT JOIN ContentEntryParentChildJoin 
                ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
                
@@ -234,7 +241,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                                     WHERE camAssignmentUid = ClazzAssignment.caUid
                                       AND camSubmitterUid = :personUid
                                  ORDER BY camLct DESC
-                                    LIMIT 1)
+                                    LIMIT 1)       
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND CourseBlock.cbActive
            AND NOT CourseBlock.cbHidden
@@ -243,7 +250,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
            AND CourseBlock.cbModuleParentBlockUid NOT IN (:collapseList)
       ORDER BY CourseBlock.cbIndex
     """)
-    @QueryLiveTables(value = ["CourseBlock", "ClazzAssignment",
+    @QueryLiveTables(value = ["CourseBlock", "ClazzAssignment", "CourseDiscussion",
         "ContentEntry", "CourseAssignmentMark","StatementEntity",
         "Container","ContentEntryParentChildJoin","PersonGroupMember",
         "Clazz","ScopedGrant","ClazzEnrolment","CourseAssignmentSubmission"])
