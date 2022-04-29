@@ -30,8 +30,6 @@ class DiscussionTopicDetailPresenter(
     )
 {
 
-    private var clazzUid: Long = 0
-
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.LIVEDATA
 
@@ -41,7 +39,6 @@ class DiscussionTopicDetailPresenter(
 
     override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<DiscussionTopic?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
 
         view.posts = repo.discussionPostDao.getPostsByDiscussionTopic(entityUid)
 
@@ -66,7 +63,7 @@ class DiscussionTopicDetailPresenter(
                 arguments = mutableMapOf(
                     DiscussionPostEditPresenter.ARG_DISCUSSION_TOPIC_UID to
                             topicUid.toString(),
-                    ARG_CLAZZUID to clazzUid.toString()
+                    ARG_CLAZZUID to view.entity?.discussionTopicClazzUid.toString()
                 )
             )
         )
@@ -76,8 +73,7 @@ class DiscussionTopicDetailPresenter(
     fun onClickPost(discussionPost: DiscussionPostWithDetails){
 
         val args = mutableMapOf<String, String>()
-        args[ARG_ENTITY_UID] = discussionPost.discussionPostUid.toString() ?: ""
-        args[ARG_CLAZZUID] = clazzUid.toString()
+        args[ARG_ENTITY_UID] = discussionPost.discussionPostUid.toString()
 
         ustadNavController?.navigate(
             DiscussionPostDetailView.VIEW_NAME, args)

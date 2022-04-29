@@ -615,6 +615,10 @@ class ClazzEdit2Presenter(
                     it.topics
                 }.flatten()
 
+//                tti.forEach {
+//                    it.discussionTopicClazzUid = entity.clazzUid
+//                }
+
 
                 txDb.discussionTopicDao.replaceListAsync(tti)
 

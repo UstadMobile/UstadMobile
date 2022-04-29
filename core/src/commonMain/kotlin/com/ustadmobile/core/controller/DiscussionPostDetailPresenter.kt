@@ -44,7 +44,6 @@ class DiscussionPostDetailPresenter(
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         postUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         loggedInPersonUid = accountManager.activeAccount.personUid
 
         //Get replies
@@ -57,7 +56,9 @@ class DiscussionPostDetailPresenter(
             val postTitle = repo.discussionPostDao.getPostTitle(
                 postUid )
             view.title = postTitle
-            view.entity = repo.discussionPostDao.findWithDetailsByUid(postUid)
+            val post = repo.discussionPostDao.findWithDetailsByUid(postUid)
+            view.entity = post
+            clazzUid = post?.discussionPostClazzUid?:0L
 
         }
 

@@ -6,7 +6,9 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CourseDiscussion
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
@@ -18,7 +20,16 @@ abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<
       SELECT DISTINCT CourseDiscussion.courseDiscussionUid AS courseDiscussionPk,
              :newNodeId AS courseDiscussionDestination
              
-       FROM CourseDiscussion
+       FROM UserSession
+             JOIN PersonGroupMember 
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                  ${Role.PERMISSION_CLAZZ_SELECT} 
+                  ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
+                  
+             JOIN CourseDiscussion 
+                  ON CourseDiscussion.courseDiscussionClazzUid = Clazz.clazzUid
+                  
        WHERE CourseDiscussion.courseDiscussionLct != COALESCE(
              (SELECT courseDiscussionVersionId
                 FROM courseDiscussionReplicate
@@ -41,7 +52,12 @@ abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<
                  JOIN CourseDiscussion
                      ON ChangeLog.chTableId = ${CourseDiscussion.TABLE_ID}
                         AND ChangeLog.chEntityPk = CourseDiscussion.courseDiscussionUid
-                 JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+                 JOIN Clazz
+                      ON Clazz.clazzUid = CourseDiscussion.courseDiscussionClazzUid
+                 ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                  ${Role.PERMISSION_CLAZZ_SELECT}
+                 ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
+                 
            WHERE UserSession.usClientNodeId != (
                  SELECT nodeClientId 
                    FROM SyncNode

@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -118,7 +119,9 @@ class ClazzDetailOverviewPresenter(
     fun handleClickCourseDiscussion(courseDiscussion: CourseDiscussion){
         ustadNavController?.navigate(
             CourseDiscussionDetailView.VIEW_NAME,
-            mapOf(ARG_ENTITY_UID to courseDiscussion.courseDiscussionUid.toString())
+            mapOf(ARG_ENTITY_UID to courseDiscussion.courseDiscussionUid.toString(),
+                ARG_CLAZZUID to courseDiscussion.courseDiscussionClazzUid.toString()
+                )
         )
     }
 

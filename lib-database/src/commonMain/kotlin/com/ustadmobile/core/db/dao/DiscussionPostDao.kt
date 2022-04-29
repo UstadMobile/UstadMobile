@@ -16,7 +16,16 @@ abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
       SELECT DISTINCT DiscussionPost.discussionPostUid AS discussionPostPk,
              :newNodeId AS discussionPostDestination
              
-       FROM DiscussionPost
+       FROM UserSession
+             JOIN PersonGroupMember 
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                  ${Role.PERMISSION_CLAZZ_SELECT} 
+                  ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
+                  
+            JOIN DiscussionPost 
+                 ON DiscussionPost.discussionPostClazzUid = Clazz.clazzUid
+                 
        WHERE DiscussionPost.discussionPostLct != COALESCE(
              (SELECT discussionPostVersionId
                 FROM discussionPostReplicate
@@ -39,7 +48,15 @@ abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
                  JOIN DiscussionPost
                      ON ChangeLog.chTableId = ${DiscussionPost.TABLE_ID}
                         AND ChangeLog.chEntityPk = DiscussionPost.discussionPostUid
-                 JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+                        
+                        
+                 JOIN Clazz 
+                      ON Clazz.clazzUid = DiscussionPost.discussionPostClazzUid
+                      
+                 ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                  ${Role.PERMISSION_CLAZZ_SELECT}
+                 ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}
+                 
            WHERE UserSession.usClientNodeId != (
                  SELECT nodeClientId 
                    FROM SyncNode

@@ -36,7 +36,12 @@ class DiscussionPostEditPresenter(context: Any,
 
         val discussionPost = withTimeoutOrNull(2000) {
             db.discussionPostDao.findByUid(entityUid)
-        } ?: DiscussionPost()
+        } ?: DiscussionPost().apply{
+            discussionPostClazzUid = clazzUid
+            discussionPostDiscussionTopicUid = topicUid
+            discussionPostStartedPersonUid = accountManager.activeAccount.personUid
+            discussionPostStartDate = systemTimeInMillis()
+        }
 
 
         return discussionPost
@@ -64,21 +69,12 @@ class DiscussionPostEditPresenter(context: Any,
 
     override fun handleClickSave(entity: DiscussionPost) {
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch {
             if(entity.discussionPostUid == 0L) {
-                entity.discussionPostStartedPersonUid = accountManager.activeAccount.personUid
-                entity.discussionPostArchive = false
-                entity.discussionPostVisible = true
-                entity.discussionPostDiscussionTopicUid = topicUid
-                entity.discussionPostStartDate = systemTimeInMillis()
                 entity.discussionPostUid = repo.discussionPostDao.insertAsync(entity)
-                entity.discussionPostClazzUid = clazzUid
             }else {
-                entity.discussionPostClazzUid = clazzUid
                 repo.discussionPostDao.updateAsync(entity)
             }
-
-
 
             onFinish(DiscussionPostDetailView.VIEW_NAME, entity.discussionPostUid, entity,
                 DiscussionPost.serializer())

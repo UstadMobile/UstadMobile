@@ -18,7 +18,16 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
       SELECT DISTINCT DiscussionTopic.discussionTopicUid AS discussionTopicPk,
              :newNodeId AS discussionTopicDestination
              
-       FROM DiscussionTopic
+       FROM UserSession
+             JOIN PersonGroupMember 
+                  ON UserSession.usPersonUid = PersonGroupMember.groupMemberPersonUid
+             ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
+                  ${Role.PERMISSION_CLAZZ_SELECT} 
+                  ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
+                  
+             JOIN DiscussionTopic 
+                  ON DiscussionTopic.discussionTopicClazzUid = Clazz.clazzUid
+                  
        WHERE DiscussionTopic.discussionTopicLct != COALESCE(
              (SELECT discussionTopicVersionId
                 FROM discussionTopicReplicate
@@ -41,7 +50,14 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
                  JOIN DiscussionTopic
                      ON ChangeLog.chTableId = ${DiscussionTopic.TABLE_ID}
                         AND ChangeLog.chEntityPk = DiscussionTopic.discussionTopicUid
-                 JOIN UserSession ON UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+                        
+                        
+                 JOIN Clazz
+                      ON Clazz.clazzUid = DiscussionTopic.discussionTopicClazzUid
+                 ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
+                  ${Role.PERMISSION_CLAZZ_SELECT}
+                 ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2}     
+                 
            WHERE UserSession.usClientNodeId != (
                  SELECT nodeClientId 
                    FROM SyncNode
@@ -60,7 +76,6 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
     abstract suspend fun replicateOnChange()
 
 
-    //TODO: Get timestamp
     @Query("""
         SELECT DiscussionTopic.*,
                 ( 
