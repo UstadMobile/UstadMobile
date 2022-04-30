@@ -7,6 +7,27 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
+/**
+ * A Container (through joins with ContainerEntry and ContainerEntryFile) represents the files in
+ * a given piece of educational content. Most such pieces of educational content (e.g. EPUB,
+ * TinCan Zip, H5P, etc) are based on zip files.
+ *
+ * The join system makes it possible to deduplicate content. Many files (e.g. H5P etc) contain
+ * duplicate files (e.g. Javascript libraries, CSS, etc). This is a waste of storage and bandwidth.
+ *
+ * The join works as follows:
+ *
+ * Container: One to many join to ContainerEntry (which includes the path of the resource within the
+ * container e.g. as it would be in a zip e.g. EPUB/content.opf etc)
+ * ContainerEntry: One to many join to ContainerEntryFile (which includes the actual location of the
+ * file on the disk and the original MD5 sum).
+ *
+ * Many ContainerEntry entities can join to a single ContainerEntryFile, thus eliminating the need
+ * to store duplicate files (as would be the case if zip files themselves were simply downloaded).
+ *
+ * It also makes it possible to update incrementally (downloading only new ContainerEntryFile data,
+ * and then linking data that already exists).
+ */
 @Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent",
         value = ["containerContentEntryUid", "cntLastModified"])))
 @ReplicateEntity(tableId = Container.TABLE_ID, tracker = ContainerReplicate::class)

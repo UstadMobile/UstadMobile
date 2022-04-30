@@ -27,6 +27,7 @@ import io.ktor.http.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.*
@@ -38,14 +39,16 @@ import org.kodein.di.scoped
 import org.kodein.di.singleton
 import java.io.File
 import kotlin.random.Random
+import io.ktor.application.install
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
+import com.ustadmobile.core.io.ContainerManifest
 
 /**
  * Needs updated to include the Download itself. This is mostly just an adapter for
  * generateConcatenatedResponse2 which is thoroughly tested.
  */
-class TestContainerDownloadRoute {
-
-    private lateinit var server: ApplicationEngine
+class ContainerDownloadRouteTest {
 
     private lateinit var db: UmAppDatabase
 
@@ -56,6 +59,8 @@ class TestContainerDownloadRoute {
     private lateinit var container: Container
 
     private lateinit var containerTmpDir: File
+
+    private lateinit var json: Json
 
     @JvmField
     @Rule
@@ -72,6 +77,11 @@ class TestContainerDownloadRoute {
         val singletonDataDir = File(dataDir, "singleton")
 
         singletonDataDir.takeIf { !it.exists() }?.mkdirs()
+
+        json = Json {
+            encodeDefaults = true
+            ignoreUnknownKeys = true
+        }
 
         nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
 
@@ -96,7 +106,21 @@ class TestContainerDownloadRoute {
             this.attachmentsDir = attachmentsDir.absolutePath
         })
 
-        server = embeddedServer(Netty, port = 8097) {
+        containerTmpDir = temporaryFolder.newFolder("dlroutetestcontainerfiles")
+        container = Container()
+        container.containerUid = repo.containerDao.insert(container)
+
+        runBlocking {
+            repo.addEntriesToContainerFromZipResource(container.containerUid, repo::class.java,
+                    "/testfiles/thelittlechicks.epub",
+                    ContainerAddOptions(containerTmpDir.toDoorUri()))
+        }
+    }
+
+
+
+    private fun <R> withTestContainerRoute(testFn: TestApplicationEngine.() -> R) {
+        withTestApplication({
             install(ContentNegotiation) {
                 gson {
                     register(ContentType.Application.Json, GsonConverter())
@@ -121,39 +145,55 @@ class TestContainerDownloadRoute {
             install(Routing) {
                 ContainerDownload()
             }
-        }.start(wait = false)
-
-        containerTmpDir = temporaryFolder.newFolder("dlroutetestcontainerfiles")
-        container = Container()
-        container.containerUid = repo.containerDao.insert(container)
-
-        runBlocking {
-            repo.addEntriesToContainerFromZipResource(container.containerUid, repo::class.java,
-                    "/testfiles/thelittlechicks.epub",
-                    ContainerAddOptions(containerTmpDir.toDoorUri()))
+        }) {
+            testFn()
         }
     }
 
+
     @After
     fun tearDown() {
-        server.stop(0, 5000)
         httpClient.close()
     }
 
     @Test
     fun givenContainer_WhenEntryListRequestIsMade_shouldGiveListWIthMd5s() {
-        runBlocking {
-            val httpClient = HttpClient {
-                install(JsonFeature)
-            }
+        withTestContainerRoute {
+            handleRequest(HttpMethod.Get, uri = "/ContainerEntryList/findByContainerWithMd5?containerUid=${container.containerUid}") {
 
-            httpClient.use {
-                val containerEntryList = httpClient.get<List<ContainerEntryWithMd5>>(
-                        "http://localhost:8097/ContainerEntryList/findByContainerWithMd5?containerUid=${container.containerUid}")
+            }.apply {
+                val containerEntryList = json.decodeFromString(ListSerializer(ContainerEntryWithMd5.serializer()),
+                    this.response.content!!)
                 val containerEntries = db.containerEntryDao.findByContainerWithMd5(container.containerUid)
                 containerEntries.forEach { dbEntry ->
                     Assert.assertTrue("Entry was in response", containerEntryList.any {
                         it.ceUid == dbEntry.ceUid && it.cefMd5 != null && it.cefMd5 == dbEntry.cefMd5})
+                }
+            }
+        }
+    }
+
+
+    @Test
+    fun givenContainer_whenContainerManifestRequestIsMade_shouldProvideContainerManifestWithMd5s() {
+        withTestContainerRoute {
+            handleRequest(HttpMethod.Get, uri = "/ContainerManifest/${container.containerUid}") {
+
+            }.apply {
+                val containerEntryList = db.containerEntryDao.findByContainerWithChecksums(
+                    container.containerUid)
+                val manifestParsed = ContainerManifest.parseFromString(response.content!!)
+                Assert.assertEquals("Count of entries matches", containerEntryList.size,
+                    manifestParsed.entries.size)
+                Assert.assertEquals("Manifest containerUid matches", container.containerUid,
+                    manifestParsed.containerUid)
+                containerEntryList.forEach { dbEntry ->
+                    Assert.assertTrue("Found entry in manifest", manifestParsed.entries.any {
+                        it.integrity == dbEntry.cefIntegrity &&
+                        it.originalMd5 == dbEntry.cefMd5 &&
+                        it.pathInContainer == dbEntry.cePath &&
+                        it.size == dbEntry.ceCompressedSize
+                    })
                 }
             }
         }

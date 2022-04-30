@@ -19,6 +19,7 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.retriever.IntegrityChecksum
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -116,8 +117,8 @@ class ContainerEntryFileIntegrityUpgradePluginTest {
             containerEntryFiles.mapNotNull { it.cefMd5 })
 
         containerEntriesInDb.forEach {
-            val (algorithm: String, digest: kotlin.ByteArray) =  parseIntegrity(it.cefIntegrity!!)
-            val messageDigest = MessageDigest.getInstance(algorithm)
+            val (algorithm, digest) =  parseIntegrity(it.cefIntegrity!!)
+            val messageDigest = MessageDigest.getInstance(algorithm.messageDigestName)
             val fileDigest = messageDigest.digest(File(it.cefPath!!).readBytes())
             Assert.assertArrayEquals("Digest and integrity match for ${it.cefPath}",
                 fileDigest, digest)

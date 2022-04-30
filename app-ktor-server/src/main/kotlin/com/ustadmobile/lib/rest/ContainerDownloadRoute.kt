@@ -13,9 +13,7 @@ import io.ktor.application.call
 import io.ktor.http.*
 import io.ktor.http.content.OutgoingContent
 import io.ktor.request.*
-import io.ktor.response.header
-import io.ktor.response.respond
-import io.ktor.response.respondFile
+import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.toMap
@@ -26,6 +24,7 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import java.io.File
 import org.kodein.di.on
+import com.ustadmobile.core.io.ContainerManifest
 
 
 fun Route.ContainerDownload() {
@@ -75,6 +74,20 @@ fun Route.ContainerDownload() {
 
     post("${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/download") {
         serveConcatenatedResponse2()
+    }
+
+    route("ContainerManifest") {
+        get("{containerUid}") {
+            val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
+            val containerUid = call.parameters["containerUid"]?.toLong() ?: 0
+            val manifestContainerEntries = db.containerEntryDao
+                .findByContainerWithChecksums(containerUid)
+
+            val containerManifest = ContainerManifest.fromContainerEntryWithChecksums(
+                manifestContainerEntries)
+
+            call.respondText { containerManifest.toManifestString() }
+        }
     }
 
     route("ContainerEntryList") {
