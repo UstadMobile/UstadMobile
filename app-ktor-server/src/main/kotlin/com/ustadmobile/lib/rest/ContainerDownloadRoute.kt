@@ -25,6 +25,7 @@ import org.kodein.di.ktor.closestDI
 import java.io.File
 import org.kodein.di.on
 import com.ustadmobile.core.io.ContainerManifest
+import com.ustadmobile.lib.rest.ext.respondContainerEntryFile
 
 
 fun Route.ContainerDownload() {
@@ -114,13 +115,14 @@ fun Route.ContainerDownload() {
         val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
         val entryFileUid = call.parameters["entryFileUid"]?.toLong() ?: 0L
         val entryFile = db.containerEntryFileDao.findByUid(entryFileUid)
-        val filePath = entryFile?.cefPath
-        if(filePath != null) {
-            call.response.header("X-Content-Length-Uncompressed", entryFile?.ceTotalSize.toString())
-            call.respondFile(File(filePath))
-        }else {
-            call.respond(HttpStatusCode.NotFound, "No such file: $entryFileUid")
-        }
+        call.respondContainerEntryFile(entryFile)
+    }
+
+    get("ContainerFileMd5/{entryMd5}") {
+        val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
+        val entryFileMd5 = call.parameters["entryMd5"] ?: ""
+        val entryFile = db.containerEntryFileDao.findEntryByMd5Sum(entryFileMd5)
+        call.respondContainerEntryFile(entryFile)
     }
 
 }

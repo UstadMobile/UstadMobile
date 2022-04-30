@@ -18,6 +18,8 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import java.io.ByteArrayInputStream
+import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import java.io.File
 
 /**
  * Given a proxy to base url, resolve the url for the current call.
@@ -83,5 +85,15 @@ suspend fun ApplicationCall.respondReverseProxy(proxyToBaseUrl: String) {
         responseInput.use { responseIn ->
             responseIn.copyTo(this)
         }
+    }
+}
+
+suspend fun ApplicationCall.respondContainerEntryFile(entryFile: ContainerEntryFile?) {
+    val filePath = entryFile?.cefPath
+    if(filePath != null) {
+        response.header("X-Content-Length-Uncompressed", entryFile.ceTotalSize.toString())
+        respondFile(File(filePath))
+    }else {
+        respond(HttpStatusCode.NotFound, "No such file")
     }
 }

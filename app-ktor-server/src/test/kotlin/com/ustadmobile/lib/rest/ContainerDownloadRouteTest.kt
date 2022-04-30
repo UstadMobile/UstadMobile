@@ -43,6 +43,10 @@ import io.ktor.application.install
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.io.ContainerManifest
+import com.ustadmobile.lib.db.entities.ContainerEntryWithChecksums
+import java.net.URLEncoder
+import java.security.MessageDigest
+import java.util.*
 
 /**
  * Needs updated to include the Download itself. This is mostly just an adapter for
@@ -194,6 +198,28 @@ class ContainerDownloadRouteTest {
                         it.pathInContainer == dbEntry.cePath &&
                         it.size == dbEntry.ceCompressedSize
                     })
+                }
+            }
+        }
+    }
+
+    @Test
+    fun givenContainer_whenContainerEntriesRequested_shouldRespondWithMatchingData() {
+        withTestContainerRoute {
+            val shaMessageDigest = MessageDigest.getInstance("SHA-256")
+            val containerEntryList: List<ContainerEntryWithChecksums> = db.containerEntryDao.findByContainerWithChecksums(
+                container.containerUid)
+            containerEntryList.forEach { entry ->
+                handleRequest(HttpMethod.Get,
+                    "/ContainerFileMd5/${URLEncoder.encode(entry.cefMd5, "UTF-8")}"
+                ) {
+
+                }.apply {
+                    val digest = shaMessageDigest.digest(response.byteContent!!)
+                    val expectedDigest = Base64.getDecoder().decode(
+                        entry.cefIntegrity!!.substringAfter("-"))
+                    Assert.assertArrayEquals("Message digest for MD5 = ${entry.cefMd5} matches",
+                        expectedDigest, digest)
                 }
             }
         }

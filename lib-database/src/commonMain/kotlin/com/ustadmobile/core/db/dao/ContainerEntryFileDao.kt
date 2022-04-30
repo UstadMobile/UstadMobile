@@ -121,7 +121,12 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     @Delete
     abstract fun deleteListOfEntryFiles(entriesToDelete: List<ContainerEntryFile>)
 
-    @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefMd5 = :md5Sum")
+    @Query("""
+        SELECT ContainerEntryFile.* 
+          FROM ContainerEntryFile 
+         WHERE cefMd5 = :md5Sum
+         LIMIT 1
+    """)
     abstract suspend fun findEntryByMd5Sum(md5Sum: String): ContainerEntryFile?
 
 
