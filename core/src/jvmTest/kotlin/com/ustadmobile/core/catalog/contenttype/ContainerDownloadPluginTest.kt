@@ -63,6 +63,10 @@ class ContainerDownloadPluginTest {
 
     private lateinit var container: Container
 
+    private lateinit var manifestUrl: String
+
+    private lateinit var contentEntry: ContentEntry
+
     @Before
     fun setup() {
         downloadDestDir = temporaryFolder.newFolder()
@@ -79,10 +83,17 @@ class ContainerDownloadPluginTest {
         clientRepo = clientDi.directActiveRepoInstance()
         endpoint = clientDi.activeEndpoint()
 
+        contentEntry = ContentEntry().apply {
+            contentEntryUid = clientDb.contentEntryDao.insert(this)
+        }
+
         container = Container().apply {
             fileSize = 10000
+            containerContentEntryUid = contentEntry.contentEntryUid
             containerUid = clientDb.containerDao.insert(this)
         }
+
+        manifestUrl = endpoint.url("/Container/Manifest/${container.containerUid}")
 
         val md5Digest = MessageDigest.getInstance("MD5")
         val sha256Digest = MessageDigest.getInstance("SHA-256")
@@ -104,9 +115,13 @@ class ContainerDownloadPluginTest {
         }
 
         containerEntryUrlList = containerEntriesList.map {
-            endpoint.url(
-                "/Container/FileByMd5/${URLEncoder.encode(it.containerEntryFile!!.cefMd5, "UTF-8")}")
+            it.downloadUrl()
         }
+    }
+
+    private fun ContainerEntryWithContainerEntryFile.downloadUrl() : String{
+        return endpoint.url(
+            "/Container/FileByMd5/${URLEncoder.encode(containerEntryFile!!.cefMd5, "UTF-8")}")
     }
 
     private fun ContainerEntryWithContainerEntryFile.assertIsMatchingInClientDb() {
@@ -130,20 +145,8 @@ class ContainerDownloadPluginTest {
             "Entry in db has matching CRC32")
     }
 
-    @Suppress("UNCHECKED_CAST") //No way to avoid this on a mock invocation
-    @Test
-    fun givenValidContentEntryUid_whenProcessJobCalled_thenShouldUseRetrieverToGetManifestThenFiles() {
-        val downloadPlugin = ContainerDownloadPlugin(Any(), endpoint, clientDi)
-        val contentEntry = ContentEntry().apply {
-            contentEntryUid = clientDb.contentEntryDao.insert(this)
-        }
-
-
-        val manifestUrl = endpoint.url("/Container/Manifest/${container.containerUid}")
-        val jobAndJobItem = makeDownloadJobAndJobItem(contentEntry, container, downloadDestDir,
-            clientDb)
-
-        mockRetriever.stub {
+    fun Retriever.onRequestManifestAnswerWriteFile() {
+        stub {
             onBlocking {
                 retrieve(argWhere { requestList ->
                     requestList.any { it.originUrl == manifestUrl }
@@ -155,10 +158,18 @@ class ContainerDownloadPluginTest {
                 File(requestArgs.first().destinationFilePath)
                     .writeText(containerManifest.toManifestString())
             }
+        }
+    }
+
+    fun Retriever.onRetrieveContainerEntryFilesThenAnswer(block: (RetrieverRequest) -> Int) {
+        stub {
+            val containerEntryUrls = containerEntriesList.map {
+                endpoint.url("/Container/FileByMd5/${URLEncoder.encode(it.containerEntryFile?.cefMd5, "UTF-8")}")
+            }
 
             onBlocking {
                 retrieve(argWhere { requestList ->
-                    !requestList.any { it.originUrl == manifestUrl }
+                    requestList.all { it.originUrl in containerEntryUrls }
                 }, any())
             }.thenAnswer {
                 val requestList = it.arguments[0] as List<RetrieverRequest>
@@ -180,22 +191,40 @@ class ContainerDownloadPluginTest {
                 Unit
             }
         }
+    }
 
-        val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
-            temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            DummyContentJobItemTransactionRunner(clientDb), clientDi)
-
-        val processResult = runBlocking {
-            downloadPlugin.processJob(jobAndJobItem, processContext, mock { })
-        }
-
-        assertEquals(JobStatus.COMPLETE, processResult.status)
-
-        verifyBlocking(mockRetriever) {
+    private fun Retriever.verifyRetrievedManifest() {
+        verifyBlocking(this) {
             retrieve(argWhere { requestList ->
                 requestList.any { it.originUrl == manifestUrl }
             }, any())
         }
+    }
+
+    private fun makeProcessContext() : ContentJobProcessContext{
+        return ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
+            temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
+            DummyContentJobItemTransactionRunner(clientDb), clientDi)
+    }
+
+    @Suppress("UNCHECKED_CAST") //No way to avoid this on a mock invocation
+    @Test
+    fun givenValidContentEntryUid_whenProcessJobCalled_thenShouldUseRetrieverToGetManifestThenFiles() {
+        val downloadPlugin = ContainerDownloadPlugin(Any(), endpoint, clientDi)
+
+        val jobAndJobItem = makeDownloadJobAndJobItem(contentEntry, container, downloadDestDir,
+            clientDb)
+
+        mockRetriever.onRequestManifestAnswerWriteFile()
+        mockRetriever.onRetrieveContainerEntryFilesThenAnswer { Retriever.STATUS_SUCCESSFUL }
+
+        val processResult = runBlocking {
+            downloadPlugin.processJob(jobAndJobItem, makeProcessContext(), mock { })
+        }
+
+        assertEquals(JobStatus.COMPLETE, processResult.status)
+
+        mockRetriever.verifyRetrievedManifest()
 
         verifyBlocking(mockRetriever) {
             retrieve(argWhere { requestList ->
@@ -209,8 +238,42 @@ class ContainerDownloadPluginTest {
         }
     }
 
-    fun givenSomeContainerFileMd5sAlreadyPresent_whenProcessJobCalled_thenShouldOnlyDownloadMissingEntries() {
+    @Test
+    fun givenSomeContainerFileMd5sAlreadyPresent_whenProcessJobCalled_thenShouldOnlyDownloadMissingEntriesAndLinkAllContainerPaths() {
+        val existingContainerFiles = containerEntriesList.subList(0, 10).mapNotNull {
+            it.containerEntryFile
+        }
+        clientDb.containerEntryFileDao.insertList(existingContainerFiles)
 
+        val downloadPlugin = ContainerDownloadPlugin(Any(), endpoint, clientDi)
+
+        val jobAndJobItem = makeDownloadJobAndJobItem(contentEntry, container, downloadDestDir,
+            clientDb)
+
+        mockRetriever.onRequestManifestAnswerWriteFile()
+        mockRetriever.onRetrieveContainerEntryFilesThenAnswer { Retriever.STATUS_SUCCESSFUL }
+
+        val processResult = runBlocking {
+            downloadPlugin.processJob(jobAndJobItem, makeProcessContext(), mock { })
+        }
+
+        assertEquals(JobStatus.COMPLETE, processResult.status)
+        mockRetriever.verifyRetrievedManifest()
+
+        val remainingUrls = containerEntriesList.subList(10, containerEntriesList.size).map {
+            it.downloadUrl()
+        }
+        verifyBlocking(mockRetriever) {
+            retrieve(argWhere { requestList ->
+                requestList.size == (containerEntriesList.size - existingContainerFiles.size)
+                    && requestList.map { it.originUrl }.containsAll(remainingUrls)
+            }, any())
+        }
+
+        //verify that the entries are added to the database
+        containerEntriesList.forEach {  entry ->
+            entry.assertIsMatchingInClientDb()
+        }
     }
 
     fun givenSomeFilesAlreadyDownloadedInDir_whenProcessJobCalled_thenShouldOnlyDownloadRemainingEntries() {
