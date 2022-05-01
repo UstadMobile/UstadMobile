@@ -173,13 +173,14 @@ class ContainerDownloadPlugin(
                 val containerEntriesPartition: ContainerEntryWithFilePartition =
                     db.partitionContainerEntries(entriesWithChecksums)
 
-                val retrieverRequests = containerEntriesPartition.entriesWithoutMatchingFile.map {
+                val entriesToDownload = containerEntriesPartition.entriesWithoutMatchingFile
+                    .filterContainerEntryNotInDirectory(containerDownloadDir)
+                val retrieverRequests = entriesToDownload.map {
                     it.toRetrieverRequest(endpoint, containerDownloadDir)
-                }
+                }.distinctBy { it.originUrl }
 
                 val pendingEntries : MutableList<ContainerEntryWithContainerEntryFile> =
-                    concurrentSafeListOf(
-                        *containerEntriesPartition.entriesWithoutMatchingFile.toTypedArray())
+                    concurrentSafeListOf(*entriesToDownload.toTypedArray())
 
                 //When Retriever tells us a particular entry was completed,
                 // write the ContainerEntryFile to disk

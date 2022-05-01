@@ -7,7 +7,9 @@ import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ContainerManifest
+import com.ustadmobile.core.io.ext.FILE_EXTENSION_CE_JSON
 import com.ustadmobile.core.util.*
+import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
@@ -19,14 +21,12 @@ import com.ustadmobile.retriever.io.FileChecksums
 import com.ustadmobile.retriever.io.parseIntegrity
 import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.junit.Rule
 import org.junit.Test
 import org.junit.Before
 import org.junit.rules.TemporaryFolder
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.direct
-import org.kodein.di.singleton
+import org.kodein.di.*
 import org.mockito.kotlin.*
 import java.io.File
 import java.net.URLEncoder
@@ -114,9 +114,13 @@ class ContainerDownloadPluginTest {
             }
         }
 
+        //Add a single md5 which has multiple entries in the same container (edge case, but it happens)
+        containerEntriesList[containerEntriesList.size - 1].containerEntryFile =
+            containerEntriesList[containerEntriesList.size - 2].containerEntryFile
+
         containerEntryUrlList = containerEntriesList.map {
             it.downloadUrl()
-        }
+        }.distinct()
     }
 
     private fun ContainerEntryWithContainerEntryFile.downloadUrl() : String{
@@ -229,6 +233,7 @@ class ContainerDownloadPluginTest {
         verifyBlocking(mockRetriever) {
             retrieve(argWhere { requestList ->
                 requestList.map { it.originUrl }.containsAll(containerEntryUrlList)
+                    && requestList.size == containerEntryUrlList.size
             }, any())
         }
 
@@ -238,6 +243,10 @@ class ContainerDownloadPluginTest {
         }
     }
 
+    /**
+     * Simulate a situation where we already have some of the needed ContainerEntryFile entities
+     * e.g. another container already downloaded has the same file.
+     */
     @Test
     fun givenSomeContainerFileMd5sAlreadyPresent_whenProcessJobCalled_thenShouldOnlyDownloadMissingEntriesAndLinkAllContainerPaths() {
         val existingContainerFiles = containerEntriesList.subList(0, 10).mapNotNull {
@@ -265,7 +274,7 @@ class ContainerDownloadPluginTest {
         }
         verifyBlocking(mockRetriever) {
             retrieve(argWhere { requestList ->
-                requestList.size == (containerEntriesList.size - existingContainerFiles.size)
+                requestList.size == (containerEntryUrlList.size - existingContainerFiles.size)
                     && requestList.map { it.originUrl }.containsAll(remainingUrls)
             }, any())
         }
@@ -276,8 +285,55 @@ class ContainerDownloadPluginTest {
         }
     }
 
+    /**
+     * Simulate a situation where the previous download was interrupted. Nothing has been inserted
+     * into the database yet, but there are json files on the disk from completed ContainerEntryFile
+     * downloads
+     */
+    @Test
     fun givenSomeFilesAlreadyDownloadedInDir_whenProcessJobCalled_thenShouldOnlyDownloadRemainingEntries() {
+        val alreadyDownloadedContainers = containerEntriesList.subList(0, 10).mapNotNull {
+            it.containerEntryFile
+        }
 
+        val json: Json = clientDi.direct.instance()
+        val containerDestDir = File(downloadDestDir, container.containerUid.toString())
+        containerDestDir.takeIf { !it.exists() }?.mkdirs()
+        alreadyDownloadedContainers.forEach { entryFile ->
+            val ceJsonFileName = entryFile.cefMd5?.base64EncodedToHexString()!! + FILE_EXTENSION_CE_JSON
+            File(containerDestDir, ceJsonFileName).writeText(
+                json.encodeToString(ContainerEntryFile.serializer(), entryFile))
+        }
+
+        val downloadPlugin = ContainerDownloadPlugin(Any(), endpoint, clientDi)
+
+        val jobAndJobItem = makeDownloadJobAndJobItem(contentEntry, container, downloadDestDir,
+            clientDb)
+
+        mockRetriever.onRequestManifestAnswerWriteFile()
+        mockRetriever.onRetrieveContainerEntryFilesThenAnswer { Retriever.STATUS_SUCCESSFUL }
+
+        val processResult = runBlocking {
+            downloadPlugin.processJob(jobAndJobItem, makeProcessContext(), mock { })
+        }
+
+        assertEquals(JobStatus.COMPLETE, processResult.status)
+        mockRetriever.verifyRetrievedManifest()
+
+        val remainingUrls = containerEntriesList.subList(10, containerEntriesList.size).map {
+            it.downloadUrl()
+        }
+        verifyBlocking(mockRetriever) {
+            retrieve(argWhere { requestList ->
+                requestList.size == (containerEntryUrlList.size - alreadyDownloadedContainers.size)
+                    && requestList.map { it.originUrl }.containsAll(remainingUrls)
+            }, any())
+        }
+
+        //verify that the entries are added to the database
+        containerEntriesList.forEach {  entry ->
+            entry.assertIsMatchingInClientDb()
+        }
     }
 
     fun givenNoContainerAvailable_whenProcessJobCalled_thenNotDownloadAnythingAndFail() {

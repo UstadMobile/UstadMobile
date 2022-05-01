@@ -123,7 +123,10 @@ class UstadTestRule(
                 UstadAccountManager(instance(), Any(), di)
             }
             bind<Json>() with singleton {
-                Json { encodeDefaults = true }
+                Json {
+                    encodeDefaults = true
+                    ignoreUnknownKeys = true
+                }
             }
 
 
