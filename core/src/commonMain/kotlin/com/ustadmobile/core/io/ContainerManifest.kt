@@ -19,6 +19,11 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
  */
 class ContainerManifest(val version: Int, val containerUid: Long, val entries: List<Entry>) {
 
+    init {
+        if(entries.isEmpty())
+            throw IllegalArgumentException("ContainerManifest for $containerUid: empty entry list")
+    }
+
     val headerString: String = "$FIELDNAME_VERSION:$version\n" +
         "$FIELDNAME_CONTAINERUID:$containerUid\n" +
         "$FIELDNAME_NUMENTRIES:${entries.size}\n"

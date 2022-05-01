@@ -34,12 +34,25 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlinx.serialization.json.Json
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.core.impl.ContainerStorageManager
+import com.ustadmobile.core.io.ContainerManifest
+import com.ustadmobile.core.io.ext.FILE_EXTENSION_CE_JSON
+import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
+import com.ustadmobile.retriever.Retriever
+import com.ustadmobile.retriever.RetrieverRequest
+import com.ustadmobile.retriever.fetcher.RetrieverListener
+import com.ustadmobile.retriever.fetcher.RetrieverProgressEvent
+import com.ustadmobile.retriever.RetrieverStatusUpdateEvent
+import java.io.BufferedReader
+import java.io.FileReader
+import io.github.aakira.napier.Napier
+import com.ustadmobile.door.ext.concurrentSafeListOf
+import java.io.IOException
 
 class ContainerDownloadPlugin(
     context: Any,
     endpoint: Endpoint,
     di: DI
-) : AbstractContentEntryPlugin(context, endpoint, di) {
+) : AbstractContentEntryPlugin(context, endpoint, di) /*, RetrieverListener */{
 
     override val pluginId: Int
         get() = CONTAINER_DOWNLOAD_PLUGIN
@@ -61,6 +74,8 @@ class ContainerDownloadPlugin(
     private val httpClient: HttpClient = di.direct.instance()
 
     private val json: Json by di.instance()
+
+    private val retriever: Retriever by di.instance()
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         return extractMetadata(ContentEntryDetailView.VIEW_NAME, uri)
@@ -116,68 +131,187 @@ class ContainerDownloadPlugin(
 
             val downloadFolderDir = DoorUri.parse(downloadFolderUri).toFile()
 
-            //This download will go into a subdirectory. This avoids any potential for concurrency
-            // issues if other downloads are running simultaneously.
-            val containerDownloadDir = File(downloadFolderDir,
+            //This download will go into a subdirectory. This avoids potential concurrency
+            // problems if other downloads are running simultaneously getting an entry with the
+            // same md5.
+            val containerDownloadDir: File = File(downloadFolderDir,
                 contentJobItem.cjiContainerUid.toString())
             containerDownloadDir.takeIf { !it.exists() }?.mkdirs()
-            val containerDownloadUri = containerDownloadDir.toDoorUri()
-
-            val progressAdapter = ContainerFetcherProgressListenerAdapter(progress, contentJobItem)
 
             try {
-                val containerEntryListUrl = UMFileUtil.joinPaths(endpoint.url,
-                        "$CONTAINER_ENTRY_LIST_PATH?containerUid=${contentJobItem.cjiContainerUid}")
-                val containerEntryListVal: List<ContainerEntryWithMd5> = httpClient.get(
-                        containerEntryListUrl)
-                val containerEntriesList = mutableListOf<ContainerEntryWithMd5>()
-                containerEntriesList.addAll(containerEntryListVal)
+                val manifestUrl = endpoint
+                    .url("/Container/Manifest/${contentJobItem.cjiContainerUid}")
+                val manifestFileDest: File = File(containerDownloadDir, "MANIFEST")
 
+                val manifestRetrieverListener = object: RetrieverListener {
+                    override suspend fun onRetrieverProgress(
+                        retrieverProgressEvent: RetrieverProgressEvent
+                    ) {
 
-                val containerEntriesPartition = db.partitionContainerEntriesWithMd5(
-                    containerEntryListVal)
+                    }
 
-                val entriesToDownload = containerEntriesPartition.entriesWithoutMatchingFile.
-                    filterNotInDirectory(containerDownloadDir)
+                    override suspend fun onRetrieverStatusUpdate(
+                        retrieverStatusEvent: RetrieverStatusUpdateEvent
+                    ) {
 
-                contentJobItem.cjiItemProgress = containerEntriesPartition.existingFiles.sumByLong {
-                    it.ceCompressedSize
+                    }
                 }
-                contentJobItem.cjiItemTotal = containerSize
-                progress.onProgress(contentJobItem)
 
-                //We always download in md5sum (hex) alphabetical order, such that a partial download will
-                //be resumed as expected.
-                val containerFetchRequest = ContainerFetcherRequest2(
-                    entriesToDownload, endpoint.url, endpoint.url,
-                    containerDownloadUri.toString())
-                val status = if(entriesToDownload.isNotEmpty()) {
-                    ContainerFetcherOkHttp(containerFetchRequest, progressAdapter,
-                        di).download()
+                retriever.retrieve(listOf(RetrieverRequest(manifestUrl,
+                    manifestFileDest.absolutePath, null)), manifestRetrieverListener)
+                val bufferedReader = BufferedReader(FileReader(manifestFileDest))
+                val manifest = bufferedReader.use { reader ->
+                    ContainerManifest.parseFromLines {
+                        reader.readLine()
+                    }
+                }
+                Napier.d("Downloaded manifest for ${contentJobItem.cjiContainerUid}")
+
+                val entriesWithChecksums = manifest.toContainerEntryList()
+
+                //TODO: filter out completed files already saved into the directory.
+                val containerEntriesPartition: ContainerEntryWithFilePartition =
+                    db.partitionContainerEntries(entriesWithChecksums)
+
+                val retrieverRequests = containerEntriesPartition.entriesWithoutMatchingFile.map {
+                    it.toRetrieverRequest(endpoint, containerDownloadDir)
+                }
+
+                val pendingEntries : MutableList<ContainerEntryWithContainerEntryFile> =
+                    concurrentSafeListOf(
+                        *containerEntriesPartition.entriesWithoutMatchingFile.toTypedArray())
+
+                //When Retriever tells us a particular entry was completed,
+                // write the ContainerEntryFile to disk
+                val retrieverListener: RetrieverListener = object: RetrieverListener {
+                    override suspend fun onRetrieverProgress(retrieverProgressEvent: RetrieverProgressEvent) {
+
+                    }
+
+                    override suspend fun onRetrieverStatusUpdate(
+                        retrieverStatusEvent: RetrieverStatusUpdateEvent
+                    ) {
+                        //HERE - when an entry is successful, save json
+                        if(retrieverStatusEvent.status == Retriever.STATUS_SUCCESSFUL) {
+                            val completedIntegrity = "sha256-${retrieverStatusEvent.checksums?.sha256?.encodeBase64()}"
+                            val completedEntry = containerEntriesPartition
+                                .entriesWithoutMatchingFile.firstOrNull {
+                                    it.containerEntryFile?.cefIntegrity == completedIntegrity
+                                }
+                            val completedEntryFile = completedEntry?.containerEntryFile
+
+                            if (completedEntryFile == null) {
+                                Napier.w("$logPrefix Retriever completed an entry, but can't find it")
+                                return
+                            }
+
+                            //write to disk
+                            val jsonFileName = completedEntryFile.cefMd5
+                                ?.base64EncodedToHexString() + FILE_EXTENSION_CE_JSON
+                            val entryFileJson = json.encodeToString(ContainerEntryFile.serializer(),
+                                completedEntryFile)
+                            File(containerDownloadDir, jsonFileName).writeText(entryFileJson)
+                            pendingEntries.removeAll {
+                                it.containerEntryFile?.cefIntegrity == completedIntegrity
+                            }
+                        }
+
+                    }
+                }
+
+                val status= if(containerEntriesPartition.entriesWithoutMatchingFile.isEmpty()) {
+                    JobStatus.COMPLETE
                 }else {
+                    retriever.retrieve(retrieverRequests, retrieverListener)
+
+                    if(pendingEntries.isNotEmpty())
+                        throw IOException("${logPrefix }retriever.retrieve was called, " +
+                            "but not everything was downloaded. Pending = " +
+                            pendingEntries.joinToString { it.cePath ?: "?" } )
+
                     JobStatus.COMPLETE
                 }
 
-                val containerEntryFileEntities = containerDownloadDir
-                    .getContentEntryJsonFilesFromDir(json)
+                //Add the entries to the database
+                if(status == JobStatus.COMPLETE) {
+                    val containerEntryFileEntities = containerDownloadDir
+                        .getContentEntryJsonFilesFromDir(json)
 
-                db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
-                    txDb.containerEntryFileDao.insertListAsync(containerEntryFileEntities)
+                    val containerEntryListVal = entriesWithChecksums.map {
+                        it.toContainerEntryWithMd5()
+                    }
 
-                    //now everything is downloaded, link it
-                    txDb.linkExistingContainerEntries(
-                        contentJobItem.cjiContainerUid, containerEntryListVal)
+                    db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                        txDb.containerEntryFileDao.insertListAsync(containerEntryFileEntities)
+                        txDb.linkExistingContainerEntries(contentJobItem.cjiContainerUid,
+                            containerEntryListVal)
+                    }
+
+                    containerDownloadDir.deleteAllContentEntryJsonFiles()
                 }
-
-                containerDownloadDir.deleteAllContentEntryJsonFiles()
 
                 ProcessResult(status)
             }finally {
-                contentJobItem.cjiItemTotal = totalDownloadSize.get()
-                contentJobItem.cjiItemProgress = bytesSoFar.get()
-                progress.onProgress(contentJobItem)
+                //progress
             }
 
+
+
+//            val progressAdapter = ContainerFetcherProgressListenerAdapter(progress, contentJobItem)
+
+//            try {
+//                val containerEntryListUrl = UMFileUtil.joinPaths(endpoint.url,
+//                        "$CONTAINER_ENTRY_LIST_PATH?containerUid=${contentJobItem.cjiContainerUid}")
+//                val containerEntryListVal: List<ContainerEntryWithMd5> = httpClient.get(
+//                        containerEntryListUrl)
+//                val containerEntriesList = mutableListOf<ContainerEntryWithMd5>()
+//                containerEntriesList.addAll(containerEntryListVal)
+//
+//
+//                val containerEntriesPartition = db.partitionContainerEntriesWithMd5(
+//                    containerEntryListVal)
+//
+//                val entriesToDownload = containerEntriesPartition.entriesWithoutMatchingFile.
+//                    filterNotInDirectory(containerDownloadDir)
+//
+//                contentJobItem.cjiItemProgress = containerEntriesPartition.existingFiles.sumByLong {
+//                    it.ceCompressedSize
+//                }
+//                contentJobItem.cjiItemTotal = containerSize
+//                progress.onProgress(contentJobItem)
+//
+//                //We always download in md5sum (hex) alphabetical order, such that a partial download will
+//                //be resumed as expected.
+//                val containerFetchRequest = ContainerFetcherRequest2(
+//                    entriesToDownload, endpoint.url, endpoint.url,
+//                    containerDownloadUri.toString())
+//                val status = if(entriesToDownload.isNotEmpty()) {
+//                    ContainerFetcherOkHttp(containerFetchRequest, progressAdapter,
+//                        di).download()
+//                }else {
+//                    JobStatus.COMPLETE
+//                }
+//
+//                val containerEntryFileEntities = containerDownloadDir
+//                    .getContentEntryJsonFilesFromDir(json)
+//
+//                db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+//                    txDb.containerEntryFileDao.insertListAsync(containerEntryFileEntities)
+//
+//                    //now everything is downloaded, link it
+//                    txDb.linkExistingContainerEntries(
+//                        contentJobItem.cjiContainerUid, containerEntryListVal)
+//                }
+//
+//                containerDownloadDir.deleteAllContentEntryJsonFiles()
+//
+//                ProcessResult(status)
+//            }finally {
+//                contentJobItem.cjiItemTotal = totalDownloadSize.get()
+//                contentJobItem.cjiItemProgress = bytesSoFar.get()
+//                progress.onProgress(contentJobItem)
+//            }
+//
         }
 
     }
