@@ -22,6 +22,8 @@ internal fun File.deleteAllContentEntryJsonFiles() = listContentEntryJsonFiles()
     it.delete()
 }
 
+@Deprecated("Now using withChecksum - this should be removable")
 internal fun List<ContainerEntryWithMd5>.filterNotInDirectory(dir: File): List<ContainerEntryWithMd5> {
     return filter { !File(dir, it.cefMd5?.base64EncodedToHexString() ?: ".").exists() }
 }
+

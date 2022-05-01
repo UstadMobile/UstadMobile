@@ -43,10 +43,10 @@ import io.ktor.application.install
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.io.ContainerManifest
-import com.ustadmobile.lib.db.entities.ContainerEntryWithChecksums
 import java.net.URLEncoder
 import java.security.MessageDigest
 import java.util.*
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 
 /**
  * Needs updated to include the Download itself. This is mostly just an adapter for
@@ -181,10 +181,10 @@ class ContainerDownloadRouteTest {
     @Test
     fun givenContainer_whenContainerManifestRequestIsMade_shouldProvideContainerManifestWithMd5s() {
         withTestContainerRoute {
-            handleRequest(HttpMethod.Get, uri = "/ContainerManifest/${container.containerUid}") {
+            handleRequest(HttpMethod.Get, uri = "/Container/Manifest/${container.containerUid}") {
 
             }.apply {
-                val containerEntryList = db.containerEntryDao.findByContainerWithChecksums(
+                val containerEntryList = db.containerEntryDao.findByContainerWithContainerEntryFile(
                     container.containerUid)
                 val manifestParsed = ContainerManifest.parseFromString(response.content!!)
                 Assert.assertEquals("Count of entries matches", containerEntryList.size,
@@ -193,10 +193,10 @@ class ContainerDownloadRouteTest {
                     manifestParsed.containerUid)
                 containerEntryList.forEach { dbEntry ->
                     Assert.assertTrue("Found entry in manifest", manifestParsed.entries.any {
-                        it.integrity == dbEntry.cefIntegrity &&
-                        it.originalMd5 == dbEntry.cefMd5 &&
+                        it.integrity == dbEntry.containerEntryFile?.cefIntegrity &&
+                        it.originalMd5 == dbEntry.containerEntryFile?.cefMd5 &&
                         it.pathInContainer == dbEntry.cePath &&
-                        it.size == dbEntry.ceCompressedSize
+                        it.size == dbEntry.containerEntryFile?.ceCompressedSize
                     })
                 }
             }
@@ -207,18 +207,19 @@ class ContainerDownloadRouteTest {
     fun givenContainer_whenContainerEntriesRequested_shouldRespondWithMatchingData() {
         withTestContainerRoute {
             val shaMessageDigest = MessageDigest.getInstance("SHA-256")
-            val containerEntryList: List<ContainerEntryWithChecksums> = db.containerEntryDao.findByContainerWithChecksums(
-                container.containerUid)
+            val containerEntryList: List<ContainerEntryWithContainerEntryFile> = db
+                .containerEntryDao.findByContainerWithContainerEntryFile(container.containerUid)
             containerEntryList.forEach { entry ->
                 handleRequest(HttpMethod.Get,
-                    "/ContainerFileMd5/${URLEncoder.encode(entry.cefMd5, "UTF-8")}"
+                    "/Container/FileByMd5/${URLEncoder.encode(entry.containerEntryFile!!.cefMd5, "UTF-8")}"
                 ) {
 
                 }.apply {
                     val digest = shaMessageDigest.digest(response.byteContent!!)
                     val expectedDigest = Base64.getDecoder().decode(
-                        entry.cefIntegrity!!.substringAfter("-"))
-                    Assert.assertArrayEquals("Message digest for MD5 = ${entry.cefMd5} matches",
+                        entry.containerEntryFile!!.cefIntegrity!!.substringAfter("-"))
+                    Assert.assertArrayEquals(
+                        "Message digest for MD5 = ${entry.containerEntryFile!!.cefMd5} matches",
                         expectedDigest, digest)
                 }
             }

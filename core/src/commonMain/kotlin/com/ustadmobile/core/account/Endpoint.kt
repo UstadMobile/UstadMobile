@@ -1,5 +1,6 @@
 package com.ustadmobile.core.account
 
+import com.ustadmobile.core.util.ext.requirePostfix
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -9,8 +10,9 @@ data class Endpoint(
      */
     val url: String
 ) {
-    init {
-//        if(!url.endsWith("/"))
-//            throw IllegalArgumentException("Endpoint url must end with / !")
+
+    fun url(subUri: String): String {
+        return url.requirePostfix("/") + subUri.removePrefix("/")
     }
+
 }

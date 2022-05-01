@@ -83,7 +83,7 @@ ext {
     ustadVersionCode = 227
 
     version_door = "0.0.57"
-    version_retriever = "0.0.1j"
+    version_retriever = "0.0.1n"
     version_xmlpullparserkmp = '0.0.20'
 
     version_gradle_buildconfig_plugin = "1.1.7"

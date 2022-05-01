@@ -502,6 +502,12 @@ data class ContainerEntryPartition(
     val existingFiles: List<ContainerEntryFile>
 )
 
+data class ContainerEntryWithFilePartition(
+    val entriesWithMatchingFile: List<ContainerEntryWithContainerEntryFile>,
+    val entriesWithoutMatchingFile: List<ContainerEntryWithContainerEntryFile>,
+    val existingFiles: List<ContainerEntryFile>,
+)
+
 /**
  * Partition a list of containerentrywithmd5 into a list of those md5s that we already have
  * and those that we don't have yet.
@@ -517,6 +523,20 @@ suspend fun UmAppDatabase.partitionContainerEntriesWithMd5(
         .partition { it.cefMd5 in existingMd5s }
 
     return ContainerEntryPartition(entriesWithFile, entriesNeedDownloaded, existingFiles)
+}
+
+suspend fun UmAppDatabase.partitionContainerEntries(
+    containerEntryFiles: List<ContainerEntryWithContainerEntryFile>
+): ContainerEntryWithFilePartition {
+    val existingFiles = containerEntryFileDao.findEntriesByMd5SumsSafeAsync(containerEntryFiles
+        .mapNotNull { it.containerEntryFile?.cefMd5 }, maxQueryParamListSize)
+    val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
+
+    val (entriesWithFile, entriesNeedDownloaded) = containerEntryFiles
+        .partition { it.containerEntryFile?.cefMd5 in existingMd5s }
+
+    return ContainerEntryWithFilePartition(entriesWithFile, entriesNeedDownloaded,
+        existingFiles)
 }
 
 /**

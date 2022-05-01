@@ -1,10 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
-import com.ustadmobile.lib.db.entities.ContainerEntry
-import com.ustadmobile.lib.db.entities.ContainerEntryWithChecksums
-import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
-import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
+import com.ustadmobile.lib.db.entities.*
 
 @Dao
 abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
@@ -26,6 +23,18 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
             "WHERE ContainerEntry.ceContainerUid = :containerUid")
     abstract fun findByContainer(containerUid: Long): List<ContainerEntryWithContainerEntryFile>
 
+
+    @Query("""
+        SELECT ContainerEntry.*, ContainerEntryFile.*
+          FROM ContainerEntry
+               JOIN ContainerEntryFile
+                    ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid
+         WHERE ContainerEntry.ceContainerUid = :containerUid           
+    """)
+    abstract fun findByContainerWithContainerEntryFile(
+        containerUid: Long
+    ) : List<ContainerEntryWithContainerEntryFile>
+
     @Query("SELECT ContainerEntry.*, ContainerEntryFile.* " +
             "FROM ContainerEntry " +
             "LEFT JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
@@ -38,16 +47,6 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
             "LEFT JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
             "WHERE ContainerEntry.ceContainerUid = :containerUid")
     abstract fun findByContainerWithMd5(containerUid: Long): List<ContainerEntryWithMd5>
-
-    @Query("""
-        SELECT ContainerEntry.*, ContainerEntryFile.cefMd5, ContainerEntryFile.cefIntegrity,
-               ContainerEntryFile.cefCrc32, ContainerEntryFile.ceCompressedSize
-          FROM ContainerEntry
-               JOIN ContainerEntryFile
-                    ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid
-         WHERE ContainerEntry.ceContainerUid = :containerUid
-    """)
-    abstract fun findByContainerWithChecksums(containerUid: Long): List<ContainerEntryWithChecksums>
 
     @Query("SELECT ContainerEntry.*, ContainerEntryFile.* " +
             "FROM ContainerEntry " +

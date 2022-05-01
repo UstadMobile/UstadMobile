@@ -77,7 +77,7 @@ val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
  * other url will be sent to the JS dev proxy
  */
 val KTOR_SERVER_ROUTES = listOf("/UmAppDatabase", "/ConcatenatedContainerFiles2",
-    "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
+    "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount", "/Container",
     "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket")
 
 

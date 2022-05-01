@@ -77,17 +77,24 @@ fun Route.ContainerDownload() {
         serveConcatenatedResponse2()
     }
 
-    route("ContainerManifest") {
-        get("{containerUid}") {
+    route("Container") {
+        get("Manifest/{containerUid}") {
             val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
             val containerUid = call.parameters["containerUid"]?.toLong() ?: 0
             val manifestContainerEntries = db.containerEntryDao
-                .findByContainerWithChecksums(containerUid)
+                .findByContainerWithContainerEntryFile(containerUid)
 
-            val containerManifest = ContainerManifest.fromContainerEntryWithChecksums(
-                manifestContainerEntries)
+            val containerManifest: ContainerManifest = ContainerManifest
+                .fromContainerEntryWithContainerEntryFiles(manifestContainerEntries)
 
             call.respondText { containerManifest.toManifestString() }
+        }
+
+        get("FileByMd5/{entryMd5}") {
+            val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
+            val entryFileMd5 = call.parameters["entryMd5"] ?: ""
+            val entryFile = db.containerEntryFileDao.findEntryByMd5Sum(entryFileMd5)
+            call.respondContainerEntryFile(entryFile)
         }
     }
 
@@ -118,11 +125,5 @@ fun Route.ContainerDownload() {
         call.respondContainerEntryFile(entryFile)
     }
 
-    get("ContainerFileMd5/{entryMd5}") {
-        val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
-        val entryFileMd5 = call.parameters["entryMd5"] ?: ""
-        val entryFile = db.containerEntryFileDao.findEntryByMd5Sum(entryFileMd5)
-        call.respondContainerEntryFile(entryFile)
-    }
 
 }

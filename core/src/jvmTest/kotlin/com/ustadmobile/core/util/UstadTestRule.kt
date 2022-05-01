@@ -66,6 +66,8 @@ fun DI.directActiveDbInstance() = onActiveAccountDirect().instance<UmAppDatabase
 
 fun DI.directActiveRepoInstance() = onActiveAccountDirect().instance<UmAppDatabase>(tag = TAG_REPO)
 
+fun DI.activeEndpoint() = direct.instance<UstadAccountManager>().activeEndpoint
+
 /**
  * UstadTestRule makes a fresh almost-ready-to-go DI module for each test run. The DB and SystemImpl
  * are wrapped with spy, so they can be used to in verify calls.

@@ -1,18 +1,19 @@
 package com.ustadmobile.core.io
 
-import com.ustadmobile.lib.db.entities.ContainerEntryWithChecksums
+import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 
 /**
  * The ContainerManifest provides a list of all the contents of a given Container so that a downloader
  * can determine which files need to be downloaded, and which files the device already has.
  *
- * The ContainerManifest will be BINARY IDENTICAL everytime. This is the primary reason for creating
- * this class (rather than using simple JSON serialization).
+ * If a Container has the same contents, The ContainerManifest will be BINARY IDENTICAL. This is the
+ * primary reason for creating this class (rather than using simple JSON serialization). Because the
+ * ContainerManifest will be binary identical everytime, we can specify the expected integrity when
+ * using retriever to fetch the manifest itself (and avoid any possibility of issues caused by a
+ * malevolent peer device)
  *
  * Entries MUST be sorted by the entry md5
- *
- * This is important so that retriever
- * itself can retrieve the manifest (securely by checking a known integrity checksum).
  *
  * @see com.ustadmobile.lib.db.entities.Container
  */
@@ -24,24 +25,79 @@ class ContainerManifest(val version: Int, val containerUid: Long, val entries: L
 
     /**
      * @param originalMd5 - as per the ContainerEntryFile (Base64 encoded)
-     * @param integrity as per ContainerEntryFile
+     * @param integrity as per ContainerEntryFile.cefIntegrity
+     * @param crc32 as per ContainerEntryFile.cefCrc32
      * @param size as per ContainerEntryFile ceCompressedSize
+     * @param inflatedSize if compressed, then the size of the entry when uncompressed
+     * @param compression as per ContainerEntryFile.compression
+     * @param lastModified as per ContainerEntryFile.lastModified
      */
     data class Entry(
         val pathInContainer: String,
         val originalMd5: String,
         val integrity: String,
-        val size: Long
+        val crc32: Long,
+        val size: Long,
+        val inflatedSize: Long,
+        val compression: Int,
+        val lastModified: Long,
     ) {
         fun toManifestSegment() : String {
             return "$FIELDNAME_PATH_IN_CONTAINER:$pathInContainer\n" +
                     "$FIELDNAME_ORIGINAL_MD5:$originalMd5\n" +
                     "$FIELDNAME_INTEGRITY:$integrity\n" +
-                    "${FIELDNAME_SIZE}:$size\n"
+                    "$FIELDNAME_CRC32:$crc32\n" +
+                    "$FIELDNAME_SIZE:$size\n" +
+                    "$FIELDNAME_INFLATED_SIZE:$inflatedSize\n" +
+                    "$FIELDNAME_COMPRESSION:$compression\n" +
+                    "$FIELDNAME_LASTMODIFIED:$lastModified\n"
+
+
+        }
+
+
+        fun toContainerEntryWithContainerEntryFile(
+            containerUid: Long
+        ): ContainerEntryWithContainerEntryFile {
+            return ContainerEntryWithContainerEntryFile().apply {
+                ceContainerUid = containerUid
+                cePath = pathInContainer
+                containerEntryFile = ContainerEntryFile().apply {
+                    ceCompressedSize = size
+                    ceTotalSize = inflatedSize
+                    cefCrc32 = crc32
+                    cefMd5 = originalMd5
+                    cefIntegrity = integrity
+                    lastModified = this@Entry.lastModified
+                    compression = this@Entry.compression
+                }
+            }
+        }
+
+    }
+
+    fun toContainerEntryWithContainerEntryFileList(): List<ContainerEntryWithContainerEntryFile> {
+        return entries.map {
+            ContainerEntryWithContainerEntryFile().apply {
+                ceContainerUid = containerUid
+                cePath = it.pathInContainer
+                containerEntryFile = ContainerEntryFile().apply {
+                    cefIntegrity = it.integrity
+                    cefMd5 = it.originalMd5
+                    cefCrc32 = it.crc32
+                    ceTotalSize = it.inflatedSize
+                    ceCompressedSize = it.size
+                    lastModified = it.lastModified
+                }
+            }
         }
     }
 
-    fun toManifestString() : String{
+    fun toContainerEntryList(): List<ContainerEntryWithContainerEntryFile> {
+        return entries.map { it.toContainerEntryWithContainerEntryFile(containerUid) }
+    }
+
+    fun toManifestString() : String {
         return headerString + "\n" + entries.joinToString(separator = "\n") { it.toManifestSegment() }
     }
 
@@ -59,7 +115,15 @@ class ContainerManifest(val version: Int, val containerUid: Long, val entries: L
 
         const val FIELDNAME_INTEGRITY = "Integrity"
 
+        const val FIELDNAME_CRC32 = "CRC32"
+
         const val FIELDNAME_SIZE = "Size"
+
+        const val FIELDNAME_INFLATED_SIZE = "InflatedSize"
+
+        const val FIELDNAME_COMPRESSION = "Compression"
+
+        const val FIELDNAME_LASTMODIFIED = "LastModified"
 
         fun parseFromString(str: String): ContainerManifest {
             val lineIterator = str.lineSequence().iterator()
@@ -106,25 +170,33 @@ class ContainerManifest(val version: Int, val containerUid: Long, val entries: L
                 val pathInContainer = requireFieldValue(FIELDNAME_PATH_IN_CONTAINER)
                 val originalMd5 = requireFieldValue(FIELDNAME_ORIGINAL_MD5)
                 val integrity = requireFieldValue(FIELDNAME_INTEGRITY)
+                val crc32 = requireFieldValue(FIELDNAME_CRC32).toLong()
                 val size = requireFieldValue(FIELDNAME_SIZE).toLong()
-                entries += Entry(pathInContainer, originalMd5, integrity, size)
+                val inflatedSize = requireFieldValue(FIELDNAME_INFLATED_SIZE).toLong()
+                val compression = requireFieldValue(FIELDNAME_COMPRESSION).toInt()
+                val lastModified = requireFieldValue(FIELDNAME_LASTMODIFIED).toLong()
+
+                entries += Entry(pathInContainer, originalMd5, integrity, crc32, size, inflatedSize,
+                    compression, lastModified)
             }
 
             return ContainerManifest(version, containerUid, entries)
         }
 
-        /**
-         * Generate a Manifest given a list of ContainerEntryWithChecksums
-         */
-        fun fromContainerEntryWithChecksums(
-            containerEntries: List<ContainerEntryWithChecksums>
-        ): ContainerManifest {
-            return ContainerManifest(1, containerEntries.first().ceContainerUid,
-                containerEntries.sortedBy { it.cefMd5 }.map {
-                    Entry(it.cePath!!, it.cefMd5!!, it.cefIntegrity!!, it.ceCompressedSize)
-                })
-        }
+        fun fromContainerEntryWithContainerEntryFiles(
+            containerEntries: List<ContainerEntryWithContainerEntryFile>
+        ) : ContainerManifest{
+            val containerUid = containerEntries.firstOrNull()?.ceContainerUid
+                ?: throw IllegalArgumentException("fromContainerEntryWithContainerEntryFiles: Empty!")
 
+            return ContainerManifest(1, containerUid, containerEntries.map {
+                val entryFile = it.containerEntryFile ?: throw IllegalArgumentException("Null entryFile!")
+
+                Entry(it.cePath!!, entryFile.cefMd5!!, entryFile.cefIntegrity!!, entryFile.cefCrc32,
+                    entryFile.ceCompressedSize, entryFile.ceTotalSize, entryFile.compression,
+                    entryFile.lastModified)
+            }.sortedBy { it.originalMd5 })
+        }
     }
 
     override fun equals(other: Any?): Boolean {
