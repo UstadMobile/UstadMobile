@@ -92,7 +92,20 @@ abstract class ChatDao: BaseDao<Chat>{
                op.personUid AS otherPersonUid,
                op.firstNames AS otherPersonFirstNames,
                op.lastName AS otherPersonLastName,
-               (0) AS unreadMessageCount,
+               (
+				SELECT COUNT(*) 
+				  FROM Message 
+				 WHERE Message.messageTableId = ${Chat.TABLE_ID} 
+				   AND Message.messageEntityUid = Chat.chatUid 
+				   AND Message.messageSenderPersonUid != :personUid
+				   AND Message.messageTimestamp > coalesce((
+						SELECT MessageRead.messageReadLct FROM MessageRead 
+						WHERE MessageRead.messageReadPersonUid = :personUid
+						AND MessageRead.messageReadMessageUid = Message.messageUid 
+				      ), 0)
+					
+				
+			   ) AS unreadMessageCount,
         
                (SELECT COUNT(*)
                   FROM ChatMember mm
@@ -151,12 +164,12 @@ abstract class ChatDao: BaseDao<Chat>{
 
     @Query("""
         SELECT CASE
-                   WHEN Chat.isChatGroup THEN Chat.chatTitle
+                   WHEN Chat.chatGroup THEN Chat.chatTitle
                    ELSE Person.firstNames||' '||Person.lastName
                END AS title
         FROM Chat
         LEFT JOIN Person 
-        ON CAST(Chat.isChatGroup AS INTEGER) = 0
+        ON CAST(Chat.chatGroup AS INTEGER) = 0
            AND Person.personUid =
           (SELECT pp.personUid
            FROM ChatMember cm
@@ -170,5 +183,21 @@ abstract class ChatDao: BaseDao<Chat>{
     abstract suspend fun getTitleChat(chatUid: Long, personUid: Long): String?
 
 
+
+    @Query("""
+        SELECT Chat.*
+          FROM ChatMember
+          LEFT JOIN Chat ON Chat.chatUid = ChatMember.chatMemberChatUid
+         WHERE ChatMember.chatMemberPersonUid = :otherPersonUid
+           AND CAST(Chat.chatGroup AS INTEGER) = 0
+           AND Chat.chatUid IN 
+               (
+                SELECT ChatMember.chatMemberChatUid
+                  FROM ChatMember
+                 WHERE ChatMember.chatMemberChatUid = Chat.chatUid
+                   AND ChatMember.chatMemberPersonUid = :loggedInPersonUid 
+               ) 
+    """)
+    abstract suspend fun getChatByOtherPerson(otherPersonUid: Long, loggedInPersonUid: Long): Chat?
 
 }

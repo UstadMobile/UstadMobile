@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.DiscussionTopicDetailPresenter" />
+
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/fragment_discussion_topic_detail_rv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/dimen_54dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:itemCount="8" />
+
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        style="@style/UmTheme.ShapeAppearance.SmallComponent"
+        android:id="@+id/fragment_discussion_topic_detail_efab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/post"
+        android:layout_marginBottom="68dp"
+        app:icon="@drawable/ic_add_black_24dp"
+        android:layout_marginRight="16dp"
+        android:layout_gravity="bottom|end"
+        />
+
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

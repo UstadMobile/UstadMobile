@@ -283,11 +283,11 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
                 TitleDescBottomSheetOption(
                         requireContext().getString(R.string.assignments),
                         requireContext().getString(R.string.add_assignment_block_content_desc),
-                        CourseBlock.BLOCK_ASSIGNMENT_TYPE)
-               /* TitleDescBottomSheetOption(
+                        CourseBlock.BLOCK_ASSIGNMENT_TYPE),
+                TitleDescBottomSheetOption(
                         requireContext().getString(R.string.discussion_board),
                         requireContext().getString(R.string.add_discussion_board_desc),
-                        CourseBlock.BLOCK_DISCUSSION_TYPE),*/
+                        CourseBlock.BLOCK_DISCUSSION_TYPE),
         )
 
         mPresenter?.onCreate(backStackSavedState)
@@ -311,6 +311,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
             CourseBlock.BLOCK_MODULE_TYPE -> mPresenter?.handleClickAddModule()
             CourseBlock.BLOCK_CONTENT_TYPE -> mPresenter?.handleClickAddContent()
             CourseBlock.BLOCK_TEXT_TYPE -> mPresenter?.handleClickAddText()
+            CourseBlock.BLOCK_DISCUSSION_TYPE -> mPresenter?.handleClickAddDiscussion()
         }
     }
 
@@ -333,7 +334,8 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
             CourseBlock.BLOCK_MODULE_TYPE to R.drawable.ic_baseline_folder_open_24,
             CourseBlock.BLOCK_ASSIGNMENT_TYPE to R.drawable.baseline_assignment_turned_in_24,
             CourseBlock.BLOCK_CONTENT_TYPE to R.drawable.video_youtube,
-            CourseBlock.BLOCK_TEXT_TYPE to R.drawable.ic_baseline_title_24
+            CourseBlock.BLOCK_TEXT_TYPE to R.drawable.ic_baseline_title_24,
+            CourseBlock.BLOCK_DISCUSSION_TYPE to R.drawable.ic_baseline_forum_24
         )
 
         @JvmField

@@ -11,11 +11,6 @@
             name="assignmentProgressSummary"
             type="com.ustadmobile.lib.db.entities.AssignmentProgressSummary" />
 
-        <variable
-            name="showMarked"
-            type="Boolean" />
-
-
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -122,7 +117,6 @@
             android:layout_height="@dimen/dimen_60dp"
             android:background="@color/text"
             android:orientation="vertical"
-            android:visibility="@{showMarked ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toEndOf="@id/item_layout_started"
             app:layout_constraintEnd_toStartOf="@+id/item_layout_marked"
             app:layout_constraintTop_toTopOf="parent"/>

@@ -75,7 +75,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
 
     enum class MarkingTypeOptions(val optionVal: Int, val messageId: Int){
-        TEACHER(ClazzAssignment.MARKED_BY_COURSE_LEADER, MessageID.course_leader),
+        TEACHER(ClazzAssignment.MARKED_BY_COURSE_LEADER, MessageID.teacher),
         PEERS(ClazzAssignment.MARKED_BY_PEERS, MessageID.peers)
     }
     class MarkingTypeOptionsMessageIdOption(day: MarkingTypeOptions, context: Any, di: DI)

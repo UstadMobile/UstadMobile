@@ -10,6 +10,9 @@ class CourseBlockWithCompleteEntity : CourseBlock() {
     @Embedded
     var entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer? = null
 
+    @Embedded
+    var courseDiscussion: CourseDiscussion? = null
+
     var expanded: Boolean = true
 
 

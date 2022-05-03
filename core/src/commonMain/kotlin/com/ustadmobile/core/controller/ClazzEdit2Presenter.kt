@@ -34,6 +34,21 @@ import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
+fun CourseBlockWithEntityDb.asCourseBlockWithEntity(topicList: List<DiscussionTopic>):
+        CourseBlockWithEntity {
+    val relevantTopics: List<DiscussionTopic> = topicList.filter {
+        it.discussionTopicCourseDiscussionUid == this.courseDiscussion?.courseDiscussionUid
+    }.sortedBy { it.discussionTopicIndex }
+
+    val courseBlockWithEntity = CourseBlockWithEntity()
+    courseBlockWithEntity.createFromDb(this)
+    courseBlockWithEntity.topics = relevantTopics
+    courseBlockWithEntity.topicUidsToRemove = listOf()
+
+
+    return courseBlockWithEntity
+
+}
 
 class ClazzEdit2Presenter(
     context: Any,
@@ -73,6 +88,7 @@ class ClazzEdit2Presenter(
     val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(repo, this,
         requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
 
+    lateinit var topics: List<DiscussionTopic>
 
     private val courseBlockOneToManyJoinEditHelper
             = OneToManyJoinEditHelperMp(CourseBlockWithEntity::cbUid,
@@ -289,7 +305,58 @@ class ClazzEdit2Presenter(
 
             requireSavedStateHandle()[ARG_SAVEDSTATE_TEXT] = null
         }
+
+
+        observeSavedStateResult(
+            SAVEDSTATE_KEY_DISCUSSION,
+            ListSerializer(CourseBlockWithEntity.serializer()), CourseBlockWithEntity::class){
+            val newDiscussion = it.firstOrNull() ?: return@observeSavedStateResult
+
+            val foundBlock: CourseBlockWithEntity = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.find {
+                    discussion -> discussion.courseDiscussion?.courseDiscussionUid == newDiscussion.courseDiscussion?.courseDiscussionUid
+            } ?: CourseBlockWithEntity().apply {
+                cbClazzUid = newDiscussion.cbClazzUid
+                cbEntityUid = newDiscussion.courseDiscussion?.courseDiscussionUid ?: 0
+                cbTitle = newDiscussion.courseDiscussion?.courseDiscussionTitle
+                cbType = CourseBlock.BLOCK_DISCUSSION_TYPE
+                cbDescription = newDiscussion.courseDiscussion?.courseDiscussionDesc
+                cbIndex = courseBlockOneToManyJoinEditHelper.liveList.getValue()?.size ?: 0
+                cbUid = newDiscussion.cbUid
+                cbHideUntilDate = newDiscussion.cbHideUntilDate
+                cbDeadlineDate = newDiscussion.cbDeadlineDate
+                cbGracePeriodDate = newDiscussion.cbGracePeriodDate
+                cbLateSubmissionPenalty = newDiscussion.cbLateSubmissionPenalty
+                cbCompletionCriteria = newDiscussion.cbCompletionCriteria
+                cbMaxPoints = newDiscussion.cbMaxPoints
+
+                courseDiscussion = newDiscussion.courseDiscussion
+
+                topics = newDiscussion.topics
+                topicUidsToRemove = newDiscussion.topicUidsToRemove
+            }
+
+            foundBlock.courseDiscussion = newDiscussion.courseDiscussion
+            foundBlock.cbTitle = newDiscussion.courseDiscussion?.courseDiscussionTitle
+            foundBlock.cbDescription = newDiscussion.courseDiscussion?.courseDiscussionDesc
+            foundBlock.cbHideUntilDate = newDiscussion.cbHideUntilDate
+            foundBlock.cbDeadlineDate = newDiscussion.cbDeadlineDate
+            foundBlock.cbGracePeriodDate = newDiscussion.cbGracePeriodDate
+            foundBlock.cbCompletionCriteria = newDiscussion.cbCompletionCriteria
+            foundBlock.cbLateSubmissionPenalty = newDiscussion.cbLateSubmissionPenalty
+            foundBlock.cbMaxPoints = newDiscussion.cbMaxPoints
+
+            foundBlock.topics = newDiscussion.topics
+            foundBlock.topicUidsToRemove = newDiscussion.topicUidsToRemove
+
+            courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
+
+            UmPlatformUtil.run {
+                requireSavedStateHandle()[SAVEDSTATE_KEY_DISCUSSION] = null
+            }
+        }
     }
+
+
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWithHolidayCalendarAndSchoolAndTerminology? {
         val clazzUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
@@ -316,9 +383,19 @@ class ClazzEdit2Presenter(
         } ?: listOf()
         scheduleOneToManyJoinEditHelper.liveList.sendValue(schedules)
 
-        val courseBlocks: List<CourseBlockWithEntity> = db.onRepoWithFallbackToDb(2000){
+        val courseBlocksDb: List<CourseBlockWithEntityDb> = db.onRepoWithFallbackToDb(2000){
             it.courseBlockDao.takeIf { clazzUid != 0L }?.findAllCourseBlockByClazzUidAsync(clazzUid)
         } ?: listOf()
+
+        //Get topics
+        topics = db.onRepoWithFallbackToDb(2000){
+            it.discussionTopicDao.getTopicsByClazz(clazzUid)
+        }
+
+        val courseBlocks: List<CourseBlockWithEntity> = courseBlocksDb.map {
+            it.asCourseBlockWithEntity(topics)
+        }
+
         courseBlockOneToManyJoinEditHelper.liveList.sendValue(courseBlocks)
 
         val termMap = db.courseTerminologyDao.findByUidAsync(clazz.clazzTerminologyUid)
@@ -521,6 +598,35 @@ class ClazzEdit2Presenter(
                     txDb.clazzAssignmentDao.updateAsync(assignment)
                 }
 
+                txDb.courseDiscussionDao.replaceListAsync(
+                    courseBlockOneToManyJoinEditHelper.entitiesToInsert.mapNotNull {
+                        it.courseDiscussion
+                    } +
+                    courseBlockOneToManyJoinEditHelper.entitiesToUpdate.mapNotNull {
+                        it.courseDiscussion
+                    })
+                txDb.courseDiscussionDao.deactivateByUids(
+                    courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate, systemTimeInMillis())
+
+
+                //Save Discussion Topic
+
+                val tti : List<DiscussionTopic> = courseBlockList.mapNotNull{
+                    it.topics
+                }.flatten()
+
+//                tti.forEach {
+//                    it.discussionTopicClazzUid = entity.clazzUid
+//                }
+
+
+                txDb.discussionTopicDao.replaceListAsync(tti)
+
+                val topicUidsToDelete: List<Long> = courseBlockList.mapNotNull{it.topicUidsToRemove }
+                    .flatten()
+
+                txDb.discussionTopicDao.deactivateByUids(topicUidsToDelete, systemTimeInMillis())
+
                 txDb.courseBlockDao.replaceListAsync(courseBlockList)
                 txDb.courseBlockDao.deactivateByUids(
                     courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate,
@@ -602,6 +708,21 @@ class ClazzEdit2Presenter(
             arguments = args))
     }
 
+    fun handleClickAddDiscussion(){
+        val args = mutableMapOf<String, String>()
+        args[UstadView.ARG_CLAZZUID] = entity?.clazzUid.toString()
+
+        navigateForResult(NavigateForResultOptions(
+            this,
+            currentEntityValue = null,
+            destinationViewName = CourseDiscussionEditView.VIEW_NAME,
+            entityClass = CourseDiscussion::class,
+            serializationStrategy = CourseDiscussion.serializer(),
+            destinationResultKey = SAVEDSTATE_KEY_DISCUSSION,
+            arguments = args))
+
+    }
+
     fun handleClickAddText(){
         val args = mutableMapOf<String, String>()
         args[UstadView.ARG_CLAZZUID] = entity?.clazzUid.toString()
@@ -637,6 +758,8 @@ class ClazzEdit2Presenter(
         const val SAVEDSTATE_KEY_FEATURES = "ClazzFeatures"
 
         const val SAVEDSTATE_KEY_TERMINOLOGY ="ClazzTerminology"
+
+        const val SAVEDSTATE_KEY_DISCUSSION = "CourseDiscussion"
 
     }
 
@@ -734,6 +857,25 @@ class ClazzEdit2Presenter(
                     destinationResultKey = ARG_SAVEDSTATE_TEXT,
                     arguments = args)
             }
+            CourseBlock.BLOCK_DISCUSSION_TYPE -> {
+                val args = mutableMapOf<String, String>()
+                args[UstadView.ARG_CLAZZUID] =
+                    (joinedEntity.courseDiscussion?.courseDiscussionClazzUid ?: entity?.clazzUid ?: 0L)
+                        .toString()
+                args[UstadView.ARG_ENTITY_UID] =
+                    (joinedEntity.courseDiscussion?.courseDiscussionUid?: 0L).toString()
+
+                NavigateForResultOptions(
+                    this,
+                    currentEntityValue = joinedEntity,
+                    destinationViewName = CourseDiscussionEditView.VIEW_NAME,
+                    entityClass = CourseBlockWithEntity::class,
+                    serializationStrategy = CourseBlockWithEntity.serializer(),
+                    destinationResultKey = SAVEDSTATE_KEY_DISCUSSION,
+                    arguments = args)
+
+            }
+
             else -> return
         }
 

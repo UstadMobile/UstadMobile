@@ -146,6 +146,13 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                 field = value
             }
         }
+    override var unassignedError: String? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
 
     override var entity: ClazzAssignmentWithCourseBlock? = null
         get() = field

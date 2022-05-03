@@ -20,7 +20,7 @@ class ChatWithLatestMessageAndCount() : Chat() {
 
     //Consider moving this logic away from the model
     val chatName: String?
-        get() = if(isChatGroup){
+        get() = if(chatGroup){
             chatTitle
         }else{
             var f = ""

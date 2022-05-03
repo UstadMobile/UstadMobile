@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.annotation.SuppressLint
+import android.graphics.Typeface
 import android.text.format.DateFormat
 import android.text.format.DateUtils
 import android.text.util.Linkify
@@ -48,23 +49,47 @@ fun TextView.setCustomFieldHint(customField: CustomField?) {
     }
 }
 
+@BindingAdapter("discussionTopicDetailText")
+fun TextView.setDiscussionTopicDetailText(discussionPostWithDetails: DiscussionTopicListDetail){
+    //Posts: 10 Last active: 02/Feb/2022
+
+    val postsText = systemImpl.getString(MessageID.posts, context)
+    val dateFormat = DateFormat.getDateFormat(context)
+    val lastActiveDate = if (discussionPostWithDetails.lastActiveTimestamp > 0)
+        dateFormat.format(discussionPostWithDetails.lastActiveTimestamp) else ""
+    text = postsText + ": " + discussionPostWithDetails.numPosts + " " + lastActiveDate
+}
+
 @BindingAdapter("chatMessage", "loggedInPersonUid")
 fun TextView.setChatMessageTitle(message: MessageWithPerson, loggedInPersonUid: Long){
+
     if(message.messagePerson?.personUid == loggedInPersonUid){
         text = systemImpl.getString(MessageID.you, context)
-        gravity = Gravity.END
+        if(message.messageTableId == Chat.TABLE_ID){
+            gravity = Gravity.END
+        }
     }else{
         text = message.messagePerson?.fullName()?:"" + " "
-        gravity = Gravity.START
+        if(message.messageTableId == Chat.TABLE_ID) {
+            gravity = Gravity.START
+        }
     }
 }
 
 @BindingAdapter("chatMessageOrientation", "loggedInPersonUidOrientation")
 fun TextView.setChatMessagOrientation(message: MessageWithPerson, loggedInPersonUid: Long){
-    if(message.messagePerson?.personUid == loggedInPersonUid){
-        gravity = Gravity.END
+    if(message.messageTableId == Chat.TABLE_ID) {
+        gravity = if (message.messagePerson?.personUid == loggedInPersonUid) {
+            Gravity.END
+        } else {
+            Gravity.START
+        }
+    }
+
+    if(message.messageRead == null && message.messagePerson?.personUid != loggedInPersonUid){
+        setTypeface(typeface, Typeface.BOLD)
     }else{
-        gravity = Gravity.START
+        setTypeface(typeface, Typeface.NORMAL)
     }
 }
 

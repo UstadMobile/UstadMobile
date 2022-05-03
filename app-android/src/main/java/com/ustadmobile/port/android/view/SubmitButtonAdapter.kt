@@ -30,6 +30,14 @@ class SubmitButtonAdapter(val eventHandler: ClazzAssignmentDetailOverviewFragmen
             viewHolder?.itemBinding?.hasFilesToSubmit = value
         }
 
+    var unassignedError: String? = null
+        set(value){
+            if(field == value)
+                return
+            field = value
+            viewHolder?.itemBinding?.unassignedError = value
+        }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmitButtonViewHolder {
         viewHolder = SubmitButtonViewHolder(
@@ -38,6 +46,7 @@ class SubmitButtonAdapter(val eventHandler: ClazzAssignmentDetailOverviewFragmen
                     it.eventHandler = eventHandler
                     it.deadlinePassed = deadlinePassed
                     it.hasFilesToSubmit = hasFilesToSubmit
+                    it.unassignedError = unassignedError
                 })
         return viewHolder as SubmitButtonViewHolder
     }

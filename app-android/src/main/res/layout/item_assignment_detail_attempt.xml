@@ -5,7 +5,7 @@
 
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary"/>
+        <import type="com.ustadmobile.lib.db.entities.PersonGroupAssignmentSummary"/>
         <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment"/>
@@ -16,11 +16,11 @@
 
         <variable
             name="person"
-            type="PersonWithAttemptsSummary" />
+            type="PersonGroupAssignmentSummary" />
 
         <variable
             name="listener"
-            type="com.ustadmobile.core.controller.AttemptListListener" />
+            type="com.ustadmobile.core.controller.SubmissionSummaryListener" />
 
         <variable
             name="selectablePagedListAdapter"
@@ -34,12 +34,12 @@
         android:paddingBottom="@dimen/dimen_16dp"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, person)}"
-        app:onSelectableItemClicked="@{() -> listener.onClickPersonWithStatementDisplay(person)}"
+        app:onSelectableItemClicked="@{() -> listener.onClickPerson(person)}"
         android:background="@drawable/bg_listitem">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_person_newitemicon"
-            app:imageForeignKey="@{person.personUid}"
+            app:imageForeignKey="@{!person.isGroupAssignment ? person.submitterUid : 0}"
             app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
             app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
             tools:src="@drawable/ic_account_circle_black_24dp"
@@ -59,7 +59,7 @@
             android:paddingEnd="@dimen/dimen_5dp"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/item_person_text"
-            android:text='@{person.firstNames + " " + person.lastName}'
+            android:text='@{person.name}'
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"

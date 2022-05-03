@@ -130,6 +130,9 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
         class AssignmentCourseBlockViewHolder(val binding: ItemAssignmentCourseBlockBinding): RecyclerView.ViewHolder(binding.root)
 
+        class DiscussionCourseBlockViewHolder(val binding: ItemDiscussionBoardCourseBlockBinding)
+            : RecyclerView.ViewHolder(binding.root)
+
         override fun getItemViewType(position: Int): Int {
             return getItem(position)?.cbType ?: 0
         }
@@ -170,6 +173,15 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                         holder.downloadJobItemLiveData = null
                     }
                 }
+
+                CourseBlock.BLOCK_DISCUSSION_TYPE -> {
+                    val discussionHolder = (holder as DiscussionCourseBlockViewHolder)
+                    discussionHolder.binding.discussion = block.courseDiscussion
+                    discussionHolder.binding.block = block
+                    discussionHolder.binding.presenter = mPresenter
+
+
+                }
             }
         }
 
@@ -193,6 +205,10 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                 CourseBlock.BLOCK_ASSIGNMENT_TYPE -> AssignmentCourseBlockViewHolder(
                     ItemAssignmentCourseBlockBinding.inflate(LayoutInflater.from(parent.context),
                     parent, false))
+                CourseBlock.BLOCK_DISCUSSION_TYPE -> DiscussionCourseBlockViewHolder(
+                    ItemDiscussionBoardCourseBlockBinding.inflate(LayoutInflater.from(parent.context),
+                    parent, false)
+                )
                 else -> ModuleCourseBlockViewHolder(
                     ItemCourseBlockBinding.inflate(LayoutInflater.from(parent.context),
                     parent, false))
@@ -381,6 +397,12 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                         isSame = isSame
                                 && newMark?.camPenalty == oldMark?.camPenalty
                                 && newMark?.camMark == oldMark?.camMark
+                    }
+
+                    CourseBlock.BLOCK_DISCUSSION_TYPE -> {
+                        val newDiscussion = newItem.courseDiscussion
+                        val oldDiscussion = oldItem.courseDiscussion
+                        //TODO
                     }
                 }
                 return isSame

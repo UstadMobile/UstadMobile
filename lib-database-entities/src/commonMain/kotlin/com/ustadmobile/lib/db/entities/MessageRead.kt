@@ -18,14 +18,15 @@ import kotlinx.serialization.Serializable
         sqlStatements = [
             """
                 REPLACE INTO MessageRead(messageReadUid, messageReadPersonUid, 
-                messageReadMessageUid, messageReadLct)
+                messageReadMessageUid, messageReadEntityUid, messageReadLct)
                 
                 VALUES(NEW.messageReadUid, NEW.messageReadPersonUid, 
-                NEW.messageReadMessageUid, NEW.messageReadLct)
+                NEW.messageReadMessageUid, NEW.messageReadEntityUid, NEW.messageReadLct)
                 
                 /*psql ON CONFLICT (messageReadUid) DO UPDATE 
                 SET messageReadPersonUid = EXCLUDED.messageReadPersonUid, 
                 messageReadMessageUid = EXCLUDED.messageReadMessageUid, 
+                messageReadEntityUid = EXCLUDED.messageReadEntityUid,
                 messageReadLct = EXCLUDED.messageReadLct
                 */
             """
@@ -41,10 +42,17 @@ open class MessageRead() {
 
     var messageReadMessageUid: Long = 0
 
+    var messageReadEntityUid: Long = 0
 
     @LastChangedTime
     @ReplicationVersionId
     var messageReadLct: Long = 0
+
+    constructor(personUid: Long, messageUid: Long, entityUid: Long) : this() {
+        messageReadPersonUid = personUid
+        messageReadMessageUid = messageUid
+        messageReadEntityUid = entityUid
+    }
 
     companion object{
         const val TABLE_ID = 129

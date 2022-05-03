@@ -19,12 +19,14 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressPrese
 import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
+import com.ustadmobile.lib.db.entities.CommentsWithPerson
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
@@ -211,11 +213,11 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             markSubmissionAdapter?.submitMarkError = value
         }
 
-    override var person: Person? = null
+    override var submitterName: String? = null
         get() = field
         set(value) {
             field = value
-            ustadFragmentTitle = value?.personFullName()
+            ustadFragmentTitle = value
         }
 
     override var submissionScore: CourseAssignmentMark? = null
