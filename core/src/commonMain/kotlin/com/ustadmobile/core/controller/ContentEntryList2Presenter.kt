@@ -1,33 +1,41 @@
 package com.ustadmobile.core.controller
 
-import SelectFolderView
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.SupportedContent.EPUB_EXTENSIONS
+import com.ustadmobile.core.contentjob.SupportedContent.EPUB_MIME_TYPES
+import com.ustadmobile.core.contentjob.SupportedContent.H5P_EXTENSIONS
+import com.ustadmobile.core.contentjob.SupportedContent.H5P_MIME_TYPES
+import com.ustadmobile.core.contentjob.SupportedContent.XAPI_MIME_TYPES
+import com.ustadmobile.core.contentjob.SupportedContent.ZIP_EXTENSIONS
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_PARENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SHOW_ONLY_FOLDER_FILTER
+import com.ustadmobile.core.view.SelectFileView.Companion.SELECTION_MODE_GALLERY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.on
 
 class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, view: ContentEntryList2View,
                                  di: DI, lifecycleOwner: DoorLifecycleOwner,
@@ -38,6 +46,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         ContentEntryListItemListener by contentEntryListItemListener, ContentEntryAddOptionsListener {
 
     private val navController: UstadNavController by instance()
+
+    private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
 
     private var contentFilter = ARG_DISPLAY_CONTENT_BY_PARENT
 
@@ -250,6 +260,31 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         return false
     }
 
+    fun handleEntrySelectedFromPicker(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+        if(arguments.containsKey(ContentEntryEdit2View.BLOCK_REQUIRED)){
+            val args = mutableMapOf<String, String>()
+            args[ARG_LEAF] = true.toString()
+            args[ARG_PARENT_ENTRY_UID] = parentEntryUid.toString()
+            args[ARG_ENTITY_UID] = entry.contentEntryUid.toString()
+            args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
+            args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
+
+            navigateForResult(
+                NavigateForResultOptions(
+                    this, null,
+                    ContentEntryEdit2View.VIEW_NAME,
+                    ContentEntryWithBlockAndLanguage::class,
+                    ContentEntryWithBlockAndLanguage.serializer(),
+                    arguments = args
+                )
+            )
+        }else{
+            finishWithResult(
+                safeStringify(di, ListSerializer(ContentEntry.serializer()), listOf(entry))
+            )
+        }
+    }
+
     override fun handleClickCreateNewFab() {
         when (contentFilter) {
             ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
@@ -279,8 +314,16 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
 
     fun handleClickEditFolder() {
-        systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to parentEntryUid.toString()), context)
+        val args = mutableMapOf(
+            UstadView.ARG_ENTITY_UID to parentEntryUid.toString())
+
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null, ContentEntryEdit2View.VIEW_NAME,
+                ContentEntry::class,
+                ContentEntry.serializer(),
+                arguments = args)
+        )
     }
 
     fun handleClickShowHiddenItems() {
@@ -290,22 +333,62 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     override fun onClickNewFolder() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_FILE,
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to false.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(ContentEntryEdit2View.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            ContentEntryEdit2View.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
+    }
+
+
+    fun handleOnClickAddSupportedFile(){
+        val supportedMimeTypes = mutableListOf(
+            EPUB_MIME_TYPES.joinToString(";"),
+            EPUB_EXTENSIONS.joinToString(";"),
+            XAPI_MIME_TYPES.joinToString(";"),
+            ZIP_EXTENSIONS.joinToString(";"),
+            H5P_MIME_TYPES.joinToString(";"),
+            H5P_EXTENSIONS.joinToString(";"),
+            SELECTION_MODE_GALLERY
+        ).joinToString (";")
+        val args = mutableMapOf(
+            SelectFileView.ARG_MIMETYPE_SELECTED to supportedMimeTypes,
+            ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
+            ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectFileView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickImportFile() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_FILE,
+                SelectFileView.ARG_MIMETYPE_SELECTED to
+                        pluginManager.supportedMimeTypeList.joinToString(";"),
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+        args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
+        args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
 
-        navController.navigate(SelectFileView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectExtractFileView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickImportLink() {
@@ -313,18 +396,34 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+        args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
+        args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
 
-        navController.navigate(ContentEntryImportLinkView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            ContentEntryImportLinkView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickImportGallery() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_GALLERY,
+                SelectFileView.ARG_MIMETYPE_SELECTED to SelectFileView.SELECTION_MODE_GALLERY,
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+        args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
+        args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
 
-        navController.navigate(SelectFileView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectExtractFileView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickAddFolder() {
@@ -333,7 +432,13 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(SelectFolderView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectFolderView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     fun handleMoveWithSelectedEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {

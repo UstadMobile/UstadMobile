@@ -34,9 +34,6 @@ class ClazzLogListAttendanceComponent (mProps: UmProps) : UstadListComponent<Cla
     override val listPresenter: UstadListPresenter<*, in ClazzLog>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzLogListAttendanceView.VIEW_NAME)
-
     var selectedFilter = VIEW_ID_TO_NUMDAYS_MAP.entries.toList().first().key
 
     private var graphRawData: Array<Array<Any>> = arrayOf()

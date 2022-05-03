@@ -175,12 +175,13 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         presenterScope.launch (doorMainDispatcher()){
             if(mountedPath.isNotEmpty()){
                 mounter.unMountContainer(mountedEndpoint, mountedPath)
             }
         }
+
+        super.onDestroy()
     }
 
 

@@ -25,6 +25,7 @@ import java.nio.file.FileSystem
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
+import java.time.Duration
 import java.util.*
 
 
@@ -148,7 +149,7 @@ class AsbScraper {
         var bookObj: AfricanBooksResponse
         ContentScraperUtil.setChromeDriverLocation()
         val driver = ContentScraperUtil.setupChrome(true)
-        val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
+        val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM)
         var retry = 0
 
         var i = 0
@@ -208,9 +209,9 @@ class AsbScraper {
                     try {
                         var id = element.attr("onclickss")
                         id = id.substring(id.indexOf("(") + 1, id.lastIndexOf(")"))
-                        val value = element.selectFirst("span").text()
+                        val value = element.selectFirst("span")?.text()
 
-                        lang = value
+                        lang = value ?: ""
                         lang = StringUtils.remove(lang, "(Original)")
                         lang = StringUtils.remove(lang, "(Adaptation)")
                         lang = StringUtils.remove(lang, "(Translation)").trim { it <= ' ' }.toLowerCase()
@@ -247,7 +248,7 @@ class AsbScraper {
                         }
                         relatedEntries.add(contentEntry)
 
-                        if (value.contains("Original")) {
+                        if (value?.contains("Original") == true) {
                             originalEntry = contentEntry
                         }
                     } catch (e: NullPointerException) {

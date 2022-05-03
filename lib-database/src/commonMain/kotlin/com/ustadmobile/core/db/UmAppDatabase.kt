@@ -51,11 +51,13 @@ import kotlin.jvm.JvmField
     PersonParentJoin::class,
     ScopedGrant::class,
     ErrorReport::class,
-    ClazzAssignment::class, ClazzAssignmentContentJoin::class,
+    ClazzAssignment::class, ClazzAssignmentContentJoin::class, CourseAssignmentSubmission::class,
+    CourseAssignmentSubmissionAttachment::class, CourseAssignmentMark::class,
     ClazzAssignmentRollUp::class,
     PersonAuth2::class,
     UserSession::class,
-    ContentJob::class, ContentJobItem::class,
+    ContentJob::class, ContentJobItem::class, CourseBlock::class, CourseTerminology::class,
+    CourseGroupSet::class, CourseGroupMember::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -67,6 +69,13 @@ import kotlin.jvm.JvmField
 
     ClazzLogReplicate::class,
     ClazzLogAttendanceRecordReplicate::class,
+    CourseAssignmentSubmissionReplicate::class,
+    CourseAssignmentSubmissionAttachmentReplicate::class,
+    CourseAssignmentMarkReplicate::class,
+    CourseBlockReplicate::class,
+    CourseTerminologyReplicate::class,
+    CourseGroupSetReplicate::class,
+    CourseGroupMemberReplicate::class,
     ScheduleReplicate::class,
     HolidayCalendarReplicate::class,
     HolidayReplicate::class,
@@ -110,11 +119,28 @@ import kotlin.jvm.JvmField
     ClazzAssignmentReplicate::class,
     ClazzAssignmentContentJoinReplicate::class,
     PersonAuth2Replicate::class,
-    UserSessionReplicate::class
+    UserSessionReplicate::class,
+    CoursePicture::class,
+    CoursePictureReplicate::class,
+    Chat::class,
+    ChatMember::class,
+    Message::class,
+    MessageReplicate::class,
+    ChatReplicate::class,
+    ChatMemberReplicate::class,
+    MessageRead::class,
+    MessageReadReplicate::class,
+    CourseDiscussion::class,
+    CourseDiscussionReplicate::class,
+    DiscussionTopic::class,
+    DiscussionTopicReplicate::class,
+    DiscussionPost::class,
+    DiscussionPostReplicate::class
+
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 102)
+], version = 103)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -156,6 +182,18 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     @JsName("clazzDao")
     abstract val clazzDao: ClazzDao
+
+    @JsName("courseBlockDao")
+    abstract val courseBlockDao: CourseBlockDao
+
+    @JsName("courseTerminologyDao")
+    abstract val courseTerminologyDao: CourseTerminologyDao
+
+    @JsName("courseGroupSetDao")
+    abstract val courseGroupSetDao: CourseGroupSetDao
+
+    @JsName("courseGroupMemberDao")
+    abstract val courseGroupMemberDao: CourseGroupMemberDao
 
     @JsName("clazzEnrolmentDao")
     abstract val clazzEnrolmentDao: ClazzEnrolmentDao
@@ -296,6 +334,15 @@ abstract class UmAppDatabase : DoorDatabase() {
     @JsName("cacheClazzAssignmentDao")
     abstract val clazzAssignmentRollUpDao: ClazzAssignmentRollUpDao
 
+    @JsName("courseAssignmentSubmissionDao")
+    abstract val courseAssignmentSubmissionDao: CourseAssignmentSubmissionDao
+
+    @JsName("courseAssignmentSubmissionAttachmentDao")
+    abstract val courseAssignmentSubmissionAttachmentDao: CourseAssignmentSubmissionAttachmentDao
+
+    @JsName("courseAssignmentMarkDao")
+    abstract val courseAssignmentMarkDao: CourseAssignmentMarkDao
+
     @JsName("commentsDao")
     abstract val commentsDao: CommentsDao
 
@@ -319,6 +366,31 @@ abstract class UmAppDatabase : DoorDatabase() {
     abstract val contentJobItemDao: ContentJobItemDao
 
     abstract val contentJobDao: ContentJobDao
+
+
+    @JsName("coursePictureDao")
+    abstract val coursePictureDao: CoursePictureDao
+
+    @JsName("chatDao")
+    abstract val chatDao: ChatDao
+
+    @JsName("chatMemberDao")
+    abstract val chatMemberDao: ChatMemberDao
+
+    @JsName("messageDao")
+    abstract val messageDao: MessageDao
+
+    @JsName("messageReadDao")
+    abstract val messageReadDao: MessageReadDao
+
+    @JsName("courseDiscussionDao")
+    abstract val courseDiscussionDao: CourseDiscussionDao
+
+    @JsName("discussionTopicDao")
+    abstract val discussionTopicDao: DiscussionTopicDao
+
+    @JsName("discussionPostDao")
+    abstract val discussionPostDao: DiscussionPostDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
@@ -2725,7 +2797,6 @@ abstract class UmAppDatabase : DoorDatabase() {
             }
         }
 
-
         /***
          *  added 16/Feb/2022 to remove special html characters from text - & > <
          */
@@ -2825,6 +2896,46 @@ DELETE FROM ContainerEntryFile
             }
         }
 
+        val MIGRATION_102_103 = DoorMigrationStatementList(102, 103) { db ->
+
+            val finalList = mutableListOf("ALTER TABLE ClazzAssignment ADD COLUMN caAssignmentType INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caFileSubmissionWeight INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caFileType INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caSizeLimit INTEGER NOT NULL DEFAULT 50",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caNumberOfFiles INTEGER NOT NULL DEFAULT 1",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caEditAfterSubmissionType INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caMarkingType INTEGER NOT NULL DEFAULT 1",
+                    "ALTER TABLE ClazzAssignment ADD COLUMN caMaxPoints INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignmentContentJoin ADD COLUMN cacjWeight INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE ClazzAssignmentRollUp ADD COLUMN cacheWeight INTEGER NOT NULL DEFAULT 0")
+
+             finalList += if(db.dbType() == DoorDbType.POSTGRES) {
+                listOf("ALTER TABLE XObjectEntity ADD COLUMN objectStatementRefUid BIGINT NOT NULL DEFAULT 0",
+                        "ALTER TABLE ClazzAssignment ADD COLUMN caRequireFileSubmission BOOL NOT NULL DEFAULT true",
+                        "ALTER TABLE ClazzAssignment ADD COLUMN caXObjectUid BIGINT NOT NULL DEFAULT 0",
+                        "ALTER TABLE ClazzAssignmentRollUp ADD COLUMN cacheFinalWeightScoreWithPenalty FLOAT NOT NULL DEFAULT 0",
+                        "CREATE TABLE IF NOT EXISTS AssignmentFileSubmission (  afsAssignmentUid  BIGINT  NOT NULL , afsStudentUid  BIGINT  NOT NULL , afsTimestamp  BIGINT  NOT NULL , afsMimeType  TEXT , afsTitle  TEXT , afsSubmitted  BOOL  NOT NULL , afsActive  BOOL  NOT NULL , afsUri  TEXT , afsMd5  TEXT , afsSize  INTEGER  NOT NULL , afsMasterCsn  BIGINT  NOT NULL , afsLocalCsn  BIGINT  NOT NULL , afsLastChangedBy  INTEGER  NOT NULL , afsLct  BIGINT  NOT NULL , afsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )",
+                        "CREATE TABLE IF NOT EXISTS AssignmentFileSubmissionReplicate (  afsPk  BIGINT  NOT NULL , afsVersionId  BIGINT  NOT NULL  DEFAULT 0 , afsDestination  BIGINT  NOT NULL , afsPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (afsPk, afsDestination) )",
+                        "CREATE INDEX index_AssignmentFileSubmissionReplicate_afsPk_afsVersionId_afsVersionId ON AssignmentFileSubmissionReplicate (afsPk, afsVersionId, afsVersionId)",
+                        "CREATE INDEX index_AssignmentFileSubmissionReplicate_afsDestination_afsPending ON AssignmentFileSubmissionReplicate (afsDestination, afsPending)"
+                )
+            }else {
+                listOf("ALTER TABLE XObjectEntity ADD COLUMN objectStatementRefUid INTEGER NOT NULL DEFAULT 0",
+                        "ALTER TABLE ClazzAssignment ADD COLUMN caRequireFileSubmission INTEGER NOT NULL DEFAULT 1",
+                        "ALTER TABLE ClazzAssignment ADD COLUMN caXObjectUid INTEGER NOT NULL DEFAULT 0",
+                        "ALTER TABLE ClazzAssignmentRollUp ADD COLUMN cacheFinalWeightScoreWithPenalty REAL NOT NULL DEFAULT 0",
+                        "CREATE TABLE IF NOT EXISTS AssignmentFileSubmission (  afsAssignmentUid  INTEGER  NOT NULL , afsStudentUid  INTEGER  NOT NULL , afsTimestamp  INTEGER  NOT NULL , afsMimeType  TEXT , afsTitle  TEXT , afsSubmitted  INTEGER  NOT NULL , afsActive  INTEGER  NOT NULL , afsUri  TEXT , afsMd5  TEXT , afsSize  INTEGER  NOT NULL , afsMasterCsn  INTEGER  NOT NULL , afsLocalCsn  INTEGER  NOT NULL , afsLastChangedBy  INTEGER  NOT NULL , afsLct  INTEGER  NOT NULL , afsUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )",
+                        "CREATE TABLE IF NOT EXISTS AssignmentFileSubmissionReplicate (  afsPk  INTEGER  NOT NULL , afsVersionId  INTEGER  NOT NULL  DEFAULT 0 , afsDestination  INTEGER  NOT NULL , afsPending  INTEGER  NOT NULL  DEFAULT 1 , PRIMARY KEY (afsPk, afsDestination) )",
+                        "CREATE INDEX index_AssignmentFileSubmissionReplicate_afsPk_afsVersionId_afsVersionId ON AssignmentFileSubmissionReplicate (afsPk, afsVersionId, afsVersionId)",
+                        "CREATE INDEX index_AssignmentFileSubmissionReplicate_afsDestination_afsPending ON AssignmentFileSubmissionReplicate (afsDestination, afsPending)"
+                )
+            }
+            finalList
+        }
+
+
+
+
 
         fun migrationList(nodeId: Long) = listOf<DoorMigration>(
             MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
@@ -2841,7 +2952,7 @@ DELETE FROM ContainerEntryFile
             MIGRATION_88_89, MIGRATION_89_90, MIGRATION_90_91,
             UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
             MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98, MIGRATION_98_99,
-            MIGRATION_99_100, MIGRATION_100_101, MIGRATION_101_102
+            MIGRATION_99_100, MIGRATION_100_101, MIGRATION_101_102, MIGRATION_102_103
         )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->

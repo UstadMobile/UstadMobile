@@ -280,6 +280,14 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
         paddingRight = (if(systemImpl.isRtlActive()) 60 else 0).px
     }
 
+
+    val chatInputMessageClass by css {
+        padding(2.spacingUnits)
+        transition += Transition("width", theme.transitions.duration.standard.ms, Timing.easeInOut, 0.ms)
+        flexGrow = 1.0
+        color = Color.inherit
+    }
+
     val mainComponentSearch by css {
         position = Position.relative
         borderRadius = theme.shape.borderRadius.px
@@ -296,6 +304,53 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
         media(theme.breakpoints.down(tabletAndHighEnd)) {
             width = 80.pct
+        }
+    }
+
+    val typingMessage by css{
+        media(theme.breakpoints.up(Breakpoint.lg)) {
+            width = 75.pct
+        }
+
+        media(theme.breakpoints.down(Breakpoint.lg)) {
+            width = 80.pct
+        }
+    }
+
+    val messageSendButton by css{
+        media(theme.breakpoints.up(Breakpoint.lg)) {
+            display = Display.block
+            if(!systemImpl.isRtlActive()) right = 2.spacingUnits
+            if(systemImpl.isRtlActive()) left = 2.spacingUnits
+        }
+
+        media(theme.breakpoints.down(Breakpoint.lg)) {
+            display = Display.none
+        }
+    }
+
+    val messageContainer by css {
+        position = Position.fixed
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            bottom = 15.px
+            width = 81.5.pct
+        }
+
+        media(theme.breakpoints.down(tabletAndHighEnd)) {
+            bottom = 70.px
+            width = 84.pct
+        }
+    }
+
+
+    val chatDetailNewMessage by css {
+        borderRadius = theme.shape.borderRadius.px
+        backgroundColor = styledModule.alpha(theme.palette.primary.dark, 0.8)
+        hover {
+            backgroundColor =  styledModule.alpha(theme.palette.primary.dark, 0.5)
+        }
+        media(theme.breakpoints.up(tabletAndHighEnd)) {
+            marginRight = 3.spacingUnits
         }
     }
 
@@ -326,6 +381,8 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
             bottom = 15.px
         }
     }
+
+
 
 
     val languageComponentLanguageSelectorFormControl by css {
@@ -504,6 +561,15 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
     val listCreateNewIconClass by css {
         fontSize = (2.5).em
         marginTop = 5.px
+    }
+
+    val dragToReorderClass by css {
+        fontSize = 2.em
+        marginTop = 1.spacingUnits
+    }
+
+    val textGrayedOut by css {
+        color = Color(theme.palette.action.disabled)
     }
 
     val chipSetFilter by css{
@@ -766,6 +832,26 @@ object StyleManager: StyleSheet("ComponentStyles", isStatic = true), DIAware {
 
     val dropZoneTxt by css {
         fontSize = 2.em
+    }
+
+    val chatMessageContent by css {
+        padding(1.spacingUnits, 2.spacingUnits)
+        borderRadius = 4.px
+        marginBottom = 4.px
+        display = Display.inlineBlock
+        wordBreak = WordBreak.breakWord
+        fontSize = (1.2).em
+    }
+
+    val chatLeft by css {
+        borderTopRightRadius = 20.px
+        borderBottomRightRadius = 20.px
+
+    }
+
+    val chatRight by css {
+        borderTopLeftRadius = 20.px
+        borderBottomLeftRadius = 20.px
     }
 
     override val di: DI

@@ -29,7 +29,6 @@ import react.RBuilder
 import react.setState
 import styled.css
 import styled.styledDiv
-import kotlin.js.Date
 
 class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPersonParentJoin>(mProps),
     PersonDetailView {
@@ -38,9 +37,6 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
-
-    override val viewNames: List<String>
-        get() = listOf(PersonDetailView.VIEW_NAME)
 
     private var classList: List<ClazzEnrolmentWithClazzAndAttendance>? = null
 
@@ -99,23 +95,23 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
             umGridContainer {
                 umItem(GridSize.cells12){
                     umGridContainer(GridSpacing.spacing4) {
-                        createTopMainAction("call", getString(MessageID.call), GridSize.cells4, GridSize.cells2,
+                        renderTopMainAction("call", getString(MessageID.call), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
 
                         }
-                        createTopMainAction("message",getString(MessageID.text), GridSize.cells4, GridSize.cells2,
+                        renderTopMainAction("message",getString(MessageID.chat), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
-
+                            mPresenter?.handleClickChat()
                         }
-                        createTopMainAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
+                        renderTopMainAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
                             entity?.emailAddr != null){
 
                         }
-                        createTopMainAction("vpn_key",getString(MessageID.change_password), GridSize.cells6, GridSize.cells3,
+                        renderTopMainAction("vpn_key",getString(MessageID.change_password), GridSize.cells6, GridSize.cells3,
                             changePasswordVisible){
                             mPresenter?.handleChangePassword()
                         }
-                        createTopMainAction("person_add",getString(MessageID.create_account), GridSize.cells6, GridSize.cells3,
+                        renderTopMainAction("person_add",getString(MessageID.create_account), GridSize.cells6, GridSize.cells3,
                             showCreateAccountVisible){
                             mPresenter?.handleCreateAccount()
                         }
@@ -156,21 +152,21 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                                 }
 
                                 umItem(GridSize.cells12){
-                                    createInformation("event",
+                                    renderInformationOnDetailScreen("event",
                                         entity?.dateOfBirth.toDate()?.standardFormat(),
                                         getString(MessageID.birthday)
                                     )
 
                                     val genderMessageId = GENDER_MESSAGE_ID_MAP[entity?.gender ?: 0]
-                                    createInformation("person", if(genderMessageId == null) "" else getString(genderMessageId),
+                                    renderInformationOnDetailScreen("person", if(genderMessageId == null) "" else getString(genderMessageId),
                                         getString(MessageID.field_person_gender)
                                     )
 
-                                    createInformation("badge", entity?.personOrgId,
+                                    renderInformationOnDetailScreen("badge", entity?.personOrgId,
                                         getString(MessageID.organization_id)
                                     )
 
-                                    createInformation("account_circle", entity?.username,
+                                    renderInformationOnDetailScreen("account_circle", entity?.username,
                                         getString(MessageID.username)
                                     )
                                 }
@@ -183,16 +179,16 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                                 }
 
                                 umItem(GridSize.cells12){
-                                    createInformation("call",entity?.phoneNum,getString(MessageID.phone_number))
-                                    createInformation("email",entity?.emailAddr,getString(MessageID.email))
-                                    createInformation("place",entity?.personAddress,getString(MessageID.address))
+                                    renderInformationOnDetailScreen("call",entity?.phoneNum,getString(MessageID.phone_number))
+                                    renderInformationOnDetailScreen("email",entity?.emailAddr,getString(MessageID.email))
+                                    renderInformationOnDetailScreen("place",entity?.personAddress,getString(MessageID.address))
                                 }
 
 
                                 if(classList != null && classList?.isNotEmpty() == true){
 
                                     umItem(GridSize.cells12){
-                                        createListSectionTitle(getString(MessageID.classes))
+                                        renderListSectionTitle(getString(MessageID.classes))
 
                                         classList?.let { clazzes ->
                                             child(ClazzEnrolmentWithClazzSimpleListComponent::class){
@@ -230,11 +226,11 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                 val title = "${item.clazz?.clazzName} (${item.roleToString(this, systemImpl)}) " +
                         "- ${item.outcomeToString(this,  systemImpl)}"
 
-                val enrollmentPeriod = "${Date(item.clazzEnrolmentDateJoined).standardFormat()} " +
-                        "- ${Date(item.clazzEnrolmentDateLeft).standardFormat()}"
+                val enrollmentPeriod = "${item.clazzEnrolmentDateJoined.toDate()?.standardFormat()} " +
+                        "- ${item.clazzEnrolmentDateLeft.toDate(true)?.standardFormat() ?: getString(MessageID.present)}"
 
 
-                createListItemWithAttendance("people", title, enrollmentPeriod,
+                renderListItemWithAttendance("people", title, enrollmentPeriod,
                     item.attendance, getString(MessageID.x_percent_attended))
             }
         }

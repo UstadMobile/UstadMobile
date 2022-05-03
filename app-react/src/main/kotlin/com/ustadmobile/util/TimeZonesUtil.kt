@@ -2,6 +2,9 @@ package com.ustadmobile.util
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Full list of UTC timezones
+ */
 @JsModule("timezones.json")
 @JsNonModule
 external val timezoneModule: dynamic
@@ -13,6 +16,9 @@ data class TimeZone(
     val isDst: Boolean, val id: String)
 
 object TimeZonesUtil {
+    /**
+     * Get timezone as a list to be presented on our UI
+     */
     fun getTimeZones(): List<TimeZone>{
         val timeZoneList = mutableListOf<TimeZone>()
         timezoneModule.forEach { zone ->

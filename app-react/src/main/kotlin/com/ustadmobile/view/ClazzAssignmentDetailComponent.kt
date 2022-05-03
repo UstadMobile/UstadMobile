@@ -21,9 +21,6 @@ class ClazzAssignmentDetailComponent(mProps: UmProps): UstadDetailComponent<Claz
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzAssignmentDetailView.VIEW_NAME)
-
     private var tabsToRender: List<UmTab>? = null
 
     override var tabs: List<String>? = null
@@ -73,7 +70,7 @@ class ClazzAssignmentDetailComponent(mProps: UmProps): UstadDetailComponent<Claz
     companion object {
         val VIEWNAME_TO_TITLE_MAP = mapOf(
             ClazzAssignmentDetailOverviewView.VIEW_NAME to MessageID.overview,
-            ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME to MessageID.student_progress,
+            ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME to MessageID.submissions,
         )
 
     }

@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.roleToString
+import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
@@ -18,7 +19,6 @@ import com.ustadmobile.util.StyleManager.gridListSecondaryItemIcons
 import com.ustadmobile.util.StyleManager.maxLines
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.roundTo
 import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.view.ext.statusCircleIndicator
 import com.ustadmobile.view.ext.umEntityAvatar
@@ -39,16 +39,13 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzDao
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzList2View.VIEW_NAME)
-
     override val listPresenter: UstadListPresenter<*, in ClazzWithListDisplayDetails>?
         get() = mPresenter
 
     override fun onCreateView() {
         super.onCreateView()
-        fabManager?.text = getString(MessageID.clazz)
-        ustadComponentTitle = getString(MessageID.classes)
+        fabManager?.text = getString(MessageID.course)
+        ustadComponentTitle = getString(MessageID.courses)
         linearLayout = false
         addNewEntryText = getString(MessageID.add_a_new_class)
         mPresenter = ClazzListPresenter(this, arguments, this,di,this)
@@ -163,12 +160,12 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
     override fun RBuilder.renderAddContentOptionsDialog() {
         if(showAddEntryOptions){
             val options = if(newClazzListOptionVisible){
-                listOf(UmDialogOptionItem("add",MessageID.add_a_new_class) {
+                listOf(UmDialogOptionItem("add",MessageID.add_a_new_course) {
                     mPresenter?.handleClickCreateNewFab()
                 })
             }else {
                 listOf()
-            } + listOf(UmDialogOptionItem("login",MessageID.join_existing_class){
+            } + listOf(UmDialogOptionItem("login",MessageID.join_existing_course){
                 mPresenter?.handleClickJoinClazz()
             })
 

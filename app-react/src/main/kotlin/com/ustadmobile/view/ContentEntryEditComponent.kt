@@ -1,24 +1,27 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
+import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.switchMargin
 import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.view.ext.renderCourseBlockCommonFields
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.*
@@ -28,16 +31,13 @@ import react.setState
 import styled.css
 import styled.styledDiv
 
-class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEntryWithLanguage>(mProps),
+class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEntryWithBlockAndLanguage>(mProps),
     ContentEntryEdit2View {
 
     private var mPresenter: ContentEntryEdit2Presenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ContentEntryWithLanguage>?
+    override val mEditPresenter: UstadEditPresenter<*, ContentEntryWithBlockAndLanguage>?
         get() = mPresenter
-
-    override val viewNames: List<String>
-        get() = listOf(ContentEntryEdit2View.VIEW_NAME)
 
     private var titleLabel = FieldLabel(text = getString(MessageID.title))
 
@@ -51,17 +51,25 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
     private var languageLabel = FieldLabel(text = getString(MessageID.language))
 
-    private var completionLabel = FieldLabel(text = getString(MessageID.completion_criteria))
+    private val doNotShowBeforeLabel = FieldLabel(text = getString(MessageID.dont_show_before).clean())
+
+    private var startTimeLabel = FieldLabel(text = getString(MessageID.time))
+
+    private var deadlineDateLabel = FieldLabel(text = getStringWithOptionalLabel(MessageID.deadline))
+
+    private var deadlineTimeLabel = FieldLabel(text = getString(MessageID.time))
+
+    private var gracePeriodDateLabel = FieldLabel(text = getStringWithOptionalLabel(MessageID.end_of_grace_period))
+
+    private var gracePeriodTimeLabel = FieldLabel(text = getString(MessageID.time))
+
+    private var completionCriteriaLabel = FieldLabel(text = getString(MessageID.completion_criteria))
+
+    private var penaltyLabel = FieldLabel(text = getString(MessageID.late_submission_penalty))
 
     private var licenseLabel = FieldLabel(text = getString(MessageID.licence))
 
-    override var showCompletionCriteria: Boolean = false
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
+    private var maxPointsLabel = FieldLabel(text = getString(MessageID.maximum_points))
 
     override var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>? = null
         get() = field
@@ -114,13 +122,6 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
             }
         }
 
-    override var entryMetaData: ImportedContentEntryMetaData? = null
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
     override var metadataResult: MetadataResult? = null
         get() = field
         set(value) {
@@ -161,6 +162,92 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                 field = value
             }
         }
+    override var caGracePeriodError: String? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var caDeadlineError: String? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var caStartDateError: String? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var caMaxPointsError: String? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var startDate: Long = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var startTime: Long = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var deadlineDate: Long = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var deadlineTime: Long = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var gracePeriodDate: Long = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+    override var gracePeriodTime: Long = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    private var gracePeriodVisiblity: Boolean = false
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+
+    override var timeZone: String? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -170,11 +257,23 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
             }
         }
 
-    override var entity: ContentEntryWithLanguage? = null
+    var minScoreVisible: Boolean = false
         get() = field
         set(value) {
             setState {
                 field = value
+            }
+        }
+
+    override var entity: ContentEntryWithBlockAndLanguage? = null
+        get() = field
+        set(value) {
+            setState {
+                field = value
+                if(value?.block?.cbDeadlineDate != Long.MAX_VALUE){
+                    gracePeriodVisiblity = true
+                }
+                minScoreVisible = value?.block?.cbCompletionCriteria == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
             }
         }
 
@@ -200,7 +299,10 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
             umGridContainer(GridSpacing.spacing4) {
 
-                if(entity?.leaf == true){
+                val showPreviews = entity?.leaf == true && videoUri != null
+                        && (showWebPreview || showVideoPreview)
+
+                if(showPreviews){
                     umItem(GridSize.cells12, GridSize.cells4){
                         css{
                             marginTop = 12.px
@@ -246,7 +348,7 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
                 }
 
-                umItem(GridSize.cells12, if(entity?.leaf == true) GridSize.cells8 else GridSize.cells12){
+                umItem(GridSize.cells12, if(showPreviews) GridSize.cells8 else GridSize.cells12){
 
                     umTextField(label = "${titleLabel.text}",
                         helperText = titleLabel.errorText,
@@ -275,42 +377,48 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                         css(StyleManager.defaultFullWidth)
                     }
 
-
-                    if(showCompletionCriteria){
-                        umGridContainer(GridSpacing.spacing4) {
-
-                            umItem(GridSize.cells12, GridSize.cells6 ) {
-                                umTextFieldSelect(
-                                    label = "${completionLabel.text}",
-                                    value =  entity?.completionCriteria.toString(),
-                                    error = completionLabel.error,
-                                    values = completionCriteriaOptions?.map {
-                                        Pair(it.code.toString(), it.toString())
-                                    }?.toList(),
-                                    onChange = {
-                                        setState {
-                                            entity?.completionCriteria = it.toInt()
-                                        }
-                                    }
-                                )
-                            }
-
-                            umItem(GridSize.cells12, GridSize.cells6 ) {
-
-                                umTextField(label = "${minScoreLabel.text}",
-                                    value = "${entity?.minScore}",
-                                    error = minScoreLabel.error, disabled = !fieldsEnabled,
-                                    helperText = minScoreLabel.errorText,
-                                    variant = FormControlVariant.outlined,
-                                    onChange = {
-                                        setState {
-                                            entity?.minScore = if(it.isEmpty()) 0 else it.toInt()
-                                        }
-                                    })
-
-                            }
-                        }
+                    if(entity?.block != null){
+                        renderCourseBlockCommonFields(entity?.block,
+                            doNotShowBeforeLabel, startDate, startTimeLabel,
+                            dateSet = {
+                                setState{
+                                    startDate = it.getTime().toLong()
+                                    caStartDateError = null
+                                }
+                            }, timeZone, completionCriteriaLabel, completionCriteriaOptions,
+                            completionCriteriaSet = {
+                                setState {
+                                    entity?.block?.cbCompletionCriteria = it
+                                    completionCriteriaLabel.errorText = null
+                                    minScoreVisible = it == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
+                                }
+                            }, maxPointsLabel, maxPointsSet = {
+                                setState {
+                                    entity?.block?.cbMaxPoints = it
+                                    caMaxPointsError = null
+                                }
+                            }, deadlineDateLabel, deadlineTimeLabel, deadlineDate,
+                            deadlineDateSet = {
+                                setState{
+                                    deadlineDate = it.getTime().toLong()
+                                    caDeadlineError = null
+                                    gracePeriodVisiblity = true
+                                }
+                            }, gracePeriodDateLabel, gracePeriodTimeLabel, gracePeriodDate, gracePeriodVisiblity,
+                            gracePeriodSet = {
+                                gracePeriodDate = it.getTime().toLong()
+                                caGracePeriodError = null
+                            }, penaltyLabel, penaltySet = {
+                                setState{
+                                    entity?.block?.cbLateSubmissionPenalty = it
+                                }
+                            }, getString(MessageID.penalty_label),
+                            minScoreVisible, minScoreLabel,
+                            minPointsSet = {
+                                entity?.block?.cbMinPoints = it
+                            })
                     }
+
 
                     umTextField(label = "${authorLabel.text}",
                         value = entity?.author,
@@ -377,8 +485,9 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
 
                     umGridContainer(GridSpacing.spacing4) {
 
-                       if(entryMetaData != null || metadataResult != null){
+                       if(metadataResult != null){
                            umItem(GridSize.cells12) {
+                               css(defaultDoubleMarginTop)
                                createSwitchItem(getString(MessageID.compress), compressionEnabled){
                                    setState {
                                        compressionEnabled = !compressionEnabled

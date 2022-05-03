@@ -64,6 +64,7 @@ class SiteTermsEditPresenterTest {
 
         testNavController = mock{
             on { getBackStackEntry(any()) }.thenReturn(ustadBackStackEntry)
+            on { currentBackStackEntry }.thenReturn(ustadBackStackEntry)
         }
         context = Any()
 
@@ -95,6 +96,7 @@ class SiteTermsEditPresenterTest {
             UstadView.ARG_RESULT_DEST_KEY to "key"
         )
 
+        testNavController.navigate(SiteTermsEditView.VIEW_NAME, presenterArgs)
         val presenter = SiteTermsEditPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)

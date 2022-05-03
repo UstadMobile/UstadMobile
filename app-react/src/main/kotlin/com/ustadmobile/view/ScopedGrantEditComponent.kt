@@ -13,7 +13,7 @@ import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.view.ext.createListItemWithTitleAndSwitch
+import com.ustadmobile.view.ext.renderListItemWithTitleAndSwitch
 import com.ustadmobile.view.ext.umGridContainer
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -28,9 +28,6 @@ class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant
 
     override val mEditPresenter: UstadEditPresenter<*, ScopedGrant>?
         get() = mPresenter
-
-    override val viewNames: List<String>
-        get() = listOf(ScopedGrantEditView.VIEW_NAME)
 
 
     private var scopeList: List<BitmaskFlag>? = null
@@ -110,7 +107,7 @@ class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant
 
         override fun RBuilder.renderListItem(item: dynamic, onClick: (Event) -> Unit) {
 
-            createListItemWithTitleAndSwitch(getString(item.messageId as Int), item.enabled as Boolean, onClick)
+            renderListItemWithTitleAndSwitch(getString(item.messageId as Int), item.enabled as Boolean, onClick)
         }
 
     }

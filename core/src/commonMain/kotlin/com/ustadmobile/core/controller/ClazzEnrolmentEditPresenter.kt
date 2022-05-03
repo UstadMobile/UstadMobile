@@ -42,8 +42,8 @@ class ClazzEnrolmentEditPresenter(context: Any,
         TEACHER(ClazzEnrolment.ROLE_TEACHER, MessageID.teacher)
     }
 
-    class RoleMessageIdOption(day: RoleOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class RoleMessageIdOption(day: RoleOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class OutcomeOptions(val optionVal: Int, val messageId: Int) {
         INPROGRESS(ClazzEnrolment.OUTCOME_IN_PROGRESS, MessageID.in_progress),
@@ -52,8 +52,8 @@ class ClazzEnrolmentEditPresenter(context: Any,
         DROPPED_OUT(ClazzEnrolment.OUTCOME_DROPPED_OUT, MessageID.dropped_out),
     }
 
-    class OutcomeMessageIdOption(day: OutcomeOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class OutcomeMessageIdOption(day: OutcomeOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     var selectedPerson: Long = 0L
     var selectedClazz: Long = 0L
@@ -70,7 +70,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
         super.onCreate(savedState)
 
-        view.statusList = OutcomeOptions.values().map { OutcomeMessageIdOption(it, context) }
+        view.statusList = OutcomeOptions.values().map { OutcomeMessageIdOption(it, context, di) }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzEnrolmentWithLeavingReason? {
@@ -103,9 +103,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
             entity?.leavingReason = reason
             entity?.clazzEnrolmentLeavingReasonUid = reason.leavingReasonUid
             view.entity = entity
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_LEAVING_REASON] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_LEAVING_REASON] = null
         }
 
     }
@@ -118,10 +116,10 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
         val roleList = mutableListOf<RoleMessageIdOption>()
         if(hasAddStudentPermission){
-            roleList.add(RoleMessageIdOption(RoleOptions.STUDENT, context))
+            roleList.add(RoleMessageIdOption(RoleOptions.STUDENT, context, di))
         }
         if(hasAddTeacherPermission){
-            roleList.add(RoleMessageIdOption(RoleOptions.TEACHER, context))
+            roleList.add(RoleMessageIdOption(RoleOptions.TEACHER, context, di))
         }
         view.roleList = roleList.toList()
 

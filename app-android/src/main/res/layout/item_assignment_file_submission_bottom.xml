@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+        <import type="com.ustadmobile.core.controller.SubmissionConstants"/>
+
+        <variable
+            name="assignment"
+            type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock" />
+
+        <variable
+            name="deadlinePassed"
+            type="Boolean" />
+
+        <variable
+            name="addFileVisible"
+            type="Boolean" />
+
+        <variable
+            name="addTextVisible"
+            type="Boolean" />
+
+        <variable
+            name="eventHandler"
+            type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragmentEventHandler" />
+
+
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dimen_10dp">
+
+
+        <Button
+            android:id="@+id/submission_add_text_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:text="@string/add_text"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:onClick="@{() -> eventHandler.onAddTextClicked() }"
+            android:visibility="@{addTextVisible ? View.VISIBLE : View.GONE}"
+            />
+
+        <Button
+            android:id="@+id/submission_add_file_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/submission_add_text_button"
+            android:visibility="@{addFileVisible ? View.VISIBLE : View.GONE}"
+            android:onClick="@{() -> eventHandler.onAddFileClicked()}"
+            android:text="@string/add_file"
+            />
+
+
+        <TextView
+            android:id="@+id/item_file_type_label"
+            android:layout_width="@dimen/dimen_0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            android:visibility="@{addFileVisible ? View.VISIBLE : View.GONE}"
+            android:text="@string/file_type_chosen"
+            tools:text="Type:"
+            app:layout_constraintStart_toStartOf="@id/submission_add_file_button"
+            app:layout_constraintTop_toBottomOf="@id/submission_add_file_button"
+            />
+
+
+        <TextView
+            android:id="@+id/item_file_type_selection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Document"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:visibility="@{addFileVisible ? View.VISIBLE : View.GONE}"
+            app:textMessageIdLookupKey="@{assignment.caFileType}"
+            app:textMessageIdLookupMap="@{SubmissionConstants.FILE_TYPE_MAP}"
+            app:layout_constraintStart_toEndOf="@id/item_file_type_label"
+            app:layout_constraintTop_toBottomOf="@id/submission_add_file_button"
+
+            />
+
+        <TextView
+            android:id="@+id/item_file_max_number"
+            android:layout_width="@dimen/dimen_0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            android:visibility="@{addFileVisible ? View.VISIBLE : View.GONE}"
+            android:text="@{@string/max_number_of_files(assignment.caNumberOfFiles)}"
+            tools:text="Maximum number of files: 2"
+            android:layout_marginStart="@dimen/dimen_24dp"
+            app:layout_constraintStart_toEndOf="@id/item_file_type_selection"
+            app:layout_constraintTop_toBottomOf="@id/submission_add_file_button"
+            />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>

@@ -47,7 +47,7 @@ class ClazzLogEditAttendancePresenterTest {
 
     @Before
     fun setup() {
-        mockView = mock { }
+        mockView = mockEditView { }
         mockLifecycleOwner = mock { }
         context = Any()
 

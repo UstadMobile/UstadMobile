@@ -19,8 +19,8 @@ import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.view.ext.createCreateNewItem
-import com.ustadmobile.view.ext.createListItemWithTitleDescriptionAndRightAction
+import com.ustadmobile.view.ext.renderCreateNewItemOnList
+import com.ustadmobile.view.ext.renderListItemWithTitleDescriptionAndRightAction
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
@@ -35,9 +35,6 @@ class ReportFilterEditComponent (mProps: UmProps): UstadEditComponent<ReportFilt
 
     override val mEditPresenter: UstadEditPresenter<*, ReportFilter>?
         get() = mPresenter
-
-    override val viewNames: List<String>
-        get() = listOf(ReportFilterEditView.VIEW_NAME)
 
 
     private var fieldLabel = FieldLabel(text = getString(MessageID.report_filter_edit_field))
@@ -294,7 +291,7 @@ class ReportFilterEditComponent (mProps: UmProps): UstadEditComponent<ReportFilt
                             }
                             for(uidLabel in uidAndLabels){
                                 umListItem(button = true) {
-                                    createListItemWithTitleDescriptionAndRightAction(
+                                    renderListItemWithTitleDescriptionAndRightAction(
                                         uidLabel.labelName ?: "", "delete",
                                         withAction = true){
                                         Util.stopEventPropagation(it)
@@ -316,7 +313,7 @@ class ReportFilterEditComponent (mProps: UmProps): UstadEditComponent<ReportFilt
                                     mPresenter?.handleAddLeavingReasonClicked()
                                 }
                             }
-                            createCreateNewItem(createNewFilter ?: "")
+                            renderCreateNewItemOnList(createNewFilter ?: "")
                         }
                     }
                 }

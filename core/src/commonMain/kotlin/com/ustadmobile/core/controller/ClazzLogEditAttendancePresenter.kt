@@ -149,7 +149,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
     }
 
     fun handleSelectClazzLog(current: ClazzLog, next: ClazzLog) {
-        GlobalScope.launch {
+        presenterScope.launch {
             //save to the database
             updateAttendanceRecordsFromView()
             view.entity = next

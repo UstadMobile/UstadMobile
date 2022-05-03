@@ -20,7 +20,7 @@ import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import io.ktor.utils.io.*
 import org.kodein.di.instance
-import org.kodein.di.ktor.di
+import org.kodein.di.ktor.closestDI
 import org.kodein.di.on
 import java.io.File
 import java.io.InputStream
@@ -31,7 +31,7 @@ fun Route.ContainerMountRoute() {
 
     route("ContainerMount"){
         get("/recentContainers"){
-            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
+            val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
             val entryUids = (call.parameters["uids"]?:"").split(",").map { it.toLong()}
             val result = db.containerDao.findRecentContainerToBeMonitoredWithEntriesUid(entryUids)
             call.respond(result)
@@ -46,8 +46,8 @@ fun Route.ContainerMountRoute() {
         }
 
         get("/{containerUid}/videoParams"){
-            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
-            val systemImpl : UstadMobileSystemImpl by di().on(call).instance()
+            val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
+            val systemImpl : UstadMobileSystemImpl by closestDI().on(call).instance()
             val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
             val container = db.containerDao.findByUidAsync(containerUid)
             if(container != null){
@@ -106,7 +106,7 @@ fun Route.ContainerMountRoute() {
 }
 
 suspend fun Route.serve(call: ApplicationCall, isHeadRequest: Boolean){
-    val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
+    val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
     val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
     val contentTypeEpub = call.parameters["contentTypeEpub"]?.toBoolean() ?: false
     val pathInContainer = call.parameters.getAll("paths")?.joinToString("/") ?: ""
@@ -157,7 +157,7 @@ suspend fun Route.serve(call: ApplicationCall, isHeadRequest: Boolean){
                 inputStream = GZIPInputStream(inputStream)
             }
             if(contentTypeEpub){
-                inputStream = EpubContainerFilter(di()).filterResponse(inputStream, mimeType)
+                inputStream = EpubContainerFilter(closestDI()).filterResponse(inputStream, mimeType)
             }
             call.respond(object : OutgoingContent.WriteChannelContent() {
                 override val contentType = contentType

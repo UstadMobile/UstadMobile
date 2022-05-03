@@ -54,8 +54,6 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
 
     private var activeAccount: UmAccount? = null
 
-    override var viewNames: List<String>? = null
-
     private var appState: ReduxAppState = ReduxAppState()
 
     private lateinit var currentDestination: UstadDestination
@@ -124,11 +122,6 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                                 if(systemImpl.isRtlActive()) "" else "...",
                         activeAccount?.firstName){
                         systemImpl.go(AccountListView.VIEW_NAME, mapOf(), this)
-                        /*
-                        Db export for debugging purpose
-                        GlobalScope.launch {
-                            database?.exportDatabase()
-                        }*/
                     }
 
                     if(currentDestination.showNavigation){

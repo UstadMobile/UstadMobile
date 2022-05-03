@@ -104,11 +104,15 @@ class VideoContentFragment : UstadBaseFragment(), VideoContentView, VideoContent
             currentWindow = savedInstanceState.get(CURRENT_WINDOW) as Int
         }
 
-        mPresenter = VideoContentPresenter(requireContext(),
-                arguments.toStringMap(), this, di).withViewLifecycle()
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-
         return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        mPresenter = VideoContentPresenter(requireContext(),
+            arguments.toStringMap(), this, di).withViewLifecycle()
+        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

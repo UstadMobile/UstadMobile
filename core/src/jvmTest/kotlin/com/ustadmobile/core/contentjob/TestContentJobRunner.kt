@@ -128,11 +128,6 @@ class TestContentJobRunner {
         jobCompleted = false
         di = DI {
             import(ustadTestRule.diModule)
-            bind<Json>() with singleton {
-                Json {
-                    encodeDefaults = true
-                }
-            }
 
             bind<ContainerStorageManager>() with scoped(ustadTestRule.endpointScope).singleton {
                 ContainerStorageManager(listOf(temporaryFolder.newFolder()))

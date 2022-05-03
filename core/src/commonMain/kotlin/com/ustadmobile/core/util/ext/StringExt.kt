@@ -89,7 +89,15 @@ fun String.appendQueryArgs(args: Map<String, String>): String {
     return appendQueryArgs(args.toQueryString())
 }
 
+fun String.capitalizeFirstLetter(): String {
+    return this.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+}
+
 /**
  * Validate email address using regular expressions
  */
 expect fun String?.validEmail(): Boolean
+
+fun String.countWords(): Int {
+    return Regex("""(\s+|(\r\n|\r|\n))""").findAll(this.trim()).count() + 1
+}

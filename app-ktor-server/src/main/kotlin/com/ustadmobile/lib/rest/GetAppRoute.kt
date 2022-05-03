@@ -9,12 +9,12 @@ import kotlinx.html.*
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.ktor.di
+import org.kodein.di.ktor.closestDI
 
 fun Route.GetAppRoute() {
     get("/getapp/") {
         val config = this.context.application.environment.config
-        val di : DI by di()
+        val di : DI by closestDI()
         val systemImpl : UstadMobileSystemImpl = di.direct.instance()
 
         call.respondHtml {

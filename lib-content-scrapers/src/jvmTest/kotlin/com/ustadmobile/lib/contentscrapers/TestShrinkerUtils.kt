@@ -153,7 +153,7 @@ class TestShrinkerUtils {
 
         val doc = Jsoup.parse(file, UTF_ENCODING)
         val afterElement = doc.selectFirst("[src]")
-        val beforeAttrList = afterElement.attributes()
+        val beforeAttrList = afterElement!!.attributes()
 
         ShrinkerUtil.cleanUpAttributeListWithMultipleSrc(afterElement, replacedFiles, file)
 
@@ -193,7 +193,7 @@ class TestShrinkerUtils {
         val doc = Jsoup.parse(file, UTF_ENCODING)
         val afterElement = doc.selectFirst("img.data-src2")
 
-        ShrinkerUtil.cleanUpAttributeListWithMultipleSrc(afterElement, replacedFiles, file)
+        ShrinkerUtil.cleanUpAttributeListWithMultipleSrc(afterElement!!, replacedFiles, file)
 
         Assert.assertEquals(2, afterElement.attributes().size().toLong())
 
@@ -234,7 +234,7 @@ class TestShrinkerUtils {
         val doc = Jsoup.parse(file, UTF_ENCODING)
         val afterElement = doc.selectFirst("img.src")
 
-        ShrinkerUtil.cleanUpAttributeListWithMultipleSrc(afterElement, replacedFiles, file)
+        ShrinkerUtil.cleanUpAttributeListWithMultipleSrc(afterElement!!, replacedFiles, file)
 
         Assert.assertEquals(2, afterElement.attributes().size().toLong())
 
@@ -287,14 +287,14 @@ class TestShrinkerUtils {
         val entry = zipFile.getEntry("META-INF/container.xml")
         val `is` = zipFile.getInputStream(entry)
         val document = Jsoup.parse(`is`.readString(), "", Parser.xmlParser())
-        val path = document.selectFirst("rootfile").attr("full-path")
+        val path = document.selectFirst("rootfile")!!.attr("full-path")
 
         val opfEntry = zipFile.getEntry(path)
         val opfis = zipFile.getInputStream(opfEntry)
         val opfdoc = Jsoup.parse(opfis.readString(), "", Parser.xmlParser())
         val manifestitem = opfdoc.selectFirst("manifest item[href=images/images/logowhite.png]")
 
-        Assert.assertEquals("images/images/logowhite.png", manifestitem.attr("href"))
+        Assert.assertEquals("images/images/logowhite.png", manifestitem!!.attr("href"))
 
     }
 
@@ -313,14 +313,14 @@ class TestShrinkerUtils {
         val entry = zipFile.getEntry("META-INF/container.xml")
         val `is` = zipFile.getInputStream(entry)
         val document = Jsoup.parse(`is`.readString(), "", Parser.xmlParser())
-        val path = document.selectFirst("rootfile").attr("full-path")
+        val path = document.selectFirst("rootfile")!!.attr("full-path")
 
         val opfEntry = zipFile.getEntry(path)
         val opfis = zipFile.getInputStream(opfEntry)
         val opfdoc = Jsoup.parse(opfis.readString(), "", Parser.xmlParser())
         val manifestitem = opfdoc.selectFirst("manifest item[href=images/cover.png]")
 
-        Assert.assertEquals("images/cover.png", manifestitem.attr("href"))
+        Assert.assertEquals("images/cover.png", manifestitem!!.attr("href"))
     }
 
     @Test

@@ -30,6 +30,7 @@
  */
 
 package com.ustadmobile.core.impl
+import com.ustadmobile.door.DoorUri
 import kotlin.jvm.JvmStatic
 
 
@@ -126,7 +127,7 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
     override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
 
 
-    fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?)
+    fun openFileInDefaultViewer(context: Any, doorUri: DoorUri, mimeType: String?)
 
 
     /**
@@ -137,14 +138,5 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
 
     companion object {
 
-        /**
-         * Get an instance of the system implementation - relies on the platform
-         * specific factory method
-         *
-         * @return A singleton instance
-         */
-        @JvmStatic
-        @Deprecated("This static property should not be used! We should access it through DI")
-        var instance: UstadMobileSystemImpl
     }
 }

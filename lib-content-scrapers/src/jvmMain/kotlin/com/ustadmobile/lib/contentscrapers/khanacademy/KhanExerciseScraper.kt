@@ -14,6 +14,7 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_HAR
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.POST_METHOD
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.HarScraper
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
@@ -44,6 +45,7 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
+import java.time.Duration
 import java.util.*
 import java.util.regex.Pattern
 
@@ -154,13 +156,13 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                         By.cssSelector("div.perseus-renderer div")))
 
                 try {
-                    chromeDriver.findElementByCssSelector("div[class*=checkbox-and-option]").click()
+                    chromeDriver.findElement(By.cssSelector("div[class*=checkbox-and-option]")).click()
                 } catch (e: Exception) {
                     // ignore
                 }
 
                 try {
-                    chromeDriver.findElementsByCssSelector("input")?.forEach { web ->
+                    chromeDriver.findElements(By.cssSelector("input"))?.forEach { web ->
                         web.sendKeys("1")
                     }
                 } catch (e: Exception) {
@@ -169,7 +171,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 
 
                 try {
-                    chromeDriver.findElementsByCssSelector("div.widget-inline-block span.mq-root-block").forEach { web ->
+                    chromeDriver.findElements(By.cssSelector("div.widget-inline-block span.mq-root-block"))?.forEach { web ->
                         web.click()
                         web.sendKeys("1")
                     }
@@ -178,16 +180,16 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                 }
 
                 try {
-                    chromeDriver.findElementsByCssSelector("div.keypad-input").forEach { web ->
+                    chromeDriver.findElements(By.cssSelector("div.keypad-input"))?.forEach { web ->
                         web.click()
-                        chromeDriver.findElementByCssSelector("div[role=button] span").click()
+                        chromeDriver.findElement(By.cssSelector("div[role=button] span")).click()
                     }
                 } catch (e: Exception) {
                     // ignore
                 }
 
                 try {
-                    val rect = chromeDriver.findElementsByCssSelector("div.perseus-widget-plotter span")
+                    val rect = chromeDriver.findElements(By.cssSelector("div.perseus-widget-plotter span"))
                     rect.forEach { web ->
                         try {
                             web.click()
@@ -202,17 +204,17 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                 }
 
                 try {
-                    chromeDriver.findElementByCssSelector("div.graphie svg").click()
+                    chromeDriver.findElement(By.cssSelector("div.graphie svg")).click()
                 } catch (e: Exception) {
                     // ignore
                     print(e)
                 }
 
                 try {
-                    val dropdownList = chromeDriver.findElementsByCssSelector("button[aria-haspopup=listbox]")
+                    val dropdownList = chromeDriver.findElements(By.cssSelector("button[aria-haspopup=listbox]"))
                     dropdownList.forEach { web ->
                         web.click()
-                        chromeDriver.findElementByCssSelector("div[role=option][aria-selected=false]").click()
+                        chromeDriver.findElement(By.cssSelector("div[role=option][aria-selected=false]")).click()
                     }
                 } catch (e: Exception) {
                     // ignore
@@ -221,7 +223,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 
 
                 try {
-                    val graphie = chromeDriver.findElementByCssSelector("div.graphie div div ellipse")
+                    val graphie = chromeDriver.findElement(By.cssSelector("div.graphie div div ellipse"))
                     val actions = Actions(chromeDriver)
                     actions.dragAndDropBy(graphie, 10, 10).build().perform()
                 } catch (e: Exception) {
@@ -230,7 +232,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 
 
                 try {
-                    val dragElements = chromeDriver.findElementsByCssSelector("li[class*=perseus-sortable-draggable]")
+                    val dragElements = chromeDriver.findElements(By.cssSelector("li[class*=perseus-sortable-draggable]"))
                     val actions = Actions(chromeDriver)
                     if (dragElements.size > 1) {
                         actions.dragAndDrop(dragElements[0], dragElements[1]).build().perform()
@@ -242,8 +244,8 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                 }
 
                 try {
-                    val dragElement = chromeDriver.findElementByCssSelector("div[class*=perseus-interactive] div[class*=perseus-interactive]")
-                    val dragBox = chromeDriver.findElementByCssSelector("div[class*=drag-hint]")
+                    val dragElement = chromeDriver.findElement(By.cssSelector("div[class*=perseus-interactive] div[class*=perseus-interactive]"))
+                    val dragBox = chromeDriver.findElement(By.cssSelector("div[class*=drag-hint]"))
                     val actions = Actions(chromeDriver)
                     actions.dragAndDrop(dragElement, dragBox).build().perform()
                 } catch (e: Exception) {
@@ -251,7 +253,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                 }
 
 
-                val checkAnswer = chromeDriver.findElementByCssSelector("button[data-test-id=exercise-check-answer]")
+                val checkAnswer = chromeDriver.findElement(By.cssSelector("button[data-test-id=exercise-check-answer]"))
                 if (checkAnswer.isEnabled) {
                     checkAnswer.click()
                 } else {
@@ -259,13 +261,13 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                 }
 
                 try {
-                    WebDriverWait(chromeDriver, 5).until<WebElement>(ExpectedConditions.elementToBeClickable(By.cssSelector("a[data-test-id=exercise-feedback-popover-skip-link]"))).click()
+                    WebDriverWait(chromeDriver, Duration.ofSeconds(5)).until<WebElement>(ExpectedConditions.elementToBeClickable(By.cssSelector("a[data-test-id=exercise-feedback-popover-skip-link]"))).click()
                 } catch (e: Exception) {
                     // ignore
                 }
 
                 try {
-                    WebDriverWait(chromeDriver, 5).until<WebElement>(ExpectedConditions.elementToBeClickable(By.cssSelector("button[data-test-id=exercise-next-question]"))).click()
+                    WebDriverWait(chromeDriver, Duration.ofSeconds(5)).until<WebElement>(ExpectedConditions.elementToBeClickable(By.cssSelector("button[data-test-id=exercise-next-question]"))).click()
                 } catch (e: Exception) {
                     // ignore
                 }
@@ -574,7 +576,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
         val chromeDriver = ChromeDriver(options)
 
         chromeDriver.get("https://$lang.khanacademy.org/login")
-        val waitDriver = WebDriverWait(chromeDriver, ScraperConstants.TIME_OUT_SELENIUM.toLong())
+        val waitDriver = WebDriverWait(chromeDriver, TIME_OUT_SELENIUM)
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
         waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#login-signup-root")))
 

@@ -8,14 +8,17 @@ import com.ustadmobile.core.contentjob.ContentPluginIds
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.toDeepLink
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryDetailOverviewView
+import com.ustadmobile.core.view.ContentEntryDetailView
+import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -118,9 +121,16 @@ class ContentEntryDetailOverviewPresenter(
     }
 
     override fun handleClickEdit() {
-        systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
-                mapOf(ARG_ENTITY_UID to entity?.contentEntryUid.toString(),
-                        ARG_LEAF to true.toString()), context)
+        val args = mutableMapOf(
+            ARG_ENTITY_UID to entity?.contentEntryUid.toString(),
+            ARG_LEAF to true.toString())
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null, ContentEntryEdit2View.VIEW_NAME,
+                ContentEntry::class,
+                ContentEntry.serializer(),
+                arguments = args)
+        )
     }
 
     fun handleClickOpenButton() {

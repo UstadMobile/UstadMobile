@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.waitForJSandJQueryToLoad
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -37,7 +38,7 @@ abstract class SeleniumIndexer(parentContentEntry: Long, runUid: Int, sqiUid: In
             throw IllegalArgumentException(e)
         }
 
-        val waitDriver = WebDriverWait(chromeDriver, ScraperConstants.TIME_OUT_SELENIUM.toLong())
+        val waitDriver = WebDriverWait(chromeDriver, TIME_OUT_SELENIUM)
         waitForJSandJQueryToLoad(waitDriver)
         waitCondition?.invoke(waitDriver)
 

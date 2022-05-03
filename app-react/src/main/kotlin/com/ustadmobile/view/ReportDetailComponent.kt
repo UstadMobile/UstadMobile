@@ -25,8 +25,8 @@ import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.util.getViewNameFromUrl
-import com.ustadmobile.view.ext.createTopMainAction
-import com.ustadmobile.view.ext.drawChart
+import com.ustadmobile.view.ext.renderTopMainAction
+import com.ustadmobile.view.ext.renderChart
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.Overflow
@@ -46,9 +46,6 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
-
-    override val viewNames: List<String>
-        get() = listOf(ReportDetailView.VIEW_NAME)
 
     var showChart = true
 
@@ -119,7 +116,7 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
                     umItem(GridSize.cells12){
                         umGridContainer(GridSpacing.spacing4) {
                             if(showChart){
-                                createTopMainAction("exit_to_app",
+                                renderTopMainAction("exit_to_app",
                                     "${getString(MessageID.export)} ${getString(MessageID.report)}",
                                     GridSize.cells12,
                                     GridSize.cells4,
@@ -128,7 +125,7 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
                                 }
                             }
 
-                            createTopMainAction("addchart",
+                            renderTopMainAction("addchart",
                                 getString(MessageID.add_to).format(getString(MessageID.dashboard)),
                                 GridSize.cells12, GridSize.cells4,
                                 visible = chartData?.reportWithFilters?.reportUid ?: 0 == 0L){
@@ -141,7 +138,7 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
                                 }
                             }
 
-                            createTopMainAction("post_add",
+                            renderTopMainAction("post_add",
                                 getString(MessageID.save_as_template),
                                 GridSize.cells12, GridSize.cells4,
                                 visible = saveAsTemplateVisible){
@@ -160,7 +157,7 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
                                 }
                                 //ID is used for exporting the chart
                                 attrs.asDynamic().id = "chat-area"
-                                drawChart(chartData){
+                                renderChart(chartData){
                                     showChart = it
                                 }
                             }

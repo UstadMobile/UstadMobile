@@ -19,7 +19,7 @@ abstract class UstadDetailComponent<T: Any>(mProps: UmProps) : UstadBaseComponen
             window.setTimeout({
                 field = value
                 fabManager?.visible = (value == EditButtonMode.FAB)
-            }, STATE_CHANGE_DELAY)
+            }, MIN_STATE_CHANGE_DELAY_TIME)
         }
 
     override fun onCreateView() {

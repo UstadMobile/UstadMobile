@@ -42,6 +42,13 @@ class WebChunkFragment : UstadBaseFragment(), WebChunkView, FragmentBackHandler 
         webView?.settings?.allowFileAccessFromFileURLs = true
         webView?.settings?.mediaPlaybackRequiresUserGesture = false
 
+
+        return mBinding?.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         mPresenter = WebChunkPresenter(this,
             arguments.toStringMap(), this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
@@ -49,9 +56,7 @@ class WebChunkFragment : UstadBaseFragment(), WebChunkView, FragmentBackHandler 
         val webClient = WebChunkWebViewClient(arguments?.getLong(UstadView.ARG_CONTAINER_UID) ?: 0,
             di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB), mPresenter)
         webView?.webViewClient = webClient
-        return mBinding?.root
     }
-
 
     override fun onHostBackPressed(): Boolean {
         return if (webView?.canGoBack() == true) {

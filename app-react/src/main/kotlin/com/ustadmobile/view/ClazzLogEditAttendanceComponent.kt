@@ -41,9 +41,6 @@ class ClazzLogEditAttendanceComponent (mProps: UmProps): UstadEditComponent<Claz
     override val mEditPresenter: UstadEditPresenter<*, ClazzLog>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzLogEditAttendanceView.VIEW_NAME)
-
     private var disablePrevBtn = false
 
     private var disableNextBtn = false
@@ -182,7 +179,7 @@ class ClazzLogEditAttendanceComponent (mProps: UmProps): UstadEditComponent<Claz
                                    stopEventPropagation(it)
                                    mPresenter?.handleClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
                                }
-                               createCreateNewItem(getString(MessageID.mark_all_present), "library_add_check")
+                               renderCreateNewItemOnList(getString(MessageID.mark_all_present), "library_add_check")
                            }
 
                            umListItem(button = true){
@@ -190,7 +187,7 @@ class ClazzLogEditAttendanceComponent (mProps: UmProps): UstadEditComponent<Claz
                                    stopEventPropagation(it)
                                    mPresenter?.handleClickMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT)
                                }
-                               createCreateNewItem(getString(MessageID.mark_all_absent), "content_copy")
+                               renderCreateNewItemOnList(getString(MessageID.mark_all_absent), "content_copy")
                            }
                            umSpacer()
                            recordWithPersonList.forEachIndexed { index,record ->

@@ -38,6 +38,12 @@ fun Date.startOfDay(timezone: String? = null) : Date{
     return moment(utc).utcOffset(timezone ?: "").startOf("day").toDate()
 }
 
+fun Date.fromNow(locale: String = "en",withSuffix: Boolean = true): String{
+    moment.locale(locale)
+    val utc = moment.utc(this).toDate()
+    return moment(utc).fromNow(!withSuffix).toString()
+}
+
 fun Date.endOfDay(timezone: String? = null) : Date{
     val utc = moment.utc(this).toDate()
     return moment(utc).utcOffset(timezone ?: "").endOf("day").toDate()

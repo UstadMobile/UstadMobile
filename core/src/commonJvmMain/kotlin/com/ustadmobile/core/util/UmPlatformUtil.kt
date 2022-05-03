@@ -12,7 +12,7 @@ actual object UmPlatformUtil {
 
     actual fun debug(){}
 
-    actual fun console(content: Any) {}
+    actual fun log(content: Any) {}
 
     /**
      * Asynchronously run certain block on a specific platform

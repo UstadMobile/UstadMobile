@@ -40,9 +40,6 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
     override val listPresenter: UstadListPresenter<*, in SchoolWithMemberCountAndLocation>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(SchoolListView.VIEW_NAME)
-
     override var newSchoolListOptionVisible: Boolean = false
         get() = field
         set(value) {
@@ -54,6 +51,7 @@ class SchoolListComponent(mProps: UmProps) : UstadListComponent<School, SchoolWi
     override fun onCreateView() {
         super.onCreateView()
         linearLayout = false
+        ustadComponentTitle = getString(MessageID.institution)
         fabManager?.text = getString(MessageID.school)
         mPresenter = SchoolListPresenter(this, arguments,
             this, di, this)

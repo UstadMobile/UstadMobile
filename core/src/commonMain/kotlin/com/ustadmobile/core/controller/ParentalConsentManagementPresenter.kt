@@ -46,9 +46,9 @@ class ParentalConsentManagementPresenter(context: Any,
         super.onCreate(savedState)
 
         view.relationshipFieldOptions = listOf(
-            MessageIdOption(MessageID.mother, context, PersonParentJoin.RELATIONSHIP_MOTHER),
-            MessageIdOption(MessageID.father, context, PersonParentJoin.RELATIONSHIP_FATHER),
-            MessageIdOption(MessageID.other_legal_guardian, context, PersonParentJoin.RELATIONSHIP_OTHER)
+            MessageIdOption(MessageID.mother, context, PersonParentJoin.RELATIONSHIP_MOTHER, di),
+            MessageIdOption(MessageID.father, context, PersonParentJoin.RELATIONSHIP_FATHER, di),
+            MessageIdOption(MessageID.other_legal_guardian, context, PersonParentJoin.RELATIONSHIP_OTHER, di)
         )
     }
 

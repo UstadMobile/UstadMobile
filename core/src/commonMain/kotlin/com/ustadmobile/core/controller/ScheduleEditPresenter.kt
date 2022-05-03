@@ -23,7 +23,11 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
         WEEKLY(Schedule.SCHEDULE_FREQUENCY_WEEKLY, MessageID.weekly)
     }
 
-    class FrequencyMessageIdOption(frequency: FrequencyOption, context: Any) : MessageIdOption(frequency.messageId, context, frequency.optionVal)
+    class FrequencyMessageIdOption(
+        frequency: FrequencyOption,
+        context: Any,
+        di: DI
+    ) : MessageIdOption(frequency.messageId, context, frequency.optionVal, di)
 
     enum class DayOptions(val optionVal: Int, val messageId: Int) {
         SUNDAY(Schedule.DAY_SUNDAY, MessageID.sunday),
@@ -35,7 +39,11 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
         SATURDAY(Schedule.DAY_SATURDAY, MessageID.saturday)
     }
 
-    class DayMessageIdOption(day: DayOptions, context: Any) : MessageIdOption(day.messageId, context, day.optionVal)
+    class DayMessageIdOption(
+        day: DayOptions,
+        context: Any,
+        di: DI
+    ) : MessageIdOption(day.messageId, context, day.optionVal, di)
 
     var schedule: Schedule? = null
 
@@ -43,7 +51,7 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
         super.onCreate(savedState)
 
         //view.frequencyOptions = FrequencyOption.values().map { FrequencyMessageIdOption(it, context) }
-        view.dayOptions = DayOptions.values().map { DayMessageIdOption(it, context) }
+        view.dayOptions = DayOptions.values().map { DayMessageIdOption(it, context, di) }
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): Schedule? {

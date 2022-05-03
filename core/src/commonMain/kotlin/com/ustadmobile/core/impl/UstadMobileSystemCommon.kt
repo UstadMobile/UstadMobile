@@ -15,7 +15,6 @@ import com.ustadmobile.door.doorMainDispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerializationStrategy
 import kotlin.js.JsName
 
 /**
@@ -235,17 +234,6 @@ abstract class UstadMobileSystemCommon {
     abstract fun getSystemLocale(context: Any): String
 
     /**
-     * Provide language UI directionality
-     * @return TRUE if the UI direction is RTL otherwise it's FALSE
-     */
-    open fun isRtlActive(): Boolean {
-        val languages = getAppPref(AppConfig.KEY_RTL_LANGUAGES, this)
-        return languages?.split(",")?.firstOrNull{it == getDisplayedLocale(this)} != null
-    }
-
-
-
-    /**
      * Provides the language code of the currently active locale. This is different to getLocale. If
      * the locale is currently set to LOCALE_USE_SYSTEM then that language will be resolved and the
      * code returned.
@@ -443,7 +431,7 @@ abstract class UstadMobileSystemCommon {
          * viewname will start with a # (as it uses the REACT hash router). Therefor this string is
          * used as a divider between the endpoint URL and the view name and its view arguments
          */
-        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/index.html#"
+        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/#/"
 
         const val SUBDIR_SITEDATA_NAME = "sitedata"
 

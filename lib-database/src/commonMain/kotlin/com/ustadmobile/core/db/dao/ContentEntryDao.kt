@@ -66,6 +66,23 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findEntryWithLanguageByEntryId")
     abstract suspend fun findEntryWithLanguageByEntryIdAsync(entryUuid: Long): ContentEntryWithLanguage?
 
+    @Query("""
+        SELECT ContentEntry.*, 
+               Language.*,
+               CourseBlock.*
+          FROM ContentEntry
+               LEFT JOIN Language 
+               ON Language.langUid = ContentEntry.primaryLanguageUid 
+               
+               LEFT JOIN CourseBlock
+               ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+               AND CourseBlock.cbEntityUid = :entityUid
+               
+         WHERE ContentEntry.contentEntryUid = :entityUid       
+    """)
+    @JsName("findEntryWithBlockAndLanguageByUidAsync")
+    abstract suspend fun findEntryWithBlockAndLanguageByUidAsync(entityUid: Long): ContentEntryWithBlockAndLanguage?
+
     @Query(ENTRY_WITH_CONTAINER_QUERY)
     abstract suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer?
 
@@ -219,7 +236,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract suspend fun findBySourceUrlWithContentEntryStatusAsync(sourceUrl: String): ContentEntry?
 
     @Query("""
-            SELECT ContentEntry.*, ContentEntryParentChildJoin.*, Container.*,
+            SELECT ContentEntry.*, ContentEntryParentChildJoin.*, Container.*, 
                 COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                 COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
                 COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
@@ -228,6 +245,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                 COALESCE(StatementEntity.resultSuccess, 0) AS success,
                 COALESCE((CASE WHEN StatementEntity.resultCompletion 
                 THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                0 AS assignmentContentWeight,
                 
                 1 as totalContent, 
                 
@@ -285,7 +303,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("""
                SELECT ContentEntry.*, ContentEntryParentChildJoin.*, 
-                           Container.*,      
+                           Container.*, 
                       COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                       COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
                       COALESCE(StatementEntity.extensionProgress,0) AS progress, 
@@ -296,12 +314,12 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
                         THEN 1 ELSE 0 END),0) AS totalCompletedContent,
                 
                       1 as totalContent, 
+                      0 AS assignmentContentWeight,
                       0 as penalty
                  FROM ClazzContentJoin
                           LEFT JOIN ContentEntry  
                           ON ccjContentEntryUid = contentEntryUid
-                         
-                            
+
                           LEFT JOIN ContentEntryParentChildJoin 
                           ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
                           
@@ -347,7 +365,10 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT * FROM ContentEntry where contentEntryUid = :parentUid LIMIT 1")
     abstract fun findLiveContentEntry(parentUid: Long): DoorLiveData<ContentEntry?>
 
-    @Query("SELECT contentEntryUid FROM ContentEntry WHERE entryId = :objectId LIMIT 1")
+    @Query("""SELECT COALESCE((SELECT contentEntryUid 
+                                      FROM ContentEntry 
+                                     WHERE entryId = :objectId 
+                                     LIMIT 1),0) AS ID""")
     @JsName("getContentEntryUidFromXapiObjectId")
     abstract fun getContentEntryUidFromXapiObjectId(objectId: String): Long
 

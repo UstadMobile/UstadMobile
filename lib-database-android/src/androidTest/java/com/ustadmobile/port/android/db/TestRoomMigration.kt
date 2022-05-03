@@ -556,7 +556,7 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 97, true,
-            UmAppDatabase.MIGRATION_96_97.asRoomMigration())
+                UmAppDatabase.MIGRATION_96_97.asRoomMigration())
     }
 
     @Test
@@ -576,8 +576,9 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 99, true,
-            UmAppDatabase.MIGRATION_98_99.asRoomMigration())
+                UmAppDatabase.MIGRATION_98_99.asRoomMigration())
     }
+
 
     @Test
     fun migrate99to100() {

@@ -16,7 +16,7 @@ import com.ustadmobile.mui.components.umMenu
 import com.ustadmobile.mui.components.umMenuItem
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.view.ext.createContentEntryListItem
+import com.ustadmobile.view.ext.renderContentEntryListItem
 import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.document
 import kotlinx.css.display
@@ -42,10 +42,6 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
 
     override val displayTypeRepo: Any?
         get() = dbRepo?.contentEntryDao
-
-    override val viewNames: List<String>
-        get() = listOf(ContentEntryList2View.VIEW_NAME_HOME, ContentEntryList2View.VIEW_NAME,
-            ContentEntryList2View.FOLDER_VIEW_NAME)
 
     override var editOptionVisible: Boolean = false
         get() = field
@@ -74,7 +70,7 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
         val showSelectBtn = arguments.determineListMode().toString() == ListViewMode.PICKER.toString()
                 && (arguments[ARG_SELECT_FOLDER_VISIBLE]?.toBoolean() ?: true || item.leaf)
         val showStatus = arguments.determineListMode().toString() != ListViewMode.PICKER.toString()
-        createContentEntryListItem(item,systemImpl, showSelectBtn, showStatus){
+        renderContentEntryListItem(item,systemImpl, showSelectBtn, showStatus){
             if(showSelectBtn){
                 mPresenter?.onClickSelectContentEntry(item)
             }else {
@@ -106,13 +102,9 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
                     MessageID.add_link_description) {
                     mPresenter?.onClickImportLink()
                 },
-                UmDialogOptionItem("collections",MessageID.add_from_gallery,
-                    MessageID.add_gallery_description) {
-                    mPresenter?.onClickImportGallery()
-                },
                 UmDialogOptionItem("note_add",MessageID.add_file,
                     MessageID.add_file_description) {
-                    mPresenter?.onClickImportFile()
+                    mPresenter?.handleOnClickAddSupportedFile()
                 }
             )
 

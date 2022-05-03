@@ -1,11 +1,10 @@
 package com.ustadmobile.port.android.screen
 
-import io.github.kakaocup.kakao.common.views.KSwipeView
-import io.github.kakaocup.kakao.edit.KTextInputLayout
-import io.github.kakaocup.kakao.recycler.KRecyclerView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.ClazzAssignmentEditFragment
+import io.github.kakaocup.kakao.common.views.KSwipeView
+import io.github.kakaocup.kakao.edit.KTextInputLayout
 
 object ClazzAssignmentEditScreen : KScreen<ClazzAssignmentEditScreen>() {
 
@@ -22,10 +21,5 @@ object ClazzAssignmentEditScreen : KScreen<ClazzAssignmentEditScreen>() {
     val clazzAssignmentDescInput = KTextInputLayout {withId(R.id.ca_edit_description_textinput)}
 
     val caStartDateText = KTextInputLayout { withId(R.id.ca_start_date_textinput)}
-
-    val contentList: KRecyclerView = KRecyclerView({ withId(R.id.ca_recyclerview_content) },
-            itemTypeBuilder = {
-            })
-
 
 }

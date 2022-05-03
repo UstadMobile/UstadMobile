@@ -6,8 +6,10 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
+import io.github.aakira.napier.Napier
 import kotlinx.browser.window
 
 abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps), UstadEditView<T> {
@@ -15,6 +17,7 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
 
     override fun onCreateView() {
+        Napier.d("UstadEditComponent: navController viewName = ${navController.currentBackStackEntry?.viewName} ")
         super.onCreateView()
         val fabLabelText = if(mEditPresenter?.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB) {
             getString(MessageID.save)
@@ -42,6 +45,30 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
             }else {
                 getString(newTitleId)
             }
-        }, STATE_CHANGE_DELAY * 2)
+        }, MAX_STATE_CHANGE_DELAY_TIME)
+    }
+
+    override fun onDestroyView() {
+        /**
+         * If the user is on an EditPresenter that saves to the database, and moving away (back or
+         * forwards), make sure that we have saved the "draft" to the state handle.
+         *
+         * When the user is navigating between edit screens using navigateForResult, this is already
+         * taken care of. On the browser, the user can go forward themselves.
+         */
+        val presenterVal = mEditPresenter
+        if(presenterVal != null
+                && presenterVal.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB
+                && (systemTimeInMillis() -  presenterVal.lastStateSaveTime) > LAST_SAVE_CHECK_WINDOW) {
+            presenterVal.saveStateToNavController()
+        }
+
+        super.onDestroyView()
+    }
+
+    companion object {
+
+        const val LAST_SAVE_CHECK_WINDOW = 100
+
     }
 }

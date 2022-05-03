@@ -17,9 +17,6 @@ class ClazzDetailComponent(mProps: UmProps): UstadDetailComponent<Clazz>(mProps)
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzDetailView.VIEW_NAME)
-
     private var tabsToRender: List<UmTab>? = null
 
     override var tabs: List<String>? = null
@@ -73,7 +70,7 @@ class ClazzDetailComponent(mProps: UmProps): UstadDetailComponent<Clazz>(mProps)
             ContentEntryList2View.VIEW_NAME to MessageID.content,
             ClazzMemberListView.VIEW_NAME to MessageID.members,
             ClazzLogListAttendanceView.VIEW_NAME to MessageID.attendance,
-            ClazzAssignmentListView.VIEW_NAME to MessageID.assignments
+            CourseGroupSetListView.VIEW_NAME to MessageID.groups
         )
 
     }

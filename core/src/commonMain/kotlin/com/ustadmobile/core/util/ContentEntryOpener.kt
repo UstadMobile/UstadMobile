@@ -7,12 +7,13 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
+import com.ustadmobile.door.DoorUri
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -85,7 +86,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
                     require(container.isNotEmpty()) { "No file found" }
                     val containerEntryFilePath = container[0].containerEntryFile?.cefPath
                     if (containerEntryFilePath != null) {
-                        systemImpl.openFileInDefaultViewer(context, containerEntryFilePath,
+                        systemImpl.openFileInDefaultViewer(context, DoorUri.parse(containerEntryFilePath),
                                 containerToOpen.mimeType)
                     } else {
                         throw IllegalArgumentException("No file found in container")

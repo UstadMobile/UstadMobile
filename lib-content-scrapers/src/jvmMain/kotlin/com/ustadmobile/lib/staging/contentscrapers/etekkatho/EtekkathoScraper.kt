@@ -36,8 +36,8 @@ constructor(url: String, private val destinationDir: File) {
         try {
             val document = Jsoup.connect(scrapUrl.toString()).get()
 
-            var hrefLink = document.selectFirst("th:contains(Download) ~td a[href].btn").attr("href")
-            hrefLink = hrefLink.replace(" ".toRegex(), "_")
+            var hrefLink = document.selectFirst("th:contains(Download) ~td a[href].btn")?.attr("href")
+            hrefLink = hrefLink?.replace(" ".toRegex(), "_")
 
             val contentUrl = URL(scrapUrl, hrefLink)
             conn = contentUrl.openConnection() as HttpURLConnection

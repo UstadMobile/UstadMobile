@@ -13,6 +13,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import junit.framework.Assert.assertEquals
@@ -45,7 +46,7 @@ class ContentEntryEdit2PresenterTest {
 
     private lateinit var container: Container
 
-    private lateinit var contentEntry: ContentEntryWithLanguage
+    private lateinit var contentEntry: ContentEntryWithBlockAndLanguage
 
     private val parentUid: Long = 12345678L
 
@@ -97,11 +98,6 @@ class ContentEntryEdit2PresenterTest {
             bind<ContentJobManager>() with singleton {
                 contentJobManager
             }
-            bind<Json>() with singleton {
-                Json {
-                    encodeDefaults = true
-                }
-            }
         }
 
         db = di.directActiveDbInstance()
@@ -134,14 +130,15 @@ class ContentEntryEdit2PresenterTest {
         }
     }
 
-    private fun createMockEntryWithLanguage(): ContentEntryWithLanguage {
+    private fun createMockEntryWithLanguage(): ContentEntryWithBlockAndLanguage {
         val language = Language()
         language.iso_639_2_standard = "en"
         language.langUid = 23
-        val content = ContentEntryWithLanguage()
+        val content = ContentEntryWithBlockAndLanguage()
         content.title = "Dummy Title"
         content.description = "Dummy description"
         content.licenseName = "Dummy Licence Name"
+        content.sourceUrl = "content://dummy"
         content.licenseType = 1
         content.leaf = true
         content.language = language
@@ -164,14 +161,14 @@ class ContentEntryEdit2PresenterTest {
             mockLifecycleOwner, di)
 
         presenter.onCreate(null)
-        val initialEntry = mockView.captureLastEntityValue()
+        mockView.captureLastEntityValue()
+
         runBlocking{
-            presenter.handleFileSelection("content://dummy")
             presenter.handleClickSave(contentEntry)
         }
 
 
-        argumentCaptor<ContentEntryWithLanguage>().apply {
+        argumentCaptor<ContentEntryWithBlockAndLanguage>().apply {
             verifyBlocking(mockEntryDao, timeout(5000).atLeastOnce()) {
                 insertAsync(capture())
             }
@@ -196,7 +193,7 @@ class ContentEntryEdit2PresenterTest {
         mockView.captureLastEntityValue()
         presenter.handleClickSave(contentEntry)
 
-        argumentCaptor<ContentEntryWithLanguage>().apply {
+        argumentCaptor<ContentEntryWithBlockAndLanguage>().apply {
             verifyBlocking(mockEntryDao, timeout(5000)) {
                 insertAsync(capture())
             }
@@ -205,7 +202,6 @@ class ContentEntryEdit2PresenterTest {
 
         verifyBlocking(contentJobManager, times(0)) {
             enqueueContentJob(any(), any())
-            //queueImportContentFromFile(eq("content://Dummy"), any(), any(), eq(ContainerImportJob.Companion.CLIENT_IMPORT_MODE), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
         }
     }
 
@@ -220,13 +216,12 @@ class ContentEntryEdit2PresenterTest {
         presenter.onCreate(null)
         val entrySetOnView = mockView.captureLastEntityValue()
         runBlocking{
-            presenter.handleFileSelection("content://dummy")
             entrySetOnView!!.title = "Updated Title"
             presenter.handleClickSave(entrySetOnView)
         }
 
 
-        argumentCaptor<ContentEntryWithLanguage>().apply {
+        argumentCaptor<ContentEntryWithBlockAndLanguage>().apply {
             verifyBlocking(mockEntryDao, timeout(5000)) {
                 updateAsync(capture())
             }
@@ -235,7 +230,6 @@ class ContentEntryEdit2PresenterTest {
 
         verifyBlocking(contentJobManager, timeout(timeoutInMill)) {
             enqueueContentJob(any(), any())
-            //queueImportContentFromFile(eq("content://Dummy"), any(), any(),eq(ContainerImportJob.Companion.CLIENT_IMPORT_MODE), eq(mapOf("compress" to true.toString(), "dimensions" to "0x0")))
         }
 
     }

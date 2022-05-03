@@ -6,7 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.view.ext.createListItemWithIconAndTitle
+import com.ustadmobile.view.ext.renderListItemWithIconAndTitle
 import react.RBuilder
 
 class LeavingReasonListComponent(props: UmProps): UstadListComponent<LeavingReason, LeavingReason>(props),
@@ -16,9 +16,6 @@ class LeavingReasonListComponent(props: UmProps): UstadListComponent<LeavingReas
 
     override val displayTypeRepo: Any?
         get() = dbRepo?.leavingReasonDao
-
-    override val viewNames: List<String>
-        get() = listOf(LeavingReasonListView.VIEW_NAME)
 
     override val listPresenter: UstadListPresenter<*, in LeavingReason>?
         get() = mPresenter
@@ -34,7 +31,7 @@ class LeavingReasonListComponent(props: UmProps): UstadListComponent<LeavingReas
     }
 
     override fun RBuilder.renderListItem(item: LeavingReason) {
-        createListItemWithIconAndTitle("question_mark", item.leavingReasonTitle ?: "")
+        renderListItemWithIconAndTitle("question_mark", item.leavingReasonTitle ?: "")
     }
 
     override fun handleClickEntry(entry: LeavingReason) {

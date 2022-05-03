@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.DiscussionTopic"/>
+        <import type="com.ustadmobile.core.util.TreeOneToManyJoinEditListener"/>
+
+        <variable
+            name="discussionTopic"
+            type="DiscussionTopic" />
+
+        <variable
+            name="mPresenter"
+            type="com.ustadmobile.core.controller.CourseDiscussionEditPresenter" />
+
+
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="@{() -> mPresenter.handleClickTopic(discussionTopic)}"
+        android:background="?attr/selectableItemBackground"
+        >
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_discussion_topic_simple_draggable_draggable_iv"
+            android:layout_width="48dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:layout_marginStart="32dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="@dimen/dimen_8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_menu_white_24dp"
+            app:tint="?colorOnIconTint" />
+
+        <!-- Line 1-->
+        <TextView
+            android:id="@+id/item_schedule_line1_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_16dp"
+            android:layout_marginBottom="16dp"
+            android:text="@{discussionTopic.discussionTopicTitle}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/item_schedule_secondary_menu_imageview"
+            app:layout_constraintStart_toEndOf="@+id/item_discussion_topic_simple_draggable_draggable_iv"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Topic 1" />
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_schedule_secondary_menu_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/delete"
+            android:onClick="@{() -> mPresenter.handleClickDeleteTopic(discussionTopic)}"
+            android:padding="@dimen/dimen_16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_delete_black_24dp"
+            app:tint="?colorOnIconTint" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -74,7 +74,7 @@ open class UstadApp : Application(), DIAware {
         import(commonJvmDiModule)
 
         bind<UstadMobileSystemImpl>() with singleton {
-            UstadMobileSystemImpl.instance
+            UstadMobileSystemImpl()
         }
 
         bind<UstadAccountManager>() with singleton {
@@ -103,12 +103,6 @@ open class UstadApp : Application(), DIAware {
                     val networkManager: NetworkManagerBle = di.direct.instance()
                     it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
                 }
-        }
-
-        bind<Json>() with singleton {
-            Json {
-                encodeDefaults = true
-            }
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
@@ -289,6 +283,12 @@ open class UstadApp : Application(), DIAware {
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
                     .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
                     .build())
+        }
+
+        bind<Json>() with singleton {
+            Json {
+                encodeDefaults = true
+            }
         }
     }
 
