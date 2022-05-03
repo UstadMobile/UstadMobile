@@ -1,19 +1,28 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.ustadmobile.core.contentjob.ContentJobProcessContext
+import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import org.junit.rules.TemporaryFolder
+import org.kodein.di.DI
 
 class ContainerDownloadTestCommon {
 
-    class ContainerDownloadTestContext(
-        val container: Container,
-        val contentEntry: ContentEntry
-    )
-
     companion object {
+
+        fun makeContentJobProcessContext(
+            temporaryFolder: TemporaryFolder,
+            db: UmAppDatabase,
+            di: DI
+        ) : ContentJobProcessContext {
+            return ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
+                temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
+                DummyContentJobItemTransactionRunner(db), di)
+        }
 
         fun makeDownloadJobAndJobItem(
             contentEntry: ContentEntry,

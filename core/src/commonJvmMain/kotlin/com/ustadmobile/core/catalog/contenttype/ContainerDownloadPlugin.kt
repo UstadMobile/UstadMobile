@@ -179,8 +179,8 @@ class ContainerDownloadPlugin(
                     it.toRetrieverRequest(endpoint, containerDownloadDir)
                 }.distinctBy { it.originUrl }
 
-                val pendingEntries : MutableList<ContainerEntryWithContainerEntryFile> =
-                    concurrentSafeListOf(*entriesToDownload.toTypedArray())
+                val downloadedEntries : MutableList<ContainerEntryWithContainerEntryFile> =
+                    concurrentSafeListOf()
 
                 //When Retriever tells us a particular entry was completed,
                 // write the ContainerEntryFile to disk
@@ -199,22 +199,27 @@ class ContainerDownloadPlugin(
                                 .entriesWithoutMatchingFile.firstOrNull {
                                     it.containerEntryFile?.cefIntegrity == completedIntegrity
                                 }
-                            val completedEntryFile = completedEntry?.containerEntryFile
 
-                            if (completedEntryFile == null) {
-                                Napier.w("$logPrefix Retriever completed an entry, but can't find it")
+                            val completedEntryFile = completedEntry?.containerEntryFile
+                            val completedMd5 = completedEntryFile?.cefMd5
+                            if (completedEntryFile == null || completedMd5 == null) {
+                                Napier.w("$logPrefix Retriever completed an entry, but can't find it or md5")
                                 return
                             }
 
+
+                            completedEntryFile.cefPath = File(containerDownloadDir,
+                                completedMd5.base64EncodedToHexString()).absolutePath
                             //write to disk
                             val jsonFileName = completedEntryFile.cefMd5
                                 ?.base64EncodedToHexString() + FILE_EXTENSION_CE_JSON
                             val entryFileJson = json.encodeToString(ContainerEntryFile.serializer(),
                                 completedEntryFile)
                             File(containerDownloadDir, jsonFileName).writeText(entryFileJson)
-                            pendingEntries.removeAll {
-                                it.containerEntryFile?.cefIntegrity == completedIntegrity
-                            }
+                            downloadedEntries += completedEntry
+                        }else if(retrieverStatusEvent.status == Retriever.STATUS_FAILED) {
+                            Napier.e("$logPrefix Retriever failure on $retrieverStatusEvent.url",
+                                retrieverStatusEvent.exception)
                         }
 
                     }
@@ -225,10 +230,15 @@ class ContainerDownloadPlugin(
                 }else {
                     retriever.retrieve(retrieverRequests, retrieverListener)
 
+                    val downloadedMd5s = downloadedEntries.mapNotNull { it.containerEntryFile?.cefMd5 }
+                    val pendingEntries = entriesToDownload.filter {
+                        it.containerEntryFile?.cefMd5 !in downloadedMd5s
+                    }
+
                     if(pendingEntries.isNotEmpty())
                         throw IOException("${logPrefix }retriever.retrieve was called, " +
                             "but not everything was downloaded. Pending = " +
-                            pendingEntries.joinToString { it.cePath ?: "?" } )
+                            pendingEntries.joinToString { "${it.cePath} (${it.containerEntryFile?.cefMd5})" } )
 
                     JobStatus.COMPLETE
                 }

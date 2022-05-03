@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 103,
-    "identityHash": "5e9d04645b5feb24c488f344eb9e6a4c",
+    "identityHash": "e5c97f371ae6353842bde7d880afb80e",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -3010,7 +3010,7 @@
       },
       {
         "tableName": "ContainerEntryFile",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cefUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cefMd5` TEXT, `cefPath` TEXT, `ceTotalSize` INTEGER NOT NULL, `ceCompressedSize` INTEGER NOT NULL, `compression` INTEGER NOT NULL, `lastModified` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cefUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cefMd5` TEXT, `cefPath` TEXT, `ceTotalSize` INTEGER NOT NULL, `ceCompressedSize` INTEGER NOT NULL, `compression` INTEGER NOT NULL, `lastModified` INTEGER NOT NULL, `cefIntegrity` TEXT, `cefCrc32` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cefUid",
@@ -3051,6 +3051,18 @@
           {
             "fieldPath": "lastModified",
             "columnName": "lastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cefIntegrity",
+            "columnName": "cefIntegrity",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cefCrc32",
+            "columnName": "cefCrc32",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -11021,7 +11033,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5e9d04645b5feb24c488f344eb9e6a4c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e5c97f371ae6353842bde7d880afb80e')"
     ]
   }
 }

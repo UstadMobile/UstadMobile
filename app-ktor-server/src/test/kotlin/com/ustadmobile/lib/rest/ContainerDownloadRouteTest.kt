@@ -89,7 +89,7 @@ class ContainerDownloadRouteTest {
 
         nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
 
-        db = DatabaseBuilder.databaseBuilder(Any() ,UmAppDatabase::class, "UmAppDatabase")
+        db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
             .build()
         db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
         val attachmentsDir = temporaryFolder.newFolder()

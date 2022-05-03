@@ -167,13 +167,6 @@ class UstadTestRule(
                 }
             }
 
-            bind<ClientId>(tag = UstadMobileSystemCommon.TAG_CLIENT_ID) with scoped(EndpointScope.Default).singleton {
-                val repo: UmAppDatabase by di.on(Endpoint(context.url)).instance(tag = TAG_REPO)
-                val nodeId = (repo as? DoorDatabaseRepository)?.config?.nodeId
-                    ?: throw IllegalStateException("Could not open repo for endpoint ${context.url}")
-                ClientId(nodeId.toInt())
-            }
-
             bind<NetworkManagerBle>() with singleton {
                 mock {
                     on { connectivityStatus }.thenReturn(mock {})

@@ -206,9 +206,8 @@ class ContainerDownloadPluginTest {
     }
 
     private fun makeProcessContext() : ContentJobProcessContext{
-        return ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
-            temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            DummyContentJobItemTransactionRunner(clientDb), clientDi)
+        return ContainerDownloadTestCommon.makeContentJobProcessContext(temporaryFolder,
+            clientDb, clientDi)
     }
 
     @Suppress("UNCHECKED_CAST") //No way to avoid this on a mock invocation
