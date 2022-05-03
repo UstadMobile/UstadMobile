@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
         unique = false)])
 data class ContentJobItem(
 
-        @PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = true)
     var cjiUid: Long = 0,
 
     var cjiJobUid: Long = 0,

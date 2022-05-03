@@ -25,10 +25,11 @@ class ContainerDownloadTestCommon {
         }
 
         fun makeDownloadJobAndJobItem(
-            contentEntry: ContentEntry,
+            contentEntry: ContentEntry?,
             container: Container?,
             downloadDestDir: File,
             db: UmAppDatabase,
+            sourceUriVal: String? = null,
         ) : ContentJobItemAndContentJob {
             return runBlocking {
                 ContentJobItemAndContentJob().apply {
@@ -38,13 +39,14 @@ class ContainerDownloadTestCommon {
                         this.cjUid = db.contentJobDao.insertAsync(this)
                     }
                     contentJobItem = ContentJobItem().apply {
-                        this.cjiContentEntryUid = contentEntry.contentEntryUid
+                        this.cjiContentEntryUid = contentEntry?.contentEntryUid ?: 0L
                         if(container != null) {
                             this.cjiContainerUid = container.containerUid
                             this.cjiItemTotal = container.fileSize
                         }
 
                         this.cjiJobUid = contentJob!!.cjUid
+                        this.sourceUri = sourceUriVal
                         this.cjiUid = db.contentJobItemDao.insertJobItem(this)
                     }
                 }

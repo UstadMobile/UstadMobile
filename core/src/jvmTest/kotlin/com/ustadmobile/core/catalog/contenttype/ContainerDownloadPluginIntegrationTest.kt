@@ -254,65 +254,6 @@ class ContainerDownloadPluginIntegrationTest {
     }
 
     @Test
-    fun givenValidSourceUri_whenExtractMetadataCalled_thenShouldReturnContentEntry() {
-        val endpointUrl = mockWebServer.url("/").toString()
-        val clientRepo: UmAppDatabase = clientDi.on(Endpoint(endpointUrl)).direct
-            .instance(tag = DoorTag.TAG_REPO)
-        val contentEntry = ContentEntry().apply {
-            title = "Hello World"
-            leaf = true
-            contentEntryUid = clientRepo.contentEntryDao.insert(this)
-        }
-
-
-        val containerDownloadContentJob = ContainerDownloadPlugin(Any(),
-            Endpoint(endpointUrl), clientDi)
-
-        val contentEntryDeepLink = contentEntry.toDeepLink(Endpoint(endpointUrl))
-
-        val metaDataExtracted = runBlocking {
-            containerDownloadContentJob.extractMetadata(
-                DoorUri.parse(contentEntryDeepLink), mock {  })
-        }
-
-        Assert.assertEquals("Content title matches", contentEntry.title,
-            metaDataExtracted?.entry?.title)
-    }
-
-    //Test to make sure that if the ContentJobItem has only the sourceUri that everything works as
-    //expected
-    @Test
-    fun givenValidSourceUri_whenProcessJobCalled_thenShouldSetContentEntryUidAndContainerUid() {
-        val siteUrl = mockWebServer.url("/").toString()
-
-        val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct.instance(tag = DoorTag.TAG_DB)
-
-        val mockListener = mock<ContentJobProgressListener> { }
-
-        val job = makeDownloadJobAndJobItem()
-
-        val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
-            temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
-            DummyContentJobItemTransactionRunner(clientDb), clientDi)
-
-
-        val downloadJob = ContainerDownloadPlugin(Any(), Endpoint(siteUrl), clientDi)
-        val result = runBlocking {  downloadJob.processJob(job, processContext, mockListener) }
-
-
-        Assert.assertEquals("Result is reported as successful", JobStatus.COMPLETE,
-            result.status)
-
-        serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
-
-        val contentJobItemInDb = clientDb.contentJobItemDao.findRootJobItemByJobId(job.contentJobItem?.cjiUid ?: 0L)
-        Assert.assertEquals("ContentEntryUid was set from sourceUri", contentEntry.contentEntryUid,
-            contentJobItemInDb?.cjiContentEntryUid)
-        Assert.assertEquals("ContainerUid was set to most recent container after looking up content entry",
-            container.containerUid, contentJobItemInDb?.cjiContainerUid)
-    }
-
-    @Test
     fun givenAllContainerEntryMd5sAlreadyPresent_whenDownloaded_thenShouldSucceed() {
         val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct
             .instance(tag = DoorTag.TAG_DB)

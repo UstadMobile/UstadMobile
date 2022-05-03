@@ -3,6 +3,7 @@ package com.ustadmobile.core.catalog.contenttype
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.catalog.contenttype.ContainerDownloadTestCommon.Companion.makeDownloadJobAndJobItem
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
+import com.ustadmobile.core.contentjob.ContentJobProgressListener
 import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -11,6 +12,9 @@ import com.ustadmobile.core.io.ext.FILE_EXTENSION_CE_JSON
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.core.util.ext.toDeepLink
+import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.retriever.Retriever
@@ -19,9 +23,11 @@ import com.ustadmobile.retriever.RetrieverStatusUpdateEvent
 import com.ustadmobile.retriever.fetcher.RetrieverListener
 import com.ustadmobile.retriever.io.FileChecksums
 import com.ustadmobile.retriever.io.parseIntegrity
+import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.Before
@@ -333,6 +339,61 @@ class ContainerDownloadPluginTest {
         containerEntriesList.forEach {  entry ->
             entry.assertIsMatchingInClientDb()
         }
+    }
+
+    @Test
+    fun givenValidSourceUri_whenExtractMetadataCalled_thenShouldReturnContentEntry() {
+        val clientRepo: UmAppDatabase = clientDi.on(endpoint).direct
+            .instance(tag = DoorTag.TAG_REPO)
+        val contentEntry = ContentEntry().apply {
+            title = "Hello World"
+            leaf = true
+            contentEntryUid = clientRepo.contentEntryDao.insert(this)
+        }
+
+
+        val containerDownloadContentJob = ContainerDownloadPlugin(Any(), endpoint, clientDi)
+
+        val contentEntryDeepLink = contentEntry.toDeepLink(endpoint)
+
+        val metaDataExtracted = runBlocking {
+            containerDownloadContentJob.extractMetadata(
+                DoorUri.parse(contentEntryDeepLink), mock {  })
+        }
+
+        Assert.assertEquals("Content title matches", contentEntry.title,
+            metaDataExtracted?.entry?.title)
+    }
+
+
+    //Test to make sure that if the ContentJobItem has only the sourceUri that everything works as
+    //expected
+    @Test
+    fun givenValidSourceUri_whenProcessJobCalled_thenShouldSetContentEntryUidAndContainerUid() {
+        val mockListener = mock<ContentJobProgressListener> { }
+
+        val job = makeDownloadJobAndJobItem(null, null,
+            temporaryFolder.newFolder(), clientDb, contentEntry.toDeepLink(endpoint))
+
+        mockRetriever.onRequestManifestAnswerWriteFile()
+        mockRetriever.onRetrieveContainerEntryFilesThenAnswer { Retriever.STATUS_SUCCESSFUL }
+
+        val processContext = ContentJobProcessContext(temporaryFolder.newFolder().toDoorUri(),
+            temporaryFolder.newFolder().toDoorUri(), params = mutableMapOf(),
+            DummyContentJobItemTransactionRunner(clientDb), clientDi)
+
+
+        val downloadJob = ContainerDownloadPlugin(Any(), endpoint, clientDi)
+        val result = runBlocking {  downloadJob.processJob(job, processContext, mockListener) }
+
+        Assert.assertEquals("Result is reported as successful", JobStatus.COMPLETE,
+            result.status)
+
+        val contentJobItemInDb = clientDb.contentJobItemDao.findRootJobItemByJobId(job.contentJobItem?.cjiUid ?: 0L)
+        Assert.assertEquals("ContentEntryUid was set from sourceUri", contentEntry.contentEntryUid,
+            contentJobItemInDb?.cjiContentEntryUid)
+        Assert.assertEquals("ContainerUid was set to most recent container after looking up content entry",
+            container.containerUid, contentJobItemInDb?.cjiContainerUid)
     }
 
     fun givenNoContainerAvailable_whenProcessJobCalled_thenNotDownloadAnythingAndFail() {
