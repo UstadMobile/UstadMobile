@@ -220,6 +220,12 @@ fun TextView.setDateWithRelativeTime(date: Long){
     text = if(date != 0L){DateUtils.getRelativeTimeSpanString(date)}else{""}
 }
 
+
+@BindingAdapter("firstString", "secondString")
+fun TextView.concatStrings(first: String, second: String){
+    text = "$first $second"
+}
+
 @BindingAdapter("dateUseSpinners")
 fun TextView.setDateUseSpinners(dateUseSpinners: Boolean) {
     setTag(R.id.tag_dateusespinner, dateUseSpinners)

@@ -103,6 +103,8 @@ interface UstadView {
 
         const val ARG_CLAZZ_ASSIGNMENT_UID = "clazzAssignmentUid"
 
+        const val ARG_SUBMITER_UID = "clazzAssignmentSubmitterUid"
+
         const val ARG_PERSON_UID = "personUid"
 
         const val ARG_NEXT = "next"

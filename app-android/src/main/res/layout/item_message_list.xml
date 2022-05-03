@@ -36,11 +36,30 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/item_message_list_person_pic"
+                app:imageForeignKey="@{message.messagePerson.personUid}"
+                app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
+                app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
+                tools:src="@drawable/ic_account_circle_black_24dp"
+                android:tint="?colorOnIconTint"
+                app:messageIconVisibility="@{message}"
+                android:layout_width="@dimen/dimen_40dp"
+                android:layout_height="@dimen/dimen_40dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:layout_marginBottom="@dimen/dimen_16dp"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:layout_marginEnd="@dimen/dimen_8dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+
             <TextView
                 android:id="@+id/item_comments_list_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
+                android:layout_marginStart="8dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="8dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
@@ -48,7 +67,7 @@
                 app:chatMessage="@{message}"
                 app:chatMessageOrientation="@{message}"
                 app:layout_constraintEnd_toStartOf="@+id/item_comments_list_line3_text"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/item_message_list_person_pic"
                 app:layout_constraintTop_toTopOf="parent"
                 app:loggedInPersonUid="@{loggedInPersonUid}"
                 app:loggedInPersonUidOrientation="@{loggedInPersonUid}"
@@ -62,7 +81,6 @@
                 android:layout_marginBottom="@dimen/dimen_16dp"
                 android:paddingStart="0dp"
                 android:paddingEnd="16dp"
-
                 app:chatMessageOrientation="@{message}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/item_comments_list_line3_text"

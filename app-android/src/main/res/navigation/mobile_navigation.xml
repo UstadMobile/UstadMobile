@@ -151,6 +151,19 @@
         android:name="com.ustadmobile.port.android.view.ModuleCourseBlockEditFragment" />
 
     <fragment
+        android:id="@+id/course_discussion_course_block_edit_dest"
+        android:name="com.ustadmobile.port.android.view.CourseDiscussionEditFragment" />
+
+  <fragment
+        android:id="@+id/course_discussion_topic_edit_dest"
+        android:name="com.ustadmobile.port.android.view.DiscussionTopicEditFragment" />
+
+<fragment
+        android:id="@+id/discussion_topic_detail_dest"
+        android:name="com.ustadmobile.port.android.view.DiscussionTopicDetailFragment" />
+
+
+    <fragment
         android:id="@+id/course_terminology_list_dest"
         android:name="com.ustadmobile.port.android.view.CourseTerminologyListFragment"/>
 
@@ -161,6 +174,18 @@
     <fragment
         android:id="@+id/clazz_assignment_edit_dest"
         android:name="com.ustadmobile.port.android.view.ClazzAssignmentEditFragment" />
+
+    <fragment
+        android:id="@+id/course_discussion_detail_dest"
+        android:name="com.ustadmobile.port.android.view.CourseDiscussionDetailFragment" />
+
+ <fragment
+        android:id="@+id/discussion_post_edit_dest"
+        android:name="com.ustadmobile.port.android.view.DiscussionPostEditFragment" />
+
+ <fragment
+        android:id="@+id/discussion_post_detail_dest"
+        android:name="com.ustadmobile.port.android.view.DiscussionPostDetailFragment" />
 
     <fragment
         android:id="@+id/clazz_assignment_detail_dest"

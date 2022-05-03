@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.DiscussionTopicListDetail"/>
+
+        <variable
+            name="discussionTopic"
+            type="DiscussionTopicListDetail" />
+
+        <variable
+            name="mPresenter"
+            type="com.ustadmobile.core.controller.CourseDiscussionDetailPresenter" />
+
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="@{() -> mPresenter.onClickTopic(discussionTopic)}"
+        android:background="?attr/selectableItemBackground"
+        >
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_discussion_topic_list_detail"
+            app:srcCompat="@drawable/ic_baseline_featured_play_list_24"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            app:tint="?colorOnIconTint"
+            android:layout_margin="@dimen/dimen_16dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <!-- Line 1-->
+        <TextView
+            android:id="@+id/item_schedule_line1_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_16dp"
+            android:text="@{discussionTopic.discussionTopicTitle}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_discussion_topic_list_detail"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Topic 1" />
+
+        <!-- Line 2-->
+        <TextView
+            android:id="@+id/item_schedule_line2_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            app:discussionTopicDetailText="@{discussionTopic}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/item_schedule_line1_text"
+            app:layout_constraintTop_toBottomOf="@+id/item_schedule_line1_text"
+            tools:text="Posts: 5, Last active: 17/April/2022" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
