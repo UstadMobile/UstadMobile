@@ -1298,4 +1298,13 @@
     <string name="connect">пайваст кунед</string>
     <string name="upload">Бор кунед</string>
     <string name="selected_file_summary">Интихобшуда</string>
+    <string name="drag_and_drop_or_click_to_add_file">Файлро интихоб набуда ба ҷои лозимӣ гузоред.</string>
+    <string name="course">Курс</string>
+    <string name="currently_enroled">Айниҳол ба қайд гирифташуда</string>
+    <string name="past_enrolments">Қайдшуда</string>
+    <string name="standard">Стандарт</string>
+    <string name="group_number" formatted="false">Гурӯҳ</string>
+    <string name="course_code">Рамзи дастрасӣ ба курс</string>
+    <string name="edit_group">Муҳаррирон</string>
+    <string name="extra_active_tab_warning">Якбора бо як чанд ҷадвал кор кардан ғайри имкон аст, якеро интихоб намоед.</string>
 </resources>
