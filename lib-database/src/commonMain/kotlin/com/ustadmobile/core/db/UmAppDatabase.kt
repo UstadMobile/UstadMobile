@@ -3317,6 +3317,186 @@ DELETE FROM ContainerEntryFile
                     " CREATE TRIGGER ch_upd_101 AFTER UPDATE ON Report BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 101 AS chTableId, NEW.reportUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 101 AND chEntityPk = NEW.reportUid); END "
                 stmtList +=
                     " CREATE TRIGGER ch_del_101 AFTER DELETE ON Report BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 101 AS chTableId, OLD.reportUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 101 AND chEntityPk = OLD.reportUid); END "
+            }else {
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS Chat (  chatStartDate  BIGINT  NOT NULL , chatTitle  TEXT , chatGroup  BOOL  NOT NULL , chatLct  BIGINT  NOT NULL , chatUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS ChatMember (  chatMemberChatUid  BIGINT  NOT NULL , chatMemberPersonUid  BIGINT  NOT NULL , chatMemberJoinedDate  BIGINT  NOT NULL , chatMemberLeftDate  BIGINT  NOT NULL , chatMemberLct  BIGINT  NOT NULL , chatMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS ChatReplicate (  chatPk  BIGINT  NOT NULL , chatVersionId  BIGINT  NOT NULL  DEFAULT 0 , chatDestination  BIGINT  NOT NULL , chatPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (chatPk, chatDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_ChatReplicate_chatPk_chatDestination_chatVersionId ON ChatReplicate (chatPk, chatDestination, chatVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_ChatReplicate_chatDestination_chatPending ON ChatReplicate (chatDestination, chatPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS ChatMemberReplicate (  chatMemberPk  BIGINT  NOT NULL , chatMemberVersionId  BIGINT  NOT NULL  DEFAULT 0 , chatMemberDestination  BIGINT  NOT NULL , chatMemberPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (chatMemberPk, chatMemberDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_ChatMemberReplicate_chatMemberPk_chatMemberDestination_chatMemberVersionId ON ChatMemberReplicate (chatMemberPk, chatMemberDestination, chatMemberVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_ChatMemberReplicate_chatMemberDestination_chatMemberPending ON ChatMemberReplicate (chatMemberDestination, chatMemberPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseAssignmentMark (  camAssignmentUid  BIGINT  NOT NULL , camSubmitterUid  BIGINT  NOT NULL , camMark  FLOAT  NOT NULL , camPenalty  INTEGER  NOT NULL , camLct  BIGINT  NOT NULL , camUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseAssignmentMarkReplicate (  camPk  BIGINT  NOT NULL , camVersionId  BIGINT  NOT NULL  DEFAULT 0 , camDestination  BIGINT  NOT NULL , camPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (camPk, camDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_CourseAssignmentMarkReplicate_camPk_camDestination_camVersionId ON CourseAssignmentMarkReplicate (camPk, camDestination, camVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_CourseAssignmentMarkReplicate_camDestination_camPending ON CourseAssignmentMarkReplicate (camDestination, camPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseAssignmentSubmission (  casAssignmentUid  BIGINT  NOT NULL , casSubmitterUid  BIGINT  NOT NULL , casSubmitterPersonUid  BIGINT  NOT NULL , casText  TEXT , casType  INTEGER  NOT NULL , casTimestamp  BIGINT  NOT NULL , casUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseAssignmentSubmissionAttachment (  casaSubmissionUid  BIGINT  NOT NULL , casaMimeType  TEXT , casaUri  TEXT , casaMd5  TEXT , casaSize  INTEGER  NOT NULL , casaTimestamp  BIGINT  NOT NULL , casaUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseAssignmentSubmissionAttachmentReplicate (  casaPk  BIGINT  NOT NULL , casaVersionId  BIGINT  NOT NULL  DEFAULT 0 , casaDestination  BIGINT  NOT NULL , casaPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (casaPk, casaDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_CourseAssignmentSubmissionAttachmentReplicate_casaPk_casaDestination_casaVersionId ON CourseAssignmentSubmissionAttachmentReplicate (casaPk, casaDestination, casaVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_CourseAssignmentSubmissionAttachmentReplicate_casaDestination_casaPending ON CourseAssignmentSubmissionAttachmentReplicate (casaDestination, casaPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseAssignmentSubmissionReplicate (  casPk  BIGINT  NOT NULL , casVersionId  BIGINT  NOT NULL  DEFAULT 0 , casDestination  BIGINT  NOT NULL , casPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (casPk, casDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_CourseAssignmentSubmissionReplicate_casPk_casDestination_casVersionId ON CourseAssignmentSubmissionReplicate (casPk, casDestination, casVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_CourseAssignmentSubmissionReplicate_casDestination_casPending ON CourseAssignmentSubmissionReplicate (casDestination, casPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseBlock (  cbType  INTEGER  NOT NULL , cbIndentLevel  INTEGER  NOT NULL , cbModuleParentBlockUid  BIGINT  NOT NULL , cbTitle  TEXT , cbDescription  TEXT , cbCompletionCriteria  INTEGER  NOT NULL , cbHideUntilDate  BIGINT  NOT NULL , cbDeadlineDate  BIGINT  NOT NULL , cbLateSubmissionPenalty  INTEGER  NOT NULL , cbGracePeriodDate  BIGINT  NOT NULL , cbMaxPoints  INTEGER  NOT NULL , cbMinPoints  INTEGER  NOT NULL , cbIndex  INTEGER  NOT NULL , cbClazzUid  BIGINT  NOT NULL , cbActive  BOOL  NOT NULL , cbHidden  BOOL  NOT NULL , cbEntityUid  BIGINT  NOT NULL , cbLct  BIGINT  NOT NULL , cbUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                stmtList += "CREATE INDEX index_CourseBlock_cbClazzUid ON CourseBlock (cbClazzUid)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseBlockReplicate (  cbPk  BIGINT  NOT NULL , cbVersionId  BIGINT  NOT NULL  DEFAULT 0 , cbDestination  BIGINT  NOT NULL , cbPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (cbPk, cbDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_CourseBlockReplicate_cbPk_cbDestination_cbVersionId ON CourseBlockReplicate (cbPk, cbDestination, cbVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_CourseBlockReplicate_cbDestination_cbPending ON CourseBlockReplicate (cbDestination, cbPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseDiscussion (  courseDiscussionTitle  TEXT , courseDiscussionDesc  TEXT , courseDiscussionClazzUid  BIGINT  NOT NULL , courseDiscussionActive  BOOL  NOT NULL , courseDiscussionLct  BIGINT  NOT NULL , courseDiscussionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseDiscussionReplicate (  courseDiscussionPk  BIGINT  NOT NULL , courseDiscussionVersionId  BIGINT  NOT NULL  DEFAULT 0 , courseDiscussionDestination  BIGINT  NOT NULL , courseDiscussionPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (courseDiscussionPk, courseDiscussionDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_CourseDiscussionReplicate_courseDiscussionPk_courseDiscussionDestination_courseDiscussionVersionId ON CourseDiscussionReplicate (courseDiscussionPk, courseDiscussionDestination, courseDiscussionVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_CourseDiscussionReplicate_courseDiscussionDestination_courseDiscussionPending ON CourseDiscussionReplicate (courseDiscussionDestination, courseDiscussionPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseGroupMember (  cgmSetUid  BIGINT  NOT NULL , cgmGroupNumber  INTEGER  NOT NULL , cgmPersonUid  BIGINT  NOT NULL , cgmLct  BIGINT  NOT NULL , cgmUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseGroupMemberReplicate (  cgmPk  BIGINT  NOT NULL , cgmVersionId  BIGINT  NOT NULL  DEFAULT 0 , cgmDestination  BIGINT  NOT NULL , cgmPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (cgmPk, cgmDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_CourseGroupMemberReplicate_cgmPk_cgmDestination_cgmVersionId ON CourseGroupMemberReplicate (cgmPk, cgmDestination, cgmVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_CourseGroupMemberReplicate_cgmDestination_cgmPending ON CourseGroupMemberReplicate (cgmDestination, cgmPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseGroupSet (  cgsName  TEXT , cgsTotalGroups  INTEGER  NOT NULL , cgsActive  BOOL  NOT NULL , cgsClazzUid  BIGINT  NOT NULL , cgsLct  BIGINT  NOT NULL , cgsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                stmtList += "CREATE INDEX index_CourseGroupSet_cgsClazzUid ON CourseGroupSet (cgsClazzUid)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseGroupSetReplicate (  cgsPk  BIGINT  NOT NULL , cgsVersionId  BIGINT  NOT NULL  DEFAULT 0 , cgsDestination  BIGINT  NOT NULL , cgsPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (cgsPk, cgsDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_CourseGroupSetReplicate_cgsPk_cgsDestination_cgsVersionId ON CourseGroupSetReplicate (cgsPk, cgsDestination, cgsVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_CourseGroupSetReplicate_cgsDestination_cgsPending ON CourseGroupSetReplicate (cgsDestination, cgsPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CoursePicture (  coursePictureClazzUid  BIGINT  NOT NULL , coursePictureMasterCsn  BIGINT  NOT NULL , coursePictureLocalCsn  BIGINT  NOT NULL , coursePictureLastChangedBy  INTEGER  NOT NULL , coursePictureLct  BIGINT  NOT NULL , coursePictureUri  TEXT , coursePictureMd5  TEXT , coursePictureFileSize  INTEGER  NOT NULL , coursePictureTimestamp  BIGINT  NOT NULL , coursePictureMimeType  TEXT , coursePictureActive  BOOL  NOT NULL , coursePictureUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CoursePictureReplicate (  cpPk  BIGINT  NOT NULL , cpVersionId  BIGINT  NOT NULL  DEFAULT 0 , cpDestination  BIGINT  NOT NULL , cpPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (cpPk, cpDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_CoursePictureReplicate_cpPk_cpDestination_cpVersionId ON CoursePictureReplicate (cpPk, cpDestination, cpVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_CoursePictureReplicate_cpDestination_cpPending ON CoursePictureReplicate (cpDestination, cpPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseTerminology (  ctTitle  TEXT , ctTerminology  TEXT , ctLct  BIGINT  NOT NULL , ctUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS CourseTerminologyReplicate (  ctPk  BIGINT  NOT NULL , ctVersionId  BIGINT  NOT NULL  DEFAULT 0 , ctDestination  BIGINT  NOT NULL , ctPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (ctPk, ctDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_CourseTerminologyReplicate_ctPk_ctDestination_ctVersionId ON CourseTerminologyReplicate (ctPk, ctDestination, ctVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_CourseTerminologyReplicate_ctDestination_ctPending ON CourseTerminologyReplicate (ctDestination, ctPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS DiscussionPost (  discussionPostTitle  TEXT , discussionPostMessage  TEXT , discussionPostStartDate  BIGINT  NOT NULL , discussionPostDiscussionTopicUid  BIGINT  NOT NULL , discussionPostVisible  BOOL  NOT NULL , discussionPostArchive  BOOL  NOT NULL , discussionPostStartedPersonUid  BIGINT  NOT NULL , discussionPostClazzUid  BIGINT  NOT NULL , discussionPostLct  BIGINT  NOT NULL , discussionPostUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS DiscussionPostReplicate (  discussionPostPk  BIGINT  NOT NULL , discussionPostVersionId  BIGINT  NOT NULL  DEFAULT 0 , discussionPostDestination  BIGINT  NOT NULL , discussionPostPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (discussionPostPk, discussionPostDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_DiscussionPostReplicate_discussionPostPk_discussionPostDestination_discussionPostVersionId ON DiscussionPostReplicate (discussionPostPk, discussionPostDestination, discussionPostVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_DiscussionPostReplicate_discussionPostDestination_discussionPostPending ON DiscussionPostReplicate (discussionPostDestination, discussionPostPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS DiscussionTopic (  discussionTopicTitle  TEXT , discussionTopicDesc  TEXT , discussionTopicStartDate  BIGINT  NOT NULL , discussionTopicCourseDiscussionUid  BIGINT  NOT NULL , discussionTopicVisible  BOOL  NOT NULL , discussionTopicArchive  BOOL  NOT NULL , discussionTopicIndex  INTEGER  NOT NULL , discussionTopicClazzUid  BIGINT  NOT NULL , discussionTopicLct  BIGINT  NOT NULL , discussionTopicUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS DiscussionTopicReplicate (  discussionTopicPk  BIGINT  NOT NULL , discussionTopicVersionId  BIGINT  NOT NULL  DEFAULT 0 , discussionTopicDestination  BIGINT  NOT NULL , discussionTopicPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (discussionTopicPk, discussionTopicDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_DiscussionTopicReplicate_discussionTopicPk_discussionTopicDestination_discussionTopicVersionId ON DiscussionTopicReplicate (discussionTopicPk, discussionTopicDestination, discussionTopicVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_DiscussionTopicReplicate_discussionTopicDestination_discussionTopicPending ON DiscussionTopicReplicate (discussionTopicDestination, discussionTopicPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS Message (  messageSenderPersonUid  BIGINT  NOT NULL , messageTableId  INTEGER  NOT NULL , messageEntityUid  BIGINT  NOT NULL , messageText  TEXT , messageTimestamp  BIGINT  NOT NULL , messageClazzUid  BIGINT  NOT NULL , messageLct  BIGINT  NOT NULL , messageUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS MessageRead (  messageReadPersonUid  BIGINT  NOT NULL , messageReadMessageUid  BIGINT  NOT NULL , messageReadEntityUid  BIGINT  NOT NULL , messageReadLct  BIGINT  NOT NULL , messageReadUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS MessageReadReplicate (  messageReadPk  BIGINT  NOT NULL , messageReadVersionId  BIGINT  NOT NULL  DEFAULT 0 , messageReadDestination  BIGINT  NOT NULL , messageReadPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (messageReadPk, messageReadDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_MessageReadReplicate_messageReadPk_messageReadDestination_messageReadVersionId ON MessageReadReplicate (messageReadPk, messageReadDestination, messageReadVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_MessageReadReplicate_messageReadDestination_messageReadPending ON MessageReadReplicate (messageReadDestination, messageReadPending)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS MessageReplicate (  messagePk  BIGINT  NOT NULL , messageVersionId  BIGINT  NOT NULL  DEFAULT 0 , messageDestination  BIGINT  NOT NULL , messagePending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (messagePk, messageDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_MessageReplicate_messagePk_messageDestination_messageVersionId ON MessageReplicate (messagePk, messageDestination, messageVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_MessageReplicate_messageDestination_messagePending ON MessageReplicate (messageDestination, messagePending)"
+
+
+                //Destructive migration
+                stmtList += "DROP TABLE ClazzAssignment"
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS ClazzAssignment (  caTitle  TEXT , caDescription  TEXT , caGroupUid  BIGINT  NOT NULL  DEFAULT 0 , caActive  BOOL  NOT NULL , caClassCommentEnabled  BOOL  NOT NULL , caPrivateCommentsEnabled  BOOL  NOT NULL  DEFAULT true, caCompletionCriteria  INTEGER  NOT NULL  DEFAULT 100 , caRequireFileSubmission  BOOL  NOT NULL  DEFAULT true, caFileType  INTEGER  NOT NULL  DEFAULT 0 , caSizeLimit  INTEGER  NOT NULL  DEFAULT 50 , caNumberOfFiles  INTEGER  NOT NULL  DEFAULT 1 , caSubmissionPolicy  INTEGER  NOT NULL  DEFAULT 1 , caMarkingType  INTEGER  NOT NULL  DEFAULT 1 , caRequireTextSubmission  BOOL  NOT NULL  DEFAULT true, caTextLimitType  INTEGER  NOT NULL  DEFAULT 1 , caTextLimit  INTEGER  NOT NULL  DEFAULT 500 , caXObjectUid  BIGINT  NOT NULL  DEFAULT 0 , caClazzUid  BIGINT  NOT NULL , caLocalChangeSeqNum  BIGINT  NOT NULL , caMasterChangeSeqNum  BIGINT  NOT NULL , caLastChangedBy  INTEGER  NOT NULL , caLct  BIGINT  NOT NULL , caUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                stmtList += "CREATE INDEX index_ClazzAssignment_caClazzUid ON ClazzAssignment (caClazzUid)"
+
+                stmtList += "DROP TABLE ClazzAssignmentContentJoin"
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin (  cacjContentUid  BIGINT  NOT NULL , cacjAssignmentUid  BIGINT  NOT NULL , cacjActive  BOOL  NOT NULL , cacjWeight  INTEGER  NOT NULL  DEFAULT 0 , cacjMCSN  BIGINT  NOT NULL , cacjLCSN  BIGINT  NOT NULL , cacjLCB  INTEGER  NOT NULL , cacjLct  BIGINT  NOT NULL , cacjUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+
+
+                stmtList += "DROP TABLE ClazzAssignmentRollUp"
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS ClazzAssignmentRollUp (  cachePersonUid  BIGINT  NOT NULL , cacheContentEntryUid  BIGINT  NOT NULL , cacheClazzAssignmentUid  BIGINT  NOT NULL , cacheStudentScore  INTEGER  NOT NULL , cacheMaxScore  INTEGER  NOT NULL , cacheFinalWeightScoreWithPenalty  FLOAT  NOT NULL  DEFAULT 0 , cacheWeight  INTEGER  NOT NULL  DEFAULT 0 , cacheProgress  INTEGER  NOT NULL , cacheContentComplete  BOOL  NOT NULL , cacheSuccess  SMALLINT  NOT NULL , cachePenalty  INTEGER  NOT NULL , lastCsnChecked  BIGINT  NOT NULL , cacheUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                stmtList +=
+                    "CREATE UNIQUE INDEX index_ClazzAssignmentRollUp_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid ON ClazzAssignmentRollUp (cachePersonUid, cacheContentEntryUid, cacheClazzAssignmentUid)"
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS Comments (  commentsText  TEXT , commentsEntityType  INTEGER  NOT NULL , commentsEntityUid  INTEGER  NOT NULL , commentsPublic  INTEGER  NOT NULL , commentsStatus  INTEGER  NOT NULL , commentsPersonUid  INTEGER  NOT NULL , commentsToPersonUid  INTEGER  NOT NULL , commentSubmitterUid  INTEGER  NOT NULL , commentsFlagged  INTEGER  NOT NULL , commentsInActive  INTEGER  NOT NULL , commentsDateTimeAdded  INTEGER  NOT NULL , commentsDateTimeUpdated  INTEGER  NOT NULL , commentsMCSN  INTEGER  NOT NULL , commentsLCSN  INTEGER  NOT NULL , commentsLCB  INTEGER  NOT NULL , commentsLct  INTEGER  NOT NULL , commentsUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )"
+
+
+                //Default policy is open
+                stmtList += "ALTER TABLE Clazz ADD COLUMN clazzEnrolmentPolicy INTEGER NOT NULL DEFAULT 102 "
+                //Default use English terminology
+                stmtList += "ALTER TABLE Clazz ADD COLUMN clazzTerminologyUid BIGINT NOT NULL DEFAULT ${('e'.code shl(8)) + 'n'.code}"
+
+                stmtList += "ALTER TABLE XObjectEntity ADD COLUMN objectStatementRefUid INTEGER NOT NULL DEFAULT 0"
+
+
+
+
             }
 
             stmtList
