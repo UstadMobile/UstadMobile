@@ -133,4 +133,5 @@ targetCompatibility = "8"
 
 if(findProperty("ktorbundleproductionjs") == "true") {
     //Required to ensure that JS resources are ready before any other task copies them etc.
+    processResources.dependsOn(":app-react:build")
 }
