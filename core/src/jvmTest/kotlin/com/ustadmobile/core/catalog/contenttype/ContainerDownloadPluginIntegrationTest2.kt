@@ -43,6 +43,7 @@ import org.mockito.kotlin.mock
 import org.junit.Assert
 import javax.naming.InitialContext
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.retriever.util.findAvailableRandomPort
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlin.system.measureTimeMillis
@@ -98,7 +99,8 @@ class ContainerDownloadPluginIntegrationTest2 {
         remoteDb = remoteDi.on(Endpoint("localhost")).direct.instance(tag = UmAppDatabase.TAG_DB)
         remoteRepo = remoteDi.on(Endpoint("localhost")).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
-        remoteServer = embeddedServer(Netty, 8091, configure = {
+        val portNum = runBlocking { findAvailableRandomPort() }
+        remoteServer = embeddedServer(Netty, portNum, configure = {
             requestReadTimeoutSeconds = 600
             responseWriteTimeoutSeconds = 600
         }) {
@@ -115,7 +117,7 @@ class ContainerDownloadPluginIntegrationTest2 {
         }
         remoteServer.start()
 
-        clientEndpoint = Endpoint("http://localhost:8091/")
+        clientEndpoint = Endpoint("http://localhost:$portNum/")
 
         val clientEndpointScope = EndpointScope()
         clientDi = DI {
@@ -162,7 +164,7 @@ class ContainerDownloadPluginIntegrationTest2 {
     @After
     fun tearDown() {
         remoteDi.direct.instance<HttpClient>().close()
-        remoteServer.stop(500, 500)
+        remoteServer.stop(1000, 1000)
     }
 
 
@@ -208,6 +210,5 @@ class ContainerDownloadPluginIntegrationTest2 {
 
 
     }
-
 
 }
