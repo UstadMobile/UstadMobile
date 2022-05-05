@@ -3070,6 +3070,253 @@ DELETE FROM ContainerEntryFile
                 stmtList += "ALTER TABLE Clazz ADD COLUMN clazzTerminologyUid INTEGER NOT NULL DEFAULT ${('e'.code shl(8)) + 'n'.code}"
 
                 stmtList += "ALTER TABLE XObjectEntity ADD COLUMN objectStatementRefUid INTEGER NOT NULL DEFAULT 0"
+
+
+                //Triggers for new entities
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_127 AFTER INSERT ON Chat BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 127 AS chTableId, NEW.chatUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 127 AND chEntityPk = NEW.chatUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_127 AFTER UPDATE ON Chat BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 127 AS chTableId, NEW.chatUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 127 AND chEntityPk = NEW.chatUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_127 AFTER DELETE ON Chat BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 127 AS chTableId, OLD.chatUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 127 AND chEntityPk = OLD.chatUid); END "
+                stmtList +=
+                    "CREATE VIEW Chat_ReceiveView AS  SELECT Chat.*, ChatReplicate.* FROM Chat LEFT JOIN ChatReplicate ON ChatReplicate.chatPk = Chat.chatUid "
+                stmtList +=
+                    " CREATE TRIGGER chat_remote_insert_ins INSTEAD OF INSERT ON Chat_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Chat(chatUid, chatStartDate, chatTitle, chatGroup, chatLct) VALUES(NEW.chatUid, NEW.chatStartDate, NEW.chatTitle, NEW.chatGroup, NEW.chatLct) /*psql ON CONFLICT (chatUid) DO UPDATE SET chatStartDate = EXCLUDED.chatStartDate, chatTitle = EXCLUDED.chatTitle, chatGroup = EXCLUDED.chatGroup, chatLct = EXCLUDED.chatLct */ ; END "
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_128 AFTER INSERT ON ChatMember BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 128 AS chTableId, NEW.chatMemberUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 128 AND chEntityPk = NEW.chatMemberUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_128 AFTER UPDATE ON ChatMember BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 128 AS chTableId, NEW.chatMemberUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 128 AND chEntityPk = NEW.chatMemberUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_128 AFTER DELETE ON ChatMember BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 128 AS chTableId, OLD.chatMemberUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 128 AND chEntityPk = OLD.chatMemberUid); END "
+                stmtList +=
+                    "CREATE VIEW ChatMember_ReceiveView AS  SELECT ChatMember.*, ChatMemberReplicate.* FROM ChatMember LEFT JOIN ChatMemberReplicate ON ChatMemberReplicate.chatMemberPk = ChatMember.chatMemberUid "
+                stmtList +=
+                    " CREATE TRIGGER chatmember_remote_insert_ins INSTEAD OF INSERT ON ChatMember_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ChatMember(chatMemberUid, chatMemberChatUid, chatMemberPersonUid, chatMemberJoinedDate, chatMemberLeftDate, chatMemberLct) VALUES(NEW.chatMemberUid, NEW.chatMemberChatUid, NEW.chatMemberPersonUid, NEW.chatMemberJoinedDate, NEW.chatMemberLeftDate, NEW.chatMemberLct) /*psql ON CONFLICT (chatMemberUid) DO UPDATE SET chatMemberChatUid = EXCLUDED.chatMemberChatUid, chatMemberPersonUid = EXCLUDED.chatMemberPersonUid, chatMemberJoinedDate = EXCLUDED.chatMemberJoinedDate, chatMemberLeftDate = EXCLUDED.chatMemberLeftDate, chatMemberLct = EXCLUDED.chatMemberLct */ ; END "
+
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_523 AFTER INSERT ON CourseAssignmentMark BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 523 AS chTableId, NEW.camUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 523 AND chEntityPk = NEW.camUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_523 AFTER UPDATE ON CourseAssignmentMark BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 523 AS chTableId, NEW.camUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 523 AND chEntityPk = NEW.camUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_523 AFTER DELETE ON CourseAssignmentMark BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 523 AS chTableId, OLD.camUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 523 AND chEntityPk = OLD.camUid); END "
+                stmtList +=
+                    "CREATE VIEW CourseAssignmentMark_ReceiveView AS  SELECT CourseAssignmentMark.*, CourseAssignmentMarkReplicate.* FROM CourseAssignmentMark LEFT JOIN CourseAssignmentMarkReplicate ON CourseAssignmentMarkReplicate.camPk = CourseAssignmentMark.camUid "
+                stmtList +=
+                    " CREATE TRIGGER courseassignmentmark_remote_insert_ins INSTEAD OF INSERT ON CourseAssignmentMark_ReceiveView FOR EACH ROW BEGIN REPLACE INTO CourseAssignmentMark(camUid, camAssignmentUid, camSubmitterUid, camMark, camPenalty, camLct) VALUES (NEW.camUid, NEW.camAssignmentUid, NEW.camSubmitterUid, NEW.camMark, NEW.camPenalty, NEW.camLct) /*psql ON CONFLICT (camUid) DO UPDATE SET camAssignmentUid = EXCLUDED.camAssignmentUid, camSubmitterUid = EXCLUDED.camSubmitterUid, camMark = EXCLUDED.camMark, camPenalty = EXCLUDED.camPenalty, camLct = EXCLUDED.camLct */; END "
+
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_522 AFTER INSERT ON CourseAssignmentSubmission BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 522 AS chTableId, NEW.casUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 522 AND chEntityPk = NEW.casUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_522 AFTER UPDATE ON CourseAssignmentSubmission BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 522 AS chTableId, NEW.casUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 522 AND chEntityPk = NEW.casUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_522 AFTER DELETE ON CourseAssignmentSubmission BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 522 AS chTableId, OLD.casUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 522 AND chEntityPk = OLD.casUid); END "
+                stmtList +=
+                    "CREATE VIEW CourseAssignmentSubmission_ReceiveView AS  SELECT CourseAssignmentSubmission.*, CourseAssignmentSubmissionReplicate.* FROM CourseAssignmentSubmission LEFT JOIN CourseAssignmentSubmissionReplicate ON CourseAssignmentSubmissionReplicate.casPk = CourseAssignmentSubmission.casUid "
+                stmtList +=
+                    " CREATE TRIGGER courseassignmentsubmission_remote_insert_ins INSTEAD OF INSERT ON CourseAssignmentSubmission_ReceiveView FOR EACH ROW BEGIN REPLACE INTO CourseAssignmentSubmission(casUid, casAssignmentUid, casSubmitterUid, casSubmitterPersonUid, casText, casType, casTimestamp) VALUES (NEW.casUid, NEW.casAssignmentUid, NEW.casSubmitterUid, NEW.casSubmitterPersonUid, NEW.casText, NEW.casType, NEW.casTimestamp) /*psql ON CONFLICT (casUid) DO UPDATE SET casAssignmentUid = EXCLUDED.casAssignmentUid, casSubmitterUid = EXCLUDED.casSubmitterUid, casSubmitterPersonUid = EXCLUDED.casSubmitterPersonUid, casText = EXCLUDED.casText, casType = EXCLUDED.casType, casTimestamp = EXCLUDED.casTimestamp */; END "
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_90 AFTER INSERT ON CourseAssignmentSubmissionAttachment BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 90 AS chTableId, NEW.casaUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 90 AND chEntityPk = NEW.casaUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_90 AFTER UPDATE ON CourseAssignmentSubmissionAttachment BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 90 AS chTableId, NEW.casaUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 90 AND chEntityPk = NEW.casaUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_90 AFTER DELETE ON CourseAssignmentSubmissionAttachment BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 90 AS chTableId, OLD.casaUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 90 AND chEntityPk = OLD.casaUid); END "
+                stmtList +=
+                    "CREATE VIEW CourseAssignmentSubmissionAttachment_ReceiveView AS  SELECT CourseAssignmentSubmissionAttachment.*, CourseAssignmentSubmissionAttachmentReplicate.* FROM CourseAssignmentSubmissionAttachment LEFT JOIN CourseAssignmentSubmissionAttachmentReplicate ON CourseAssignmentSubmissionAttachmentReplicate.casaPk = CourseAssignmentSubmissionAttachment.casaUid "
+                stmtList +=
+                    " CREATE TRIGGER courseassignmentsubmissionattachment_remote_insert_ins INSTEAD OF INSERT ON CourseAssignmentSubmissionAttachment_ReceiveView FOR EACH ROW BEGIN REPLACE INTO CourseAssignmentSubmissionAttachment(casaUid, casaSubmissionUid, casaMimeType, casaUri, casaMd5, casaSize, casaTimestamp) VALUES (NEW.casaUid, NEW.casaSubmissionUid, NEW.casaMimeType, NEW.casaUri, NEW.casaMd5, NEW.casaSize, NEW.casaTimestamp) /*psql ON CONFLICT (casaUid) DO UPDATE SET casaSubmissionUid = EXCLUDED.casaSubmissionUid, casaMimeType = EXCLUDED.casaMimeType, casaUri = EXCLUDED.casaUri, casaMd5 = EXCLUDED.casaMd5, casaSize = EXCLUDED.casaSize, casaTimestamp = EXCLUDED.casaTimestamp */; END "
+                stmtList += """
+        |
+        |        CREATE TRIGGER ATTUPD_CourseAssignmentSubmissionAttachment
+        |        AFTER UPDATE ON CourseAssignmentSubmissionAttachment FOR EACH ROW WHEN
+        |        OLD.casaMd5 IS NOT NULL
+        |        BEGIN
+        |        
+        |        INSERT INTO ZombieAttachmentData(zaUri) 
+        |        SELECT OLD.casaUri AS zaUri
+        |          FROM CourseAssignmentSubmissionAttachment   
+        |         WHERE CourseAssignmentSubmissionAttachment.casaUid = OLD.casaUid
+        |           AND (SELECT COUNT(*) 
+        |                  FROM CourseAssignmentSubmissionAttachment
+        |                 WHERE casaMd5 = OLD.casaMd5) = 0
+        |    ; 
+        |        END
+        |    
+        """.trimMargin()
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_124 AFTER INSERT ON CourseBlock BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 124 AS chTableId, NEW.cbUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 124 AND chEntityPk = NEW.cbUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_124 AFTER UPDATE ON CourseBlock BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 124 AS chTableId, NEW.cbUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 124 AND chEntityPk = NEW.cbUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_124 AFTER DELETE ON CourseBlock BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 124 AS chTableId, OLD.cbUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 124 AND chEntityPk = OLD.cbUid); END "
+                stmtList +=
+                    "CREATE VIEW CourseBlock_ReceiveView AS  SELECT CourseBlock.*, CourseBlockReplicate.* FROM CourseBlock LEFT JOIN CourseBlockReplicate ON CourseBlockReplicate.cbPk = CourseBlock.cbUid "
+                stmtList +=
+                    " CREATE TRIGGER courseblock_remote_insert_ins INSTEAD OF INSERT ON CourseBlock_ReceiveView FOR EACH ROW BEGIN REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints,cbMinPoints, cbIndex, cbClazzUid, cbActive,cbHidden, cbEntityUid, cbLct) VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbModuleParentBlockUid, NEW.cbTitle, NEW.cbDescription, NEW.cbCompletionCriteria, NEW.cbHideUntilDate, NEW.cbDeadlineDate, NEW.cbLateSubmissionPenalty, NEW.cbGracePeriodDate, NEW.cbMaxPoints,NEW.cbMinPoints, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbHidden, NEW.cbEntityUid, NEW.cbLct) /*psql ON CONFLICT (cbUid) DO UPDATE SET cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbModuleParentBlockUid = EXCLUDED.cbModuleParentBlockUid, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbCompletionCriteria = EXCLUDED.cbCompletionCriteria, cbHideUntilDate = EXCLUDED.cbHideUntilDate,cbDeadlineDate = EXCLUDED.cbDeadlineDate, cbLateSubmissionPenalty = EXCLUDED.cbLateSubmissionPenalty, cbGracePeriodDate= EXCLUDED.cbGracePeriodDate, cbMaxPoints = EXCLUDED.cbMaxPoints, cbMinPoints = EXCLUDED.cbMinPoints, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbHidden = EXCLUDED.cbHidden, cbEntityUid = EXCLUDED.cbEntityUid, cbLct = EXCLUDED.cbLct */; END "
+
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_130 AFTER INSERT ON CourseDiscussion BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 130 AS chTableId, NEW.courseDiscussionUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 130 AND chEntityPk = NEW.courseDiscussionUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_130 AFTER UPDATE ON CourseDiscussion BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 130 AS chTableId, NEW.courseDiscussionUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 130 AND chEntityPk = NEW.courseDiscussionUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_130 AFTER DELETE ON CourseDiscussion BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 130 AS chTableId, OLD.courseDiscussionUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 130 AND chEntityPk = OLD.courseDiscussionUid); END "
+                stmtList +=
+                    "CREATE VIEW CourseDiscussion_ReceiveView AS  SELECT CourseDiscussion.*, CourseDiscussionReplicate.* FROM CourseDiscussion LEFT JOIN CourseDiscussionReplicate ON CourseDiscussionReplicate.courseDiscussionPk = CourseDiscussion.courseDiscussionUid "
+                stmtList +=
+                    " CREATE TRIGGER coursediscussion_remote_insert_ins INSTEAD OF INSERT ON CourseDiscussion_ReceiveView FOR EACH ROW BEGIN REPLACE INTO CourseDiscussion(courseDiscussionUid, courseDiscussionActive, courseDiscussionTitle, courseDiscussionDesc, courseDiscussionClazzUid, courseDiscussionLct) VALUES(NEW.courseDiscussionUid, NEW.courseDiscussionActive, NEW.courseDiscussionTitle, NEW.courseDiscussionDesc, NEW.courseDiscussionClazzUid, NEW.courseDiscussionLct) /*psql ON CONFLICT (courseDiscussionUid) DO UPDATE SET courseDiscussionActive = EXCLUDED.courseDiscussionActive, courseDiscussionTitle = EXCLUDED.courseDiscussionTitle, courseDiscussionDesc = EXCLUDED.courseDiscussionDesc, courseDiscussionClazzUid = EXCLUDED.courseDiscussionClazzUid, courseDiscussionLct = EXCLUDED.courseDiscussionLct */ ; END "
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_243 AFTER INSERT ON CourseGroupMember BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 243 AS chTableId, NEW.cgmUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 243 AND chEntityPk = NEW.cgmUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_243 AFTER UPDATE ON CourseGroupMember BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 243 AS chTableId, NEW.cgmUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 243 AND chEntityPk = NEW.cgmUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_243 AFTER DELETE ON CourseGroupMember BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 243 AS chTableId, OLD.cgmUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 243 AND chEntityPk = OLD.cgmUid); END "
+                stmtList +=
+                    "CREATE VIEW CourseGroupMember_ReceiveView AS  SELECT CourseGroupMember.*, CourseGroupMemberReplicate.* FROM CourseGroupMember LEFT JOIN CourseGroupMemberReplicate ON CourseGroupMemberReplicate.cgmPk = CourseGroupMember.cgmUid "
+                stmtList +=
+                    " CREATE TRIGGER coursegroupmember_remote_insert_ins INSTEAD OF INSERT ON CourseGroupMember_ReceiveView FOR EACH ROW BEGIN REPLACE INTO CourseGroupMember(cgmUid, cgmSetUid, cgmGroupNumber, cgmPersonUid, cgmLct) VALUES (NEW.cgmUid, NEW.cgmSetUid, NEW.cgmGroupNumber, NEW.cgmPersonUid, NEW.cgmLct) /*psql ON CONFLICT (cgmUid) DO UPDATE SET cgmSetUid = EXCLUDED.cgmSetUid, cgmGroupNumber = EXCLUDED.cgmGroupNumber, cgmPersonUid = EXCLUDED.cgmPersonUid, cgmLct = EXCLUDED.cgmLct */; END "
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_242 AFTER INSERT ON CourseGroupSet BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 242 AS chTableId, NEW.cgsUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 242 AND chEntityPk = NEW.cgsUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_242 AFTER UPDATE ON CourseGroupSet BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 242 AS chTableId, NEW.cgsUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 242 AND chEntityPk = NEW.cgsUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_242 AFTER DELETE ON CourseGroupSet BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 242 AS chTableId, OLD.cgsUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 242 AND chEntityPk = OLD.cgsUid); END "
+                stmtList +=
+                    "CREATE VIEW CourseGroupSet_ReceiveView AS  SELECT CourseGroupSet.*, CourseGroupSetReplicate.* FROM CourseGroupSet LEFT JOIN CourseGroupSetReplicate ON CourseGroupSetReplicate.cgsPk = CourseGroupSet.cgsUid "
+                stmtList +=
+                    " CREATE TRIGGER coursegroupset_remote_insert_ins INSTEAD OF INSERT ON CourseGroupSet_ReceiveView FOR EACH ROW BEGIN REPLACE INTO CourseGroupSet(cgsUid, cgsName, cgsTotalGroups, cgsActive, cgsClazzUid, cgsLct) VALUES (NEW.cgsUid, NEW.cgsName, NEW.cgsTotalGroups, NEW.cgsActive, NEW.cgsClazzUid, NEW.cgsLct) /*psql ON CONFLICT (cgsUid) DO UPDATE SET cgsName = EXCLUDED.cgsName, cgsTotalGroups = EXCLUDED.cgsTotalGroups, cgsActive = EXCLUDED.cgsActive, cgsClazzUid = EXCLUDED.cgsClazzUid, cgsLct = EXCLUDED.cgsLct */; END "
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_125 AFTER INSERT ON CoursePicture BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 125 AS chTableId, NEW.coursePictureUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 125 AND chEntityPk = NEW.coursePictureUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_125 AFTER UPDATE ON CoursePicture BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 125 AS chTableId, NEW.coursePictureUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 125 AND chEntityPk = NEW.coursePictureUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_125 AFTER DELETE ON CoursePicture BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 125 AS chTableId, OLD.coursePictureUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 125 AND chEntityPk = OLD.coursePictureUid); END "
+                stmtList +=
+                    "CREATE VIEW CoursePicture_ReceiveView AS  SELECT CoursePicture.*, CoursePictureReplicate.* FROM CoursePicture LEFT JOIN CoursePictureReplicate ON CoursePictureReplicate.cpPk = CoursePicture.coursePictureUid "
+                stmtList +=
+                    " CREATE TRIGGER coursepicture_remote_insert_ins INSTEAD OF INSERT ON CoursePicture_ReceiveView FOR EACH ROW BEGIN REPLACE INTO CoursePicture(coursePictureUid, coursePictureClazzUid, coursePictureMasterCsn, coursePictureLocalCsn, coursePictureLastChangedBy, coursePictureLct, coursePictureUri, coursePictureMd5, coursePictureFileSize, coursePictureTimestamp, coursePictureMimeType, coursePictureActive) VALUES (NEW.coursePictureUid, NEW.coursePictureClazzUid, NEW.coursePictureMasterCsn, NEW.coursePictureLocalCsn, NEW.coursePictureLastChangedBy, NEW.coursePictureLct, NEW.coursePictureUri, NEW.coursePictureMd5, NEW.coursePictureFileSize, NEW.coursePictureTimestamp, NEW.coursePictureMimeType, NEW.coursePictureActive) /*psql ON CONFLICT (coursePictureUid) DO UPDATE SET coursePictureClazzUid = EXCLUDED.coursePictureClazzUid, coursePictureMasterCsn = EXCLUDED.coursePictureMasterCsn, coursePictureLocalCsn = EXCLUDED.coursePictureLocalCsn, coursePictureLastChangedBy = EXCLUDED.coursePictureLastChangedBy, coursePictureLct = EXCLUDED.coursePictureLct, coursePictureUri = EXCLUDED.coursePictureUri, coursePictureMd5 = EXCLUDED.coursePictureMd5, coursePictureFileSize = EXCLUDED.coursePictureFileSize, coursePictureTimestamp = EXCLUDED.coursePictureTimestamp, coursePictureMimeType = EXCLUDED.coursePictureMimeType, coursePictureActive = EXCLUDED.coursePictureActive */; END "
+                stmtList += """
+        |
+        |        CREATE TRIGGER ATTUPD_CoursePicture
+        |        AFTER UPDATE ON CoursePicture FOR EACH ROW WHEN
+        |        OLD.coursePictureMd5 IS NOT NULL
+        |        BEGIN
+        |        
+        |        INSERT INTO ZombieAttachmentData(zaUri) 
+        |        SELECT OLD.coursePictureUri AS zaUri
+        |          FROM CoursePicture   
+        |         WHERE CoursePicture.coursePictureUid = OLD.coursePictureUid
+        |           AND (SELECT COUNT(*) 
+        |                  FROM CoursePicture
+        |                 WHERE coursePictureMd5 = OLD.coursePictureMd5) = 0
+        |    ; 
+        |        END
+        |    
+        """.trimMargin()
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_450 AFTER INSERT ON CourseTerminology BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 450 AS chTableId, NEW.ctUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 450 AND chEntityPk = NEW.ctUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_450 AFTER UPDATE ON CourseTerminology BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 450 AS chTableId, NEW.ctUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 450 AND chEntityPk = NEW.ctUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_450 AFTER DELETE ON CourseTerminology BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 450 AS chTableId, OLD.ctUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 450 AND chEntityPk = OLD.ctUid); END "
+                stmtList +=
+                    "CREATE VIEW CourseTerminology_ReceiveView AS  SELECT CourseTerminology.*, CourseTerminologyReplicate.* FROM CourseTerminology LEFT JOIN CourseTerminologyReplicate ON CourseTerminologyReplicate.ctPk = CourseTerminology.ctUid "
+                stmtList +=
+                    " CREATE TRIGGER courseterminology_remote_insert_ins INSTEAD OF INSERT ON CourseTerminology_ReceiveView FOR EACH ROW BEGIN REPLACE INTO CourseTerminology(ctUid, ctTitle, ctTerminology, ctLct) VALUES (NEW.ctUid, NEW.ctTitle, NEW.ctTerminology, NEW.ctLct) /*psql ON CONFLICT (ctUid) DO UPDATE SET ctTitle = EXCLUDED.ctTitle, ctTerminology = EXCLUDED.ctTerminology, ctLct = EXCLUDED.ctLct */; END "
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_132 AFTER INSERT ON DiscussionPost BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 132 AS chTableId, NEW.discussionPostUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 132 AND chEntityPk = NEW.discussionPostUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_132 AFTER UPDATE ON DiscussionPost BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 132 AS chTableId, NEW.discussionPostUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 132 AND chEntityPk = NEW.discussionPostUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_132 AFTER DELETE ON DiscussionPost BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 132 AS chTableId, OLD.discussionPostUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 132 AND chEntityPk = OLD.discussionPostUid); END "
+                stmtList +=
+                    "CREATE VIEW DiscussionPost_ReceiveView AS  SELECT DiscussionPost.*, DiscussionPostReplicate.* FROM DiscussionPost LEFT JOIN DiscussionPostReplicate ON DiscussionPostReplicate.discussionPostPk = DiscussionPost.discussionPostUid "
+                stmtList +=
+                    " CREATE TRIGGER discussionpost_remote_insert_ins INSTEAD OF INSERT ON DiscussionPost_ReceiveView FOR EACH ROW BEGIN REPLACE INTO DiscussionPost(discussionPostUid, discussionPostTitle, discussionPostMessage, discussionPostStartDate, discussionPostDiscussionTopicUid, discussionPostVisible, discussionPostArchive, discussionPostStartedPersonUid, discussionPostClazzUid, discussionPostLct) VALUES(NEW.discussionPostUid, NEW.discussionPostTitle, NEW.discussionPostMessage, NEW.discussionPostStartDate, NEW.discussionPostDiscussionTopicUid, NEW.discussionPostVisible, NEW.discussionPostArchive, NEW.discussionPostStartedPersonUid, NEW.discussionPostClazzUid, NEW.discussionPostLct) /*psql ON CONFLICT (discussionPostUid) DO UPDATE SET discussionPostTitle = EXCLUDED.discussionPostTitle , discussionPostMessage = EXCLUDED.discussionPostMessage , discussionPostStartDate = EXCLUDED.discussionPostStartDate , discussionPostDiscussionTopicUid = EXCLUDED.discussionPostDiscussionTopicUid, discussionPostVisible = EXCLUDED.discussionPostVisible , discussionPostArchive = EXCLUDED.discussionPostArchive , discussionPostStartedPersonUid = EXCLUDED.discussionPostStartedPersonUid , discussionPostClazzUid = EXCLUDED.discussionPostClazzUid, discussionPostLct = EXCLUDED.discussionPostLct */ ; END "
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_131 AFTER INSERT ON DiscussionTopic BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 131 AS chTableId, NEW.discussionTopicUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 131 AND chEntityPk = NEW.discussionTopicUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_131 AFTER UPDATE ON DiscussionTopic BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 131 AS chTableId, NEW.discussionTopicUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 131 AND chEntityPk = NEW.discussionTopicUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_131 AFTER DELETE ON DiscussionTopic BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 131 AS chTableId, OLD.discussionTopicUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 131 AND chEntityPk = OLD.discussionTopicUid); END "
+                stmtList +=
+                    "CREATE VIEW DiscussionTopic_ReceiveView AS  SELECT DiscussionTopic.*, DiscussionTopicReplicate.* FROM DiscussionTopic LEFT JOIN DiscussionTopicReplicate ON DiscussionTopicReplicate.discussionTopicPk = DiscussionTopic.discussionTopicUid "
+                stmtList +=
+                    " CREATE TRIGGER discussiontopic_remote_insert_ins INSTEAD OF INSERT ON DiscussionTopic_ReceiveView FOR EACH ROW BEGIN REPLACE INTO DiscussionTopic(discussionTopicUid, discussionTopicTitle, discussionTopicDesc, discussionTopicStartDate, discussionTopicCourseDiscussionUid, discussionTopicVisible, discussionTopicArchive, discussionTopicIndex, discussionTopicClazzUid, discussionTopicLct) VALUES(NEW.discussionTopicUid, NEW.discussionTopicTitle, NEW.discussionTopicDesc, NEW.discussionTopicStartDate, NEW.discussionTopicCourseDiscussionUid, NEW.discussionTopicVisible, NEW.discussionTopicArchive, NEW.discussionTopicIndex, NEW.discussionTopicClazzUid, NEW.discussionTopicLct) /*psql ON CONFLICT (discussionTopicUid) DO UPDATE SET discussionTopicTitle = EXCLUDED.discussionTopicTitle, discussionTopicDesc = EXCLUDED.discussionTopicDesc, discussionTopicStartDate = EXCLUDED.discussionTopicStartDate, discussionTopicCourseDiscussionUid = EXCLUDED.discussionTopicCourseDiscussionUid, discussionTopicVisible = EXCLUDED.discussionTopicVisible, discussionTopicArchive = EXCLUDED.discussionTopicArchive, discussionTopicIndex = EXCLUDED.discussionTopicIndex, discussionTopicClazzUid = EXCLUDED.discussionTopicClazzUid, discussionTopicLct = EXCLUDED.discussionTopicLct */ ; END "
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_126 AFTER INSERT ON Message BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 126 AS chTableId, NEW.messageUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 126 AND chEntityPk = NEW.messageUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_126 AFTER UPDATE ON Message BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 126 AS chTableId, NEW.messageUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 126 AND chEntityPk = NEW.messageUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_126 AFTER DELETE ON Message BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 126 AS chTableId, OLD.messageUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 126 AND chEntityPk = OLD.messageUid); END "
+                stmtList +=
+                    "CREATE VIEW Message_ReceiveView AS  SELECT Message.*, MessageReplicate.* FROM Message LEFT JOIN MessageReplicate ON MessageReplicate.messagePk = Message.messageUid "
+                stmtList +=
+                    " CREATE TRIGGER message_remote_insert_ins INSTEAD OF INSERT ON Message_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Message(messageUid, messageSenderPersonUid, messageTableId, messageEntityUid, messageText, messageTimestamp, messageClazzUid, messageLct) VALUES(NEW.messageUid, NEW.messageSenderPersonUid, NEW.messageTableId, NEW.messageEntityUid, NEW.messageText, NEW.messageTimestamp, NEW.messageClazzUid, NEW.messageLct) /*psql ON CONFLICT (messageUid) DO UPDATE SET messageSenderPersonUid = EXCLUDED.messageSenderPersonUid, messageTableId = EXCLUDED.messageTableId, messageEntityUid = EXCLUDED.messageEntityUid, messageText = EXCLUDED.messageText, messageTimestamp = EXCLUDED.messageTimestamp, messageClazzUid = EXCLUDED.messageClazzUid, messageLct = EXCLUDED.messageLct */ ; END "
+
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_129 AFTER INSERT ON MessageRead BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 129 AS chTableId, NEW.messageReadUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 129 AND chEntityPk = NEW.messageReadUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_129 AFTER UPDATE ON MessageRead BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 129 AS chTableId, NEW.messageReadUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 129 AND chEntityPk = NEW.messageReadUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_129 AFTER DELETE ON MessageRead BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 129 AS chTableId, OLD.messageReadUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 129 AND chEntityPk = OLD.messageReadUid); END "
+                stmtList +=
+                    "CREATE VIEW MessageRead_ReceiveView AS  SELECT MessageRead.*, MessageReadReplicate.* FROM MessageRead LEFT JOIN MessageReadReplicate ON MessageReadReplicate.messageReadPk = MessageRead.messageReadUid "
+                stmtList +=
+                    " CREATE TRIGGER messageread_remote_insert_ins INSTEAD OF INSERT ON MessageRead_ReceiveView FOR EACH ROW BEGIN REPLACE INTO MessageRead(messageReadUid, messageReadPersonUid, messageReadMessageUid, messageReadEntityUid, messageReadLct) VALUES(NEW.messageReadUid, NEW.messageReadPersonUid, NEW.messageReadMessageUid, NEW.messageReadEntityUid, NEW.messageReadLct) /*psql ON CONFLICT (messageReadUid) DO UPDATE SET messageReadPersonUid = EXCLUDED.messageReadPersonUid, messageReadMessageUid = EXCLUDED.messageReadMessageUid, messageReadEntityUid = EXCLUDED.messageReadEntityUid, messageReadLct = EXCLUDED.messageReadLct */ ; END "
+
+                //Triggers for entities with destructive migration
+                stmtList += "DROP VIEW IF EXISTS ClazzAssignment_ReceiveView"
+                stmtList += "DROP TRIGGER IF EXISTS clazzassignment_remote_insert_ins"
+                stmtList += "DROP TRIGGER IF EXISTS ch_ins_521"
+                stmtList += "DROP TRIGGER IF EXISTS ch_upd_521"
+                stmtList += "DROP TRIGGER IF EXISTS ch_del_521"
+
+                stmtList +=
+                    "CREATE VIEW ClazzAssignment_ReceiveView AS  SELECT ClazzAssignment.*, ClazzAssignmentReplicate.* FROM ClazzAssignment LEFT JOIN ClazzAssignmentReplicate ON ClazzAssignmentReplicate.caPk = ClazzAssignment.caUid "
+                stmtList +=
+                    " CREATE TRIGGER clazzassignment_remote_insert_ins INSTEAD OF INSERT ON ClazzAssignment_ReceiveView FOR EACH ROW BEGIN REPLACE INTO ClazzAssignment(caUid, caTitle, caDescription, caGroupUid, caActive, caClassCommentEnabled, caPrivateCommentsEnabled, caRequireFileSubmission, caFileType, caSizeLimit, caNumberOfFiles, caSubmissionPolicy, caMarkingType, caRequireTextSubmission, caTextLimitType, caTextLimit, caXObjectUid, caClazzUid, caLocalChangeSeqNum, caMasterChangeSeqNum, caLastChangedBy, caLct) VALUES (NEW.caUid, NEW.caTitle, NEW.caDescription, NEW.caGroupUid, NEW.caActive, NEW.caClassCommentEnabled, NEW.caPrivateCommentsEnabled, NEW.caRequireFileSubmission, NEW.caFileType, NEW.caSizeLimit, NEW.caNumberOfFiles, NEW.caSubmissionPolicy, NEW.caMarkingType,NEW.caRequireTextSubmission, NEW.caTextLimitType, NEW.caTextLimit, NEW.caXObjectUid, NEW.caClazzUid, NEW.caLocalChangeSeqNum, NEW.caMasterChangeSeqNum, NEW.caLastChangedBy, NEW.caLct) /*psql ON CONFLICT (caUid) DO UPDATE SET caTitle = EXCLUDED.caTitle, caDescription = EXCLUDED.caDescription, caGroupUid = EXCLUDED.caGroupUid, caActive = EXCLUDED.caActive, caClassCommentEnabled = EXCLUDED.caClassCommentEnabled, caPrivateCommentsEnabled = EXCLUDED.caPrivateCommentsEnabled, caRequireFileSubmission = EXCLUDED.caRequireFileSubmission, caFileType = EXCLUDED.caFileType, caSizeLimit = EXCLUDED.caSizeLimit, caNumberOfFiles = EXCLUDED.caNumberOfFiles, caSubmissionPolicy = EXCLUDED.caSubmissionPolicy, caMarkingType = EXCLUDED.caMarkingType, caRequireTextSubmission = EXCLUDED.caRequireTextSubmission, caTextLimitType = EXCLUDED.caTextLimitType, caTextLimit = EXCLUDED.caTextLimit, caXObjectUid = EXCLUDED.caXObjectUid, caClazzUid = EXCLUDED.caClazzUid, caLocalChangeSeqNum = EXCLUDED.caLocalChangeSeqNum, caMasterChangeSeqNum = EXCLUDED.caMasterChangeSeqNum, caLastChangedBy = EXCLUDED.caLastChangedBy, caLct = EXCLUDED.caLct */; END "
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_521 AFTER INSERT ON ClazzAssignmentContentJoin BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 521 AS chTableId, NEW.cacjUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 521 AND chEntityPk = NEW.cacjUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_521 AFTER UPDATE ON ClazzAssignmentContentJoin BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 521 AS chTableId, NEW.cacjUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 521 AND chEntityPk = NEW.cacjUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_521 AFTER DELETE ON ClazzAssignmentContentJoin BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 521 AS chTableId, OLD.cacjUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 521 AND chEntityPk = OLD.cacjUid); END "
+
+                stmtList += "DROP VIEW IF EXISTS ClazzAssignmentContentJoin_ReceiveView"
+                stmtList += "DROP TRIGGER IF EXISTS clazzassignmentcontentjoin_remote_insert_ins"
+                stmtList += "DROP TRIGGER IF EXISTS ch_ins_522"
+                stmtList += "DROP TRIGGER IF EXISTS ch_upd_522"
+                stmtList += "DROP TRIGGER IF EXISTS ch_del_522"
+
+
+                stmtList += "DROP VIEW IF EXISTS Comments_ReceiveView"
+                stmtList += "DROP TRIGGER IF EXISTS comments_remote_insert_ins"
+                stmtList += "DROP TRIGGER IF EXISTS ch_ins_101"
+                stmtList += "DROP TRIGGER IF EXISTS ch_upd_101"
+                stmtList += "DROP TRIGGER IF EXISTS ch_del_101"
+                stmtList +=
+                    "CREATE VIEW Comments_ReceiveView AS  SELECT Comments.*, CommentsReplicate.* FROM Comments LEFT JOIN CommentsReplicate ON CommentsReplicate.commentsPk = Comments.commentsUid "
+                stmtList +=
+                    " CREATE TRIGGER comments_remote_insert_ins INSTEAD OF INSERT ON Comments_ReceiveView FOR EACH ROW BEGIN REPLACE INTO Comments(commentsUid, commentsText, commentsEntityType, commentsEntityUid, commentsPublic, commentsStatus, commentsPersonUid, commentsToPersonUid, commentSubmitterUid, commentsFlagged, commentsInActive, commentsDateTimeAdded, commentsDateTimeUpdated, commentsMCSN, commentsLCSN, commentsLCB, commentsLct) VALUES (NEW.commentsUid, NEW.commentsText, NEW.commentsEntityType, NEW.commentsEntityUid, NEW.commentsPublic, NEW.commentsStatus, NEW.commentsPersonUid, NEW.commentsToPersonUid, NEW.commentSubmitterUid, NEW.commentsFlagged, NEW.commentsInActive, NEW.commentsDateTimeAdded, NEW.commentsDateTimeUpdated, NEW.commentsMCSN, NEW.commentsLCSN, NEW.commentsLCB, NEW.commentsLct) /*psql ON CONFLICT (commentsUid) DO UPDATE SET commentsText = EXCLUDED.commentsText, commentsEntityType = EXCLUDED.commentsEntityType, commentsEntityUid = EXCLUDED.commentsEntityUid, commentsPublic = EXCLUDED.commentsPublic, commentsStatus = EXCLUDED.commentsStatus, commentsPersonUid = EXCLUDED.commentsPersonUid, commentsToPersonUid = EXCLUDED.commentsToPersonUid, commentSubmitterUid = EXCLUDED.commentSubmitterUid, commentsFlagged = EXCLUDED.commentsFlagged, commentsInActive = EXCLUDED.commentsInActive, commentsDateTimeAdded = EXCLUDED.commentsDateTimeAdded, commentsDateTimeUpdated = EXCLUDED.commentsDateTimeUpdated, commentsMCSN = EXCLUDED.commentsMCSN, commentsLCSN = EXCLUDED.commentsLCSN, commentsLCB = EXCLUDED.commentsLCB, commentsLct = EXCLUDED.commentsLct */; END "
+                stmtList +=
+                    " CREATE TRIGGER ch_ins_101 AFTER INSERT ON Report BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 101 AS chTableId, NEW.reportUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 101 AND chEntityPk = NEW.reportUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_101 AFTER UPDATE ON Report BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 101 AS chTableId, NEW.reportUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 101 AND chEntityPk = NEW.reportUid); END "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_101 AFTER DELETE ON Report BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 101 AS chTableId, OLD.reportUid AS chEntityPk, 2 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 101 AND chEntityPk = OLD.reportUid); END "
             }
 
             stmtList
