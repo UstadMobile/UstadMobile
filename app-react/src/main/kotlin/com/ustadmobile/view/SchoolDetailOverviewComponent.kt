@@ -34,9 +34,6 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(SchoolDetailOverviewView.VIEW_NAME)
-
     private var schoolClazzList: List<ClazzWithListDisplayDetails>? = null
 
     private val observer = ObserverFnWrapper<List<ClazzWithListDisplayDetails>>{

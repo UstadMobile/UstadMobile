@@ -47,9 +47,6 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ReportDetailView.VIEW_NAME)
-
     var showChart = true
 
     override var saveAsTemplateVisible: Boolean = false

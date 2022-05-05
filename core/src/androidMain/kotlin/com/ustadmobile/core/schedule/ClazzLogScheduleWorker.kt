@@ -12,14 +12,14 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_ENDP
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_FROMTIME
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_TOTIME
 import org.kodein.di.DI
-import org.kodein.di.android.di
+import org.kodein.di.android.closestDI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
 class ClazzLogScheduleWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
-    val di: DI by di(context)
+    val di: DI by closestDI(context)
 
     override fun doWork(): Result {
         val endpoint = inputData.getString(INPUT_ENDPOINTURL) ?: return Result.failure()

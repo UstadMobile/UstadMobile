@@ -15,10 +15,10 @@ import kotlinx.serialization.Serializable
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
                 sqlStatements = [
-                    """REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints, cbIndex, cbClazzUid, cbActive,cbHidden, cbEntityUid, cbLct) 
-         VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbModuleParentBlockUid, NEW.cbTitle, NEW.cbDescription, NEW.cbCompletionCriteria, NEW.cbHideUntilDate, NEW.cbDeadlineDate, NEW.cbLateSubmissionPenalty, NEW.cbGracePeriodDate, NEW.cbMaxPoints, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbHidden, NEW.cbEntityUid, NEW.cbLct) 
+                    """REPLACE INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints,cbMinPoints, cbIndex, cbClazzUid, cbActive,cbHidden, cbEntityUid, cbLct) 
+         VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbModuleParentBlockUid, NEW.cbTitle, NEW.cbDescription, NEW.cbCompletionCriteria, NEW.cbHideUntilDate, NEW.cbDeadlineDate, NEW.cbLateSubmissionPenalty, NEW.cbGracePeriodDate, NEW.cbMaxPoints,NEW.cbMinPoints, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbHidden, NEW.cbEntityUid, NEW.cbLct) 
          /*psql ON CONFLICT (cbUid) DO UPDATE 
-         SET cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbModuleParentBlockUid = EXCLUDED.cbModuleParentBlockUid, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbCompletionCriteria = EXCLUDED.cbCompletionCriteria, cbHideUntilDate = EXCLUDED.cbHideUntilDate,cbDeadlineDate = EXCLUDED.cbDeadlineDate, cbLateSubmissionPenalty = EXCLUDED.cbLateSubmissionPenalty, cbGracePeriodDate= EXCLUDED.cbGracePeriodDate, cbMaxPoints = EXCLUDED.cbMaxPoints, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbHidden = EXCLUDED.cbHidden, cbEntityUid = EXCLUDED.cbEntityUid, cbLct = EXCLUDED.cbLct
+         SET cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbModuleParentBlockUid = EXCLUDED.cbModuleParentBlockUid, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbCompletionCriteria = EXCLUDED.cbCompletionCriteria, cbHideUntilDate = EXCLUDED.cbHideUntilDate,cbDeadlineDate = EXCLUDED.cbDeadlineDate, cbLateSubmissionPenalty = EXCLUDED.cbLateSubmissionPenalty, cbGracePeriodDate= EXCLUDED.cbGracePeriodDate, cbMaxPoints = EXCLUDED.cbMaxPoints, cbMinPoints = EXCLUDED.cbMinPoints, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbHidden = EXCLUDED.cbHidden, cbEntityUid = EXCLUDED.cbEntityUid, cbLct = EXCLUDED.cbLct
          */"""
                 ]
         )
@@ -55,6 +55,8 @@ open class CourseBlock {
 
     var cbMaxPoints: Int = 10
 
+    var cbMinPoints: Int = 0
+
     var cbIndex: Int = 0
 
     @ColumnInfo(index = true)
@@ -70,27 +72,9 @@ open class CourseBlock {
     @ReplicationVersionId
     var cbLct: Long = 0
 
-    companion object {
-
-        const val TABLE_ID = 124
-
-        const val BLOCK_MODULE_TYPE = 100
-
-        const val BLOCK_TEXT_TYPE = 102
-
-        const val BLOCK_ASSIGNMENT_TYPE = 103
-
-        const val BLOCK_CONTENT_TYPE = 104
-
-        const val BLOCK_DISCUSSION_TYPE = 105
-
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as CourseBlock
+        if (other !is CourseBlock) return false
 
         if (cbUid != other.cbUid) return false
         if (cbType != other.cbType) return false
@@ -98,6 +82,13 @@ open class CourseBlock {
         if (cbModuleParentBlockUid != other.cbModuleParentBlockUid) return false
         if (cbTitle != other.cbTitle) return false
         if (cbDescription != other.cbDescription) return false
+        if (cbCompletionCriteria != other.cbCompletionCriteria) return false
+        if (cbHideUntilDate != other.cbHideUntilDate) return false
+        if (cbDeadlineDate != other.cbDeadlineDate) return false
+        if (cbLateSubmissionPenalty != other.cbLateSubmissionPenalty) return false
+        if (cbGracePeriodDate != other.cbGracePeriodDate) return false
+        if (cbMaxPoints != other.cbMaxPoints) return false
+        if (cbMinPoints != other.cbMinPoints) return false
         if (cbIndex != other.cbIndex) return false
         if (cbClazzUid != other.cbClazzUid) return false
         if (cbActive != other.cbActive) return false
@@ -115,6 +106,13 @@ open class CourseBlock {
         result = 31 * result + cbModuleParentBlockUid.hashCode()
         result = 31 * result + (cbTitle?.hashCode() ?: 0)
         result = 31 * result + (cbDescription?.hashCode() ?: 0)
+        result = 31 * result + cbCompletionCriteria
+        result = 31 * result + cbHideUntilDate.hashCode()
+        result = 31 * result + cbDeadlineDate.hashCode()
+        result = 31 * result + cbLateSubmissionPenalty
+        result = 31 * result + cbGracePeriodDate.hashCode()
+        result = 31 * result + cbMaxPoints
+        result = 31 * result + cbMinPoints
         result = 31 * result + cbIndex
         result = 31 * result + cbClazzUid.hashCode()
         result = 31 * result + cbActive.hashCode()
@@ -122,6 +120,22 @@ open class CourseBlock {
         result = 31 * result + cbEntityUid.hashCode()
         result = 31 * result + cbLct.hashCode()
         return result
+    }
+
+    companion object {
+
+        const val TABLE_ID = 124
+
+        const val BLOCK_MODULE_TYPE = 100
+
+        const val BLOCK_TEXT_TYPE = 102
+
+        const val BLOCK_ASSIGNMENT_TYPE = 103
+
+        const val BLOCK_CONTENT_TYPE = 104
+
+        const val BLOCK_DISCUSSION_TYPE = 105
+
     }
 
 }

@@ -3,10 +3,10 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.ModuleCourseBlockEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.view.LanguageEditView
 import com.ustadmobile.core.view.ModuleCourseBlockEditView
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.core.navigation.UstadSavedStateHandleJs
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
 import com.ustadmobile.util.UmProps
@@ -15,6 +15,7 @@ import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import io.github.aakira.napier.Napier
 import react.RBuilder
 import react.setState
 import styled.css
@@ -27,9 +28,6 @@ class ModuleCourseBlockEditComponent (mProps: UmProps): UstadEditComponent<Cours
 
     override val mEditPresenter: UstadEditPresenter<*, CourseBlock>?
         get() = mPresenter
-
-    override val viewNames: List<String>
-        get() = listOf(LanguageEditView.VIEW_NAME)
 
     private var titleLabel = FieldLabel(text = getString(MessageID.title))
 
@@ -94,6 +92,8 @@ class ModuleCourseBlockEditComponent (mProps: UmProps): UstadEditComponent<Cours
         super.onCreateView()
         mPresenter = ModuleCourseBlockEditPresenter(this, arguments, this,di,this)
         setEditTitle(MessageID.add_module, MessageID.edit_module)
+        Napier.d("ModuleCourseBlockEditComponent: navController viewName = ${navController.currentBackStackEntry?.viewName}" +
+            "stateHandle=${(navController.currentBackStackEntry?.savedStateHandle as? UstadSavedStateHandleJs)?.dumpToString()}")
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
     }
 

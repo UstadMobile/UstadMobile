@@ -19,12 +19,14 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressPrese
 import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
+import com.ustadmobile.lib.db.entities.CommentsWithPerson
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
@@ -63,7 +65,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     private var submissionAttachmentLiveDataCourse: LiveData<PagedList<CourseAssignmentSubmissionWithAttachment>>? = null
     private val fileSubmissionObserver = Observer<PagedList<CourseAssignmentSubmissionWithAttachment>?> {
         t -> run {
-        markSubmissionAdapter?.markGradeEnabled = !t.isEmpty()
+        markSubmissionAdapter?.markStudentVisible = !t.isEmpty()
         submissionAdapter?.submitList(t)
     }
     }
@@ -193,10 +195,16 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             field = value
         }
 
-    override var markNextStudentEnabled: Boolean = false
+    override var markNextStudentVisible: Boolean = false
         set(value) {
             field = value
-            markSubmissionAdapter?.markNextStudentEnabled = value
+            markSubmissionAdapter?.markNextStudentVisible = value
+        }
+
+    override var submitButtonVisible: Boolean = false
+        set(value) {
+            field = value
+            markSubmissionAdapter?.markStudentVisible = value
         }
 
     override var submitMarkError: String? = null
@@ -205,11 +213,11 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             markSubmissionAdapter?.submitMarkError = value
         }
 
-    override var person: Person? = null
+    override var submitterName: String? = null
         get() = field
         set(value) {
             field = value
-            ustadFragmentTitle = value?.personFullName()
+            ustadFragmentTitle = value
         }
 
     override var submissionScore: CourseAssignmentMark? = null
@@ -217,6 +225,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         set(value) {
             field = value
             submissionStatusHeaderAdapter?.courseAssignmentMark = value
+            markSubmissionAdapter?.mark = value
         }
 
     override var submissionStatus: Int = 0
@@ -250,8 +259,8 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         // cant delete here
     }
 
-    override fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment, isEditable: Boolean) {
-        mPresenter?.onClickOpenSubmission(submissionCourse, isEditable)
+    override fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment) {
+        mPresenter?.onClickOpenSubmission(submissionCourse)
     }
 
 }

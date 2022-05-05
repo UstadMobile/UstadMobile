@@ -29,7 +29,6 @@ import react.RBuilder
 import react.setState
 import styled.css
 import styled.styledDiv
-import kotlin.js.Date
 
 class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPersonParentJoin>(mProps),
     PersonDetailView {
@@ -38,9 +37,6 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
-
-    override val viewNames: List<String>
-        get() = listOf(PersonDetailView.VIEW_NAME)
 
     private var classList: List<ClazzEnrolmentWithClazzAndAttendance>? = null
 
@@ -103,9 +99,9 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                             entity?.phoneNum != null){
 
                         }
-                        renderTopMainAction("message",getString(MessageID.text), GridSize.cells4, GridSize.cells2,
+                        renderTopMainAction("message",getString(MessageID.chat), GridSize.cells4, GridSize.cells2,
                             entity?.phoneNum != null){
-
+                            mPresenter?.handleClickChat()
                         }
                         renderTopMainAction("email",getString(MessageID.email), GridSize.cells4, GridSize.cells2,
                             entity?.emailAddr != null){
@@ -230,8 +226,8 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                 val title = "${item.clazz?.clazzName} (${item.roleToString(this, systemImpl)}) " +
                         "- ${item.outcomeToString(this,  systemImpl)}"
 
-                val enrollmentPeriod = "${Date(item.clazzEnrolmentDateJoined).standardFormat()} " +
-                        "- ${Date(item.clazzEnrolmentDateLeft).standardFormat()}"
+                val enrollmentPeriod = "${item.clazzEnrolmentDateJoined.toDate()?.standardFormat()} " +
+                        "- ${item.clazzEnrolmentDateLeft.toDate(true)?.standardFormat() ?: getString(MessageID.present)}"
 
 
                 renderListItemWithAttendance("people", title, enrollmentPeriod,

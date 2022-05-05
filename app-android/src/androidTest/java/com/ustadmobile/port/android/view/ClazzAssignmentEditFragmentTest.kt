@@ -148,8 +148,9 @@ class ClazzAssignmentEditFragmentTest : TestCase() {
     }
 
 
-    @AdbScreenRecord("given ClazzAssignment exists when updated then should be updated on database")
-    @Test
+    //Disabled 16/Apr/2022 as per Taiga issue 732
+//    @AdbScreenRecord("given ClazzAssignment exists when updated then should be updated on database")
+//    @Test
     fun givenClazzAssignmentExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
         val entry = ContentEntry().apply {
             title = "Quiz"

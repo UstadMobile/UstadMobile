@@ -8,7 +8,7 @@ import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 
 
-val commonJvmDiModule = DI.Module {
+val commonJvmDiModule = DI.Module("CommonJvm") {
     bind<OkHttpClient>() with singleton {
         OkHttpClient.Builder()
             .dispatcher(Dispatcher().also {

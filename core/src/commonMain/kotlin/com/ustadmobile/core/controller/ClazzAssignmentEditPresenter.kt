@@ -7,7 +7,6 @@ import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.fallbackIndividualSet
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -37,29 +36,26 @@ class ClazzAssignmentEditPresenter(context: Any,
         WORDS(ClazzAssignment.TEXT_WORD_LIMIT, MessageID.words),
         CHARS(ClazzAssignment.TEXT_CHAR_LIMIT, MessageID.characters)
     }
-    class TextLimitTypeOptionsMessageIdOption(day: TextLimitTypeOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class TextLimitTypeOptionsMessageIdOption(day: TextLimitTypeOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class CompletionCriteriaOptions(val optionVal: Int, val messageId: Int){
         SUBMITTED(ClazzAssignment.COMPLETION_CRITERIA_SUBMIT, MessageID.submitted_cap),
         GRADED(ClazzAssignment.COMPLETION_CRITERIA_GRADED, MessageID.graded)
     }
-    class CompletionCriteriaOptionsMessageIdOption(day: CompletionCriteriaOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class CompletionCriteriaOptionsMessageIdOption(day: CompletionCriteriaOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
 
-    enum class EditAfterSubmissionOptions(val optionVal: Int, val messageId: Int) {
-        ALLOWED_DEADLINE(ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_DEADLINE,
-                MessageID.allowed_till_deadline),
-        ALLOWED_GRACE(ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_GRACE,
-                MessageID.allowed_till_grace),
-        NOT_ALLOWED(ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_NOT_ALLOWED,
-                MessageID.not_allowed)
+    enum class SubmissionPolicyOptions(val optionVal: Int, val messageId: Int) {
+        SUBMIT_ALL_AT_ONCE(ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE,
+                MessageID.submit_all_at_once_submission_policy),
+        MULTIPLE_SUBMISSIONS(ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED,
+                MessageID.multiple_submission_allowed_submission_policy),
     }
 
-    class  EditAfterSubmissionOptionsMessageIdOption(day: EditAfterSubmissionOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
-
+    class  SubmissionPolicyOptionsMessageIdOption(day: SubmissionPolicyOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class FileTypeOptions(val optionVal: Int, val messageId: Int) {
         ANY(ClazzAssignment.FILE_TYPE_ANY,
@@ -74,16 +70,16 @@ class ClazzAssignmentEditPresenter(context: Any,
                 MessageID.audio)
     }
 
-    class  FileTypeOptionsMessageIdOption(day: FileTypeOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class  FileTypeOptionsMessageIdOption(day: FileTypeOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
 
     enum class MarkingTypeOptions(val optionVal: Int, val messageId: Int){
-        TEACHER(ClazzAssignment.MARKED_BY_COURSE_LEADER, MessageID.course_leader),
+        TEACHER(ClazzAssignment.MARKED_BY_COURSE_LEADER, MessageID.teacher),
         PEERS(ClazzAssignment.MARKED_BY_PEERS, MessageID.peers)
     }
-    class MarkingTypeOptionsMessageIdOption(day: MarkingTypeOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class MarkingTypeOptionsMessageIdOption(day: MarkingTypeOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
 
     private var clazzUid: Long = 0L
@@ -94,11 +90,11 @@ class ClazzAssignmentEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.markingTypeOptions = MarkingTypeOptions.values().map { MarkingTypeOptionsMessageIdOption(it, context) }
-        view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaOptionsMessageIdOption(it, context) }
-        view.editAfterSubmissionOptions = EditAfterSubmissionOptions.values().map { EditAfterSubmissionOptionsMessageIdOption(it, context) }
-        view.fileTypeOptions = FileTypeOptions.values().map { FileTypeOptionsMessageIdOption(it, context) }
-        view.textLimitTypeOptions = TextLimitTypeOptions.values().map { TextLimitTypeOptionsMessageIdOption(it, context) }
+        view.markingTypeOptions = MarkingTypeOptions.values().map { MarkingTypeOptionsMessageIdOption(it, context, di) }
+        view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaOptionsMessageIdOption(it, context, di) }
+        view.submissionPolicyOptions = SubmissionPolicyOptions.values().map { SubmissionPolicyOptionsMessageIdOption(it, context, di) }
+        view.fileTypeOptions = FileTypeOptions.values().map { FileTypeOptionsMessageIdOption(it, context, di) }
+        view.textLimitTypeOptions = TextLimitTypeOptions.values().map { TextLimitTypeOptionsMessageIdOption(it, context, di) }
     }
 
     override fun onLoadDataComplete() {
@@ -110,10 +106,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             entity?.assignment?.caGroupUid = group.cgsUid
             view.groupSet = group
             view.entity = entity
-
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
         }
     }
 
@@ -201,8 +194,10 @@ class ClazzAssignmentEditPresenter(context: Any,
     fun saveDateTimeIntoEntity(entity: CourseBlockWithEntity){
         val timeZone = view.timeZone ?: "UTC"
 
-        entity.cbHideUntilDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
+        if(view.startDate != 0L){
+            entity.cbHideUntilDate = DateTime(view.startDate).toOffsetByTimezone(timeZone)
                 .localMidnight.utc.unixMillisLong + view.startTime
+        }
 
         if(view.deadlineDate != Long.MAX_VALUE){
             entity.cbDeadlineDate = DateTime(view.deadlineDate).toOffsetByTimezone(timeZone)
@@ -231,6 +226,12 @@ class ClazzAssignmentEditPresenter(context: Any,
 
 
     override fun handleClickSave(entity: CourseBlockWithEntity) {
+        if(!view.fieldsEnabled)
+            //Do nothing - prevent anger clicks
+            return
+
+        view.loading = true
+        view.fieldsEnabled = false
         presenterScope.launch {
 
             saveDateTimeIntoEntity(entity)
@@ -264,14 +265,16 @@ class ClazzAssignmentEditPresenter(context: Any,
                 view.caGracePeriodError = null
             }
 
+            if(entity.assignment?.caRequireTextSubmission == false && entity.assignment?.caRequireFileSubmission == false){
+                foundError = true
+                view.showSnackBar(systemImpl.getString(MessageID.text_file_submission_error, context))
+            }
 
             if(foundError){
+                view.loading = false
+                view.fieldsEnabled = true
                 return@launch
             }
-            
-
-            view.loading = true
-            view.fieldsEnabled = false
 
             // if grace period is not set, set the date to equal the deadline
             if(entity.cbGracePeriodDate == Long.MAX_VALUE){
@@ -283,7 +286,6 @@ class ClazzAssignmentEditPresenter(context: Any,
                             listOf(entity)))
 
             view.loading = false
-            view.fieldsEnabled = true
 
         }
     }

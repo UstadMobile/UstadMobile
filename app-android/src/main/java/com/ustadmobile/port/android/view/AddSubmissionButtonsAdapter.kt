@@ -10,22 +10,20 @@ import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 class AddSubmissionButtonsAdapter(val eventHandler: ClazzAssignmentDetailOverviewFragmentEventHandler): SingleItemRecyclerViewAdapter<
         AddSubmissionButtonsAdapter.FileSubmissionBottomViewHolder>(false) {
 
-
-    var maxFilesReached: Boolean = false
+    var addFileVisible: Boolean = false
         set(value){
             if(field == value)
                 return
             field = value
-            viewHolder?.itemBinding?.showAddFile = checkCanAddFile()
+            viewHolder?.itemBinding?.addFileVisible = value
         }
 
-    var deadlinePassed: Boolean = false
+    var addTextVisible: Boolean = false
         set(value){
             if(field == value)
                 return
             field = value
-            viewHolder?.itemBinding?.deadlinePassed = value
-            viewHolder?.itemBinding?.showAddFile = checkCanAddFile()
+            viewHolder?.itemBinding?.addTextVisible = value
         }
 
     var assignment: ClazzAssignmentWithCourseBlock? = null
@@ -34,7 +32,6 @@ class AddSubmissionButtonsAdapter(val eventHandler: ClazzAssignmentDetailOvervie
                 return
             field = value
             viewHolder?.itemBinding?.assignment = value
-            viewHolder?.itemBinding?.showAddFile = checkCanAddFile()
         }
 
 
@@ -43,18 +40,14 @@ class AddSubmissionButtonsAdapter(val eventHandler: ClazzAssignmentDetailOvervie
 
     private var viewHolder: FileSubmissionBottomViewHolder? = null
 
-    private fun checkCanAddFile(): Boolean {
-        return (assignment?.caRequireFileSubmission ?: false) && !(maxFilesReached || deadlinePassed)
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileSubmissionBottomViewHolder {
         viewHolder = FileSubmissionBottomViewHolder(
                 ItemAssignmentFileSubmissionBottomBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
                     it.assignment = assignment
                     it.eventHandler = eventHandler
-                    it.showAddFile = checkCanAddFile()
-                    it.deadlinePassed = deadlinePassed
+                    it.addFileVisible = addFileVisible
+                    it.addTextVisible = addTextVisible
                 })
         return viewHolder as FileSubmissionBottomViewHolder
     }

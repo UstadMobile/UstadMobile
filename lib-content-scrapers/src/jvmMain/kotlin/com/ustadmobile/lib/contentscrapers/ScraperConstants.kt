@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers
 
 import com.soywiz.klock.DateFormat
 import com.ustadmobile.lib.db.entities.ContentEntry
+import java.time.Duration
 import java.util.*
 
 object ScraperConstants {
@@ -280,8 +281,11 @@ object ScraperConstants {
     const val CONTENT_LIST= "ContentList"
     const val CONTENT_DETAIL_SOURCE_URL_KHAN_ID = "content-detail?sourceUrl=khan-id://"
 
-    const val TIME_OUT_SELENIUM = 120
+    const val TIME_OUT_SELENIUM_SECS = 120
 
+    val TIME_OUT_SELENIUM: Duration by lazy {
+        Duration.ofSeconds(TIME_OUT_SELENIUM_SECS.toLong())
+    }
 
     enum class QUESTION_TYPE private constructor(val type: String) {
 

@@ -165,10 +165,10 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-
         siteLoadJob?.cancel()
         siteLoadJob = null
+
+        super.onDestroy()
     }
 
 }

@@ -19,9 +19,6 @@ class ContentEntryDetailComponent(mProps: UmProps): UstadDetailComponent<Content
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ContentEntryDetailView.VIEW_NAME)
-
     private var tabsToRender: List<UmTab>? = null
 
     override var tabs: List<String>? = null

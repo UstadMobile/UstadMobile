@@ -55,21 +55,21 @@ class WebAppE2ETest {
         val adminPlainPassword = inputStream.bufferedReader().use { it.readText() }
 
 
-        val loginBtn = WebDriverWait(driver, Duration.ofMinutes(1).toSeconds())
+        val loginBtn = WebDriverWait(driver, Duration.ofMinutes(1))
             .until(ExpectedConditions.elementToBeClickable(By.id("login-btn")))
 
         assertTrue("Login page is loaded and button is displayed",loginBtn.isDisplayed)
 
-        driver.findElementById("username-input").sendKeys("admin")
+        driver.findElement(By.id("username-input")).sendKeys("admin")
 
-        val password = driver.findElementById("password-input")
+        val password = driver.findElement(By.id("password-input"))
         actions.moveToElement(password).click().sendKeys(adminPlainPassword).build().perform()
 
         loginBtn.click()
 
-        WebDriverWait(driver, Duration.ofMinutes(1).toSeconds())
+        WebDriverWait(driver, Duration.ofMinutes(1))
             .until(ExpectedConditions.urlContains("Home"))
-        val homeTitle = driver.findElementByClassName("ComponentStyles-toolbarTitle")
+        val homeTitle = driver.findElement(By.className("ComponentStyles-toolbarTitle"))
 
         assertEquals("App launched successfully, showing content list","content", homeTitle.text.lowercase())
     }

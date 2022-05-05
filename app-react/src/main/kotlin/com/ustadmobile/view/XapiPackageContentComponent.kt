@@ -17,8 +17,6 @@ class XapiPackageContentComponent(mProps: UmProps): UstadBaseComponent<UmProps, 
             ustadComponentTitle = value
         }
 
-    override var viewNames: List<String>? = null
-
     override var url: String = ""
         get() = field
         set(value) {
@@ -47,6 +45,5 @@ class XapiPackageContentComponent(mProps: UmProps): UstadBaseComponent<UmProps, 
         super.onDestroyView()
         mPresenter?.onDestroy()
         mPresenter = null
-        viewNames = null
     }
 }

@@ -27,6 +27,7 @@ import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.impl.nav.navigateToErrorScreen
@@ -39,6 +40,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -69,7 +71,22 @@ abstract class UstadBaseController<V : UstadView>(
     protected var savedState: Map<String, String>? = null
         private set
 
-    protected val ustadNavController: UstadNavController by instance()
+    /**
+     * The NavController might be null if being used in screens outside the normal navigation flow
+     * e.g. OnboardingActivity, EpubActivity, etc.
+     *
+     * Where using the NavController is required, use requireNavController()
+     */
+    protected val ustadNavController: UstadNavController? by instanceOrNull()
+
+    private var backStackEntry: UstadBackStackEntry? = null
+
+    /**
+     * The last time the contents of this presenter was saved to the back stack saved state handle.
+     * Helps to avoid duplicate save work.
+     */
+    var lastStateSaveTime: Long = 0
+        private set
 
     /**
      * There are two possible scenarios for using a presenter:
@@ -101,6 +118,11 @@ abstract class UstadBaseController<V : UstadView>(
         }
     }
 
+    fun requireNavController(): UstadNavController {
+        return ustadNavController
+            ?: throw IllegalStateException("RequireNavController: ustadNavController is null")
+    }
+
     /**
      * Handle when the presenter is created. Analogous to Android's onCreate
      *
@@ -113,7 +135,7 @@ abstract class UstadBaseController<V : UstadView>(
 
         created = true
         this.savedState = savedState
-
+        backStackEntry = ustadNavController?.currentBackStackEntry
 
         for (listener in lifecycleListeners) {
             listener.onLifecycleCreate(this)
@@ -187,6 +209,7 @@ abstract class UstadBaseController<V : UstadView>(
 
 
         lifecycleStatus.value = DESTROYED
+        backStackEntry = null
     }
 
     override fun addLifecycleListener(listener: UmLifecycleListener) {
@@ -229,12 +252,14 @@ abstract class UstadBaseController<V : UstadView>(
         val stateMap = mutableMapOf<String, String>()
         onSaveInstanceState(stateMap)
 
-        val stateHandle = ustadNavController.currentBackStackEntry?.savedStateHandle
+        val stateHandle = backStackEntry?.savedStateHandle
         if(stateHandle != null) {
             stateMap.forEach {
                 stateHandle[it.key] = it.value
             }
         }
+
+        lastStateSaveTime = systemTimeInMillis()
     }
 
 
@@ -249,21 +274,23 @@ abstract class UstadBaseController<V : UstadView>(
         val saveToKey = arguments[ARG_RESULT_DEST_KEY]
 
         if(saveToViewName != null && saveToKey != null){
-            val destBackStackEntry = ustadNavController.getBackStackEntry(saveToViewName)
+            val destBackStackEntry = requireNavController().getBackStackEntry(saveToViewName)
             destBackStackEntry?.savedStateHandle?.set(saveToKey, result)
 
-            ustadNavController.popBackStack(saveToViewName, false)
+            requireNavController().popBackStack(saveToViewName, false)
+        }else {
+            requireNavController().popBackStack(UstadView.CURRENT_DEST, true)
         }
     }
 
 
     fun requireSavedStateHandle(): UstadSavedStateHandle {
-        return ustadNavController.currentBackStackEntry?.savedStateHandle
+        return requireNavController().currentBackStackEntry?.savedStateHandle
             ?: throw IllegalStateException("Require saved state handle: no current back stack entry")
     }
 
     private fun <T: Any> NavigateForResultOptions<T>.putPresenterResultDestInfo() {
-        val currentBackStackEntryVal = ustadNavController.currentBackStackEntry
+        val currentBackStackEntryVal = backStackEntry
         val effectiveResultKey = destinationResultKey ?: entityClass.simpleName
             ?: throw IllegalArgumentException("putPresenterResultDestInfo: no destination key and no class name")
 
@@ -304,7 +331,7 @@ abstract class UstadBaseController<V : UstadView>(
                 di, options.serializationStrategy, options.entityClass,currentEntityValue)
         }
 
-        ustadNavController.navigate(options.destinationViewName, options.arguments)
+        requireNavController().navigate(options.destinationViewName, options.arguments)
     }
 
     /**
@@ -312,7 +339,7 @@ abstract class UstadBaseController<V : UstadView>(
      * to the user accordingly.
      */
     fun navigateToErrorScreen(exception: Exception) {
-        ustadNavController.navigateToErrorScreen(exception, di, context)
+        requireNavController().navigateToErrorScreen(exception, di, context)
     }
 
     /**

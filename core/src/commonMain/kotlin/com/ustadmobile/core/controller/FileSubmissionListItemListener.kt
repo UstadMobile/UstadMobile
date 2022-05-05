@@ -6,6 +6,6 @@ interface FileSubmissionListItemListener {
 
     fun onClickDeleteSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment)
 
-    fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment, isEditable: Boolean)
+    fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment)
 
 }

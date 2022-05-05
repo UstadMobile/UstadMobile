@@ -4,7 +4,10 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
@@ -76,27 +79,38 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
 
     @Query("""
         SELECT * 
-          FROM CourseAssignmentMark
+          FROM CourseAssignmentMark               
          WHERE camAssignmentUid = :assignmentUid
-           AND camStudentUid = :studentUid
+           AND camSubmitterUid = :submitterUid
       ORDER BY camLct DESC
          LIMIT 1
     """)
-    abstract fun getMarkOfAssignmentForStudent(assignmentUid: Long, studentUid: Long): DoorLiveData<CourseAssignmentMark?>
+    abstract fun getMarkOfAssignmentForSubmitterLiveData(assignmentUid: Long, submitterUid: Long): DoorLiveData<CourseAssignmentMark?>
+
+    @Query("""
+        SELECT * 
+          FROM CourseAssignmentMark
+         WHERE camAssignmentUid = :assignmentUid
+           AND camSubmitterUid = :submitterUid
+      ORDER BY camLct DESC
+         LIMIT 1
+    """)
+    abstract fun getMarkOfAssignmentForStudent(assignmentUid: Long, submitterUid: Long): CourseAssignmentMark?
+
 
     @Query("""
          SELECT COALESCE((
-            SELECT clazzEnrolmentPersonUid
-              FROM ClazzEnrolment
+            SELECT casSubmitterUid
+              FROM CourseAssignmentSubmission
+              
                    LEFT JOIN CourseAssignmentMark
-                   ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
+                   ON CourseAssignmentMark.camSubmitterUid = CourseAssignmentSubmission.casSubmitterUid
                    AND CourseAssignmentMark.camAssignmentUid = :assignmentUid
-               WHERE ClazzEnrolment.clazzEnrolmentActive
-               AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-               AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
-               AND ClazzEnrolment.clazzEnrolmentPersonUid != :studentUid
+                   
+             WHERE CourseAssignmentSubmission.casSubmitterUid != :submitterUid
                AND CourseAssignmentMark.camUid IS NULL
+          GROUP BY casSubmitterUid
          LIMIT 1),0)
     """)
-    abstract suspend fun findNextStudentToMarkForAssignment(assignmentUid: Long, studentUid: Long): Long
+    abstract suspend fun findNextSubmitterToMarkForAssignment(assignmentUid: Long, submitterUid: Long): Long
 }

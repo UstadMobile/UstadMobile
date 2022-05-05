@@ -32,9 +32,6 @@ class HolidayEditComponent(mProps: UmProps): UstadEditComponent<Holiday>(mProps)
 
     private val holidayEnd = FieldLabel(getString(MessageID.end_date))
 
-    override val viewNames: List<String>
-        get() = listOf(HolidayEditView.VIEW_NAME)
-
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {

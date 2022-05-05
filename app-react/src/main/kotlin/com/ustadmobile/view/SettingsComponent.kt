@@ -21,9 +21,6 @@ import styled.styledDiv
 
 class SettingsComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props), SettingsView {
 
-    override val viewNames: List<String>
-        get() = listOf(SettingsView.VIEW_NAME)
-
     var mPresenter: SettingsPresenter? = null
 
     override var workspaceSettingsVisible: Boolean = false

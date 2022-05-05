@@ -38,9 +38,6 @@ class ParentalConsentManagementComponent (mProps: UmProps): UstadEditComponent<P
     override val mEditPresenter: UstadEditPresenter<*, PersonParentJoinWithMinorPerson>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ParentalConsentManagementView.VIEW_NAME)
-
     private var relationshipLabel = FieldLabel(text = getString(MessageID.relationship))
 
     override var infoText: String? = null

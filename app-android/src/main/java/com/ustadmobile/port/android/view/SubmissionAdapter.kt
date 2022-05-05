@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemAssignmentFileSubmissionBinding
 import com.ustadmobile.core.controller.FileSubmissionListItemListener
-import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
@@ -36,14 +35,6 @@ class SubmissionAdapter(
             viewHolder?.binding?.assignment = value
         }
 
-    var hasPassedDeadline: Boolean = false
-        set(value){
-            if(field == value)
-                return
-            field = value
-            viewHolder?.binding?.hasPassedDeadline = value
-        }
-
     var isSubmitted: Boolean = false
         set(value){
             if(field == value)
@@ -65,7 +56,6 @@ class SubmissionAdapter(
                     it.eventHandler = itemListener
                     it.showFiles = visible
                     it.notSubmitted = !isSubmitted
-                    it.hasPassedDeadline = hasPassedDeadline
                     it.dateTimeMode = MODE_START_OF_DAY
                     it.timeZoneId = "UTC"
                 })
@@ -95,7 +85,11 @@ class SubmissionAdapter(
 
                     override fun areContentsTheSame(oldItem: CourseAssignmentSubmissionWithAttachment,
                                                     newItem: CourseAssignmentSubmissionWithAttachment): Boolean {
-                        return oldItem == newItem
+                        return oldItem.casUid == newItem.casUid
+                                && oldItem.casText == newItem.casText
+                                && oldItem.casType == newItem.casType
+                                && oldItem.attachment?.casaMd5 == newItem.attachment?.casaMd5
+                                && oldItem.attachment?.casaUri == newItem.attachment?.casaUri
                     }
                 }
 

@@ -14,9 +14,8 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.ext.renderCourseBlockCommonFields
 import com.ustadmobile.view.ext.renderListItemWithTitleAndSwitch
-import com.ustadmobile.view.ext.renderListSectionTitle
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
@@ -28,9 +27,6 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
     ClazzAssignmentEditView {
 
     private var mPresenter: ClazzAssignmentEditPresenter? = null
-
-    override val viewNames: List<String>
-        get() = listOf(ClazzAssignmentEditView.VIEW_NAME)
 
     override val mEditPresenter: UstadEditPresenter<*, CourseBlockWithEntity>?
         get() = mPresenter
@@ -46,6 +42,10 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
     private var deadlineDateLabel = FieldLabel(text = getStringWithOptionalLabel(MessageID.deadline))
 
     private var deadlineTimeLabel = FieldLabel(text = getString(MessageID.time))
+
+    private var gracePeriodDateLabel = FieldLabel(text = getStringWithOptionalLabel(MessageID.end_of_grace_period))
+
+    private var gracePeriodTimeLabel = FieldLabel(text = getString(MessageID.time))
 
     private var completionCriteriaLabel = FieldLabel(text = getString(MessageID.completion_criteria))
 
@@ -63,7 +63,9 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
 
     private var textLimitMaxLabel = FieldLabel(text = getString(MessageID.maximum))
 
-    private var editAfterSubLabel = FieldLabel(text = getString(MessageID.edit_after_submission))
+    private var penaltyLabel = FieldLabel(text = getString(MessageID.late_submission_penalty))
+
+    private var submissionPolicyLabel = FieldLabel(text = getString(MessageID.submission_policy))
 
     private var markedByLabel = FieldLabel(text = getString(MessageID.marked_by))
 
@@ -72,7 +74,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
         set(value) {
             field = value
             setState {
-
+                gracePeriodDateLabel = gracePeriodDateLabel.copy(errorText = value)
             }
         }
 
@@ -176,14 +178,13 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
             }
         }
 
-    override var editAfterSubmissionOptions: List<ClazzAssignmentEditPresenter.EditAfterSubmissionOptionsMessageIdOption>? = null
+    override var submissionPolicyOptions: List<ClazzAssignmentEditPresenter.SubmissionPolicyOptionsMessageIdOption>? = null
         get() = field
         set(value) {
             setState {
                 field = value
             }
         }
-
 
     override var fileTypeOptions: List<ClazzAssignmentEditPresenter.FileTypeOptionsMessageIdOption>?= null
         get() = field
@@ -230,8 +231,36 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
         set(value) {
             setState {
                 field = value
+                requireFileSubmission = value?.assignment?.caRequireFileSubmission ?: true
+                requireTextSubmission = value?.assignment?.caRequireTextSubmission ?: true
+                if(value?.cbDeadlineDate != Long.MAX_VALUE){
+                    gracePeriodVisiblity = true
+                }
             }
         }
+
+
+    private var requireFileSubmission: Boolean = false
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    private var requireTextSubmission: Boolean = false
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    private var gracePeriodVisiblity: Boolean = false
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
 
     override fun onCreateView() {
         super.onCreateView()
@@ -277,112 +306,42 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                         }
                     )
 
-                    umGridContainer(columnSpacing = GridSpacing.spacing4) {
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                    renderCourseBlockCommonFields(entity,
+                        doNotShowBeforeLabel, startDate, startTimeLabel,
+                        dateSet = {
+                            setState{
+                                startDate = it.getTime().toLong()
+                                caStartDateError = null
+                            }
+                        }, timeZone, completionCriteriaLabel, completionCriteriaOptions,
+                        completionCriteriaSet = {
+                            setState {
+                                entity?.cbCompletionCriteria = it
+                                completionCriteriaLabel.errorText = null
+                            }
+                        }, maxPointsLabel, maxPointsSet = {
+                            setState {
+                                entity?.cbMaxPoints = it
+                                caMaxPointsError = null
+                            }
+                        }, deadlineDateLabel, deadlineTimeLabel, deadlineDate,
+                        deadlineDateSet = {
+                            setState{
+                                deadlineDate = it.getTime().toLong()
+                                caDeadlineError = null
+                                gracePeriodVisiblity = true
+                            }
+                        }, gracePeriodDateLabel, gracePeriodTimeLabel, gracePeriodDate, gracePeriodVisiblity,
+                        gracePeriodSet = {
+                            gracePeriodDate = it.getTime().toLong()
+                            caGracePeriodError = null
+                        }, penaltyLabel, penaltySet = {
+                            setState{
+                                entity?.cbLateSubmissionPenalty = it
+                            }
+                        }, getString(MessageID.penalty_label),
+                        false)
 
-                            umDatePicker(
-                                label = "${doNotShowBeforeLabel.text}",
-                                error = doNotShowBeforeLabel.error,
-                                helperText = doNotShowBeforeLabel.errorText,
-                                value = startDate.toDate(true),
-                                inputVariant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        startDate = it.getTime().toLong()
-                                        caStartDateError = null
-                                    }
-                                })
-
-                        }
-
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-                            umTimePicker(
-                                label = "${startTimeLabel.text}",
-                                error = startTimeLabel.error,
-                                helperText = startTimeLabel.errorText,
-                                value = startDate.toDate(true),
-                                inputVariant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        startDate = it.getTime().toLong()
-                                    }
-                                })
-                        }
-                    }
-
-                    umItem {
-                        renderListSectionTitle(timeZone ?: "", TypographyVariant.h6)
-                    }
-
-                    umGridContainer(columnSpacing = GridSpacing.spacing4) {
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-
-                            umTextFieldSelect(
-                                "${completionCriteriaLabel.text}",
-                                entity?.cbCompletionCriteria.toString(),
-                                completionCriteriaLabel.errorText ?: "",
-                                error = completionCriteriaLabel.error,
-                                values = completionCriteriaOptions?.map {
-                                    Pair(it.code.toString(), it.toString())
-                                }?.toList(),
-                                onChange = {
-                                    setState {
-                                        entity?.cbCompletionCriteria = it.toInt()
-                                        completionCriteriaOptions = null
-                                    }
-                                }
-                            )
-
-                        }
-
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-                            umTextField(label = "${maxPointsLabel.text}",
-                                helperText = maxPointsLabel.errorText,
-                                value = entity?.cbMaxPoints.toString(),
-                                error = maxPointsLabel.error,
-                                disabled = !fieldsEnabled,
-                                variant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        entity?.cbMaxPoints = it.toInt()
-                                        caMaxPointsError = null
-                                    }
-                                })
-                        }
-                    }
-
-                    umGridContainer(columnSpacing = GridSpacing.spacing4) {
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-
-                            umDatePicker(
-                                label = "${deadlineDateLabel.text}",
-                                error = deadlineDateLabel.error,
-                                helperText = deadlineDateLabel.errorText,
-                                value = deadlineDate.toDate(true),
-                                inputVariant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        deadlineDate = it.getTime().toLong()
-                                        caDeadlineError = null
-                                    }
-                                })
-
-                        }
-
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-                            umTimePicker(
-                                label = "${deadlineTimeLabel.text}",
-                                error = deadlineTimeLabel.error,
-                                helperText = deadlineTimeLabel.errorText,
-                                value = deadlineDate.toDate(true),
-                                inputVariant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        deadlineDate = it.getTime().toLong()
-                                    }
-                                })
-                        }
-                    }
 
                     umTextField(label = "${submissionTypeLabel.text}",
                         helperText = submissionTypeLabel.errorText,
@@ -400,56 +359,61 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                         renderListItemWithTitleAndSwitch(getString(MessageID.require_file_submission), entity?.assignment?.caRequireFileSubmission ?: false){
                             setState {
                                 entity?.assignment?.caRequireFileSubmission = !(entity?.assignment?.caRequireFileSubmission ?: false)
+                                requireFileSubmission = entity?.assignment?.caRequireFileSubmission ?: false
                             }
                         }
                     }
 
-                    umGridContainer(columnSpacing = GridSpacing.spacing4) {
-                        umItem(GridSize.cells12, GridSize.cells4 ) {
-                            umTextFieldSelect(
-                                "${fileTypeLabel.text}",
-                                entity?.assignment?.caFileType.toString(),
-                                fileTypeLabel.errorText ?: "",
-                                error = fileTypeLabel.error,
-                                values = fileTypeOptions?.map {
-                                    Pair(it.code.toString(), it.toString())
-                                }?.toList(),
-                                onChange = {
-                                    setState {
-                                        entity?.assignment?.caFileType = it.toInt()
-                                    }
-                                }
-                            )
-                        }
+                    if(requireFileSubmission) {
 
-                        umItem(GridSize.cells12, GridSize.cells4 ) {
-                            umTextField(label = "${fileSizeLimitLabel.text}",
-                                helperText = fileSizeLimitLabel.errorText,
-                                value = entity?.assignment?.caSizeLimit.toString(),
-                                error = fileSizeLimitLabel.error,
-                                disabled = !fieldsEnabled,
-                                variant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        entity?.assignment?.caSizeLimit = it.toInt()
+                        umGridContainer(columnSpacing = GridSpacing.spacing4) {
+                            umItem(GridSize.cells12, GridSize.cells4) {
+                                umTextFieldSelect(
+                                    "${fileTypeLabel.text}",
+                                    entity?.assignment?.caFileType.toString(),
+                                    fileTypeLabel.errorText ?: "",
+                                    error = fileTypeLabel.error,
+                                    values = fileTypeOptions?.map {
+                                        Pair(it.code.toString(), it.toString())
+                                    }?.toList(),
+                                    onChange = {
+                                        setState {
+                                            entity?.assignment?.caFileType = it.toInt()
+                                        }
                                     }
-                                }
-                            )
-                        }
+                                )
+                            }
 
-                        umItem(GridSize.cells12, GridSize.cells4 ) {
-                            umTextField(label = "${fileNumberLimitLabel.text}",
-                                helperText = fileNumberLimitLabel.errorText,
-                                value = entity?.assignment?.caNumberOfFiles.toString(),
-                                error = fileNumberLimitLabel.error,
-                                disabled = !fieldsEnabled,
-                                variant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        entity?.assignment?.caNumberOfFiles = it.toInt()
+                            umItem(GridSize.cells12, GridSize.cells4) {
+                                umTextField(label = "${fileSizeLimitLabel.text}",
+                                    helperText = fileSizeLimitLabel.errorText,
+                                    value = entity?.assignment?.caSizeLimit.toString(),
+                                    error = fileSizeLimitLabel.error,
+                                    disabled = !fieldsEnabled,
+                                    variant = FormControlVariant.outlined,
+                                    onChange = {
+                                        setState {
+                                            entity?.assignment?.caSizeLimit = it.toInt()
+                                        }
                                     }
-                                }
-                            )
+                                )
+                            }
+
+                            umItem(GridSize.cells12, GridSize.cells4) {
+                                umTextField(label = "${fileNumberLimitLabel.text}",
+                                    helperText = fileNumberLimitLabel.errorText,
+                                    value = entity?.assignment?.caNumberOfFiles.toString(),
+                                    error = fileNumberLimitLabel.error,
+                                    disabled = !fieldsEnabled,
+                                    variant = FormControlVariant.outlined,
+                                    onChange = {
+                                        setState {
+                                            entity?.assignment?.caNumberOfFiles =
+                                                it.toIntOrNull() ?: 0
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
 
@@ -458,41 +422,44 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                         renderListItemWithTitleAndSwitch(getString(MessageID.require_text_submission), entity?.assignment?.caRequireTextSubmission ?: false){
                             setState {
                                 entity?.assignment?.caRequireTextSubmission = !(entity?.assignment?.caRequireTextSubmission ?: false)
+                                requireTextSubmission = entity?.assignment?.caRequireTextSubmission ?: false
                             }
                         }
                     }
 
-                    umGridContainer(columnSpacing = GridSpacing.spacing4) {
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-                            umTextFieldSelect(
-                                "${textLimitTypeLabel.text}",
-                                entity?.assignment?.caTextLimitType.toString(),
-                                textLimitTypeLabel.errorText ?: "",
-                                error = textLimitTypeLabel.error,
-                                values = textLimitTypeOptions?.map {
-                                    Pair(it.code.toString(), it.toString())
-                                }?.toList(),
-                                onChange = {
-                                    setState {
-                                        entity?.assignment?.caTextLimitType = it.toInt()
+                    if(requireTextSubmission) {
+                        umGridContainer(columnSpacing = GridSpacing.spacing4) {
+                            umItem(GridSize.cells12, GridSize.cells6) {
+                                umTextFieldSelect(
+                                    "${textLimitTypeLabel.text}",
+                                    entity?.assignment?.caTextLimitType.toString(),
+                                    textLimitTypeLabel.errorText ?: "",
+                                    error = textLimitTypeLabel.error,
+                                    values = textLimitTypeOptions?.map {
+                                        Pair(it.code.toString(), it.toString())
+                                    }?.toList(),
+                                    onChange = {
+                                        setState {
+                                            entity?.assignment?.caTextLimitType = it.toInt()
+                                        }
                                     }
-                                }
-                            )
-                        }
+                                )
+                            }
 
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-                            umTextField(label = "${textLimitMaxLabel.text}",
-                                helperText = textLimitMaxLabel.errorText,
-                                value = entity?.assignment?.caTextLimit.toString(),
-                                error = textLimitMaxLabel.error,
-                                disabled = !fieldsEnabled,
-                                variant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        entity?.assignment?.caTextLimit = it.toInt()
+                            umItem(GridSize.cells12, GridSize.cells6) {
+                                umTextField(label = "${textLimitMaxLabel.text}",
+                                    helperText = textLimitMaxLabel.errorText,
+                                    value = entity?.assignment?.caTextLimit.toString(),
+                                    error = textLimitMaxLabel.error,
+                                    disabled = !fieldsEnabled,
+                                    variant = FormControlVariant.outlined,
+                                    onChange = {
+                                        setState {
+                                            entity?.assignment?.caTextLimit = it.toIntOrNull() ?: 0
+                                        }
                                     }
-                                }
-                            )
+                                )
+                            }
                         }
                     }
 
@@ -500,16 +467,16 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                     umGridContainer(columnSpacing = GridSpacing.spacing4) {
                         umItem(GridSize.cells12, GridSize.cells6 ) {
                             umTextFieldSelect(
-                                "${editAfterSubLabel.text}",
-                                entity?.assignment?.caEditAfterSubmissionType.toString(),
-                                editAfterSubLabel.errorText ?: "",
-                                error = editAfterSubLabel.error,
-                                values = editAfterSubmissionOptions?.map {
+                                "${submissionPolicyLabel.text}",
+                                entity?.assignment?.caSubmissionPolicy.toString(),
+                                submissionPolicyLabel.errorText ?: "",
+                                error = submissionPolicyLabel.error,
+                                values = submissionPolicyOptions?.map {
                                     Pair(it.code.toString(), it.toString())
                                 }?.toList(),
                                 onChange = {
                                     setState {
-                                        entity?.assignment?.caEditAfterSubmissionType = it.toInt()
+                                        entity?.assignment?.caSubmissionPolicy = it.toInt()
                                     }
                                 }
                             )

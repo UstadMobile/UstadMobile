@@ -48,8 +48,6 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
             }
         }
 
-    override var viewNames: List<String>? = listOf(Login2View.VIEW_NAME)
-
     override var versionInfo: String? = null
         get() = field
         set(value) {

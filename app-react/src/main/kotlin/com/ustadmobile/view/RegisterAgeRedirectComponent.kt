@@ -27,9 +27,6 @@ class RegisterAgeRedirectComponent(props: UmProps): UstadBaseComponent<UmProps, 
 
     private var mPresenter: RegisterAgeRedirectPresenter? = null
 
-    override val viewNames: List<String>
-        get() = listOf(RegisterAgeRedirectView.VIEW_NAME)
-
     private var dateLabel = FieldLabel(text = getString(MessageID.what_is_your_date_of_birth))
 
     override var dateOfBirth: Long = Date().getTime().toLong()

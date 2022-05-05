@@ -22,13 +22,15 @@ interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignmentWith
 
     var showSubmission: Boolean
 
-    var hasPassedDeadline: Boolean
+    var addTextSubmissionVisible: Boolean
 
-    var maxNumberOfFilesSubmission: Int
+    var addFileSubmissionVisible: Boolean
 
     var submissionMark: CourseAssignmentMark?
 
     var submissionStatus: Int
+
+    var unassignedError: String?
 
     companion object {
 

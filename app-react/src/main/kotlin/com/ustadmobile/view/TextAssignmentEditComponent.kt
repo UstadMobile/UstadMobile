@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.TextAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ext.countWords
 import com.ustadmobile.core.view.TextAssignmentEditView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -11,7 +12,6 @@ import com.ustadmobile.mui.components.spacingUnits
 import com.ustadmobile.mui.components.umTypography
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.util.ext.countWords
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umSpacer
@@ -27,9 +27,6 @@ class TextAssignmentEditComponent (mProps: UmProps): UstadEditComponent<CourseAs
 
     override val mEditPresenter: UstadEditPresenter<*, CourseAssignmentSubmission>?
         get() = mPresenter
-
-    override val viewNames: List<String>
-        get() = listOf(TextAssignmentEditView.VIEW_NAME)
 
     var limitType = ClazzAssignment.TEXT_CHAR_LIMIT
 
@@ -102,6 +99,10 @@ class TextAssignmentEditComponent (mProps: UmProps): UstadEditComponent<CourseAs
         mPresenter = TextAssignmentEditPresenter(this, arguments, this,
             this,di)
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+
+        updateUiWithStateChangeDelay {
+            fabManager?.visible = arguments[TextAssignmentEditView.EDIT_ENABLED].toString().toBoolean()
+        }
     }
 
     override fun RBuilder.render() {

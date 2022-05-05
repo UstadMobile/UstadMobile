@@ -88,7 +88,7 @@ class PhetContentScraper(private val url: String, private val destinationDirecto
             throw IllegalArgumentException("File Type not supported for url " + simulationUrl!!.toString())
         }
 
-        aboutText = simulationDoc!!.getElementById("about").html()
+        aboutText = simulationDoc!!.getElementById("about")?.html()
         aboutDescription = Jsoup.parse(aboutText!!).select("p.simulation-panel-indent").text()
 
         val contentUpdated: Boolean
@@ -161,7 +161,7 @@ class PhetContentScraper(private val url: String, private val destinationDirecto
 
                 try {
                     val categoryName = category.text() // category name
-                    val path = category.parent().attr("href") // url path to category
+                    val path = category.parent()?.attr("href") // url path to category
 
                     val categoryContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, categoryName,
                             URL(simulationUrl, path).toString(), PHET, LICENSE_TYPE_CC_BY, language.langUid, null,
@@ -267,7 +267,7 @@ class PhetContentScraper(private val url: String, private val destinationDirecto
                             if (file.name.endsWith(".html")) {
 
                                 try {
-                                    val langTitle = simulationDoc!!.selectFirst("td a[href*=_$langCode] span").text()
+                                    val langTitle = simulationDoc!!.selectFirst("td a[href*=_$langCode] span")?.text()
 
                                     val path = simulationUrl!!.toString().replace("/en/", "/$langCode/")
                                     val translationUrl = URL(path)

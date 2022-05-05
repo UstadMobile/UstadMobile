@@ -119,7 +119,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/text"
                         app:iconGravity="top"
-                        app:icon="@drawable/ic_message_bcd4_24dp" />
+                        app:icon="@drawable/ic_baseline_sms_24" />
 
 
                     <com.google.android.material.button.MaterialButton
@@ -169,6 +169,19 @@
                         app:iconGravity="top"
                         app:icon="@drawable/ic_baseline_supervised_user_circle_24"
                         android:onClick="@{() -> presenter.handleClickManageParentalConsent()}"
+                        />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/fragment_person_detail_chat"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:visibility="visible"
+                        android:layout_width="wrap_content"
+                        android:maxWidth="@dimen/dimen_110dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/chat"
+                        app:iconGravity="top"
+                        app:icon="@drawable/ic_baseline_chat_24"
+                        android:onClick="@{() -> presenter.handleClickChat()}"
                         />
 
                 </LinearLayout>

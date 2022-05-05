@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
-import com.ustadmobile.core.contentformats.xapi.endpoints.storeSubmitFileSubmissionStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
@@ -12,11 +11,8 @@ import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
-import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
-import com.ustadmobile.core.view.SelectFileView
-import com.ustadmobile.core.view.TextAssignmentEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.TextAssignmentEditView.Companion.EDIT_ENABLED
-import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
@@ -24,36 +20,45 @@ import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.door.util.randomUuid
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
+import kotlin.jvm.JvmStatic
 
 
-class ClazzAssignmentDetailOverviewPresenter(context: Any,
-                                             arguments: Map<String, String>, view: ClazzAssignmentDetailOverviewView,
-                                             lifecycleOwner: DoorLifecycleOwner,
-                                             di: DI,val newPrivateCommentListener: DefaultNewCommentItemListener =
-                                                     DefaultNewCommentItemListener(di, context,
-                                                             arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
-                                                     ClazzAssignment.TABLE_ID, false),
-                                             val newClassCommentListener: DefaultNewCommentItemListener =
-                                                     DefaultNewCommentItemListener(di, context,
-                                                             arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
-                                                             ClazzAssignment.TABLE_ID, true))
-    : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignmentWithCourseBlock>(context, arguments, view, di, lifecycleOwner){
+class ClazzAssignmentDetailOverviewPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: ClazzAssignmentDetailOverviewView,
+    lifecycleOwner: DoorLifecycleOwner,
+    di: DI
+) : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignmentWithCourseBlock>(
+    context,
+    arguments,
+    view, di, lifecycleOwner
+) {
 
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
 
     val submissionList = mutableListOf<CourseAssignmentSubmissionWithAttachment>()
+
+    var submitterUid: Long = 0
+
+    val newPrivateCommentListener: DefaultNewCommentItemListener = DefaultNewCommentItemListener(di, context,
+        arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
+        ClazzAssignment.TABLE_ID, false)
+
+    val newClassCommentListener: DefaultNewCommentItemListener =
+        DefaultNewCommentItemListener(di, context,
+            arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
+            ClazzAssignment.TABLE_ID, true)
 
     override val persistenceMode: PersistenceMode
           get() = PersistenceMode.DB
@@ -89,40 +94,42 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         }
 
         val isStudent = ClazzEnrolment.ROLE_STUDENT == clazzEnrolment?.clazzEnrolmentRole ?: 0
+        view.showSubmission = isStudent
 
         if(isStudent) {
-            view.showSubmission = clazzAssignment.caRequireFileSubmission || clazzAssignment.caRequireTextSubmission
-            view.maxNumberOfFilesSubmission = clazzAssignment.caNumberOfFiles
-            view.hasPassedDeadline = hasPassedDeadline(clazzAssignment)
+
+            checkSubmittedUid(clazzAssignment)
+
+            val unassignedMessage = systemImpl.getString(MessageID.unassigned, context)
+            view.unassignedError = if(submitterUid == 0L) unassignedMessage else null
+
+            checkCanAddFileOrText(clazzAssignment)
+
+            // don't show private comments if unassigned in group
+            view.showPrivateComments = clazzAssignment.caPrivateCommentsEnabled && submitterUid != 0L
+
+            if(clazzAssignment.caPrivateCommentsEnabled){
+                view.clazzAssignmentPrivateComments = db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
+                    ClazzAssignment.TABLE_ID, clazzAssignment.caUid,
+                    loggedInPersonUid, submitterUid)
+            }
+
             view.submittedCourseAssignmentSubmission = db.onRepoWithFallbackToDb(2000){
-                it.courseAssignmentSubmissionDao.getAllFileSubmissionsFromStudent(
-                        clazzAssignment.caUid, loggedInPersonUid)
+                it.courseAssignmentSubmissionDao.getAllSubmissionsFromSubmitter(
+                        clazzAssignment.caUid, submitterUid)
             }
             db.courseAssignmentSubmissionDao
-                    .getStatusOfAssignmentForStudent(
-                            clazzAssignment.caUid, loggedInPersonUid)
+                    .getStatusOfAssignmentForSubmitter(
+                            clazzAssignment.caUid, submitterUid)
                     .observeWithLifecycleOwner(lifecycleOwner){
                         view.submissionStatus = it ?: 0
                     }
 
-            db.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(
-                    clazzAssignment.caUid, loggedInPersonUid)
+            db.courseAssignmentMarkDao.getMarkOfAssignmentForSubmitterLiveData(
+                    clazzAssignment.caUid, submitterUid)
                     .observeWithLifecycleOwner(lifecycleOwner){
                         view.submissionMark = it
                     }
-        }else{
-            // isTeacher/admin
-            view.showSubmission = false
-        }
-
-
-        if(isStudent && clazzAssignment.caPrivateCommentsEnabled){
-            view.clazzAssignmentPrivateComments = db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
-                    ClazzAssignment.TABLE_ID, clazzAssignment.caUid,
-                    loggedInPersonUid)
-            view.showPrivateComments = true
-        }else{
-            view.showPrivateComments = false
         }
 
         if(clazzAssignment.caClassCommentEnabled){
@@ -131,17 +138,49 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         }
     }
 
+    suspend fun checkSubmittedUid(clazzAssignment: ClazzAssignmentWithCourseBlock){
+        val groupMemberPerson = db.courseGroupMemberDao.findByPersonUid(clazzAssignment.caGroupUid, accountManager.activeAccount.personUid)
+        submitterUid = if(clazzAssignment.caGroupUid != 0L){
+            groupMemberPerson?.cgmGroupNumber?.toLong() ?: 0
+        }else{
+            accountManager.activeAccount.personUid
+        }
+    }
+
+    suspend fun checkCanAddFileOrText(clazzAssignment: ClazzAssignmentWithCourseBlock) {
+        var alreadySubmitted = false
+        if(clazzAssignment.caSubmissionPolicy == ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE){
+            val sizeOfSubmitted = repo.courseAssignmentSubmissionDao.countSubmissionsFromSubmitter(
+                clazzAssignment.caUid, submitterUid)
+            alreadySubmitted = sizeOfSubmitted > 0
+        }
+
+        val hasPassedDeadline = hasPassedDeadline(clazzAssignment)
+        val maxFilesReached = checkMaxFilesReached(db, clazzAssignment)
+        val assignedInGroup = submitterUid != 0L
+
+        view.addFileSubmissionVisible = clazzAssignment.caRequireFileSubmission
+                && !alreadySubmitted && !maxFilesReached && !hasPassedDeadline && assignedInGroup
+
+
+        view.addTextSubmissionVisible = clazzAssignment.caRequireTextSubmission
+                && !alreadySubmitted && !hasPassedDeadline && assignedInGroup
+
+    }
+
     override fun onLoadFromJson(bundle: Map<String, String>): ClazzAssignmentWithCourseBlock? {
         super.onLoadFromJson(bundle)
 
         val entity = safeParse(di, ClazzAssignmentWithCourseBlock.serializer(), bundle[UstadEditView.ARG_ENTITY_JSON].toString())
-        presenterScope.launch {
-            loadAssignment(entity, db)
-        }
         submissionList.addAll(
                 safeParseList(di, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
                 CourseAssignmentSubmissionWithAttachment::class, bundle[SAVED_STATE_ADD_SUBMISSION_LIST]
                 ?: ""))
+        view.addedCourseAssignmentSubmission = submissionList
+
+        presenterScope.launch {
+            loadAssignment(entity, db)
+        }
 
         return entity
     }
@@ -154,18 +193,16 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 submissionList)
     }
 
+    private suspend fun checkMaxFilesReached(db: UmAppDatabase, clazzAssignment: ClazzAssignmentWithCourseBlock) : Boolean {
+        val sizeOfAddedList = submissionList.filter { it.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE }.size
+        val sizeOfSubmitted = db.courseAssignmentSubmissionDao.countFileSubmissionFromStudent(
+            clazzAssignment.caUid, submitterUid)
+        return (sizeOfAddedList + sizeOfSubmitted) >= clazzAssignment.caNumberOfFiles
+    }
 
     private fun hasPassedDeadline(course: ClazzAssignmentWithCourseBlock): Boolean {
         val currentTime = systemTimeInMillis()
-        return when (course.caEditAfterSubmissionType) {
-            ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_DEADLINE -> {
-                currentTime > (course.block?.cbDeadlineDate ?: Long.MAX_VALUE)
-            }
-            ClazzAssignment.EDIT_AFTER_SUBMISSION_TYPE_ALLOWED_GRACE -> {
-                currentTime > (course.block?.cbGracePeriodDate ?: Long.MAX_VALUE)
-            }
-            else -> currentTime > (course.block?.cbDeadlineDate ?: Long.MAX_VALUE)
-        }
+        return currentTime > (course.block?.cbGracePeriodDate ?: Long.MAX_VALUE)
     }
 
     override fun onLoadDataComplete() {
@@ -174,11 +211,16 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         observeSavedStateResult(SAVED_STATE_KEY_URI, ListSerializer(String.serializer()),
                 String::class) {
             val uri = it.firstOrNull() ?: return@observeSavedStateResult
+            val entity = entity ?: return@observeSavedStateResult
             presenterScope.launch(doorMainDispatcher()) {
                 val doorUri = DoorUri.parse(uri)
+
+                checkSubmittedUid(entity)
+
                 val submission = CourseAssignmentSubmissionWithAttachment().apply {
-                    casSubmitterUid = accountManager.activeAccount.personUid
-                    casAssignmentUid = entity?.caUid ?: 0
+                    casSubmitterUid = submitterUid
+                    casAssignmentUid = entity.caUid
+                    casSubmitterPersonUid = accountManager.activeAccount.personUid
                     casText = doorUri.getFileName(context)
                     casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
                     casUid = db.doorPrimaryKeyManager.nextIdAsync(CourseAssignmentSubmission.TABLE_ID)
@@ -193,6 +235,9 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
                 submission.attachment = attachment
                 submissionList.add(submission)
                 view.addedCourseAssignmentSubmission = submissionList
+
+                checkCanAddFileOrText(entity)
+
             }
             requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
         }
@@ -200,16 +245,26 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         observeSavedStateResult(SAVED_STATE_KEY_TEXT, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
             CourseAssignmentSubmissionWithAttachment::class){
             val submission = it.firstOrNull() ?: return@observeSavedStateResult
+            val entity = entity ?: return@observeSavedStateResult
+            presenterScope.launch(doorMainDispatcher()) {
+                checkSubmittedUid(entity)
 
-            // find existing and remove it
-            val existingSubmission = submissionList.find { subList -> subList.casUid == submission.casUid }
-            submissionList.remove(existingSubmission)
+                // find existing and remove it
+                val existingSubmission = submissionList.find { subList -> subList.casUid == submission.casUid }
+                submissionList.remove(existingSubmission)
 
-            submission.casAssignmentUid = entity?.caUid ?: 0
-            submission.casSubmitterUid = accountManager.activeAccount.personUid
-            submissionList.add(submission)
-            view.addedCourseAssignmentSubmission = submissionList
+                submission.casAssignmentUid = entity.caUid
+                submission.casSubmitterUid =  submitterUid
+                submission.casSubmitterPersonUid = accountManager.activeAccount.personUid
+
+                submissionList.add(submission)
+                view.addedCourseAssignmentSubmission = submissionList
+                checkCanAddFileOrText(entity)
+
+            }
+
             requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
+
         }
 
     }
@@ -217,63 +272,122 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
     fun handleDeleteSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment) {
         submissionList.remove(submissionCourse)
         view.addedCourseAssignmentSubmission = submissionList
+        presenterScope.launch {
+            entity?.let { checkCanAddFileOrText(it) }
+        }
     }
 
-    fun handleOpenSubmission(courseSubmission: CourseAssignmentSubmissionWithAttachment, canEdit: Boolean){
+    fun handleEditSubmission(courseSubmission: CourseAssignmentSubmissionWithAttachment){
+        if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
+            val args = mutableMapOf<String, String>()
+            args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON,
+                CourseAssignmentSubmissionWithAttachment.serializer(), courseSubmission)
+            args[EDIT_ENABLED] = true.toString()
+
+            navigateForResult(
+                NavigateForResultOptions(
+                    this@ClazzAssignmentDetailOverviewPresenter,
+                    courseSubmission,
+                    TextAssignmentEditView.VIEW_NAME,
+                    CourseAssignmentSubmission::class,
+                    CourseAssignmentSubmission.serializer(),
+                    SAVED_STATE_KEY_TEXT,
+                    arguments = args))
+        }else{
+            presenterScope.launch {
+                openAssignmentFileAttachment(courseSubmission)
+            }
+        }
+    }
+
+    fun handleOpenSubmission(
+        courseSubmission: CourseAssignmentSubmissionWithAttachment
+    ){
         presenterScope.launch {
             if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
-
                 val args = mutableMapOf<String, String>()
-                args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON,
-                        CourseAssignmentSubmissionWithAttachment.serializer(), courseSubmission)
-                args[EDIT_ENABLED] = canEdit.toString()
-                if(canEdit){
-                    navigateForResult(
-                            NavigateForResultOptions(this@ClazzAssignmentDetailOverviewPresenter,
-                                    courseSubmission, TextAssignmentEditView.VIEW_NAME, CourseAssignmentSubmission::class,
-                                    CourseAssignmentSubmission.serializer(), SAVED_STATE_KEY_TEXT,
-                                    arguments = args))
-                }else{
-                    systemImpl.go(TextAssignmentEditView.VIEW_NAME, args, context)
-                }
+                args[HtmlTextViewDetailView.DISPLAY_TEXT] = courseSubmission.casText ?: ""
+
+                requireNavController().navigate(
+                    HtmlTextViewDetailView.VIEW_NAME, args)
 
             }else if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_FILE){
-                val fileSubmission = courseSubmission.attachment ?: return@launch
-                val uri = fileSubmission.casaUri ?: return@launch
-                val doorUri = if(uri.startsWith("door-attachment://")) repo.retrieveAttachment(uri) else DoorUri.parse(uri)
-                try{
-                    systemImpl.openFileInDefaultViewer(context, doorUri, fileSubmission.casaMimeType)
-                }catch (e: Exception){
-                    if (e is NoAppFoundException) {
-                        view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
-                    }else{
-                        val message = e.message
-                        if (message != null) {
-                            view.showSnackBar(message)
-                        }
-                    }
+                openAssignmentFileAttachment(courseSubmission)
+            }
+        }
+    }
+
+    private suspend fun openAssignmentFileAttachment(courseSubmission: CourseAssignmentSubmissionWithAttachment){
+        val fileSubmission = courseSubmission.attachment ?: return
+        val uri = fileSubmission.casaUri ?: return
+        val doorUri = if(uri.startsWith("door-attachment://")) repo.retrieveAttachment(uri) else DoorUri.parse(uri)
+        try{
+            systemImpl.openFileInDefaultViewer(context, doorUri, fileSubmission.casaMimeType)
+        }catch (e: Exception){
+            if (e is NoAppFoundException) {
+                view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
+            }else{
+                val message = e.message
+                if (message != null) {
+                    view.showSnackBar(message)
                 }
             }
         }
     }
 
     fun handleSubmitButtonClicked(){
-        presenterScope.launch {
+        presenterScope.launch(doorMainDispatcher()) {
             val hasPassedDeadline = entity?.let { hasPassedDeadline(it) } ?: true
-            if(hasPassedDeadline)
+            if(hasPassedDeadline) {
+                view.showSnackBar(systemImpl.getString(MessageID.deadline_has_passed, context))
                 return@launch
+            }
 
-            repo.courseAssignmentSubmissionDao.insertListAsync(submissionList)
-            repo.courseAssignmentSubmissionAttachmentDao.insertListAsync(submissionList.mapNotNull { it.attachment })
+            if(entity?.caSubmissionPolicy == ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE){
+                val sizeOfSubmitted = repo.courseAssignmentSubmissionDao
+                    .countSubmissionsFromSubmitter(
+                        entity?.caUid ?: 0,
+                        submitterUid
+                    )
+                if(sizeOfSubmitted > 0){
+                    view.showSnackBar(systemImpl.getString(MessageID.submission_already_made, context))
+                    return@launch
+                }
+            }
+            repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                txDb.courseAssignmentSubmissionDao.insertListAsync(submissionList)
+                txDb.courseAssignmentSubmissionAttachmentDao.insertListAsync(submissionList.mapNotNull { it.attachment })
+
+                entity?.let { checkCanAddFileOrText(it) }
+
+                // TODO need to handle groups
+               /* val agentPerson = txDb.agentDao.getAgentFromPersonUsername(
+                    accountManager.activeAccount.endpointUrl,
+                    accountManager.activeAccount.username ?: ""
+                ) ?: AgentEntity().apply {
+                        agentPersonUid = accountManager.activeAccount.personUid
+                        agentAccountName = accountManager.activeAccount.username
+                        agentHomePage = accountManager.activeAccount.endpointUrl
+                        agentUid = txDb.agentDao.insertAsync(this)
+                }
+
+                val submitStatement = StatementEntity().apply {
+                    statementVerbUid = VerbEntity.VERB_SUBMITTED_UID
+                    statementPersonUid = accountManager.activeAccount.personUid
+                    statementClazzUid = entity?.caClazzUid ?: 0
+                    xObjectUid = entity?.caXObjectUid ?: 0
+                    agentUid = agentPerson.agentUid
+                    contextRegistration = randomUuid().toString()
+                    timestamp = systemTimeInMillis()
+                    stored = systemTimeInMillis()
+                    fullStatement = "" // TODO
+                }
+                txDb.statementDao.insertAsync(submitStatement)*/
+            }
+
             submissionList.clear()
             view.addedCourseAssignmentSubmission = submissionList
-            withContext(Dispatchers.Default) {
-                val assignment = view.entity ?: return@withContext
-                statementEndpoint.storeSubmitFileSubmissionStatement(
-                        accountManager.activeAccount,
-                        randomUuid().toString(),
-                        assignment)
-            }
+
         }
     }
 
@@ -302,13 +416,21 @@ class ClazzAssignmentDetailOverviewPresenter(context: Any,
         args[EDIT_ENABLED] = true.toString()
         navigateForResult(
                 NavigateForResultOptions(this,
-                        null, TextAssignmentEditView.VIEW_NAME, CourseAssignmentSubmission::class,
-                        CourseAssignmentSubmission.serializer(), SAVED_STATE_KEY_TEXT,
-                            arguments = args))
+                        null,
+                    TextAssignmentEditView.VIEW_NAME,
+                    CourseAssignmentSubmission::class,
+                    CourseAssignmentSubmission.serializer(),
+                    SAVED_STATE_KEY_TEXT,
+                    arguments = args))
     }
 
 
     companion object {
+
+        @JvmStatic
+        val SUBMISSION_POLICY_OPTIONS = mapOf(
+            ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED to MessageID.multiple_submission_allowed_submission_policy,
+            ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE to MessageID.submit_all_at_once_submission_policy)
 
         const val SAVED_STATE_KEY_URI = "URI"
 

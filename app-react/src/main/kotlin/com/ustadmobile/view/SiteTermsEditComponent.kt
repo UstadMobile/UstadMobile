@@ -21,9 +21,6 @@ import styled.styledDiv
 class SiteTermsEditComponent(props: UmProps): UstadEditComponent<SiteTermsWithLanguage>(props),
     SiteTermsEditView {
 
-    override val viewNames: List<String>
-        get() = listOf(SiteTermsEditView.VIEW_NAME)
-
     private var mPresenter: SiteTermsEditPresenter? = null
 
     override val mEditPresenter: UstadEditPresenter<*, SiteTermsWithLanguage>?

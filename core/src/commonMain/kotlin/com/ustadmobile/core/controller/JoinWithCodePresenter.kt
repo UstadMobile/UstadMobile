@@ -52,13 +52,13 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
 
         //If the code is in the args, we should make only one attempt to use it
         //Because it can lead to navigation, this must be done in onStart
-        val codeFromArgsUsed = ustadNavController.currentBackStackEntry?.savedStateHandle
+        val codeFromArgsUsed = requireNavController().currentBackStackEntry?.savedStateHandle
             ?.get<String>(CODE_FROM_ARGS_USED)?.toBoolean() ?: false
 
         if(!codeFromArgsUsed) {
             val codeArg = arguments[UstadView.ARG_CODE] ?:""
             if(codeArg.isNotEmpty()) {
-                ustadNavController.currentBackStackEntry?.savedStateHandle
+                requireNavController().currentBackStackEntry?.savedStateHandle
                     ?.set(CODE_FROM_ARGS_USED, true.toString())
                 handleClickDone(codeArg)
             }else {

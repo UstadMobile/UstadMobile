@@ -15,6 +15,10 @@
             type="Boolean" />
 
         <variable
+            name="unassignedError"
+            type="String" />
+
+        <variable
             name="eventHandler"
             type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragmentEventHandler" />
 
@@ -27,6 +31,18 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/dimen_10dp">
 
+        <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="@{unassignedError}"
+            android:gravity="center"
+            android:visibility="@{unassignedError == null ?  View.GONE : View.VISIBLE}"
+            tools:text="Unassigned in group"
+            />
 
         <Button
             android:id="@+id/submission_add_text_button"
@@ -38,7 +54,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:onClick="@{() -> eventHandler.onSubmitButtonClicked() }"
-            android:visibility="@{hasFilesToSubmit &amp; !deadlinePassed ? View.VISIBLE : View.GONE}"
+            android:visibility="@{hasFilesToSubmit &amp; !deadlinePassed &amp; unassignedError == null ? View.VISIBLE : View.GONE}"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

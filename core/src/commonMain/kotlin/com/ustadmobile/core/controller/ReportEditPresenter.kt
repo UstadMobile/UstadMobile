@@ -49,8 +49,8 @@ class ReportEditPresenter(context: Any,
                 MessageID.line_chart)
     }
 
-    class VisualTypeMessageIdOption(day: VisualTypeOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class VisualTypeMessageIdOption(day: VisualTypeOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class XAxisOptions(val optionVal: Int, val messageId: Int) {
         DAY(Report.DAY,
@@ -71,8 +71,8 @@ class ReportEditPresenter(context: Any,
                 MessageID.class_enrolment_leaving)
     }
 
-    class XAxisMessageIdOption(day: XAxisOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class XAxisMessageIdOption(day: XAxisOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class DateRangeOptions(val code: Int, val messageId: Int,
                                 var dateRange: DateRangeMoment?) {
@@ -152,8 +152,8 @@ class ReportEditPresenter(context: Any,
                 MessageID.class_enrolment_leaving)
     }
 
-    class SubGroupByMessageIdOption(day: SubGroupOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class SubGroupByMessageIdOption(day: SubGroupOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class YAxisOptions(val optionVal: Int, val messageId: Int) {
         TOTAL_DURATION(ReportSeries.TOTAL_DURATION,
@@ -188,18 +188,18 @@ class ReportEditPresenter(context: Any,
                 MessageID.number_unique_students_attending)
     }
 
-    class YAxisMessageIdOption(data: YAxisOptions, context: Any)
-        : MessageIdOption(data.messageId, context, data.optionVal)
+    class YAxisMessageIdOption(data: YAxisOptions, context: Any, di: DI)
+        : MessageIdOption(data.messageId, context, data.optionVal, di = di)
 
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        view.visualTypeOptions = VisualTypeOptions.values().map { VisualTypeMessageIdOption(it, context) }
-        view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context) }
-        view.yAxisOptions = YAxisOptions.values().map { YAxisMessageIdOption(it, context) }
+        view.visualTypeOptions = VisualTypeOptions.values().map { VisualTypeMessageIdOption(it, context, di) }
+        view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context, di) }
+        view.yAxisOptions = YAxisOptions.values().map { YAxisMessageIdOption(it, context, di) }
         view.dateRangeOptions = DateRangeOptions.values().filter { it.dateRange != null }
-                .map {  ObjectMessageIdOption(it.messageId, context, it.code, it.dateRange) }
+                .map {  ObjectMessageIdOption(it.messageId, context, it.code, it.dateRange, di) }
     }
 
     override fun onLoadDataComplete() {
@@ -239,9 +239,8 @@ class ReportEditPresenter(context: Any,
 
             entityVal?.reportSeriesWithFiltersList = newSeriesList.toList()
             view.entity = entityVal
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[RESULT_REPORT_FILTER_KEY] = null
-            }
+            requireSavedStateHandle()[RESULT_REPORT_FILTER_KEY] = null
+
         }
 
 
@@ -250,9 +249,7 @@ class ReportEditPresenter(context: Any,
             ListSerializer(DateRangeMoment.serializer()), DateRangeMoment::class) {
             val dateRangeMoment = it.firstOrNull() ?: return@observeSavedStateResult
             handleAddCustomRange(dateRangeMoment)
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[RESULT_DATE_RANGE_KEY] = null
-            }
+            requireSavedStateHandle()[RESULT_DATE_RANGE_KEY] = null
         }
     }
 
@@ -263,7 +260,7 @@ class ReportEditPresenter(context: Any,
             it.takeIf { entityUid != 0L }?.reportDao?.findByUid(entityUid)
         } ?: Report()
 
-        handleXAxisSelected(XAxisOptions.values().map { XAxisMessageIdOption(it, context) }.find { it.code == report.xAxis } as MessageIdOption)
+        handleXAxisSelected(XAxisOptions.values().map { XAxisMessageIdOption(it, context, di) }.find { it.code == report.xAxis } as MessageIdOption)
         if(report.reportDateRangeSelection == Report.CUSTOM_RANGE){
             handleAddCustomRange(report.toDateRangeMoment())
         }
@@ -305,7 +302,7 @@ class ReportEditPresenter(context: Any,
             ReportWithSeriesWithFilters()
         }
 
-        handleXAxisSelected(XAxisOptions.values().map { XAxisMessageIdOption(it, context) }.find { it.code == editEntity.xAxis } as MessageIdOption)
+        handleXAxisSelected(XAxisOptions.values().map { XAxisMessageIdOption(it, context, di) }.find { it.code == editEntity.xAxis } as MessageIdOption)
         if(editEntity.reportDateRangeSelection == Report.CUSTOM_RANGE){
             handleAddCustomRange(editEntity.toDateRangeMoment())
         }
@@ -354,7 +351,7 @@ class ReportEditPresenter(context: Any,
     fun handleAddCustomRange(dateRangeMoment: DateRangeMoment) {
         view.dateRangeOptions = DateRangeOptions.values().map {
             ObjectMessageIdOption(it.messageId, context, it.code, it.dateRange ?: dateRangeMoment,
-                    if(it.dateRange != null) null else dateRangeMoment.toDisplayString())
+                    di, if(it.dateRange != null) null else dateRangeMoment.toDisplayString())
         }
         view.selectedDateRangeMoment = dateRangeMoment
         val entityVal = entity ?: return
@@ -470,7 +467,7 @@ class ReportEditPresenter(context: Any,
 
     fun handleXAxisSelected(selectedOption: IdOption) {
         if (selectedOption.optionId == Report.DAY || selectedOption.optionId == Report.MONTH || selectedOption.optionId == Report.WEEK) {
-            view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
+            view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context, di) }
                     .filter {
                         it.code == Report.GENDER ||
                                 it.code == Report.CONTENT_ENTRY ||
@@ -483,7 +480,7 @@ class ReportEditPresenter(context: Any,
                 selectedOption.optionId == Report.GENDER ||
                 selectedOption.optionId == Report.ENROLMENT_LEAVING_REASON ||
                 selectedOption.optionId == Report.ENROLMENT_OUTCOME) {
-            view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
+            view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context, di) }
         }
     }
 

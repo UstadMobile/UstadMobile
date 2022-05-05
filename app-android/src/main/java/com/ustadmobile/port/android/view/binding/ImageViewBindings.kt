@@ -298,3 +298,12 @@ fun ImageView.setImageResIdInt(resId: Int) {
     setImageResource(resId)
 }
 
+@BindingAdapter("messageIconVisibility")
+fun View.setMessageIconVisibility(message: MessageWithPerson){
+    visibility = if(message.messageTableId == DiscussionPost.TABLE_ID){
+        View.VISIBLE
+    }else{
+        View.GONE
+    }
+}
+

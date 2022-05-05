@@ -20,9 +20,6 @@ class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWit
     override val displayTypeRepo: Any?
         get() = dbRepo?.personDao
 
-    override val viewNames: List<String>
-        get() = listOf(PersonListView.VIEW_NAME)
-
 
     override val listPresenter: UstadListPresenter<*, in PersonWithDisplayDetails>?
         get() = mPresenter

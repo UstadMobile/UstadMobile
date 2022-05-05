@@ -26,9 +26,6 @@ class InviteViaLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
 
     private var mPresenter: InviteViaLinkPresenter? = null
 
-    override val viewNames: List<String>
-        get() = listOf(InviteViaLinkView.VIEW_NAME)
-
     override var inviteLink: String? = null
         get() = field
         set(value) {

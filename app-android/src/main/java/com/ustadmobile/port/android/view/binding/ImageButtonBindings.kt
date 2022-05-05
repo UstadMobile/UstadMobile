@@ -25,6 +25,7 @@ fun ImageButton.setEditButtonClick2(listener: NewCommentItemListener, text: Stri
         if(text.isNullOrEmpty()){
             return@setOnClickListener
         }
+
         listener.addComment(text)
     }
 

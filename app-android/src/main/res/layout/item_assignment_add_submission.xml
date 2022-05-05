@@ -9,6 +9,7 @@
         <import type="android.view.View" />
         <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
         <import type="com.ustadmobile.port.android.view.SubmissionAdapter"/>
+        <import type="android.text.Html"/>
 
         <variable
             name="showFiles"
@@ -52,7 +53,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/dimen_10dp"
-        app:onSelectableItemClicked="@{() -> eventHandler.onClickOpenSubmission(fileSubmission, notSubmitted)}"
+        app:onSelectableItemClicked="@{() -> eventHandler.onClickOpenSubmission(fileSubmission)}"
         android:visibility="@{showFiles ? View.VISIBLE : View.GONE}"
         android:tag="@{fileSubmission.casUid}">
 
@@ -75,7 +76,7 @@
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
-            android:text="@{fileSubmission.casText}"
+            android:text="@{Html.fromHtml(fileSubmission.casText)}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:textStyle="bold"
             android:maxLines="3"

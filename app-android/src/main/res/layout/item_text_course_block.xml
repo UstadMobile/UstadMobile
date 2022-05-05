@@ -8,10 +8,15 @@
         <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
         <import type="com.ustadmobile.port.android.view.ClazzEditFragment"/>
         <import type="android.view.View"/>
+        <import type="android.text.Html"/>
 
         <variable
             name="block"
             type="CourseBlockWithCompleteEntity" />
+
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ClazzDetailOverviewPresenter" />
 
     </data>
 
@@ -19,6 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
+        android:onClick="@{() -> presenter.handleClickTextBlock(block)}"
         app:courseBlockIndent="@{block.cbIndentLevel}">
 
 
@@ -52,7 +58,7 @@
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:id="@+id/item_block_line2_desc"
-            android:text="@{block.cbDescription}"
+            android:text="@{Html.fromHtml(block.cbDescription)}"
             tools:text="Description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

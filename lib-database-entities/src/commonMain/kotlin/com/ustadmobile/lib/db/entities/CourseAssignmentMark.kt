@@ -14,10 +14,10 @@ import kotlinx.serialization.Serializable
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
                 sqlStatements = [
-                    """REPLACE INTO CourseAssignmentMark(camUid, camAssignmentUid, camStudentUid, camMark, camPenalty, camLct) 
-         VALUES (NEW.camUid, NEW.camAssignmentUid, NEW.camStudentUid, NEW.camMark, NEW.camPenalty, NEW.camLct) 
+                    """REPLACE INTO CourseAssignmentMark(camUid, camAssignmentUid, camSubmitterUid, camMark, camPenalty, camLct) 
+         VALUES (NEW.camUid, NEW.camAssignmentUid, NEW.camSubmitterUid, NEW.camMark, NEW.camPenalty, NEW.camLct) 
          /*psql ON CONFLICT (camUid) DO UPDATE 
-         SET camAssignmentUid = EXCLUDED.camAssignmentUid, camStudentUid = EXCLUDED.camStudentUid, camMark = EXCLUDED.camMark, camPenalty = EXCLUDED.camPenalty, camLct = EXCLUDED.camLct
+         SET camAssignmentUid = EXCLUDED.camAssignmentUid, camSubmitterUid = EXCLUDED.camSubmitterUid, camMark = EXCLUDED.camMark, camPenalty = EXCLUDED.camPenalty, camLct = EXCLUDED.camLct
          */"""
                 ]
         )
@@ -30,9 +30,9 @@ class CourseAssignmentMark {
 
     var camAssignmentUid: Long = 0
 
-    var camStudentUid: Long = 0
+    var camSubmitterUid: Long = 0
 
-    var camMark: Int = 0
+    var camMark: Float = 0f
 
     var camPenalty: Int = 0
 

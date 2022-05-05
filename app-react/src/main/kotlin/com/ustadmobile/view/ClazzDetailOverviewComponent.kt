@@ -37,9 +37,6 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzDetailOverviewView.VIEW_NAME)
-
     private var schedules: List<Schedule> = listOf()
 
     private var courseBlocks: List<CourseBlockWithCompleteEntity> = listOf()
@@ -203,7 +200,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
 
                     CourseBlock.BLOCK_CONTENT_TYPE -> {
                         item.entry?.let {
-                            renderContentEntryListItem(it, systemImpl)
+                            renderContentEntryListItem(it,systemImpl, showStatus= true, block = item)
                         }
                     }
                 }

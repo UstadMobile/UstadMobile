@@ -82,14 +82,33 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
     @Query("""
         SELECT * 
           FROM CourseAssignmentSubmission
+          
                LEFT JOIN CourseAssignmentSubmissionAttachment
                ON CourseAssignmentSubmissionAttachment.casaSubmissionUid = CourseAssignmentSubmission.casUid
+               
          WHERE casAssignmentUid = :assignmentUid
-           AND casSubmitterUid = :studentUid
+           AND casSubmitterUid = :submitterUid
       ORDER BY casTimestamp DESC
     """)
-    abstract fun getAllFileSubmissionsFromStudent(assignmentUid: Long, studentUid: Long)
+    abstract fun getAllSubmissionsFromSubmitter(assignmentUid: Long, submitterUid: Long)
             : DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>
+
+    @Query("""
+        SELECT Count(casUid)
+          FROM CourseAssignmentSubmission
+         WHERE casAssignmentUid = :assignmentUid
+           AND casSubmitterUid = :submitterUid
+           AND casType = ${CourseAssignmentSubmission.SUBMISSION_TYPE_FILE}
+    """)
+    abstract suspend fun countFileSubmissionFromStudent(assignmentUid: Long, submitterUid: Long): Int
+
+    @Query("""
+        SELECT Count(casUid)
+          FROM CourseAssignmentSubmission
+         WHERE casAssignmentUid = :assignmentUid
+           AND casSubmitterUid = :submitterUid
+    """)
+    abstract suspend fun countSubmissionsFromSubmitter(assignmentUid: Long, submitterUid: Long): Int
 
     @Query("""
            SELECT COALESCE((
@@ -98,24 +117,40 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
                              ELSE ${CourseAssignmentSubmission.SUBMITTED} 
                              END) AS status
                   FROM CourseAssignmentSubmission
+                       
                        LEFT JOIN CourseAssignmentMark
                        ON CourseAssignmentMark.camAssignmentUid = :assignmentUid
-                       AND CourseAssignmentMark.camStudentUid = :studentUid
+                       AND CourseAssignmentMark.camSubmitterUid = :submitterUid
+                       
                  WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
-                   AND CourseAssignmentSubmission.casSubmitterUid = :studentUid
+                   AND CourseAssignmentSubmission.casSubmitterUid = :submitterUid
                  LIMIT 1
            ),${CourseAssignmentSubmission.NOT_SUBMITTED}) AS Status
     """)
-    abstract fun getStatusOfAssignmentForStudent(assignmentUid: Long, studentUid: Long): DoorLiveData<Int>
+    abstract fun getStatusOfAssignmentForSubmitter(assignmentUid: Long, submitterUid: Long): DoorLiveData<Int>
 
     @Query("""
         SELECT * 
           FROM CourseAssignmentSubmission
          WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
-           AND CourseAssignmentSubmission.casSubmitterUid = :studentUid
+           AND CourseAssignmentSubmission.casSubmitterUid = :submitterUid
       ORDER BY casTimestamp DESC
          LIMIT 1
     """)
-    abstract suspend fun findLastSubmissionFromStudent(studentUid: Long, assignmentUid: Long): CourseAssignmentSubmission?
+    abstract suspend fun findLastSubmissionFromStudent(submitterUid: Long, assignmentUid: Long): CourseAssignmentSubmission?
+
+    companion object {
+
+        const val GET_SUBMITTERID_FROM_STUDENT = """
+             (CASE WHEN ClazzAssignment.caGroupUid = 0
+                                       THEN :studentUid
+                                       ELSE COALESCE((SELECT cgmGroupNumber 
+                                                       FROM CourseGroupMember
+                                                      WHERE cgmSetUid = ClazzAssignment.caGroupUid
+                                                        AND cgmPersonUid = :studentUid
+                                                      LIMIT 1),0))
+        """
+
+    }
 
 }

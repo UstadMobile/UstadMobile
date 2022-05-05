@@ -27,9 +27,6 @@ class CourseGroupSetListComponent(mProps: UmProps): UstadListComponent<CourseGro
     override val listPresenter: UstadListPresenter<*, in CourseGroupSet>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(CourseGroupSetListView.VIEW_NAME)
-
     override var individualList: List<CourseGroupSet>? = null
         get() = field
         set(value) {

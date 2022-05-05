@@ -29,5 +29,6 @@ Issues and workarounds implemented:
 dumpEnvProperties task in core will dump the system properties using Gradle, so that it can be 
 loaded and manually put in place using System.setProperty
 
-* Resource loading: the IDE runs the tests from projectDir/classes .
+* jsTest : This might throw an IllegalStateException when running. Run core:clean, core:prepareLocale,
+   and try again.
 

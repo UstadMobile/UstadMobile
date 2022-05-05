@@ -45,9 +45,6 @@ class ReportListComponent(mProps: UmProps):  UstadListComponent<Report, Report>(
     override val listPresenter: UstadListPresenter<*, in Report>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ReportListView.VIEW_NAME)
-
     private val chartDataMap: MutableMap<Long, ChartData?> = mutableMapOf()
 
     override fun onCreateView() {

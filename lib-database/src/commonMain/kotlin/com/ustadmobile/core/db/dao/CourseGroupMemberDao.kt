@@ -78,6 +78,8 @@ abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
           FROM Person
                JOIN ClazzEnrolment 
                ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+               AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+               AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
                
                LEFT JOIN CourseGroupMember
                ON CourseGroupMember.cgmPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
@@ -93,6 +95,8 @@ abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
           FROM Person
                JOIN ClazzEnrolment 
                ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+               AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
+               AND ClazzEnrolment.clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}
                
                LEFT JOIN CourseGroupMember
                ON CourseGroupMember.cgmPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
@@ -102,6 +106,15 @@ abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
       ORDER BY CourseGroupMember.cgmGroupNumber, Person.firstNames
     """)
     abstract suspend fun findByGroupSetOrderedAsync(setUid: Long, clazzUid: Long): List<CourseGroupMemberPerson>
+
+    @Query("""
+        SELECT * 
+          FROM CourseGroupMember
+         WHERE cgmPersonUid = :studentUid 
+          AND cgmSetUid = :groupSetUid
+         LIMIT 1
+    """)
+    abstract suspend fun findByPersonUid(groupSetUid: Long, studentUid: Long): CourseGroupMember?
 
     @Insert
     abstract suspend fun insertListAsync(entityList: List<CourseGroupMember>)

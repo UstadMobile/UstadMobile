@@ -11,6 +11,7 @@
         <import type="com.ustadmobile.core.util.TreeOneToManyJoinEditListener"/>
         <import type="com.ustadmobile.lib.db.entities.Schedule"/>
         <import type="com.ustadmobile.lib.db.entities.Clazz"/>
+        <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlockWithEntity"/>
         <import type="com.ustadmobile.core.controller.ClazzEdit2Presenter"/>
         <import type="com.ustadmobile.core.model.BitmaskMessageId"/>
@@ -66,6 +67,10 @@
         <variable
             name="mPresenter"
             type="ClazzEdit2Presenter" />
+
+        <variable
+            name="enrolmentPolicy"
+            type="java.util.List&lt;IdOption&gt;"/>
 
         <variable
             name="coursePicture"
@@ -388,6 +393,27 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_setup_heading" />
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/clazz_enrolment_policy"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/enrolment_policy"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_attendance_switch">
+
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:selectedMessageIdOption="@={clazz.clazzEnrolmentPolicy}"
+                    app:messageIdOptions="@{enrolmentPolicy}"
+                    />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/activity_clazz_edit_terminology"
@@ -396,7 +422,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_attendance_switch"
+                app:layout_constraintTop_toBottomOf="@+id/clazz_enrolment_policy"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/terminology">
 

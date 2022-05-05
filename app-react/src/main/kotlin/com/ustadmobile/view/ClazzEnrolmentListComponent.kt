@@ -32,9 +32,6 @@ class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnro
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzEnrolmentDao
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzEnrolmentListView.VIEW_NAME)
-
     private var selectedPersonUid: Long = 0
 
     private var headerText = ""
@@ -117,8 +114,7 @@ class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnro
     override fun RBuilder.renderListItem(item: ClazzEnrolmentWithLeavingReason) {
         umGridContainer {
             val startEndTime = "${item.clazzEnrolmentDateJoined.toDate()?.standardFormat()} " +
-                    "- ${item.clazzEnrolmentDateLeft.toDate(true)?.standardFormat()
-                        ?.replace("Invalid date", getString(MessageID.present))}"
+                    "- ${item.clazzEnrolmentDateLeft.toDate(true)?.standardFormat() ?: getString(MessageID.present)}"
             renderListItemWithTitleDescriptionAndRightAction(
                 title = "${item.roleToString(this, systemImpl)} " +
                         "- ${item.outcomeToString(this, systemImpl)}",

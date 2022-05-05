@@ -14,6 +14,7 @@ compileKotlin{
     kotlinOptions {
         freeCompilerArgs += "-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview"
     }
+
 }
 
 compileTestKotlin {
@@ -25,6 +26,9 @@ compileTestKotlin {
 
 sourceSets.main {
     java.srcDirs("$buildDir/generated/source/door")
+    if(findProperty("skipreactproductionbundle") != "true") {
+        resources.srcDir(rootProject.file("app-react/build/dist-web/"))
+    }
 }
 
 
@@ -121,11 +125,13 @@ shadowJar {
         attributes 'Main-Class': mainClassName
     }
     archiveBaseName = "ustad-server"
+
 }
 
 sourceCompatibility = "8"
 targetCompatibility = "8"
 
-if(findProperty("skipreactproductionbundle") != "true") {
-    shadowJar.dependsOn(":app-react:copyWebAppBundleToJar")
+if(findProperty("ktorbundleproductionjs") == "true") {
+    //Required to ensure that JS resources are ready before any other task copies them etc.
+    processResources.dependsOn(":app-react:build")
 }

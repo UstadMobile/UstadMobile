@@ -20,9 +20,6 @@ class CourseTerminologyListComponent(mProps: UmProps): UstadListComponent<Course
     override val listPresenter: UstadListPresenter<*, in CourseTerminology>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(CourseTerminologyListView.VIEW_NAME)
-
     override fun onCreateView() {
         super.onCreateView()
         ustadComponentTitle = getString(MessageID.select_terminology)

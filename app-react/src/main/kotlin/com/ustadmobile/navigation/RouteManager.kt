@@ -3,6 +3,7 @@ package com.ustadmobile.navigation
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.*
 import com.ustadmobile.view.*
+import kotlin.reflect.KClass
 
 /**
  * Manages all route functionalities like defining the routes and find destinations
@@ -80,6 +81,7 @@ object RouteManager {
         UstadDestination(view = ClazzAssignmentDetailStudentProgressView.VIEW_NAME, component = ClazzAssignmentDetailStudentProgressComponent::class),
         UstadDestination(view = SessionListView.VIEW_NAME, component = SessionListComponent::class, showSearch = true),
         UstadDestination(view = TextAssignmentEditView.VIEW_NAME, component = TextAssignmentEditComponent::class),
+        UstadDestination(view = HtmlTextViewDetailView.VIEW_NAME, component = HtmlTextViewComponent::class),
         UstadDestination(view = SelectFileView.VIEW_NAME, component = SelectFileComponent::class),
         UstadDestination(view = StatementListView.VIEW_NAME, component = StatementListComponent::class),
         UstadDestination(view = ReportTemplateListView.VIEW_NAME, component = ReportTemplateListComponent::class),
@@ -93,6 +95,14 @@ object RouteManager {
         UstadDestination(view = ChatDetailView.VIEW_NAME, component = ChatDetailComponent::class),
         UstadDestination(view = ReportDetailView.VIEW_NAME, component = ReportDetailComponent::class)
     )
+
+    private val componentClassToViewNamesMap: Map<KClass<*>, List<String>> by lazy {
+        destinationList.groupBy {
+            it.component
+        }.entries.associate { entry ->
+            entry.key to entry.value.map { it.view }
+        }
+    }
 
     /**
      * Default destination to navigate to when destination is not specified
@@ -119,4 +129,12 @@ object RouteManager {
             it.view == view
         }
     }
+
+    /**
+     * Get a list of the viewnames that belong to any given component class.
+     */
+    fun lookupViewNamesByComponent(componentClass: KClass<*>) : List<String>? {
+        return componentClassToViewNamesMap[componentClass]
+    }
+
 }

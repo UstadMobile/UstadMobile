@@ -212,7 +212,7 @@ class EdraakK12ContentScraper : Runnable {
         try {
             val index = javaClass.getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG).readString()
             val doc = Jsoup.parse(index, UTF_ENCODING)
-            doc.head().selectFirst("title").text(response.title!!)
+            doc.head().selectFirst("title")?.text(response.title!!)
             FileUtils.writeStringToFile(File(destinationDirectory, INDEX_HTML), doc.toString(), UTF_ENCODING)
 
             checkBeforeCopyToFile(ScraperConstants.JS_TAG, File(destinationDirectory, JQUERY_JS))

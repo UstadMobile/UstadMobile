@@ -1,138 +1,115 @@
 package com.ustadmobile.view
 
-import Breakpoint
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.DefaultNewCommentItemListener
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.util.FieldLabel
+import com.ustadmobile.util.StyleManager.defaultMarginBottom
+import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
-import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.view.ext.umProfileAvatar
-import com.ustadmobile.mui.components.*
 import kotlinx.css.FlexDirection
 import kotlinx.css.LinearDimension
+import kotlinx.css.marginTop
 import kotlinx.css.padding
-import kotlinx.css.width
 import react.RBuilder
 import react.RComponent
 import react.setState
 import styled.css
 import styled.styledSpan
-import kotlin.js.Date
 
 interface CommentProps: UmProps {
     var listener: DefaultNewCommentItemListener?
-    var systemImpl: UstadMobileSystemImpl
-    var shownAt: Long
-    var person: Person?
-    var title: String?
     var label: String?
-    var onDialogClosed: () -> Unit
 }
 
 class NewCommentsComponent(mProps: CommentProps): RComponent<CommentProps, UmState>(mProps) {
 
-    private var showDialog: Boolean = true
+    private var commentLabel = FieldLabel(text = props.label)
 
-    private var lastShownAt = 0L
-
-    private var classCommentLabel = FieldLabel(text = props.label)
-
-    private var classCommentText = ""
+    private var commentText = ""
 
     override fun RBuilder.render() {
-        umDialog(showDialog,
-            onClose = {handleDialogClosed()},
-            fullWidth = true,
-            maxWidth = Breakpoint.sm) {
-            umDialogContent {
-                css {
-                    width = LinearDimension("100%")
+        umItem(GridSize.cells12, flexDirection = FlexDirection.row){
+            css{
+                +defaultMarginBottom
+            }
+            styledSpan {
+                css{
+                    padding(right = 4.spacingUnits)
                 }
-                umGridContainer(rowSpacing = GridSpacing.spacing4) {
+                umIcon("person"){
                     css {
-                        width = LinearDimension("100%")
-                    }
-
-                    if(props.person != null){
-                        umItem(GridSize.cells12, flexDirection = FlexDirection.row){
-                            styledSpan {
-                                css{
-                                    padding(right = 2.spacingUnits)
-                                }
-                                umProfileAvatar(props.person?.personUid ?: 0,fallback = "person")
-                                umTypography(props.person?.fullName())
-                            }
-                        }
-                    }
-
-                    umItem(GridSize.cells12){
-                        umTextFieldMultiLine(
-                            label = "${classCommentLabel.text}",
-                            helperText = classCommentLabel.errorText,
-                            value = classCommentText,
-                            error = classCommentLabel.error,
-                            rowsMax = 5,
-                            rows = 3,
-                            variant = FormControlVariant.outlined,
-                            onChange = {
-                                setState {
-                                    classCommentText = it
-                                    classCommentLabel = classCommentLabel.copy(errorText = null)
-                                }
-                            })
+                        marginTop = LinearDimension("20px")
                     }
                 }
             }
 
-            umDialogActions {
-                umButton(
-                    props.systemImpl.getString(MessageID.send, this),
-                    endIcon = "send",
-                    color = UMColor.secondary,
-                    onClick = {
-                        if(classCommentText.isNotEmpty()){
-                            props.listener?.addComment(classCommentText)
-                            setState {
-                                classCommentText = ""
-                            }
-                            handleDialogClosed()
-                        }else{
-                            setState {
-                                classCommentLabel = classCommentLabel.copy(errorText = "")
-                            }
+            umItem(if(commentText.isNotEmpty()) GridSize.cells11 else GridSize.cells12,
+                if(commentText.isNotEmpty()) GridSize.cells10 else GridSize.cells11){
+                umTextFieldMultiLine(
+                    value = commentText,
+                    label = "${commentLabel.text}",
+                    rowsMax = 3,
+                    variant = FormControlVariant.outlined,
+                    onChange = {
+                        setState {
+                            commentText = it
+                        }
+                    }){
+                    attrs.onKeyDown = {
+                        if(it.shiftKey && it.key.lowercase() == "enter"){
+                            it.preventDefault()
+                            it.target.asDynamic().value += "\n"
+                        }
+                        if(!it.shiftKey && it.key.lowercase() == "enter"){
+                            it.preventDefault()
+                            handleSendComment()
                         }
                     }
-                )
+                }
             }
+
+            if(commentText.isNotEmpty()){
+                umItem(GridSize.cells2, GridSize.cells1, flexDirection = FlexDirection.rowReverse) {
+                    umFab("send","",
+                        variant = FabVariant.round,
+                        size = ButtonSize.large,
+                        color = UMColor.secondary,
+                        onClick = {
+                            stopEventPropagation(it)
+                            handleSendComment()
+                        }){
+                        css{
+                            +defaultMarginTop
+                        }
+                    }
+                }
+            }
+
         }
     }
 
-    private fun handleDialogClosed(){
-        props.onDialogClosed.invoke()
-        setState {
-            showDialog = false
-            lastShownAt = props.shownAt
+    private fun handleSendComment(){
+        if(commentText.isNotEmpty()){
+            props.listener?.addComment(commentText)
+            setState {
+                commentText = ""
+            }
+        }else {
+            setState {
+                commentLabel = commentLabel.copy(errorText = "")
+            }
         }
     }
 }
 
 fun RBuilder.renderCreateNewComment(
     label: String,
-    person: Person? = null,
-    listener: DefaultNewCommentItemListener?,
-    systemImpl: UstadMobileSystemImpl,
-    shownAt: Long = Date().getTime().toLong(),
-    onDialogClosed: () -> Unit
+    listener: DefaultNewCommentItemListener?
 ) = child(NewCommentsComponent::class) {
     attrs.label = label
-    attrs.shownAt = shownAt
     attrs.listener = listener
-    attrs.person = person
-    attrs.systemImpl = systemImpl
-    attrs.onDialogClosed = onDialogClosed
 }

@@ -4,10 +4,8 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ext.toDeepLink
-import com.ustadmobile.core.view.ClazzAssignmentDetailView
-import com.ustadmobile.core.view.ClazzDetailOverviewView
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -97,13 +95,34 @@ class ClazzDetailOverviewPresenter(
     }
 
     fun handleClickAssignment(assignment: ClazzAssignment){
-        ustadNavController.navigate(
+        requireNavController().navigate(
             ClazzAssignmentDetailView.VIEW_NAME,
             mapOf(ARG_ENTITY_UID to assignment.caUid.toString()))
     }
 
+    fun handleClickTextBlock(courseBlock: CourseBlockWithCompleteEntity){
+        val args = mutableMapOf<String, String>()
+        args[HtmlTextViewDetailView.DISPLAY_TEXT] = courseBlock.cbDescription ?: ""
+        args[HtmlTextViewDetailView.DISPLAY_TITLE] = courseBlock.cbTitle ?: ""
+
+        requireNavController().navigate(
+            HtmlTextViewDetailView.VIEW_NAME, args)
+    }
+
     fun handleDownloadAllClicked() {
 
+    }
+
+    /**
+     * Goes to CourseDiscussion's Detail screen not edit
+     */
+    fun handleClickCourseDiscussion(courseDiscussion: CourseDiscussion){
+        ustadNavController?.navigate(
+            CourseDiscussionDetailView.VIEW_NAME,
+            mapOf(ARG_ENTITY_UID to courseDiscussion.courseDiscussionUid.toString(),
+                ARG_CLAZZUID to courseDiscussion.courseDiscussionClazzUid.toString()
+                )
+        )
     }
 
 

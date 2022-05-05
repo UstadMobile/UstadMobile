@@ -24,9 +24,6 @@ import styled.styledDiv
 
 class SiteEditComponent(props: UmProps): UstadEditComponent<Site>(props), SiteEditView {
 
-    override val viewNames: List<String>
-        get() = listOf(SiteEditView.VIEW_NAME)
-
     private var mPresenter: SiteEditPresenter? = null
 
     private var siteTermsWithLanguageList: List<SiteTermsWithLanguage> = listOf()

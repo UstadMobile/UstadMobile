@@ -10,7 +10,7 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.*
-import com.ustadmobile.util.ext.observeResult
+import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.view.ext.renderListItemWithPersonAttendanceAndPendingRequests
 import com.ustadmobile.view.ext.renderListSectionTitle
 import org.w3c.dom.events.Event
@@ -35,9 +35,6 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
     private var addNewStringId: Int = 0
 
     private var filterBySchoolUid: Long = 0
-
-    override val viewNames: List<String>
-        get() = listOf(SchoolMemberListView.VIEW_NAME)
 
     override fun addMember() {
         val args = if (addPersonKeyName == "Person_" + Role.ROLE_SCHOOL_STAFF_UID.toString()) {

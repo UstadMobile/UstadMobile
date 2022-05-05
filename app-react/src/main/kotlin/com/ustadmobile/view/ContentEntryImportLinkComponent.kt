@@ -3,7 +3,6 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ContentEntryImportLinkView
-import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
@@ -24,9 +23,6 @@ class ContentEntryImportLinkComponent(mProps: UmProps): UstadBaseComponent<UmPro
 
     private var mPresenter: ContentEntryImportLinkPresenter? = null
 
-
-    override val viewNames: List<String>
-        get() = listOf(SiteEnterLinkView.VIEW_NAME)
 
     var importLinkLabel = FieldLabel(getString(MessageID.enter_url))
 

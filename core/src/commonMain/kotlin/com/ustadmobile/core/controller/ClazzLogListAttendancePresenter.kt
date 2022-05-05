@@ -70,16 +70,17 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
         RECORD_ATTENDANCE_NEW_SCHEDULE(2, MessageID.add_a_new_occurrence)
     }
 
-    fun RecordAttendanceOption.toMessageIdOption(context: Any) = MessageIdOption(messageId, context,
-            commandId)
-
-    class ClazzLogListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    class ClazzLogListSortOption(
+        val sortOrder: SortOrder,
+        context: Any,
+        di: DI
+    ) : MessageIdOption(sortOrder.messageId, context, di = di)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         clazzUidFilter = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
         updateListOnView()
-        view.sortOptions = SortOrder.values().toList().map { ClazzLogListSortOption(it, context) }
+        view.sortOptions = SortOrder.values().toList().map { ClazzLogListSortOption(it, context, di) }
         view.graphData = graphDisplayData
 
         presenterScope.launch {

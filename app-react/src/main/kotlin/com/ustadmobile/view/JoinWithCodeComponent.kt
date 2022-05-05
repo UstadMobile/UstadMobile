@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.core.navigation.NavControllerJs
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
@@ -27,9 +28,6 @@ class JoinWithCodeComponent (mProps: UmProps): UstadBaseComponent<UmProps, UmSta
     JoinWithCodeView {
 
     private var mPresenter: JoinWithCodePresenter? = null
-
-    override val viewNames: List<String>
-        get() = listOf(JoinWithCodeView.VIEW_NAME)
 
     var buttonEnabled = true
 
@@ -58,7 +56,8 @@ class JoinWithCodeComponent (mProps: UmProps): UstadBaseComponent<UmProps, UmSta
         }
 
     override fun finish() {
-        navController.navigateUp()
+        //TODO: Why is this only on JS?
+        (navController as NavControllerJs).navigateUp()
     }
 
     override var buttonLabel: String? = null

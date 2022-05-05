@@ -43,10 +43,6 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
     override val displayTypeRepo: Any?
         get() = dbRepo?.contentEntryDao
 
-    override val viewNames: List<String>
-        get() = listOf(ContentEntryList2View.VIEW_NAME_HOME, ContentEntryList2View.VIEW_NAME,
-            ContentEntryList2View.FOLDER_VIEW_NAME)
-
     override var editOptionVisible: Boolean = false
         get() = field
         set(value) {
@@ -106,13 +102,9 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
                     MessageID.add_link_description) {
                     mPresenter?.onClickImportLink()
                 },
-                UmDialogOptionItem("collections",MessageID.add_from_gallery,
-                    MessageID.add_gallery_description) {
-                    mPresenter?.onClickImportGallery()
-                },
                 UmDialogOptionItem("note_add",MessageID.add_file,
                     MessageID.add_file_description) {
-                    mPresenter?.onClickImportFile()
+                    mPresenter?.handleOnClickAddSupportedFile()
                 }
             )
 

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
 import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -8,47 +7,72 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemMessageListBinding
-import com.ustadmobile.core.controller.ChatDetailPresenter
+import com.ustadmobile.core.controller.MessagesPresenter
+import com.ustadmobile.lib.db.entities.MessageRead
 import com.ustadmobile.lib.db.entities.MessageWithPerson
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import kotlinx.coroutines.*
 import me.saket.bettermovementmethod.BetterLinkMovementMethod
 
 
-class MessagesRecyclerAdapter(val loggedInPersonUid: Long)
-    : SelectablePagedListAdapter<MessageWithPerson,
+class MessagesRecyclerAdapter(
+    val loggedInPersonUid: Long,
+    private val presenterScope: CoroutineScope?,
+    private val presenter: MessagesPresenter?
+): SelectablePagedListAdapter<MessageWithPerson,
         MessagesRecyclerAdapter.MessageWithPersonViewHolder>(DIFF_CALLBACK_COMMENTS) {
 
-    var presenter: ChatDetailPresenter? = null
 
-    class MessageWithPersonViewHolder(val binding: ItemMessageListBinding)
+
+    class MessageWithPersonViewHolder(val binding: ItemMessageListBinding,
+                                      var messageReadJob: Job? = null)
         : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageWithPersonViewHolder {
         val vh = MessageWithPersonViewHolder(ItemMessageListBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false))
 
-        addMovement(vh.binding.itemCommentsListLine2Text, parent.context)
+        addMovement(vh.binding.itemCommentsListLine2Text)
 
         return vh
     }
 
 
     override fun onBindViewHolder(holder: MessageWithPersonViewHolder, position: Int) {
-        if(itemCount > 0 ) {
+        holder.messageReadJob?.cancel()
 
-            val message = getItem(position)
-            holder.binding.loggedInPersonUid = loggedInPersonUid
-            holder.itemView.tag = message?.messageUid
-            holder.binding.message = message
+        val message = getItem(position)
+        holder.binding.loggedInPersonUid = loggedInPersonUid
+        holder.itemView.tag = message?.messageUid
+        holder.binding.message = message
 
-            holder.binding.itemCommentsListLine2Text.text = message?.messageText
-            addMovement(holder.binding.itemCommentsListLine2Text, holder.itemView.context)
+        holder.binding.itemCommentsListLine2Text.text = message?.messageText
+        addMovement(holder.binding.itemCommentsListLine2Text)
 
+
+        //if message is unread
+        holder.takeIf {
+            message != null && message.messageRead == null
+        }?.messageReadJob = presenterScope?.launch {
+            delay(1000)
+            //GO and run the insert
+            presenter?.updateMessageRead(
+                MessageRead(loggedInPersonUid, message?.messageUid?:0,
+                    message?.messageEntityUid?:0L)
+            )
+
+            //TODO: Consider an event collator
+//                val collator = EventCollator<MessageRead>(200){
+//                    readMessages:List<MessageRead> ->
+//                        presenter?.updateMessageReadList(readMessages)
+//                }
+//                collator.send()
+            holder.messageReadJob = null
         }
     }
 
 
-    private fun addMovement(textView: TextView, context: Context){
+    private fun addMovement(textView: TextView){
 
         textView.linksClickable = true
 

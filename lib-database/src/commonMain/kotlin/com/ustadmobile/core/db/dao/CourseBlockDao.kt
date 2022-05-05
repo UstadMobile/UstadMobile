@@ -86,14 +86,22 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                LEFT JOIN ClazzAssignment as assignment
                ON assignment.caUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+               LEFT JOIN CourseDiscussion as courseDiscussion
+               ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
+               AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
                LEFT JOIN ContentEntry as entry
                ON entry.contentEntryUid = CourseBlock.cbEntityUid
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+               
+               LEFT JOIN Language
+               ON Language.langUid = entry.primaryLanguageUid
+                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+               
          WHERE cbClazzUid = :clazzUid
            AND cbActive
       ORDER BY cbIndex
           """)
-    abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntity>
+    abstract suspend fun findAllCourseBlockByClazzUidAsync(clazzUid: Long): List<CourseBlockWithEntityDb>
 
     @Query("""
          WITH CtePermissionCheck (hasPermission) 
@@ -106,8 +114,9 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                  WHERE Clazz.clazzUid = :clazzUid
                    AND PrsGrpMbr.groupMemberPersonUid = :personUid))
 
-        SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, ContentEntryParentChildJoin.*, 
+        SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, CourseDiscussion.*, ContentEntryParentChildJoin.*, 
                Container.*, CourseAssignmentMark.*, (CourseBlock.cbUid NOT IN (:collapseList)) AS expanded,
+               
                
                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
                 COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
@@ -124,6 +133,8 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                 0 as penalty,
                 
                 (SELECT hasPermission FROM CtePermissionCheck) AS hasMetricsPermission,
+                
+             
                  (SELECT COUNT(*) 
                         FROM ClazzEnrolment 
                         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid 
@@ -143,7 +154,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                               AND ClazzAssignment.caUid = CourseAssignmentSubmission.casAssignmentUid
                              
                               LEFT JOIN CourseAssignmentMark
-                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
+                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camSubmitterUid
                               AND ClazzAssignment.caUid = CourseAssignmentMark.camAssignmentUid
                               
                         WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
@@ -155,10 +166,10 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                
                 (CASE WHEN (SELECT hasPermission 
                            FROM CtePermissionCheck)
-                   THEN (SELECT COUNT(DISTINCT(CourseAssignmentMark.camStudentUid)) 
+                   THEN (SELECT COUNT(DISTINCT(CourseAssignmentMark.camSubmitterUid)) 
                            FROM CourseAssignmentMark 
                                 JOIN ClazzEnrolment
-                                ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
+                                ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camSubmitterUid
                                 
                           WHERE CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
                             AND ClazzEnrolment.clazzEnrolmentActive
@@ -167,10 +178,13 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                             AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
                    ELSE 0 END) AS markedStudents,
                    
-                   (CASE WHEN CourseAssignmentMark.camAssignmentUid IS NOT NULL 
-                             THEN ${CourseAssignmentSubmission.MARKED}
-                             ELSE ${CourseAssignmentSubmission.SUBMITTED} 
-                             END) AS fileSubmissionStatus
+                   COALESCE((CASE WHEN CourseAssignmentMark.camUid IS NOT NULL 
+                          THEN ${CourseAssignmentSubmission.MARKED} 
+                          WHEN CourseAssignmentSubmission.casUid IS NOT NULL 
+                          THEN ${CourseAssignmentSubmission.SUBMITTED} 
+                          ELSE ${CourseAssignmentSubmission.NOT_SUBMITTED} END), 
+                               ${CourseAssignmentSubmission.NOT_SUBMITTED}) AS fileSubmissionStatus
+                
                 
           FROM CourseBlock 
           
@@ -186,6 +200,10 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                ON ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
                AND NOT ceInactive
                AND CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+               
+               LEFT JOIN CourseDiscussion 
+                      ON CourseDiscussion.courseDiscussionUid = CourseBlock.cbEntityUid
+                     AND CourseBlock.cbType = ${CourseBlock.BLOCK_DISCUSSION_TYPE}
                
                LEFT JOIN ContentEntryParentChildJoin 
                ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid
@@ -207,14 +225,23 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                                ORDER BY resultScoreScaled DESC, 
                                         extensionProgress DESC, 
                                         resultSuccess DESC 
-                                  LIMIT 1)         
+                                  LIMIT 1) 
+                                  
+               LEFT JOIN CourseAssignmentSubmission
+                ON casUid = (SELECT casUid 
+                                     FROM CourseAssignmentSubmission
+                                    WHERE casAssignmentUid = ClazzAssignment.caUid
+                                      AND casSubmitterUid = :personUid
+                                 ORDER BY casTimestamp DESC
+                                    LIMIT 1)
+                                          
                LEFT JOIN CourseAssignmentMark
                       ON camUid = (SELECT camUid 
                                      FROM CourseAssignmentMark
                                     WHERE camAssignmentUid = ClazzAssignment.caUid
-                                      AND camStudentUid = :personUid
+                                      AND camSubmitterUid = :personUid
                                  ORDER BY camLct DESC
-                                    LIMIT 1)
+                                    LIMIT 1)       
          WHERE CourseBlock.cbClazzUid = :clazzUid
            AND CourseBlock.cbActive
            AND NOT CourseBlock.cbHidden
@@ -223,7 +250,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
            AND CourseBlock.cbModuleParentBlockUid NOT IN (:collapseList)
       ORDER BY CourseBlock.cbIndex
     """)
-    @QueryLiveTables(value = ["CourseBlock", "ClazzAssignment",
+    @QueryLiveTables(value = ["CourseBlock", "ClazzAssignment", "CourseDiscussion",
         "ContentEntry", "CourseAssignmentMark","StatementEntity",
         "Container","ContentEntryParentChildJoin","PersonGroupMember",
         "Clazz","ScopedGrant","ClazzEnrolment","CourseAssignmentSubmission"])
@@ -239,7 +266,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
            SET cbActive = :active, 
                cbLct = :changeTime
          WHERE cbUid = :cbUid""")
-    abstract fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
+    abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
     override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
         uidList.forEach {

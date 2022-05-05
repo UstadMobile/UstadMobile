@@ -3,12 +3,6 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_FIRST_NAME_ASC
-import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_FIRST_NAME_DESC
-import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_ACTIVE_ASC
-import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_ACTIVE_DESC
-import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_NAME_ASC
-import com.ustadmobile.core.db.dao.StatementDao.Companion.SORT_LAST_NAME_DESC
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
@@ -89,7 +83,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
            SET caActive = :active, 
                caLct = :changeTime
          WHERE caUid = :cbUid""")
-    abstract fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
+    abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
     override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
         uidList.forEach {
@@ -98,98 +92,86 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
     }
 
     @Query("""
-        SELECT 0 AS resultMax, 
-               0 AS resultScore, 
-               COALESCE(SUM(ResultSource.cacheFinalWeightScoreWithPenalty),0) as resultScaled,
-               'FALSE' as contentComplete, 
-               COALESCE(AVG(ResultSource.cacheProgress),0) as progress, 0 as success,
-               0 AS penalty,
-               
-               0 As resultWeight,
-               
-              COALESCE((SUM(CASE 
-                        WHEN CAST(ResultSource.cacheContentComplete AS INTEGER) > 0 
-                        THEN 1 ELSE 0 END)), 0) AS totalCompletedContent,
-                        
-               COALESCE(COUNT(DISTINCT ResultSource.cacheContentEntryUid), 0) AS totalContent
- 
-     	  FROM (SELECT ClazzAssignmentRollUp.cacheContentComplete, ClazzAssignmentRollUp.cacheProgress,
-                        ClazzAssignmentRollUp.cacheContentEntryUid, ClazzAssignmentRollUp.cacheWeight, 
-                        ClazzAssignmentRollUp.cacheFinalWeightScoreWithPenalty
-     	 	      FROM ClazzAssignmentRollUp 
-                 WHERE ClazzAssignmentRollUp.cachePersonUid = :personUid
-                   AND ClazzAssignmentRollUp.cacheClazzAssignmentUid = :caUid
-              GROUP BY ClazzAssignmentRollUp.cacheContentEntryUid
-     	  ) AS ResultSource
+            $SUBMITTER_LIST_CTE
+            
+            SELECT (SELECT COUNT(*) FROM SubmitterList) AS totalStudents,
+            
+                    0 as notSubmittedStudents,
+                    
+                    (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casSubmitterUid) 
+                      FROM CourseAssignmentSubmission
+                           LEFT JOIN CourseAssignmentMark
+                           ON CourseAssignmentSubmission.casSubmitterUid = CourseAssignmentMark.camSubmitterUid
+                           AND CourseAssignmentMark.camAssignmentUid = CourseAssignmentSubmission.casAssignmentUid
+                     WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+                       AND CourseAssignmentMark.camUid IS NULL
+                       AND CourseAssignmentSubmission.casSubmitterUid IN (SELECT submitterId 
+                                                                            FROM SubmitterList))
+                      AS submittedStudents,
+                     
+                     
+                     (SELECT COUNT(DISTINCT CourseAssignmentMark.camSubmitterUid) 
+                        FROM CourseAssignmentMark
+                            
+                             JOIN CourseAssignmentSubmission
+                             ON CourseAssignmentSubmission.casSubmitterUid = CourseAssignmentMark.camSubmitterUid
+                             AND CourseAssignmentSubmission.casAssignmentUid = CourseAssignmentMark.camAssignmentUid
+                             
+                       WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
+                         AND CourseAssignmentMark.camSubmitterUid IN (SELECT submitterId 
+                                                                            FROM SubmitterList))
+                         AS markedStudents, 
+                         
+                         'TRUE' AS hasMetricsPermission
+                         
+         FROM  ClazzAssignment
+        WHERE caActive
+          AND caClazzUid = :clazzUid 
+          AND caUid = :assignmentUid                  
     """)
-    @SqliteOnly
-    abstract fun getStatementScoreProgressForAssignment(caUid: Long, personUid: Long): DoorLiveData<ContentEntryStatementScoreProgress?>
-    
+    abstract fun getProgressSummaryForAssignment(
+        assignmentUid: Long, clazzUid: Long, group: String) : DoorLiveData<AssignmentProgressSummary?>
+
+
     @Query("""
-         SELECT ResultSource.personUid, ResultSource.firstNames, ResultSource.lastName,
-            0 AS attempts, 
-            0 AS startDate, 
-            0 AS endDate, 
-            0 AS duration, 
-            
-            
-            0 AS progress,
+         $SUBMITTER_LIST_CTE
+        
+         SELECT submitterId AS submitterUid,
+                name, 
                 
-                0 as success, 
-                
-              0 AS resultScaled,
-                              
-             0 AS resultWeight,       
-                
-                'FALSE' as contentComplete,
-                
-                0 AS resultScore,
-                          
-                0 AS resultMax, 
-                                        
-                0 AS penalty,   
-                                                    
-                  0 AS totalCompletedContent,
-            
-           0 AS totalContent,                              
-                                                   
-           COALESCE((CASE WHEN ResultSource.camUid IS NOT NULL 
+                 COALESCE((CASE WHEN CourseAssignmentMark.camUid IS NOT NULL 
                           THEN ${CourseAssignmentSubmission.MARKED} 
-                          WHEN ResultSource.casUid IS NOT NULL 
+                          WHEN CourseAssignmentSubmission.casUid IS NOT NULL 
                           THEN ${CourseAssignmentSubmission.SUBMITTED} 
                           ELSE ${CourseAssignmentSubmission.NOT_SUBMITTED} END), 
                                ${CourseAssignmentSubmission.NOT_SUBMITTED}) AS fileSubmissionStatus,
-                                 
-
-            cm.commentsText AS latestPrivateComment
-        
-         FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 
-            CourseAssignmentSubmission.casUid, 
-            CourseAssignmentMark.camUid
-                FROM PersonGroupMember
-         ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
-             LEFT JOIN ClazzEnrolment
-             ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid 
-                AND ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid
-            
-             LEFT JOIN ClazzAssignment 
-             ON ClazzAssignment.caUid = :assignmentUid
-             
-             LEFT JOIN CourseAssignmentSubmission
-             ON CourseAssignmentSubmission.casAssignmentUid = ClazzAssignment.caUid
-             AND CourseAssignmentSubmission.casSubmitterUid = Person.personUid
-             
-             LEFT JOIN CourseAssignmentMark
-             ON CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
-             AND CourseAssignmentMark.camStudentUid = Person.personUid
                 
-                WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
-                AND PersonGroupMember.groupMemberActive                      
-                AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
-                AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}     
-                AND ClazzEnrolment.clazzEnrolmentActive
-                GROUP BY Person.personUid) AS ResultSource 
-             		LEFT JOIN Comments AS cm 
+                (CASE WHEN ClazzAssignment.caGroupUid = 0 
+                 THEN 'TRUE' 
+                 ELSE 'FALSE' END) AS isGroupAssignment,
+                 
+                 cm.commentsText AS latestPrivateComment 
+
+           FROM SubmitterList
+                JOIN ClazzAssignment
+                ON ClazzAssignment.caUid = :assignmentUid
+           
+                LEFT JOIN CourseAssignmentMark
+                ON CourseAssignmentMark.camUid = (SELECT camUid
+                                                    FROM CourseAssignmentMark
+                                                   WHERE camAssignmentUid = :assignmentUid
+                                                     AND camSubmitterUid = SubmitterList.submitterId
+                                                ORDER BY camLct DESC 
+                                                   LIMIT 1)
+                
+                LEFT JOIN CourseAssignmentSubmission
+                ON CourseAssignmentSubmission.casUid = (SELECT casUid
+                                                          FROM CourseAssignmentSubmission
+                                                         WHERE casAssignmentUid = :assignmentUid
+                                                           AND casSubmitterUid = SubmitterList.submitterId
+                                                      ORDER BY casTimestamp DESC 
+                                                         LIMIT 1)
+                LEFT JOIN Comments AS cm 
                     ON cm.commentsUid = (
                                  SELECT Comments.commentsUid 
                                    FROM Comments 
@@ -197,106 +179,20 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
                                     AND commentsEntityUid = :assignmentUid
                                     AND NOT commentsInActive
                                     AND NOT commentsPublic
-                                    AND Comments.commentsPersonUid = ResultSource.personUid
-                               ORDER BY commentsDateTimeAdded DESC LIMIT 1)
-
-         GROUP BY ResultSource.personUid 
-         ORDER BY CASE(:sortOrder) 
-                WHEN $SORT_FIRST_NAME_ASC THEN ResultSource.firstNames
-                WHEN $SORT_LAST_NAME_ASC THEN ResultSource.lastName
-                ELSE ''
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_FIRST_NAME_DESC THEN ResultSource.firstNames
-                WHEN $SORT_LAST_NAME_DESC THEN ResultSource.lastName
-                ELSE ''
-            END DESC,
-            CASE(:sortOrder)
-                WHEN $SORT_LAST_ACTIVE_ASC THEN endDate 
-                ELSE 0
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_LAST_ACTIVE_DESC then endDate
-                ELSE 0
-            END DESC
+                                    AND (CASE WHEN ClazzAssignment.caGroupUid = 0
+                                              THEN commentsPersonUid = SubmitterList.submitterId
+                                              ELSE commentSubmitterUid = SubmitterList.submitterId END)
+                               ORDER BY commentsDateTimeAdded DESC LIMIT 1)                                                      
+                                                                      
+          WHERE name LIKE :searchText
+       ORDER BY name 
     """)
-    @SqliteOnly
-    abstract fun getAttemptSummaryForStudentsInAssignment(assignmentUid: Long, clazzUid: Long,
-                                                          accountPersonUid: Long,
-                                                          searchText: String, sortOrder: Int):
-            DoorDataSourceFactory<Int, PersonWithAttemptsSummary>
-
-    @Query("""
-        WITH CtePermissionCheck (hasPermission) 
-            AS (SELECT EXISTS( 
-               SELECT PrsGrpMbr.groupMemberPersonUid
-                  FROM Clazz
-                       ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                          :permission
-                          ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
-                 WHERE Clazz.clazzUid = :clazzUid
-                   AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid))
-                
-                
-        SELECT (SELECT hasPermission FROM CtePermissionCheck) AS hasMetricsPermission,
-        
-        (SELECT COUNT(*) 
-                        FROM ClazzEnrolment 
-                        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid 
-                        AND ClazzEnrolment.clazzEnrolmentActive 
-                        AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                        AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
-                        AS totalStudents, 
-        
-               0 AS notSubmittedStudents,
-                
-               (CASE WHEN (SELECT hasPermission 
-                          FROM CtePermissionCheck)
-                     THEN (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casSubmitterUid)
-                         FROM ClazzEnrolment
-                              JOIN CourseAssignmentSubmission
-                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentSubmission.casSubmitterUid
-                              AND ClazzAssignment.caUid = CourseAssignmentSubmission.casAssignmentUid
-                             
-                              LEFT JOIN CourseAssignmentMark
-                              ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
-                              AND ClazzAssignment.caUid = CourseAssignmentMark.camAssignmentUid
-                              
-                        WHERE ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                          AND ClazzEnrolment.clazzEnrolmentActive
-                          AND CourseAssignmentMark.camUid IS NULL
-                          AND ClazzAssignment.caClazzUid = ClazzEnrolment.clazzEnrolmentClazzUid
-                          AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft) 
-                ELSE 0 END) AS submittedStudents,      
-
-                  
-             (CASE WHEN (SELECT hasPermission 
-                           FROM CtePermissionCheck)
-                   THEN (SELECT COUNT(DISTINCT(CourseAssignmentMark.camStudentUid)) 
-                           FROM CourseAssignmentMark 
-                                JOIN ClazzEnrolment
-                                ON ClazzEnrolment.clazzEnrolmentPersonUid = CourseAssignmentMark.camStudentUid
-                                
-                          WHERE CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
-                            AND ClazzEnrolment.clazzEnrolmentActive
-                            AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                            AND ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
-                            AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft)
-                   ELSE 0 END) AS markedStudents
-                           
-        
-        FROM ClazzAssignment
-             JOIN CourseBlock
-             ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
-             AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-       WHERE caActive
-         AND caClazzUid = :clazzUid 
-         AND caUid = :clazzAssignmentUid
-    """)
-    abstract fun getStudentsProgressOnAssignment(clazzUid: Long, accountPersonUid: Long,
-                                                 clazzAssignmentUid: Long, permission: Long): DoorLiveData<AssignmentProgressSummary?>
-
-
+    abstract fun getSubmitterListForAssignment(
+        assignmentUid: Long,
+        clazzUid: Long,
+        group: String,
+        searchText: String
+    ): DoorDataSourceFactory<Int, PersonGroupAssignmentSummary>
 
     @Update
     abstract suspend fun updateAsync(clazzAssignment: ClazzAssignment)
@@ -332,36 +228,41 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
 
     companion object{
 
-        private const val GET_TOTAL_SCORE_WITH_PENALTY_FOR_USER_IN_ASSIGNMENT = """
-               COALESCE((SELECT SUM(cacheFinalWeightScoreWithPenalty)
-                          FROM ClazzAssignmentRollUp
-                         WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
-                          AND cachePersonUid = :accountPersonUid), 0)
+        const val SUBMITTER_LIST_CTE = """
+            WITH SubmitterList (submitterId, name)
+            AS (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid AS submitterId, 
+                       Person.firstNames || ' ' || Person.lastName AS name
+                  FROM ClazzEnrolment
+                  
+                       JOIN Person 
+                       ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                        
+                       JOIN ClazzAssignment
+                       ON ClazzAssignment.caUid = :assignmentUid
 
+                       JOIN CourseBlock
+                       ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
+                       AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                       
+                 WHERE ClazzAssignment.caGroupUid = 0
+                   AND clazzEnrolmentClazzUid = :clazzUid
+                   AND clazzEnrolmentActive
+                   AND clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                   AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft
+                   AND ClazzEnrolment.clazzEnrolmentDateJoined <= CourseBlock.cbGracePeriodDate
+              GROUP BY submitterId, name
+            UNION                 
+             SELECT DISTINCT CourseGroupMember.cgmGroupNumber AS submitterId,
+                    :group || ' ' || CourseGroupMember.cgmGroupNumber AS name  
+               FROM CourseGroupMember
+                    JOIN ClazzAssignment
+                    ON ClazzAssignment.caUid = :assignmentUid
+              WHERE CourseGroupMember.cgmSetUid = ClazzAssignment.caGroupUid
+                AND ClazzAssignment.caGroupUid != 0
+                AND CourseGroupMember.cgmGroupNumber != 0
+           GROUP BY submitterId, name
+            )
         """
-
-        private const val GET_TOTAL_WEIGHT_OF_ASSIGNMENT = """
-            COALESCE((SELECT SUM(cacheWeight)
-                        FROM ClazzAssignmentRollUp
-                       WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
-                         AND cachePersonUid = :accountPersonUid), 0)
-        """
-
-
-        private const val GET_TOTAL_CONTENT_OF_ASSIGNMENT = """
-            COALESCE((SELECT COUNT(DISTINCT cacheContentEntryUid)
-                        FROM ClazzAssignmentRollUp
-                       WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid), 0)
-        """
-
-        private const val GET_TOTAL_COMPLETE_CONTENT_OF_ASSIGNMENT_FOR_USER = """
-             COALESCE((SELECT COUNT(cacheContentComplete)
-                         FROM ClazzAssignmentRollUp
-                        WHERE cacheClazzAssignmentUid = ClazzAssignment.caUid
-                          AND cacheContentComplete
-                          AND cachePersonUid = :accountPersonUid), 0)
-        """
-
 
         const val SORT_DEADLINE_ASC = 1
 

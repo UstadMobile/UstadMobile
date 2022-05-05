@@ -26,9 +26,6 @@ class ScheduleEditComponent (mProps: UmProps): UstadEditComponent<Schedule>(mPro
     override val mEditPresenter: UstadEditPresenter<*, Schedule>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ScheduleEditView.VIEW_NAME)
-
     private val okText = getString(MessageID.ok)
 
     private val cancelText = getString(MessageID.cancel)

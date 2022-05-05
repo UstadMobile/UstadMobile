@@ -21,9 +21,6 @@ class SiteTermsDetailComponent(props: UmProps): UstadDetailComponent<SiteTerms>(
 
     private var mPresenter: SiteTermsDetailPresenter? = null
 
-    override val viewNames: List<String>
-        get() = listOf(SiteTermsDetailView.VIEW_NAME)
-
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
@@ -31,7 +28,7 @@ class SiteTermsDetailComponent(props: UmProps): UstadDetailComponent<SiteTerms>(
         get() = field
         set(value) {
             field = value
-            updateUiWithStateChangeDelay(STATE_CHANGE_DELAY * 5) {
+            updateUiWithStateChangeDelay(MAX_STATE_CHANGE_DELAY_TIME * 2) {
                 fabManager?.visible = value
             }
         }

@@ -8,6 +8,8 @@
         <import type="android.view.View"/>
         <import type="java.util.TimeZone"/>
         <import type="com.ustadmobile.lib.db.entities.CourseAssignmentMark"/>
+        <import type="com.ustadmobile.core.controller.ClazzAssignmentDetailOverviewPresenter"/>
+        <import type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment"/>
 
         <variable
             name="clazzAssignment"
@@ -53,8 +55,8 @@
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
-            android:contentDescription="@string/school"
             app:tint="?colorOnIconTint"
+            android:importantForAccessibility="no"
             app:visibleIfDateSet="@{clazzAssignment.block.cbDeadlineDate}"
             android:src="@drawable/ic_event_available_black_24dp"
             app:layout_constraintStart_toStartOf="parent"
@@ -102,9 +104,51 @@
             app:visibleIfDateSet="@{clazzAssignment.block.cbDeadlineDate}"
             app:layout_constraintStart_toStartOf="@id/item_ca_detail_description_deadline_date"
             app:layout_constraintTop_toBottomOf="@id/item_ca_detail_description_deadline_date"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:text="@string/deadline"
             />
+
+        <ImageView
+            android:id="@+id/item_ca_detail_submission_policy_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:importantForAccessibility="no"
+            app:imageLookupKey="@{clazzAssignment.caSubmissionPolicy}"
+            app:imageLookupMap="@{ClazzAssignmentDetailOverviewFragment.SUBMISSION_POLICY_MAP}"
+            app:tint="?colorOnIconTint"
+            android:src="@drawable/ic_baseline_task_alt_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_ca_detail_deadline_label" />
+
+        <TextView
+            android:id="@+id/item_ca_detail_submission_policy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:layout_marginTop="8dp"
+            android:textStyle="bold"
+            app:textMessageIdLookupKey="@{clazzAssignment.caSubmissionPolicy}"
+            app:textMessageIdLookupMap="@{ClazzAssignmentDetailOverviewPresenter.SUBMISSION_POLICY_OPTIONS}"
+            app:layout_constraintStart_toEndOf="@+id/item_ca_detail_submission_policy_icon"
+            app:layout_constraintTop_toBottomOf="@+id/item_ca_detail_deadline_label"
+            tools:text="Must submit all at once" />
+
+        <TextView
+            android:id="@+id/item_ca_detail_submission_policy_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/item_ca_detail_submission_policy"
+            app:layout_constraintTop_toBottomOf="@id/item_ca_detail_submission_policy"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="@string/submission_policy"
+            />
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
