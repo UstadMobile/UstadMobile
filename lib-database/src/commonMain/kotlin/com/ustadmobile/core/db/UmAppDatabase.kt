@@ -3498,8 +3498,326 @@ DELETE FROM ContainerEntryFile
                 stmtList += "ALTER TABLE XObjectEntity ADD COLUMN objectStatementRefUid INTEGER NOT NULL DEFAULT 0"
 
 
+                //Triggers
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_127_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (127, NEW.chatUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_127_trig AFTER UPDATE OR INSERT ON Chat FOR EACH ROW EXECUTE PROCEDURE ch_upd_127_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_127_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (127, OLD.chatUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_127_trig AFTER DELETE ON Chat FOR EACH ROW EXECUTE PROCEDURE ch_del_127_fn(); "
+                stmtList +=
+                    "CREATE VIEW Chat_ReceiveView AS  SELECT Chat.*, ChatReplicate.* FROM Chat LEFT JOIN ChatReplicate ON ChatReplicate.chatPk = Chat.chatUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION chat_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO Chat(chatUid, chatStartDate, chatTitle, chatGroup, chatLct) VALUES(NEW.chatUid, NEW.chatStartDate, NEW.chatTitle, NEW.chatGroup, NEW.chatLct) ON CONFLICT (chatUid) DO UPDATE SET chatStartDate = EXCLUDED.chatStartDate, chatTitle = EXCLUDED.chatTitle, chatGroup = EXCLUDED.chatGroup, chatLct = EXCLUDED.chatLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER chat_remote_insert_trig INSTEAD OF INSERT ON Chat_ReceiveView FOR EACH ROW EXECUTE PROCEDURE chat_remote_insert_fn() "
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_128_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (128, NEW.chatMemberUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_128_trig AFTER UPDATE OR INSERT ON ChatMember FOR EACH ROW EXECUTE PROCEDURE ch_upd_128_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_128_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (128, OLD.chatMemberUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_128_trig AFTER DELETE ON ChatMember FOR EACH ROW EXECUTE PROCEDURE ch_del_128_fn(); "
+                stmtList +=
+                    "CREATE VIEW ChatMember_ReceiveView AS  SELECT ChatMember.*, ChatMemberReplicate.* FROM ChatMember LEFT JOIN ChatMemberReplicate ON ChatMemberReplicate.chatMemberPk = ChatMember.chatMemberUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION chatmember_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChatMember(chatMemberUid, chatMemberChatUid, chatMemberPersonUid, chatMemberJoinedDate, chatMemberLeftDate, chatMemberLct) VALUES(NEW.chatMemberUid, NEW.chatMemberChatUid, NEW.chatMemberPersonUid, NEW.chatMemberJoinedDate, NEW.chatMemberLeftDate, NEW.chatMemberLct) ON CONFLICT (chatMemberUid) DO UPDATE SET chatMemberChatUid = EXCLUDED.chatMemberChatUid, chatMemberPersonUid = EXCLUDED.chatMemberPersonUid, chatMemberJoinedDate = EXCLUDED.chatMemberJoinedDate, chatMemberLeftDate = EXCLUDED.chatMemberLeftDate, chatMemberLct = EXCLUDED.chatMemberLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER chatmember_remote_insert_trig INSTEAD OF INSERT ON ChatMember_ReceiveView FOR EACH ROW EXECUTE PROCEDURE chatmember_remote_insert_fn() "
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_523_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (523, NEW.camUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_523_trig AFTER UPDATE OR INSERT ON CourseAssignmentMark FOR EACH ROW EXECUTE PROCEDURE ch_upd_523_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_523_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (523, OLD.camUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_523_trig AFTER DELETE ON CourseAssignmentMark FOR EACH ROW EXECUTE PROCEDURE ch_del_523_fn(); "
+                stmtList +=
+                    "CREATE VIEW CourseAssignmentMark_ReceiveView AS  SELECT CourseAssignmentMark.*, CourseAssignmentMarkReplicate.* FROM CourseAssignmentMark LEFT JOIN CourseAssignmentMarkReplicate ON CourseAssignmentMarkReplicate.camPk = CourseAssignmentMark.camUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION courseassignmentmark_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO CourseAssignmentMark(camUid, camAssignmentUid, camSubmitterUid, camMark, camPenalty, camLct) VALUES (NEW.camUid, NEW.camAssignmentUid, NEW.camSubmitterUid, NEW.camMark, NEW.camPenalty, NEW.camLct) ON CONFLICT (camUid) DO UPDATE SET camAssignmentUid = EXCLUDED.camAssignmentUid, camSubmitterUid = EXCLUDED.camSubmitterUid, camMark = EXCLUDED.camMark, camPenalty = EXCLUDED.camPenalty, camLct = EXCLUDED.camLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER courseassignmentmark_remote_insert_trig INSTEAD OF INSERT ON CourseAssignmentMark_ReceiveView FOR EACH ROW EXECUTE PROCEDURE courseassignmentmark_remote_insert_fn() "
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_522_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (522, NEW.casUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_522_trig AFTER UPDATE OR INSERT ON CourseAssignmentSubmission FOR EACH ROW EXECUTE PROCEDURE ch_upd_522_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_522_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (522, OLD.casUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_522_trig AFTER DELETE ON CourseAssignmentSubmission FOR EACH ROW EXECUTE PROCEDURE ch_del_522_fn(); "
+                stmtList +=
+                    "CREATE VIEW CourseAssignmentSubmission_ReceiveView AS  SELECT CourseAssignmentSubmission.*, CourseAssignmentSubmissionReplicate.* FROM CourseAssignmentSubmission LEFT JOIN CourseAssignmentSubmissionReplicate ON CourseAssignmentSubmissionReplicate.casPk = CourseAssignmentSubmission.casUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION courseassignmentsubmission_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO CourseAssignmentSubmission(casUid, casAssignmentUid, casSubmitterUid, casSubmitterPersonUid, casText, casType, casTimestamp) VALUES (NEW.casUid, NEW.casAssignmentUid, NEW.casSubmitterUid, NEW.casSubmitterPersonUid, NEW.casText, NEW.casType, NEW.casTimestamp) ON CONFLICT (casUid) DO UPDATE SET casAssignmentUid = EXCLUDED.casAssignmentUid, casSubmitterUid = EXCLUDED.casSubmitterUid, casSubmitterPersonUid = EXCLUDED.casSubmitterPersonUid, casText = EXCLUDED.casText, casType = EXCLUDED.casType, casTimestamp = EXCLUDED.casTimestamp ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER courseassignmentsubmission_remote_insert_trig INSTEAD OF INSERT ON CourseAssignmentSubmission_ReceiveView FOR EACH ROW EXECUTE PROCEDURE courseassignmentsubmission_remote_insert_fn() "
 
 
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_90_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (90, NEW.casaUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_90_trig AFTER UPDATE OR INSERT ON CourseAssignmentSubmissionAttachment FOR EACH ROW EXECUTE PROCEDURE ch_upd_90_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_90_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (90, OLD.casaUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_90_trig AFTER DELETE ON CourseAssignmentSubmissionAttachment FOR EACH ROW EXECUTE PROCEDURE ch_del_90_fn(); "
+                stmtList +=
+                    "CREATE VIEW CourseAssignmentSubmissionAttachment_ReceiveView AS  SELECT CourseAssignmentSubmissionAttachment.*, CourseAssignmentSubmissionAttachmentReplicate.* FROM CourseAssignmentSubmissionAttachment LEFT JOIN CourseAssignmentSubmissionAttachmentReplicate ON CourseAssignmentSubmissionAttachmentReplicate.casaPk = CourseAssignmentSubmissionAttachment.casaUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION courseassignmentsubmissionattachment_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO CourseAssignmentSubmissionAttachment(casaUid, casaSubmissionUid, casaMimeType, casaUri, casaMd5, casaSize, casaTimestamp) VALUES (NEW.casaUid, NEW.casaSubmissionUid, NEW.casaMimeType, NEW.casaUri, NEW.casaMd5, NEW.casaSize, NEW.casaTimestamp) ON CONFLICT (casaUid) DO UPDATE SET casaSubmissionUid = EXCLUDED.casaSubmissionUid, casaMimeType = EXCLUDED.casaMimeType, casaUri = EXCLUDED.casaUri, casaMd5 = EXCLUDED.casaMd5, casaSize = EXCLUDED.casaSize, casaTimestamp = EXCLUDED.casaTimestamp ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER courseassignmentsubmissionattachment_remote_insert_trig INSTEAD OF INSERT ON CourseAssignmentSubmissionAttachment_ReceiveView FOR EACH ROW EXECUTE PROCEDURE courseassignmentsubmissionattachment_remote_insert_fn() "
+                stmtList += """
+        |    CREATE OR REPLACE FUNCTION attach_CourseAssignmentSubmissionAttachment_fn() RETURNS trigger AS ${'$'}${'$'}
+        |    BEGIN
+        |    
+        |    INSERT INTO ZombieAttachmentData(zaUri) 
+        |    SELECT OLD.casaUri AS zaUri
+        |      FROM CourseAssignmentSubmissionAttachment   
+        |     WHERE CourseAssignmentSubmissionAttachment.casaUid = OLD.casaUid
+        |       AND (SELECT COUNT(*) 
+        |              FROM CourseAssignmentSubmissionAttachment
+        |             WHERE casaMd5 = OLD.casaMd5) = 0
+        |;
+        |    RETURN NEW;
+        |    END ${'$'}${'$'}
+        |    LANGUAGE plpgsql
+        """.trimMargin()
+                stmtList += """
+        |CREATE TRIGGER attach_CourseAssignmentSubmissionAttachment_trig
+        |AFTER UPDATE ON CourseAssignmentSubmissionAttachment
+        |FOR EACH ROW WHEN (OLD.casaMd5 IS NOT NULL)
+        |EXECUTE PROCEDURE attach_CourseAssignmentSubmissionAttachment_fn();
+        """.trimMargin()
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_124_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (124, NEW.cbUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_124_trig AFTER UPDATE OR INSERT ON CourseBlock FOR EACH ROW EXECUTE PROCEDURE ch_upd_124_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_124_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (124, OLD.cbUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_124_trig AFTER DELETE ON CourseBlock FOR EACH ROW EXECUTE PROCEDURE ch_del_124_fn(); "
+                stmtList +=
+                    "CREATE VIEW CourseBlock_ReceiveView AS  SELECT CourseBlock.*, CourseBlockReplicate.* FROM CourseBlock LEFT JOIN CourseBlockReplicate ON CourseBlockReplicate.cbPk = CourseBlock.cbUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION courseblock_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO CourseBlock(cbUid, cbType, cbIndentLevel, cbModuleParentBlockUid, cbTitle, cbDescription, cbCompletionCriteria, cbHideUntilDate, cbDeadlineDate, cbLateSubmissionPenalty, cbGracePeriodDate, cbMaxPoints,cbMinPoints, cbIndex, cbClazzUid, cbActive,cbHidden, cbEntityUid, cbLct) VALUES (NEW.cbUid, NEW.cbType, NEW.cbIndentLevel, NEW.cbModuleParentBlockUid, NEW.cbTitle, NEW.cbDescription, NEW.cbCompletionCriteria, NEW.cbHideUntilDate, NEW.cbDeadlineDate, NEW.cbLateSubmissionPenalty, NEW.cbGracePeriodDate, NEW.cbMaxPoints,NEW.cbMinPoints, NEW.cbIndex, NEW.cbClazzUid,NEW.cbActive, NEW.cbHidden, NEW.cbEntityUid, NEW.cbLct) ON CONFLICT (cbUid) DO UPDATE SET cbType = EXCLUDED.cbType, cbIndentLevel = EXCLUDED.cbIndentLevel, cbModuleParentBlockUid = EXCLUDED.cbModuleParentBlockUid, cbTitle = EXCLUDED.cbTitle, cbDescription = EXCLUDED.cbDescription, cbCompletionCriteria = EXCLUDED.cbCompletionCriteria, cbHideUntilDate = EXCLUDED.cbHideUntilDate,cbDeadlineDate = EXCLUDED.cbDeadlineDate, cbLateSubmissionPenalty = EXCLUDED.cbLateSubmissionPenalty, cbGracePeriodDate= EXCLUDED.cbGracePeriodDate, cbMaxPoints = EXCLUDED.cbMaxPoints, cbMinPoints = EXCLUDED.cbMinPoints, cbIndex = EXCLUDED.cbIndex,cbClazzUid = EXCLUDED.cbClazzUid, cbActive = EXCLUDED.cbActive, cbHidden = EXCLUDED.cbHidden, cbEntityUid = EXCLUDED.cbEntityUid, cbLct = EXCLUDED.cbLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER courseblock_remote_insert_trig INSTEAD OF INSERT ON CourseBlock_ReceiveView FOR EACH ROW EXECUTE PROCEDURE courseblock_remote_insert_fn() "
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_130_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (130, NEW.courseDiscussionUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_130_trig AFTER UPDATE OR INSERT ON CourseDiscussion FOR EACH ROW EXECUTE PROCEDURE ch_upd_130_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_130_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (130, OLD.courseDiscussionUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_130_trig AFTER DELETE ON CourseDiscussion FOR EACH ROW EXECUTE PROCEDURE ch_del_130_fn(); "
+                stmtList +=
+                    "CREATE VIEW CourseDiscussion_ReceiveView AS  SELECT CourseDiscussion.*, CourseDiscussionReplicate.* FROM CourseDiscussion LEFT JOIN CourseDiscussionReplicate ON CourseDiscussionReplicate.courseDiscussionPk = CourseDiscussion.courseDiscussionUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION coursediscussion_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO CourseDiscussion(courseDiscussionUid, courseDiscussionActive, courseDiscussionTitle, courseDiscussionDesc, courseDiscussionClazzUid, courseDiscussionLct) VALUES(NEW.courseDiscussionUid, NEW.courseDiscussionActive, NEW.courseDiscussionTitle, NEW.courseDiscussionDesc, NEW.courseDiscussionClazzUid, NEW.courseDiscussionLct) ON CONFLICT (courseDiscussionUid) DO UPDATE SET courseDiscussionActive = EXCLUDED.courseDiscussionActive, courseDiscussionTitle = EXCLUDED.courseDiscussionTitle, courseDiscussionDesc = EXCLUDED.courseDiscussionDesc, courseDiscussionClazzUid = EXCLUDED.courseDiscussionClazzUid, courseDiscussionLct = EXCLUDED.courseDiscussionLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER coursediscussion_remote_insert_trig INSTEAD OF INSERT ON CourseDiscussion_ReceiveView FOR EACH ROW EXECUTE PROCEDURE coursediscussion_remote_insert_fn() "
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_243_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (243, NEW.cgmUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_243_trig AFTER UPDATE OR INSERT ON CourseGroupMember FOR EACH ROW EXECUTE PROCEDURE ch_upd_243_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_243_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (243, OLD.cgmUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_243_trig AFTER DELETE ON CourseGroupMember FOR EACH ROW EXECUTE PROCEDURE ch_del_243_fn(); "
+                stmtList +=
+                    "CREATE VIEW CourseGroupMember_ReceiveView AS  SELECT CourseGroupMember.*, CourseGroupMemberReplicate.* FROM CourseGroupMember LEFT JOIN CourseGroupMemberReplicate ON CourseGroupMemberReplicate.cgmPk = CourseGroupMember.cgmUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION coursegroupmember_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO CourseGroupMember(cgmUid, cgmSetUid, cgmGroupNumber, cgmPersonUid, cgmLct) VALUES (NEW.cgmUid, NEW.cgmSetUid, NEW.cgmGroupNumber, NEW.cgmPersonUid, NEW.cgmLct) ON CONFLICT (cgmUid) DO UPDATE SET cgmSetUid = EXCLUDED.cgmSetUid, cgmGroupNumber = EXCLUDED.cgmGroupNumber, cgmPersonUid = EXCLUDED.cgmPersonUid, cgmLct = EXCLUDED.cgmLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER coursegroupmember_remote_insert_trig INSTEAD OF INSERT ON CourseGroupMember_ReceiveView FOR EACH ROW EXECUTE PROCEDURE coursegroupmember_remote_insert_fn() "
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_242_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (242, NEW.cgsUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_242_trig AFTER UPDATE OR INSERT ON CourseGroupSet FOR EACH ROW EXECUTE PROCEDURE ch_upd_242_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_242_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (242, OLD.cgsUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_242_trig AFTER DELETE ON CourseGroupSet FOR EACH ROW EXECUTE PROCEDURE ch_del_242_fn(); "
+                stmtList +=
+                    "CREATE VIEW CourseGroupSet_ReceiveView AS  SELECT CourseGroupSet.*, CourseGroupSetReplicate.* FROM CourseGroupSet LEFT JOIN CourseGroupSetReplicate ON CourseGroupSetReplicate.cgsPk = CourseGroupSet.cgsUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION coursegroupset_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO CourseGroupSet(cgsUid, cgsName, cgsTotalGroups, cgsActive, cgsClazzUid, cgsLct) VALUES (NEW.cgsUid, NEW.cgsName, NEW.cgsTotalGroups, NEW.cgsActive, NEW.cgsClazzUid, NEW.cgsLct) ON CONFLICT (cgsUid) DO UPDATE SET cgsName = EXCLUDED.cgsName, cgsTotalGroups = EXCLUDED.cgsTotalGroups, cgsActive = EXCLUDED.cgsActive, cgsClazzUid = EXCLUDED.cgsClazzUid, cgsLct = EXCLUDED.cgsLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER coursegroupset_remote_insert_trig INSTEAD OF INSERT ON CourseGroupSet_ReceiveView FOR EACH ROW EXECUTE PROCEDURE coursegroupset_remote_insert_fn() "
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_125_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (125, NEW.coursePictureUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_125_trig AFTER UPDATE OR INSERT ON CoursePicture FOR EACH ROW EXECUTE PROCEDURE ch_upd_125_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_125_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (125, OLD.coursePictureUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_125_trig AFTER DELETE ON CoursePicture FOR EACH ROW EXECUTE PROCEDURE ch_del_125_fn(); "
+                stmtList +=
+                    "CREATE VIEW CoursePicture_ReceiveView AS  SELECT CoursePicture.*, CoursePictureReplicate.* FROM CoursePicture LEFT JOIN CoursePictureReplicate ON CoursePictureReplicate.cpPk = CoursePicture.coursePictureUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION coursepicture_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO CoursePicture(coursePictureUid, coursePictureClazzUid, coursePictureMasterCsn, coursePictureLocalCsn, coursePictureLastChangedBy, coursePictureLct, coursePictureUri, coursePictureMd5, coursePictureFileSize, coursePictureTimestamp, coursePictureMimeType, coursePictureActive) VALUES (NEW.coursePictureUid, NEW.coursePictureClazzUid, NEW.coursePictureMasterCsn, NEW.coursePictureLocalCsn, NEW.coursePictureLastChangedBy, NEW.coursePictureLct, NEW.coursePictureUri, NEW.coursePictureMd5, NEW.coursePictureFileSize, NEW.coursePictureTimestamp, NEW.coursePictureMimeType, NEW.coursePictureActive) ON CONFLICT (coursePictureUid) DO UPDATE SET coursePictureClazzUid = EXCLUDED.coursePictureClazzUid, coursePictureMasterCsn = EXCLUDED.coursePictureMasterCsn, coursePictureLocalCsn = EXCLUDED.coursePictureLocalCsn, coursePictureLastChangedBy = EXCLUDED.coursePictureLastChangedBy, coursePictureLct = EXCLUDED.coursePictureLct, coursePictureUri = EXCLUDED.coursePictureUri, coursePictureMd5 = EXCLUDED.coursePictureMd5, coursePictureFileSize = EXCLUDED.coursePictureFileSize, coursePictureTimestamp = EXCLUDED.coursePictureTimestamp, coursePictureMimeType = EXCLUDED.coursePictureMimeType, coursePictureActive = EXCLUDED.coursePictureActive ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER coursepicture_remote_insert_trig INSTEAD OF INSERT ON CoursePicture_ReceiveView FOR EACH ROW EXECUTE PROCEDURE coursepicture_remote_insert_fn() "
+                stmtList += """
+        |    CREATE OR REPLACE FUNCTION attach_CoursePicture_fn() RETURNS trigger AS ${'$'}${'$'}
+        |    BEGIN
+        |    
+        |    INSERT INTO ZombieAttachmentData(zaUri) 
+        |    SELECT OLD.coursePictureUri AS zaUri
+        |      FROM CoursePicture   
+        |     WHERE CoursePicture.coursePictureUid = OLD.coursePictureUid
+        |       AND (SELECT COUNT(*) 
+        |              FROM CoursePicture
+        |             WHERE coursePictureMd5 = OLD.coursePictureMd5) = 0
+        |;
+        |    RETURN NEW;
+        |    END ${'$'}${'$'}
+        |    LANGUAGE plpgsql
+        """.trimMargin()
+                stmtList += """
+        |CREATE TRIGGER attach_CoursePicture_trig
+        |AFTER UPDATE ON CoursePicture
+        |FOR EACH ROW WHEN (OLD.coursePictureMd5 IS NOT NULL)
+        |EXECUTE PROCEDURE attach_CoursePicture_fn();
+        """.trimMargin()
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_450_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (450, NEW.ctUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_450_trig AFTER UPDATE OR INSERT ON CourseTerminology FOR EACH ROW EXECUTE PROCEDURE ch_upd_450_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_450_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (450, OLD.ctUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_450_trig AFTER DELETE ON CourseTerminology FOR EACH ROW EXECUTE PROCEDURE ch_del_450_fn(); "
+                stmtList +=
+                    "CREATE VIEW CourseTerminology_ReceiveView AS  SELECT CourseTerminology.*, CourseTerminologyReplicate.* FROM CourseTerminology LEFT JOIN CourseTerminologyReplicate ON CourseTerminologyReplicate.ctPk = CourseTerminology.ctUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION courseterminology_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO CourseTerminology(ctUid, ctTitle, ctTerminology, ctLct) VALUES (NEW.ctUid, NEW.ctTitle, NEW.ctTerminology, NEW.ctLct) ON CONFLICT (ctUid) DO UPDATE SET ctTitle = EXCLUDED.ctTitle, ctTerminology = EXCLUDED.ctTerminology, ctLct = EXCLUDED.ctLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER courseterminology_remote_insert_trig INSTEAD OF INSERT ON CourseTerminology_ReceiveView FOR EACH ROW EXECUTE PROCEDURE courseterminology_remote_insert_fn() "
+
+
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_132_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (132, NEW.discussionPostUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_132_trig AFTER UPDATE OR INSERT ON DiscussionPost FOR EACH ROW EXECUTE PROCEDURE ch_upd_132_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_132_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (132, OLD.discussionPostUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_132_trig AFTER DELETE ON DiscussionPost FOR EACH ROW EXECUTE PROCEDURE ch_del_132_fn(); "
+                stmtList +=
+                    "CREATE VIEW DiscussionPost_ReceiveView AS  SELECT DiscussionPost.*, DiscussionPostReplicate.* FROM DiscussionPost LEFT JOIN DiscussionPostReplicate ON DiscussionPostReplicate.discussionPostPk = DiscussionPost.discussionPostUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION discussionpost_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO DiscussionPost(discussionPostUid, discussionPostTitle, discussionPostMessage, discussionPostStartDate, discussionPostDiscussionTopicUid, discussionPostVisible, discussionPostArchive, discussionPostStartedPersonUid, discussionPostClazzUid, discussionPostLct) VALUES(NEW.discussionPostUid, NEW.discussionPostTitle, NEW.discussionPostMessage, NEW.discussionPostStartDate, NEW.discussionPostDiscussionTopicUid, NEW.discussionPostVisible, NEW.discussionPostArchive, NEW.discussionPostStartedPersonUid, NEW.discussionPostClazzUid, NEW.discussionPostLct) ON CONFLICT (discussionPostUid) DO UPDATE SET discussionPostTitle = EXCLUDED.discussionPostTitle , discussionPostMessage = EXCLUDED.discussionPostMessage , discussionPostStartDate = EXCLUDED.discussionPostStartDate , discussionPostDiscussionTopicUid = EXCLUDED.discussionPostDiscussionTopicUid, discussionPostVisible = EXCLUDED.discussionPostVisible , discussionPostArchive = EXCLUDED.discussionPostArchive , discussionPostStartedPersonUid = EXCLUDED.discussionPostStartedPersonUid , discussionPostClazzUid = EXCLUDED.discussionPostClazzUid, discussionPostLct = EXCLUDED.discussionPostLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER discussionpost_remote_insert_trig INSTEAD OF INSERT ON DiscussionPost_ReceiveView FOR EACH ROW EXECUTE PROCEDURE discussionpost_remote_insert_fn() "
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_131_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (131, NEW.discussionTopicUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_131_trig AFTER UPDATE OR INSERT ON DiscussionTopic FOR EACH ROW EXECUTE PROCEDURE ch_upd_131_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_131_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (131, OLD.discussionTopicUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_131_trig AFTER DELETE ON DiscussionTopic FOR EACH ROW EXECUTE PROCEDURE ch_del_131_fn(); "
+                stmtList +=
+                    "CREATE VIEW DiscussionTopic_ReceiveView AS  SELECT DiscussionTopic.*, DiscussionTopicReplicate.* FROM DiscussionTopic LEFT JOIN DiscussionTopicReplicate ON DiscussionTopicReplicate.discussionTopicPk = DiscussionTopic.discussionTopicUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION discussiontopic_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO DiscussionTopic(discussionTopicUid, discussionTopicTitle, discussionTopicDesc, discussionTopicStartDate, discussionTopicCourseDiscussionUid, discussionTopicVisible, discussionTopicArchive, discussionTopicIndex, discussionTopicClazzUid, discussionTopicLct) VALUES(NEW.discussionTopicUid, NEW.discussionTopicTitle, NEW.discussionTopicDesc, NEW.discussionTopicStartDate, NEW.discussionTopicCourseDiscussionUid, NEW.discussionTopicVisible, NEW.discussionTopicArchive, NEW.discussionTopicIndex, NEW.discussionTopicClazzUid, NEW.discussionTopicLct) ON CONFLICT (discussionTopicUid) DO UPDATE SET discussionTopicTitle = EXCLUDED.discussionTopicTitle, discussionTopicDesc = EXCLUDED.discussionTopicDesc, discussionTopicStartDate = EXCLUDED.discussionTopicStartDate, discussionTopicCourseDiscussionUid = EXCLUDED.discussionTopicCourseDiscussionUid, discussionTopicVisible = EXCLUDED.discussionTopicVisible, discussionTopicArchive = EXCLUDED.discussionTopicArchive, discussionTopicIndex = EXCLUDED.discussionTopicIndex, discussionTopicClazzUid = EXCLUDED.discussionTopicClazzUid, discussionTopicLct = EXCLUDED.discussionTopicLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER discussiontopic_remote_insert_trig INSTEAD OF INSERT ON DiscussionTopic_ReceiveView FOR EACH ROW EXECUTE PROCEDURE discussiontopic_remote_insert_fn() "
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_126_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (126, NEW.messageUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_126_trig AFTER UPDATE OR INSERT ON Message FOR EACH ROW EXECUTE PROCEDURE ch_upd_126_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_126_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (126, OLD.messageUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_126_trig AFTER DELETE ON Message FOR EACH ROW EXECUTE PROCEDURE ch_del_126_fn(); "
+                stmtList +=
+                    "CREATE VIEW Message_ReceiveView AS  SELECT Message.*, MessageReplicate.* FROM Message LEFT JOIN MessageReplicate ON MessageReplicate.messagePk = Message.messageUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION message_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO Message(messageUid, messageSenderPersonUid, messageTableId, messageEntityUid, messageText, messageTimestamp, messageClazzUid, messageLct) VALUES(NEW.messageUid, NEW.messageSenderPersonUid, NEW.messageTableId, NEW.messageEntityUid, NEW.messageText, NEW.messageTimestamp, NEW.messageClazzUid, NEW.messageLct) ON CONFLICT (messageUid) DO UPDATE SET messageSenderPersonUid = EXCLUDED.messageSenderPersonUid, messageTableId = EXCLUDED.messageTableId, messageEntityUid = EXCLUDED.messageEntityUid, messageText = EXCLUDED.messageText, messageTimestamp = EXCLUDED.messageTimestamp, messageClazzUid = EXCLUDED.messageClazzUid, messageLct = EXCLUDED.messageLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER message_remote_insert_trig INSTEAD OF INSERT ON Message_ReceiveView FOR EACH ROW EXECUTE PROCEDURE message_remote_insert_fn() "
+
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_129_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (129, NEW.messageReadUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_129_trig AFTER UPDATE OR INSERT ON MessageRead FOR EACH ROW EXECUTE PROCEDURE ch_upd_129_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_129_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (129, OLD.messageReadUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_129_trig AFTER DELETE ON MessageRead FOR EACH ROW EXECUTE PROCEDURE ch_del_129_fn(); "
+                stmtList +=
+                    "CREATE VIEW MessageRead_ReceiveView AS  SELECT MessageRead.*, MessageReadReplicate.* FROM MessageRead LEFT JOIN MessageReadReplicate ON MessageReadReplicate.messageReadPk = MessageRead.messageReadUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION messageread_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO MessageRead(messageReadUid, messageReadPersonUid, messageReadMessageUid, messageReadEntityUid, messageReadLct) VALUES(NEW.messageReadUid, NEW.messageReadPersonUid, NEW.messageReadMessageUid, NEW.messageReadEntityUid, NEW.messageReadLct) ON CONFLICT (messageReadUid) DO UPDATE SET messageReadPersonUid = EXCLUDED.messageReadPersonUid, messageReadMessageUid = EXCLUDED.messageReadMessageUid, messageReadEntityUid = EXCLUDED.messageReadEntityUid, messageReadLct = EXCLUDED.messageReadLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER messageread_remote_insert_trig INSTEAD OF INSERT ON MessageRead_ReceiveView FOR EACH ROW EXECUTE PROCEDURE messageread_remote_insert_fn() "
+
+                //Destructive migration triggers
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_520_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (520, NEW.caUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_520_trig AFTER UPDATE OR INSERT ON ClazzAssignment FOR EACH ROW EXECUTE PROCEDURE ch_upd_520_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_520_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (520, OLD.caUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_520_trig AFTER DELETE ON ClazzAssignment FOR EACH ROW EXECUTE PROCEDURE ch_del_520_fn(); "
+                stmtList +=
+                    "CREATE VIEW ClazzAssignment_ReceiveView AS  SELECT ClazzAssignment.*, ClazzAssignmentReplicate.* FROM ClazzAssignment LEFT JOIN ClazzAssignmentReplicate ON ClazzAssignmentReplicate.caPk = ClazzAssignment.caUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION clazzassignment_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ClazzAssignment(caUid, caTitle, caDescription, caGroupUid, caActive, caClassCommentEnabled, caPrivateCommentsEnabled, caRequireFileSubmission, caFileType, caSizeLimit, caNumberOfFiles, caSubmissionPolicy, caMarkingType, caRequireTextSubmission, caTextLimitType, caTextLimit, caXObjectUid, caClazzUid, caLocalChangeSeqNum, caMasterChangeSeqNum, caLastChangedBy, caLct) VALUES (NEW.caUid, NEW.caTitle, NEW.caDescription, NEW.caGroupUid, NEW.caActive, NEW.caClassCommentEnabled, NEW.caPrivateCommentsEnabled, NEW.caRequireFileSubmission, NEW.caFileType, NEW.caSizeLimit, NEW.caNumberOfFiles, NEW.caSubmissionPolicy, NEW.caMarkingType,NEW.caRequireTextSubmission, NEW.caTextLimitType, NEW.caTextLimit, NEW.caXObjectUid, NEW.caClazzUid, NEW.caLocalChangeSeqNum, NEW.caMasterChangeSeqNum, NEW.caLastChangedBy, NEW.caLct) ON CONFLICT (caUid) DO UPDATE SET caTitle = EXCLUDED.caTitle, caDescription = EXCLUDED.caDescription, caGroupUid = EXCLUDED.caGroupUid, caActive = EXCLUDED.caActive, caClassCommentEnabled = EXCLUDED.caClassCommentEnabled, caPrivateCommentsEnabled = EXCLUDED.caPrivateCommentsEnabled, caRequireFileSubmission = EXCLUDED.caRequireFileSubmission, caFileType = EXCLUDED.caFileType, caSizeLimit = EXCLUDED.caSizeLimit, caNumberOfFiles = EXCLUDED.caNumberOfFiles, caSubmissionPolicy = EXCLUDED.caSubmissionPolicy, caMarkingType = EXCLUDED.caMarkingType, caRequireTextSubmission = EXCLUDED.caRequireTextSubmission, caTextLimitType = EXCLUDED.caTextLimitType, caTextLimit = EXCLUDED.caTextLimit, caXObjectUid = EXCLUDED.caXObjectUid, caClazzUid = EXCLUDED.caClazzUid, caLocalChangeSeqNum = EXCLUDED.caLocalChangeSeqNum, caMasterChangeSeqNum = EXCLUDED.caMasterChangeSeqNum, caLastChangedBy = EXCLUDED.caLastChangedBy, caLct = EXCLUDED.caLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER clazzassignment_remote_insert_trig INSTEAD OF INSERT ON ClazzAssignment_ReceiveView FOR EACH ROW EXECUTE PROCEDURE clazzassignment_remote_insert_fn() "
+
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_521_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (521, NEW.cacjUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_521_trig AFTER UPDATE OR INSERT ON ClazzAssignmentContentJoin FOR EACH ROW EXECUTE PROCEDURE ch_upd_521_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_521_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (521, OLD.cacjUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_521_trig AFTER DELETE ON ClazzAssignmentContentJoin FOR EACH ROW EXECUTE PROCEDURE ch_del_521_fn(); "
+                stmtList +=
+                    "CREATE VIEW ClazzAssignmentContentJoin_ReceiveView AS  SELECT ClazzAssignmentContentJoin.*, ClazzAssignmentContentJoinReplicate.* FROM ClazzAssignmentContentJoin LEFT JOIN ClazzAssignmentContentJoinReplicate ON ClazzAssignmentContentJoinReplicate.cacjPk = ClazzAssignmentContentJoin.cacjUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION clazzassignmentcontentjoin_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ClazzAssignmentContentJoin(cacjUid, cacjContentUid, cacjAssignmentUid, cacjActive,cacjWeight, cacjMCSN, cacjLCSN, cacjLCB, cacjLct) VALUES (NEW.cacjUid, NEW.cacjContentUid, NEW.cacjAssignmentUid, NEW.cacjActive, NEW.cacjWeight, NEW.cacjMCSN, NEW.cacjLCSN, NEW.cacjLCB, NEW.cacjLct) ON CONFLICT (cacjUid) DO UPDATE SET cacjContentUid = EXCLUDED.cacjContentUid, cacjAssignmentUid = EXCLUDED.cacjAssignmentUid, cacjActive = EXCLUDED.cacjActive, cacjWeight = EXCLUDED.cacjWeight, cacjMCSN = EXCLUDED.cacjMCSN, cacjLCSN = EXCLUDED.cacjLCSN, cacjLCB = EXCLUDED.cacjLCB, cacjLct = EXCLUDED.cacjLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER clazzassignmentcontentjoin_remote_insert_trig INSTEAD OF INSERT ON ClazzAssignmentContentJoin_ReceiveView FOR EACH ROW EXECUTE PROCEDURE clazzassignmentcontentjoin_remote_insert_fn() "
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_208_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (208, NEW.commentsUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_208_trig AFTER UPDATE OR INSERT ON Comments FOR EACH ROW EXECUTE PROCEDURE ch_upd_208_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_208_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (208, OLD.commentsUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_208_trig AFTER DELETE ON Comments FOR EACH ROW EXECUTE PROCEDURE ch_del_208_fn(); "
+                stmtList +=
+                    "CREATE VIEW Comments_ReceiveView AS  SELECT Comments.*, CommentsReplicate.* FROM Comments LEFT JOIN CommentsReplicate ON CommentsReplicate.commentsPk = Comments.commentsUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION comments_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO Comments(commentsUid, commentsText, commentsEntityType, commentsEntityUid, commentsPublic, commentsStatus, commentsPersonUid, commentsToPersonUid, commentSubmitterUid, commentsFlagged, commentsInActive, commentsDateTimeAdded, commentsDateTimeUpdated, commentsMCSN, commentsLCSN, commentsLCB, commentsLct) VALUES (NEW.commentsUid, NEW.commentsText, NEW.commentsEntityType, NEW.commentsEntityUid, NEW.commentsPublic, NEW.commentsStatus, NEW.commentsPersonUid, NEW.commentsToPersonUid, NEW.commentSubmitterUid, NEW.commentsFlagged, NEW.commentsInActive, NEW.commentsDateTimeAdded, NEW.commentsDateTimeUpdated, NEW.commentsMCSN, NEW.commentsLCSN, NEW.commentsLCB, NEW.commentsLct) ON CONFLICT (commentsUid) DO UPDATE SET commentsText = EXCLUDED.commentsText, commentsEntityType = EXCLUDED.commentsEntityType, commentsEntityUid = EXCLUDED.commentsEntityUid, commentsPublic = EXCLUDED.commentsPublic, commentsStatus = EXCLUDED.commentsStatus, commentsPersonUid = EXCLUDED.commentsPersonUid, commentsToPersonUid = EXCLUDED.commentsToPersonUid, commentSubmitterUid = EXCLUDED.commentSubmitterUid, commentsFlagged = EXCLUDED.commentsFlagged, commentsInActive = EXCLUDED.commentsInActive, commentsDateTimeAdded = EXCLUDED.commentsDateTimeAdded, commentsDateTimeUpdated = EXCLUDED.commentsDateTimeUpdated, commentsMCSN = EXCLUDED.commentsMCSN, commentsLCSN = EXCLUDED.commentsLCSN, commentsLCB = EXCLUDED.commentsLCB, commentsLct = EXCLUDED.commentsLct ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER comments_remote_insert_trig INSTEAD OF INSERT ON Comments_ReceiveView FOR EACH ROW EXECUTE PROCEDURE comments_remote_insert_fn() "
             }
 
             stmtList
