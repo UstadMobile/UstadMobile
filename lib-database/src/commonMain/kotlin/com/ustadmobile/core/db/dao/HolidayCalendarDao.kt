@@ -14,16 +14,23 @@ abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
 
     @Query("""
      REPLACE INTO HolidayCalendarReplicate(hcPk, hcDestination)
-      SELECT HolidayCalendar.umCalendarUid AS hcPk,
+      SELECT DISTINCT HolidayCalendar.umCalendarUid AS hcPk,
              :newNodeId AS hcDestination
         FROM HolidayCalendar
+             JOIN UserSession
+                  ON UserSession.usClientNodeId = :newNodeId
+        --notpsql 
        WHERE HolidayCalendar.umCalendarLct != COALESCE(
              (SELECT hcVersionId
                 FROM HolidayCalendarReplicate
                WHERE hcPk = HolidayCalendar.umCalendarUid
-                 AND hcDestination = :newNodeId), 0) 
+                 AND hcDestination = UserSession.usClientNodeId), 0) 
+         --endnotpsql        
       /*psql ON CONFLICT(hcPk, hcDestination) DO UPDATE
-             SET hcPending = true
+             SET hcPending = (SELECT HolidayCalendar.umCalendarLct
+                                FROM HolidayCalendar
+                               WHERE HolidayCalendar.umCalendarUid = EXCLUDED.hcPk ) 
+                                     != HolidayCalendarReplicate.hcPk
       */       
     """)
     @ReplicationRunOnNewNode
@@ -32,7 +39,7 @@ abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
 
  @Query("""
  REPLACE INTO HolidayCalendarReplicate(hcPk, hcDestination)
-  SELECT HolidayCalendar.umCalendarUid AS hcUid,
+  SELECT DISTINCT HolidayCalendar.umCalendarUid AS hcUid,
          UserSession.usClientNodeId AS hcDestination
     FROM ChangeLog
          JOIN HolidayCalendar
@@ -43,14 +50,19 @@ abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
          SELECT nodeClientId 
            FROM SyncNode
           LIMIT 1)
-     AND HolidayCalendar.umCalendarLct != COALESCE(
-         (SELECT hcVersionId
-            FROM HolidayCalendarReplicate
-           WHERE hcPk = HolidayCalendar.umCalendarUid
-             AND hcDestination = UserSession.usClientNodeId), 0)
- /*psql ON CONFLICT(hcPk, hcDestination) DO UPDATE
-     SET hcPending = true
-  */               
+     --notpsql 
+      AND HolidayCalendar.umCalendarLct != COALESCE(
+             (SELECT hcVersionId
+                FROM HolidayCalendarReplicate
+               WHERE hcPk = HolidayCalendar.umCalendarUid
+                 AND hcDestination = UserSession.usClientNodeId), 0) 
+         --endnotpsql    
+   /*psql ON CONFLICT(hcPk, hcDestination) DO UPDATE
+             SET hcPending = (SELECT HolidayCalendar.umCalendarLct
+                                FROM HolidayCalendar
+                               WHERE HolidayCalendar.umCalendarUid = EXCLUDED.hcPk ) 
+                                     != HolidayCalendarReplicate.hcPk     
+        */                                           
     """)
     @ReplicationRunOnChange([HolidayCalendar::class])
     @ReplicationCheckPendingNotificationsFor([HolidayCalendar::class])

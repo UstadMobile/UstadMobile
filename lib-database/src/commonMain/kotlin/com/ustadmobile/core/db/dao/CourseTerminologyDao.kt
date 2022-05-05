@@ -15,7 +15,7 @@ abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
 
     @Query("""
      REPLACE INTO CourseTerminologyReplicate(ctPk, ctDestination)
-      SELECT CourseTerminology.ctUid AS ctPk,
+      SELECT DISTINCT CourseTerminology.ctUid AS ctPk,
              :newNodeId AS ctDestination
         FROM CourseTerminology
        WHERE CourseTerminology.ctLct != COALESCE(
@@ -33,7 +33,7 @@ abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
 
     @Query("""
  REPLACE INTO CourseTerminologyReplicate(ctPk, ctDestination)
-  SELECT CourseTerminology.ctUid AS ctUid,
+  SELECT DISTINCT CourseTerminology.ctUid AS ctUid,
          UserSession.usClientNodeId AS ctDestination
     FROM ChangeLog
          JOIN CourseTerminology
