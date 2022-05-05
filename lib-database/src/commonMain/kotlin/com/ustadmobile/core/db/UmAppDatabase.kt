@@ -3467,11 +3467,13 @@ DELETE FROM ContainerEntryFile
 
 
                 //Destructive migration
+                stmtList += "DROP VIEW ClazzAssignment_ReceiveView"
                 stmtList += "DROP TABLE ClazzAssignment"
                 stmtList +=
                     "CREATE TABLE IF NOT EXISTS ClazzAssignment (  caTitle  TEXT , caDescription  TEXT , caGroupUid  BIGINT  NOT NULL  DEFAULT 0 , caActive  BOOL  NOT NULL , caClassCommentEnabled  BOOL  NOT NULL , caPrivateCommentsEnabled  BOOL  NOT NULL  DEFAULT true, caCompletionCriteria  INTEGER  NOT NULL  DEFAULT 100 , caRequireFileSubmission  BOOL  NOT NULL  DEFAULT true, caFileType  INTEGER  NOT NULL  DEFAULT 0 , caSizeLimit  INTEGER  NOT NULL  DEFAULT 50 , caNumberOfFiles  INTEGER  NOT NULL  DEFAULT 1 , caSubmissionPolicy  INTEGER  NOT NULL  DEFAULT 1 , caMarkingType  INTEGER  NOT NULL  DEFAULT 1 , caRequireTextSubmission  BOOL  NOT NULL  DEFAULT true, caTextLimitType  INTEGER  NOT NULL  DEFAULT 1 , caTextLimit  INTEGER  NOT NULL  DEFAULT 500 , caXObjectUid  BIGINT  NOT NULL  DEFAULT 0 , caClazzUid  BIGINT  NOT NULL , caLocalChangeSeqNum  BIGINT  NOT NULL , caMasterChangeSeqNum  BIGINT  NOT NULL , caLastChangedBy  INTEGER  NOT NULL , caLct  BIGINT  NOT NULL , caUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
                 stmtList += "CREATE INDEX index_ClazzAssignment_caClazzUid ON ClazzAssignment (caClazzUid)"
 
+                stmtList += "DROP VIEW ClazzAssignmentContentJoin_ReceiveView"
                 stmtList += "DROP TABLE ClazzAssignmentContentJoin"
                 stmtList +=
                     "CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin (  cacjContentUid  BIGINT  NOT NULL , cacjAssignmentUid  BIGINT  NOT NULL , cacjActive  BOOL  NOT NULL , cacjWeight  INTEGER  NOT NULL  DEFAULT 0 , cacjMCSN  BIGINT  NOT NULL , cacjLCSN  BIGINT  NOT NULL , cacjLCB  INTEGER  NOT NULL , cacjLct  BIGINT  NOT NULL , cacjUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
@@ -3483,8 +3485,9 @@ DELETE FROM ContainerEntryFile
                 stmtList +=
                     "CREATE UNIQUE INDEX index_ClazzAssignmentRollUp_cachePersonUid_cacheContentEntryUid_cacheClazzAssignmentUid ON ClazzAssignmentRollUp (cachePersonUid, cacheContentEntryUid, cacheClazzAssignmentUid)"
 
+                stmtList += "DROP VIEW Comments_ReceiveView"
                 stmtList +=
-                    "CREATE TABLE IF NOT EXISTS Comments (  commentsText  TEXT , commentsEntityType  INTEGER  NOT NULL , commentsEntityUid  INTEGER  NOT NULL , commentsPublic  INTEGER  NOT NULL , commentsStatus  INTEGER  NOT NULL , commentsPersonUid  INTEGER  NOT NULL , commentsToPersonUid  INTEGER  NOT NULL , commentSubmitterUid  INTEGER  NOT NULL , commentsFlagged  INTEGER  NOT NULL , commentsInActive  INTEGER  NOT NULL , commentsDateTimeAdded  INTEGER  NOT NULL , commentsDateTimeUpdated  INTEGER  NOT NULL , commentsMCSN  INTEGER  NOT NULL , commentsLCSN  INTEGER  NOT NULL , commentsLCB  INTEGER  NOT NULL , commentsLct  INTEGER  NOT NULL , commentsUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )"
+                    "CREATE TABLE IF NOT EXISTS Comments (  commentsText  TEXT , commentsEntityType  INTEGER  NOT NULL , commentsEntityUid  BIGINT  NOT NULL , commentsPublic  BOOL  NOT NULL , commentsStatus  INTEGER  NOT NULL , commentsPersonUid  BIGINT  NOT NULL , commentsToPersonUid  BIGINT  NOT NULL , commentSubmitterUid  BIGINT  NOT NULL , commentsFlagged  BOOL  NOT NULL , commentsInActive  BOOL  NOT NULL , commentsDateTimeAdded  BIGINT  NOT NULL , commentsDateTimeUpdated  BIGINT  NOT NULL , commentsMCSN  BIGINT  NOT NULL , commentsLCSN  BIGINT  NOT NULL , commentsLCB  INTEGER  NOT NULL , commentsLct  BIGINT  NOT NULL , commentsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
 
 
                 //Default policy is open
