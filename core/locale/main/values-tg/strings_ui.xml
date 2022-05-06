@@ -1307,4 +1307,23 @@
     <string name="course_code">Рамзи дастрасӣ ба курс</string>
     <string name="edit_group">Муҳаррирон</string>
     <string name="extra_active_tab_warning">Якбора бо як чанд ҷадвал кор кардан ғайри имкон аст, якеро интихоб намоед.</string>
+    <string name="new_group_set">Гурӯҳи нав</string>
+    <string name="edit_text">Таҳрири матн</string>
+    <string name="add_module">Модули иловагӣ</string>
+    <string name="add_a_new_course">Илова ба курси нав</string>
+    <string name="join_existing_course">Ворид шудан ба курси амалкунанда</string>
+    <string name="edit_course">Танзими курс</string>
+    <string name="currently_enrolled">Айниҳол ба қайд гирифташуда</string>
+    <string name="past_enrollments">Бақайдгирифташуда</string>
+    <string name="unread">Нахондашуда</string>
+    <string name="new_chat">Сӯҳбати нав</string>
+    <string name="chat">Сӯҳбат</string>
+    <string name="you">Шумо</string>
+    <string name="edit_topic">Таҳрири мавзӯъ</string>
+    <string name="posts">Эълонҳо</string>
+    <string name="post">Эълон</string>
+    <string name="unassigned">Номнавис нашуда</string>
+    <string name="error_too_long_text">Матни аз ҳад зиёд</string>
+    <string name="individual_submission">Пешниҳоди инфиродӣ</string>
+    <string name="managed_enrolment">"Интихобшуда бояд  огоҳ бошад"</string>
 </resources>
