@@ -135,6 +135,10 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
      */
     fun openLinkInBrowser(url: String, context: Any)
 
+    /**
+     * Handle clicking link that decides to open on the web or to open in the browser
+     */
+    fun handleClickLink(url: String, context: Any)
 
     companion object {
 

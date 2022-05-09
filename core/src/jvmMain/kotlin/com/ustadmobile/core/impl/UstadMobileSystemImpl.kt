@@ -243,6 +243,10 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
         //On JVM - do nothing at the moment. This is only used for unit testing with verify calls.
     }
 
+    actual fun handleClickLink(url: String, context: Any) {
+        //On JVM - do nothing I guess
+    }
+
     actual companion object {
 
         const val APPCONFIG_PROPERTIES_PATH = "/com/ustadmobile/core/appconfig.properties"

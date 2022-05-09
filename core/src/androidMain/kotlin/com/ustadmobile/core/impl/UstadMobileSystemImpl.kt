@@ -485,6 +485,20 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         (context as Context).startActivity(intent)
     }
 
+    actual fun handleClickLink(url: String, context: Any){
+        if(url.contains(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
+
+            val viewUri =
+                url.substringAfter(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER)
+
+            goToViewLink(viewUri, context)
+        }else{
+            
+            //Send link to android system
+            openLinkInBrowser(url, context)
+        }
+    }
+
 
     actual companion object {
 

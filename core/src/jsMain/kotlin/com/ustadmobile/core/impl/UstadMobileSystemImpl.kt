@@ -169,6 +169,10 @@ actual open class UstadMobileSystemImpl(
         window.open(url, "_blank")
     }
 
+    actual fun handleClickLink(url: String, context: Any){
+        openLinkInBrowser(url, context)
+    }
+
     /**
      * Provide language UI directionality
      * @return TRUE if the UI direction is RTL otherwise it's FALSE

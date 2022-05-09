@@ -81,17 +81,7 @@ class ChatDetailPresenter(
      */
     override fun handleClickLink(link: String){
         val systemImpl: UstadMobileSystemImpl by instance()
-        if(link.contains(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
-
-            val viewUri =
-                link.substringAfter(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER)
-
-            systemImpl.goToViewLink(viewUri, context)
-        }else{
-
-            //Send link to android system
-            systemImpl.openLinkInBrowser(link, context)
-        }
+        systemImpl.handleClickLink(link, context)
     }
 
 

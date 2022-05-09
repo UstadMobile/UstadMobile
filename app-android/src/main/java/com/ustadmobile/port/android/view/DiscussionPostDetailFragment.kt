@@ -75,7 +75,7 @@ class DiscussionPostDetailFragment: UstadBaseFragment(), DiscussionPostDetailVie
         stackedLayoutManager.reverseLayout = true
 
         //1.
-        descriptionRecyclerAdapter = DiscussionPostDescriptionRecyclerAdapter()
+        descriptionRecyclerAdapter = DiscussionPostDescriptionRecyclerAdapter(di, requireContext())
 
         //2.
         newReplyRecyclerAdapter  = NewMessageSendRecyclerViewAdapter(this,
