@@ -663,6 +663,9 @@ class ClazzEdit2Presenter(
     fun handleClickAddAssignment() {
         val args = mutableMapOf<String, String>()
         args[UstadView.ARG_CLAZZUID] = entity?.clazzUid.toString()
+        if(entity != null){
+            args[ClazzAssignmentEditView.TERMINOLOGY_ID] = entity?.clazzTerminologyUid.toString()
+        }
 
         navigateForResult(NavigateForResultOptions(
                 this,
@@ -773,6 +776,9 @@ class ClazzEdit2Presenter(
                 val args = mutableMapOf<String, String>()
                 args[UstadView.ARG_CLAZZUID] = (joinedEntity.assignment?.caClazzUid ?: entity?.clazzUid ?: 0L).toString()
                 args[UstadView.ARG_ENTITY_UID] = (joinedEntity.assignment?.caUid ?: 0L).toString()
+                if(entity != null){
+                    args[ClazzAssignmentEditView.TERMINOLOGY_ID] = entity?.clazzTerminologyUid.toString()
+                }
 
                 NavigateForResultOptions(
                         this,

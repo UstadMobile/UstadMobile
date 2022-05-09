@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
@@ -210,7 +211,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
             }
         }
 
-    override var markingTypeOptions: List<ClazzAssignmentEditPresenter.MarkingTypeOptionsMessageIdOption>?= null
+    override var markingTypeOptions: List<IdOption>?= null
         get() = field
         set(value) {
             setState {
@@ -489,7 +490,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                                 markedByLabel.errorText ?: "",
                                 error = markedByLabel.error,
                                 values = markingTypeOptions?.map {
-                                    Pair(it.code.toString(), it.toString())
+                                    Pair(it.optionId.toString(), it.toString())
                                 }?.toList(),
                                 onChange = {
                                     setState {

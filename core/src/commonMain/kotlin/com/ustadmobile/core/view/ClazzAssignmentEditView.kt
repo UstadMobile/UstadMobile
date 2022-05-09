@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 
@@ -34,11 +35,13 @@ interface ClazzAssignmentEditView: UstadEditView<CourseBlockWithEntity> {
 
     var completionCriteriaOptions: List<ClazzAssignmentEditPresenter.CompletionCriteriaOptionsMessageIdOption>?
 
-    var markingTypeOptions: List<ClazzAssignmentEditPresenter.MarkingTypeOptionsMessageIdOption>?
+    var markingTypeOptions: List<IdOption>?
 
     companion object {
 
         const val VIEW_NAME = "CourseAssignmentEditView"
+
+        const val TERMINOLOGY_ID = "clazzTerminologyId"
 
     }
 

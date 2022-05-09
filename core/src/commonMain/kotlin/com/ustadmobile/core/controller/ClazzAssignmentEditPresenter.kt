@@ -6,10 +6,12 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.fallbackIndividualSet
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.toTermMap
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzAssignmentEditView
@@ -23,7 +25,9 @@ import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 
 class ClazzAssignmentEditPresenter(context: Any,
@@ -31,6 +35,9 @@ class ClazzAssignmentEditPresenter(context: Any,
                                    lifecycleOwner: DoorLifecycleOwner,
                                    di: DI)
     : UstadEditPresenter<ClazzAssignmentEditView, CourseBlockWithEntity>(context, arguments, view, di, lifecycleOwner) {
+
+
+    private val json: Json by instance()
 
     enum class TextLimitTypeOptions(val optionVal: Int, val messageId: Int){
         WORDS(ClazzAssignment.TEXT_WORD_LIMIT, MessageID.words),
@@ -73,15 +80,6 @@ class ClazzAssignmentEditPresenter(context: Any,
     class  FileTypeOptionsMessageIdOption(day: FileTypeOptions, context: Any, di: DI)
         : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
-
-    enum class MarkingTypeOptions(val optionVal: Int, val messageId: Int){
-        TEACHER(ClazzAssignment.MARKED_BY_COURSE_LEADER, MessageID.teacher),
-        PEERS(ClazzAssignment.MARKED_BY_PEERS, MessageID.peers)
-    }
-    class MarkingTypeOptionsMessageIdOption(day: MarkingTypeOptions, context: Any, di: DI)
-        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
-
-
     private var clazzUid: Long = 0L
 
     override val persistenceMode: PersistenceMode
@@ -90,7 +88,6 @@ class ClazzAssignmentEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.markingTypeOptions = MarkingTypeOptions.values().map { MarkingTypeOptionsMessageIdOption(it, context, di) }
         view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaOptionsMessageIdOption(it, context, di) }
         view.submissionPolicyOptions = SubmissionPolicyOptions.values().map { SubmissionPolicyOptionsMessageIdOption(it, context, di) }
         view.fileTypeOptions = FileTypeOptions.values().map { FileTypeOptionsMessageIdOption(it, context, di) }
@@ -139,6 +136,14 @@ class ClazzAssignmentEditPresenter(context: Any,
             val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
                 it.clazzDao.getClazzWithSchool(clazzUid)
             } ?: ClazzWithSchool()
+
+            val terminologyUid = arguments[ClazzAssignmentEditView.TERMINOLOGY_ID]?.toLongOrNull() ?: clazzWithSchool.clazzTerminologyUid
+            val terminology = db.courseTerminologyDao.findByUidAsync(terminologyUid)
+            val termMap = terminology.toTermMap(json, systemImpl, context)
+
+            view.markingTypeOptions = listOf(
+                IdOption(termMap.getValue(TerminologyKeys.TEACHER_KEY), ClazzAssignment.MARKED_BY_COURSE_LEADER),
+                MessageIdOption(MessageID.peers, context, ClazzAssignment.MARKED_BY_PEERS, di))
 
             val timeZone = clazzWithSchool.effectiveTimeZone()
             view.timeZone = timeZone
