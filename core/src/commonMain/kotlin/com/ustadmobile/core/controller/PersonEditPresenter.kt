@@ -7,7 +7,6 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
@@ -17,8 +16,10 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
-import com.ustadmobile.lib.db.entities.*
-import io.ktor.client.features.json.*
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.PersonPicture
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
@@ -266,18 +267,17 @@ class PersonEditPresenter(
                     repo.personDao.updateAsync(entity)
                 }
 
-                UmPlatformUtil.runAsync {
-                    val personPictureVal = view.personPicture
-                    if(personPictureVal != null) {
-                        personPictureVal.personPicturePersonUid = entity.personUid
+                val personPictureVal = view.personPicture
+                if(personPictureVal != null) {
+                    personPictureVal.personPicturePersonUid = entity.personUid
 
-                        if(personPictureVal.personPictureUid == 0L) {
-                            repo.personPictureDao.insertAsync(personPictureVal)
-                        }else {
-                            repo.personPictureDao.updateAsync(personPictureVal)
-                        }
+                    if(personPictureVal.personPictureUid == 0L) {
+                        repo.personPictureDao.insertAsync(personPictureVal)
+                    }else {
+                        repo.personPictureDao.updateAsync(personPictureVal)
                     }
                 }
+
 
                 //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
                 // PersonList, PersonEdit, EnrolmentEdit

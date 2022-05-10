@@ -122,6 +122,8 @@ import kotlin.jvm.JvmField
     UserSessionReplicate::class,
     CoursePicture::class,
     CoursePictureReplicate::class,
+    ContentEntryPicture::class,
+    ContentEntryPictureReplicate::class,
     Chat::class,
     ChatMember::class,
     Message::class,
@@ -370,6 +372,9 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     @JsName("coursePictureDao")
     abstract val coursePictureDao: CoursePictureDao
+
+    @JsName("contentEntryPictureDao")
+    abstract val contentEntryPictureDao: ContentEntryPictureDao
 
     @JsName("chatDao")
     abstract val chatDao: ChatDao

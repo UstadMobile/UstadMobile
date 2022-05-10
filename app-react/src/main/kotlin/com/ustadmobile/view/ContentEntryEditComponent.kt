@@ -7,6 +7,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryPicture
 import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.theme.UMColor
@@ -70,6 +71,14 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
     private var licenseLabel = FieldLabel(text = getString(MessageID.licence))
 
     private var maxPointsLabel = FieldLabel(text = getString(MessageID.maximum_points))
+
+    override var contentEntryPicture: ContentEntryPicture? = null
+        get() = field
+        set(value) {
+            setState{
+                field = value
+            }
+        }
 
     override var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>? = null
         get() = field

@@ -70,6 +70,8 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
     private var downloadRecyclerAdapter: CourseDownloadDetailRecyclerAdapter? = null
 
+    private var courseImageAdapter: CourseImageAdapter? = null
+
     private var currentLiveData: LiveData<PagedList<Schedule>>? = null
 
     private var courseBlockLiveData: LiveData<PagedList<CourseBlockWithCompleteEntity>>? = null
@@ -256,6 +258,9 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
         detailMergerRecyclerView = rootView.findViewById(R.id.fragment_course_detail_overview)
 
+        // 0
+        courseImageAdapter = CourseImageAdapter()
+
         // 1
         downloadRecyclerAdapter = CourseDownloadDetailRecyclerAdapter(this)
 
@@ -289,7 +294,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
         courseBlockDetailRecyclerAdapter?.mPresenter = mPresenter
 
-        detailMergerRecyclerAdapter = ConcatAdapter(downloadRecyclerAdapter,
+        detailMergerRecyclerAdapter = ConcatAdapter(courseImageAdapter, downloadRecyclerAdapter,
             detailRecyclerAdapter, scheduleHeaderAdapter,
             mScheduleListRecyclerAdapter, courseBlockDetailRecyclerAdapter)
 
@@ -306,6 +311,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         detailMergerRecyclerView?.adapter = null
         detailMergerRecyclerView = null
 
+        courseImageAdapter = null
         downloadRecyclerAdapter = null
         detailRecyclerAdapter = null
         scheduleHeaderAdapter = null
@@ -320,6 +326,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         set(value) {
             field = value
             detailRecyclerAdapter?.clazz = value
+            courseImageAdapter?.clazz = value
             courseBlockDetailRecyclerAdapter?.timeZone = value?.clazzTimeZone ?: value?.clazzSchool?.schoolTimeZone ?: "UTC"
         }
 
