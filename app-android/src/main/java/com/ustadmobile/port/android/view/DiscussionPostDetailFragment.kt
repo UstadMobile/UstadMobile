@@ -67,8 +67,8 @@ class DiscussionPostDetailFragment: UstadBaseFragment(), DiscussionPostDetailVie
             requireContext(),
             arguments.toStringMap(),
             this,
-            di,
-            viewLifecycleOwner)
+            di
+        )
 
 
         val stackedLayoutManager = LinearLayoutManager(requireContext())
@@ -85,7 +85,7 @@ class DiscussionPostDetailFragment: UstadBaseFragment(), DiscussionPostDetailVie
 
         //3.
         messagesRecyclerAdapter = MessagesRecyclerAdapter(accountManager.activeAccount.personUid,
-            mPresenter?.ps, mPresenter)
+            mPresenter?.ps, mPresenter, di, requireContext())
 
 
 

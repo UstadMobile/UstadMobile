@@ -165,13 +165,11 @@ actual open class UstadMobileSystemImpl(
     /**
      * Open the given link in a browser and/or tab depending on the platform
      */
-    actual fun openLinkInBrowser(url: String, context: Any) {
+    actual override fun openLinkInBrowser(url: String, context: Any) {
         window.open(url, "_blank")
     }
 
-    actual fun handleClickLink(url: String, context: Any){
-        openLinkInBrowser(url, context)
-    }
+
 
     /**
      * Provide language UI directionality

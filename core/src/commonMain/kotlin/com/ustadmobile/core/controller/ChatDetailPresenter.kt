@@ -2,15 +2,10 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.view.ChatDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
-import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.withDoorTransactionAsync
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Chat
 import com.ustadmobile.lib.db.entities.ChatMember
 import com.ustadmobile.lib.db.entities.Message
@@ -23,8 +18,9 @@ import org.kodein.di.on
 class ChatDetailPresenter(
     context: Any,
     arguments: Map<String, String>,
-    view: ChatDetailView, di: DI,
-    lifecycleOwner: DoorLifecycleOwner)
+    view: ChatDetailView,
+    di: DI
+)
 
     : UstadBaseController<ChatDetailView>(
         context, arguments, view, di), MessagesPresenter {
@@ -75,14 +71,6 @@ class ChatDetailPresenter(
 
     }
 
-    /**
-     * If link is on active endpoint :
-    Then just use systemImpl.go and use logic as per goToDeepLink :
-     */
-    override fun handleClickLink(link: String){
-        val systemImpl: UstadMobileSystemImpl by instance()
-        systemImpl.handleClickLink(link, context)
-    }
 
 
     fun addMessage(message: String){
@@ -143,6 +131,6 @@ class ChatDetailPresenter(
     }
 
     companion object{
-        val ARG_CHAT_IS_GROUP = "isChatGroup"
+        const val ARG_CHAT_IS_GROUP = "isChatGroup"
     }
 }

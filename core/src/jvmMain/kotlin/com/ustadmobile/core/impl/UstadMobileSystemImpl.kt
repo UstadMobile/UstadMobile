@@ -239,13 +239,10 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
     /**
      * Open the given link in a browser and/or tab depending on the platform
      */
-    actual fun openLinkInBrowser(url: String, context: Any) {
+    actual override fun openLinkInBrowser(url: String, context: Any) {
         //On JVM - do nothing at the moment. This is only used for unit testing with verify calls.
     }
 
-    actual fun handleClickLink(url: String, context: Any) {
-        //On JVM - do nothing I guess
-    }
 
     actual companion object {
 

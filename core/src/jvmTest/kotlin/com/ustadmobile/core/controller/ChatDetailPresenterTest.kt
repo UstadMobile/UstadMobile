@@ -9,22 +9,14 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ChatDao
-import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.db.dao.MessageDao
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.*
-import com.ustadmobile.core.util.ext.grantScopedPermission
-import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
-import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
-import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 
 class ChatDetailPresenterTest {
@@ -182,8 +174,8 @@ class ChatDetailPresenterTest {
             context,
             mapOf(ARG_ENTITY_UID to chatTestUserPersonOne!!.chatUid.toString()),
             mockView,
-            di,
-            mockLifecycleOwner)
+            di
+        )
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view

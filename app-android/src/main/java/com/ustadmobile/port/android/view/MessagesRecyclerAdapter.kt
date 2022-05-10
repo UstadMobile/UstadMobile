@@ -1,40 +1,45 @@
 package com.ustadmobile.port.android.view
 
-import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemMessageListBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.MessagesPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.MessageRead
 import com.ustadmobile.lib.db.entities.MessageWithPerson
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-import kotlinx.coroutines.*
-import me.saket.bettermovementmethod.BetterLinkMovementMethod
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 
 class MessagesRecyclerAdapter(
     val loggedInPersonUid: Long,
     private val presenterScope: CoroutineScope?,
-    private val presenter: MessagesPresenter?
+    private val presenter: MessagesPresenter?,
+    di: DI,
+    val context: Any
 ): SelectablePagedListAdapter<MessageWithPerson,
         MessagesRecyclerAdapter.MessageWithPersonViewHolder>(DIFF_CALLBACK_COMMENTS) {
 
 
+    private val systemImpl: UstadMobileSystemImpl by di.instance()
+
+    private val accountManager: UstadAccountManager by di.instance()
 
     class MessageWithPersonViewHolder(val binding: ItemMessageListBinding,
                                       var messageReadJob: Job? = null)
         : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageWithPersonViewHolder {
-        val vh = MessageWithPersonViewHolder(ItemMessageListBinding.inflate(
+        return MessageWithPersonViewHolder(ItemMessageListBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false))
-
-        addMovement(vh.binding.itemCommentsListLine2Text)
-
-        return vh
     }
 
 
@@ -47,7 +52,9 @@ class MessagesRecyclerAdapter(
         holder.binding.message = message
 
         holder.binding.itemCommentsListLine2Text.text = message?.messageText
-        addMovement(holder.binding.itemCommentsListLine2Text)
+        val listener = BetterLinkMovementLinkClickListener(systemImpl, accountManager, context)
+        listener.addMovement(holder.binding.itemCommentsListLine2Text)
+        //addMovement(holder.binding.itemCommentsListLine2Text)
 
 
         //if message is unread
@@ -61,44 +68,8 @@ class MessagesRecyclerAdapter(
                     message?.messageEntityUid?:0L)
             )
 
-            //TODO: Consider an event collator
-//                val collator = EventCollator<MessageRead>(200){
-//                    readMessages:List<MessageRead> ->
-//                        presenter?.updateMessageReadList(readMessages)
-//                }
-//                collator.send()
             holder.messageReadJob = null
         }
-    }
-
-
-    private fun addMovement(textView: TextView){
-
-        textView.linksClickable = true
-
-        textView.movementMethod =
-            BetterLinkMovementMethod.newInstance().apply {
-                this.setOnLinkClickListener(onClickListener)
-                this.setOnLinkLongClickListener(onLongClickListener)
-
-            }
-
-        Linkify.addLinks(textView, Linkify.ALL)
-
-    }
-
-    val onClickListener: BetterLinkMovementMethod.OnLinkClickListener =
-        BetterLinkMovementMethod.OnLinkClickListener{
-        _,url ->
-        presenter?.handleClickLink(url)
-
-        true
-    }
-
-    val onLongClickListener: BetterLinkMovementMethod.OnLinkLongClickListener =
-        BetterLinkMovementMethod.OnLinkLongClickListener{
-            _,_ ->
-        true
     }
 
     companion object{
