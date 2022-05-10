@@ -43,7 +43,7 @@ open class Comments() {
     // person uid of whoever made the comment
     var commentsPersonUid : Long = 0
 
-    // ignore
+    @Deprecated("use commentSubmitterUid")
     var commentsToPersonUid: Long = 0
 
     // personUid if individual, groupNum if group, 0 for class comment)

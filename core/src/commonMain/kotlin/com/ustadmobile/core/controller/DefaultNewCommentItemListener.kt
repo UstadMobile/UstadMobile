@@ -11,8 +11,14 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class DefaultNewCommentItemListener(override val di: DI, val context: Any, val entityUid: Long,
-                                    val tableId: Int, val isPublic: Boolean, val toPerson: Long = 0): NewCommentItemListener, DIAware {
+class DefaultNewCommentItemListener(
+    override val di: DI,
+    val context: Any,
+    val entityUid: Long,
+    val tableId: Int,
+    val isPublic: Boolean,
+    private val commentOnSubmitterUid: Long = 0
+): NewCommentItemListener, DIAware {
 
     override fun addComment(text: String) {
 
@@ -29,7 +35,7 @@ class DefaultNewCommentItemListener(override val di: DI, val context: Any, val e
             }else{
                 0L
             }
-            commentObj.commentSubmitterUid = if(toPerson == 0L) submitterUid else toPerson
+            commentObj.commentSubmitterUid = if(commentOnSubmitterUid == 0L) submitterUid else commentOnSubmitterUid
 
             repo.commentsDao.insertAsync(commentObj)
         }
