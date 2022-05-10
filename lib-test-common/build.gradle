@@ -22,6 +22,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 31
     }
+    namespace 'com.ustadmobile.lib.test'
 }
 
 apply plugin: "maven-publish"
