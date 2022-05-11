@@ -192,6 +192,8 @@ class ContentEntryEdit2PresenterTest {
         contentEntry.leaf = false
         val presenter = ContentEntryEdit2Presenter(context, mapOf(UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString()), mockView, mockLifecycleOwner, di)
 
+        whenever(mockView.metadataResult).thenReturn(null)
+
         presenter.onCreate(null)
         mockView.captureLastEntityValue()
         presenter.handleClickSave(contentEntry)
