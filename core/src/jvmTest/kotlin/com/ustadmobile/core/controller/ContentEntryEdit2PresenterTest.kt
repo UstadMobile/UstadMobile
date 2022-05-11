@@ -1,6 +1,8 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.contentjob.ContentJobManager
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.ContainerStorageManager
@@ -12,6 +14,8 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.toFile
+import com.ustadmobile.door.ext.waitUntilWithTimeout
+import com.ustadmobile.door.getFirstValue
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -19,7 +23,6 @@ import com.ustadmobile.lib.db.entities.Language
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -165,20 +168,20 @@ class ContentEntryEdit2PresenterTest {
 
         runBlocking{
             presenter.handleClickSave(contentEntry)
-        }
 
-
-        argumentCaptor<ContentEntryWithBlockAndLanguage>().apply {
-            verifyBlocking(mockEntryDao, timeout(5000).atLeastOnce()) {
-                insertAsync(capture())
+            repo.contentEntryDao.findAllLive().waitUntilWithTimeout(5000) {
+                it.size == 1
             }
-            assertEquals("Got expected content entry title", contentEntry.title, firstValue.title)
+
+            val entry = repo.contentEntryDao.findAllLive().getFirstValue().first()
+            assertEquals("Got expected content entry title", contentEntry.title, entry.title)
+
         }
+
 
         verifyBlocking(contentJobManager, timeout(timeoutInMill)) {
             enqueueContentJob(any(), any())
         }
-
 
     }
 
@@ -193,11 +196,14 @@ class ContentEntryEdit2PresenterTest {
         mockView.captureLastEntityValue()
         presenter.handleClickSave(contentEntry)
 
-        argumentCaptor<ContentEntryWithBlockAndLanguage>().apply {
-            verifyBlocking(mockEntryDao, timeout(5000)) {
-                insertAsync(capture())
+        runBlocking {
+            repo.contentEntryDao.findAllLive().waitUntilWithTimeout(5000) {
+                it.size == 1
             }
-            assertEquals("Got expected folder title", contentEntry.title, firstValue.title)
+
+            val entry = repo.contentEntryDao.findAllLive().getFirstValue().first()
+            assertEquals("Got expected folder title", contentEntry.title, entry.title)
+
         }
 
         verifyBlocking(contentJobManager, times(0)) {
@@ -218,14 +224,15 @@ class ContentEntryEdit2PresenterTest {
         runBlocking{
             entrySetOnView!!.title = "Updated Title"
             presenter.handleClickSave(entrySetOnView)
-        }
 
 
-        argumentCaptor<ContentEntryWithBlockAndLanguage>().apply {
-            verifyBlocking(mockEntryDao, timeout(5000)) {
-                updateAsync(capture())
+            repo.contentEntryDao.findAllLive().waitUntilWithTimeout(5000) {
+                it.size == 1
             }
-            assertEquals("Got expected content entry title", "Updated Title", firstValue.title)
+
+            val entry = repo.contentEntryDao.findAllLive().getFirstValue().first()
+            assertEquals("Got expected content entry title", "Updated Title", entry.title)
+
         }
 
         verifyBlocking(contentJobManager, timeout(timeoutInMill)) {
