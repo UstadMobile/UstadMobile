@@ -196,13 +196,16 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
 
 
     @Query("""
-        SELECT COALESCE((SELECT COALESCE(CourseGroupMember.cgmGroupNumber, 0)
+        SELECT (CASE WHEN ClazzAssignment.caGroupUid = 0 
+                     THEN :personUid 
+                     WHEN CourseGroupMember.cgmUid IS NULL 
+                     THEN 0 
+                     ELSE CourseGroupMember.cgmGroupNumber END) as submitterUid
           FROM ClazzAssignment
                LEFT JOIN CourseGroupMember
                ON cgmSetUid = ClazzAssignment.caGroupUid
                AND cgmPersonUid = :personUid
          WHERE caUid = :assignmentUid
-           AND caGroupUid != 0), :personUid)
     """)
     abstract suspend fun getSubmitterUid(assignmentUid: Long, personUid: Long): Long
 

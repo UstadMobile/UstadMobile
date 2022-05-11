@@ -225,14 +225,17 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                 ON casUid = (SELECT casUid 
                                      FROM CourseAssignmentSubmission
                                     WHERE casAssignmentUid = ClazzAssignment.caUid
-                                      AND casSubmitterUid = (SELECT personUid from Person 
-                                                              WHERE ClazzAssignment.caGroupUid != 0 
-                                                                AND personUid = :personUid 
-                                                             UNION 
-                                                      	       SELECT CourseGroupMember.cgmGroupNumber 
-                                                                FROM CourseGroupMember 
-                                                               WHERE ClazzAssignment.caGroupUid = CourseGroupMember.cgmSetUid 
-                                                                 AND cgmPersonUid = :personUid)
+                                      AND casSubmitterUid = (SELECT (CASE WHEN ref.caGroupUid = 0 
+                                                                          THEN :personUid 
+                                                                          WHEN CourseGroupMember.cgmUid IS NULL 
+                                                                          THEN 0 
+                                                                          ELSE CourseGroupMember.cgmGroupNumber 
+                                                                          END) as submitterUid
+                                                               FROM ClazzAssignment AS ref
+                                                                    LEFT JOIN CourseGroupMember
+                                                                     ON cgmSetUid = ClazzAssignment.caGroupUid
+                                                                     AND cgmPersonUid = :personUid
+                                                              WHERE ref.caUid = ClazzAssignment.caUid)
                                  ORDER BY casTimestamp DESC
                                     LIMIT 1)
                                           
@@ -240,14 +243,17 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                       ON camUid = (SELECT camUid 
                                      FROM CourseAssignmentMark
                                     WHERE camAssignmentUid = ClazzAssignment.caUid
-                                      AND camSubmitterUid = (SELECT personUid from Person 
-                                                              WHERE ClazzAssignment.caGroupUid != 0 
-                                                                AND personUid = :personUid 
-                                                             UNION 
-                                                      	       SELECT CourseGroupMember.cgmGroupNumber 
-                                                                FROM CourseGroupMember 
-                                                               WHERE ClazzAssignment.caGroupUid = CourseGroupMember.cgmSetUid 
-                                                                 AND cgmPersonUid = :personUid)
+                                      AND camSubmitterUid = (SELECT (CASE WHEN ref.caGroupUid = 0 
+                                                                          THEN :personUid 
+                                                                          WHEN CourseGroupMember.cgmUid IS NULL 
+                                                                          THEN 0 
+                                                                          ELSE CourseGroupMember.cgmGroupNumber 
+                                                                          END) as submitterUid
+                                                               FROM ClazzAssignment AS ref
+                                                                    LEFT JOIN CourseGroupMember
+                                                                     ON cgmSetUid = ClazzAssignment.caGroupUid
+                                                                     AND cgmPersonUid = :personUid
+                                                              WHERE ref.caUid = ClazzAssignment.caUid)
                                  ORDER BY camLct DESC
                                     LIMIT 1)       
          WHERE CourseBlock.cbClazzUid = :clazzUid
