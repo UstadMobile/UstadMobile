@@ -102,16 +102,15 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
                    ON Person.personUid = Comments.commentsPersonUid
              WHERE Comments.commentsEntityType = :entityType 
                AND Comments.commentsEntityUid = :entityUid
-               AND (Comments.commentsPersonUid = :personUid 
-                    OR Comments.commentSubmitterUid = :submitterUid)  
+               AND Comments.commentSubmitterUid = :submitterUid  
                AND CAST(Comments.commentsFlagged AS INTEGER) = 0
                AND CAST(Comments.commentsInActive AS INTEGER) = 0
                AND CAST(Comments.commentsPublic AS INTEGER) = 0
           ORDER BY Comments.commentsDateTimeAdded DESC 
     """)
     abstract fun findPrivateByEntityTypeAndUidAndForPersonLive2(
-        entityType: Int, entityUid: Long,
-        personUid: Long,
+        entityType: Int,
+        entityUid: Long,
         submitterUid: Long
     ):
             DoorDataSourceFactory<Int, CommentsWithPerson>
