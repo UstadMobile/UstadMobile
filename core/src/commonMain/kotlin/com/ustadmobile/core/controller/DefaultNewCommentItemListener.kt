@@ -17,7 +17,7 @@ class DefaultNewCommentItemListener(
     val entityUid: Long,
     val tableId: Int,
     val isPublic: Boolean,
-    private val commentOnSubmitterUid: Long = 0
+    private val commentOnSubmitterUid: Long? = null
 ): NewCommentItemListener, DIAware {
 
     override fun addComment(text: String) {
@@ -29,13 +29,8 @@ class DefaultNewCommentItemListener(
         val commentObj = Comments(tableId, entityUid, accountManager.activeAccount.personUid,
                 getSystemTimeInMillis(), text, isPublic)
         GlobalScope.launch {
-            val assignment = repo.clazzAssignmentDao.findByUidAsync(entityUid) ?: return@launch
-            val submitterUid = if(assignment.caGroupUid != 0L){
-                repo.courseGroupMemberDao.findByPersonUid(assignment.caGroupUid, accountManager.activeAccount.personUid)?.cgmGroupNumber?.toLong() ?: 0
-            }else{
-                0L
-            }
-            commentObj.commentSubmitterUid = if(commentOnSubmitterUid == 0L) submitterUid else commentOnSubmitterUid
+            commentObj.commentSubmitterUid = commentOnSubmitterUid ?: repo.clazzAssignmentDao
+                                .getSubmitterUid(entityUid, accountManager.activeAccount.personUid)
 
             repo.commentsDao.insertAsync(commentObj)
         }

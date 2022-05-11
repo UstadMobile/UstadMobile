@@ -194,6 +194,18 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
         searchText: String
     ): DoorDataSourceFactory<Int, PersonGroupAssignmentSummary>
 
+
+    @Query("""
+        SELECT COALESCE((SELECT COALESCE(CourseGroupMember.cgmGroupNumber, 0)
+          FROM ClazzAssignment
+               LEFT JOIN CourseGroupMember
+               ON cgmSetUid = ClazzAssignment.caGroupUid
+               AND cgmPersonUid = :personUid
+         WHERE caUid = :assignmentUid
+           AND caGroupUid != 0), :personUid)
+    """)
+    abstract suspend fun getSubmitterUid(assignmentUid: Long, personUid: Long): Long
+
     @Update
     abstract suspend fun updateAsync(clazzAssignment: ClazzAssignment)
 

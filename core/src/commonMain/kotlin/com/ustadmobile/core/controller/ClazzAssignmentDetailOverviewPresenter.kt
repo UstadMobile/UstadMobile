@@ -7,7 +7,6 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.io.ext.guessMimeType
 import com.ustadmobile.core.util.ext.effectiveTimeZone
-import com.ustadmobile.core.util.ext.getSubmitterUid
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -49,14 +48,16 @@ class ClazzAssignmentDetailOverviewPresenter(
 
     val submissionList = mutableListOf<CourseAssignmentSubmissionWithAttachment>()
 
+    // for student/group to enter their private comment about their submission
     val newPrivateCommentListener: DefaultNewCommentItemListener = DefaultNewCommentItemListener(di, context,
         arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
         ClazzAssignment.TABLE_ID, false)
 
+    // for everyone to enter their public comment
     val newClassCommentListener: DefaultNewCommentItemListener =
         DefaultNewCommentItemListener(di, context,
             arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
-            ClazzAssignment.TABLE_ID, true)
+            ClazzAssignment.TABLE_ID, true, 0)
 
     override val persistenceMode: PersistenceMode
           get() = PersistenceMode.DB
@@ -96,12 +97,13 @@ class ClazzAssignmentDetailOverviewPresenter(
 
         if(isStudent) {
 
-            val submitterUid = clazzAssignment.getSubmitterUid(db, accountManager.activeAccount.personUid)
+            val submitterUid = db.clazzAssignmentDao.getSubmitterUid(clazzAssignment.caUid,
+                                                            accountManager.activeAccount.personUid)
 
             val unassignedMessage = systemImpl.getString(MessageID.unassigned, context)
             view.unassignedError = if(submitterUid == 0L) unassignedMessage else null
 
-            checkCanAddFileOrText(clazzAssignment, submitterUid)
+            checkCanAddFileOrText(clazzAssignment)
 
             // don't show private comments if unassigned in group
             view.showPrivateComments = clazzAssignment.caPrivateCommentsEnabled && submitterUid != 0L
@@ -109,7 +111,7 @@ class ClazzAssignmentDetailOverviewPresenter(
             if(clazzAssignment.caPrivateCommentsEnabled){
                 view.clazzAssignmentPrivateComments = db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
                     ClazzAssignment.TABLE_ID, clazzAssignment.caUid,
-                    loggedInPersonUid, submitterUid)
+                    submitterUid)
             }
 
             view.submittedCourseAssignmentSubmission = db.onRepoWithFallbackToDb(2000){
@@ -136,7 +138,9 @@ class ClazzAssignmentDetailOverviewPresenter(
         }
     }
 
-    suspend fun checkCanAddFileOrText(clazzAssignment: ClazzAssignmentWithCourseBlock, submitterUid: Long) {
+    suspend fun checkCanAddFileOrText(clazzAssignment: ClazzAssignmentWithCourseBlock) {
+        val submitterUid = repo.clazzAssignmentDao.getSubmitterUid(clazzAssignment.caUid,
+            accountManager.activeAccount.personUid)
         var alreadySubmitted = false
         if(clazzAssignment.caSubmissionPolicy == ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE){
             val sizeOfSubmitted = repo.courseAssignmentSubmissionDao.countSubmissionsFromSubmitter(
@@ -208,7 +212,8 @@ class ClazzAssignmentDetailOverviewPresenter(
             presenterScope.launch(doorMainDispatcher()) {
                 val doorUri = DoorUri.parse(uri)
 
-                val submitterUid = entity.getSubmitterUid(repo, accountManager.activeAccount.personUid)
+                val submitterUid = repo.clazzAssignmentDao.getSubmitterUid(entity.caUid,
+                                                        accountManager.activeAccount.personUid)
 
                 val submission = CourseAssignmentSubmissionWithAttachment().apply {
                     casSubmitterUid = submitterUid
@@ -229,7 +234,7 @@ class ClazzAssignmentDetailOverviewPresenter(
                 submissionList.add(submission)
                 view.addedCourseAssignmentSubmission = submissionList
 
-                checkCanAddFileOrText(entity, submitterUid)
+                checkCanAddFileOrText(entity)
 
             }
             requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
@@ -241,7 +246,8 @@ class ClazzAssignmentDetailOverviewPresenter(
             val entity = entity ?: return@observeSavedStateResult
             presenterScope.launch(doorMainDispatcher()) {
 
-                val submitterUid = entity.getSubmitterUid(repo, accountManager.activeAccount.personUid)
+                val submitterUid = repo.clazzAssignmentDao.getSubmitterUid(entity.caUid,
+                                                            accountManager.activeAccount.personUid)
 
                 // find existing and remove it
                 val existingSubmission = submissionList.find { subList -> subList.casUid == submission.casUid }
@@ -253,7 +259,7 @@ class ClazzAssignmentDetailOverviewPresenter(
 
                 submissionList.add(submission)
                 view.addedCourseAssignmentSubmission = submissionList
-                checkCanAddFileOrText(entity, submitterUid)
+                checkCanAddFileOrText(entity)
 
             }
 
@@ -268,7 +274,7 @@ class ClazzAssignmentDetailOverviewPresenter(
         view.addedCourseAssignmentSubmission = submissionList
         presenterScope.launch {
             entity?.let {
-                checkCanAddFileOrText(it, it.getSubmitterUid(db, accountManager.activeAccount.personUid))
+                checkCanAddFileOrText(it)
             }
         }
     }
@@ -340,7 +346,8 @@ class ClazzAssignmentDetailOverviewPresenter(
                 return@launch
             }
 
-            val submitterUid = entity.getSubmitterUid(db, accountManager.activeAccount.personUid)
+            val submitterUid = repo.clazzAssignmentDao.getSubmitterUid(entity.caUid,
+                                                        accountManager.activeAccount.personUid)
 
             if(entity.caSubmissionPolicy == ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE){
                 val sizeOfSubmitted = repo.courseAssignmentSubmissionDao
@@ -357,7 +364,7 @@ class ClazzAssignmentDetailOverviewPresenter(
                 txDb.courseAssignmentSubmissionDao.insertListAsync(submissionList)
                 txDb.courseAssignmentSubmissionAttachmentDao.insertListAsync(submissionList.mapNotNull { it.attachment })
 
-                checkCanAddFileOrText(entity, submitterUid)
+                checkCanAddFileOrText(entity)
 
                 // TODO need to handle groups
                /* val agentPerson = txDb.agentDao.getAgentFromPersonUsername(
