@@ -4,7 +4,7 @@
 
     <data>
 
-        <import type="com.ustadmobile.port.android.view.CourseImageAdapter"/>
+        <import type="com.ustadmobile.port.android.view.ClazzListFragment"/>
 
         <variable
             name="clazz"
@@ -15,17 +15,23 @@
             type="com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter" />
     </data>
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/fragment_course_detail_picture_imageview"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dimen_256dp"
-        android:scaleType="centerCrop"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:imageForeignKey="@{clazz.clazzUid}"
-        app:imageForeignKeyAdapter="@{CourseImageAdapter.FOREIGNKEYADAPTER_COURSE}"
-        app:imageForeignKeyAutoHide="@{true}"
-        />
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/fragment_course_detail_picture_imageview"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dimen_256dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:imageForeignKey="@{clazz.clazzUid}"
+            app:imageForeignKeyAdapter="@{ClazzListFragment.FOREIGNKEYADAPTER_COURSE}"
+            app:imageForeignKeyAutoHide="@{true}"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </layout>

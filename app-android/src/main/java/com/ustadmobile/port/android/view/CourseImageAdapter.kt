@@ -4,9 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCourseImageBinding
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
-import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class CourseImageAdapter()
@@ -40,16 +38,5 @@ class CourseImageAdapter()
 
     override fun onBindViewHolder(holder: CourseImageViewHolder, position: Int) {
         super.onBindViewHolder(holder, position)
-    }
-
-    companion object {
-
-        @JvmStatic
-        val FOREIGNKEYADAPTER_COURSE = object: ForeignKeyAttachmentUriAdapter {
-            override suspend fun getAttachmentUri(foreignKey: Long, dbToUse: UmAppDatabase): String? {
-                return dbToUse.coursePictureDao.findByClazzUidAsync(foreignKey)?.coursePictureUri
-            }
-        }
-
     }
 }
