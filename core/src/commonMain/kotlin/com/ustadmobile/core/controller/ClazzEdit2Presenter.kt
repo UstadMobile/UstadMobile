@@ -632,21 +632,19 @@ class ClazzEdit2Presenter(
                     courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate,
                     systemTimeInMillis())
 
-            }
-
-            UmPlatformUtil.runAsync {
+                
                 val coursePictureVal = view.coursePicture
                 if(coursePictureVal != null) {
                     coursePictureVal.coursePictureClazzUid = entity.clazzUid
 
                     if(coursePictureVal.coursePictureUid == 0L) {
-                        repo.coursePictureDao.insertAsync(coursePictureVal)
+                        txDb.coursePictureDao.insertAsync(coursePictureVal)
                     }else {
-                        repo.coursePictureDao.updateAsync(coursePictureVal)
+                        txDb.coursePictureDao.updateAsync(coursePictureVal)
                     }
                 }
-            }
 
+            }
 
             val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight
             val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()

@@ -118,15 +118,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
             field = value
             field?.observe(this, scopedGrantListObserver)
         }
-
-    override var coursePicturePath: String? = null
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
-
+    
     override var coursePicture: CoursePicture? = null
         get() = field
         set(value) {

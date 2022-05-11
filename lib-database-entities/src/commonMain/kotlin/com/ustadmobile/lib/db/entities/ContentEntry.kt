@@ -78,6 +78,7 @@ open class ContentEntry() {
      */
     var sourceUrl: String? = null
 
+    @Deprecated("use contentEntryPicture")
     var thumbnailUrl: String? = null
 
     var lastModified: Long = 0

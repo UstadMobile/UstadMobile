@@ -3,10 +3,13 @@ package com.ustadmobile.core.view
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.impl.ContainerStorageDir
+import com.ustadmobile.lib.db.entities.ContentEntryPicture
 import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 
 
 interface ContentEntryEdit2View: UstadEditView<ContentEntryWithBlockAndLanguage>{
+
+    var contentEntryPicture: ContentEntryPicture?
 
     var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>?
 

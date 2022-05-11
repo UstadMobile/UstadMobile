@@ -74,7 +74,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:imageForeignKey="@{person.personUid}"
                 app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
-                app:imageForeignKeyAutoHide="@{false}"
+                app:imageForeignKeyAutoHide="@{true}"
                 />
 
             <androidx.constraintlayout.widget.Barrier
