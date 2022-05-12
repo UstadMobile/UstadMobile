@@ -20,4 +20,6 @@ expect object UmPlatformUtil {
     fun debug()
 
     fun log(content: Any)
+
+    suspend fun runIfNotJs(block:suspend () -> Unit)
 }

@@ -559,6 +559,7 @@ class ClazzEdit2Presenter(
             }
             courseBlockOneToManyJoinEditHelper.liveList.sendValue(courseBlockList)
 
+
             repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
 
                 if((arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() ?: 0L) == 0L) {
@@ -632,15 +633,16 @@ class ClazzEdit2Presenter(
                     courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate,
                     systemTimeInMillis())
 
-                
-                val coursePictureVal = view.coursePicture
-                if(coursePictureVal != null) {
-                    coursePictureVal.coursePictureClazzUid = entity.clazzUid
+                UmPlatformUtil.runIfNotJs {
+                    val coursePictureVal = view.coursePicture
+                    if(coursePictureVal != null) {
+                        coursePictureVal.coursePictureClazzUid = entity.clazzUid
 
-                    if(coursePictureVal.coursePictureUid == 0L) {
-                        txDb.coursePictureDao.insertAsync(coursePictureVal)
-                    }else {
-                        txDb.coursePictureDao.updateAsync(coursePictureVal)
+                        if(coursePictureVal.coursePictureUid == 0L) {
+                            txDb.coursePictureDao.insertAsync(coursePictureVal)
+                        }else {
+                            txDb.coursePictureDao.updateAsync(coursePictureVal)
+                        }
                     }
                 }
 

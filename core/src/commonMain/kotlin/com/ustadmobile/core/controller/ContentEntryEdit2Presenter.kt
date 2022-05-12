@@ -15,14 +15,11 @@ import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.encodeStringMapToString
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
-import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.BLOCK_REQUIRED
@@ -394,6 +391,7 @@ class ContentEntryEdit2Presenter(
 
                 val isNewEntry = entity.contentEntryUid == 0L
 
+
                 repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
 
                     if (entity.contentEntryUid == 0L) {
@@ -413,16 +411,19 @@ class ContentEntryEdit2Presenter(
                         txDb.contentEntryDao.updateAsync(entity)
                     }
 
-                    val contentEntryPictureVal = view.contentEntryPicture
-                    if(contentEntryPictureVal != null) {
-                        contentEntryPictureVal.cepContentEntryUid = entity.contentEntryUid
+                    UmPlatformUtil.runIfNotJs {
+                        val contentEntryPictureVal = view.contentEntryPicture
+                        if(contentEntryPictureVal != null) {
+                            contentEntryPictureVal.cepContentEntryUid = entity.contentEntryUid
 
-                        if(contentEntryPictureVal.cepUid == 0L) {
-                            txDb.contentEntryPictureDao.insertAsync(contentEntryPictureVal)
-                        }else {
-                            txDb.contentEntryPictureDao.updateAsync(contentEntryPictureVal)
+                            if(contentEntryPictureVal.cepUid == 0L) {
+                                txDb.contentEntryPictureDao.insertAsync(contentEntryPictureVal)
+                            }else {
+                                txDb.contentEntryPictureDao.updateAsync(contentEntryPictureVal)
+                            }
                         }
                     }
+
 
                     val language = entity.language
                     if (language != null && language.langUid == 0L) {
