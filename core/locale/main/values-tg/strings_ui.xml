@@ -1326,4 +1326,13 @@
     <string name="error_too_long_text">Матни аз ҳад зиёд</string>
     <string name="individual_submission">Пешниҳоди инфиродӣ</string>
     <string name="managed_enrolment">"Интихобшуда бояд  огоҳ бошад"</string>
+    <string name="text_file_submission_error">матн ва/ё файли пешниҳодшударо бояд истифода бурд</string>
+    <string name="submit_all_at_once_submission_policy">Cупоришҳои анҷомёфта бояд сари вақт фиристода шаванд</string>
+    <string name="multiple_submission_allowed_submission_policy">Таҳрири такрори мумкин аст</string>
+    <string name="enrolment_policy">"Қоидаҳои  бақайдгирӣ"</string>
+    <string name="submission_policy">"Қоидаҳои қабули супоришҳои  анҷомёфта"</string>
+    <string name="grade_out_of_range">"Баҳои ниҳоӣ  набояд аз 0 ва % 1$s баланд бошад"</string>
+    <string name="update_grade">Эълони баҳо</string>
+    <string name="update_grade_and_mark_next">"Баъд аз эълони  баҳо  супориши дигарро таъин намоед"</string>
+    <string name="submission_already_made">"Муҳлати қабули супоришҳо  ба анҷом расид"</string>
 </resources>
