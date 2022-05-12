@@ -9,6 +9,7 @@
         <import type="com.ustadmobile.port.android.view.ClazzEditFragment"/>
         <import type="android.view.View"/>
         <import type="android.text.Html"/>
+        <import type="android.text.SpannedString"/>
 
         <variable
             name="block"
@@ -63,7 +64,7 @@
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:id="@+id/item_block_line2_desc"
-            android:text="@{Html.fromHtml(block.cbDescription)}"
+            android:text='@{block.cbDescription != null ? Html.fromHtml(block.cbDescription) :  SpannedString.valueOf("")}'
             tools:text="Description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

@@ -152,7 +152,8 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                                    ON CourseAssignmentSubmission.casSubmitterUid = CourseAssignmentMark.camSubmitterUid
                                    AND CourseAssignmentMark.camAssignmentUid = CourseAssignmentSubmission.casAssignmentUid
                             WHERE CourseAssignmentMark.camUid IS NULL
-                             AND CourseAssignmentSubmission.casSubmitterUid IN 
+                              AND CourseAssignmentSubmission.casAssignmentUid = ClazzAssignment.caUid
+                              AND CourseAssignmentSubmission.casSubmitterUid IN 
                                                     (SELECT submitterId 
                                                       FROM SubmitterList
                                                      WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid))  
@@ -167,7 +168,8 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                              ON CourseAssignmentSubmission.casSubmitterUid = CourseAssignmentMark.camSubmitterUid
                              AND CourseAssignmentSubmission.casAssignmentUid = CourseAssignmentMark.camAssignmentUid
                              
-                          WHERE CourseAssignmentMark.camSubmitterUid IN (SELECT submitterId 
+                          WHERE CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid 
+                            AND CourseAssignmentMark.camSubmitterUid IN (SELECT submitterId 
                                                                             FROM SubmitterList
                                                                            WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid))
                    ELSE 0 END) AS markedStudents,
