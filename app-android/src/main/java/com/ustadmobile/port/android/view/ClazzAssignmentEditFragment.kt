@@ -224,6 +224,12 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             mBinding?.markingTypeOptions = value
         }
 
+    override var groupSetEnabled: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.groupSetEnabled = value
+        }
 
     private val onFileRequiredChanged: CompoundButton.OnCheckedChangeListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
         mBinding?.fileSubmissionVisibility = if(isChecked) View.VISIBLE else View.GONE

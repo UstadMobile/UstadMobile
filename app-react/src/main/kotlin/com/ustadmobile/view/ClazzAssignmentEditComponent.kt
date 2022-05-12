@@ -218,6 +218,13 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                 field = value
             }
         }
+    override var groupSetEnabled: Boolean = false
+        get() = field
+        set(value) {
+            setState{
+                field = value
+            }
+        }
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -348,7 +355,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                         helperText = submissionTypeLabel.errorText,
                         value = groupSet?.cgsName,
                         error = nameLabel.error,
-                        disabled = !fieldsEnabled,
+                        disabled = !groupSetEnabled,
                         variant = FormControlVariant.outlined,
                         onClick = {
                             mPresenter?.handleSubmissionTypeClicked()

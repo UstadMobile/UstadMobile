@@ -8,10 +8,7 @@ import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.effectiveTimeZone
-import com.ustadmobile.core.util.ext.fallbackIndividualSet
-import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.ext.toTermMap
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzAssignmentEditView
@@ -131,6 +128,12 @@ class ClazzAssignmentEditPresenter(context: Any,
             val group = db.courseGroupSetDao.findByUidAsync(editEntity.assignment?.caGroupUid ?: 0)
                 .fallbackIndividualSet(systemImpl, context)
             view.groupSet = group
+
+            repo.courseAssignmentSubmissionDao
+                .checkNoSubmissionsMade(editEntity.assignment?.caUid ?: 0)
+                .observeWithLifecycleOwner(lifecycleOwner){
+                    view.groupSetEnabled = it == true
+                }
 
             clazzUid = editEntity.assignment?.caClazzUid ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
             val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
