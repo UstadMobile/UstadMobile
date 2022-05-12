@@ -23,6 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
+        android:onClick="@{() -> presenter.handleModuleExpandCollapseClicked(block)}"
         app:courseBlockIndent="@{block.cbIndentLevel}">
 
 
@@ -84,7 +85,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             tools:src="@drawable/ic_baseline_keyboard_arrow_up_24"
-            android:onClick="@{() -> presenter.handleModuleExpandCollapseClicked(block)}"
             app:fallbackDrawable="@{block.expanded ? @drawable/ic_baseline_keyboard_arrow_up_24 : @drawable/ic_baseline_keyboard_arrow_down_24}"
             />
 
