@@ -61,10 +61,10 @@
             android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
             app:imageForeignKey="@{contentEntry.contentEntryUid}"
             app:imageForeignKeyAdapter="@{ContentEntryDetailFragment.FOREIGNKEYADAPTER_ENTRY}"
-            app:fallbackDrawable="@{contentEntry.leaf ? @drawable/book_24px:@drawable/ic_folder_black_24dp}"
+            app:fallbackDrawable="@{contentEntry.leaf ? @drawable/ic_round_book:@drawable/ic_round_folder}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/book_24px" />
+            tools:src="@drawable/ic_round_book" />
 
         <ProgressBar
             android:id="@+id/content_entry_progress"
@@ -167,6 +167,7 @@
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:tint="?colorOnIconTint"
+            app:layout_goneMarginStart="@dimen/dimen_16dp"
             android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
             android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
             app:imageLookupKey="@{contentEntry.contentTypeFlag}"
