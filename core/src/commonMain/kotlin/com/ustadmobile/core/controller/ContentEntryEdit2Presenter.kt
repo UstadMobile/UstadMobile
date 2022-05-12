@@ -343,6 +343,7 @@ class ContentEntryEdit2Presenter(
         entityVal.primaryLanguageUid = metadataResult.entry.primaryLanguageUid
         entityVal.thumbnailUrl = metadataResult.entry.thumbnailUrl
         entityVal.contentFlags = metadataResult.entry.contentFlags
+        entityVal.leaf = metadataResult.entry.leaf
 
         return entityVal
     }
