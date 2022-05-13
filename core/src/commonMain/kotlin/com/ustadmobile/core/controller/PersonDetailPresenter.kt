@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -80,8 +81,11 @@ class PersonDetailPresenter(context: Any,
     }
 
     fun handleClickChat(){
-        systemImpl.go(ChatDetailView.VIEW_NAME,
-            mapOf(ARG_ENTITY_UID to (arguments[ARG_ENTITY_UID]?.toLong() ?: 0L).toString()),
+        systemImpl.go(
+            ChatDetailView.VIEW_NAME,
+            mapOf(
+                ARG_PERSON_UID to (arguments[ARG_ENTITY_UID]?.toLong() ?: 0L).toString(),
+            ),
             context)
     }
 

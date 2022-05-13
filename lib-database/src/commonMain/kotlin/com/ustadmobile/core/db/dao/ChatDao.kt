@@ -132,6 +132,7 @@ abstract class ChatDao: BaseDao<Chat>{
          WHERE ChatMember.chatMemberPersonUid = :personUid
            AND ChatMember.chatMemberLeftDate = ${Long.MAX_VALUE}
            AND Chat.chatUid != 0 
+           AND op.firstNames||' '||op.lastName LIKE :searchBit 
         -- When in search mode we need to add all Persons who match the search to the list, even if
         -- no chat has started
         UNION

@@ -48,8 +48,6 @@ class ChatDetailPresenter(
         view.messageList =
             repo.messageDao.findAllMessagesByChatUid(chatUid, Chat.TABLE_ID, loggedInPersonUid)
 
-
-
         presenterScope.launch{
             val chatTitle = repo.chatDao.getTitleChat(
                 chatUid,
@@ -67,11 +65,7 @@ class ChatDetailPresenter(
 
             }
         }
-
-
     }
-
-
 
     fun addMessage(message: String){
         presenterScope.launch {
