@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
@@ -269,7 +270,27 @@ abstract class ScopedGrantDao {
     @Update
     abstract suspend fun updateListAsync(scopedGrantList: List<ScopedGrant>)
 
+    @Query(SQL_FIND_BY_TABLE_AND_ENTITY)
+    abstract suspend fun findByTableIdAndEntityUid(tableId: Int, entityUid: Long): List<ScopedGrantAndName>
+
+    @Query(SQL_FIND_BY_TABLE_AND_ENTITY)
+    abstract fun findByTableIdAndEntityUidWithNameAsDataSource(
+        tableId: Int,
+        entityUid: Long
+    ): DoorDataSourceFactory<Int, ScopedGrantWithName>
+
+
     @Query("""
+        SELECT ScopedGrant.*
+          FROM ScopedGrant
+         WHERE sgTableId = :tableId
+           AND sgEntityUid = :entityUid
+    """)
+    abstract suspend fun findByTableIdAndEntityIdSync(tableId: Int, entityUid: Long): List<ScopedGrant>
+
+    companion object {
+
+        const val SQL_FIND_BY_TABLE_AND_ENTITY = """
         SELECT ScopedGrant.*,
                CASE
                WHEN Person.firstNames IS NOT NULL THEN Person.firstNames
@@ -281,16 +302,9 @@ abstract class ScopedGrantDao {
                LEFT JOIN Person
                          ON Person.personGroupUid = PersonGroup.groupUid
          WHERE ScopedGrant.sgTableId = :tableId
-               AND ScopedGrant.sgEntityUid = :entityUid 
-    """)
-    abstract suspend fun findByTableIdAndEntityUid(tableId: Int, entityUid: Long): List<ScopedGrantAndName>
+               AND ScopedGrant.sgEntityUid = :entityUid  
+    """
 
-    @Query("""
-        SELECT ScopedGrant.*
-          FROM ScopedGrant
-         WHERE sgTableId = :tableId
-           AND sgEntityUid = :entityUid
-    """)
-    abstract suspend fun findByTableIdAndEntityIdSync(tableId: Int, entityUid: Long): List<ScopedGrant>
+    }
 
 }

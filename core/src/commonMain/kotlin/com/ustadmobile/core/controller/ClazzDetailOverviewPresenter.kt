@@ -113,6 +113,12 @@ class ClazzDetailOverviewPresenter(
 
     }
 
+    fun handleClickPermissions() {
+        ustadNavController?.navigate(ScopedGrantListView.VIEW_NAME,
+            mapOf(ScopedGrantListView.ARG_FILTER_TABLE_ID to Clazz.TABLE_ID.toString(),
+                ScopedGrantListView.ARG_FILTER_ENTITY_UID to (arguments[ARG_ENTITY_UID] ?: "0")))
+    }
+
     /**
      * Goes to CourseDiscussion's Detail screen not edit
      */
@@ -120,8 +126,7 @@ class ClazzDetailOverviewPresenter(
         ustadNavController?.navigate(
             CourseDiscussionDetailView.VIEW_NAME,
             mapOf(ARG_ENTITY_UID to courseDiscussion.courseDiscussionUid.toString(),
-                ARG_CLAZZUID to courseDiscussion.courseDiscussionClazzUid.toString()
-                )
+                ARG_CLAZZUID to courseDiscussion.courseDiscussionClazzUid.toString())
         )
     }
 

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.ScopedGrantWithName"/>
+        <import type="com.ustadmobile.port.android.view.ScopedGrantListFragment"/>
+        <import type="com.ustadmobile.port.android.view.ScopedGrantListRecyclerAdapter"/>
+        <import type="com.ustadmobile.core.model.BitmaskMessageId"/>
+        <import type="java.util.List"/>
+
+        <variable
+            name="scopedGrant"
+            type="ScopedGrantWithName" />
+
+        <variable
+            name="itemListener"
+            type="com.ustadmobile.core.controller.ScopedGrantListItemListener" />
+
+        <variable
+            name="selectablePagedListAdapter"
+            type="ScopedGrantListRecyclerAdapter" />
+
+        <variable
+            name="scopedGrantFlagMessageIds"
+            type="List&lt;BitmaskMessageId&gt;" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, scopedGrant)}"
+        app:onSelectableItemClicked="@{() -> itemListener.onClickScopedGrant(scopedGrant)}"
+        android:background="@drawable/bg_listitem"
+        >
+
+        <!-- Line 1-->
+        <TextView
+            android:text="@{scopedGrant.name}"
+            android:id="@+id/line1_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_16dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
+            />
+
+        <!-- Line 2-->
+        <TextView
+            android:id="@+id/line2_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@+id/line1_text"
+            app:layout_constraintTop_toBottomOf="@+id/line1_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            app:bitmaskValue="@{scopedGrant.sgPermissions}"
+            app:flagMessageIds="@{scopedGrantFlagMessageIds}"
+            android:maxLines="3"
+            android:ellipsize="end"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

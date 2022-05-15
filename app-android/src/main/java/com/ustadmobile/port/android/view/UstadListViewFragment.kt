@@ -278,7 +278,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         }
 
     override var list: DataSource.Factory<Int, DT>? = null
-        get() = field
         set(value) {
             currentLiveData?.removeObserver(this)
             val displayTypeRepoVal = displayTypeRepo ?: return
@@ -323,6 +322,10 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     override fun onClick(v: View?) {
         if(v?.id == R.id.item_sort_selected_layout)
             showSortOptionsFrag()
+        else if(v?.id == R.id.item_createnew_layout) {
+            //This is the "Add new " item in picker mode.
+            listPresenter?.handleClickAddNewItem()
+        }
     }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {

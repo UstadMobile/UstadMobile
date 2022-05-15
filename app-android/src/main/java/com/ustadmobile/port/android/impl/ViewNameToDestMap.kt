@@ -154,6 +154,7 @@ class ViewNameToDestMap: DestinationProvider {
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL,
                 hideAccountIcon = true,
                 hideBottomNavigation = true),
+            ScopedGrantListView.VIEW_NAME to UstadDestination(R.id.scoped_grant_list_dest)
     )
 
     override val navControllerViewId: Int
