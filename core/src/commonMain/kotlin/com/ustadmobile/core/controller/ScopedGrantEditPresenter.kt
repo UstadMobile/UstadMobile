@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.ScopedGrantDetailView
 import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.view.ScopedGrantEditView.Companion.ARG_PERMISSION_LIST
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -114,14 +115,16 @@ class ScopedGrantEditPresenter(
         entity.sgPermissions = permissionsList.combinedFlagValue
         presenterScope.launch {
             if(entity.sgUid == 0L) {
-                db.scopedGrantDao.insertAsync(entity)
+                entity.sgUid = db.scopedGrantDao.insertAsync(entity)
             }else {
                 db.scopedGrantDao.updateAsync(entity)
             }
 
-            val serializedResult = safeStringify(di, ListSerializer(ScopedGrant.serializer()),
-                listOf(entity))
-            finishWithResult(serializedResult)
+            onFinish(ScopedGrantDetailView.VIEW_NAME, entity.sgUid, entity,
+                ScopedGrant.serializer())
+//            val serializedResult = safeStringify(di, ListSerializer(ScopedGrant.serializer()),
+//                listOf(entity))
+//            finishWithResult(serializedResult)
         }
     }
 

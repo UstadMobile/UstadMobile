@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ScopedGrantListView
 import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.ScopedGrantDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.lib.db.entities.ScopedGrantAndName
@@ -22,11 +23,11 @@ class DefaultScopedGrantListItemListener(
     val systemImpl: UstadMobileSystemImpl by instance()
 
     override fun onClickScopedGrant(scopedGrant: ScopedGrantWithName) {
-//        if(listViewMode == ListViewMode.BROWSER) {
-//            systemImpl.go(ScopedGrantDetailView.VIEW_NAME,
-//                    mapOf(UstadView.ARG_ENTITY_UID to scopedGrant.scopedGrantUid.toString()), context)
-//        }else {
-//            view?.finishWithResult(listOf(scopedGrant))
-//        }
+        if(listViewMode == ListViewMode.BROWSER) {
+            systemImpl.go(ScopedGrantDetailView.VIEW_NAME,
+                    mapOf(UstadView.ARG_ENTITY_UID to scopedGrant.sgUid.toString()), context)
+        }
+
+        //Picker is not used for ScopedGrant
     }
 }

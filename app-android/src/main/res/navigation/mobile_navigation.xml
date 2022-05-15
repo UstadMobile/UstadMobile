@@ -440,5 +440,9 @@
         android:name="com.ustadmobile.port.android.view.ScopedGrantListFragment"
         android:label="@string/permissions"/>
 
+    <fragment
+        android:id="@+id/scoped_grant_detail_dest"
+        android:name="com.ustadmobile.port.android.view.ScopedGrantDetailFragment"/>
+
 
 </navigation>

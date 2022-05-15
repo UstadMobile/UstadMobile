@@ -122,7 +122,8 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
             if(entityLiveData != null) {
                 entityLiveDataObserver = object : DoorObserver<RT?> {
                     override fun onChanged(t: RT?) {
-                        view.entity = t
+                        entity = t
+                        view.entity = entity
                         view.takeIf { t != null }?.loading = false
                     }
                 }.also {

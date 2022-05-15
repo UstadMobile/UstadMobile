@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
@@ -294,6 +295,21 @@ abstract class ScopedGrantDao {
          WHERE sgUid = :sgUid 
     """)
     abstract suspend fun findByUid(sgUid: Long): ScopedGrant?
+
+    @Query("""
+        SELECT ScopedGrant.*, 
+               CASE
+               WHEN Person.firstNames IS NOT NULL THEN Person.firstNames
+               ELSE PersonGroup.groupName 
+               END AS name
+          FROM ScopedGrant
+               LEFT JOIN PersonGroup 
+                    ON ScopedGrant.sgGroupUid = PersonGroup.groupUid
+               LEFT JOIN Person
+                    ON Person.personGroupUid = PersonGroup.groupUid
+         WHERE ScopedGrant.sgUid = :sgUid 
+    """)
+    abstract fun findByUidLiveWithName(sgUid: Long): DoorLiveData<ScopedGrantWithName?>
 
     companion object {
 

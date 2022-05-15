@@ -1893,4 +1893,11 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <!-- used to display as an error to the user when he is not assigned in a group for an assignment -->
     <string name="unassigned_error">Can\'t submit: you\'re enroled in the course, but not assigned to a group</string>
+
+    <!-- E.g. an option in the app that is enabled -->
+    <string name="enabled">Enabled</string>
+
+    <!-- Used in the context of an option the app that is disabled -->
+    <string name="disabled">Disabled</string>
+
 </resources>
