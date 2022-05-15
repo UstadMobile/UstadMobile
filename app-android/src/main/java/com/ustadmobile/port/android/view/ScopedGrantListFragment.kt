@@ -39,8 +39,8 @@ class ScopedGrantListFragment(
         mDataRecyclerViewAdapter = ScopedGrantListRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
             requireContext().getString(R.string.add))
-
         super.onViewCreated(view, savedInstanceState)
+        fabManager?.text = requireContext().getString(R.string.permission)
     }
 
     override fun onDestroyView() {

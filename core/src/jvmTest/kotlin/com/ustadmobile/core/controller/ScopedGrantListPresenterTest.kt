@@ -71,6 +71,13 @@ class ScopedGrantListPresenterTest {
         verify(mockView, timeout(5000)).list = any()
     }
 
+    @Test
+    fun givenUserHasDelegatePermission_whenOnCheckNewPermissionCalled_thenShouldReturnTrue() {
+
+
+    }
+
+
 //    @Test
 //    fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
 //        val repo: UmAppDatabase by di.activeRepoInstance()

@@ -288,6 +288,13 @@ abstract class ScopedGrantDao {
     """)
     abstract suspend fun findByTableIdAndEntityIdSync(tableId: Int, entityUid: Long): List<ScopedGrant>
 
+    @Query("""
+        SELECT ScopedGrant.*
+          FROM ScopedGrant
+         WHERE sgUid = :sgUid 
+    """)
+    abstract suspend fun findByUid(sgUid: Long): ScopedGrant?
+
     companion object {
 
         const val SQL_FIND_BY_TABLE_AND_ENTITY = """

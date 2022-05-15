@@ -1,9 +1,9 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ScopedGrant
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 
 class ScopedGrantListPresenter(
@@ -17,8 +17,15 @@ class ScopedGrantListPresenter(
     ScopedGrantListItemListener by scopedGrantItemListener
 {
 
+    private var tableId = 0
+
+    private var entityUid = 0L
+
     override fun onCreate(savedState: Map<String, String>?) {
+        tableId = arguments[ScopedGrantListView.ARG_FILTER_TABLE_ID]?.toInt() ?: 0
+        entityUid = arguments[ScopedGrantListView.ARG_FILTER_ENTITY_UID]?.toLong() ?: 0L
         super.onCreate(savedState)
+
         updateListOnView()
         scopedGrantItemListener.listViewMode = mListMode
     }
@@ -28,21 +35,34 @@ class ScopedGrantListPresenter(
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return false
+        return when(tableId) {
+            Clazz.TABLE_ID -> repo.clazzDao.personHasPermissionWithClazz(account?.personUid ?: 0L,
+                entityUid, Role.PERMISSION_PERSON_DELEGATE)
+            else -> false
+        }
     }
 
     private fun updateListOnView() {
         view.list = repo.scopedGrantDao.findByTableIdAndEntityUidWithNameAsDataSource(
-            arguments[ScopedGrantListView.ARG_FILTER_TABLE_ID]?.toInt() ?: 0,
+            tableId,
             arguments[ScopedGrantListView.ARG_FILTER_ENTITY_UID]?.toLong() ?: 0L)
     }
 
     override fun handleClickCreateNewFab() {
-        /* TODO: Add code to go to the edit view when the user clicks the new item FAB. This is only
-         * called when the fab is clicked, not if the first item is create new item (e.g. picker mode).
-         * That has to be handled at a platform level to use prepareCall etc.
-        systemImpl.go(ScopedGrantEditView.VIEW_NAME, mapOf(), context)
-         */
+        val args = mutableMapOf(
+            ScopedGrantEditView.ARG_GRANT_ON_TABLE_ID to tableId.toString(),
+            ScopedGrantEditView.ARG_GRANT_ON_ENTITY_UID to entityUid.toString(),
+            UstadView.ARG_GO_TO_COMPLETE to ScopedGrantEditView.VIEW_NAME,
+            UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
+
+        navigateForResult(NavigateForResultOptions(
+            fromPresenter = this,
+            currentEntityValue = null,
+            destinationViewName = PersonListView.VIEW_NAME,
+            entityClass = ScopedGrant::class,
+            serializationStrategy = ScopedGrant.serializer(),
+            arguments = args,
+        ))
     }
 
 }
