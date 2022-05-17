@@ -65,6 +65,8 @@ class ClazzDetailOverviewPresenter(
             view.courseBlockList = repo.courseBlockDao.findAllCourseBlockByClazzUidLive(
                 entityUid, accountManager.activeAccount.personUid,
                 collapsedList.toList(), systemTimeInMillis())
+            view.showPermissionButton = repo.clazzDao.personHasPermissionWithClazz(
+                accountManager.activeAccount.personUid, entityUid, Role.PERMISSION_PERSON_DELEGATE)
         }
 
         return repo.clazzDao.getClazzWithDisplayDetails(entityUid, systemTimeInMillis())

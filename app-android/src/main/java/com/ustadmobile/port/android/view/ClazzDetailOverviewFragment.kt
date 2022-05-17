@@ -82,6 +82,12 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
     private var courseBlockDetailRecyclerAdapter: CourseBlockDetailRecyclerViewAdapter? = null
 
+    override var showPermissionButton: Boolean = false
+        set(value) {
+            downloadRecyclerAdapter?.permissionButtonVisible = value
+            field = value
+        }
+
     private val courseBlockObserver = Observer<PagedList<CourseBlockWithCompleteEntity>?> {
         t -> courseBlockDetailRecyclerAdapter?.submitList(t)
     }

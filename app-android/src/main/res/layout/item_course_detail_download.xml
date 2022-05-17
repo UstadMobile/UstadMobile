@@ -4,13 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="android.view.View"/>
 
         <variable
             name="fragmentEventHandler"
             type="com.ustadmobile.port.android.view.ClazzDetailOverviewEventListener" />
 
-
-
+        <variable
+            name="permissionButtonVisible"
+            type="boolean" />
 
     </data>
 
@@ -64,8 +66,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/item_course_share_button"
+            android:visibility="@{permissionButtonVisible ? View.VISIBLE : View.GONE}"
             tools:layout_editor_absoluteY="16dp" />
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
