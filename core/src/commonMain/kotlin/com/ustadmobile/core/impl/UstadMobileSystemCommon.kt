@@ -385,7 +385,7 @@ abstract class UstadMobileSystemCommon {
             val components = UstadUrlComponents.parse(url)
             val endpoint = components.endpoint
             if(endpoint == accountManager.activeEndpoint.url){
-                goToViewLink(viewUri, context)
+                goToViewLink(components.viewUri, context)
             }else{
                 goToDeepLink(url, accountManager, context)
             }
