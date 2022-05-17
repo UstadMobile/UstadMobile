@@ -44,6 +44,8 @@ class PersonDetailPresenter(context: Any,
             view.changePasswordVisible = person.username != null
                     && (activePersonUid == entityUid || hasAuthPermission)
 
+            view.chatVisibility = person.personUid != activePersonUid
+
             view.showCreateAccountVisible =  person.username == null && hasAuthPermission
         }
         return repo.personDao.findByUidWithDisplayDetailsLive(entityUid, activePersonUid)

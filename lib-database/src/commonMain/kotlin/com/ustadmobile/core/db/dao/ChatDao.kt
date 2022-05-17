@@ -202,6 +202,7 @@ abstract class ChatDao: BaseDao<Chat>{
                  WHERE ChatMember.chatMemberChatUid = Chat.chatUid
                    AND ChatMember.chatMemberPersonUid = :loggedInPersonUid 
                ) 
+           AND :otherPersonUid != :loggedInPersonUid
     """)
     abstract suspend fun getChatByOtherPerson(otherPersonUid: Long, loggedInPersonUid: Long): Chat?
 
