@@ -221,6 +221,14 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
 
 
     @Query("""
+          SELECT COALESCE((
+           SELECT caGroupUid
+           FROM ClazzAssignment
+          WHERE caUid = :uid),-1)
+    """)
+    abstract suspend fun getGroupUidFromAssignment(uid: Long): Long
+
+    @Query("""
         SELECT * 
           FROM ClazzAssignment
                LEFT JOIN CourseBlock

@@ -19,6 +19,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.getFirstValue
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
@@ -276,6 +277,20 @@ class ClazzAssignmentEditPresenter(context: Any,
             if(entity.assignment?.caRequireTextSubmission == false && entity.assignment?.caRequireFileSubmission == false){
                 foundError = true
                 view.showSnackBar(systemImpl.getString(MessageID.text_file_submission_error, context))
+            }
+
+            val dbGroupUid = repo.clazzAssignmentDao.getGroupUidFromAssignment(entity.assignment?.caUid?: 0L)
+
+            // groups have changed
+            if(dbGroupUid != -1L && dbGroupUid != entity.assignment?.caGroupUid){
+
+                val noSubmissionMade = repo.courseAssignmentSubmissionDao
+                    .checkNoSubmissionsMade(entity.assignment?.caUid ?: 0L).getFirstValue()
+
+                if(!noSubmissionMade){
+                    foundError = true
+                    view.showSnackBar(systemImpl.getString(MessageID.error , context))
+                }
             }
 
             if(foundError){
