@@ -122,9 +122,6 @@ class ScopedGrantEditPresenter(
 
             onFinish(ScopedGrantDetailView.VIEW_NAME, entity.sgUid, entity,
                 ScopedGrant.serializer())
-//            val serializedResult = safeStringify(di, ListSerializer(ScopedGrant.serializer()),
-//                listOf(entity))
-//            finishWithResult(serializedResult)
         }
     }
 

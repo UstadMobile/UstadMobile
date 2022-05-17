@@ -437,15 +437,6 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <include layout="@layout/item_scoped_grant_one_to_many_list"
-                android:id="@+id/clazz_edit_fragment_permissions_inc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_terminology"
-                app:scopedGrantsOneToManyListener="@{mPresenter.scopedGrantOneToManyHelper}"
-                />
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>

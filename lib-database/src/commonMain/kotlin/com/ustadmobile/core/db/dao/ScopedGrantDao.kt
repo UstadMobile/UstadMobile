@@ -287,7 +287,7 @@ abstract class ScopedGrantDao {
          WHERE sgTableId = :tableId
            AND sgEntityUid = :entityUid
     """)
-    abstract suspend fun findByTableIdAndEntityIdSync(tableId: Int, entityUid: Long): List<ScopedGrant>
+    abstract fun findByTableIdAndEntityIdSync(tableId: Int, entityUid: Long): List<ScopedGrant>
 
     @Query("""
         SELECT ScopedGrant.*
