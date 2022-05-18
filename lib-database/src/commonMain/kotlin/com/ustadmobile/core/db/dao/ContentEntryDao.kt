@@ -301,54 +301,95 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
 
-    @Query("""
-               SELECT ContentEntry.*, ContentEntryParentChildJoin.*, 
-                           Container.*, 
-                      COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
-                      COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
-                      COALESCE(StatementEntity.extensionProgress,0) AS progress, 
-                      COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
-                      COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
-                      COALESCE(StatementEntity.resultSuccess, 0) AS success,
-                      COALESCE((CASE WHEN StatementEntity.resultCompletion 
-                        THEN 1 ELSE 0 END),0) AS totalCompletedContent,
-                
-                      1 as totalContent, 
-                      0 AS assignmentContentWeight,
-                      0 as penalty
-                 FROM ClazzContentJoin
-                          LEFT JOIN ContentEntry  
-                          ON ccjContentEntryUid = contentEntryUid
 
-                          LEFT JOIN ContentEntryParentChildJoin 
-                          ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
-                          
-                           LEFT JOIN StatementEntity
+    @Query("""
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, Container.*, 
+                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
+                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+                COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                COALESCE((CASE WHEN StatementEntity.resultCompletion 
+                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                0 AS assignmentContentWeight,
+                
+                1 as totalContent, 
+                
+                0 as penalty
+          FROM CourseBlock
+               JOIN ContentEntry 
+                    ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+                       AND ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
+                       AND CAST(CourseBlock.cbActive AS INTEGER) = 1
+               LEFT JOIN ContentEntryParentChildJoin 
+                    ON ContentEntryParentChildJoin.cepcjUid = 0 
+               LEFT JOIN StatementEntity
 							ON StatementEntity.statementUid = 
                                 (SELECT statementUid 
 							       FROM StatementEntity 
                                   WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
 							        AND StatementEntity.statementPersonUid = :personUid
 							        AND contentEntryRoot 
-                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)
-                          
-                          LEFT JOIN Container 
-                          ON Container.containerUid = (SELECT containerUid 
-                                                         FROM Container 
-                                                        WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
-                                                     ORDER BY cntLastModified DESC LIMIT 1)
-                 WHERE ccjClazzUid = :clazzUid 
-                  AND (ccjActive OR NOT ccjActive = :showHidden)
-              ORDER BY CASE(:sortOrder)
-                        WHEN $SORT_TITLE_ASC THEN ContentEntry.title
-                        ELSE ''
-                        END ASC,
-                        CASE(:sortOrder)
-                        WHEN $SORT_TITLE_DESC THEN ContentEntry.title
-                        ELSE ''
-                        END DESC
+                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)     
+               LEFT JOIN Container 
+                    ON Container.containerUid = 
+                        (SELECT containerUid 
+                           FROM Container 
+                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
+                       ORDER BY cntLastModified DESC LIMIT 1)  
+                               
+         WHERE CourseBlock.cbClazzUid IN
+               (SELECT ClazzEnrolment.clazzEnrolmentClazzUid
+                  FROM ClazzEnrolment
+                 WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid)
     """)
-    abstract fun getClazzContent(clazzUid: Long,  personUid: Long, showHidden: Boolean, sortOrder: Int): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun getContentFromMyCourses(
+        personUid: Long
+    ): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+
+
+    @Query("""
+        SELECT ContentEntry.*, ContentEntryParentChildJoin.*, Container.*, 
+                COALESCE(StatementEntity.resultScoreMax,0) AS resultMax, 
+                COALESCE(StatementEntity.resultScoreRaw,0) AS resultScore, 
+                COALESCE(StatementEntity.resultScoreScaled,0) AS resultScaled, 
+                COALESCE(StatementEntity.extensionProgress,0) AS progress, 
+                COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
+                COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                COALESCE((CASE WHEN StatementEntity.resultCompletion 
+                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
+                0 AS assignmentContentWeight,
+                
+                1 as totalContent, 
+                
+                0 as penalty
+          FROM ContentEntry
+               LEFT JOIN ContentEntryParentChildJoin 
+                    ON ContentEntryParentChildJoin.cepcjUid = 0 
+               LEFT JOIN StatementEntity
+							ON StatementEntity.statementUid = 
+                                (SELECT statementUid 
+							       FROM StatementEntity 
+                                  WHERE statementContentEntryUid = ContentEntry.contentEntryUid 
+							        AND StatementEntity.statementPersonUid = :personUid
+							        AND contentEntryRoot 
+                               ORDER BY resultScoreScaled DESC, extensionProgress DESC, resultSuccess DESC LIMIT 1)     
+               LEFT JOIN Container 
+                    ON Container.containerUid = 
+                        (SELECT containerUid 
+                           FROM Container 
+                          WHERE containerContentEntryUid = ContentEntry.contentEntryUid 
+                       ORDER BY cntLastModified DESC LIMIT 1)  
+         WHERE ContentEntry.contentOwner = :personUid
+           AND NOT EXISTS(
+               SELECT ContentEntryParentChildJoin.cepcjUid 
+                 FROM ContentEntryParentChildJoin
+                WHERE ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid)
+    """)
+    abstract fun getContentByOwner(
+        personUid: Long
+    ): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Update

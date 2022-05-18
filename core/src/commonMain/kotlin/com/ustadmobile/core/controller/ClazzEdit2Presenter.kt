@@ -613,9 +613,6 @@ class ClazzEdit2Presenter(
 
     fun handleClickAddContent(){
         val args = mutableMapOf(
-            ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
-                ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
-            UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString(),
             ContentEntryList2View.ARG_SELECT_FOLDER_VISIBLE to false.toString(),
             UstadView.ARG_CLAZZUID to entity?.clazzUid.toString(),
             ContentEntryEdit2View.BLOCK_REQUIRED to true.toString()
