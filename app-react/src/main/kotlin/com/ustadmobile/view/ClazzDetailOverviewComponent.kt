@@ -157,6 +157,12 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
                                             mPresenter?.handleClickAssignment(it.assignment as ClazzAssignment)
                                         CourseBlock.BLOCK_CONTENT_TYPE ->
                                             mPresenter?.contentEntryListItemListener?.onClickContentEntry(it.entry!!)
+                                        CourseBlock.BLOCK_DISCUSSION_TYPE ->
+                                            it.courseDiscussion?.let { it1 ->
+                                                mPresenter?.handleClickCourseDiscussion(
+                                                    it1
+                                                )
+                                            }
                                     }
                                 }
                             }
@@ -202,6 +208,21 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
                         item.entry?.let {
                             renderContentEntryListItem(it,systemImpl, showStatus= true, block = item)
                         }
+                    }
+
+                    CourseBlock.BLOCK_DISCUSSION_TYPE -> {
+                        renderCourseBlockTextOrModuleListItem(
+                            item.cbType,
+                            item.cbIndentLevel,
+                            item.courseDiscussion?.courseDiscussionTitle?: "",
+                            showReorder = false,
+                            withAction = item.cbType == CourseBlock.BLOCK_DISCUSSION_TYPE,
+                            description = clean(item.courseDiscussion?.courseDiscussionDesc ?: ""),
+                            onActionClick = {
+                                Util.stopEventPropagation(it)
+                                onClick.invoke(it)
+                            }
+                        )
                     }
                 }
             }

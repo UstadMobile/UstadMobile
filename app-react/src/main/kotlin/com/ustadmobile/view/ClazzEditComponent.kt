@@ -413,6 +413,12 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                 },
                 UmDialogOptionItem("assignment",MessageID.assignments, MessageID.add_assignment_block_content_desc) {
                     mPresenter?.handleClickAddAssignment()
+                },
+                UmDialogOptionItem(
+                    "forum",
+                    MessageID.discussion_board,
+                    MessageID.add_discussion_board_desc) {
+                    mPresenter?.handleClickAddDiscussion()
                 }
             )
 
@@ -436,7 +442,8 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
             CourseBlock.BLOCK_MODULE_TYPE to "folder",
             CourseBlock.BLOCK_ASSIGNMENT_TYPE to "assignment_turned_in",
             CourseBlock.BLOCK_CONTENT_TYPE to "smart_display",
-            CourseBlock.BLOCK_TEXT_TYPE to "title"
+            CourseBlock.BLOCK_TEXT_TYPE to "title",
+            CourseBlock.BLOCK_DISCUSSION_TYPE to "forum"
         )
     }
 
