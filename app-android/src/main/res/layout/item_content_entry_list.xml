@@ -6,6 +6,7 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment"/>
+        <import type="com.ustadmobile.port.android.view.ContentEntryDetailFragment"/>
         <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryListRecyclerAdapter"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
@@ -41,7 +42,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/dimen_10dp"
+        android:padding="@dimen/dimen_16dp"
         android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, contentEntry)}"
@@ -53,16 +54,17 @@
 
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:scaleType="fitCenter"
+            android:scaleType="centerCrop"
             android:id="@+id/content_entry_item_thumbnail"
-            android:layout_width="@dimen/dimen_70dp"
-            android:layout_height="@dimen/dimen_70dp"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
             android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
-            app:fallbackDrawable="@{contentEntry.leaf ? @drawable/book_24px:@drawable/ic_folder_black_24dp}"
-            app:imageUri="@{contentEntry.thumbnailUrl}"
+            app:imageForeignKey="@{contentEntry.contentEntryUid}"
+            app:imageForeignKeyAdapter="@{ContentEntryDetailFragment.FOREIGNKEYADAPTER_ENTRY}"
+            app:fallbackDrawable="@{contentEntry.leaf ? @drawable/ic_round_book:@drawable/ic_round_folder}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/book_24px" />
+            tools:src="@drawable/ic_round_book" />
 
         <ProgressBar
             android:id="@+id/content_entry_progress"
@@ -117,7 +119,7 @@
             android:id="@+id/content_entry_item_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dimen_10dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:text="@{contentEntry.title}"
@@ -134,7 +136,7 @@
             android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(contentEntry.description)}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dimen_10dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_marginTop="@dimen/dimen_4dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
@@ -165,6 +167,7 @@
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:tint="?colorOnIconTint"
+            app:layout_goneMarginStart="@dimen/dimen_16dp"
             android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
             android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
             app:imageLookupKey="@{contentEntry.contentTypeFlag}"
@@ -207,7 +210,7 @@
             android:id="@+id/content_entry_locally_available"
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="@dimen/dimen_16dp"
-            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_marginTop="@dimen/dimen_4dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"

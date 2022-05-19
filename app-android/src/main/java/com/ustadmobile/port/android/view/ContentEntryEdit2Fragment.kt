@@ -14,7 +14,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.fragment.findNavController
 import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
@@ -31,10 +30,12 @@ import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryPicture
 import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
+import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.isSet
 
 
@@ -103,7 +104,14 @@ class ContentEntryEdit2Fragment(
             mBinding?.licenceOptions = value
         }
 
+    override var contentEntryPicture: ContentEntryPicture?
+        get() = mBinding?.contentEntryPicture
+        set(value) {
+            mBinding?.contentEntryPicture = value
+        }
 
+
+    private var imageViewLifecycleObserver: ImageViewLifecycleObserver2? = null
 
     override var completionCriteriaOptions: List<ContentEntryEdit2Presenter.CompletionCriteriaMessageIdOption>? = null
         set(value) {
@@ -297,10 +305,20 @@ class ContentEntryEdit2Fragment(
         entity = entityVal
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
+            requireActivity().activityResultRegistry,null, 1).also {
+            lifecycle.addObserver(it)
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentContentEntryEdit2Binding.inflate(inflater, container, false).also {
             rootView = it.root
+            it.imageViewLifecycleObserver = imageViewLifecycleObserver
             it.activityEventHandler = this
             it.compressionEnabled = true
             it.showVideoPreview = false

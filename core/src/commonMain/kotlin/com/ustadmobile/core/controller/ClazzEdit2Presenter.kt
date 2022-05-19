@@ -506,6 +506,7 @@ class ClazzEdit2Presenter(
             }
             courseBlockOneToManyJoinEditHelper.liveList.sendValue(courseBlockList)
 
+
             repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
 
                 if((arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() ?: 0L) == 0L) {
@@ -569,21 +570,20 @@ class ClazzEdit2Presenter(
                     courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate,
                     systemTimeInMillis())
 
-            }
+                UmPlatformUtil.runIfNotJs {
+                    val coursePictureVal = view.coursePicture
+                    if(coursePictureVal != null) {
+                        coursePictureVal.coursePictureClazzUid = entity.clazzUid
 
-            UmPlatformUtil.runAsync {
-                val coursePictureVal = view.coursePicture
-                if(coursePictureVal != null) {
-                    coursePictureVal.coursePictureClazzUid = entity.clazzUid
-
-                    if(coursePictureVal.coursePictureUid == 0L) {
-                        repo.coursePictureDao.insertAsync(coursePictureVal)
-                    }else {
-                        repo.coursePictureDao.updateAsync(coursePictureVal)
+                        if(coursePictureVal.coursePictureUid == 0L) {
+                            txDb.coursePictureDao.insertAsync(coursePictureVal)
+                        }else {
+                            txDb.coursePictureDao.updateAsync(coursePictureVal)
+                        }
                     }
                 }
-            }
 
+            }
 
             val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight
             val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()
@@ -600,6 +600,9 @@ class ClazzEdit2Presenter(
     fun handleClickAddAssignment() {
         val args = mutableMapOf<String, String>()
         args[UstadView.ARG_CLAZZUID] = entity?.clazzUid.toString()
+        if(entity != null){
+            args[ClazzAssignmentEditView.TERMINOLOGY_ID] = entity?.clazzTerminologyUid.toString()
+        }
 
         navigateForResult(NavigateForResultOptions(
                 this,
@@ -707,6 +710,9 @@ class ClazzEdit2Presenter(
                 val args = mutableMapOf<String, String>()
                 args[UstadView.ARG_CLAZZUID] = (joinedEntity.assignment?.caClazzUid ?: entity?.clazzUid ?: 0L).toString()
                 args[UstadView.ARG_ENTITY_UID] = (joinedEntity.assignment?.caUid ?: 0L).toString()
+                if(entity != null){
+                    args[ClazzAssignmentEditView.TERMINOLOGY_ID] = entity?.clazzTerminologyUid.toString()
+                }
 
                 NavigateForResultOptions(
                         this,

@@ -33,7 +33,9 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -140,6 +142,10 @@ class ContentEntryEdit2Presenter(
         } ?: ContentEntryWithBlockAndLanguage().apply {
             leaf = isLeaf ?: (contentFlags != ContentEntry.FLAG_IMPORTED)
         }
+
+        view.contentEntryPicture = db.onDbThenRepoWithTimeout(2000) { dbToUse, _ ->
+            dbToUse.takeIf { entityUid != 0L }?.contentEntryPictureDao?.findByContentEntryUidAsync(entityUid)
+        } ?: ContentEntryPicture()
 
         entry.block = if(isBlockRequired){
                 entry.block ?: CourseBlock().apply {
@@ -385,30 +391,49 @@ class ContentEntryEdit2Presenter(
 
                 val isNewEntry = entity.contentEntryUid == 0L
 
-                if (entity.contentEntryUid == 0L) {
-                    entity.contentOwner = accountManager.activeAccount.personUid
-                    entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
 
-                    if (entity.entryId == null) {
-                        entity.entryId = accountManager.activeAccount.endpointUrl +
-                                "${entity.contentEntryUid}/${randomUuid()}"
-                        repo.contentEntryDao.updateAsync(entity)
-                    }
+                repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
 
-                    if(parentEntryUid != 0L) {
-                        val contentEntryJoin = ContentEntryParentChildJoin().apply {
-                            cepcjChildContentEntryUid = entity.contentEntryUid
-                            cepcjParentContentEntryUid = parentEntryUid
+                    if (entity.contentEntryUid == 0L) {
+                        entity.contentOwner = accountManager.activeAccount.personUid
+                        entity.contentEntryUid = txDb.contentEntryDao.insertAsync(entity)
+
+                        if (entity.entryId == null) {
+                            entity.entryId = accountManager.activeAccount.endpointUrl +
+                                    "${entity.contentEntryUid}/${randomUuid()}"
+                            txDb.contentEntryDao.updateAsync(entity)
                         }
-                        repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
-                    }
-                } else {
-                    repo.contentEntryDao.updateAsync(entity)
-                }
 
-                val language = entity.language
-                if (language != null && language.langUid == 0L) {
-                    repo.languageDao.insertAsync(language)
+                        if(parentEntryUid != 0L) {
+                            val contentEntryJoin = ContentEntryParentChildJoin().apply {
+                                cepcjChildContentEntryUid = entity.contentEntryUid
+                                cepcjParentContentEntryUid = parentEntryUid
+                            }
+                            txDb.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
+                        }
+                    } else {
+                        txDb.contentEntryDao.updateAsync(entity)
+                    }
+
+                    UmPlatformUtil.runIfNotJs {
+                        val contentEntryPictureVal = view.contentEntryPicture
+                        if(contentEntryPictureVal != null) {
+                            contentEntryPictureVal.cepContentEntryUid = entity.contentEntryUid
+
+                            if(contentEntryPictureVal.cepUid == 0L) {
+                                txDb.contentEntryPictureDao.insertAsync(contentEntryPictureVal)
+                            }else {
+                                txDb.contentEntryPictureDao.updateAsync(contentEntryPictureVal)
+                            }
+                        }
+                    }
+
+
+                    val language = entity.language
+                    if (language != null && language.langUid == 0L) {
+                        txDb.languageDao.insertAsync(language)
+                    }
+
                 }
 
                 val metaData = view.metadataResult

@@ -11,11 +11,15 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryDetailViewpagerBinding
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
+import com.ustadmobile.core.view.ContentEntryDetailOverviewView
+import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.view.ext.createTabLayoutStrategy
+import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
 
@@ -110,6 +114,13 @@ class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEn
                 ContentEntryDetailOverviewView.VIEW_NAME to R.string.overview,
                 ContentEntryDetailAttemptsListView.VIEW_NAME to R.string.attempts
         )
+
+        @JvmStatic
+        val FOREIGNKEYADAPTER_ENTRY = object: ForeignKeyAttachmentUriAdapter {
+            override suspend fun getAttachmentUri(foreignKey: Long, dbToUse: UmAppDatabase): String? {
+                return dbToUse.contentEntryPictureDao.findByContentEntryUidAsync(foreignKey)?.cepUri
+            }
+        }
 
     }
 

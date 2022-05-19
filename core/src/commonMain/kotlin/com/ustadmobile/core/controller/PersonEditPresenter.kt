@@ -17,8 +17,10 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
-import com.ustadmobile.lib.db.entities.*
-import io.ktor.client.features.json.*
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.PersonPicture
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
@@ -266,7 +268,7 @@ class PersonEditPresenter(
                     repo.personDao.updateAsync(entity)
                 }
 
-                UmPlatformUtil.runAsync {
+                UmPlatformUtil.runIfNotJs {
                     val personPictureVal = view.personPicture
                     if(personPictureVal != null) {
                         personPictureVal.personPicturePersonUid = entity.personUid
