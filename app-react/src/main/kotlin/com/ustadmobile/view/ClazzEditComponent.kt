@@ -103,7 +103,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                 startDateLabel = startDateLabel.copy(errorText = value)
             }
         }
-    
+
     override var coursePicture: CoursePicture? = null
         get() = field
         set(value) {
