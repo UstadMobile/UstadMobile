@@ -6,6 +6,4 @@ interface MessagesPresenter {
 
     fun updateMessageRead(messageRead: MessageRead)
 
-    fun handleClickLink(link: String)
-
 }

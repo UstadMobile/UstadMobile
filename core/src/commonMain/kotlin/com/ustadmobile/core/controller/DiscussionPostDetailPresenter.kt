@@ -21,8 +21,9 @@ import org.kodein.di.on
 class DiscussionPostDetailPresenter(
     context: Any,
     arguments: Map<String, String>,
-    view: DiscussionPostDetailView, di: DI,
-    lifecycleOwner: DoorLifecycleOwner)
+    view: DiscussionPostDetailView,
+    di: DI
+)
 
     : UstadBaseController<DiscussionPostDetailView>(
         context, arguments, view, di), MessagesPresenter {
@@ -62,25 +63,6 @@ class DiscussionPostDetailPresenter(
 
         }
 
-    }
-
-    /**
-     * If link is on active endpoint :
-    Then just use systemImpl.go and use logic as per goToDeepLink :
-     */
-    override fun handleClickLink(link: String){
-        val systemImpl: UstadMobileSystemImpl by instance()
-        if(link.contains(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
-
-            val viewUri =
-                link.substringAfter(UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER)
-
-            systemImpl.goToViewLink(viewUri, context)
-        }else{
-
-            //Send link to android system
-            systemImpl.openLinkInBrowser(link, context)
-        }
     }
 
 
