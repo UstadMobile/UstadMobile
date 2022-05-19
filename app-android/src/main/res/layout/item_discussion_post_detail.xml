@@ -78,13 +78,12 @@
             app:tint="@color/grey" />
 
         <TextView
-            android:id="@+id/item_discussion_post_list_detail_post_latest_message"
+            android:id="@+id/item_discussion_post_detail_latest_message"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="@dimen/dimen_16dp"
-            android:text="@{discussionPost.discussionPostMessage}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

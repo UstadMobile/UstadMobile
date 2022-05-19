@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -96,6 +97,19 @@ class ClazzEdit2PresenterTest {
         }.getValue()!!.first()
         Assert.assertEquals("Entity was saved to database", "Bob",
                 entitySaved.clazzName)
+
+        //Verify that the appropriate ScopedGrants and groups have been created
+        val clazzScopedGrants = runBlocking {
+            db.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID, entitySaved.clazzUid)
+        }
+        val teacherGroup = db.personGroupDao.findByUid(entitySaved.clazzTeachersPersonGroupUid)
+        Assert.assertNotNull("Teacher group exists", teacherGroup)
+        val teacherGrant = clazzScopedGrants.find {
+            it.scopedGrant?.sgGroupUid == entitySaved.clazzTeachersPersonGroupUid
+        }
+        Assert.assertEquals("Teacher grant has default teacher permissions",
+            Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT, teacherGrant?.scopedGrant?.sgPermissions)
+
     }
 
     @Test

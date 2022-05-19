@@ -334,6 +334,7 @@ class ContentEntryEdit2Presenter(
         entityVal.primaryLanguageUid = metadataResult.entry.primaryLanguageUid
         entityVal.thumbnailUrl = metadataResult.entry.thumbnailUrl
         entityVal.contentFlags = metadataResult.entry.contentFlags
+        entityVal.leaf = metadataResult.entry.leaf
 
         return entityVal
     }
@@ -385,6 +386,7 @@ class ContentEntryEdit2Presenter(
                 val isNewEntry = entity.contentEntryUid == 0L
 
                 if (entity.contentEntryUid == 0L) {
+                    entity.contentOwner = accountManager.activeAccount.personUid
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
 
                     if (entity.entryId == null) {
@@ -392,11 +394,14 @@ class ContentEntryEdit2Presenter(
                                 "${entity.contentEntryUid}/${randomUuid()}"
                         repo.contentEntryDao.updateAsync(entity)
                     }
-                    val contentEntryJoin = ContentEntryParentChildJoin().apply {
-                        cepcjChildContentEntryUid = entity.contentEntryUid
-                        cepcjParentContentEntryUid = parentEntryUid
+
+                    if(parentEntryUid != 0L) {
+                        val contentEntryJoin = ContentEntryParentChildJoin().apply {
+                            cepcjChildContentEntryUid = entity.contentEntryUid
+                            cepcjParentContentEntryUid = parentEntryUid
+                        }
+                        repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
                     }
-                    repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
                 } else {
                     repo.contentEntryDao.updateAsync(entity)
                 }

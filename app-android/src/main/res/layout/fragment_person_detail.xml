@@ -39,6 +39,10 @@
             type="Integer" />
 
         <variable
+            name="chatVisibility"
+            type="Integer" />
+
+        <variable
             name="manageParentConsentVisible"
             type="boolean" />
 
@@ -174,7 +178,7 @@
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/fragment_person_detail_chat"
                         style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:visibility="visible"
+                        android:visibility="@{chatVisibility}"
                         android:layout_width="wrap_content"
                         android:maxWidth="@dimen/dimen_110dp"
                         android:layout_height="wrap_content"

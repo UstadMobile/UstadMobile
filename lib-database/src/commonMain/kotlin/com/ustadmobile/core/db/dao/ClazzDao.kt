@@ -265,6 +265,22 @@ abstract class ClazzDao : BaseDao<Clazz> {
                                                       permission: Long) : Boolean
 
     @Query("""
+        SELECT ScopedGrant.sgPermissions
+          FROM Clazz
+               JOIN ScopedGrant
+                    ON ${Clazz.JOIN_SCOPEDGRANT_ON_CLAUSE}
+               JOIN PersonGroupMember AS PrsGrpMbr
+                    ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
+         WHERE Clazz.clazzUid = :clazzUid
+           AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_DELEGATE}) > 0
+           AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun selectDelegatablePermissions(
+        accountPersonUid: Long,
+        clazzUid: Long
+    ): List<Long>
+
+    @Query("""
         SELECT Clazz.*, 
                HolidayCalendar.*, 
                School.*,

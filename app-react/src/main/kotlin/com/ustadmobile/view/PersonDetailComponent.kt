@@ -63,6 +63,14 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
             }
         }
 
+    override var chatVisibility: Boolean = false
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
     override var showCreateAccountVisible: Boolean = false
         get() = field
         set(value) {

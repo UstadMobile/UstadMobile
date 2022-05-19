@@ -26,13 +26,18 @@ abstract class AgentDao :BaseDao<AgentEntity> {
         JOIN AgentEntity 
              ON AgentEntity.agentPersonUid = Person.personUid
        WHERE UserSession.usClientNodeId = :newNodeId
+         --notpsql 
          AND AgentEntity.agentLct != COALESCE(
              (SELECT aeVersionId
                 FROM AgentEntityReplicate
                WHERE aePk = AgentEntity.agentUid
-                 AND aeDestination = :newNodeId), 0) 
+                 AND aeDestination = UserSession.usClientNodeId), 0) 
+         --endnotpsql        
       /*psql ON CONFLICT(aePk, aeDestination) DO UPDATE
-             SET aePending = true
+             SET aePending = (SELECT AgentEntity.agentLct
+                                FROM AgentEntity
+                               WHERE AgentEntity.agentUid = EXCLUDED.aePk ) 
+                                     != AgentEntityReplicate.aePk
       */       
      """)
     @ReplicationRunOnNewNode
@@ -56,14 +61,19 @@ abstract class AgentDao :BaseDao<AgentEntity> {
              SELECT nodeClientId 
                FROM SyncNode
               LIMIT 1)
+         --notpsql 
          AND AgentEntity.agentLct != COALESCE(
              (SELECT aeVersionId
                 FROM AgentEntityReplicate
                WHERE aePk = AgentEntity.agentUid
-                 AND aeDestination = UserSession.usClientNodeId), 0)
-     /*psql ON CONFLICT(aePk, aeDestination) DO UPDATE
-         SET aePending = true
-      */               
+                 AND aeDestination = UserSession.usClientNodeId), 0) 
+         --endnotpsql 
+      /*psql ON CONFLICT(aePk, aeDestination) DO UPDATE
+             SET aePending = (SELECT AgentEntity.agentLct
+                                FROM AgentEntity
+                               WHERE AgentEntity.agentUid = EXCLUDED.aePk ) 
+                                     != AgentEntityReplicate.aePk
+      */    
     """)
     @ReplicationRunOnChange([AgentEntity::class])
     @ReplicationCheckPendingNotificationsFor([AgentEntity::class])

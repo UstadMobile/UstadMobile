@@ -24,6 +24,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 31
     }
+    namespace 'com.ustadmobile.lib.db.entities'
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {

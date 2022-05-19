@@ -7,9 +7,7 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Chat
-import com.ustadmobile.lib.db.entities.ChatWithLatestMessageAndCount
-import com.ustadmobile.lib.db.entities.UserSession
+import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
@@ -134,6 +132,7 @@ abstract class ChatDao: BaseDao<Chat>{
          WHERE ChatMember.chatMemberPersonUid = :personUid
            AND ChatMember.chatMemberLeftDate = ${Long.MAX_VALUE}
            AND Chat.chatUid != 0 
+           AND op.firstNames||' '||op.lastName LIKE :searchBit 
         -- When in search mode we need to add all Persons who match the search to the list, even if
         -- no chat has started
         UNION
@@ -145,10 +144,16 @@ abstract class ChatDao: BaseDao<Chat>{
                     Person.lastName AS otherPersonLastName,
                     0 AS unreadMessageCount,
                     0 AS numMembers
-          FROM Person
+                              
+          FROM PersonGroupMember
+             ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
+                    ${Role.PERMISSION_PERSON_SELECT}
+                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
+		  
                LEFT JOIN Chat
                     ON Chat.chatUid = 0
          WHERE :searchBit != '%'
+           AND PersonGroupMember.groupMemberPersonUid = :personUid
            AND Person.personUid != :personUid
            AND Person.personUid NOT IN
                (SELECT p.personUid
@@ -197,6 +202,7 @@ abstract class ChatDao: BaseDao<Chat>{
                  WHERE ChatMember.chatMemberChatUid = Chat.chatUid
                    AND ChatMember.chatMemberPersonUid = :loggedInPersonUid 
                ) 
+           AND :otherPersonUid != :loggedInPersonUid
     """)
     abstract suspend fun getChatByOtherPerson(otherPersonUid: Long, loggedInPersonUid: Long): Chat?
 

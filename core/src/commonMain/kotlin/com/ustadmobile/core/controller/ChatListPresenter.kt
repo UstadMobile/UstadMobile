@@ -38,8 +38,6 @@ class ChatListPresenter(context: Any, arguments: Map<String, String>, view: Chat
     private fun updateListOnView() {
         view.list = repo.chatDao.findAllChatsForUser(
                 searchText.toQueryLikeParam(), loggedInPersonUid)
-
-
     }
 
     override fun onSearchSubmitted(text: String?) {
@@ -79,25 +77,6 @@ class ChatListPresenter(context: Any, arguments: Map<String, String>, view: Chat
         )
     }
 
-    fun handleClickCreateNewGroup(args: Map<String, String>?, destinationResultKey: String?){
-        //TODO: enable multi select ?
-//        val args2: Map<String, String>? = mapOf(
-//            ARG_GO_TO_COMPLETE to ChatDetailView.VIEW_NAME,
-//            PersonListPresenter.ARG_HIDE_PERSON_ADD to "true",
-//            PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST to loggedInPersonUid.toString()
-//        )
-//        navigateForResult(
-//            NavigateForResultOptions(this,
-//                null,
-//                ChatDetailView.VIEW_NAME,
-//                Chat::class,
-//                Chat.serializer(),
-//                destinationResultKey ?: CHAT_RESULT_KEY,
-//                arguments = args2?.toMutableMap() ?: arguments.toMutableMap()
-//            )
-//        )
-    }
-
     override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
         navigateForResult(
             NavigateForResultOptions(this,
@@ -120,11 +99,7 @@ class ChatListPresenter(context: Any, arguments: Map<String, String>, view: Chat
         return true
     }
 
-    override fun handleClickCreateNewFab() {
-        //TODO? Check
-        println("breakpoint")
-    }
-
+    override fun handleClickCreateNewFab() {}
 
     companion object {
 

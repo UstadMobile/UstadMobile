@@ -22,10 +22,6 @@ import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
-import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_PARENT_GROUP
-import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_STUDENT_GROUP
-import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_TEACHER_GROUP
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
@@ -85,9 +81,6 @@ class ClazzEdit2Presenter(
     val scheduleOneToManyJoinListener = scheduleOneToManyJoinEditHelper.createNavigateForResultListener(
         ScheduleEditView.VIEW_NAME, Schedule.serializer())
 
-    val scopedGrantOneToManyHelper = ScopedGrantOneToManyHelper(repo, this,
-        requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
-
     lateinit var topics: List<DiscussionTopic>
 
     private val courseBlockOneToManyJoinEditHelper
@@ -105,7 +98,6 @@ class ClazzEdit2Presenter(
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.clazzSchedules = scheduleOneToManyJoinEditHelper.liveList
-        view.scopedGrants = scopedGrantOneToManyHelper.liveList
         view.courseBlocks = courseBlockOneToManyJoinEditHelper.liveList
         view.enrolmentPolicyOptions = EnrolmentPolicyOptions.values().map {
             EnrolmentPolicyOptionsMessageIdOption(it, context, di)
@@ -398,51 +390,6 @@ class ClazzEdit2Presenter(
 
         courseBlockOneToManyJoinEditHelper.liveList.sendValue(courseBlocks)
 
-        val termMap = db.courseTerminologyDao.findByUidAsync(clazz.clazzTerminologyUid)
-            .toTermMap(json, systemImpl, context)
-
-        if(clazzUid != 0L) {
-            val scopedGrants = db.onRepoWithFallbackToDb(2000) {
-                it.scopedGrantDao.findByTableIdAndEntityUid(Clazz.TABLE_ID, clazzUid)
-            }
-            scopedGrantOneToManyHelper.liveList.setVal(scopedGrants)
-        }else if(db is DoorDatabaseRepository){
-            /*
-            This should be enabled once a field has been added on Clazz for the adminGroupUid
-            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
-                name = "Admins"
-                scopedGrant = ScopedGrant().apply {
-                    sgFlags = ScopedGrant.FLAG_ADMIN_GROUP.or(FLAG_NO_DELETE)
-                    sgPermissions = Role.ALL_PERMISSIONS
-                }
-            })
-            */
-
-            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
-                name = termMap[TerminologyKeys.TEACHERS_KEY]
-                scopedGrant = ScopedGrant().apply {
-                    sgFlags = ScopedGrant.FLAG_TEACHER_GROUP.or(FLAG_NO_DELETE)
-                    sgPermissions = Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT
-                }
-            })
-
-            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
-                name = termMap[TerminologyKeys.STUDENTS_KEY]
-                scopedGrant = ScopedGrant().apply {
-                    sgFlags = ScopedGrant.FLAG_STUDENT_GROUP.or(FLAG_NO_DELETE)
-                    sgPermissions = Role.ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT
-                }
-            })
-
-            scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
-                name = "Parents"
-                scopedGrant = ScopedGrant().apply {
-                    sgFlags = (ScopedGrant.FLAG_PARENT_GROUP or FLAG_NO_DELETE)
-                    sgPermissions = Role.ROLE_CLAZZ_PARENT_PERMISSION_DEFAULT
-                }
-            })
-        }
-
         return clazz
     }
 
@@ -562,7 +509,9 @@ class ClazzEdit2Presenter(
             repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
 
                 if((arguments[UstadView.ARG_ENTITY_UID]?.toLongOrNull() ?: 0L) == 0L) {
-                    txDb.createNewClazzAndGroups(entity, systemImpl, context)
+                    val termMap = db.courseTerminologyDao.findByUidAsync(entity.clazzTerminologyUid)
+                        .toTermMap(json, systemImpl, context)
+                    txDb.createNewClazzAndGroups(entity, systemImpl, termMap, context)
                 }else {
                     txDb.clazzDao.updateAsync(entity)
                 }
@@ -570,13 +519,6 @@ class ClazzEdit2Presenter(
                 scheduleOneToManyJoinEditHelper.commitToDatabase(txDb.scheduleDao) {
                     it.scheduleClazzUid = entity.clazzUid
                 }
-
-                scopedGrantOneToManyHelper.commitToDatabase(txDb, entity.clazzUid, flagToGroupMap = mapOf(
-                    FLAG_TEACHER_GROUP to entity.clazzTeachersPersonGroupUid,
-                    FLAG_STUDENT_GROUP to entity.clazzStudentsPersonGroupUid,
-                    FLAG_PARENT_GROUP to entity.clazzParentsPersonGroupUid,
-                ))
-
 
                 val assignmentList = courseBlockOneToManyJoinEditHelper.entitiesToInsert.mapNotNull { it.assignment }
                 txDb.clazzAssignmentDao.insertListAsync(assignmentList)
@@ -614,11 +556,6 @@ class ClazzEdit2Presenter(
                 val tti : List<DiscussionTopic> = courseBlockList.mapNotNull{
                     it.topics
                 }.flatten()
-
-//                tti.forEach {
-//                    it.discussionTopicClazzUid = entity.clazzUid
-//                }
-
 
                 txDb.discussionTopicDao.replaceListAsync(tti)
 
@@ -676,9 +613,6 @@ class ClazzEdit2Presenter(
 
     fun handleClickAddContent(){
         val args = mutableMapOf(
-            ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
-                ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
-            UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString(),
             ContentEntryList2View.ARG_SELECT_FOLDER_VISIBLE to false.toString(),
             UstadView.ARG_CLAZZUID to entity?.clazzUid.toString(),
             ContentEntryEdit2View.BLOCK_REQUIRED to true.toString()

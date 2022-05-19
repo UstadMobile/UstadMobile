@@ -211,7 +211,7 @@ open class Person() {
                           FROM SchoolMember
                          WHERE schoolMemberSchoolUid = ScopedGrant.sgEntityUid
                            AND schoolMemberActive))
-                           )
+                           )    
         """
 
 

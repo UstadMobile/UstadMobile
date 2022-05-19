@@ -33,7 +33,7 @@ import kotlinx.serialization.Serializable
         ])
 ))
 @Serializable
-class ScopedGrant {
+open class ScopedGrant {
 
     @PrimaryKey(autoGenerate = true)
     var sgUid: Long = 0
