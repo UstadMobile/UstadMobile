@@ -21,10 +21,10 @@ import org.kodein.di.instance
 
 class MessagesRecyclerAdapter(
     val loggedInPersonUid: Long,
-    private val presenterScope: CoroutineScope?,
-    private val presenter: MessagesPresenter?,
+    private var presenterScope: CoroutineScope?,
+    private var presenter: MessagesPresenter?,
     di: DI,
-    val context: Any
+    context: Any
 ): SelectablePagedListAdapter<MessageWithPerson,
         MessagesRecyclerAdapter.MessageWithPersonViewHolder>(DIFF_CALLBACK_COMMENTS) {
 
@@ -32,6 +32,8 @@ class MessagesRecyclerAdapter(
     private val systemImpl: UstadMobileSystemImpl by di.instance()
 
     private val accountManager: UstadAccountManager by di.instance()
+
+    private var context: Any? = context
 
     class MessageWithPersonViewHolder(val binding: ItemMessageListBinding,
                                       var messageReadJob: Job? = null)
@@ -68,6 +70,13 @@ class MessagesRecyclerAdapter(
 
             holder.messageReadJob = null
         }
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        context = null
+        presenter = null
+        presenterScope = null
     }
 
     companion object{

@@ -378,22 +378,13 @@ abstract class UstadMobileSystemCommon {
      */
     fun handleClickLink(url: String, accountManager: UstadAccountManager, context: Any){
         if(url.contains(LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
-
-            val viewUri =
-                url.substringAfter(LINK_ENDPOINT_VIEWNAME_DIVIDER)
-
             val components = UstadUrlComponents.parse(url)
-            val endpoint = components.endpoint
-            if(endpoint == accountManager.activeEndpoint.url){
+            if(components.endpoint == accountManager.activeEndpoint.url){
                 goToViewLink(components.viewUri, context)
             }else{
                 goToDeepLink(url, accountManager, context)
             }
-
-
-
         }else{
-
             //Send link to system
             openLinkInBrowser(url, context)
         }

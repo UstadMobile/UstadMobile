@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.accounts.AccountManager
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -14,9 +13,10 @@ import org.kodein.di.instance
 
 class DiscussionPostDescriptionRecyclerAdapter(
     di: DI,
-    val context: Any
-): SingleItemRecyclerViewAdapter<
-        DiscussionPostDescriptionRecyclerAdapter.DiscussionPostViewHolder>(true) {
+    context: Any
+): SingleItemRecyclerViewAdapter<DiscussionPostDescriptionRecyclerAdapter.DiscussionPostViewHolder>(true) {
+
+    private var context: Any? = context
 
     class DiscussionPostViewHolder(var itemBinding: ItemDiscussionPostDetailBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
@@ -55,5 +55,6 @@ class DiscussionPostDescriptionRecyclerAdapter(
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         viewHolder = null
+        context = null
     }
 }
