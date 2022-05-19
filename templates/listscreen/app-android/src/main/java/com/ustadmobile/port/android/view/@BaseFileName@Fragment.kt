@@ -18,7 +18,8 @@ import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 
 class @BaseFileName@Fragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>(),
-        @BaseFileName@View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+    @BaseFileName@View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener
+{
 
     private var mPresenter: @BaseFileName@Presenter? = null
 

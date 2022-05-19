@@ -13,6 +13,8 @@ interface ClazzDetailOverviewView: UstadDetailView<ClazzWithDisplayDetails> {
 
     var clazzCodeVisible: Boolean
 
+    var showPermissionButton: Boolean
+
     companion object {
 
         const val VIEW_NAME = "CourseDetailOverviewView"

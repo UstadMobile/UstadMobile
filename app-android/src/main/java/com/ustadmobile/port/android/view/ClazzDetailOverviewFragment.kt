@@ -46,6 +46,8 @@ interface ClazzDetailOverviewEventListener {
     fun onClickShare()
 
     fun onClickDownloadAll()
+
+    fun onClickPermissions()
 }
 
 class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(),
@@ -81,6 +83,12 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
     private var mScheduleListRecyclerAdapter: ScheduleRecyclerViewAdapter? = null
 
     private var courseBlockDetailRecyclerAdapter: CourseBlockDetailRecyclerViewAdapter? = null
+
+    override var showPermissionButton: Boolean = false
+        set(value) {
+            downloadRecyclerAdapter?.permissionButtonVisible = value
+            field = value
+        }
 
     private val courseBlockObserver = Observer<PagedList<CourseBlockWithCompleteEntity>?> {
         t -> courseBlockDetailRecyclerAdapter?.submitList(t)
@@ -357,6 +365,10 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         mPresenter?.handleDownloadAllClicked()
     }
 
+    override fun onClickPermissions() {
+        mPresenter?.handleClickPermissions()
+    }
+
     companion object {
 
         val SCHEDULE_DIFF_UTIL = object: DiffUtil.ItemCallback<Schedule>() {
@@ -409,7 +421,8 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                     CourseBlock.BLOCK_DISCUSSION_TYPE -> {
                         val newDiscussion = newItem.courseDiscussion
                         val oldDiscussion = oldItem.courseDiscussion
-                        //TODO
+                        isSame = isSame
+                                && newDiscussion?.courseDiscussionTitle == oldDiscussion?.courseDiscussionTitle
                     }
                 }
                 return isSame

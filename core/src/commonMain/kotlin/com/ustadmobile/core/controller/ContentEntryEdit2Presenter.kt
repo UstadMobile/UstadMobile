@@ -395,6 +395,7 @@ class ContentEntryEdit2Presenter(
                 repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
 
                     if (entity.contentEntryUid == 0L) {
+                        entity.contentOwner = accountManager.activeAccount.personUid
                         entity.contentEntryUid = txDb.contentEntryDao.insertAsync(entity)
 
                         if (entity.entryId == null) {
@@ -402,11 +403,14 @@ class ContentEntryEdit2Presenter(
                                     "${entity.contentEntryUid}/${randomUuid()}"
                             txDb.contentEntryDao.updateAsync(entity)
                         }
-                        val contentEntryJoin = ContentEntryParentChildJoin().apply {
-                            cepcjChildContentEntryUid = entity.contentEntryUid
-                            cepcjParentContentEntryUid = parentEntryUid
+
+                        if(parentEntryUid != 0L) {
+                            val contentEntryJoin = ContentEntryParentChildJoin().apply {
+                                cepcjChildContentEntryUid = entity.contentEntryUid
+                                cepcjParentContentEntryUid = parentEntryUid
+                            }
+                            txDb.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
                         }
-                        txDb.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
                     } else {
                         txDb.contentEntryDao.updateAsync(entity)
                     }
@@ -431,7 +435,6 @@ class ContentEntryEdit2Presenter(
                     }
 
                 }
-
 
                 val metaData = view.metadataResult
                 val videoDimensions = view.videoDimensions
