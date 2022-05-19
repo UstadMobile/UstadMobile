@@ -20,21 +20,36 @@ See [app-ktor-server](app-ktor-server/) for instructions on building the server 
 
 ## Getting started building from source:
 
+* __Install latest Node-14x__ as per [Instructions on Node website](https://nodejs.org/en/download/).
+  Kotlin/JS depends on it to build
+
 * __Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
 https://github.com/UstadMobile/UstadMobile.git and wait for the project to import.
 
-* __Build and run the http rest server__ : run
+* __Build it__ :
+Linux command line:
 ```
-./gradlew app-ktor-server:shadowJar
-./runserver.sh
+./gradlew -Pktorbundleproductionjs=true build
 ```
+Windows command line:
+```
+gradlew  -Pktorbundleproductionjs=true build
+```
+
+If you see compilation errors regarding MessageID, this seems to be caused by a gradle dependency
+ordering issue. Run:
+```
+gradlew core:prepareLocale
+```
+Then try again (Sorry).
+
+Start the server:
 
 You should now be able to open the web version on http://localhost:8087/ . The admin password will
 be found in ./app-ktor-server/data/singleton/admin.txt
 
-* __Build and run the Android app__ : run
+* __Install and run the Android app__ : run
 ```
-./gradlew app-android-launcher:assembleDebug
 adb install ./app-android-launcher/build/outputs/apk/debug/app-android-launcher-debug.apk
 ```
 

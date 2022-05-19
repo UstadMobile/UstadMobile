@@ -1,23 +1,24 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ClazzDetailView.Companion.ARG_TABS
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.*
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
@@ -53,7 +54,7 @@ class ClazzDetailPresenter(context: Any,
         if(tabsJson != null){
             view.tabs = safeParse(di, ListSerializer(String.serializer()), tabsJson)
         }else{
-            GlobalScope.launch {
+            presenterScope.launch {
                 setupTabs(editEntity)
             }
         }
@@ -93,11 +94,6 @@ class ClazzDetailPresenter(context: Any,
                 ClazzDetailOverviewView.VIEW_NAME.appendQueryArgs(
                     commonArgs + mapOf(ARG_ENTITY_UID to entityUid.toString())
                 ),
-                ContentEntryList2View.VIEW_NAME.appendQueryArgs(
-                    commonArgs + mapOf(
-                        ARG_CLAZZUID to entityUid.toString(),
-                        ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_CLAZZ)
-                ),
                 ClazzMemberListView.VIEW_NAME.appendQueryArgs(
                     commonArgs + mapOf(ARG_CLAZZUID to entityUid.toString())
                 ))
@@ -111,58 +107,26 @@ class ClazzDetailPresenter(context: Any,
                 )
             }
 
-            val desiredTabs = coreTabs + permissionAndFeatureBasedTabs
+            val groupsTab = CourseGroupSetListView.VIEW_NAME.appendQueryArgs(
+                commonArgs + mapOf(ARG_CLAZZUID to entityUid.toString())
+            )
+
+            val desiredTabs = coreTabs + permissionAndFeatureBasedTabs + groupsTab
             if(view.tabs != desiredTabs)
-                view.tabs =  coreTabs + permissionAndFeatureBasedTabs
+                view.tabs =  desiredTabs
         }
-    }
-
-    override fun onLoadDataComplete() {
-        super.onLoadDataComplete()
-
-        observeSavedStateResult(ContentEntryList2Presenter.SAVEDSTATE_KEY_ENTRY,
-                ListSerializer(ContentEntry.serializer()),
-                ContentEntry::class) {
-            val entry = it.firstOrNull() ?: return@observeSavedStateResult
-            GlobalScope.launch {
-                val entriesInClazz = repo.clazzContentJoinDao.listOfEntriesInClazz(arguments[ARG_ENTITY_UID]?.toLong() ?: 0)
-
-                if(entriesInClazz.contains(entry.contentEntryUid)) {
-
-                    view.showSnackBar(
-                            systemImpl.getString(MessageID.content_already_added_to_class, context)
-                                    .replace("%1\$s",entry.title ?: ""))
-
-                    return@launch
-                }
-
-                ClazzContentJoin().apply {
-                    ccjClazzUid = arguments[ARG_ENTITY_UID]?.toLong() ?: return@apply
-                    ccjContentEntryUid = entry.contentEntryUid
-                    ccjUid = repo.clazzContentJoinDao.insertAsync(this)
-                }
-
-                view.showSnackBar(
-                        systemImpl.getString(MessageID.added_to_class_content, context)
-                                .replace("%1\$s",entry.title ?: ""))
-            }
-            requireSavedStateHandle()[ContentEntryList2Presenter.SAVEDSTATE_KEY_ENTRY] = null
-        }
-
     }
 
     companion object {
 
-        val CLAZZ_FEATURES = listOf(Clazz.CLAZZ_FEATURE_ATTENDANCE, Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT)
+        val CLAZZ_FEATURES = listOf(Clazz.CLAZZ_FEATURE_ATTENDANCE)
 
         //Map of the feature flag to the permission flag required for that tab to be visible
         val FEATURE_PERMISSION_MAP = mapOf(
-                Clazz.CLAZZ_FEATURE_ATTENDANCE to Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT,
-                Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT to Role.PERMISSION_ASSIGNMENT_SELECT)
+                Clazz.CLAZZ_FEATURE_ATTENDANCE to Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT)
 
         val VIEWNAME_MAP = mapOf<Long, String>(
-                Clazz.CLAZZ_FEATURE_ATTENDANCE to ClazzLogListAttendanceView.VIEW_NAME,
-                Clazz.CLAZZ_FEATURE_CLAZZ_ASSIGNMENT to ClazzAssignmentListView.VIEW_NAME
+                Clazz.CLAZZ_FEATURE_ATTENDANCE to ClazzLogListAttendanceView.VIEW_NAME
         )
     }
 

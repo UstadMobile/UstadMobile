@@ -16,13 +16,17 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailOverviewBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressPresenter
+import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
+import com.ustadmobile.lib.db.entities.CommentsWithPerson
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
@@ -31,9 +35,17 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 
-class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzAssignment>(),
-        ClazzAssignmentDetailStudentProgressView,
-       OpenSheetListener {
+interface ClazzAssignmentDetailStudentProgressFragmentEventHandler {
+
+    fun onSubmitGradeClicked()
+
+    fun onSubmitGradeAndMarkNextClicked()
+
+}
+
+class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzAssignmentWithCourseBlock>(),
+        ClazzAssignmentDetailStudentProgressView, ClazzAssignmentDetailStudentProgressFragmentEventHandler,
+        OpenSheetListener, FileSubmissionListItemListener {
 
     private var dbRepo: UmAppDatabase? = null
 
@@ -45,28 +57,27 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
 
     private var mBinding: FragmentClazzAssignmentDetailOverviewBinding? = null
 
+    private var submissionsHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
+    private var submissionStatusHeaderAdapter: SubmissionStatusHeaderAdapter? = null
 
-    private var contentHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
-    private var contentRecyclerAdapter: ContentWithAttemptRecyclerAdapter? = null
+    private var submissionAdapter: SubmissionAdapter? = null
 
-    private var contentLiveData: LiveData<PagedList<
-            ContentWithAttemptSummary>>? = null
-    private val contentObserver = Observer<PagedList<
-            ContentWithAttemptSummary>?> { t ->
-        run {
-            contentHeaderAdapter?.visible = t?.size ?: 0 > 0
-            contentRecyclerAdapter?.submitList(t)
-        }
+    private var submissionAttachmentLiveDataCourse: LiveData<PagedList<CourseAssignmentSubmissionWithAttachment>>? = null
+    private val fileSubmissionObserver = Observer<PagedList<CourseAssignmentSubmissionWithAttachment>?> {
+        t -> run {
+        markSubmissionAdapter?.markStudentVisible = !t.isEmpty()
+        submissionAdapter?.submitList(t)
     }
+    }
+
+
+    private var markSubmissionAdapter: MarkFileSubmissionAdapter? = null
 
     private var privateCommentsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
     private var privateCommentsRecyclerAdapter: CommentsRecyclerAdapter? = null
     private var privateCommentsObserver: Observer<PagedList<CommentsWithPerson>>? = null
     private var newPrivateCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
     private var privateCommentsLiveData: LiveData<PagedList<CommentsWithPerson>>? = null
-
-
-    private var scoreRecyclerAdapter: ScoreRecyclerAdapter? = null
 
     private var detailMergerRecyclerView: RecyclerView? = null
     private var detailMergerRecyclerAdapter: ConcatAdapter? = null
@@ -88,37 +99,46 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
                 rootView.findViewById(R.id.fragment_clazz_assignment_detail_overview)
 
         // 1
-        contentHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.content).toString()).apply {
-            visible = false
+        submissionsHeaderAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.submissions).toString()).apply {
+            visible = true
         }
 
         // 2
-        contentRecyclerAdapter = ContentWithAttemptRecyclerAdapter(mPresenter)
+        submissionStatusHeaderAdapter = SubmissionStatusHeaderAdapter().apply {
+            visible = true
+        }
 
-        // 3
-        scoreRecyclerAdapter = ScoreRecyclerAdapter()
+        // 3 file submission for student
+        submissionAdapter = SubmissionAdapter(this).also{
+            it.isSubmitted = true
+            it.visible = true
+        }
+
+        // 4 mark grade
+        markSubmissionAdapter = MarkFileSubmissionAdapter(this)
 
 
-        // 4 - Private
+        // 5 - Private
         privateCommentsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.private_comments).toString()
         ).apply {
             visible = false
         }
 
-        // 5 - New Private comments section:
+        // 6 - New Private comments section:
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_private_comment), false).apply{
             visible = false
         }
 
-        //6 - Private comments list
+        //7 - Private comments list
         privateCommentsRecyclerAdapter = CommentsRecyclerAdapter().also{
             privateCommentsObserver = PagedListSubmitObserver(it)
         }
 
-        detailMergerRecyclerAdapter = ConcatAdapter(contentHeaderAdapter,
-                contentRecyclerAdapter, scoreRecyclerAdapter, privateCommentsHeadingRecyclerAdapter,
+        detailMergerRecyclerAdapter = ConcatAdapter(submissionsHeaderAdapter,
+                submissionStatusHeaderAdapter, submissionAdapter,
+                markSubmissionAdapter, privateCommentsHeadingRecyclerAdapter,
                 newPrivateCommentRecyclerAdapter, privateCommentsRecyclerAdapter)
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
@@ -140,10 +160,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         entity = null
 
         detailMergerRecyclerView?.adapter = null
-        contentHeaderAdapter = null
-        contentRecyclerAdapter = null
-        contentLiveData = null
-        scoreRecyclerAdapter = null
+        submissionsHeaderAdapter = null
 
         privateCommentsLiveData = null
         newPrivateCommentRecyclerAdapter = null
@@ -159,13 +176,13 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     }
 
 
-    override var clazzAssignmentContent: DataSource.Factory<Int, ContentWithAttemptSummary>? = null
+    override var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
         set(value) {
             val dbRepoVal = dbRepo?: return
-            contentLiveData?.removeObserver(contentObserver)
-            contentLiveData = value?.asRepositoryLiveData(dbRepoVal.clazzAssignmentDao)
+            submissionAttachmentLiveDataCourse?.removeObserver(fileSubmissionObserver)
+            submissionAttachmentLiveDataCourse = value?.asRepositoryLiveData(dbRepoVal.courseAssignmentSubmissionDao)
             field = value
-            contentLiveData?.observeIfFragmentViewIsReady(this, contentObserver)
+            submissionAttachmentLiveDataCourse?.observeIfFragmentViewIsReady(this, fileSubmissionObserver)
         }
 
     override var clazzAssignmentPrivateComments: DataSource.Factory<Int, CommentsWithPerson>? = null
@@ -178,28 +195,72 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             field = value
         }
 
-    override var person: Person? = null
+    override var markNextStudentVisible: Boolean = false
+        set(value) {
+            field = value
+            markSubmissionAdapter?.markNextStudentVisible = value
+        }
+
+    override var submitButtonVisible: Boolean = false
+        set(value) {
+            field = value
+            markSubmissionAdapter?.markStudentVisible = value
+        }
+
+    override var submitMarkError: String? = null
+        set(value) {
+            field = value
+            markSubmissionAdapter?.submitMarkError = value
+        }
+
+    override var submitterName: String? = null
         get() = field
         set(value) {
             field = value
-            ustadFragmentTitle = value?.personFullName()
+            ustadFragmentTitle = value
         }
 
-    override var studentScore: ContentEntryStatementScoreProgress? = null
+    override var submissionScore: CourseAssignmentMark? = null
         get() = field
         set(value) {
             field = value
-            scoreRecyclerAdapter?.score = value
-            scoreRecyclerAdapter?.visible = value?.resultMax?: 0 > 0
+            submissionStatusHeaderAdapter?.courseAssignmentMark = value
+            markSubmissionAdapter?.mark = value
         }
 
+    override var submissionStatus: Int = 0
+        set(value) {
+            field = value
+            submissionStatusHeaderAdapter?.assignmentStatus = value
+        }
 
-    override var entity: ClazzAssignment? = null
+    override var entity: ClazzAssignmentWithCourseBlock? = null
         get() = field
         set(value) {
             field = value
             newPrivateCommentRecyclerAdapter?.visible = value?.caPrivateCommentsEnabled ?: false
             privateCommentsHeadingRecyclerAdapter?.visible = value?.caPrivateCommentsEnabled ?: false
+            markSubmissionAdapter?.assignment = value
+            submissionAdapter?.assignment = value
+            submissionStatusHeaderAdapter?.assignment = value
         }
+
+    override fun onSubmitGradeClicked() {
+        val grade = markSubmissionAdapter?.grade ?: return
+        mPresenter?.onClickSubmitGrade(grade)
+    }
+
+    override fun onSubmitGradeAndMarkNextClicked() {
+        val grade = markSubmissionAdapter?.grade ?: return
+        mPresenter?.onClickSubmitGradeAndMarkNext(grade)
+    }
+
+    override fun onClickDeleteSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment) {
+        // cant delete here
+    }
+
+    override fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment) {
+        mPresenter?.onClickOpenSubmission(submissionCourse)
+    }
 
 }

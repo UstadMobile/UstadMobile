@@ -267,7 +267,7 @@ fun Application.umRestApplication(
             })
 
             runBlocking { repo.preload() }
-            repo.ktorInitRepo()
+            repo.ktorInitRepo(di)
             runBlocking {
                 repo.initAdminUser(context, di)
             }

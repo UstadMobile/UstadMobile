@@ -1,13 +1,13 @@
 package com.ustadmobile.port.android.screen
 
 import android.view.View
+import com.kaspersky.kaspresso.screens.KScreen
+import com.toughra.ustadmobile.R
+import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment
 import io.github.kakaocup.kakao.edit.KEditText
 import io.github.kakaocup.kakao.recycler.KRecyclerItem
 import io.github.kakaocup.kakao.recycler.KRecyclerView
-import com.kaspersky.kaspresso.screens.KScreen
 import io.github.kakaocup.kakao.text.KTextView
-import com.toughra.ustadmobile.R
-import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment
 import org.hamcrest.Matcher
 
 object ClazzAssignmentDetailOverviewScreen : KScreen<ClazzAssignmentDetailOverviewScreen>() {
@@ -21,8 +21,6 @@ object ClazzAssignmentDetailOverviewScreen : KScreen<ClazzAssignmentDetailOvervi
         withId(R.id.fragment_clazz_assignment_detail_overview)
     }, itemTypeBuilder = {
         itemType(::AssignmentDetail)
-        itemType(::Content)
-        itemType(::TotalScore)
         itemType(::ClassComments)
         itemType(::PrivateComments)
         itemType(::NewClassComments)
@@ -32,17 +30,6 @@ object ClazzAssignmentDetailOverviewScreen : KScreen<ClazzAssignmentDetailOvervi
     class AssignmentDetail(parent: Matcher<View>) : KRecyclerItem<AssignmentDetail>(parent) {
         val desc: KTextView = KTextView(parent) { withId(R.id.item_ca_detail_description) }
         val deadline: KTextView = KTextView(parent) {withId(R.id.item_ca_detail_description_deadline_date)}
-    }
-
-    class Content(parent: Matcher<View>) : KRecyclerItem<Content>(parent) {
-        val contentTitle: KTextView = KTextView(parent) { withId(R.id.content_entry_item_title) }
-        val score: KTextView = KTextView(parent) {withId(R.id.item_person_progress)}
-        val scoreResults: KTextView = KTextView(parent) {withId(R.id.item_person_score_results)}
-    }
-
-    class TotalScore(parent: Matcher<View>) : KRecyclerItem<TotalScore>(parent) {
-        val score: KTextView = KTextView(parent) {withId(R.id.item_person_score)}
-        val scoreResults: KTextView = KTextView(parent) {withId(R.id.item_person_total_score_results)}
     }
 
     class ClassComments(parent: Matcher<View>) : KRecyclerItem<ClassComments>(parent) {

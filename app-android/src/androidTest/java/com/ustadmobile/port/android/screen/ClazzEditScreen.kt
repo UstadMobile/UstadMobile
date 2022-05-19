@@ -6,7 +6,7 @@ import io.github.kakaocup.kakao.edit.KTextInputLayout
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.networkmanager.defaultGson
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
+import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.view.ClazzEditFragment
 import com.ustadmobile.test.port.android.KNestedScrollView
@@ -33,8 +33,8 @@ object ClazzEditScreen : KScreen<ClazzEditScreen>() {
     val schoolTextInputLayout = KTextInputLayout { withId(R.id.fragment_clazz_edit_school_selected) }
 
     fun fillFields(fragmentScenario: FragmentScenario<ClazzEditFragment>,
-                   clazz: ClazzWithHolidayCalendarAndSchool,
-                   clazzOnForm: ClazzWithHolidayCalendarAndSchool?,
+                   clazz: ClazzWithHolidayCalendarAndSchoolAndTerminology,
+                   clazzOnForm: ClazzWithHolidayCalendarAndSchoolAndTerminology?,
                    schedules: List<Schedule> = listOf(),
                    schedulesOnForm: List<Schedule>? = null,
                    setFieldsRequiringNavigation: Boolean = true) {

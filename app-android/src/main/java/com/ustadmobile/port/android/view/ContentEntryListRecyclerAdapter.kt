@@ -41,8 +41,9 @@ class ContentEntryListRecyclerAdapter(
 
     private val boundViewHolders = mutableSetOf<ContentEntryListViewHolder>()
 
-    inner class ContentEntryListViewHolder(
-        val itemBinding: ItemContentEntryListBinding
+    class ContentEntryListViewHolder(
+        val itemBinding: ItemContentEntryListBinding,
+        val lifecycleOwner: LifecycleOwner?
     ): RecyclerView.ViewHolder(itemBinding.root), DoorObserver<ContentJobItemProgressAndStatus?>{
         var downloadJobItemLiveData: DoorLiveData<ContentJobItemProgressAndStatus?>? = null
             set(value) {
@@ -82,7 +83,7 @@ class ContentEntryListRecyclerAdapter(
         itemBinding.selectablePagedListAdapter = this
         itemBinding.isPickerMode = pickerMode == ListViewMode.PICKER.toString()
         itemBinding.selectFolderVisible = selectFolderVisible ?: true
-        return ContentEntryListViewHolder(itemBinding)
+        return ContentEntryListViewHolder(itemBinding, lifecycleOwner)
     }
 
     override fun onBindViewHolder(holder: ContentEntryListViewHolder, position: Int) {

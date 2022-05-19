@@ -31,36 +31,28 @@
 
 package com.ustadmobile.core.impl
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.AsyncTask
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.*
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.toNavOptions
 import com.ustadmobile.core.io.ext.isGzipped
-import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.toFile
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
-import org.kodein.di.android.di
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.*
@@ -114,7 +106,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
        suspend fun getFile(): String {
             val apkFile = File(context.applicationInfo.sourceDir)
             //TODO: replace this with something from appconfig.properties
-            val di: DI by di(context)
+            val di: DI by closestDI(context)
             val impl : UstadMobileSystemImpl = di.direct.instance()
 
             val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context) + "-" +
@@ -435,30 +427,35 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?) {
+    actual fun openFileInDefaultViewer(context: Any, doorUri: DoorUri, mimeType: String?) {
         var mMimeType = mimeType
         val ctx = context as Context
         val intent = Intent(Intent.ACTION_VIEW)
         intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-        var file = File(path)
+        val uri: Uri
+        if(doorUri.uri.toString().startsWith("content://")){
+            uri = doorUri.uri
+        }else{
+            var file = doorUri.toFile()
 
-        if (file.isGzipped()) {
+            if (file.isGzipped()) {
 
-            var gzipIn: GZIPInputStream? = null
-            var destOut: FileOutputStream? = null
-            try {
-                gzipIn = GZIPInputStream(FileInputStream(File(path)))
-                var destFile = File(file.parentFile, file.name + "unzip")
-                destOut = FileOutputStream(destFile)
-                gzipIn.copyTo(destOut)
-                file = destFile
-            } finally {
-                gzipIn?.close()
-                destOut?.flush()
-                destOut?.close()
+                var gzipIn: GZIPInputStream? = null
+                var destOut: FileOutputStream? = null
+                try {
+                    gzipIn = GZIPInputStream(FileInputStream(file))
+                    val destFile = File(file.parentFile, file.name + "unzip")
+                    destOut = FileOutputStream(destFile)
+                    gzipIn.copyTo(destOut)
+                    file = destFile
+                } finally {
+                    gzipIn?.close()
+                    destOut?.flush()
+                    destOut?.close()
+                }
             }
+            uri = FileProvider.getUriForFile(ctx, "${context.packageName}.provider", file)
         }
-        val uri = FileProvider.getUriForFile(ctx, "${context.packageName}.provider", file)
         if (mMimeType.isNullOrEmpty()) {
             mMimeType = "*/*"
         }
@@ -483,10 +480,11 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     /**
      * Open the given link in a browser and/or tab depending on the platform
      */
-    actual fun openLinkInBrowser(url: String, context: Any) {
+    actual override fun openLinkInBrowser(url: String, context: Any) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         (context as Context).startActivity(intent)
     }
+
 
 
     actual companion object {
@@ -499,16 +497,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
         const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
 
-
-        /**
-         * Get an instance of the system implementation - relies on the platform
-         * specific factory method
-         *
-         * @return A singleton instance
-         */
-        @JvmStatic
-        @Deprecated("This old static getter should not be used! Use DI instead!")
-        actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
     }
 

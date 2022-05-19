@@ -150,7 +150,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
 
         if (lessonListDoc.hasClass("btn--load-more")) {
 
-            val loadMoreHref = lessonListDoc.selectFirst("p.btn--load-more a").attr("href")
+            val loadMoreHref = lessonListDoc.selectFirst("p.btn--load-more a")?.attr("href")
             ContentScraperUtil.createQueueItem(queueDao!!, URL(indexerUrl, loadMoreHref), categoryEntry, categoryFolder,
                     ScraperConstants.VoaContentType.LESSONS.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
 

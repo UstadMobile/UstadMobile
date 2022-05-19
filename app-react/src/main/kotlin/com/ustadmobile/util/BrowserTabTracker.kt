@@ -1,6 +1,5 @@
 package com.ustadmobile.util
 
-import com.ustadmobile.navigation.UstadBackStackEntryJs
 import com.ustadmobile.redux.ReduxAppStateManager.dispatch
 import com.ustadmobile.redux.ReduxAppStateManager.getCurrentState
 import com.ustadmobile.redux.ReduxNavStackState
@@ -35,12 +34,15 @@ object BrowserTabTracker {
             field = value
         }
 
+    @Deprecated("This should not be used now that the nav stack manages its own persistence")
     var navStackState: ReduxNavStackState
         get() {
             val tabStateList = getStoredTabStateList()
             val navState = ReduxNavStackState()
             tabStateList.map {
-                navState.stack.add(UstadBackStackEntryJs(it.viewName, it.arguments))
+//This is no longer used. Pending check with original developer.
+//                navState.stack.add(UstadBackStackEntryJs(it.viewName, it.arguments, "",
+//                    "ustadnav", null, saveToStorageOnInit = false))
             }
             return navState
         }
@@ -72,8 +74,9 @@ object BrowserTabTracker {
             onExtraTabDetected(true)
         }
         dispatch(getCurrentState().navStack)
-        window.onunload = {
+        window.onbeforeunload = {
             localStorage.removeItem(KEY_ACTIVE_TAB)
+            null
         }
     }
 

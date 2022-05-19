@@ -6,6 +6,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
@@ -15,7 +16,6 @@ import com.ustadmobile.door.doorMainDispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerializationStrategy
 import kotlin.js.JsName
 
 /**
@@ -235,17 +235,6 @@ abstract class UstadMobileSystemCommon {
     abstract fun getSystemLocale(context: Any): String
 
     /**
-     * Provide language UI directionality
-     * @return TRUE if the UI direction is RTL otherwise it's FALSE
-     */
-    open fun isRtlActive(): Boolean {
-        val languages = getAppPref(AppConfig.KEY_RTL_LANGUAGES, this)
-        return languages?.split(",")?.firstOrNull{it == getDisplayedLocale(this)} != null
-    }
-
-
-
-    /**
      * Provides the language code of the currently active locale. This is different to getLocale. If
      * the locale is currently set to LOCALE_USE_SYSTEM then that language will be resolved and the
      * code returned.
@@ -382,6 +371,25 @@ abstract class UstadMobileSystemCommon {
     }
 
 
+    abstract fun openLinkInBrowser(url: String, context: Any)
+
+    /**
+     * Handle clicking link that decides to open on the web or to open in the browser
+     */
+    fun handleClickLink(url: String, accountManager: UstadAccountManager, context: Any){
+        if(url.contains(LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
+            val components = UstadUrlComponents.parse(url)
+            if(components.endpoint == accountManager.activeEndpoint.url){
+                goToViewLink(components.viewUri, context)
+            }else{
+                goToDeepLink(url, accountManager, context)
+            }
+        }else{
+            //Send link to system
+            openLinkInBrowser(url, context)
+        }
+    }
+
     companion object {
         private val MIME_TYPES = mapOf("image/jpg" to "jpg", "image/jpg" to "jpg",
                 "image/jpeg" to "jpg", "image/png" to "png", "image/gif" to "gif",
@@ -443,7 +451,7 @@ abstract class UstadMobileSystemCommon {
          * viewname will start with a # (as it uses the REACT hash router). Therefor this string is
          * used as a divider between the endpoint URL and the view name and its view arguments
          */
-        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/index.html#"
+        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/#/"
 
         const val SUBDIR_SITEDATA_NAME = "sitedata"
 

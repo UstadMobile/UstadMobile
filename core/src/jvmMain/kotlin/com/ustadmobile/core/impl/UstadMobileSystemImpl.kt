@@ -36,6 +36,7 @@ import java.util.*
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.getStringsXmlResource
+import com.ustadmobile.door.DoorUri
 import org.xmlpull.v1.XmlPullParserFactory
 import java.util.concurrent.ConcurrentHashMap
 
@@ -230,7 +231,7 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?){
+    actual fun openFileInDefaultViewer(context: Any, doorUri: DoorUri, mimeType: String?){
 
     }
 
@@ -238,21 +239,12 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
     /**
      * Open the given link in a browser and/or tab depending on the platform
      */
-    actual fun openLinkInBrowser(url: String, context: Any) {
+    actual override fun openLinkInBrowser(url: String, context: Any) {
         //On JVM - do nothing at the moment. This is only used for unit testing with verify calls.
     }
 
+
     actual companion object {
-        /**
-         * Get an instance of the system implementation - relies on the platform
-         * specific factory method
-         *
-         * @return A singleton instance
-         */
-        @Deprecated("Don't use this! Use this class via DI")
-        @JvmStatic
-        actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl(
-            XmlPullParserFactory.newInstance(), File("."))
 
         const val APPCONFIG_PROPERTIES_PATH = "/com/ustadmobile/core/appconfig.properties"
 

@@ -340,7 +340,7 @@ object ShrinkerUtil {
             }
         }
         if (!foundReplaced) {
-            UMLogUtil.logInfo("Did not find the replacement file for " + element.selectFirst("[src]").attr("src"))
+            UMLogUtil.logInfo("Did not find the replacement file for " + element.selectFirst("[src]")?.attr("src"))
         }
     }
 

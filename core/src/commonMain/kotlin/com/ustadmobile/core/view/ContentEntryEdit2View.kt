@@ -1,15 +1,12 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.impl.ContainerStorageDir
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 
 
-interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
-
-    var showCompletionCriteria: Boolean
+interface ContentEntryEdit2View: UstadEditView<ContentEntryWithBlockAndLanguage>{
 
     var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>?
 
@@ -23,8 +20,6 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var storageOptions: List<ContainerStorageDir> ?
 
-    var entryMetaData: ImportedContentEntryMetaData?
-
     var metadataResult: MetadataResult?
 
     var compressionEnabled: Boolean
@@ -35,6 +30,23 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var showUpdateContentButton: Boolean
 
+    var caGracePeriodError: String?
+    var caDeadlineError: String?
+    var caStartDateError: String?
+    var caMaxPointsError: String?
+
+    var startDate: Long
+    var startTime: Long
+
+    var deadlineDate: Long
+    var deadlineTime: Long
+
+    var gracePeriodDate: Long
+    var gracePeriodTime: Long
+
+    var timeZone: String?
+
+
     companion object {
 
         const val VIEW_NAME = "ContentEntryEditView"
@@ -42,6 +54,8 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
         const val ARG_IMPORTED_METADATA = "metadata"
 
         const val ARG_URI = "uri"
+
+        const val BLOCK_REQUIRED = "isBlockRequired"
 
     }
 

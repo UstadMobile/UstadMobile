@@ -1,6 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.ClazzMemberListPresenter
+import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
@@ -17,8 +18,8 @@ import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util.stopEventPropagation
-import com.ustadmobile.view.ext.createListItemWithPersonAttendanceAndPendingRequests
-import com.ustadmobile.view.ext.createListSectionTitle
+import com.ustadmobile.view.ext.renderListItemWithPersonAttendanceAndPendingRequests
+import com.ustadmobile.view.ext.renderListSectionTitle
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import org.w3c.dom.events.Event
@@ -37,8 +38,11 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
     override val listPresenter: UstadListPresenter<*, in PersonWithClazzEnrolmentDetails>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzMemberListView.VIEW_NAME)
+    private var addNewStudentText = getString(MessageID.add_a_student)
+
+    private var teacherSectionHeaderText = getString(MessageID.teachers_literal)
+
+    private var studentSectionHeaderText = getString(MessageID.students)
 
     private var students: List<PersonWithClazzEnrolmentDetails> = listOf()
 
@@ -86,23 +90,37 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
             }
         }
 
+    override var termMap: Map<String, String>? = null
+        set(value) {
+            field = value
+           setState {
+               addNewEntryText = value?.get(TerminologyKeys.ADD_TEACHER_KEY).toString()
+               teacherSectionHeaderText = value?.get(TerminologyKeys.TEACHERS_KEY).toString()
+               addNewStudentText = value?.get(TerminologyKeys.ADD_STUDENT_KEY).toString()
+               studentSectionHeaderText = value?.get(TerminologyKeys.STUDENTS_KEY).toString()
+           }
+        }
+
     private var filterByClazzUid: Long = 0
 
     override fun onCreateView() {
         super.onCreateView()
-        addNewEntryText = getString(MessageID.add_a_teacher)
         showEmptyState = false
+        updateUiWithStateChangeDelay {
+            showCreateNewItem = true
+        }
+        addNewEntryText = getString(MessageID.add_a_teacher)
         filterByClazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
         mPresenter = ClazzMemberListPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.renderListHeaderView() {
-        createListSectionTitle(getString(MessageID.teachers_literal))
+        renderListSectionTitle(teacherSectionHeaderText)
     }
 
     override fun RBuilder.renderListItem(item: PersonWithClazzEnrolmentDetails) {
-        createListItemWithPersonAttendanceAndPendingRequests(
+        renderListItemWithPersonAttendanceAndPendingRequests(
             item.personUid, item.fullName(),
             attendance = item.attendance,
             attendanceLabel = getString(MessageID.x_percent_attended),
@@ -112,12 +130,18 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
 
     override fun RBuilder.renderListFooterView() {
         umGridContainer(rowSpacing = GridSpacing.spacing2) {
-            createMemberList(students, getString(MessageID.students),
-                ClazzEnrolment.ROLE_STUDENT, MessageID.add_a_student)
+            createMemberList(students,
+                studentSectionHeaderText,
+                ClazzEnrolment.ROLE_STUDENT,
+                addNewStudentText,
+                addStudentVisible)
 
             if(pendingStudents.isNotEmpty()){
-                createMemberList(pendingStudents, getString(MessageID.pending_requests),
-                    ClazzEnrolment.ROLE_STUDENT_PENDING, pending = true)
+                createMemberList(pendingStudents,
+                    getString(MessageID.pending_requests),
+                    ClazzEnrolment.ROLE_STUDENT_PENDING,
+                    showCreateNewItem = addTeacherVisible,
+                    pending = true)
             }
         }
     }
@@ -127,53 +151,34 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
     }
 
     override fun handleClickAddNewEntry() {
-        navigateToPickNewMember(ClazzEnrolment.ROLE_TEACHER)
+        mPresenter?.handlePickNewMemberClicked(ClazzEnrolment.ROLE_TEACHER)
     }
 
     private fun RBuilder.createMemberList(
         members: List<PersonWithClazzEnrolmentDetails>,
         sectionTitle: String,
         role: Int,
-        createNewLabel: Int = 0,
+        createNewLabel: String = "",
+        showCreateNewItem: Boolean = true,
         pending: Boolean = false){
 
         umGridContainer(rowSpacing = GridSpacing.spacing1) {
             css(StyleManager.defaultDoubleMarginTop)
             umItem(GridSize.cells12){
-                createListSectionTitle(sectionTitle)
+                renderListSectionTitle(sectionTitle)
             }
 
             umItem(GridSize.cells12){
-                val createNewItem = CreateNewItem(createNewLabel != 0, createNewLabel){
-                    navigateToPickNewMember(role)
+                val createNewItem = CreateNewItem(showCreateNewItem, createNewLabel){
+                    mPresenter?.handlePickNewMemberClicked(role)
                 }
                 mPresenter?.let { presenter ->
                     renderMembers(presenter,members, createNewItem, pending){ entry ->
-                        if(createNewLabel != 0){
-                            handleClickEntry(entry)
-                        }
+                        handleClickEntry(entry)
                     }
                 }
             }
         }
-    }
-
-    private fun navigateToPickNewMember(role: Int) {
-        val args = mutableMapOf(
-            PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
-            UstadView.ARG_FILTER_BY_ENROLMENT_ROLE to role.toString(),
-            UstadView.ARG_CLAZZUID to (arguments[UstadView.ARG_CLAZZUID] ?: "-1"),
-            UstadView.ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME,
-            UstadView.ARG_POPUPTO_ON_FINISH to ClazzMemberListView.VIEW_NAME,
-            ClazzMemberListView.ARG_HIDE_CLAZZES to true.toString(),
-            UstadView.ARG_SAVE_TO_DB to true.toString()).also {
-
-            if(role == ClazzEnrolment.ROLE_STUDENT){
-                it[UstadView.ARG_CODE_TABLE] = Clazz.TABLE_ID.toString()
-            }
-        }
-
-        mPresenter?.handlePickNewMemberClicked(args)
     }
 
     override fun onDestroyView() {
@@ -198,7 +203,7 @@ class MembersListComponent(mProps: MemberListProps):
             }
 
             val presenter = props.presenter as ClazzMemberListPresenter
-            createListItemWithPersonAttendanceAndPendingRequests(
+            renderListItemWithPersonAttendanceAndPendingRequests(
                 item.personUid, item.fullName(),
                 props.pending, item.attendance,
                 getString(MessageID.x_percent_attended),

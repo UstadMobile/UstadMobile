@@ -108,7 +108,7 @@ class IndexEtekkathoScraper {
 
             if (!element.attr("scope").isEmpty()) {
 
-                val headingUrl = URL(url, element.selectFirst("a").attr("href"))
+                val headingUrl = URL(url, element.selectFirst("a")?.attr("href"))
                 // found Main Content
                 subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(element.text(),
                         element.text(), headingUrl.toString(),
@@ -227,7 +227,7 @@ class IndexEtekkathoScraper {
             val publisherElement = subject.selectFirst("dd.publisher")
             val publisher = if (publisherElement != null) publisherElement.text() else ETEKKATHO
 
-            val hrefLink = subject.selectFirst("a").attr("href")
+            val hrefLink = subject.selectFirst("a")?.attr("href")
 
             val subjectUrl = URL(url, hrefLink)
             val subjectUrlString = subjectUrl.toString()

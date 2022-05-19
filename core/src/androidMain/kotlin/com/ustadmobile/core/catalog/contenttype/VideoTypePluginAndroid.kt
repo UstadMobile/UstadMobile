@@ -18,6 +18,7 @@ import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.network.NetworkProgressListenerAdapter
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
@@ -76,9 +77,8 @@ class VideoTypePluginAndroid(
             val videoTempDir = makeTempDir(prefix = "tmp")
             val newVideo = File(videoTempDir,
                     localUri.getFileName(context))
-            val params: Map<String, String> = Json.decodeFromString(
-                    MapSerializer(String.serializer(), String.serializer()),
-                    jobItem.contentJob?.params ?: "")
+            val params: Map<String, String> = safeParse(di, MapSerializer(String.serializer(), String.serializer()),
+                jobItem.contentJob?.params ?: "")
             val compressVideo: Boolean = params["compress"]?.toBoolean() ?: false
             val mediaTransformer = MediaTransformer(context as Context)
             val videoIsProcessed = contentJobItem.cjiContainerUid != 0L

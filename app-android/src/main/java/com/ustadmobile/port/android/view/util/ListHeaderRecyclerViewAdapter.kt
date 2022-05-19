@@ -14,7 +14,6 @@ import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.OnListFilterOptionSelectedListener
 import com.ustadmobile.core.util.SortOrderOption
-import java.lang.IllegalArgumentException
 
 /**
  * This is a RecyclerViewAdapter that provides various utilities that are often found at the top of a
@@ -77,6 +76,14 @@ class ListHeaderRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null
             field = value
             boundNewItemViewHolders.forEach {
                 it.itemBinding.createNewText = value
+            }
+        }
+
+    var headerStringText: String? = null
+        set(value){
+            field = value
+            boundHeaderViewHolders.forEach{
+                (it.view as TextView).text = value ?: it.view.context.getText(headerStringId)
             }
         }
 
@@ -146,6 +153,8 @@ class ListHeaderRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null
 
     private val boundFilterOptionViewHolders = mutableListOf<FilterChipsItemViewHolder>()
 
+    private val boundHeaderViewHolders = mutableListOf<HeaderItemViewHolder>()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             ITEM_NEWITEMHOLDER -> NewItemViewHolder(ItemCreatenewBinding.inflate(LayoutInflater.from(parent.context),
@@ -174,7 +183,8 @@ class ListHeaderRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null
         if (holder is NewItemViewHolder)
             boundNewItemViewHolders += holder
         else if (holder is HeaderItemViewHolder) {
-            (holder.view as? TextView)?.text = holder.view.context.getText(headerStringId)
+            (holder.view as? TextView)?.text = headerStringText ?: holder.view.context.getText(headerStringId)
+            boundHeaderViewHolders += holder
         } else if (holder is SortItemViewHolder) {
             boundSortItemViewHolders += holder
         }else if(holder is FilterChipsItemViewHolder) {
@@ -192,6 +202,8 @@ class ListHeaderRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null
             boundSortItemViewHolders -= holder
         else if(holder is FilterChipsItemViewHolder) {
             boundFilterOptionViewHolders -= holder
+        }else if(holder is HeaderItemViewHolder){
+            boundHeaderViewHolders -= holder
         }
     }
 
@@ -202,6 +214,7 @@ class ListHeaderRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null
         boundNewItemViewHolders.clear()
         boundSortItemViewHolders.clear()
         boundFilterOptionViewHolders.clear()
+        boundHeaderViewHolders.clear()
     }
 
     override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {

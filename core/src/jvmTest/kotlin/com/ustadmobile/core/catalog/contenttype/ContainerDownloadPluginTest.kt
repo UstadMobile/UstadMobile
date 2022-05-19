@@ -130,11 +130,6 @@ class ContainerDownloadPluginTest {
         }
         clientDi = DI {
             import(ustadTestRule.diModule)
-            bind<Json>() with singleton {
-                Json {
-                    encodeDefaults = true
-                }
-            }
         }
 
         //Create a mock web server that will serve the concatenated data

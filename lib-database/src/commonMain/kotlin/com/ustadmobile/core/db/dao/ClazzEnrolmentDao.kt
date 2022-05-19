@@ -1,18 +1,15 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.FROM_SCOPEDGRANT_TO_CLAZZENROLMENT_JOIN__ON_CLAUSE
-import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_CLAZZSCOPE_ONLY_PT1
-import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.JOIN_FROM_CLAZZENROLMENT_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 
 @Repository
@@ -254,16 +251,20 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         FROM PersonGroupMember
         ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2} 
         
-         WHERE
-         PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-         AND PersonGroupMember.groupMemberActive 
-        AND Person.personUid IN (SELECT clazzEnrolmentPersonUid FROM ClazzEnrolment 
-        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid AND ClazzEnrolment.clazzEnrolmentActive 
-        AND ClazzEnrolment.clazzEnrolmentRole = :roleId AND (:filter != $FILTER_ACTIVE_ONLY 
-        OR (:currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
-        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
-        GROUP BY Person.personUid
-        ORDER BY CASE(:sortOrder)
+         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+           AND PersonGroupMember.groupMemberActive 
+           AND Person.personUid IN (SELECT clazzEnrolmentPersonUid 
+                                      FROM ClazzEnrolment 
+                                     WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+                                       AND ClazzEnrolment.clazzEnrolmentActive 
+                                       AND ClazzEnrolment.clazzEnrolmentRole = :roleId 
+                                       AND (:filter != $FILTER_ACTIVE_ONLY 
+                                        OR (:currentTime 
+                                            BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+                                            AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
+          AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+     GROUP BY Person.personUid
+     ORDER BY CASE(:sortOrder)
                 WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
                 WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
                 ELSE ''
@@ -290,7 +291,6 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @SqliteOnly
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%",
                                        filter: Int, accountPersonUid: Long, currentTime: Long): DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>
-
 
     @Query("""
         UPDATE ClazzEnrolment 

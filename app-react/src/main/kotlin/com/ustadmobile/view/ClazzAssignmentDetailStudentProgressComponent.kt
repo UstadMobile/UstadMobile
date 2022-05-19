@@ -1,35 +1,37 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressPresenter
+import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.DraftJsUtil.clean
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
-import com.ustadmobile.util.StyleManager.horizontalList
+import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
+import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.listComponentContainer
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.util.ext.formatToStringHoursMinutesSeconds
-import com.ustadmobile.util.ext.standardFormat
+import com.ustadmobile.util.ext.formatFullDate
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
-import kotlinx.css.*
+import kotlinx.css.height
+import kotlinx.css.px
 import react.RBuilder
+import react.dom.html.InputType
 import react.setState
 import styled.css
 import styled.styledDiv
-import styled.styledSpan
-import kotlin.js.Date
 
-class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetailComponent<ClazzAssignment>(mProps),
+class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetailComponent<ClazzAssignmentWithCourseBlock>(mProps),
     ClazzAssignmentDetailStudentProgressView {
 
     private var mPresenter: ClazzAssignmentDetailStudentProgressPresenter? = null
@@ -37,14 +39,15 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    private var showPrivateCommentDialog = false
+    private var markGrade = ""
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzAssignmentDetailStudentProgressView.VIEW_NAME)
+    private var markLabel = FieldLabel(text = getString(MessageID.points ))
 
     private var privateComments: List<CommentsWithPerson> = listOf()
 
     private var contents : List<ContentWithAttemptSummary> = listOf()
+
+    private var submissions : List<CourseAssignmentSubmissionWithAttachment> = listOf()
 
     private val privateCommentsObserver = ObserverFnWrapper<List<CommentsWithPerson>>{
         if(it.isEmpty()) return@ObserverFnWrapper
@@ -60,21 +63,34 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
         }
     }
 
-    override var person: Person? = null
+    private val submissionsObserver = ObserverFnWrapper<List<CourseAssignmentSubmissionWithAttachment>>{
+        if(it.isEmpty()) return@ObserverFnWrapper
+        setState {
+            submissions = it
+        }
+    }
+    override var submitMarkError: String? = null
+        get() = field
+        set(value) {
+            setState {
+                markLabel = markLabel.copy(errorText =  value)
+            }
+        }
+
+    override var submitterName: String? = null
         get() = field
         set(value) {
             setState {
                 field = value
-                ustadComponentTitle = value?.fullName()
+                ustadComponentTitle = value
             }
         }
-
-    override var clazzAssignmentContent: DoorDataSourceFactory<Int, ContentWithAttemptSummary>? = null
+    override var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
-            liveData?.removeObserver(contentsObserver)
-            liveData?.observe(this, contentsObserver)
+            liveData?.removeObserver(submissionsObserver)
+            liveData?.observe(this, submissionsObserver)
         }
 
     override var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>? = null
@@ -85,7 +101,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
             liveData?.observe(this, privateCommentsObserver)
         }
 
-    override var entity: ClazzAssignment? = null
+    override var submissionScore: CourseAssignmentMark? = null
         get() = field
         set(value) {
             setState {
@@ -93,7 +109,30 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
             }
         }
 
-    override var studentScore: ContentEntryStatementScoreProgress? = null
+    override var submissionStatus: Int = 0
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    override var markNextStudentVisible: Boolean = false
+        get() = field
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    override var submitButtonVisible: Boolean = false
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
+    override var entity: ClazzAssignmentWithCourseBlock? = null
         get() = field
         set(value) {
             setState {
@@ -103,14 +142,13 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
 
     override fun onCreateView() {
         super.onCreateView()
-        editButtonMode = EditButtonMode.FAB
+        editButtonMode = EditButtonMode.GONE
         mPresenter = ClazzAssignmentDetailStudentProgressPresenter(this,
             arguments, this,  di, this)
         mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
-        if(entity == null) return
         styledDiv {
             css {
                 +listComponentContainer
@@ -119,169 +157,115 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
 
             umGridContainer(rowSpacing = GridSpacing.spacing3) {
 
-                if(contents.isNotEmpty()){
-                    umItem(GridSize.cells12){
-                        createListSectionTitle(getString(MessageID.content), TypographyVariant.h6)
-                        umList {
-                            css(horizontalList)
-                            for (content in contents) {
-                                umListItem(button = true) {
-                                    css{
-                                        width = LinearDimension("100%")
-                                    }
+                umItem {
+                    renderListSectionTitle(getString(MessageID.submissions), TypographyVariant.h6)
+                }
 
-                                    umGridContainer {
-                                        attrs.onClick = {
-                                            Util.stopEventPropagation(it)
-                                            mPresenter?.onClickContentWithAttempt(content)
+                umItem {
+
+                    renderInformationOnDetailScreen(
+                        if(submissionStatus == CourseAssignmentSubmission.NOT_SUBMITTED) null
+                        else ClazzAssignmentDetailOverviewComponent.ASSIGNMENT_STATUS_MAP[submissionStatus],
+                        getString(SubmissionConstants.STATUS_MAP[submissionStatus] ?: 0),
+                        getString(MessageID.status),
+                        shrink = true
+                    )
+
+                    val mark = submissionScore
+                    if(mark != null){
+
+                        val marks = "${mark.camMark} / ${entity?.block?.cbMaxPoints} ${getString(MessageID.points)}"
+
+                        val penalty = if(mark.camPenalty != 0)
+                            " ${getString(MessageID.late_penalty).format(entity?.block?.cbLateSubmissionPenalty ?: "")}"
+                        else
+                            ""
+
+                        renderInformationOnDetailScreen("emoji_events",
+                            "$marks$penalty",
+                            getString(MessageID.xapi_result_header),
+                            shrink = true
+                        )
+                    }
+                }
+
+                umGridContainer(GridSpacing.spacing4) {
+                    css(defaultDoubleMarginTop)
+
+                    if(submitButtonVisible){
+
+                        umItem(GridSize.cells12, GridSize.cells4) {
+                            umFormControl(variant = FormControlVariant.outlined) {
+                                css{
+                                    +StyleManager.defaultMarginTop
+                                }
+                                umInputLabel("${markLabel.text}",
+                                    id = markLabel.id,
+                                    error = markLabel.error,
+                                    variant = FormControlVariant.outlined,
+                                    htmlFor = markLabel.id)
+                                umOutlinedInput(
+                                    id = markLabel.id,
+                                    value = markGrade,
+                                    label = markLabel.text,
+                                    error = markLabel.error,
+                                    type =  InputType.number,
+                                    onChange = {
+                                        setState {
+                                            markGrade = it
+                                            submitMarkError = null
                                         }
-                                        umItem(GridSize.cells4, GridSize.cells2){
-                                            umGridContainer {
-                                                umItem(GridSize.cells12) {
-                                                    umItemThumbnail("class",content.contentEntryThumbnailUrl, width = 80,
-                                                        iconColor = Color(StyleManager.theme.palette.action.disabled),
-                                                        avatarBackgroundColor = Color.transparent)
-                                                }
+                                    }) {
+                                    attrs.endAdornment = umTypography("/${entity?.block?.cbMaxPoints ?: 10}", variant = TypographyVariant.h6)
 
-                                                if(content.scoreProgress?.progress ?: 0 > 0){
-                                                    umItem(GridSize.cells12) {
-                                                        umLinearProgress(content.scoreProgress?.progress?.toDouble(),
-                                                            variant = ProgressVariant.determinate){
-                                                            css{
-                                                                marginTop = 1.spacingUnits
-                                                                width = LinearDimension("80px")
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        umItem(GridSize.cells8, GridSize.cells10){
-                                            umGridContainer {
-
-                                                umItem(GridSize.cells12){
-                                                    umTypography(content.contentEntryTitle,
-                                                        variant = TypographyVariant.h6){
-                                                        css(StyleManager.alignTextToStart)
-                                                    }
-                                                }
-
-                                                umItem(GridSize.cells12, GridSize.cells3, flexDirection = FlexDirection.row){
-                                                    styledSpan {
-                                                        css{
-                                                            padding(right = 3.spacingUnits)
-                                                        }
-                                                        umIcon("restore", fontSize = IconFontSize.small){
-                                                            css{
-                                                                marginTop = 1.px
-                                                            }
-                                                        }
-                                                    }
-
-                                                    umTypography("${content.attempts} ${systemImpl.getString(MessageID.attempts, this)}",
-                                                        variant = TypographyVariant.body2){
-                                                        css(StyleManager.alignTextToStart)
-                                                    }
-                                                }
-
-                                                if(content.startDate > 0){
-                                                    umItem(GridSize.cells12, GridSize.cells3) {
-                                                        val endDate = if(content.endDate == 0L) "" else " - ${content.endDate.toDate()?.standardFormat()}"
-                                                        umTypography("${content.startDate.toDate()?.standardFormat()}$endDate",
-                                                            variant = TypographyVariant.body2){
-                                                            css (StyleManager.alignTextToStart)
-                                                        }
-                                                    }
-                                                }
-
-                                                if(content.duration > 60000){
-                                                    umItem (GridSize.cells12, flexDirection = FlexDirection.row){
-                                                        styledSpan {
-                                                            css{
-                                                                padding(right = 2.spacingUnits)
-                                                            }
-                                                            umIcon("timer", fontSize = IconFontSize.small){
-                                                                css{
-                                                                    marginTop = 1.px
-                                                                }
-                                                            }
-                                                        }
-
-                                                        styledSpan {
-                                                            css{
-                                                                padding(right = 2.spacingUnits)
-                                                            }
-
-                                                            umTypography(content.duration.formatToStringHoursMinutesSeconds(systemImpl),
-                                                                variant = TypographyVariant.body1,
-                                                                paragraph = true){
-                                                                css(StyleManager.alignTextToStart)
-                                                            }
-                                                        }
-                                                    }
-                                                }
-
-                                                umItem(GridSize.cells12, flexDirection = FlexDirection.row){
-                                                    styledSpan {
-                                                        css{
-                                                            padding(right = 3.spacingUnits)
-                                                        }
-                                                        umIcon("emoji_events", fontSize = IconFontSize.small){
-                                                            css{
-                                                                marginTop = 1.px
-                                                            }
-                                                        }
-                                                    }
-
-                                                    umTypography("${content.scoreProgress?.calculateScoreWithPenalty()}%",
-                                                        variant = TypographyVariant.body2){
-                                                        css(StyleManager.alignTextToStart)
-                                                    }
-
-                                                    val hideScore = content.scoreProgress == null || (content.scoreProgress?.resultScore == 0 && content.scoreProgress?.progress == 0)
-
-                                                    if(!hideScore){
-                                                        styledSpan {
-                                                            css{
-                                                                padding(left = 3.spacingUnits)
-                                                            }
-                                                            umTypography("(${content.scoreProgress?.resultScore} / ${content.scoreProgress?.resultMax})",
-                                                                variant = TypographyVariant.body2){
-                                                                css(StyleManager.alignTextToStart)
-                                                            }
-                                                        }
-                                                    }
-
-
-                                                    if(content.scoreProgress?.penalty ?:0 > 0){
-                                                        styledSpan {
-                                                            css{
-                                                                padding(left = 3.spacingUnits)
-                                                            }
-                                                            umTypography(systemImpl.getString(MessageID.late_penalty, this).format(content.scoreProgress?.penalty ?: 0),
-                                                                variant = TypographyVariant.body2){
-                                                                css(StyleManager.alignTextToStart)
-                                                            }
-                                                        }
-                                                    }
-
-                                                }
-                                            }
-                                        }
+                                }
+                                markLabel.errorText?.let { error ->
+                                    umFormHelperText(error){
+                                        css(StyleManager.errorTextClass)
                                     }
                                 }
                             }
                         }
-                        umSpacer()
-                    }
-                }
 
-                if(studentScore != null){
-                    umItem(GridSize.cells12) {
-                        createSummaryCard("${studentScore?.calculateScoreWithPenalty()}%  " +
-                                "(${studentScore?.resultScore}/${studentScore?.resultMax})",
-                            getString(MessageID.total_score))
+
+                        umItem(GridSize.cells12, GridSize.cells4) {
+                            umButton(if(submissionScore == null)
+                                getString(MessageID.submit_grade)
+                                else getString(MessageID.update_grade),
+                                variant = ButtonVariant.contained,
+                                onClick = {
+                                    if(markGrade.isNotEmpty()){
+                                        mPresenter?.onClickSubmitGrade(markGrade.toFloat())
+                                    }
+                                }){
+                                css {
+                                    +StyleManager.defaultFullWidth
+                                    +defaultMarginTop
+                                    height = 50.px
+                                }
+                            }
+                        }
+                    }
+
+                    if(markNextStudentVisible){
+                        umItem(GridSize.cells12, GridSize.cells4) {
+                            umButton(
+                                if(submissionScore == null)
+                                getString(MessageID.submit_grade_and_mark_next)
+                                else getString(MessageID.update_grade_and_mark_next),
+                                variant = ButtonVariant.contained,
+                                onClick = {
+                                    if(markGrade.isNotEmpty()){
+                                        mPresenter?.onClickSubmitGradeAndMarkNext(markGrade.toFloat())
+                                    }
+                                }){
+                                css {
+                                    +StyleManager.defaultFullWidth
+                                    +defaultMarginTop
+                                    height = 50.px
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -290,31 +274,40 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                         umGridContainer(rowSpacing = GridSpacing.spacing1) {
 
                             umItem(GridSize.cells12){
-                                createListSectionTitle(getString(MessageID.private_comments), TypographyVariant.h6)
+                                renderListSectionTitle(getString(MessageID.private_comments), TypographyVariant.h6)
                             }
 
                             umItem(GridSize.cells12) {
-                                val label = getString(MessageID.add_private_comment)
-                                renderCreateCommentSection(label){
-                                    setState {
-                                        showPrivateCommentDialog = true
-                                    }
-                                }
-
-                                if(showPrivateCommentDialog){
-                                    renderCreateNewComment(label,
-                                        listener = mPresenter?.newPrivateCommentListener,
-                                        systemImpl = systemImpl,
-                                        shownAt = Date().getTime().toLong()){
-                                        setState {
-                                            showPrivateCommentDialog = false
-                                        }
-                                    }
-                                }
+                                renderCreateNewComment(
+                                    getString(MessageID.add_private_comment),
+                                    mPresenter?.newPrivateCommentListener
+                                )
                             }
 
                             umItem(GridSize.cells12){
                                 renderComments(privateComments)
+                            }
+                        }
+                    }
+                }
+
+                if(submissions.isNotEmpty()){
+                    umItem {
+                        umList {
+                            submissions.forEach { submission ->
+                                umListItem {
+                                    attrs.onClick = {
+                                        Util.stopEventPropagation(it)
+                                        mPresenter?.onClickOpenSubmission(submission/*, false*/)
+                                    }
+                                    renderListItemWithLeftIconTitleAndDescription(
+                                        "class",
+                                        clean(submission.casText),
+                                        "${getString(MessageID.submitted_cap)} " +
+                                                ": ${submission.casTimestamp.toDate()?.formatFullDate()}",
+                                        true,
+                                    )
+                                }
                             }
                         }
                     }

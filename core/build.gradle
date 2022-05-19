@@ -40,6 +40,7 @@ android {
         //This will apparently prevent Android Studio from recognizing the project
         //coreLibraryDesugaringEnabled true
     }
+    namespace 'com.ustadmobile.core'
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
@@ -229,6 +230,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-json-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-extensions:$version_kotlin_extensions"
                 implementation npm("asmcrypto.js","$version_npm_asmcrypto")
                 implementation npm("buffer","$version_npm_buffer")
             }

@@ -7,14 +7,14 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewLis
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
-import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
+import com.ustadmobile.lib.db.entities.PersonGroupAssignmentSummary
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.mui.components.umDivider
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
-import com.ustadmobile.view.ext.createPersonWithAttemptProgress
-import com.ustadmobile.view.ext.createSummaryCard
+import com.ustadmobile.view.ext.renderAssignmentSubmittedProgress
+import com.ustadmobile.view.ext.renderSummaryCard
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import react.RBuilder
@@ -22,7 +22,7 @@ import react.setState
 import styled.css
 
 class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps):
-    UstadListComponent<PersonWithAttemptsSummary, PersonWithAttemptsSummary>(props),
+    UstadListComponent<PersonGroupAssignmentSummary, PersonGroupAssignmentSummary>(props),
     ClazzAssignmentDetailStudentProgressOverviewListView {
 
     private var mPresenter: ClazzAssignmentDetailStudentProgressOverviewListPresenter? = null
@@ -30,10 +30,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzDao
 
-    override val viewNames: List<String>
-        get() = listOf(ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME)
-
-    override val listPresenter: UstadListPresenter<*, in PersonWithAttemptsSummary>?
+    override val listPresenter: UstadListPresenter<*, in PersonGroupAssignmentSummary>?
         get() = mPresenter
 
     private var summary: AssignmentProgressSummary? = null
@@ -63,9 +60,9 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
 
     override fun RBuilder.renderListHeaderView() {
         umGridContainer(GridSpacing.spacing4) {
-            createSummaryCard(summary?.notStartedStudents, getString(MessageID.not_started))
-            createSummaryCard(summary?.startedStudents, getString(MessageID.started))
-            createSummaryCard(summary?.completedStudents, getString(MessageID.completed))
+            renderSummaryCard(summary?.notSubmittedStudents, getString(MessageID.not_submitted_cap))
+            renderSummaryCard(summary?.submittedStudents, getString(MessageID.submitted))
+            renderSummaryCard(summary?.markedStudents, getString(MessageID.marked_cap))
             umItem(GridSize.cells12){
                 umDivider {
                     css{
@@ -77,12 +74,12 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
         }
     }
 
-    override fun RBuilder.renderListItem(item: PersonWithAttemptsSummary) {
-        createPersonWithAttemptProgress(item, systemImpl, false)
+    override fun RBuilder.renderListItem(item: PersonGroupAssignmentSummary) {
+        renderAssignmentSubmittedProgress(item, systemImpl, false)
     }
 
-    override fun handleClickEntry(entry: PersonWithAttemptsSummary) {
-        mPresenter?.onClickPersonWithStatementDisplay(entry)
+    override fun handleClickEntry(entry: PersonGroupAssignmentSummary) {
+        mPresenter?.onClickPerson(entry)
     }
 
     override fun onFabClicked() {}

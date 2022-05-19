@@ -26,12 +26,16 @@ class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, vie
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
-    class PersonGroupListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    class PersonGroupListSortOption(
+        val sortOrder: SortOrder,
+        context: Any,
+        di: DI
+    ) : MessageIdOption(sortOrder.messageId, context, di = di)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         updateListOnView()
-        view.sortOptions = SortOrder.values().toList().map { PersonGroupListSortOption(it, context) }
+        view.sortOptions = SortOrder.values().toList().map { PersonGroupListSortOption(it, context, di) }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {

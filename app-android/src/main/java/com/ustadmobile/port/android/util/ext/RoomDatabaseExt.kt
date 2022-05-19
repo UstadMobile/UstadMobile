@@ -15,7 +15,7 @@ suspend fun <R> RoomDatabase.waitUntil2(tableNames: Set<String>, timeout: Long,
 
     val invalidationObserver: InvalidationTracker.Observer = object: InvalidationTracker.Observer(tableNames.toTypedArray()) {
         override fun onInvalidated(tables: MutableSet<String>) {
-            changeChannel.offer(true)
+            changeChannel.trySend(true)
         }
     }
 
@@ -31,7 +31,7 @@ suspend fun <R> RoomDatabase.waitUntil2(tableNames: Set<String>, timeout: Long,
         realDb.invalidationTracker.addObserver(invalidationObserver)
     }
 
-    changeChannel.offer(true)
+    changeChannel.trySend(true)
 
     try {
         return withTimeout(timeout) {

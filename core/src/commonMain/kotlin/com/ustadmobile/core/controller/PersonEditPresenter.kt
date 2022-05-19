@@ -82,9 +82,9 @@ class PersonEditPresenter(
 
         super.onCreate(savedState)
 
-        view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
-                MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
-                MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
+        view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE, di),
+                MessageIdOption(MessageID.male, context, Person.GENDER_MALE, di),
+                MessageIdOption(MessageID.other, context, Person.GENDER_OTHER, di))
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount {

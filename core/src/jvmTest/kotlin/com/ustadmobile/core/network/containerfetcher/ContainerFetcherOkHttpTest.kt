@@ -124,10 +124,6 @@ class ContainerFetcherOkHttpTest {
 
         clientDi = DI {
             import(ustadTestRule.diModule)
-
-            bind<Json>() with singleton {
-                Json { encodeDefaults = true }
-            }
         }
     }
 

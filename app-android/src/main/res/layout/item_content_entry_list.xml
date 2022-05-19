@@ -32,6 +32,10 @@
         <variable
             name="locallyAvailable"
             type="boolean" />
+
+        <variable
+            name="indentLevel"
+            type="int"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -44,7 +48,8 @@
         app:onSelectableItemClicked="@{() -> itemListener.onClickContentEntry(contentEntry)}"
         android:id="@+id/item_content_entry_list"
         android:tag="@{contentEntry.contentEntryUid}"
-        android:background="@drawable/bg_listitem">
+        android:background="@drawable/bg_listitem"
+        app:courseBlockIndent="@{indentLevel}">
 
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -189,6 +194,7 @@
             app:layout_constraintTop_toBottomOf="@id/content_entry_desc_bottom_barrier"
             app:textMessageIdLookupKey="@{contentEntry.contentTypeFlag}"
             app:textMessageIdLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_LABEL_MAP}" />
+
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/content_type_barrier"

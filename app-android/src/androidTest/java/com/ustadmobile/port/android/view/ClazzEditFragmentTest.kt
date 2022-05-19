@@ -14,8 +14,7 @@ import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.util.OneToManyJoinEditHelperMp.Companion.SUFFIX_RETKEY_DEFAULT
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
+import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.screen.ClazzEditScreen
@@ -164,7 +163,7 @@ class ClazzEditFragmentTest : TestCase() {
                     umCalendarUid = dbRule.repo.holidayCalendarDao.insert(this)
                 }
 
-                val existingClazz = ClazzWithHolidayCalendarAndSchool().apply {
+                val existingClazz = ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
                     clazzName = "New Clazz"
                     clazzDesc = "Clazz description"
                     clazzHolidayUMCalendarUid = existingHolidayCal.umCalendarUid
@@ -187,7 +186,7 @@ class ClazzEditFragmentTest : TestCase() {
                 //Freeze and serialize the value as it was first shown to the user
                 var entityLoadedByFragment = fragmentScenario.waitUntilLetOnFragment { it.entity }
                 val entityLoadedJson = gson.toJson(entityLoadedByFragment)
-                val newClazzValues = gson.fromJson(entityLoadedJson, ClazzWithHolidayCalendarAndSchool::class.java).apply {
+                val newClazzValues = gson.fromJson(entityLoadedJson, ClazzWithHolidayCalendarAndSchoolAndTerminology::class.java).apply {
                     clazzName = "Updated Clazz"
                 }
 
@@ -201,7 +200,7 @@ class ClazzEditFragmentTest : TestCase() {
 
                 Assert.assertEquals("Entity in database was loaded for user",
                         "New Clazz",
-                        gson.fromJson(entityLoadedJson, ClazzWithHolidayCalendarAndSchool::class.java).clazzName)
+                        gson.fromJson(entityLoadedJson, ClazzWithHolidayCalendarAndSchoolAndTerminology::class.java).clazzName)
 
                 val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existingClazz.clazzUid)
                         .waitUntilWithFragmentScenario(fragmentScenario) { it?.clazzName == "Updated Clazz" }

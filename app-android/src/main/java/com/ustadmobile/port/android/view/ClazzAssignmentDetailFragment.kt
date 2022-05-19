@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +13,9 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
+import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
+import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.port.android.view.ext.createTabLayoutStrategy
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
@@ -115,7 +116,7 @@ class ClazzAssignmentDetailFragment: UstadDetailFragment<ClazzAssignment>(), Cla
 
         val VIEWNAME_TO_TITLE_MAP = mapOf(
                 ClazzAssignmentDetailOverviewView.VIEW_NAME to R.string.overview,
-                ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME to R.string.student_progress,
+                ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME to R.string.submissions,
         )
 
     }

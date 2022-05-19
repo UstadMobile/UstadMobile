@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -12,20 +11,20 @@ import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
-import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
-import kotlinx.css.Display
 import kotlinx.css.LinearDimension
-import kotlinx.css.display
+import kotlinx.css.margin
 import kotlinx.css.marginTop
 import react.RBuilder
 import react.dom.html.InputType
@@ -44,10 +43,9 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
 
     private var showConfirmPassword = false
 
-    private var displayRegField = Display.flex
+    private var registrationEnabled = false
 
-    override val viewNames: List<String>
-        get() = listOf(PersonEditView.VIEW_NAME)
+    private var minorRegistrationModeEnabled = false
 
     override var genderOptions: List<MessageIdOption>? = null
         get() = field
@@ -84,11 +82,18 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
     override var registrationMode: Int = 0
         get() = field
         set(value) {
-            setState {
-                displayRegField = displayProperty(
-                    value == PersonEditView.REGISTER_MODE_ENABLED, true)
+            registrationEnabled = value.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)
+            minorRegistrationModeEnabled = value.hasFlag(PersonEditView.REGISTER_MODE_MINOR)
+
+            if(registrationEnabled) {
+                ustadComponentTitle = getString(MessageID.register)
+            }else {
+                setEditTitle(MessageID.add_a_new_person, MessageID.edit_person)
             }
-            field = value
+
+            setState {
+                field = value
+            }
         }
 
     private var usernameLabel = FieldLabel(getString(MessageID.username))
@@ -109,17 +114,19 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
             }
         }
 
-    private var passwordLabel = FieldLabel(getString(MessageID.password), id = "password-og")
+    private var passwordLabel = FieldLabel(getString(MessageID.password), id = "password-field")
 
     override var passwordError: String?  = null
         set(value) {
+            field = value
             setState{
                 passwordLabel = passwordLabel.copy(errorText = value)
             }
-            field = value
         }
 
     private var emailLabel = FieldLabel(getString(MessageID.email))
+
+    private var parentEmailLabel = FieldLabel(getString(MessageID.parents_email_address).clean())
 
     override var emailError: String?  = null
         set(value) {
@@ -129,7 +136,8 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
             field = value
         }
 
-    private var confirmPasswordLabel = FieldLabel(getString(MessageID.confirm_password))
+    private var confirmPasswordLabel = FieldLabel(
+        getString(MessageID.confirm_password), id = "confirm-password-field")
     
     override var confirmError: String?  = null
         set(value) {
@@ -153,6 +161,9 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
         get() = field
         set(value) {
             field = value
+            setState{
+                parentEmailLabel = parentEmailLabel.copy(errorText = value)
+            }
         }
 
     private var firstNameLabel = FieldLabel(text = getString(MessageID.first_name))
@@ -182,8 +193,10 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
 
     override var firstNameError: String?  = null
         set(value) {
-            setState{}
-            field = value
+            setState{
+                firstNameLabel = firstNameLabel.copy(errorText = value)
+                field = value
+            }
         }
 
     private var lastNameLabel = FieldLabel(getString(MessageID.last_name))
@@ -219,13 +232,6 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
     override fun onCreateView() {
         super.onCreateView()
         loading = false
-        if(registrationMode.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
-            setState {
-                ustadComponentTitle = getString(MessageID.register)
-            }
-        }else {
-            setEditTitle(MessageID.add_a_new_person, MessageID.edit_person)
-        }
         mPresenter = PersonEditPresenter(this, arguments,this, di, this)
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
     }
@@ -263,35 +269,57 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
 
                     umTextField(label = "${lastNameLabel.text}",
                         value = entity?.lastName,
-                        error = lastNameLabel.error, disabled = !fieldsEnabled,
+                        error = lastNameLabel.error,
+                        disabled = !fieldsEnabled,
                         helperText = lastNameLabel.errorText,
                         variant = FormControlVariant.outlined,
                         onChange = {
                             setState {
                                 entity?.lastName = it
-                                firstNameError = null
+                                lastNameError = null
                             }
                         })
 
                     umGridContainer(GridSpacing.spacing4) {
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
 
-                            umDatePicker(
-                                label = "${dobLabel.text}",
-                                error = dobLabel.error,
-                                helperText = dobLabel.errorText,
-                                value = entity?.dateOfBirth.toDate(),
-                                inputVariant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        entity?.dateOfBirth = it.getTime().toLong()
-                                        dateOfBirthError = null
-                                    }
-                                })
-
+                        if(minorRegistrationModeEnabled){
+                            umItem(GridSize.cells12, GridSize.cells6 ) {
+                                umTextField(
+                                    label = "${parentEmailLabel.text}",
+                                    value = approvalPersonParentJoin?.ppjEmail,
+                                    error = parentEmailLabel.error,
+                                    disabled = !fieldsEnabled,
+                                    variant = FormControlVariant.outlined,
+                                    onChange = {
+                                        setState {
+                                            approvalPersonParentJoin?.ppjEmail = it
+                                            parentContactError = null
+                                        }
+                                    })
+                            }
                         }
 
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                        if(!registrationEnabled){
+                            umItem(GridSize.cells12, GridSize.cells6 ) {
+
+                                umDatePicker(
+                                    label = "${dobLabel.text}",
+                                    error = dobLabel.error,
+                                    helperText = dobLabel.errorText,
+                                    value = entity?.dateOfBirth.toDate(),
+                                    inputVariant = FormControlVariant.outlined,
+                                    onChange = {
+                                        setState {
+                                            entity?.dateOfBirth = it.getTime().toLong()
+                                            dateOfBirthError = null
+                                        }
+                                    })
+
+                            }
+                        }
+
+                        umItem(GridSize.cells12, if(registrationEnabled && !minorRegistrationModeEnabled)
+                            GridSize.cells12 else GridSize.cells6 ) {
                             umTextFieldSelect(
                                 "${genderLabel.text}",
                                 entity?.gender.toString(),
@@ -310,140 +338,153 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                         }
                     }
 
-                    umTextField(
-                        label = getString(MessageID.address),
-                        value = entity?.personAddress,
-                        disabled = !fieldsEnabled,
-                        variant = FormControlVariant.outlined,
-                        onChange = {
-                            setState {
-                                entity?.personAddress = it
-                            }
-                        })
+                    if(!minorRegistrationModeEnabled){
+                        umTextField(
+                            label = getString(MessageID.address),
+                            value = entity?.personAddress,
+                            disabled = !fieldsEnabled,
+                            variant = FormControlVariant.outlined,
+                            onChange = {
+                                setState {
+                                    entity?.personAddress = it
+                                }
+                            })
+                    }
 
                     umGridContainer(GridSpacing.spacing4) {
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-                            umTextField(
-                                label = getString(MessageID.phone_number),
-                                value = entity?.phoneNum,
-                                disabled = !fieldsEnabled,
-                                variant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        entity?.phoneNum = it
-                                    }
-                                })
+                        css{
+                            margin(
+                                bottom = (if(registrationEnabled && !minorRegistrationModeEnabled)
+                                0 else 4).spacingUnits
+                            )
                         }
+                       if(!minorRegistrationModeEnabled){
+                           umItem(GridSize.cells12, GridSize.cells6 ) {
+                               umTextField(
+                                   label = getString(MessageID.phone_number),
+                                   value = entity?.phoneNum,
+                                   disabled = !fieldsEnabled,
+                                   variant = FormControlVariant.outlined,
+                                   onChange = {
+                                       setState {
+                                           entity?.phoneNum = it
+                                       }
+                                   })
+                           }
+                       }
 
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-                            umTextField(
-                                label = "${emailLabel.text}",
-                                value = entity?.emailAddr,
-                                error = emailLabel.error,
-                                disabled = !fieldsEnabled,
-                                variant = FormControlVariant.outlined,
-                                onChange = {
-                                    setState {
-                                        entity?.emailAddr = it
-                                        emailError = null
-                                    }
-                                })
+                        if(!minorRegistrationModeEnabled){
+                            umItem(GridSize.cells12, GridSize.cells6 ) {
+                                umTextField(
+                                    label = "${emailLabel.text}",
+                                    value = entity?.emailAddr,
+                                    error = emailLabel.error,
+                                    disabled = !fieldsEnabled,
+                                    variant = FormControlVariant.outlined,
+                                    onChange = {
+                                        setState {
+                                            entity?.emailAddr = it
+                                            emailError = null
+                                        }
+                                    })
+                            }
                         }
                     }
 
-
-                    umTextField(
-                        autoFocus = false,
-                        label = "${usernameLabel.text}",
-                        value = entity?.lastName,
-                        error = usernameLabel.error,
-                        disabled = !fieldsEnabled,
-                        variant = FormControlVariant.outlined,
-                        onChange = {
-                            setState {
-                                entity?.username = it
-                                usernameError = null
-                            }
-                        }){
-                        css{
-                            display = displayRegField
-                        }}
+                    if(registrationEnabled){
+                        umTextField(
+                            autoFocus = false,
+                            label = "${usernameLabel.text}",
+                            value = entity?.username,
+                            error = usernameLabel.error,
+                            disabled = !fieldsEnabled,
+                            variant = FormControlVariant.outlined,
+                            onChange = {
+                                setState {
+                                    entity?.username = it
+                                    usernameError = null
+                                }
+                            })
+                    }
 
                     umGridContainer(GridSpacing.spacing4) {
-                        css{
-                            display = displayRegField
-                        }
 
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-                            css(defaultMarginTop)
+                        if(registrationEnabled){
+                            umItem(GridSize.cells12, GridSize.cells6 ) {
+                                css(defaultMarginTop)
+                                umFormControl(variant = FormControlVariant.outlined) {
+                                    umInputLabel("${passwordLabel.text}",
+                                        id = passwordLabel.id,
+                                        error = passwordLabel.error,
+                                        variant = FormControlVariant.outlined,
+                                        htmlFor = passwordLabel.id)
+                                    umOutlinedInput(
+                                        id = passwordLabel.id,
+                                        value = entity?.newPassword,
+                                        disabled = !fieldsEnabled,
+                                        label = passwordLabel.text,
+                                        error = passwordLabel.error,
+                                        type =  if(showPassword) InputType.text else InputType.password,
+                                        onChange = {
+                                            setState {
+                                                entity?.newPassword = it
+                                                passwordError = null
+                                            }
+                                        }) {
+                                        attrs.endAdornment = umIconButton(
+                                            if(!showPassword) "visibility" else "visibility_off",
+                                            edge = IconEdge.end,
+                                            onClick = {
+                                            setState {
+                                                showPassword = !showPassword
+                                            }
+                                        })
 
-                            umFormControl(variant = FormControlVariant.outlined) {
-                                umInputLabel("${passwordLabel.text}",
-                                    id = passwordLabel.id,
-                                    error = passwordLabel.error,
-                                    variant = FormControlVariant.outlined,
-                                    htmlFor = passwordLabel.id)
-                                umOutlinedInput(
-                                    id = passwordLabel.id,
-                                    value = entity?.newPassword,
-                                    disabled = !fieldsEnabled,
-                                    error = passwordLabel.error,
-                                    type =  if(showPassword) InputType.text else InputType.password,
-                                    onChange = {
-                                        setState {
-                                            entity?.newPassword = it
-                                            passwordError = null
+                                    }
+                                    passwordLabel.errorText?.let { error ->
+                                        umFormHelperText(error){
+                                            css(StyleManager.errorTextClass)
                                         }
-                                    }) {
-                                    attrs.endAdornment = umIconButton(if(showPassword) "visibility" else "visibility_off", edge = IconEdge.end, onClick = {
-                                        setState {
-                                            showPassword = !showPassword
-                                        }
-                                    })
-
-                                }
-                                passwordLabel.errorText?.let { error ->
-                                    umFormHelperText(error){
-                                        css(StyleManager.errorTextClass)
                                     }
                                 }
                             }
-                        }
 
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
-                            css(defaultMarginTop)
+                            umItem(GridSize.cells12, GridSize.cells6 ) {
+                                css(defaultMarginTop)
 
-                            umFormControl(variant = FormControlVariant.outlined) {
-                                umInputLabel("${confirmPasswordLabel.text}",
-                                    id = confirmPasswordLabel.id,
-                                    error = confirmPasswordLabel.error,
-                                    variant = FormControlVariant.outlined,
-                                    htmlFor = confirmPasswordLabel.id)
-                                umOutlinedInput(
-                                    id = confirmPasswordLabel.id,
-                                    value = entity?.confirmedPassword,
-                                    disabled = !fieldsEnabled,
-                                    error = confirmPasswordLabel.error,
-                                    type =  if(showConfirmPassword) InputType.text else InputType.password,
-                                    onChange = {
-                                        setState {
-                                            entity?.confirmedPassword = it
-                                            passwordError = null
-                                        }
-                                    }) {
-                                    attrs.endAdornment = umIconButton(
-                                        if(showConfirmPassword) "visibility" else "visibility_off",
-                                        edge = IconEdge.end,
-                                        onClick = {
+                                umFormControl(variant = FormControlVariant.outlined) {
+                                    umInputLabel("${confirmPasswordLabel.text}",
+                                        id = confirmPasswordLabel.id,
+                                        error = confirmPasswordLabel.error,
+                                        variant = FormControlVariant.outlined,
+                                        htmlFor = confirmPasswordLabel.id)
+                                    umOutlinedInput(
+                                        id = confirmPasswordLabel.id,
+                                        value = entity?.confirmedPassword,
+                                        disabled = !fieldsEnabled,
+                                        error = confirmPasswordLabel.error,
+                                        label = confirmPasswordLabel.text,
+                                        type =  if(showConfirmPassword) InputType.text else InputType.password,
+                                        onChange = {
                                             setState {
-                                                showConfirmPassword = !showConfirmPassword
+                                                entity?.confirmedPassword = it
+                                                confirmError = null
                                             }
-                                    })
+                                        }) {
+                                        attrs.endAdornment = umIconButton(
+                                            if(!showConfirmPassword) "visibility" else "visibility_off",
+                                            edge = IconEdge.end,
+                                            onClick = {
+                                                setState {
+                                                    showConfirmPassword = !showConfirmPassword
+                                                }
+                                            })
 
-                                }
-                                passwordLabel.errorText?.let { error ->
-                                    umFormHelperText(error){
-                                        css(StyleManager.errorTextClass)
+                                    }
+                                    confirmPasswordLabel.errorText?.let { error ->
+                                        umFormHelperText(error){
+                                            css(StyleManager.errorTextClass)
+                                        }
                                     }
                                 }
                             }

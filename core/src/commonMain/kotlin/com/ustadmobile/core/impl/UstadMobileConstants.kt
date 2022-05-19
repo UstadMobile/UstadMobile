@@ -49,9 +49,8 @@ object UstadMobileConstants {
     const val LOCALE_CODE = 0
 
     /**
-     * Map of all supported UI language
+     * Map of all supported UI language to the language name (in its respective language)
      */
-
     val LANGUAGE_NAMES = mapOf(
             "en" to "English",
             "tg" to "Тоҷикӣ",
@@ -62,6 +61,11 @@ object UstadMobileConstants {
             "ne" to "नेपाली",
             "my" to "မြန်မာစာ",
             "ru" to "Русский")
+
+    /**
+     * A list known RTL languages
+     */
+    val RTL_LANGUAGES = arrayOf("ar","arc","dv","fa","ha","he","khw","ks","ku","ps","ur","yi")
 
     /**
      * Anyone under this age is considered a minor. They can only register with the consent of a

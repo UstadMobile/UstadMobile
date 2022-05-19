@@ -34,3 +34,8 @@ fun ContentEntryStatementScoreProgress.isContentComplete(): Int {
 fun ContentEntryStatementScoreProgress.calculateScoreWithPenalty(): Int{
     return ((((resultScore / resultMax.toFloat()) * 100) * (totalCompletedContent / totalContent.toFloat())) * (1 - (penalty.toFloat()/100))).toInt()
 }
+
+
+fun ContentEntryStatementScoreProgress.calculateScoreWithWeight(): Int{
+    return ((resultScaled / resultWeight) * (totalCompletedContent / totalContent.toFloat())).toInt()
+}

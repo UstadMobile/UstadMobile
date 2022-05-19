@@ -12,10 +12,12 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 
-class Default@BaseFileName@ItemListener(var view: @BaseFileName@View?,
-                                   var listViewMode: ListViewMode,
-                                   val context: Any,
-                                   override val di: DI): @BaseFileName@ItemListener, DIAware {
+class Default@BaseFileName@ItemListener(
+    var view: @BaseFileName@View?,
+    var listViewMode: ListViewMode,
+    val context: Any,
+    override val di: DI
+): @BaseFileName@ItemListener, DIAware {
 
     val systemImpl: UstadMobileSystemImpl by instance()
 

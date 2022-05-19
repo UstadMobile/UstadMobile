@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -43,6 +44,8 @@ class PersonDetailPresenter(context: Any,
             view.changePasswordVisible = person.username != null
                     && (activePersonUid == entityUid || hasAuthPermission)
 
+            view.chatVisibility = person.personUid != activePersonUid
+
             view.showCreateAccountVisible =  person.username == null && hasAuthPermission
         }
         return repo.personDao.findByUidWithDisplayDetailsLive(entityUid, activePersonUid)
@@ -77,6 +80,15 @@ class PersonDetailPresenter(context: Any,
                 arguments = mutableMapOf(ARG_ENTITY_UID to personUid.toString())
             )
         )
+    }
+
+    fun handleClickChat(){
+        systemImpl.go(
+            ChatDetailView.VIEW_NAME,
+            mapOf(
+                ARG_PERSON_UID to (arguments[ARG_ENTITY_UID]?.toLong() ?: 0L).toString(),
+            ),
+            context)
     }
 
     fun handleClickManageParentalConsent() {

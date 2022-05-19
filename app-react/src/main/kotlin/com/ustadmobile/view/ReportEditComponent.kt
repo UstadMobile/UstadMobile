@@ -31,9 +31,6 @@ class ReportEditComponent (mProps: UmProps): UstadEditComponent<ReportWithSeries
     override val mEditPresenter: UstadEditPresenter<*, ReportWithSeriesWithFilters>?
         get() = mPresenter
 
-    override val viewNames: List<String>
-        get() = listOf(ReportEditView.VIEW_NAME)
-
     private var showSeriesDeleteButton = false
 
     private var reportTitleLabel = FieldLabel(text = getString(MessageID.xapi_options_report_title))
@@ -240,7 +237,7 @@ class ReportEditComponent (mProps: UmProps): UstadEditComponent<ReportWithSeries
                         attrs.onClick = {
                             mPresenter?.handleClickAddSeries()
                         }
-                        createCreateNewItem(getString(MessageID.xapi_options_series))
+                        renderCreateNewItemOnList(getString(MessageID.xapi_options_series))
                     }
                 }
 
@@ -348,7 +345,7 @@ class ReportEditComponent (mProps: UmProps): UstadEditComponent<ReportWithSeries
             }
 
             umItem(GridSize.cells12) {
-                createListSectionTitle(getString(MessageID.filter))
+                renderListSectionTitle(getString(MessageID.filter))
             }
 
             val filters = series.reportSeriesFilters ?: listOf()
@@ -363,7 +360,7 @@ class ReportEditComponent (mProps: UmProps): UstadEditComponent<ReportWithSeries
                                 mPresenter?.handleOnFilterClicked(filter)
                             }
 
-                            createListItemWithTitleDescriptionAndRightAction(
+                            renderListItemWithTitleDescriptionAndRightAction(
                                 filter.toDisplayString(systemImpl, Any()), "delete",
                                 withAction = true){
                                 Util.stopEventPropagation(it)
@@ -382,7 +379,7 @@ class ReportEditComponent (mProps: UmProps): UstadEditComponent<ReportWithSeries
                             reportFilterSeriesUid = series.reportSeriesUid
                         })
                     }
-                    createCreateNewItem(getString(MessageID.filter))
+                    renderCreateNewItemOnList(getString(MessageID.filter))
                 }
             }
         }

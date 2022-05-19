@@ -1866,7 +1866,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
      -->
     <string name="submission_already_made">Submission already made</string>
 
-
     <!-- used to display as an error when the teacher submits a grade thats greater than the maximum grade-->
     <string name="grade_out_of_range">Grade must be between 0 and %1$s</string>
 
@@ -1887,6 +1886,23 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <!-- Used when editing the options for a discussion block on a course -->
     <string name="edit_discussion">Edit discussion</string>
+
+    <string name="type_here">Type here…</string>
+
+    <string name="deadline_has_passed">Deadline has passed</string>
+
+    <!-- used to display as an error to the user when he is not assigned in a group for an assignment -->
+    <string name="unassigned_error">Can\'t submit: you\'re enroled in the course, but not assigned to a group</string>
+
+    <!-- E.g. an option in the app that is enabled -->
+    <string name="enabled">Enabled</string>
+
+    <!-- Used in the context of an option the app that is disabled -->
+    <string name="disabled">Disabled</string>
+
+    <!-- Used in the context of selecting something e.g. select content from my courses etc -->
+    <string name="from_my_courses">From my courses</string>
+
 
 
 </resources>

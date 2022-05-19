@@ -17,6 +17,7 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabaseRepository
@@ -48,6 +49,7 @@ import java.nio.file.Files
 import javax.naming.InitialContext
 import kotlin.random.Random
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import kotlinx.serialization.json.Json
 
 fun DI.onActiveAccount(): DI {
     val accountManager: UstadAccountManager by instance()
@@ -118,6 +120,10 @@ class UstadTestRule(
             bind<UstadAccountManager>() with singleton {
                 UstadAccountManager(instance(), Any(), di)
             }
+            bind<Json>() with singleton {
+                Json { encodeDefaults = true }
+            }
+
 
             bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
                 NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
@@ -126,8 +132,10 @@ class UstadTestRule(
             bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
+                val attachmentsDir = File(tempFolder.siteDataSubDir(this@singleton.context),
+                        UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName, attachmentsDir)
                     .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
                     .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())

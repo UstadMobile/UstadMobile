@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    
+    <data>
+        
+        <import type="com.ustadmobile.lib.db.entities.TerminologyEntry"/>
+
+        <variable
+            name="entry"
+            type="TerminologyEntry" />
+        
+        
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_course_terminology_edit_teacher"
+            android:layout_width="@dimen/dimen_0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginBottom="@dimen/dimen_8dp"
+            app:hintMessageId="@{entry.messageId}"
+            app:errorEnabled="@{entry.errorMessage != null}"
+            app:errorText="@{entry.errorMessage}"
+            tools:hint="@string/add_a_teacher"
+            app:hintEnabled="true"
+            app:errorTextColor="?colorError"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/fragment_course_terminology_edit_teacher_text"
+                android:text="@={entry.term}"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+        
+        
+    
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    
+    
+    
+    
+</layout>

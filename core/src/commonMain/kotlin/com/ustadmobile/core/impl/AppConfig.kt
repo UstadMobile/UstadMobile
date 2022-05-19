@@ -21,8 +21,6 @@ object AppConfig {
 
     const val KEY_SUPPORTED_LANGUAGES = "app.ui_languages"
 
-    const val KEY_RTL_LANGUAGES = "app.ui_languages_rtl"
-
     const val KEY_DEFAULT_LANGUAGE = "app.ui_default_language"
 
     const val KEY_ALLOW_GUEST_LOGIN= "app.guest_allowed"

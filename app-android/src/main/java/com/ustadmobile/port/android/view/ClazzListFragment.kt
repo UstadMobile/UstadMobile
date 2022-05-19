@@ -8,6 +8,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.IdOption
@@ -18,6 +19,7 @@ import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
+import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -46,24 +48,24 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
             sortOrderOption = mPresenter?.sortOptions?.get(0),
             filterOptions = ClazzListPresenter.FILTER_OPTIONS.toListFilterOptions(requireContext(), di),
             onFilterOptionSelected = mPresenter)
-        mDataRecyclerViewAdapter = ClazzListRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = ClazzListRecyclerAdapter(mPresenter, di)
 
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fabManager?.text = requireContext().getText(R.string.clazz)
+        fabManager?.text = requireContext().getText(R.string.course)
 
         //override this to show our own bottom sheet
         fabManager?.onClickListener = {
             val optionList = if(newClazzListOptionVisible) {
                 listOf(BottomSheetOption(R.drawable.ic_add_black_24dp,
-                        requireContext().getString(R.string.add_a_new_class), NEW_CLAZZ))
+                        requireContext().getString(R.string.add_a_new_course), NEW_CLAZZ))
             }else {
                 listOf()
             } + listOf(BottomSheetOption(R.drawable.ic_login_24px,
-                requireContext().getString(R.string.join_existing_class), JOIN_CLAZZ))
+                requireContext().getString(R.string.join_existing_course), JOIN_CLAZZ))
 
             val sheet = OptionsBottomSheetFragment(optionList, this)
             sheet.show(childFragmentManager, sheet.tag)
@@ -120,11 +122,20 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzDao
 
+
     companion object {
 
         const val NEW_CLAZZ = 2
 
         const val JOIN_CLAZZ = 3
+
+
+        @JvmStatic
+        val FOREIGNKEYADAPTER_COURSE = object: ForeignKeyAttachmentUriAdapter {
+            override suspend fun getAttachmentUri(foreignKey: Long, dbToUse: UmAppDatabase): String? {
+                return dbToUse.coursePictureDao.findByClazzUidAsync(foreignKey)?.coursePictureUri
+            }
+        }
 
     }
 

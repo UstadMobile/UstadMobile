@@ -27,9 +27,6 @@ class VideoContentComponent(mProps: UmProps):UstadBaseComponent<UmProps, UmState
             mPresenter?.onResume()
         }
 
-    override val viewNames: List<String>
-        get() = listOf(VideoContentView.VIEW_NAME)
-
     override var videoParams: VideoContentPresenterCommon.VideoParams? = null
         get() = field
         set(value) {

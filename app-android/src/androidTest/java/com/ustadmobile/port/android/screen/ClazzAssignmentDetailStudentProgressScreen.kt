@@ -35,7 +35,6 @@ object ClazzAssignmentDetailStudentProgressScreen : KScreen<ClazzAssignmentDetai
 
     class TotalScore(parent: Matcher<View>) : KRecyclerItem<TotalScore>(parent) {
         val score: KTextView = KTextView(parent) {withId(R.id.item_person_score)}
-        val scoreResults: KTextView = KTextView(parent) {withId(R.id.item_person_total_score_results)}
     }
 
     class PrivateComments(parent: Matcher<View>) : KRecyclerItem<PrivateComments>(parent) {

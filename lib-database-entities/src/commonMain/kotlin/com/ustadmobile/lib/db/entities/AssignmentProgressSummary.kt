@@ -5,19 +5,19 @@ import kotlinx.serialization.Serializable
 @Serializable
 class AssignmentProgressSummary {
 
-    var notStartedStudents : Int = 0
+    var notSubmittedStudents : Int = 0
 
-    var startedStudents : Int = 0
-
-    var completedStudents : Int = 0
+    var submittedStudents : Int = 0
 
     var totalStudents: Int = 0
 
+    var markedStudents: Int = 0
+
     var hasMetricsPermission: Boolean = false
 
-    fun calculateStartedStudents(): Int {
-        startedStudents = totalStudents - completedStudents - notStartedStudents
-        return startedStudents
+    fun calculateNotSubmittedStudents(): Int {
+        notSubmittedStudents = totalStudents - markedStudents - submittedStudents
+        return notSubmittedStudents
     }
 
 

@@ -8,7 +8,7 @@ import com.ustadmobile.util.TimeZone
 import com.ustadmobile.util.TimeZonesUtil
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
-import com.ustadmobile.view.ext.createListItemWithLeftIconTitleAndDescription
+import com.ustadmobile.view.ext.renderListItemWithLeftIconTitleAndDescription
 import com.ustadmobile.view.ext.umGridContainer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -24,9 +24,6 @@ class TimeZoneListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmStat
     private var mPresenter: TimeZoneListPresenter? = null
 
     private var timeZoneList: List<TimeZone> = TimeZonesUtil.getTimeZones()
-
-    override val viewNames: List<String>
-        get() = listOf(TimeZoneListView.VIEW_NAME)
 
     override fun onCreateView() {
         super.onCreateView()
@@ -76,7 +73,7 @@ class ZonesListComponent(mProps: SimpleListProps<TimeZone>):
             attrs.onClick = {
                 onClick.invoke(it.nativeEvent)
             }
-            createListItemWithLeftIconTitleAndDescription("query_builder",item.name,
+            renderListItemWithLeftIconTitleAndDescription("query_builder",item.name,
                 item.timeName, onMainList = true)
         }
     }

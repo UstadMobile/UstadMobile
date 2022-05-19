@@ -26,13 +26,18 @@ abstract class AgentDao :BaseDao<AgentEntity> {
         JOIN AgentEntity 
              ON AgentEntity.agentPersonUid = Person.personUid
        WHERE UserSession.usClientNodeId = :newNodeId
+         --notpsql 
          AND AgentEntity.agentLct != COALESCE(
              (SELECT aeVersionId
                 FROM AgentEntityReplicate
                WHERE aePk = AgentEntity.agentUid
-                 AND aeDestination = :newNodeId), 0) 
+                 AND aeDestination = UserSession.usClientNodeId), 0) 
+         --endnotpsql        
       /*psql ON CONFLICT(aePk, aeDestination) DO UPDATE
-             SET aePending = true
+             SET aePending = (SELECT AgentEntity.agentLct
+                                FROM AgentEntity
+                               WHERE AgentEntity.agentUid = EXCLUDED.aePk ) 
+                                     != AgentEntityReplicate.aePk
       */       
      """)
     @ReplicationRunOnNewNode
@@ -56,14 +61,19 @@ abstract class AgentDao :BaseDao<AgentEntity> {
              SELECT nodeClientId 
                FROM SyncNode
               LIMIT 1)
+         --notpsql 
          AND AgentEntity.agentLct != COALESCE(
              (SELECT aeVersionId
                 FROM AgentEntityReplicate
                WHERE aePk = AgentEntity.agentUid
-                 AND aeDestination = UserSession.usClientNodeId), 0)
-     /*psql ON CONFLICT(aePk, aeDestination) DO UPDATE
-         SET aePending = true
-      */               
+                 AND aeDestination = UserSession.usClientNodeId), 0) 
+         --endnotpsql 
+      /*psql ON CONFLICT(aePk, aeDestination) DO UPDATE
+             SET aePending = (SELECT AgentEntity.agentLct
+                                FROM AgentEntity
+                               WHERE AgentEntity.agentUid = EXCLUDED.aePk ) 
+                                     != AgentEntityReplicate.aePk
+      */    
     """)
     @ReplicationRunOnChange([AgentEntity::class])
     @ReplicationCheckPendingNotificationsFor([AgentEntity::class])
@@ -73,5 +83,14 @@ abstract class AgentDao :BaseDao<AgentEntity> {
     @Query("SELECT * FROM AgentEntity WHERE agentOpenId = :openId OR agentMbox = :mbox " +
             "OR agentMbox_sha1sum = :sha1 OR (agentAccountName = :account AND agentHomePage = :homepage)")
     abstract fun getAgentByAnyId(openId: String? = "", mbox: String? = "", account: String? = "", homepage: String? = "", sha1: String? = ""): AgentEntity?
+
+
+    @Query("""
+        SELECT *
+          FROM AgentEntity
+         WHERE agentAccountName = :username 
+           AND agentHomePage = :endpoint
+    """)
+    abstract suspend fun getAgentFromPersonUsername(endpoint: String, username: String): AgentEntity?
 
 }

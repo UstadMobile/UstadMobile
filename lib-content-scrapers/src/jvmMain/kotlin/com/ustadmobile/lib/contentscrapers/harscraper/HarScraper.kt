@@ -15,6 +15,7 @@ import java.io.File
 import java.lang.IllegalArgumentException
 import java.net.URL
 import java.net.URLDecoder
+import java.time.Duration
 import java.util.*
 
 typealias ScrapeFilterFn = (harEntry: HarEntry) -> HarEntry
@@ -40,7 +41,7 @@ fun scrapeUrlwithHar(proxy: BrowserMobProxyServer, driver: ChromeDriver, url: St
         driver.quit()
         throw IllegalArgumentException(e)
     }
-    val waitDriver = WebDriverWait(driver, ScraperConstants.TIME_OUT_SELENIUM.toLong())
+    val waitDriver = WebDriverWait(driver, ScraperConstants.TIME_OUT_SELENIUM)
     ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
 
     waitCondition?.invoke(waitDriver)

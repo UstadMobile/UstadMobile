@@ -19,7 +19,7 @@ interface ClazzLogListAttendanceView: UstadListView<ClazzLog, ClazzLog> {
     var recordAttendanceOptions: List<ClazzLogListAttendancePresenter.RecordAttendanceOption>?
 
     companion object {
-        const val VIEW_NAME = "ClassLogListAttendanceView"
+        const val VIEW_NAME = "CourseLogListAttendanceView"
     }
 
 }

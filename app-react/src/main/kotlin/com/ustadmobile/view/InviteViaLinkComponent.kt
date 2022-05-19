@@ -13,7 +13,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.Util.copyToClipboard
 import com.ustadmobile.util.ext.format
-import com.ustadmobile.view.ext.createListItemWithIconAndTitle
+import com.ustadmobile.view.ext.renderListItemWithIconAndTitle
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.marginTop
@@ -25,9 +25,6 @@ import styled.styledDiv
 class InviteViaLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState>(mProps), InviteViaLinkView {
 
     private var mPresenter: InviteViaLinkPresenter? = null
-
-    override val viewNames: List<String>
-        get() = listOf(InviteViaLinkView.VIEW_NAME)
 
     override var inviteLink: String? = null
         get() = field
@@ -79,7 +76,7 @@ class InviteViaLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                 }
 
                 umItem(GridSize.cells12){
-                    createListItemWithIconAndTitle("link",inviteLink ?: "")
+                    renderListItemWithIconAndTitle("link",inviteLink ?: "")
                 }
 
                 umGridContainer(GridSpacing.spacing6) {

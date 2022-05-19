@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.CourseAssignmentSubmission" />
+        <import type="com.ustadmobile.lib.db.entities.ClazzAssignment" />
+
+        <variable
+            name="course"
+            type="ClazzAssignment" />
+
+    </data>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="@dimen/dimen_16dp"
+    android:paddingEnd="@dimen/dimen_16dp">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/view_text_assignment_inputlayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_8dp"
+            android:layout_margin="@dimen/dimen_16dp"
+            app:suffixText="@{&quot;/&quot; + course.caTextLimit}"
+            app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/view_text_assignment_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</layout>

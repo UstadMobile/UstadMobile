@@ -4,7 +4,7 @@ import android.view.View
 import com.google.gson.Gson
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import org.kodein.di.DI
-import org.kodein.di.android.di
+import org.kodein.di.android.closestDI
 import org.kodein.di.direct
 import org.kodein.di.instance
 
@@ -13,12 +13,12 @@ import org.kodein.di.instance
  */
 val View.systemImpl: UstadMobileSystemImpl
     get() {
-        val di: DI by di(context)
+        val di: DI by closestDI()
         return di.direct.instance()
     }
 
 val View.gson: Gson
     get() {
-        val di: DI by di(context)
+        val di: DI by closestDI()
         return di.direct.instance()
     }

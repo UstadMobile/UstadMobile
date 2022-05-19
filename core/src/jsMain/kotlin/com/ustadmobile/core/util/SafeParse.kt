@@ -4,6 +4,8 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
 import kotlin.reflect.KClass
 
 /**
@@ -12,13 +14,16 @@ import kotlin.reflect.KClass
  * error would disappear after a clean and rebuild with no other changes.
  */
 actual inline fun <reified T> safeParse(di: DI, strategy: DeserializationStrategy<T>, str: String): T {
-    return Json.decodeFromString(strategy,str)
+    val json: Json = di.direct.instance()
+    return json.decodeFromString(strategy,str)
 }
 
 actual inline fun <reified T> safeStringify(di: DI, strategy: SerializationStrategy<T>, entity: T): String {
-    return Json.encodeToString(strategy,entity)
+    val json: Json = di.direct.instance()
+    return json.encodeToString(strategy,entity)
 }
 
 actual fun <T : Any> safeParseList(di: DI, strategy: DeserializationStrategy<List<T>>, klass: KClass<T>, str: String): List<T> {
-    return Json.decodeFromString(strategy,str).toList()
+    val json: Json = di.direct.instance()
+    return json.decodeFromString(strategy,str).toList()
 }

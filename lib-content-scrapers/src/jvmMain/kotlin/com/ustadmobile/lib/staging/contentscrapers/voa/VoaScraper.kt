@@ -138,7 +138,7 @@ class VoaScraper : Runnable {
         val driver = ContentScraperUtil.setupChrome(true)
 
         driver.get(scrapUrl!!.toString())
-        val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
+        val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM)
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
 
         val lessonId = FilenameUtils.getBaseName(scrapUrl!!.path)
@@ -148,7 +148,7 @@ class VoaScraper : Runnable {
         voaDirectory.mkdirs()
         var isUpdated: Boolean
         isUpdated = try {
-            val element = driver.findElementByCssSelector("script[type*=json]")
+            val element = driver.findElement(By.cssSelector("script[type*=json]"))
             val scriptText = driver.executeScript("return arguments[0].innerText;", element) as String
 
             val response = gson.fromJson(scriptText, VoaResponse::class.java)
@@ -158,7 +158,7 @@ class VoaScraper : Runnable {
 
         } catch (ignored: NoSuchElementException) {
 
-            val modified = ContentScraperUtil.parseServerDate(driver.findElementByCssSelector("time").getAttribute("datetime"))
+            val modified = ContentScraperUtil.parseServerDate(driver.findElement(By.cssSelector("time")).getAttribute("datetime"))
             ContentScraperUtil.isFileContentsUpdated(modifiedFile, modified.toString())
 
         }
@@ -238,10 +238,10 @@ class VoaScraper : Runnable {
                     val videoDoc = Jsoup.parse(questionData!!)
 
                     val question = VoaQuiz.Questions()
-                    question.questionText = questionDoc.selectFirst("h2.ta-l").text()
+                    question.questionText = questionDoc.selectFirst("h2.ta-l")?.text()
                     try {
                         val mediaSource = videoDoc.selectFirst("div.quiz__answers-img video,div.quiz__answers-img img")
-                        question.videoHref = mediaSource.attr("src")
+                        question.videoHref = mediaSource?.attr("src")
                     } catch (ignored: NoSuchElementException) {
 
                     } catch (ignored: NullPointerException) {
@@ -251,13 +251,13 @@ class VoaScraper : Runnable {
                     val answerTextList = questionDoc.select("label.quiz__answers-label")
                     for (answer in answerTextList) {
                         val choices = VoaQuiz.Questions.Choices()
-                        choices.id = answer.selectFirst("input").attr("value")
-                        choices.answerText = answer.selectFirst("span.quiz__answers-item-text").text()
+                        choices.id = answer.selectFirst("input")?.attr("value")
+                        choices.answerText = answer.selectFirst("span.quiz__answers-item-text")?.text()
                         choiceList.add(choices)
                     }
                     question.choices = choiceList
 
-                    val answerId = answerLabel.attr("value")
+                    val answerId = answerLabel?.attr("value")
 
                     val selectedParams = createParams(quizId, i + 1, answerId, "False")
 
@@ -271,8 +271,8 @@ class VoaScraper : Runnable {
 
                     val selectedAnswerDoc = Jsoup.parse(answerPage, UTF_ENCODING)
                     question.answerId = selectedAnswerDoc.selectFirst("li.quiz__answers-item--correct input")
-                            .attr("value")
-                    question.answer = selectedAnswerDoc.selectFirst("p.p-t-md").text()
+                            ?.attr("value")
+                    question.answer = selectedAnswerDoc.selectFirst("p.p-t-md")?.text()
                     questionList.add(question)
                 } catch (e: IOException) {
                     UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
@@ -289,7 +289,7 @@ class VoaScraper : Runnable {
             FileUtils.writeStringToFile(quizFile, gson.toJson(quizResponse), UTF_ENCODING)
 
         }
-        val voaData = ContentScraperUtil.downloadAllResources(document.selectFirst("div#content").html(), assetDirectory, scrapUrl)
+        val voaData = ContentScraperUtil.downloadAllResources(document.selectFirst("div#content")?.html() ?: "", assetDirectory, scrapUrl)
         val finalDoc = Jsoup.parse(voaData!!)
         finalDoc.head().append("<link rel=\"stylesheet\" href=\"asset/materialize.min.css\">")
         finalDoc.head().append("<meta charset=\"utf-8\" name=\"viewport\"\n" + "          content=\"width=device-width, initial-scale=1, shrink-to-fit=no,user-scalable=no\">")
@@ -299,7 +299,7 @@ class VoaScraper : Runnable {
 
         finalDoc.body().attr("style", "padding:2%")
         if (quizHref != null) {
-            finalDoc.selectFirst("div.quiz__body").after("<div class=\"iframe-container\"><iframe id=\"myFrame\" src=\"quiz.html\" frameborder=\"0\" scrolling=\"no\" width=\"100%\"></frame></div>")
+            finalDoc.selectFirst("div.quiz__body")?.after("<div class=\"iframe-container\"><iframe id=\"myFrame\" src=\"quiz.html\" frameborder=\"0\" scrolling=\"no\" width=\"100%\"></frame></div>")
         }
         FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.QUIZ_HTML_LINK),
                 File(voaDirectory, ScraperConstants.QUIZ_HTML_FILE))
