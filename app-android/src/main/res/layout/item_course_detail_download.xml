@@ -36,6 +36,7 @@
             app:layout_constraintEnd_toStartOf="@+id/item_course_share_button"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
+            android:visibility="gone"
             tools:layout_editor_absoluteY="16dp" />
 
         <com.google.android.material.button.MaterialButton
