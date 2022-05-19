@@ -54,7 +54,8 @@ class MessagesRecyclerAdapter(
         holder.binding.message = message
 
         holder.binding.itemCommentsListLine2Text.text = message?.messageText
-        val listener = BetterLinkMovementLinkClickListener(systemImpl, accountManager, context)
+        val contextVal = context ?: return
+        val listener = BetterLinkMovementLinkClickListener(systemImpl, accountManager, contextVal)
         listener.addMovement(holder.binding.itemCommentsListLine2Text)
 
         //if message is unread

@@ -36,7 +36,9 @@ class DiscussionPostDescriptionRecyclerAdapter(
             viewHolder?.itemBinding?.itemDiscussionPostDetailLatestMessage?.text =
                 value?.discussionPostMessage
 
-            val listener = BetterLinkMovementLinkClickListener(systemImpl, accountManager, context)
+            val contextVal = context ?: return
+            val listener = BetterLinkMovementLinkClickListener(systemImpl, accountManager,
+                    contextVal)
             listener.addMovement(viewHolder?.itemBinding?.itemDiscussionPostDetailLatestMessage)
 
         }
