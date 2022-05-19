@@ -96,6 +96,7 @@ android {
     lint {
         abortOnError false
     }
+    namespace 'com.toughra.ustadmobile.launcher'
 }
 
 configurations.all {

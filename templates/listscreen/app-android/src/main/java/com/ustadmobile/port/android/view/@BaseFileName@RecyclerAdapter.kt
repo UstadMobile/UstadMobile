@@ -14,7 +14,11 @@ import androidx.recyclerview.widget.DiffUtil
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 
 
-class @BaseFileName@RecyclerAdapter(var itemListener: @BaseFileName@ItemListener?): SelectablePagedListAdapter<@DisplayEntity@, @BaseFileName@RecyclerAdapter.@Entity@ListViewHolder>(DIFF_CALLBACK) {
+class @BaseFileName@RecyclerAdapter(
+    var itemListener: @BaseFileName@ItemListener?
+): SelectablePagedListAdapter<@DisplayEntity@, @BaseFileName@RecyclerAdapter.@Entity@ListViewHolder>(
+    DIFF_CALLBACK
+) {
 
     class @Entity@ListViewHolder(val itemBinding: Item@ListItemName@ListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
@@ -39,13 +43,17 @@ class @BaseFileName@RecyclerAdapter(var itemListener: @BaseFileName@ItemListener
     companion object {
         val DIFF_CALLBACK: DiffUtil.ItemCallback<@DisplayEntity@> = object
             : DiffUtil.ItemCallback<@DisplayEntity@>() {
-            override fun areItemsTheSame(oldItem: @DisplayEntity@,
-                                         newItem: @DisplayEntity@): Boolean {
+            override fun areItemsTheSame(
+                oldItem: @DisplayEntity@,
+                newItem: @DisplayEntity@
+            ): Boolean {
                 TODO("e.g. insert primary keys here return oldItem.@Entity_VariableName@ == newItem.@Entity_VariableName@")
             }
 
-            override fun areContentsTheSame(oldItem: @DisplayEntity@,
-                                            newItem: @DisplayEntity@): Boolean {
+            override fun areContentsTheSame(
+                oldItem: @DisplayEntity@,
+                newItem: @DisplayEntity@
+            ): Boolean {
                 //Check only those fields that are displayed to the user to minimize refreshes
                 TODO("e.g. return oldItem.field1 == newItem.field1 && oldItem.field2 == newItem.field2")
             }

@@ -40,6 +40,7 @@ android {
         //This will apparently prevent Android Studio from recognizing the project
         //coreLibraryDesugaringEnabled true
     }
+    namespace 'com.ustadmobile.core'
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {

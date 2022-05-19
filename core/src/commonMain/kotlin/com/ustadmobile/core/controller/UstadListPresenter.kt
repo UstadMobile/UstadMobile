@@ -23,11 +23,15 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 
-abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>,
-                                                               view: V, di: DI,
-                                                    val lifecycleOwner: DoorLifecycleOwner)
-    : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected,
-        OnSearchSubmitted, OnListFilterOptionSelectedListener {
+abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(
+    context: Any,
+    arguments: Map<String, String>,
+    view: V,
+    di: DI,
+    val lifecycleOwner: DoorLifecycleOwner
+) : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected,
+    OnSearchSubmitted, OnListFilterOptionSelectedListener
+{
 
     open val mListMode : ListViewMode by lazy {
         arguments.determineListMode()
@@ -52,7 +56,7 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
             onLoadFromDb()
         }
     }
@@ -118,6 +122,10 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     abstract fun handleClickCreateNewFab()
 
+    /**
+     * Called when the user clicks the add new item that appears in the list (e.g. when this list
+     * presenter is operating in picker mode)
+     */
     abstract fun handleClickAddNewItem(
         args: Map<String, String>? = null,
         destinationResultKey: String? = null)
