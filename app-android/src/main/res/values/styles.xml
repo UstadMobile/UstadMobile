@@ -15,7 +15,11 @@
         <item name="android:theme">@style/SelectableItemTheme</item>
         <item name="android:background">?attr/selectableItemBackground</item>
     </style>
-    
+
+    <style name="ShapeAppearanceOverlay.App.CornerSize50Percent" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 
     <!-- As per https://material.io/develop/android/components/buttons/#toggle-button - Implementing an icon-only toggle button -->
     <style name="UmTheme.Widget.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">

@@ -5,8 +5,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
-import org.kodein.di.instance
-
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
@@ -18,6 +16,7 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, view: ClazzMemberListView,
                                di: DI, lifecycleOwner: DoorLifecycleOwner)
@@ -69,16 +68,16 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     private fun updateListOnView() {
         view.list = repo.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
                 ClazzEnrolment.ROLE_TEACHER, selectedSortOption?.flag ?: 0,
-                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: 0,
+                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDao.FILTER_ACTIVE_ONLY,
                 mLoggedInPersonUid, systemTimeInMillis())
         view.studentList = repo.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
                 ClazzEnrolment.ROLE_STUDENT, selectedSortOption?.flag ?: 0,
-                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: 0,
+                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDao.FILTER_ACTIVE_ONLY,
                 mLoggedInPersonUid, systemTimeInMillis())
         if (view.addStudentVisible) {
             view.pendingStudentList = db.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
                     ClazzEnrolment.ROLE_STUDENT_PENDING, selectedSortOption?.flag ?: 0,
-                    searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: 0,
+                    searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDao.FILTER_ACTIVE_ONLY,
                     mLoggedInPersonUid, systemTimeInMillis())
         }
     }

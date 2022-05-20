@@ -104,15 +104,6 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
             }
         }
 
-
-    override var coursePicturePath: String? = null
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
-
     override var coursePicture: CoursePicture? = null
         get() = field
         set(value) {

@@ -18,4 +18,7 @@ actual object UmPlatformUtil {
         console.log("JS-LOG",JSON.stringify(content))
     }
 
+    actual suspend fun runIfNotJs(block: suspend () -> Unit){
+    }
+
 }

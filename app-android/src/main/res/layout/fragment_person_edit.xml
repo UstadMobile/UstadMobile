@@ -23,10 +23,6 @@
             type="com.ustadmobile.lib.db.entities.PersonPicture"/>
 
         <variable
-            name="personPictureUri"
-            type="String" />
-
-        <variable
             name="imageViewLifecycleObserver"
             type="com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2" />
 

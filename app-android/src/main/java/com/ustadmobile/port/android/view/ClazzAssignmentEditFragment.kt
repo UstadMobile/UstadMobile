@@ -10,6 +10,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
@@ -216,13 +217,19 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             mBinding?.completionCriteriaOptions = value
         }
 
-    override var markingTypeOptions: List<ClazzAssignmentEditPresenter.MarkingTypeOptionsMessageIdOption>? = null
+    override var markingTypeOptions: List<IdOption>? = null
         get() = field
         set(value) {
             field = value
             mBinding?.markingTypeOptions = value
         }
 
+    override var groupSetEnabled: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.groupSetEnabled = value
+        }
 
     private val onFileRequiredChanged: CompoundButton.OnCheckedChangeListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
         mBinding?.fileSubmissionVisibility = if(isChecked) View.VISIBLE else View.GONE

@@ -1,14 +1,10 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.net.toFile
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
@@ -25,11 +21,9 @@ import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
-import java.io.File
 
 interface ClazzEditFragmentEventHandler {
 
@@ -107,47 +101,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
         set(value) {
             mDataBinding?.coursePicture = value
         }
-
-    /**
-     * This may lead to I/O activity - do not call from the main thread!
-     */
-    override var coursePicturePath: String?
-        get() {
-            val boundPicUri = mDataBinding?.coursePictureUri
-            if(boundPicUri == null) {
-                return null
-            }else{
-                val uriObj = Uri.parse(boundPicUri)
-                if(uriObj.scheme == "file") {
-                    return uriObj.toFile().absolutePath
-                }else {
-                    val tmpFile = findNavController().createTempFileForDestination(requireContext(),
-                        "coursePicture-${System.currentTimeMillis()}")
-                    try {
-                        val input = (context as Context).contentResolver.openInputStream(uriObj) ?: return null
-                        val output = tmpFile.outputStream()
-                        input.copyTo(tmpFile.outputStream())
-                        output.flush()
-                        output.close()
-                        input.close()
-                        return tmpFile.absolutePath
-                    }catch(e: Exception) {
-                        e.printStackTrace()
-                    }
-                    return null
-                }
-            }
-        }
-
-        set(value) {
-            if(value != null) {
-                mDataBinding?.coursePictureUri = Uri.fromFile(File(value)).toString()
-            }else {
-                mDataBinding?.coursePictureUri = null
-            }
-        }
-
-
 
     class ScheduleRecyclerAdapter(var oneToManyEditListener: OneToManyJoinEditListener<Schedule>?,
                                   var presenter: ClazzEdit2Presenter?): ListAdapter<Schedule,

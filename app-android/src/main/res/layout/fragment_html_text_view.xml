@@ -6,6 +6,7 @@
     <data>
         <import type="android.view.View"/>
         <import type="android.text.Html"/>
+        <import type="android.text.SpannedString"/>
 
         <variable
             name="text"
@@ -34,7 +35,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:text="@{Html.fromHtml(text)}"
+                android:text='@{text != null ? Html.fromHtml(text) :  SpannedString.valueOf("")}'
                 />
 
 
