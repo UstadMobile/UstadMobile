@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+Do not use Android backup. The sync and download system manage this.
+-->
+<full-backup-content xmlns:android="http://schemas.android.com/apk/res/android">
+    <exclude domain="root" />
+    <exclude domain="file" />
+    <exclude domain="database" />
+    <exclude domain="sharedpref" />
+    <exclude domain="external" />
+</full-backup-content>

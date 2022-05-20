@@ -1,11 +1,14 @@
 package com.ustadmobile.core.controller
 
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.*
@@ -17,6 +20,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
+import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
@@ -260,12 +265,31 @@ class PersonEditPresenter(
                 }
             } else {
                 //Create/Update person group
-                if(entity.personUid == 0L) {
-                    val personWithGroup = repo.insertPersonAndGroup(entity)
-                    entity.personGroupUid = personWithGroup.personGroupUid
-                    entity.personUid = personWithGroup.personUid
-                }else {
-                    repo.personDao.updateAsync(entity)
+                repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+                    if(entity.personUid == 0L) {
+                        val personWithGroup = txRepo.insertPersonAndGroup(entity)
+                        entity.personGroupUid = personWithGroup.personGroupUid
+                        entity.personUid = personWithGroup.personUid
+                    }else {
+                        txRepo.personDao.updateAsync(entity)
+                    }
+
+                    val dateBirthDateTime = DateTime(entity.dateOfBirth)
+
+                    if(dateBirthDateTime.age() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
+                        //Mark this as approved by the current user
+                        val approved = txRepo.personParentJoinDao.isMinorApproved(
+                            entity.personUid)
+
+                        if(!approved) {
+                            txRepo.personParentJoinDao.insertAsync(PersonParentJoin().apply {
+                                ppjMinorPersonUid = entity.personUid
+                                ppjParentPersonUid = accountManager.activeAccount.personUid
+                                ppjStatus = PersonParentJoin.STATUS_APPROVED
+                                ppjApprovalTiemstamp = systemTimeInMillis()
+                            })
+                        }
+                    }
                 }
 
                 UmPlatformUtil.runIfNotJsAsync {
