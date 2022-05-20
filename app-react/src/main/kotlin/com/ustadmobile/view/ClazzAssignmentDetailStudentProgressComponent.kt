@@ -189,6 +189,28 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                     }
                 }
 
+                if(submissions.isNotEmpty()){
+                    umItem {
+                        umList {
+                            submissions.forEach { submission ->
+                                umListItem {
+                                    attrs.onClick = {
+                                        Util.stopEventPropagation(it)
+                                        mPresenter?.onClickOpenSubmission(submission/*, false*/)
+                                    }
+                                    renderListItemWithLeftIconTitleAndDescription(
+                                        "class",
+                                        clean(submission.casText),
+                                        "${getString(MessageID.submitted_cap)} " +
+                                                ": ${submission.casTimestamp.toDate()?.formatFullDate()}",
+                                        true,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 umGridContainer(GridSpacing.spacing4) {
                     css(defaultDoubleMarginTop)
 
@@ -291,27 +313,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                     }
                 }
 
-                if(submissions.isNotEmpty()){
-                    umItem {
-                        umList {
-                            submissions.forEach { submission ->
-                                umListItem {
-                                    attrs.onClick = {
-                                        Util.stopEventPropagation(it)
-                                        mPresenter?.onClickOpenSubmission(submission/*, false*/)
-                                    }
-                                    renderListItemWithLeftIconTitleAndDescription(
-                                        "class",
-                                        clean(submission.casText),
-                                        "${getString(MessageID.submitted_cap)} " +
-                                                ": ${submission.casTimestamp.toDate()?.formatFullDate()}",
-                                        true,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+
             }
         }
 

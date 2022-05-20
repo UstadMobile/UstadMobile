@@ -136,6 +136,18 @@
             name="gracePeriodVisibility"
             type="int" />
 
+        <variable
+            name="contentEntryPicture"
+            type="com.ustadmobile.lib.db.entities.ContentEntryPicture"/>
+
+        <variable
+            name="contentEntryPictureUri"
+            type="String" />
+
+        <variable
+            name="imageViewLifecycleObserver"
+            type="com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2" />
+
 
     </data>
 
@@ -154,6 +166,30 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/content_entry_edit_image_view"
+                android:layout_width="@dimen/dimen_48dp"
+                android:layout_height="@dimen/dimen_48dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:civ_circle_background_color="?colorSecondary"
+                app:imageUri="@={contentEntryPicture.cepUri}"
+                app:imageViewLifecycleObserver="@{imageViewLifecycleObserver}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/item_presenter_field_row_picture_photoicon"
+                android:layout_width="@dimen/dimen_24dp"
+                android:layout_height="@dimen/dimen_24dp"
+                android:onClick="@{() -> contentEntryEditImageView.callOnClick()}"
+                app:layout_constraintBottom_toBottomOf="@+id/content_entry_edit_image_view"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/content_entry_edit_image_view"
+                app:srcCompat="@drawable/ic_add_a_photo_24"
+                app:tint="?colorOnError" />
+
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/content_entry_select_file"
@@ -169,7 +205,7 @@
                 android:visibility="@{showUpdateContentButton ? View.VISIBLE: View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/content_entry_edit_image_view"
                 tools:text="@string/update_content" />
 
             <TextView

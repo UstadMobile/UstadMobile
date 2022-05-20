@@ -140,6 +140,7 @@ class ScopedGrantEditPresenter(
             BitmaskMessageId(Role.PERMISSION_CLAZZ_SELECT, MessageID.view_clazzes),
             BitmaskMessageId(Role.PERMISSION_ADD_CLASS_TO_SCHOOL, MessageID.add_new_clazz_to_school),
             BitmaskMessageId(Role.PERMISSION_CLAZZ_UPDATE, MessageID.edit_clazzes),
+            BitmaskMessageId(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT, MessageID.permission_attendance_insert),
             BitmaskMessageId(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT, MessageID.permission_attendance_select),
             BitmaskMessageId(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE, MessageID.permission_attendance_update),
             BitmaskMessageId(Role.PERMISSION_CLAZZ_CONTENT_SELECT, MessageID.view_class_content),
@@ -163,6 +164,7 @@ class ScopedGrantEditPresenter(
                     Role.PERMISSION_CLAZZ_UPDATE or
                     Role.PERMISSION_CLAZZ_ADD_STUDENT or
                     Role.PERMISSION_CLAZZ_ADD_TEACHER or
+                    Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT or
                     Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT or
                     Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE or
                     Role.PERMISSION_CLAZZ_CONTENT_SELECT or

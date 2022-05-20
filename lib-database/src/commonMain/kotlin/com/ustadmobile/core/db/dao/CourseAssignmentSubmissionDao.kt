@@ -139,6 +139,15 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
     """)
     abstract suspend fun findLastSubmissionFromStudent(submitterUid: Long, assignmentUid: Long): CourseAssignmentSubmission?
 
+
+    @Query("""
+        SELECT NOT EXISTS(SELECT 1
+                        FROM CourseAssignmentSubmission
+                       WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+                       LIMIT 1)
+    """)
+    abstract fun checkNoSubmissionsMade(assignmentUid: Long): DoorLiveData<Boolean>
+
     companion object {
 
         const val GET_SUBMITTERID_FROM_STUDENT = """

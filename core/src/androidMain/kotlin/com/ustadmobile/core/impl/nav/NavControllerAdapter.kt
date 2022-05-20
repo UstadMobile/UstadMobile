@@ -20,10 +20,10 @@ class NavControllerAdapter(
         }
 
     private fun lookupDestinationName(viewName: String): Int? {
-        return if(viewName == UstadView.CURRENT_DEST) {
-            droidNavController.currentDestination?.id
-        }else {
-            destinationProvider.lookupDestinationName(viewName)?.destinationId
+        return when(viewName) {
+            UstadView.CURRENT_DEST -> droidNavController.currentDestination?.id
+            UstadView.ROOT_DEST -> droidNavController.graph.startDestinationId
+            else -> destinationProvider.lookupDestinationName(viewName)?.destinationId
         }
     }
 

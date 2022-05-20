@@ -13,12 +13,14 @@ import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.navOptions
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -139,11 +141,30 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         navController.addOnDestinationChangedListener(DeleteTempFilesNavigationListener(this))
         appBarConfiguration = AppBarConfiguration(navController.graph)
         mBinding.bottomNavView.setupWithNavController(navController)
-        setupActionBarWithNavController(navController, AppBarConfiguration(mBinding.bottomNavView.menu))
+
+        fun NavController.navigateToRootMenuItem(menuItem: MenuItem) {
+            if(currentDestination?.id != menuItem.itemId)
+                navigate(menuItem.itemId, args = bundleOf(), navOptions = navOptions {
+                    popUpTo(R.id.redirect_dest) {
+                        inclusive = false
+                    }
+                })
+        }
+
+        mBinding.bottomNavView.setOnItemSelectedListener {
+            navController.navigateToRootMenuItem(it)
+            true
+        }
+
+        mBinding.bottomNavView.setOnItemReselectedListener {
+            navController.navigateToRootMenuItem(it)
+        }
+
+        setupActionBarWithNavController(navController,
+            AppBarConfiguration(mBinding.bottomNavView.menu))
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
         accountManager.activeAccountLive.observe(this, mActiveUserObserver)
-
     }
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,

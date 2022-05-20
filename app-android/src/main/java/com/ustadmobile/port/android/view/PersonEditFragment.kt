@@ -1,14 +1,9 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
-import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.net.toFile
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
@@ -22,8 +17,10 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.ext.createTempFileForDestination
+import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.PersonPicture
+import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.view.PersonAccountEditFragment.Companion.USERNAME_FILTER
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
@@ -31,7 +28,6 @@ import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 import com.ustadmobile.port.android.view.util.RunAfterTextChangedTextWatcher
 import org.kodein.di.direct
 import org.kodein.di.instance
-import java.io.File
 
 interface PersonEditFragmentEventHandler {
 
@@ -79,45 +75,6 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         get() = mBinding?.personPicture
         set(value) {
             mBinding?.personPicture = value
-        }
-
-    /**
-     * This may lead to I/O activity - do not call from the main thread!
-     */
-    override var personPicturePath: String?
-        get() {
-            val boundPicUri = mBinding?.personPictureUri
-            if(boundPicUri == null) {
-                return null
-            }else{
-                val uriObj = Uri.parse(boundPicUri)
-                if(uriObj.scheme == "file") {
-                    return uriObj.toFile().absolutePath
-                }else {
-                    val tmpFile = findNavController().createTempFileForDestination(requireContext(),
-                            "personPicture-${System.currentTimeMillis()}")
-                    try {
-                        val input = (context as Context).contentResolver.openInputStream(uriObj) ?: return null
-                        val output = tmpFile.outputStream()
-                        input.copyTo(tmpFile.outputStream())
-                        output.flush()
-                        output.close()
-                        input.close()
-                        return tmpFile.absolutePath
-                    }catch(e: Exception) {
-                        e.printStackTrace()
-                    }
-                    return null
-                }
-            }
-        }
-
-        set(value) {
-            if(value != null) {
-                mBinding?.personPictureUri = Uri.fromFile(File(value)).toString()
-            }else {
-                mBinding?.personPictureUri = null
-            }
         }
 
     override var registrationMode: Int

@@ -1,13 +1,14 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.PersonPicture
+import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.lib.db.entities.UmAccount
 
 interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var genderOptions: List<MessageIdOption>?
-
-    var personPicturePath: String?
 
     var personPicture: PersonPicture?
 

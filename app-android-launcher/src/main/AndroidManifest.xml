@@ -11,7 +11,10 @@
         android:theme="@style/UmTheme.App"
         android:supportsRtl="true"
         tools:replace="android:allowBackup"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        >
 
         <!--
          The path to the asset containing the app runtime configuration.

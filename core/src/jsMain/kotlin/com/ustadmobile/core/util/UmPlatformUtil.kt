@@ -18,4 +18,11 @@ actual object UmPlatformUtil {
         console.log("JS-LOG",JSON.stringify(content))
     }
 
+    actual suspend fun runIfNotJsAsync(block: suspend () -> Unit){
+    }
+
+    actual fun runIfNotJs(block: () -> Unit) {
+    }
+
+
 }

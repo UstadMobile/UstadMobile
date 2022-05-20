@@ -140,4 +140,15 @@ abstract class PersonParentJoinDao {
     @Update
     abstract suspend fun updateAsync(personParentJoin: PersonParentJoin)
 
+    @Query("""
+        SELECT EXISTS(
+               SELECT ppjUid
+                 FROM PersonParentJoin
+                WHERE ppjMinorPersonUid = :minorPersonUid
+                  AND CAST(ppjInactive AS INTEGER) = 0
+                  AND ppjStatus = ${PersonParentJoin.STATUS_APPROVED})
+    """)
+    abstract suspend fun isMinorApproved(minorPersonUid: Long) : Boolean
+
+
 }

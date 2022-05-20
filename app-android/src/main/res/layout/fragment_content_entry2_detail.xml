@@ -6,14 +6,11 @@
     <data>
 
         <import type="android.view.View" />
-
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
-
         <import  type="com.ustadmobile.lib.db.entities.ContentJobItem" />
-
         <import type="com.ustadmobile.core.util.ext.ContentJobItemExtKt" />
-
         <import type="com.ustadmobile.lib.db.entities.ContentEntryButtonModel" />
+        <import type="com.ustadmobile.port.android.view.ContentEntryDetailFragment"/>
 
         <variable
             name="contentEntry"
@@ -73,9 +70,11 @@
                 android:layout_width="@dimen/dimen_110dp"
                 android:layout_height="@dimen/dimen_110dp"
                 android:layout_margin="@dimen/dimen_8dp"
-                android:scaleType="fitCenter"
-                app:fallbackDrawable="@{@drawable/book_24px}"
-                app:imageUri="@{contentEntry.thumbnailUrl}"
+                android:scaleType="centerCrop"
+                app:imageForeignKey="@{contentEntry.contentEntryUid}"
+                app:imageForeignKeyPlaceholder="@{@drawable/book_24px}"
+                app:imageForeignKeyAdapter="@{ContentEntryDetailFragment.FOREIGNKEYADAPTER_ENTRY}"
+                app:imageForeignKeyAutoHide="@{false}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:src="@drawable/book_24px" />

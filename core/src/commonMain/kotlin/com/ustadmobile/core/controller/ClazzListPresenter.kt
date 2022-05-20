@@ -62,7 +62,7 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
                 searchText.toQueryLikeParam(),
                 loggedInPersonUid, filterAlreadySelectedList,
                 filterExcludeMembersOfSchool, selectedSortOption?.flag ?: 0,
-                view.checkedFilterOptionChip?.optionId ?: 0,
+                view.checkedFilterOptionChip?.optionId ?: ClazzDao.FILTER_CURRENTLY_ENROLLED,
                 systemTimeInMillis(), filterByPermission, 0)
     }
 

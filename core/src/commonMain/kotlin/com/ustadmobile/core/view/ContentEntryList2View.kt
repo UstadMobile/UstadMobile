@@ -37,6 +37,12 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
         const val ARG_SELECT_FOLDER_VISIBLE = "selectFolderVisible"
 
+        /**
+         * Show chips for My content, from my courses, and library (e.g. when selecting content that
+         * is going to be added to a course).
+         */
+        const val ARG_USE_CHIPS = "contentEntryListChips"
+
     }
 
 }
