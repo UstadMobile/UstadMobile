@@ -268,7 +268,7 @@ class PersonEditPresenter(
                     repo.personDao.updateAsync(entity)
                 }
 
-                UmPlatformUtil.runIfNotJs {
+                UmPlatformUtil.runIfNotJsAsync {
                     val personPictureVal = view.personPicture
                     if(personPictureVal != null) {
                         personPictureVal.personPicturePersonUid = entity.personUid

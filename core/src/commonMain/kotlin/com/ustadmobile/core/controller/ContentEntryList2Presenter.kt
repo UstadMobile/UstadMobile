@@ -69,8 +69,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     private var showHiddenEntries = false
 
-    private var selectedClazzUid: Long = 0L
-
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
@@ -82,7 +80,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         contentFilter = arguments[ARG_DISPLAY_CONTENT_BY_OPTION] ?: ARG_DISPLAY_CONTENT_BY_PARENT
         onlyFolderFilter = arguments[ARG_SHOW_ONLY_FOLDER_FILTER]?.toBoolean() ?: false
         parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLongOrNull() ?: MASTER_SERVER_ROOT_ENTRY_UID
-        selectedClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         loggedPersonUid = accountManager.activeAccount.personUid
         showHiddenEntries = false
         getAndSetList()
@@ -187,6 +184,9 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 SelectionOption.UNHIDE -> {
                     repo.contentEntryDao.toggleVisibilityContentEntryItems(false,
                         selectedContentEntryUids, systemTimeInMillis())
+                }
+                else -> {
+                    //Do nothing
                 }
             }
         }
@@ -409,7 +409,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     override fun onClickImportGallery() {
         val args = mutableMapOf(
-                SelectFileView.ARG_MIMETYPE_SELECTED to SelectFileView.SELECTION_MODE_GALLERY,
+                SelectFileView.ARG_MIMETYPE_SELECTED to SELECTION_MODE_GALLERY,
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)

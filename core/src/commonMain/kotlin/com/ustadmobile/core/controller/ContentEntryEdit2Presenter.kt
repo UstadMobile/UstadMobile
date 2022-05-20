@@ -121,7 +121,7 @@ class ContentEntryEdit2Presenter(
         }
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithBlockAndLanguage? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithBlockAndLanguage {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
         val isLeaf = arguments[ARG_LEAF]?.toBoolean()
         val metaData = arguments[ARG_IMPORTED_METADATA]
@@ -164,7 +164,7 @@ class ContentEntryEdit2Presenter(
         return entry
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): ContentEntryWithBlockAndLanguage? {
+    override fun onLoadFromJson(bundle: Map<String, String>): ContentEntryWithBlockAndLanguage {
         super.onLoadFromJson(bundle)
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         val metaDataStr = bundle[ARG_IMPORTED_METADATA]
@@ -338,7 +338,6 @@ class ContentEntryEdit2Presenter(
         entityVal.publisher = metadataResult.entry.publisher
         entityVal.languageVariantUid = metadataResult.entry.languageVariantUid
         entityVal.primaryLanguageUid = metadataResult.entry.primaryLanguageUid
-        entityVal.thumbnailUrl = metadataResult.entry.thumbnailUrl
         entityVal.contentFlags = metadataResult.entry.contentFlags
         entityVal.leaf = metadataResult.entry.leaf
 
@@ -415,7 +414,7 @@ class ContentEntryEdit2Presenter(
                         txDb.contentEntryDao.updateAsync(entity)
                     }
 
-                    UmPlatformUtil.runIfNotJs {
+                    UmPlatformUtil.runIfNotJsAsync {
                         val contentEntryPictureVal = view.contentEntryPicture
                         if(contentEntryPictureVal != null) {
                             contentEntryPictureVal.cepContentEntryUid = entity.contentEntryUid

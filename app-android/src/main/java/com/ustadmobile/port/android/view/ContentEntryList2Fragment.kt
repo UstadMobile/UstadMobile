@@ -15,7 +15,7 @@ import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SELECT_FOLDER_VISIBLE
-import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_USE_CHIPS
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
@@ -75,7 +75,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 viewLifecycleOwner, di)
 
 
-        val filterOptions = if(mPresenter?.mListMode == ListViewMode.PICKER) {
+        val filterOptions = if(arguments?.get(ARG_USE_CHIPS) == true.toString()) {
             ContentEntryList2Presenter.PICKER_CHIP_OPTIONS.map {
                 ListFilterIdOption(systemImpl.getString(it.first, requireContext()), it.second)
             }
@@ -177,7 +177,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                         oldItem.description == newItem.description &&
                         oldItem.contentTypeFlag == newItem.contentTypeFlag &&
                         oldItem.mostRecentContainer?.fileSize == newItem.mostRecentContainer?.fileSize &&
-                        oldItem.thumbnailUrl == newItem.thumbnailUrl &&
                         oldItem.ceInactive == newItem.ceInactive
             }
         }
