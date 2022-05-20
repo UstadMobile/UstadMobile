@@ -152,6 +152,7 @@ open class Role() {
         const val PERMISSION_ASSIGNMENT_UPDATE : Long = 16777216
 
         //2^25
+        @Deprecated("Use LEARNING RECORD SELECT INSTEAD")
         const val PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS : Long= 33554432
 
         //2^26
@@ -255,7 +256,6 @@ open class Role() {
                 PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE or
                 PERMISSION_ASSIGNMENT_SELECT or
                 PERMISSION_ASSIGNMENT_UPDATE or
-                PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS or
                 PERMISSION_PERSON_LEARNINGRECORD_SELECT or
                 PERMISSION_PERSON_LEARNINGRECORD_INSERT or
                 PERMISSION_PERSON_LEARNINGRECORD_UPDATE or
@@ -345,7 +345,6 @@ open class Role() {
                         PERMISSION_PERSON_PICTURE_UPDATE or
                         PERMISSION_ASSIGNMENT_SELECT  or
                         PERMISSION_ASSIGNMENT_UPDATE  or
-                        PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS or
                         PERMISSION_CONTENT_SELECT or
                         PERMISSION_CONTENT_INSERT or
                         PERMISSION_CONTENT_UPDATE or

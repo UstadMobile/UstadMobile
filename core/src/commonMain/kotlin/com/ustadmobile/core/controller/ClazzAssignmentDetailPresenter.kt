@@ -60,8 +60,8 @@ class ClazzAssignmentDetailPresenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         presenterScope.launch {
             val loggedInPersonUid = accountManager.activeAccount.personUid
-            val hasStudentProgressPermission = db.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
-                    assignment.caClazzUid, Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS)
+            val hasStudentProgressPermission = db.clazzDao.personHasPermissionWithClazz(
+                loggedInPersonUid, assignment.caClazzUid, Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT)
 
             val commonArgs = mapOf(UstadView.ARG_NAV_CHILD to true.toString(),
                     ARG_ENTITY_UID to entityUid.toString(),
