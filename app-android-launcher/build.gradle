@@ -13,7 +13,7 @@ if(keyStoreFile == null) {
 
 def keyStorePropertiesExists = rootProject.file(keyStoreFile).exists()
 def keystoreProperties = new Properties()
-def baseAppId = "com.toughra.ustadmobile"
+def baseAppId = "org.unicef.tj.omuzgormobile"
 
 if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file(keyStoreFile)))
@@ -55,7 +55,7 @@ android {
 
     defaultConfig {
         applicationId "${baseAppId}"
-        resConfigs 'en', 'fa', 'ps', 'ar', 'tg', 'bn', 'ne', 'my', 'ru', 'tl'
+        resConfigs 'en', 'tg', 'ru'
         minSdkVersion 21
         targetSdkVersion 31
         versionCode rootProject.ext.ustadVersionCode
