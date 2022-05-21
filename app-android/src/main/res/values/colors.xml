@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- As per: https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=00796B&secondary.color=FF9800 -->
+
+    <!--Material color usage is based on https://material.io/design/material-theming/implementing-your-theme.html#color
+    As per: https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=00796B&secondary.color=FF9800 
+    -->
+
     <color name="primaryLightColor">#48a999</color> <!--@200 Intensity-->
     <color name="primaryLightVariantColor">#C2FFF5</color>
     <color name="primaryColor">#00796b</color> <!--@500 Intensity-->
@@ -26,5 +30,4 @@
     <color name="navigationBarColor">#000000</color>
     <color name="iconTintColor">#727272</color>
     <color name="successColor">#4CAF50</color>
-
 </resources>

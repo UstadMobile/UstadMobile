@@ -25,7 +25,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="@dimen/dimen_16dp"
-        app:srcCompat="@drawable/expo2020_logo"/>
+        app:srcCompat="@drawable/ic_tajik_emblem"/>
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier_top"
@@ -56,6 +56,17 @@
             android:layout_height="wrap_content"/>
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@id/unicef_logo"
+        android:layout_marginBottom="@dimen/dimen_16dp"
+        android:layout_width="@dimen/dimen_70dp"
+        android:layout_height="@dimen/dimen_70dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="@dimen/dimen_16dp"
+        app:srcCompat="@drawable/unicef_tj"/>
 
     <com.google.android.material.button.MaterialButton
         style="@style/UmTheme.ShapeAppearance.SmallComponent"
@@ -104,6 +115,7 @@
         />
 
     <TextView
+        android:visibility="gone"
         android:paddingTop="@dimen/dimen_10dp"
         android:id="@+id/in_partnership_with_text"
         android:layout_width="0dp"
@@ -120,12 +132,12 @@
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@id/irc_logo"
         android:layout_marginBottom="@dimen/dimen_16dp"
-        android:layout_width="53dp"
+        android:layout_width="@dimen/dimen_70dp"
         android:layout_height="@dimen/dimen_70dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="@dimen/dimen_16dp"
-        app:srcCompat="@drawable/ic_irc"/>
+        app:srcCompat="@drawable/eu_logo_tg"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

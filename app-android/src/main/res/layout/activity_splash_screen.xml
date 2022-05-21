@@ -10,64 +10,77 @@
 
    <androidx.appcompat.widget.AppCompatImageView
        android:id="@+id/organisation_icon"
-       android:layout_width="@dimen/dimen_300dp"
-       android:minHeight="@dimen/dimen_100dp"
-       android:layout_height="0dp"
-       app:layout_constraintHeight_max="@dimen/dimen_300dp"
-       app:layout_constraintHeight_min="@dimen/dimen_100dp"
-       app:layout_constraintBottom_toTopOf="@+id/expo_logo"
-       app:layout_constraintHorizontal_bias="0.5"
-       app:layout_constraintLeft_toLeftOf="parent"
-       app:layout_constraintRight_toRightOf="parent"
+       android:layout_width="@dimen/dimen_100dp"
+       android:layout_height="@dimen/dimen_100dp"
+       android:layout_marginTop="@dimen/dimen_16dp"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="0.498"
+       app:layout_constraintStart_toStartOf="parent"
+
        app:layout_constraintTop_toTopOf="parent"
-       app:srcCompat="@drawable/ic_ustad_logo"
-       tools:ignore="ContentDescription" />
+       app:layout_constraintVertical_bias="0.2  "
+       app:srcCompat="@drawable/ic_launcher_maktab2"
+       tools:ignore="ContentDescription"
+       tools:src="@drawable/ic_launcher_maktab2" />
+
+   <TextView
+       android:id="@+id/organisation_name"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:gravity="center"
+       android:text="Мактаб Мобайл"
+       android:textAppearance="@style/UmTheme.TextAppearance.Headline5"
+       android:textColor="?colorOnOrganisationText"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/organisation_icon" />
 
 
    <androidx.appcompat.widget.AppCompatImageView
-       android:id="@+id/expo_logo"
-       android:layout_width="@dimen/dimen_100dp"
-       android:layout_height="@dimen/dimen_100dp"
-       android:layout_marginVertical="@dimen/dimen_8dp"
-       app:layout_constraintBottom_toTopOf="@+id/partnership_with_linearlayout"
+       android:id="@+id/tajik_emblem"
+       android:layout_marginTop="@dimen/dimen_8dp"
+       android:layout_width="@dimen/dimen_64dp"
+       android:layout_height="@dimen/dimen_64dp"
+       app:layout_constraintEnd_toStartOf="@+id/unicef_logo"
        app:layout_constraintHorizontal_bias="0.5"
-       app:layout_constraintLeft_toLeftOf="parent"
-       app:layout_constraintRight_toRightOf="parent"
-       app:layout_constraintTop_toBottomOf="@+id/organisation_icon"
-       app:srcCompat="@drawable/expo2020_logo"
-       tools:ignore="ContentDescription" />
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/organisation_name"
+       app:srcCompat="@drawable/ic_tajik_emblem" />
 
 
-   <LinearLayout
-       android:id="@+id/partnership_with_linearlayout"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:orientation="vertical"
+   <androidx.appcompat.widget.AppCompatImageView
+       android:id="@+id/unicef_logo"
+       android:layout_width="@dimen/dimen_64dp"
+       android:layout_height="@dimen/dimen_64dp"
+       android:layout_marginTop="@dimen/dimen_8dp"
+       app:layout_constraintEnd_toStartOf="@+id/eu_logo"
+       app:layout_constraintHorizontal_bias="0.5"
+       app:layout_constraintStart_toEndOf="@+id/tajik_emblem"
+       app:layout_constraintTop_toBottomOf="@+id/organisation_name"
+       app:srcCompat="@drawable/unicef_tj" />
+
+   <androidx.appcompat.widget.AppCompatImageView
+       android:layout_marginTop="@dimen/dimen_8dp"
+
+       android:id="@+id/eu_logo"
+       android:layout_width="@dimen/dimen_64dp"
+       android:layout_height="@dimen/dimen_64dp"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="0.5"
+       app:layout_constraintStart_toEndOf="@+id/unicef_logo"
+       app:layout_constraintTop_toBottomOf="@+id/organisation_name"
+       app:srcCompat="@drawable/eu_logo_tg" />
+
+   <androidx.appcompat.widget.AppCompatImageView
+       android:id="@+id/irc_logo"
+       android:layout_width="match_parent"
+       android:layout_height="@dimen/dimen_24dp"
+       android:maxHeight="@dimen/dimen_80dp"
        app:layout_constraintBottom_toBottomOf="parent"
-       app:layout_constraintHorizontal_bias="0.5"
-       app:layout_constraintLeft_toLeftOf="parent"
-       app:layout_constraintRight_toRightOf="parent"
-       app:layout_constraintTop_toBottomOf="@+id/expo_logo">
-
-      <TextView
-          android:id="@+id/partnership_text"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="@string/created_partnership"
-          android:textAppearance="@style/UmTheme.TextAppearance.Body2" />
-
-      <androidx.appcompat.widget.AppCompatImageView
-          android:layout_marginTop="@dimen/dimen_8dp"
-          android:id="@+id/irc_logo"
-          android:layout_width="match_parent"
-          android:layout_height="@dimen/dimen_80dp"
-          android:minHeight="@dimen/dimen_70dp"
-          android:maxHeight="@dimen/dimen_150dp"
-          android:layout_marginBottom="@dimen/dimen_30dp"
-          app:srcCompat="@drawable/ic_irc"
-          tools:ignore="ContentDescription" />
-
-   </LinearLayout>
+       app:srcCompat="@drawable/ic_ustad_logo_poweredby"
+       android:layout_marginBottom="@dimen/dimen_8dp"
+       tools:ignore="ContentDescription" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

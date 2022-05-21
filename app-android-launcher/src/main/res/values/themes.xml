@@ -38,8 +38,9 @@
         <item name="colorOnIconTint">@color/iconTintColor</item>
         <item name="colorOnTintPrimary">?colorPrimary</item>
         <item name="colorTabIndicator">@color/onPrimaryColor</item>
-        <item name="colorTabText" >@color/primaryLightVariantColor</item>
-        <item name="colorSelectedTabText">@color/onPrimaryColor</item>
+        <item name="colorTabText" >@color/onBackgroundColor</item>
+        <item name="colorOnOrganisationText">@color/primaryColor</item>
+        <item name="colorSelectedTabText">@color/onSurfaceColor</item>
         <item name="colorPrimaryBackground">@color/primaryColor</item>
         <item name="colorPrimarySurface">@color/primaryColor</item>
         <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimaryVariant</item>

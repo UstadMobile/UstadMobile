@@ -54,8 +54,8 @@ android {
     }
 
     defaultConfig {
-        applicationId "${baseAppId}"
-        resConfigs 'en', 'tg', 'ru'
+        applicationId "${baseAppId}.launcher"
+        resConfigs "en","tg","ru"
         minSdkVersion 21
         targetSdkVersion 31
         versionCode rootProject.ext.ustadVersionCode
