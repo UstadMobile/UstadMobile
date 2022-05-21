@@ -20,7 +20,7 @@
 
        app:layout_constraintTop_toTopOf="parent"
        app:layout_constraintVertical_bias="0.2  "
-       app:srcCompat="@drawable/ic_launcher_maktab2"
+       app:srcCompat="@drawable/ic_launcher_omuzgor"
        tools:ignore="ContentDescription"
        tools:src="@drawable/ic_launcher_maktab2" />
 
@@ -29,7 +29,7 @@
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:gravity="center"
-       android:text="Мактаб Мобайл"
+       android:text="Омузгор мобайл"
        android:textAppearance="@style/UmTheme.TextAppearance.Headline5"
        android:textColor="?colorOnOrganisationText"
        app:layout_constraintEnd_toEndOf="parent"
