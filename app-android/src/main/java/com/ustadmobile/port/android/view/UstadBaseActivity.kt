@@ -29,7 +29,6 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
 import com.ustadmobile.sharedse.network.NetworkManagerBle
@@ -45,8 +44,9 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotifications,
-        UstadView, ShakeDetector.Listener, BleNetworkManagerProvider, DIAware {
+abstract class UstadBaseActivity : AppCompatActivity(), UstadView, ShakeDetector.Listener,
+    BleNetworkManagerProvider, DIAware
+{
 
     override val di by closestDI()
 
@@ -242,11 +242,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
             Locale(languageSetting)
         config.setLocale(locale)
         super.attachBaseContext(newBase.createConfigurationContext(config))
-    }
-
-
-    override fun showNotification(notification: String, length: Int) {
-        runOnUiThread { Toast.makeText(this, notification, length).show() }
     }
 
 

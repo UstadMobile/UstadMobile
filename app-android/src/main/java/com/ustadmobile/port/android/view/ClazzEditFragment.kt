@@ -254,6 +254,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
         courseBlockRecyclerAdapter = null
         courseBlocks = null
         clazzSchedules = null
+        mPresenter = null
     }
 
     companion object {
