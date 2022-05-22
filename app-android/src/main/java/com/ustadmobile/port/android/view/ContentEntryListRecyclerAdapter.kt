@@ -39,8 +39,6 @@ class ContentEntryListRecyclerAdapter(
 
     private val appDatabase: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
 
-    private val boundViewHolders = mutableSetOf<ContentEntryListViewHolder>()
-
     class ContentEntryListViewHolder(
         val itemBinding: ItemContentEntryListBinding,
         val lifecycleOwner: LifecycleOwner?
@@ -69,14 +67,6 @@ class ContentEntryListRecyclerAdapter(
         }
     }
 
-    fun onLocalAvailabilityUpdated(localAvailabilityMap: Map<Long, Boolean>) {
-        boundViewHolders.forEach {
-            it.itemBinding.locallyAvailable = localAvailabilityMap.getOrElse(
-                    it.itemBinding.contentEntry?.mostRecentContainer?.containerUid ?: -1) { false }
-        }
-    }
-
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentEntryListViewHolder {
         val itemBinding = ItemContentEntryListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         itemBinding.itemListener = itemListener
@@ -88,7 +78,6 @@ class ContentEntryListRecyclerAdapter(
 
     override fun onBindViewHolder(holder: ContentEntryListViewHolder, position: Int) {
         val item = getItem(position)
-        boundViewHolders += holder
         holder.itemBinding.contentEntry = item
         holder.itemView.setSelectedIfInList(item, selectedItems, ContentEntryList2Fragment.DIFF_CALLBACK)
         if(item != null) {
@@ -100,9 +89,6 @@ class ContentEntryListRecyclerAdapter(
         }
     }
 
-    override fun onViewRecycled(holder: ContentEntryListViewHolder) {
-        boundViewHolders -= holder
-    }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)

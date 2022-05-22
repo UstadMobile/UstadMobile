@@ -15,9 +15,10 @@ import com.toughra.ustadmobile.databinding.ItemCourseBottomSheetOptionBinding
 
 data class TitleDescBottomSheetOption(val title: String, val desc: String, val optionCode: Int)
 
-class TitleDescBottomSheetOptionFragment(private val optionsList: List<TitleDescBottomSheetOption>,
-                                         private var onOptionSelected: TitleDescBottomSheetOptionSelectedListener?)
-    : BottomSheetDialogFragment(), TitleDescBottomSheetOptionSelectedListener {
+class TitleDescBottomSheetOptionFragment(
+    private val optionsList: List<TitleDescBottomSheetOption>,
+    private var onOptionSelected: TitleDescBottomSheetOptionSelectedListener?
+) : BottomSheetDialogFragment(), TitleDescBottomSheetOptionSelectedListener {
 
         class BottomSheetOptionViewHolder(val mBinding: ItemCourseBottomSheetOptionBinding) : RecyclerView.ViewHolder(mBinding.root)
 

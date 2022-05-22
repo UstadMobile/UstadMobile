@@ -256,7 +256,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         val rootView: View
 
         mBinding = FragmentCourseDetailOverviewBinding.inflate(inflater, container,
@@ -325,6 +325,8 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         scheduleHeaderAdapter = null
         mScheduleListRecyclerAdapter = null
         courseBlockDetailRecyclerAdapter = null
+        currentLiveData = null
+        courseBlockLiveData = null
 
     }
 
@@ -334,7 +336,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         set(value) {
             field = value
             detailRecyclerAdapter?.clazz = value
-            courseImageAdapter?.clazz = value
+            courseImageAdapter?.submitList(value?.let { listOf(it) } ?: listOf())
             courseBlockDetailRecyclerAdapter?.timeZone = value?.clazzTimeZone ?: value?.clazzSchool?.schoolTimeZone ?: "UTC"
         }
 

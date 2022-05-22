@@ -403,14 +403,17 @@ class ClazzEdit2Presenter(
 
         scheduleOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
         courseBlockOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
+        view.coursePicture = bundle[SAVEDSTATE_KEY_COURSEPICTURE]?.let {
+            json.decodeFromString(CoursePicture.serializer(), it)
+        }
         return clazz
     }
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = view.entity ?: return
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                    entityVal)
+        savedState.putEntityAsJson(SAVEDSTATE_KEY_COURSEPICTURE, null, view.coursePicture)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
     fun handleClickTimezone() {
@@ -671,32 +674,6 @@ class ClazzEdit2Presenter(
             serializationStrategy = CourseBlock.serializer(),
             destinationResultKey = ARG_SAVEDSTATE_TEXT,
             arguments = args))
-    }
-
-    companion object {
-
-        const val ARG_SAVEDSTATE_SCHEDULES = "schedules"
-
-        const val ARG_SAVEDSTATE_BLOCK = "courseBlocks"
-
-        const val ARG_SAVEDSTATE_MODULE = "courseModule"
-
-        const val ARG_SAVEDSTATE_TEXT = "courseText"
-
-        const val SAVEDSTATE_KEY_SCHOOL = "School"
-
-        const val SAVEDSTATE_KEY_ASSIGNMENT = "Assignment"
-
-        const val SAVEDSTATE_KEY_CONTENT = "courseContent"
-
-        const val SAVEDSTATE_KEY_HOLIDAYCALENDAR = "ClazzHolidayCalendar"
-
-        const val SAVEDSTATE_KEY_FEATURES = "ClazzFeatures"
-
-        const val SAVEDSTATE_KEY_TERMINOLOGY ="ClazzTerminology"
-
-        const val SAVEDSTATE_KEY_DISCUSSION = "CourseDiscussion"
-
     }
 
     override fun onClickNew() {
@@ -967,6 +944,34 @@ class ClazzEdit2Presenter(
     }
 
     override fun onItemDismiss(position: Int) {
+
+    }
+
+    companion object {
+
+        const val ARG_SAVEDSTATE_SCHEDULES = "schedules"
+
+        const val ARG_SAVEDSTATE_BLOCK = "courseBlocks"
+
+        const val ARG_SAVEDSTATE_MODULE = "courseModule"
+
+        const val ARG_SAVEDSTATE_TEXT = "courseText"
+
+        const val SAVEDSTATE_KEY_SCHOOL = "School"
+
+        const val SAVEDSTATE_KEY_ASSIGNMENT = "Assignment"
+
+        const val SAVEDSTATE_KEY_CONTENT = "courseContent"
+
+        const val SAVEDSTATE_KEY_HOLIDAYCALENDAR = "ClazzHolidayCalendar"
+
+        const val SAVEDSTATE_KEY_FEATURES = "ClazzFeatures"
+
+        const val SAVEDSTATE_KEY_TERMINOLOGY ="ClazzTerminology"
+
+        const val SAVEDSTATE_KEY_DISCUSSION = "CourseDiscussion"
+
+        const val SAVEDSTATE_KEY_COURSEPICTURE = "CoursePicture"
 
     }
 
