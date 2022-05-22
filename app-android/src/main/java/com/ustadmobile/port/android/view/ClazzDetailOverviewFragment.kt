@@ -325,6 +325,8 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         scheduleHeaderAdapter = null
         mScheduleListRecyclerAdapter = null
         courseBlockDetailRecyclerAdapter = null
+        currentLiveData = null
+        courseBlockLiveData = null
 
     }
 

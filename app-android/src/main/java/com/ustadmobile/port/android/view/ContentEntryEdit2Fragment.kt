@@ -306,21 +306,11 @@ class ContentEntryEdit2Fragment(
         entity = entityVal
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
-            requireActivity().activityResultRegistry,null, 1).also {
-            lifecycle.addObserver(it)
-        }
-    }
-
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val rootView: View
         mBinding = FragmentContentEntryEdit2Binding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.imageViewLifecycleObserver = imageViewLifecycleObserver
             it.activityEventHandler = this
             it.compressionEnabled = true
             it.showVideoPreview = false
@@ -367,6 +357,13 @@ class ContentEntryEdit2Fragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val navController = findNavController()
+
+        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
+            requireActivity().activityResultRegistry,null, 1).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+            mBinding?.imageViewLifecycleObserver = it
+        }
+
         ustadFragmentTitle = getString(R.string.content)
 
         mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), this,

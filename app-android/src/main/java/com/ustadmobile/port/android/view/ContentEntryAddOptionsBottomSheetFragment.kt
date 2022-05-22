@@ -26,7 +26,9 @@ import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
  * CONTENT_CREATE_CONTENT = create content from out content editor
  */
 
-class ContentEntryAddOptionsBottomSheetFragment(var listener: ContentEntryAddOptionsListener? = null) : BottomSheetDialogFragment(), ContentEntryAddOptionsView, View.OnClickListener {
+class ContentEntryAddOptionsBottomSheetFragment(
+    var listener: ContentEntryAddOptionsListener? = null
+) : BottomSheetDialogFragment(), ContentEntryAddOptionsView, View.OnClickListener {
 
 
     private var createFolderOptionView: View? = null
@@ -42,7 +44,7 @@ class ContentEntryAddOptionsBottomSheetFragment(var listener: ContentEntryAddOpt
     private lateinit var argsMap: Map<String, String>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         argsMap = arguments.toStringMap()
         val showFolder = argsMap[ARG_SHOW_ADD_FOLDER].toBoolean()
         return FragmentContentEntryAddOptionsBinding.inflate(inflater, container, false).also {
@@ -91,10 +93,12 @@ class ContentEntryAddOptionsBottomSheetFragment(var listener: ContentEntryAddOpt
         addGalleryOptionView?.setOnClickListener(null)
         addFileOptionView?.setOnClickListener(null)
         addFolderOptionView?.setOnClickListener(null)
-        addLinkOptionView = null
         createFolderOptionView = null
-        addFileOptionView = null
+        addLinkOptionView = null
+        addFolderOptionView = null
         addGalleryOptionView = null
+        addFileOptionView = null
+        listener = null
     }
 
     companion object {
