@@ -195,6 +195,9 @@ class ContentEntryEdit2Presenter(
         }
 
         view.showUpdateContentButton = editEntity.contentEntryUid != 0L && editEntity.leaf
+        view.contentEntryPicture = bundle[SAVED_STATE_CONTENTENTRY_PICTURE]?.let {
+            json.decodeFromString(ContentEntryPicture.serializer(), it)
+        }
 
         return editEntity
     }
@@ -234,7 +237,10 @@ class ContentEntryEdit2Presenter(
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        savedState.putEntityAsJson(ARG_IMPORTED_METADATA, MetadataResult.serializer(), view.metadataResult)
+        savedState.putEntityAsJson(ARG_IMPORTED_METADATA, MetadataResult.serializer(),
+            view.metadataResult)
+        savedState.putEntityAsJson(SAVED_STATE_CONTENTENTRY_PICTURE,
+            ContentEntryPicture.serializer(), view.contentEntryPicture)
     }
 
     fun loadEntityIntoDateTime(entry: ContentEntryWithBlockAndLanguage){
@@ -638,6 +644,8 @@ class ContentEntryEdit2Presenter(
         const val SAVEDSTATE_KEY_LANGUAGE = "Language"
 
         const val SAVED_STATE_KEY_METADATA = "importedMetadata"
+
+        const val SAVED_STATE_CONTENTENTRY_PICTURE = "contentEntryPicture"
 
         const val HTTP_PARAM_CONVERSION_PARAMS = "conversionParams"
 
