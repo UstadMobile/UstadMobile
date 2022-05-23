@@ -102,9 +102,10 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
             mDataBinding?.coursePicture = value
         }
 
-    class ScheduleRecyclerAdapter(var oneToManyEditListener: OneToManyJoinEditListener<Schedule>?,
-                                  var presenter: ClazzEdit2Presenter?): ListAdapter<Schedule,
-            ScheduleRecyclerAdapter.ScheduleViewHolder>(DIFF_CALLBACK_SCHEDULE) {
+    class ScheduleRecyclerAdapter(
+        var oneToManyEditListener: OneToManyJoinEditListener<Schedule>?,
+        var presenter: ClazzEdit2Presenter?
+    ): ListAdapter<Schedule, ScheduleRecyclerAdapter.ScheduleViewHolder>(DIFF_CALLBACK_SCHEDULE) {
 
         class ScheduleViewHolder(val binding: ItemScheduleBinding): RecyclerView.ViewHolder(binding.root)
 
