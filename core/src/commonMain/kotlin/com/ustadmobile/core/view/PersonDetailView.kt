@@ -11,6 +11,8 @@ interface PersonDetailView: UstadDetailView<PersonWithPersonParentJoin> {
 
     var showCreateAccountVisible: Boolean
 
+    var chatVisibility: Boolean
+
     companion object {
 
         const val VIEW_NAME = "PersonDetailView"

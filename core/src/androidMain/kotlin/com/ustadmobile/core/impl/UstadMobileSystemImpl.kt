@@ -480,10 +480,11 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     /**
      * Open the given link in a browser and/or tab depending on the platform
      */
-    actual fun openLinkInBrowser(url: String, context: Any) {
+    actual override fun openLinkInBrowser(url: String, context: Any) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         (context as Context).startActivity(intent)
     }
+
 
 
     actual companion object {

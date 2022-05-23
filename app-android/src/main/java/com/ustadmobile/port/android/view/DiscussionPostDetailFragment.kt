@@ -63,19 +63,19 @@ class DiscussionPostDetailFragment: UstadBaseFragment(), DiscussionPostDetailVie
 
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
+        //1.
+        descriptionRecyclerAdapter = DiscussionPostDescriptionRecyclerAdapter(di, requireContext())
+
         mPresenter = DiscussionPostDetailPresenter(
             requireContext(),
             arguments.toStringMap(),
             this,
-            di,
-            viewLifecycleOwner)
+            di
+        )
 
 
         val stackedLayoutManager = LinearLayoutManager(requireContext())
         stackedLayoutManager.reverseLayout = true
-
-        //1.
-        descriptionRecyclerAdapter = DiscussionPostDescriptionRecyclerAdapter()
 
         //2.
         newReplyRecyclerAdapter  = NewMessageSendRecyclerViewAdapter(this,
@@ -85,7 +85,7 @@ class DiscussionPostDetailFragment: UstadBaseFragment(), DiscussionPostDetailVie
 
         //3.
         messagesRecyclerAdapter = MessagesRecyclerAdapter(accountManager.activeAccount.personUid,
-            mPresenter?.ps, mPresenter)
+            mPresenter?.ps, mPresenter, di, requireContext())
 
 
 

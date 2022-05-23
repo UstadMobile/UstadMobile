@@ -14,7 +14,6 @@ import com.toughra.ustadmobile.databinding.FragmentClazzEditBinding
 import com.toughra.ustadmobile.databinding.ItemScheduleBinding
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
-import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.core.util.ext.toStringMap
@@ -56,12 +55,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
         t -> scheduleRecyclerAdapter?.submitList(t)
     }
 
-    private var scopedGrantRecyclerAdapter: ScopedGrantAndNameEditRecyclerViewAdapter? = null
-
-    private val scopedGrantListObserver = Observer<List<ScopedGrantAndName>> {
-        t -> scopedGrantRecyclerAdapter?.submitList(t)
-    }
-
     private val courseBlockObserver = Observer<List<CourseBlockWithEntity>?> {
         t -> courseBlockRecyclerAdapter?.dataSet = t
     }
@@ -101,13 +94,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
             mDataBinding?.enrolmentPolicy = value
         }
 
-    override var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>? = null
-        set(value) {
-            field?.removeObserver(scopedGrantListObserver)
-            field = value
-            field?.observe(this, scopedGrantListObserver)
-        }
-
     private var imageViewLifecycleObserver: ImageViewLifecycleObserver2? = null
 
     override var coursePicture: CoursePicture?
@@ -116,9 +102,10 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
             mDataBinding?.coursePicture = value
         }
 
-    class ScheduleRecyclerAdapter(var oneToManyEditListener: OneToManyJoinEditListener<Schedule>?,
-                                  var presenter: ClazzEdit2Presenter?): ListAdapter<Schedule,
-            ScheduleRecyclerAdapter.ScheduleViewHolder>(DIFF_CALLBACK_SCHEDULE) {
+    class ScheduleRecyclerAdapter(
+        var oneToManyEditListener: OneToManyJoinEditListener<Schedule>?,
+        var presenter: ClazzEdit2Presenter?
+    ): ListAdapter<Schedule, ScheduleRecyclerAdapter.ScheduleViewHolder>(DIFF_CALLBACK_SCHEDULE) {
 
         class ScheduleViewHolder(val binding: ItemScheduleBinding): RecyclerView.ViewHolder(binding.root)
 
@@ -162,21 +149,11 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
             mDataBinding?.fieldsEnabled = value
         }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
-            requireActivity().activityResultRegistry,null, 1).also {
-            lifecycle.addObserver(it)
-        }
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val rootView: View
 
         mDataBinding = FragmentClazzEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.imageViewLifecycleObserver = imageViewLifecycleObserver
             it.featuresBitmaskFlags = BitmaskEditPresenter.FLAGS_AVAILABLE
             it.activityEventHandler = this
         }
@@ -190,6 +167,14 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setEditFragmentTitle(R.string.add_a_new_course, R.string.edit_course)
+
+
+        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
+            requireActivity().activityResultRegistry,null, 1
+        ).also {
+            mDataBinding?.imageViewLifecycleObserver = it
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
 
         mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
             di, viewLifecycleOwner).withViewLifecycle()
@@ -209,16 +194,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
 
         courseBlockRecyclerView?.adapter = courseBlockRecyclerAdapter
         courseBlockRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
-        val permissionList = ScopedGrantEditPresenter.PERMISSION_LIST_MAP[Clazz.TABLE_ID]
-            ?: throw IllegalStateException("ScopedGrantEdit permission list not found!")
-        scopedGrantRecyclerAdapter = ScopedGrantAndNameEditRecyclerViewAdapter(
-            mPresenter?.scopedGrantOneToManyHelper, permissionList)
-
-        mDataBinding?.clazzEditFragmentPermissionsInc?.itemScopedGrantOneToNRecycler?.apply {
-            adapter = scopedGrantRecyclerAdapter
-            layoutManager = LinearLayoutManager(requireContext())
-        }
 
         bottomSheetOptionList = listOf(
                 TitleDescBottomSheetOption(
@@ -271,6 +246,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
     override fun onDestroyView() {
         super.onDestroyView()
         mDataBinding?.activityClazzEditScheduleRecyclerview?.adapter = null
+        mDataBinding?.activityEventHandler = null
         mDataBinding = null
         scheduleRecyclerView = null
         scheduleRecyclerAdapter = null
@@ -278,6 +254,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
         courseBlockRecyclerAdapter = null
         courseBlocks = null
         clazzSchedules = null
+        mPresenter = null
     }
 
     companion object {

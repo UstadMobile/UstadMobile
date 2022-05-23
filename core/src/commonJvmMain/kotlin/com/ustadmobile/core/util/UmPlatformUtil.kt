@@ -19,7 +19,11 @@ actual object UmPlatformUtil {
      */
     actual suspend fun runAsync(block: suspend CoroutineScope.() -> Unit) {}
 
-    actual suspend fun runIfNotJs(block:suspend () ->Unit){
+    actual suspend fun runIfNotJsAsync(block:suspend () ->Unit){
+        block()
+    }
+
+    actual fun runIfNotJs(block: () -> Unit) {
         block()
     }
 

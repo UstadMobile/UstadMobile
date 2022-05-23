@@ -18,7 +18,7 @@ class TimeZoneListPresenter(context: Any, args: Map<String, String>, view: TimeZ
 
 
     fun handleClickTimeZone(timeZoneId: String) {
-        finishWithResult(safeStringify(di, ListSerializer(String.serializer()),listOf(timeZoneId)))
+        finishWithResult(timeZoneId)
     }
 
     companion object {

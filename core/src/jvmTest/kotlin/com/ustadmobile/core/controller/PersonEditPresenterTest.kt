@@ -3,30 +3,26 @@ package com.ustadmobile.core.controller
 import org.mockito.kotlin.*
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.years
-import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.EntityRoleDao
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
-import junit.framework.Assert.assertEquals
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -123,26 +119,6 @@ class PersonEditPresenterTest  {
         }
     }
 
-
-    private fun createPersonAndInsert(matchPassword: Boolean = true, leftOutPassword: Boolean = false): PersonWithAccount {
-        val password = "password"
-        val confirmPassword = if(matchPassword) password else "password1"
-        var personWithAccount =  PersonWithAccount().apply {
-            fatherName = "Doe"
-            firstNames = "Jane"
-            lastName = "Doe"
-            if(!leftOutPassword){
-                newPassword = password
-                confirmedPassword = confirmPassword
-            }
-        }
-
-        GlobalScope.launch {
-            personWithAccount = repo.insertPersonAndGroup(personWithAccount)
-        }
-        return personWithAccount
-    }
-
     @Test
     fun givenPresenterCreatedInRegistrationMode_whenUsernameAndPasswordNotFilledClickSave_shouldShowErrors() {
         val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to PersonEditView.REGISTER_MODE_ENABLED.toString())
@@ -235,9 +211,14 @@ class PersonEditPresenterTest  {
 
         presenter.handleClickSave(person)
 
-        verifyBlocking(mockDao, timeout(timeoutInMill)) {
-            insertAsync(argWhere { it.username ==  "dummyUsername"})
+        runBlocking {
+            repo.waitUntil(5000, listOf("Person")) {
+                repo.personDao.findByUsername("dummyUsername") != null
+            }
         }
+
+        val personInDb = repo.personDao.findByUsername("dummyUsername")
+        Assert.assertNotNull("Person was created in database", personInDb)
     }
 
     @Test
@@ -251,7 +232,7 @@ class PersonEditPresenterTest  {
         val presenter = PersonEditPresenter(context, args, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
-        nullableArgumentCaptor<PersonParentJoin>() {
+        nullableArgumentCaptor<PersonParentJoin> {
             verify(mockView, timeout(5000)).approvalPersonParentJoin = capture()
             firstValue?.ppjEmail = "parent@somewhere.com"
         }
@@ -270,7 +251,7 @@ class PersonEditPresenterTest  {
 
         verifyBlocking(accountManager, timeout(timeoutInMill)) {
             register(argWhere { it.personUid == personToRegister.personUid },
-                eq(serverUrl), argWhere<AccountRegisterOptions> { it.parentJoin?.ppjEmail == "parent@somewhere.com" })
+                eq(serverUrl), argWhere { it.parentJoin?.ppjEmail == "parent@somewhere.com" })
         }
 
         argumentCaptor<Map<String, String>> {
@@ -319,7 +300,37 @@ class PersonEditPresenterTest  {
                 MessageID.field_required_prompt, context)
     }
 
+    /**
+     * When an adult directly adds a child account to the system, we consider that they have provided
+     * consent.
+     */
+    @Test
+    fun givenPresenterCreatedInNonRegistrationMode_whenDateOfBirthIndicatesMinor_shouldSaveAPersonInDbAndRecordConsent() {
+        val args = mapOf(UstadView.ARG_REGISTRATION_ALLOWED to false.toString())
 
+        val person = createPerson().apply {
+            username = "dummyUsername"
+            dateOfBirth = systemTimeInMillis() - (365 * 24 * 60 * 60 * 1000L)
+        }
+        val presenter = PersonEditPresenter(context, args,mockView, di,mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        presenter.handleClickSave(person)
+
+        runBlocking {
+            repo.waitUntil(5000, listOf("Person")) {
+                repo.personDao.findByUsername("dummyUsername") != null
+            }
+        }
+
+        val personInDb = repo.personDao.findByUsername("dummyUsername")
+
+        runBlocking {
+            Assert.assertTrue("Minor was marked as approved",
+                repo.personParentJoinDao.isMinorApproved(personInDb?.personUid ?: 0))
+        }
+    }
 
 
 }

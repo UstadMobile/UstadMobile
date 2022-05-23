@@ -49,7 +49,7 @@ abstract class ContentJobItemDao {
            AND cjiRecursiveStatus <= ${JobStatus.RUNNING_MAX}
       ORDER BY cjiStartTime DESC
     """)
-    abstract fun findActiveContentJobItems(contentEntryUid: Long): List<ContentJobItemProgress>
+    abstract suspend fun findActiveContentJobItems(contentEntryUid: Long): List<ContentJobItemProgress>
 
 
     @Insert

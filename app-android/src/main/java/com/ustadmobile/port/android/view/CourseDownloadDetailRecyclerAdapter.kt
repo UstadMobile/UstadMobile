@@ -14,6 +14,11 @@ class CourseDownloadDetailRecyclerAdapter(val listener: ClazzDetailOverviewEvent
 
     private var viewHolder: CourseDownloadDetailViewHolder? = null
 
+    var permissionButtonVisible: Boolean = false
+        set(value) {
+            field = value
+            currentViewHolder?.itemBinding?.permissionButtonVisible = value
+        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseDownloadDetailViewHolder {
         viewHolder =  CourseDownloadDetailViewHolder(
@@ -31,5 +36,6 @@ class CourseDownloadDetailRecyclerAdapter(val listener: ClazzDetailOverviewEvent
 
     override fun onBindViewHolder(holder: CourseDownloadDetailViewHolder, position: Int) {
         super.onBindViewHolder(holder, position)
+        holder.itemBinding?.permissionButtonVisible = permissionButtonVisible
     }
 }

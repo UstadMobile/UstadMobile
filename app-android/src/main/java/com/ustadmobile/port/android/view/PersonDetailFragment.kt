@@ -82,6 +82,12 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
             mBinding?.changePasswordVisibility = if(value) View.VISIBLE else View.GONE
         }
 
+    override var chatVisibility: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.chatVisibility = if(value) View.VISIBLE else View.GONE
+        }
+
     override var showCreateAccountVisible: Boolean = false
         set(value) {
             field = value
@@ -106,6 +112,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
             rootView = it.root
             it.createAccountVisibility = View.GONE
             it.changePasswordVisibility = View.GONE
+            it.chatVisibility = View.GONE
             it.classesRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.classesRecyclerview.adapter = clazzEnrolmentWithClazzRecyclerAdapter
         }

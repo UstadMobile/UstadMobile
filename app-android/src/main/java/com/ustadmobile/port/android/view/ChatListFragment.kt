@@ -73,9 +73,7 @@ class ChatListFragment : UstadListViewFragment<Chat, ChatWithLatestMessageAndCou
             val optionList =
                 listOf(
                     BottomSheetOption(R.drawable.ic_add_black_24dp,
-                        requireContext().getString(R.string.new_chat), NEW_CHAT),
-                    BottomSheetOption(R.drawable.ic_login_24px,
-                    requireContext().getString(R.string.new_group), NEW_GROUP)
+                        requireContext().getString(R.string.new_chat), NEW_CHAT)
                 )
 
             val sheet = OptionsBottomSheetFragment(optionList, this)
@@ -125,9 +123,6 @@ class ChatListFragment : UstadListViewFragment<Chat, ChatWithLatestMessageAndCou
         when(optionSelected.optionCode) {
             NEW_CHAT -> mPresenter?.handleClickCreateNewFab(
                 ChatListPresenter.CHAT_RESULT_KEY)
-            NEW_GROUP -> mPresenter?.handleClickCreateNewGroup(
-                arguments.toStringMap(),
-                ChatListPresenter.CHAT_RESULT_KEY_GROUP)
         }
     }
 
@@ -154,7 +149,6 @@ class ChatListFragment : UstadListViewFragment<Chat, ChatWithLatestMessageAndCou
 
         const val NEW_CHAT = 2
 
-        const val NEW_GROUP = 3
     }
 
 

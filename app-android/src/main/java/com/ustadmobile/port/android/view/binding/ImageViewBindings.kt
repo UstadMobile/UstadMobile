@@ -241,6 +241,12 @@ fun ImageView.setIconOnProgressFlag(progress: ContentEntryStatementScoreProgress
     }
 }
 
+@BindingAdapter(value = ["scopedGrantEnabledIcon"])
+fun ImageView.setScopedGrantEnabledIcon(enabled: Boolean) {
+    setImageResource(if(enabled) R.drawable.ic_done_white_24dp else R.drawable.ic_close_black_24dp)
+    contentDescription = context.getString(if(enabled) R.string.enabled else R.string.disabled)
+}
+
 @Suppress("UNCHECKED_CAST")
 private fun ImageView.updateFromImageLookupMap() {
     val lookupKey = getTag(R.id.tag_imagelookup_key) as? Int

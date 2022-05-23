@@ -82,7 +82,7 @@ class JoinWithCodePresenterTest {
 
         runBlocking {
             clazzToEnrolInto = Clazz("Test Class")
-            repo.createNewClazzAndGroups(clazzToEnrolInto, systemImpl, context)
+            repo.createNewClazzAndGroups(clazzToEnrolInto, systemImpl, mapOf(), context)
         }
     }
 

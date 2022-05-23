@@ -6,6 +6,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
@@ -369,6 +370,25 @@ abstract class UstadMobileSystemCommon {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context)
     }
 
+
+    abstract fun openLinkInBrowser(url: String, context: Any)
+
+    /**
+     * Handle clicking link that decides to open on the web or to open in the browser
+     */
+    fun handleClickLink(url: String, accountManager: UstadAccountManager, context: Any){
+        if(url.contains(LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
+            val components = UstadUrlComponents.parse(url)
+            if(components.endpoint == accountManager.activeEndpoint.url){
+                goToViewLink(components.viewUri, context)
+            }else{
+                goToDeepLink(url, accountManager, context)
+            }
+        }else{
+            //Send link to system
+            openLinkInBrowser(url, context)
+        }
+    }
 
     companion object {
         private val MIME_TYPES = mapOf("image/jpg" to "jpg", "image/jpg" to "jpg",

@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
+import com.ustadmobile.core.view.UstadView
 
 class NavControllerAdapter(
     private val droidNavController: NavController,
@@ -18,16 +19,23 @@ class NavControllerAdapter(
             BackStackEntryAdapter(it, viewName)
         }
 
+    private fun lookupDestinationName(viewName: String): Int? {
+        return when(viewName) {
+            UstadView.CURRENT_DEST -> droidNavController.currentDestination?.id
+            UstadView.ROOT_DEST -> droidNavController.graph.startDestinationId
+            else -> destinationProvider.lookupDestinationName(viewName)?.destinationId
+        }
+    }
+
     override fun getBackStackEntry(viewName: String): UstadBackStackEntry? {
-        val ustadDestination = destinationProvider.lookupDestinationName(viewName) ?: return null
+        val destinationId = lookupDestinationName(viewName) ?: return null
 
         return BackStackEntryAdapter(
-            droidNavController.getBackStackEntry(ustadDestination.destinationId), viewName)
+            droidNavController.getBackStackEntry(destinationId), viewName)
     }
 
     override fun popBackStack(viewName: String, inclusive: Boolean) {
-        val popViewId = destinationProvider.lookupDestinationName(viewName)?.destinationId
-            ?: return
+        val popViewId = lookupDestinationName(viewName) ?: return
 
         droidNavController.popBackStack(popViewId, inclusive)
     }

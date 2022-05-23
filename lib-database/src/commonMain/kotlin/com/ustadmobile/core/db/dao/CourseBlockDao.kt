@@ -109,7 +109,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                SELECT PrsGrpMbr.groupMemberPersonUid
                   FROM Clazz
                        ${Clazz.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1}
-                          ${Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS}
+                          ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT}
                           ${Clazz.JOIN_FROM_SCOPEDGRANT_TO_PERSONGROUPMEMBER}
                  WHERE Clazz.clazzUid = :clazzUid
                    AND PrsGrpMbr.groupMemberPersonUid = :personUid)), 

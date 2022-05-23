@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
@@ -305,20 +306,11 @@ class ContentEntryEdit2Fragment(
         entity = entityVal
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
-            requireActivity().activityResultRegistry,null, 1).also {
-            lifecycle.addObserver(it)
-        }
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    @SuppressLint("SetJavaScriptEnabled")
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val rootView: View
         mBinding = FragmentContentEntryEdit2Binding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.imageViewLifecycleObserver = imageViewLifecycleObserver
             it.activityEventHandler = this
             it.compressionEnabled = true
             it.showVideoPreview = false
@@ -354,9 +346,9 @@ class ContentEntryEdit2Fragment(
         }
 
         if (savedInstanceState != null) {
-            playbackPosition = savedInstanceState.get(PLAYBACK) as Long
-            playWhenReady = savedInstanceState.get(PLAY_WHEN_READY) as Boolean
-            currentWindow = savedInstanceState.get(CURRENT_WINDOW) as Int
+            playbackPosition = savedInstanceState.get(PLAYBACK) as? Long ?: 0L
+            playWhenReady = savedInstanceState.get(PLAY_WHEN_READY) as? Boolean ?: false
+            currentWindow = savedInstanceState.get(CURRENT_WINDOW) as? Int ?: 0
         }
 
         return rootView
@@ -365,6 +357,13 @@ class ContentEntryEdit2Fragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val navController = findNavController()
+
+        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
+            requireActivity().activityResultRegistry,null, 1).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+            mBinding?.imageViewLifecycleObserver = it
+        }
+
         ustadFragmentTitle = getString(R.string.content)
 
         mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), this,

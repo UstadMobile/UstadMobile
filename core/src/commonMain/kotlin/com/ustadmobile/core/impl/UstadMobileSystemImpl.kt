@@ -133,7 +133,7 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
     /**
      * Open the given link in a browser and/or tab depending on the platform
      */
-    fun openLinkInBrowser(url: String, context: Any)
+    override fun openLinkInBrowser(url: String, context: Any)
 
 
     companion object {

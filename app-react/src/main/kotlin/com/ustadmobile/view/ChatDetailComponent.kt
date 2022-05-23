@@ -79,7 +79,7 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
     override fun onCreateView() {
         super.onCreateView()
         fabManager?.visible = false
-        mPresenter = ChatDetailPresenter(this, arguments, this, di, this)
+        mPresenter = ChatDetailPresenter(this, arguments, this, di)
         mPresenter?.onCreate(mapOf())
     }
 

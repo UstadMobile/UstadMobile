@@ -3888,7 +3888,7 @@ DELETE FROM ContainerEntryFile
                 stmtList += "CREATE TABLE IF NOT EXISTS ContentEntryPictureReplicate (`cepPk` INTEGER NOT NULL, `cepVersionId` INTEGER NOT NULL DEFAULT 0, `cepDestination` INTEGER NOT NULL, `cepPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`cepPk`, `cepDestination`))"
                 stmtList += "CREATE INDEX IF NOT EXISTS `index_ContentEntryPictureReplicate_cepPk_cepDestination_cepVersionId` ON ContentEntryPictureReplicate (`cepPk`, `cepDestination`, `cepVersionId`)"
                 stmtList += "CREATE INDEX IF NOT EXISTS `index_ContentEntryPictureReplicate_cepDestination_cepPending` ON ContentEntryPictureReplicate (`cepDestination`, `cepPending`)"
-            }else{
+
                 stmtList +=
                     " CREATE TRIGGER ch_ins_138 AFTER INSERT ON ContentEntryPicture BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) SELECT 138 AS chTableId, NEW.cepUid AS chEntityPk, 1 AS chType WHERE NOT EXISTS( SELECT chTableId FROM ChangeLog WHERE chTableId = 138 AND chEntityPk = NEW.cepUid); END "
                 stmtList +=
@@ -3917,32 +3917,34 @@ DELETE FROM ContainerEntryFile
         |        END
         |    
         """.trimMargin()
-            }
 
-            stmtList +=
-                "CREATE TABLE IF NOT EXISTS ContentEntryPicture (  cepContentEntryUid  BIGINT  NOT NULL , cepUri  TEXT , cepMd5  TEXT , cepFileSize  INTEGER  NOT NULL , cepTimestamp  BIGINT  NOT NULL , cepMimeType  TEXT , cepActive  BOOL  NOT NULL , cepUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
-            stmtList +=
-                "CREATE TABLE IF NOT EXISTS ContentEntryPictureReplicate (  cepPk  BIGINT  NOT NULL , cepVersionId  BIGINT  NOT NULL  DEFAULT 0 , cepDestination  BIGINT  NOT NULL , cepPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (cepPk, cepDestination) )"
-            stmtList +=
-                "CREATE INDEX index_ContentEntryPictureReplicate_cepPk_cepDestination_cepVersionId ON ContentEntryPictureReplicate (cepPk, cepDestination, cepVersionId)"
-            stmtList +=
-                "CREATE INDEX index_ContentEntryPictureReplicate_cepDestination_cepPending ON ContentEntryPictureReplicate (cepDestination, cepPending)"
 
-            stmtList +=
-                " CREATE OR REPLACE FUNCTION ch_upd_138_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (138, NEW.cepUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
-            stmtList +=
-                " CREATE TRIGGER ch_upd_138_trig AFTER UPDATE OR INSERT ON ContentEntryPicture FOR EACH ROW EXECUTE PROCEDURE ch_upd_138_fn(); "
-            stmtList +=
-                " CREATE OR REPLACE FUNCTION ch_del_138_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (138, OLD.cepUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
-            stmtList +=
-                " CREATE TRIGGER ch_del_138_trig AFTER DELETE ON ContentEntryPicture FOR EACH ROW EXECUTE PROCEDURE ch_del_138_fn(); "
-            stmtList +=
-                "CREATE VIEW ContentEntryPicture_ReceiveView AS  SELECT ContentEntryPicture.*, ContentEntryPictureReplicate.* FROM ContentEntryPicture LEFT JOIN ContentEntryPictureReplicate ON ContentEntryPictureReplicate.cepPk = ContentEntryPicture.cepUid "
-            stmtList +=
-                "CREATE OR REPLACE FUNCTION ceppicture_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ContentEntryPicture(cepUid, cepContentEntryUid, cepUri, cepMd5, cepFileSize, cepTimestamp, cepMimeType, cepActive) VALUES (NEW.cepUid, NEW.cepContentEntryUid, NEW.cepUri, NEW.cepMd5, NEW.cepFileSize, NEW.cepTimestamp, NEW.cepMimeType, NEW.cepActive) ON CONFLICT (cepUid) DO UPDATE SET cepContentEntryUid = EXCLUDED.cepContentEntryUid, cepUri = EXCLUDED.cepUri, cepMd5 = EXCLUDED.cepMd5, cepFileSize = EXCLUDED.cepFileSize, cepTimestamp = EXCLUDED.cepTimestamp, cepMimeType = EXCLUDED.cepMimeType, cepActive = EXCLUDED.cepActive ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
-            stmtList +=
-                " CREATE TRIGGER ceppicture_remote_insert_trig INSTEAD OF INSERT ON ContentEntryPicture_ReceiveView FOR EACH ROW EXECUTE PROCEDURE ceppicture_remote_insert_fn() "
-            stmtList += """
+            }else {
+
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS ContentEntryPicture (  cepContentEntryUid  BIGINT  NOT NULL , cepUri  TEXT , cepMd5  TEXT , cepFileSize  INTEGER  NOT NULL , cepTimestamp  BIGINT  NOT NULL , cepMimeType  TEXT , cepActive  BOOL  NOT NULL , cepUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"
+                stmtList +=
+                    "CREATE TABLE IF NOT EXISTS ContentEntryPictureReplicate (  cepPk  BIGINT  NOT NULL , cepVersionId  BIGINT  NOT NULL  DEFAULT 0 , cepDestination  BIGINT  NOT NULL , cepPending  BOOL  NOT NULL  DEFAULT true, PRIMARY KEY (cepPk, cepDestination) )"
+                stmtList +=
+                    "CREATE INDEX index_ContentEntryPictureReplicate_cepPk_cepDestination_cepVersionId ON ContentEntryPictureReplicate (cepPk, cepDestination, cepVersionId)"
+                stmtList +=
+                    "CREATE INDEX index_ContentEntryPictureReplicate_cepDestination_cepPending ON ContentEntryPictureReplicate (cepDestination, cepPending)"
+
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_upd_138_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (138, NEW.cepUid, 1) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 1; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_upd_138_trig AFTER UPDATE OR INSERT ON ContentEntryPicture FOR EACH ROW EXECUTE PROCEDURE ch_upd_138_fn(); "
+                stmtList +=
+                    " CREATE OR REPLACE FUNCTION ch_del_138_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ChangeLog(chTableId, chEntityPk, chType) VALUES (138, OLD.cepUid, 2) ON CONFLICT(chTableId, chEntityPk) DO UPDATE SET chType = 2; RETURN NULL; END ${'$'}${'$'} LANGUAGE plpgsql "
+                stmtList +=
+                    " CREATE TRIGGER ch_del_138_trig AFTER DELETE ON ContentEntryPicture FOR EACH ROW EXECUTE PROCEDURE ch_del_138_fn(); "
+                stmtList +=
+                    "CREATE VIEW ContentEntryPicture_ReceiveView AS  SELECT ContentEntryPicture.*, ContentEntryPictureReplicate.* FROM ContentEntryPicture LEFT JOIN ContentEntryPictureReplicate ON ContentEntryPictureReplicate.cepPk = ContentEntryPicture.cepUid "
+                stmtList +=
+                    "CREATE OR REPLACE FUNCTION ceppicture_remote_insert_fn() RETURNS TRIGGER AS ${'$'}${'$'} BEGIN INSERT INTO ContentEntryPicture(cepUid, cepContentEntryUid, cepUri, cepMd5, cepFileSize, cepTimestamp, cepMimeType, cepActive) VALUES (NEW.cepUid, NEW.cepContentEntryUid, NEW.cepUri, NEW.cepMd5, NEW.cepFileSize, NEW.cepTimestamp, NEW.cepMimeType, NEW.cepActive) ON CONFLICT (cepUid) DO UPDATE SET cepContentEntryUid = EXCLUDED.cepContentEntryUid, cepUri = EXCLUDED.cepUri, cepMd5 = EXCLUDED.cepMd5, cepFileSize = EXCLUDED.cepFileSize, cepTimestamp = EXCLUDED.cepTimestamp, cepMimeType = EXCLUDED.cepMimeType, cepActive = EXCLUDED.cepActive ; IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN RETURN NEW; ELSE RETURN OLD; END IF; END ${'$'}${'$'} LANGUAGE plpgsql"
+                stmtList +=
+                    " CREATE TRIGGER ceppicture_remote_insert_trig INSTEAD OF INSERT ON ContentEntryPicture_ReceiveView FOR EACH ROW EXECUTE PROCEDURE ceppicture_remote_insert_fn() "
+                stmtList += """
         |    CREATE OR REPLACE FUNCTION attach_ContentEntryPicture_fn() RETURNS trigger AS ${'$'}${'$'}
         |    BEGIN
         |    
@@ -3958,12 +3960,14 @@ DELETE FROM ContainerEntryFile
         |    END ${'$'}${'$'}
         |    LANGUAGE plpgsql
         """.trimMargin()
-            stmtList += """
+                stmtList += """
         |CREATE TRIGGER attach_ContentEntryPicture_trig
         |AFTER UPDATE ON ContentEntryPicture
         |FOR EACH ROW WHEN (OLD.cepMd5 IS NOT NULL)
         |EXECUTE PROCEDURE attach_ContentEntryPicture_fn();
         """.trimMargin()
+
+            }
 
             stmtList
         }

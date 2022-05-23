@@ -148,7 +148,8 @@ class ViewNameToDestMap: DestinationProvider {
                 hideBottomNavigation = true, hideAccountIcon = true),
             ParentalConsentManagementView.VIEW_NAME to UstadDestination(R.id.parental_consent_management_dest),
             ScopedGrantEditView.VIEW_NAME to UstadDestination(R.id.scoped_grant_edit_dest,
-                hideAccountIcon = true),
+                hideAccountIcon = true, actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL,
+                hideBottomNavigation = true),
             ErrorReportView.VIEW_NAME to UstadDestination(R.id.error_report_dest),
             RedirectView.VIEW_NAME to UstadDestination(R.id.redirect_dest),
             ChatListView.VIEW_NAME to UstadDestination(R.id.chat_list_home_dest),
@@ -156,6 +157,8 @@ class ViewNameToDestMap: DestinationProvider {
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL,
                 hideAccountIcon = true,
                 hideBottomNavigation = true),
+            ScopedGrantListView.VIEW_NAME to UstadDestination(R.id.scoped_grant_list_dest),
+            ScopedGrantDetailView.VIEW_NAME to UstadDestination(R.id.scoped_grant_detail_dest),
     )
 
     override val navControllerViewId: Int

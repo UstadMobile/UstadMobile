@@ -60,17 +60,19 @@ class ChatDetailFragment: UstadBaseFragment(), ChatDetailView, ChatDetailFragmen
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?)
-    : View? {
+    : View {
         val rootView: View
 
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
-        mPresenter = ChatDetailPresenter(requireContext(), arguments.toStringMap(), this,
-            di, viewLifecycleOwner)
+        mPresenter = ChatDetailPresenter(
+            requireContext(), arguments.toStringMap(), this,
+            di
+        )
 
 
         messagesRecyclerAdapter = MessagesRecyclerAdapter(accountManager.activeAccount.personUid,
-            mPresenter?.ps, mPresenter)
+            mPresenter?.ps, mPresenter, di, requireContext())
 
         val stackedLayoutManager = LinearLayoutManager(requireContext())
         stackedLayoutManager.reverseLayout = true
@@ -137,16 +139,11 @@ class ChatDetailFragment: UstadBaseFragment(), ChatDetailView, ChatDetailFragmen
         set(value) {}
 
     override var entity: Chat? = null
-        get() = field
         set(value) {
             field = value
             ustadFragmentTitle = value?.chatTitle
             mBinding?.chat = value
         }
-
-    companion object {
-
-    }
 
     override fun addComment(text: String) {
         mBinding?.fragmentChatDetailMessageEt?.text?.clear()

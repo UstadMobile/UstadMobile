@@ -75,112 +75,164 @@ open class Role() {
 
         const val TABLE_ID = 45
 
-        const val PERMISSION_CLAZZ_SELECT: Long = 1
+        //2^0
+        const val PERMISSION_CLAZZ_SELECT: Long = 2
 
+        //2^1
         const val PERMISSION_CLAZZ_INSERT: Long = 2
 
+        //2^2
         const val PERMISSION_CLAZZ_UPDATE: Long = 4
 
+        //2^3
         const val PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT: Long = 8
 
+        //2^4
         const val PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT: Long = 16
 
+        //2^5
         const val PERMISSION_SEL_QUESTION_RESPONSE_INSERT: Long = 32
 
+        //2^6
         const val PERMISSION_PERSON_SELECT: Long = 64
 
+        //2^7
         const val PERMISSION_PERSON_INSERT: Long = 128
 
+        //2^8
         const val PERMISSION_PERSON_UPDATE: Long = 256
 
+        //2^9
         const val PERMISSION_CLAZZ_ADD_TEACHER: Long = 512
 
+        //2^10
         const val PERMISSION_CLAZZ_ADD_STUDENT: Long = 1024
 
+        //2^11
         const val PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT: Long = 2048
 
+        //2^12
         const val PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE: Long = 4096
 
+        //2^13
         const val PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE: Long = 8192
 
+        //2^14
         const val PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT: Long = 16384
 
+        //2^15
         const val PERMISSION_SEL_QUESTION_RESPONSE_SELECT: Long = 32768
 
+        //2^16
         const val PERMISSION_SEL_QUESTION_RESPONSE_UPDATE: Long = 65536
 
+        //2^17
         const val PERMISSION_SEL_QUESTION_SELECT: Long = 131072
 
+        //2^18
         const val PERMISSION_SEL_QUESTION_INSERT: Long = 262144
 
+        //2^19
         const val PERMISSION_SEL_QUESTION_UPDATE: Long = 524288
 
+        //2^20
         const val PERMISSION_PERSON_PICTURE_SELECT: Long = 1048576
 
+        //2^21
         const val PERMISSION_PERSON_PICTURE_INSERT: Long = 2097152
 
+        //2^22
         const val PERMISSION_PERSON_PICTURE_UPDATE: Long = 4194304
 
+        //2^23
         const val PERMISSION_ASSIGNMENT_SELECT : Long = 8388608
 
         //There is no "insert" for CLAZZ_ASSIGNMENT as they are all tied to classes, so are considered updates
+        //2^24
         const val PERMISSION_ASSIGNMENT_UPDATE : Long = 16777216
 
+        //2^25
+        @Deprecated("Use LEARNING RECORD SELECT INSTEAD")
         const val PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS : Long= 33554432
 
+        //2^26
         const val PERMISSION_CONTENT_SELECT : Long= 67108864
 
+        //2^27
         const val PERMISSION_CONTENT_INSERT : Long= 134217728
 
+        //2^28
         const val PERMISSION_CONTENT_UPDATE : Long= 268435456
 
+        //2^29
         const val PERMISSION_SCHOOL_SELECT: Long = 536870912
 
+        //2^30
         const val PERMISSION_SCHOOL_INSERT: Long = 1073741824
 
+        //2^31
         const val PERMISSION_SCHOOL_UPDATE: Long = 2147483648L
 
+        //2^32
         const val PERMISSION_PERSON_DELEGATE: Long = 4294967296L
 
+        //2^33
         //Permission to actually open and enter the class (eg. available to accept members, not those with pending requests)
         const val PERMISSION_CLAZZ_OPEN: Long = 8589934592L
 
+        //2^34
         const val PERMISSION_ROLE_SELECT : Long = 17179869184L
 
+        //2^35
         const val PERMISSION_ROLE_INSERT: Long = 34359738368L
 
+        //2^36
         const val PERMISSION_RESET_PASSWORD: Long = 68719476736L
 
+        //2^37
         const val PERMISSION_SCHOOL_ADD_STAFF: Long = 137438953472L
 
+        //2^38
         const val PERMISSION_SCHOOL_ADD_STUDENT: Long = 274877906944L
 
         /**
          * Permission to view the learner records of a person (e.g. Xapi statements, progress, etc)
          */
+        //2^39
         const val PERMISSION_PERSON_LEARNINGRECORD_SELECT: Long = 549755813888L
 
+        //2^40
         const val PERMISSION_PERSON_LEARNINGRECORD_INSERT: Long = 1099511627776L
 
+        //2^41
         const val PERMISSION_PERSON_LEARNINGRECORD_UPDATE: Long = 2199023255552L
 
+        //2^42
         //Note: to create further constants, use the Tools - Kotlin - REPL to double each value
         const val PERMISSION_CLAZZ_CONTENT_SELECT: Long = 4398046511104L
 
+        //2^43
         const val PERMISSION_CLAZZ_CONTENT_UPDATE: Long = 8796093022208L
 
+        //2^44
         const val PERMISSION_PERSONCONTACT_SELECT: Long = 17592186044416L
 
+        //2^45
         const val PERMISSION_PERSONCONTACT_UPDATE: Long = 35184372088832L
 
+        //2^46
         const val PERMISSION_PERSONSOCIOECONOMIC_SELECT: Long = 70368744177664L
 
+        //2^47
         const val PERMISSION_PERSONSOCIOECONOMIC_UPDATE: Long = 140737488355328L
 
+        //2^48
         const val PERMISSION_ADD_CLASS_TO_SCHOOL: Long = 281474976710656L
 
+        //2^49
         const val PERMISSION_AUTH_SELECT: Long = 562949953421312L
 
+        //2^50
         const val PERMISSION_AUTH_UPDATE: Long = 1125899906842624L
 
         //Predefined roles that are added by the system
@@ -204,7 +256,6 @@ open class Role() {
                 PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE or
                 PERMISSION_ASSIGNMENT_SELECT or
                 PERMISSION_ASSIGNMENT_UPDATE or
-                PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS or
                 PERMISSION_PERSON_LEARNINGRECORD_SELECT or
                 PERMISSION_PERSON_LEARNINGRECORD_INSERT or
                 PERMISSION_PERSON_LEARNINGRECORD_UPDATE or
@@ -294,7 +345,6 @@ open class Role() {
                         PERMISSION_PERSON_PICTURE_UPDATE or
                         PERMISSION_ASSIGNMENT_SELECT  or
                         PERMISSION_ASSIGNMENT_UPDATE  or
-                        PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS or
                         PERMISSION_CONTENT_SELECT or
                         PERMISSION_CONTENT_INSERT or
                         PERMISSION_CONTENT_UPDATE or
