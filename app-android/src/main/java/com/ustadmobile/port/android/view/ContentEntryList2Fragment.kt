@@ -74,19 +74,9 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 arguments?.get(ARG_SELECT_FOLDER_VISIBLE)?.toString()?.toBoolean(),
                 viewLifecycleOwner, di)
 
-
-        val filterOptions = if(arguments?.get(ARG_USE_CHIPS) == true.toString()) {
-            ContentEntryList2Presenter.PICKER_CHIP_OPTIONS.map {
-                ListFilterIdOption(systemImpl.getString(it.first, requireContext()), it.second)
-            }
-        }else {
-            listOf()
-        }
-
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
             requireContext().getString(R.string.add_new_content),
             onClickSort = this,
-            filterOptions = filterOptions,
             onFilterOptionSelected = mPresenter,
             sortOrderOption = mPresenter?.sortOptions?.get(0))
 

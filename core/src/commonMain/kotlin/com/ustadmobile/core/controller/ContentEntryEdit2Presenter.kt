@@ -50,6 +50,7 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 
@@ -66,7 +67,8 @@ class ContentEntryEdit2Presenter(
     di,
     lifecycleOwner), ContentEntryAddOptionsListener {
 
-    private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
+    private val pluginManager: ContentPluginManager? by on(accountManager.activeAccount)
+        .instanceOrNull()
 
     private val contentJobManager: ContentJobManager by di.instance()
 
@@ -325,13 +327,12 @@ class ContentEntryEdit2Presenter(
         }
         view.metadataResult = metadataResult
 
-        val plugin = pluginManager.getPluginById(metadataResult.pluginId)
+        val plugin = pluginManager?.getPluginById(metadataResult.pluginId)
         val uri = metadataResult.entry.sourceUrl ?: ""
         val isRemote = DoorUri.parse(uri).isRemote()
 
         // show video preview
-        if (!isRemote && plugin.supportedMimeTypes.firstOrNull()?.startsWith("video/") == true
-            && !uri.lowercase().startsWith("https://drive.google.com")) {
+        if(!isRemote && plugin?.supportedMimeTypes?.firstOrNull()?.startsWith("video/") == true) {
             view.videoUri = uri
         }
 
@@ -565,7 +566,7 @@ class ContentEntryEdit2Presenter(
     override fun onClickImportFile() {
         val args = mutableMapOf(
                 SelectFileView.ARG_MIMETYPE_SELECTED to
-                        pluginManager.supportedMimeTypeList.joinToString(";"),
+                        (pluginManager?.supportedMimeTypeList?.joinToString(";") ?: "*/*"),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
         args.putFromOtherMapIfPresent(arguments, BLOCK_REQUIRED)
