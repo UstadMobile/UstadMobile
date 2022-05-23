@@ -189,6 +189,12 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             mBinding?.groupSet = value
         }
 
+    override var reviewerCountError: String? = null
+        set(value) {
+            field = value
+            mBinding?.reviewerCountError = value
+        }
+
     override var submissionPolicyOptions: List<ClazzAssignmentEditPresenter.SubmissionPolicyOptionsMessageIdOption>? = null
         get() = field
         set(value) {

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="com.ustadmobile.lib.db.entities.PeerReviewerAllocation"/>
+        <import type="com.ustadmobile.core.util.UidOption" />
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener" />
+
+
+        <variable
+            name="reviewer"
+            type="PeerReviewerAllocation" />
+
+        <variable
+            name="submitterList"
+            type="java.util.List&lt;UidOption&gt;" />
+
+        <variable
+            name="index"
+            type="Integer" />
+
+
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dimen_16dp">
+
+
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            android:paddingEnd="@dimen/dimen_5dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:id="@+id/item_group_member_name"
+            android:text='@{@string/reviewer(index)}'
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/item_group_member_text_input"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="Reviewer #1"
+            />
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/item_group_member_text_input"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_group_member_name"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.ustadmobile.port.android.view.UidOptionAutoCompleteTextView
+                android:id="@+id/item_group_member_text_input_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:uidOptions="@{submitterList}"
+                app:selectedUidOption="@={reviewer.praMarkerSubmitterUid}" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+</layout>

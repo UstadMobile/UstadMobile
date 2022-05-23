@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
-class PersonGroupAssignmentSummary {
+open class AssignmentSubmitterSummary {
 
     var submitterUid: Long = 0
 

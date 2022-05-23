@@ -187,12 +187,52 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
           WHERE name LIKE :searchText
        ORDER BY name 
     """)
-    abstract fun getSubmitterListForAssignment(
+    abstract fun getSubmitterListForAssignmentSummary(
         assignmentUid: Long,
         clazzUid: Long,
         group: String,
         searchText: String
-    ): DoorDataSourceFactory<Int, PersonGroupAssignmentSummary>
+    ): DoorDataSourceFactory<Int, AssignmentSubmitterSummary>
+
+    @Query("""
+         $SUBMITTER_LIST_CTE
+        
+         SELECT submitterId AS submitterUid,
+                name, 
+                0 as fileSubmissionStatus,
+                (CASE WHEN ClazzAssignment.caGroupUid = 0 
+                 THEN 'TRUE' 
+                 ELSE 'FALSE' END) AS isGroupAssignment,
+                 
+                 '' as latestPrivateComment
+                 
+          FROM SubmitterList
+                JOIN ClazzAssignment
+                ON ClazzAssignment.caUid = :assignmentUid       
+      ORDER BY name         
+    """)
+    abstract suspend fun getSubmitterListForAssignmentList(
+        assignmentUid: Long,
+        clazzUid: Long,
+        group: String
+    ): List<AssignmentSubmitterSummary>
+
+
+
+    @Query("""
+         $SUBMITTER_LIST_CTE
+        
+         SELECT COUNT(*) 
+          FROM SubmitterList
+                JOIN ClazzAssignment
+                ON ClazzAssignment.caUid = :assignmentUid       
+      ORDER BY name         
+    """)
+    abstract suspend fun getSubmitterCountFromAssignment(
+        assignmentUid: Long,
+        clazzUid: Long,
+        group: String
+    ): Int
 
 
     @Query("""

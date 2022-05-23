@@ -9,6 +9,7 @@
         <import type="android.content.Context" />
         <import type="com.ustadmobile.lib.db.entities.CourseBlockWithEntity"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
+        <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
         <import type="com.ustadmobile.lib.db.entities.CourseGroupSet"/>
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.core.controller.ClazzAssignmentEditPresenter"/>
@@ -63,6 +64,10 @@
 
         <variable
             name="caDeadlineError"
+            type="String" />
+
+        <variable
+            name="reviewerCountError"
             type="String" />
         
         <variable
@@ -450,6 +455,47 @@
             </com.google.android.material.textfield.TextInputLayout>
 
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ca_edit_reviewers_per_user_layout"
+                android:layout_width="@dimen/dimen_0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:hint="@string/reviews_per_user_group"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:hintEnabled="true"
+                app:errorEnabled="@{reviewerCountError != null}"
+                app:errorText="@{reviewerCountError}"
+                android:visibility="@{blockWithAssignment.assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS ? View.VISIBLE : View.GONE}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/ca_edit_assign_reviewers_button"
+                app:layout_constraintTop_toBottomOf="@+id/ca_edit_marking_type">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ca_edit_reviewers_number"
+                    android:digits="0123456789"
+                    android:inputType="number"
+                    android:text="@={`` + blockWithAssignment.assignment.caPeerReviewerCount}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <Button
+                android:id="@+id/ca_edit_assign_reviewers_button"
+                android:layout_width="@dimen/dimen_0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:text="@string/assign_reviewers"
+                android:onClick="@{() -> mPresenter.handleAssignReviewersClicked()}"
+                android:visibility="@{blockWithAssignment.assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS ? View.VISIBLE : View.GONE}"
+                app:layout_constraintStart_toEndOf="@id/ca_edit_reviewers_per_user_layout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ca_edit_marking_type"
+                />
+
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/ca_edit_class_comments"
                 android:layout_width="0dp"
@@ -461,7 +507,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:checked="true"
                 android:text="@string/allow_class_comments"
-                app:layout_constraintTop_toBottomOf="@id/ca_edit_marking_type" />
+                app:layout_constraintTop_toBottomOf="@id/ca_edit_reviewers_per_user_layout" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/ca_edit_private_comments"

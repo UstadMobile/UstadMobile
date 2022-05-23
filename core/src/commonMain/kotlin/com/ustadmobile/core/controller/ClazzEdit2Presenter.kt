@@ -34,15 +34,23 @@ import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
-fun CourseBlockWithEntityDb.asCourseBlockWithEntity(topicList: List<DiscussionTopic>):
+fun CourseBlockWithEntityDb.asCourseBlockWithEntity(
+    topicList: List<DiscussionTopic>,
+    assignmentPeerAllocations: List<PeerReviewerAllocation>
+):
         CourseBlockWithEntity {
     val relevantTopics: List<DiscussionTopic> = topicList.filter {
         it.discussionTopicCourseDiscussionUid == this.courseDiscussion?.courseDiscussionUid
     }.sortedBy { it.discussionTopicIndex }
 
+    val assignmentAllocations = assignmentPeerAllocations.filter {
+        it.praAssignmentUid == this.assignment?.caUid
+    }
+
     val courseBlockWithEntity = CourseBlockWithEntity()
     courseBlockWithEntity.createFromDb(this)
     courseBlockWithEntity.topics = relevantTopics
+    courseBlockWithEntity.assignmentPeerAllocations = assignmentAllocations
     courseBlockWithEntity.topicUidsToRemove = listOf()
 
 
@@ -89,6 +97,8 @@ class ClazzEdit2Presenter(
         requireBackStackEntry().savedStateHandle, Clazz.TABLE_ID)
 
     lateinit var topics: List<DiscussionTopic>
+
+    lateinit var assignmentPeerAllocations: List<PeerReviewerAllocation>
 
     private val courseBlockOneToManyJoinEditHelper
             = OneToManyJoinEditHelperMp(CourseBlockWithEntity::cbUid,
@@ -350,9 +360,7 @@ class ClazzEdit2Presenter(
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
-            UmPlatformUtil.run {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_DISCUSSION] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_DISCUSSION] = null
         }
     }
 
@@ -392,8 +400,15 @@ class ClazzEdit2Presenter(
             it.discussionTopicDao.getTopicsByClazz(clazzUid)
         }
 
+        // get allocations from list of assignment uids
+        assignmentPeerAllocations = db.onRepoWithFallbackToDb(2000){
+            it.peerReviewerAllocationDao.getAllPeerReviewerAllocations(courseBlocksDb
+                .filter { block -> block.assignment != null }
+                .map { assignmentBlock -> assignmentBlock.assignment?.caUid ?: 0 })
+        }
+
         val courseBlocks: List<CourseBlockWithEntity> = courseBlocksDb.map {
-            it.asCourseBlockWithEntity(topics)
+            it.asCourseBlockWithEntity(topics, assignmentPeerAllocations)
         }
 
         courseBlockOneToManyJoinEditHelper.liveList.sendValue(courseBlocks)

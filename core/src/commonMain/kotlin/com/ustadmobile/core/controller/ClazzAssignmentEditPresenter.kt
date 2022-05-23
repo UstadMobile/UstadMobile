@@ -13,10 +13,13 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.CourseGroupSetListView
+import com.ustadmobile.core.view.PeerReviewerAllocationEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.getFirstValue
@@ -83,7 +86,6 @@ class ClazzAssignmentEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
 
-
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.completionCriteriaOptions = CompletionCriteriaOptions.values().map { CompletionCriteriaOptionsMessageIdOption(it, context, di) }
@@ -103,6 +105,15 @@ class ClazzAssignmentEditPresenter(context: Any,
             view.entity = entity
             requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
         }
+        observeSavedStateResult(ARG_SAVED_STATE_PEER_ALLOCATION,
+            ListSerializer(PeerReviewerAllocationList.serializer()), PeerReviewerAllocationList::class){
+            val allocations = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.assignmentPeerAllocations = allocations.allocations
+            view.entity = entity
+
+            requireSavedStateHandle()[ARG_SAVED_STATE_PEER_ALLOCATION] = null
+        }
+
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): CourseBlockWithEntity {
@@ -233,6 +244,37 @@ class ClazzAssignmentEditPresenter(context: Any,
         )
     }
 
+    fun handleAssignReviewersClicked(){
+        val assignment = entity?.assignment ?: return
+        val reviewerCount = entity?.assignment?.caPeerReviewerCount ?: 0
+        presenterScope.launch(doorMainDispatcher()) {
+            val totalSubmitterSize = repo.clazzAssignmentDao.getSubmitterCountFromAssignment(
+                assignment.caUid, assignment.caClazzUid, "")
+            if((reviewerCount) <= 0 || reviewerCount >= totalSubmitterSize){
+                // show error on view
+                view.reviewerCountError = " "
+                return@launch
+            }
+
+            navigateForResult(
+                NavigateForResultOptions(this@ClazzAssignmentEditPresenter,
+                    PeerReviewerAllocationList(entity?.assignmentPeerAllocations),
+                    PeerReviewerAllocationEditView.VIEW_NAME,
+                    PeerReviewerAllocationList::class,
+                    PeerReviewerAllocationList.serializer(),
+                    ARG_SAVED_STATE_PEER_ALLOCATION,
+                    arguments = mutableMapOf(
+                        ARG_CLAZZUID to entity?.cbClazzUid.toString(),
+                        PeerReviewerAllocationEditView.ARG_REVIEWERS_COUNT to
+                                entity?.assignment?.caPeerReviewerCount.toString(),
+                        UstadView.ARG_CLAZZ_ASSIGNMENT_UID to entity?.assignment?.caUid.toString(),
+                        PeerReviewerAllocationEditView.ARG_ASSIGNMENT_GROUP
+                                to entity?.assignment?.caGroupUid.toString())
+                ))
+        }
+
+    }
+
 
     override fun handleClickSave(entity: CourseBlockWithEntity) {
         if(!view.fieldsEnabled)
@@ -279,6 +321,17 @@ class ClazzAssignmentEditPresenter(context: Any,
                 view.showSnackBar(systemImpl.getString(MessageID.text_file_submission_error, context))
             }
 
+            if(entity.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS){
+                val reviewerCount = entity.assignment?.caPeerReviewerCount ?: 0
+                val totalSubmitterSize = repo.clazzAssignmentDao.getSubmitterCountFromAssignment(
+                    entity.assignment?.caUid ?: 0, clazzUid, "")
+                if((reviewerCount) <= 0 || reviewerCount >= totalSubmitterSize){
+                    // show error on view
+                    view.reviewerCountError = " "
+                    foundError = true
+                }
+            }
+
             val dbGroupUid = repo.clazzAssignmentDao.getGroupUidFromAssignment(entity.assignment?.caUid?: 0L)
 
             // groups have changed
@@ -321,6 +374,8 @@ class ClazzAssignmentEditPresenter(context: Any,
         const val ARG_SAVEDSTATE_CONTENT = "contents"
 
         const val SAVEDSTATE_KEY_SUBMISSION_TYPE = "submissionType"
+
+        const val ARG_SAVED_STATE_PEER_ALLOCATION = "peerReviewerAllocation"
 
     }
 

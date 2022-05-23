@@ -53,6 +53,7 @@ import kotlin.jvm.JvmField
     ErrorReport::class,
     ClazzAssignment::class, ClazzAssignmentContentJoin::class, CourseAssignmentSubmission::class,
     CourseAssignmentSubmissionAttachment::class, CourseAssignmentMark::class,
+    PeerReviewerAllocation::class,
     ClazzAssignmentRollUp::class,
     PersonAuth2::class,
     UserSession::class,
@@ -124,6 +125,7 @@ import kotlin.jvm.JvmField
     CoursePictureReplicate::class,
     ContentEntryPicture::class,
     ContentEntryPictureReplicate::class,
+    PeerReviewerAllocationReplicate::class,
     Chat::class,
     ChatMember::class,
     Message::class,
@@ -142,7 +144,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 105)
+], version = 106)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -390,6 +392,9 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     @JsName("courseDiscussionDao")
     abstract val courseDiscussionDao: CourseDiscussionDao
+
+    @JsName("peerReviewerAllocationDao")
+    abstract val peerReviewerAllocationDao: PeerReviewerAllocationDao
 
     @JsName("discussionTopicDao")
     abstract val discussionTopicDao: DiscussionTopicDao

@@ -8,7 +8,7 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewLis
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.PersonGroupAssignmentSummary
+import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
@@ -16,7 +16,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
                                                                 view: ClazzAssignmentDetailStudentProgressOverviewListView,
                                                                 di: DI, lifecycleOwner: DoorLifecycleOwner)
     : UstadListPresenter<ClazzAssignmentDetailStudentProgressOverviewListView,
-        PersonGroupAssignmentSummary>(context, arguments, view, di, lifecycleOwner), SubmissionSummaryListener,
+        AssignmentSubmitterSummary>(context, arguments, view, di, lifecycleOwner), SubmissionSummaryListener,
         OnSortOptionSelected, OnSearchSubmitted{
 
     private var clazzUid: Long = -1
@@ -43,7 +43,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
         view.progressSummary = repo.clazzAssignmentDao.getProgressSummaryForAssignment(
                 clazzAssignmentUid, clazzUid, "")
 
-        view.list = repo.clazzAssignmentDao.getSubmitterListForAssignment(
+        view.list = repo.clazzAssignmentDao.getSubmitterListForAssignmentSummary(
             clazzAssignmentUid, clazzUid,
             systemImpl.getString(MessageID.group_number, context).replace("%1\$s",""),
             searchText.toQueryLikeParam())
@@ -64,7 +64,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, ar
         updateListOnView()
     }
 
-    override fun onClickPerson(personWithAttemptsSummary: PersonGroupAssignmentSummary) {
+    override fun onClickPerson(personWithAttemptsSummary: AssignmentSubmitterSummary) {
         systemImpl.go(ClazzAssignmentDetailStudentProgressView.VIEW_NAME,
                 mapOf(UstadView.ARG_SUBMITER_UID to personWithAttemptsSummary.submitterUid.toString(),
                 UstadView.ARG_CLAZZ_ASSIGNMENT_UID to clazzAssignmentUid.toString(),

@@ -662,7 +662,7 @@ fun RBuilder.renderPersonWithAttemptProgress(
 
 
 fun RBuilder.renderAssignmentSubmittedProgress(
-    item: PersonGroupAssignmentSummary,
+    item: AssignmentSubmitterSummary,
     systemImpl: UstadMobileSystemImpl,
     onMainList: Boolean = false){
     umGridContainer{
