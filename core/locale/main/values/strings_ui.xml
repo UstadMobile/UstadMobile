@@ -1904,5 +1904,32 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="from_my_courses">From my courses</string>
 
 
+    <!--
+    Used in the context of an assignment that uses peer review (students mark
+    each others work), this button allows the teacher or admin to assign the reviewer who will mark
+    submissions (e.g. Student A marks Student B, Student B marks Student C, Student C marks Student A)
+    -->
+    <string name="assign_reviewers">Assign reviewers</string>
+
+    <!--
+    Used in the context of an assignment that uses peer review (students mark
+    each others work). Used next to a text field where the teacher or admin can set how many
+    reviews of each submission will be done.
+    -->
+    <string name="reviews_per_user_group">Reviews per user or group</string>
+
+
+    <!--
+    Used in the context of an assignment that uses peer review (students mark
+    each others work), this button allows the teacher or admin to automatically assign reviewers
+    at random.
+    -->
+    <string name="assign_random_reviewers">Assign random reviewers</string>
+
+    <!--
+    Used in the context of an assignment that uses peer review (students mark
+    each others work). %1$s will be replaced with a number e.g. Reviewer #1, Reviewer #2 etc
+    -->
+    <string name="reviewer">Reviewer #%1$s</string>
 
 </resources>
