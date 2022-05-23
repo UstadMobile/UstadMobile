@@ -30,6 +30,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
     view: ClazzAssignmentDetailStudentProgressView,
     di: DI,
     lifecycleOwner: DoorLifecycleOwner,
+    // to enter the private comment to student/group
     val newPrivateCommentListener: DefaultNewCommentItemListener =
         DefaultNewCommentItemListener(
             di,
@@ -121,9 +122,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
 
         if(clazzAssignment.caPrivateCommentsEnabled){
             view.clazzAssignmentPrivateComments = db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
-                ClazzAssignment.TABLE_ID, clazzAssignment.caUid,
-                selectedSubmitterUid,
-                selectedSubmitterUid
+                ClazzAssignment.TABLE_ID, clazzAssignment.caUid, selectedSubmitterUid
             )
         }
 

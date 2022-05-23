@@ -159,6 +159,7 @@ android {
     lint {
         abortOnError false
     }
+    namespace 'com.toughra.ustadmobile'
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8

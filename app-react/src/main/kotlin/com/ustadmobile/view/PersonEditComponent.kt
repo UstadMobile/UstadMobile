@@ -55,14 +55,6 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
             }
         }
 
-    override var personPicturePath: String? = null
-        get() = field
-        set(value) {
-            setState{
-                field = value
-            }
-        }
-
     override var personPicture: PersonPicture? = null
         get() = field
         set(value) {

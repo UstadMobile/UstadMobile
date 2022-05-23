@@ -15,10 +15,6 @@ interface ClazzEdit2View: UstadEditView<ClazzWithHolidayCalendarAndSchoolAndTerm
 
     var clazzStartDateError: String?
 
-    var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>?
-
-    var coursePicturePath: String?
-
     var coursePicture: CoursePicture?
 
     var enrolmentPolicyOptions: List<ClazzEdit2Presenter.EnrolmentPolicyOptionsMessageIdOption>?

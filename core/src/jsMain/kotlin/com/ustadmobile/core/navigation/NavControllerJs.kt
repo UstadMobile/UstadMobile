@@ -220,16 +220,21 @@ class NavControllerJs(
             else -> viewName
         }
 
-        val viewNameIndex = max(navStack.indexOfLast { it.viewName == resolvedPopViewname }, 0)
+        //The user might not be at the top of the nav stack. If the user is going back we should
+        // only consider items below the current position in the stack (exclude forward steps).
+        val navStackUpToCurrent = navStack.subList(0, currentStackIndex + 1)
+
+        val viewNameIndex = max(navStackUpToCurrent.indexOfLast { it.viewName == resolvedPopViewname },
+            0)
 
         //When popping off the stack, we are always at the top of the stack
         // e.g. currentIndex must equal (navStack.size-1)
-        val deltaIndex = (navStack.size - 1) - viewNameIndex
+        val deltaIndex = (navStackUpToCurrent.size - 1) - viewNameIndex
         return min(if(inclusive) {
             deltaIndex + 1
         }else {
             deltaIndex
-        }, navStack.size)
+        }, navStackUpToCurrent.size)
     }
 
     override fun popBackStack(viewName: String, inclusive: Boolean) {

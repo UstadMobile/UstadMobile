@@ -3,6 +3,7 @@ package com.ustadmobile.core.util.ext
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
+import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.generated.locale.MessageID
@@ -23,6 +24,7 @@ import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.util.randomString
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -34,14 +36,19 @@ fun UmAppDatabase.runPreload() {
 
 /**
  * Insert a new class and
+ * @param termMap course terminology map
  */
-suspend fun UmAppDatabase.createNewClazzAndGroups(clazz: Clazz, impl: UstadMobileSystemImpl, context: Any) {
+suspend fun UmAppDatabase.createNewClazzAndGroups(
+    clazz: Clazz,
+    impl: UstadMobileSystemImpl,
+    termMap: Map<String, String>,
+    context: Any
+) {
     clazz.clazzTeachersPersonGroupUid = personGroupDao.insertAsync(
-            PersonGroup("${clazz.clazzName} - " +
-                    impl.getString(MessageID.teachers_literal, context)))
+            PersonGroup("${clazz.clazzName} - " + termMap[TerminologyKeys.TEACHER_KEY]))
 
     clazz.clazzStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
-            impl.getString(MessageID.students, context)))
+            termMap[TerminologyKeys.STUDENTS_KEY]))
 
     clazz.clazzPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
             impl.getString(MessageID.pending_requests, context)))
@@ -50,6 +57,29 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(clazz: Clazz, impl: UstadMobil
             impl.getString(MessageID.parent, context)))
 
     clazz.takeIf { it.clazzCode == null }?.clazzCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
+
+
+    //Make the default ScopedGrants
+    scopedGrantDao.insertListAsync(listOf(ScopedGrant().apply {
+        sgFlags = ScopedGrant.FLAG_TEACHER_GROUP.or(FLAG_NO_DELETE)
+        sgPermissions = Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT
+        sgGroupUid = clazz.clazzTeachersPersonGroupUid
+        sgEntityUid = clazz.clazzUid
+        sgTableId = Clazz.TABLE_ID
+    }, ScopedGrant().apply {
+        sgFlags = ScopedGrant.FLAG_STUDENT_GROUP.or(FLAG_NO_DELETE)
+        sgPermissions = Role.ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT
+        sgGroupUid = clazz.clazzStudentsPersonGroupUid
+        sgEntityUid = clazz.clazzUid
+        sgTableId = Clazz.TABLE_ID
+    }, ScopedGrant().apply {
+        sgFlags = (ScopedGrant.FLAG_PARENT_GROUP or FLAG_NO_DELETE)
+        sgPermissions = Role.ROLE_CLAZZ_PARENT_PERMISSION_DEFAULT
+        sgGroupUid = clazz.clazzParentsPersonGroupUid
+        sgEntityUid = clazz.clazzUid
+        sgTableId = Clazz.TABLE_ID
+    }))
+
 
     clazz.clazzUid = clazzDao.insertAsync(clazz)
 }

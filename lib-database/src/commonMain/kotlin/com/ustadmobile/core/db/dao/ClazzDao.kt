@@ -176,7 +176,10 @@ abstract class ClazzDao : BaseDao<Clazz> {
            AND (Clazz.clazzUid NOT IN (:excludeSelectedClazzList))
            AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
            AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
-           AND ( :filter != $FILTER_ACTIVE_ONLY OR (:currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime))
+           AND ( :filter = 0 OR (CASE WHEN :filter = $FILTER_CURRENTLY_ENROLLED 
+                                      THEN :currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime
+                                      ELSE :currentTime > Clazz.clazzEndTime 
+                                      END))
            AND ( :selectedSchool = 0 OR Clazz.clazzSchoolUid = :selectedSchool)
       GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid, CourseTerminology.ctUid
       ORDER BY CASE :sortOrder
@@ -263,6 +266,22 @@ abstract class ClazzDao : BaseDao<Clazz> {
     """)
     abstract suspend fun personHasPermissionWithClazz(accountPersonUid: Long, clazzUid: Long,
                                                       permission: Long) : Boolean
+
+    @Query("""
+        SELECT ScopedGrant.sgPermissions
+          FROM Clazz
+               JOIN ScopedGrant
+                    ON ${Clazz.JOIN_SCOPEDGRANT_ON_CLAUSE}
+               JOIN PersonGroupMember AS PrsGrpMbr
+                    ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
+         WHERE Clazz.clazzUid = :clazzUid
+           AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_DELEGATE}) > 0
+           AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun selectDelegatablePermissions(
+        accountPersonUid: Long,
+        clazzUid: Long
+    ): List<Long>
 
     @Query("""
         SELECT Clazz.*, 

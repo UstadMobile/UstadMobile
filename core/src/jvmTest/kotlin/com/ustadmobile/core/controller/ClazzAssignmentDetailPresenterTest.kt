@@ -84,7 +84,7 @@ class ClazzAssignmentDetailPresenterTest {
 
         runBlocking {
             repo.grantScopedPermission(activePerson,
-                Role.PERMISSION_ASSIGNMENT_VIEWSTUDENTPROGRESS,
+                Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT,
                 Clazz.TABLE_ID, testClazz.clazzUid)
         }
 

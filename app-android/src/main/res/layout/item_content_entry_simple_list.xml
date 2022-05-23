@@ -6,6 +6,7 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment"/>
+        <import type="com.ustadmobile.port.android.view.ContentEntryDetailFragment"/>
         <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryListRecyclerAdapter"/>
 
@@ -34,16 +35,18 @@
 
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:scaleType="fitCenter"
+            android:scaleType="centerCrop"
             android:id="@+id/content_entry_item_thumbnail"
-            android:layout_width="@dimen/dimen_70dp"
-            android:layout_height="@dimen/dimen_70dp"
-            app:fallbackDrawable="@{contentEntry.leaf ? @drawable/book_24px:@drawable/ic_folder_black_24dp}"
-            app:imageUri="@{contentEntry.thumbnailUrl}"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
+            app:imageForeignKey="@{contentEntry.contentEntryUid}"
+            app:imageForeignKeyAdapter="@{ContentEntryDetailFragment.FOREIGNKEYADAPTER_ENTRY}"
+            app:fallbackDrawable="@{contentEntry.leaf ? @drawable/ic_round_book:@drawable/ic_round_folder}"
             app:tint="?colorOnIconTint"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/ic_outline_book_24" />
+            tools:src="@drawable/ic_round_book" />
 
         <ProgressBar
             android:id="@+id/content_entry_progress"

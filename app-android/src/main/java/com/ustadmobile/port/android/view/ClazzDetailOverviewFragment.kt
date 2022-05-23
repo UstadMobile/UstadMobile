@@ -46,6 +46,8 @@ interface ClazzDetailOverviewEventListener {
     fun onClickShare()
 
     fun onClickDownloadAll()
+
+    fun onClickPermissions()
 }
 
 class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(),
@@ -70,6 +72,8 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
     private var downloadRecyclerAdapter: CourseDownloadDetailRecyclerAdapter? = null
 
+    private var courseImageAdapter: CourseImageAdapter? = null
+
     private var currentLiveData: LiveData<PagedList<Schedule>>? = null
 
     private var courseBlockLiveData: LiveData<PagedList<CourseBlockWithCompleteEntity>>? = null
@@ -79,6 +83,12 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
     private var mScheduleListRecyclerAdapter: ScheduleRecyclerViewAdapter? = null
 
     private var courseBlockDetailRecyclerAdapter: CourseBlockDetailRecyclerViewAdapter? = null
+
+    override var showPermissionButton: Boolean = false
+        set(value) {
+            downloadRecyclerAdapter?.permissionButtonVisible = value
+            field = value
+        }
 
     private val courseBlockObserver = Observer<PagedList<CourseBlockWithCompleteEntity>?> {
         t -> courseBlockDetailRecyclerAdapter?.submitList(t)
@@ -246,7 +256,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         val rootView: View
 
         mBinding = FragmentCourseDetailOverviewBinding.inflate(inflater, container,
@@ -255,6 +265,9 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         }
 
         detailMergerRecyclerView = rootView.findViewById(R.id.fragment_course_detail_overview)
+
+        // 0
+        courseImageAdapter = CourseImageAdapter()
 
         // 1
         downloadRecyclerAdapter = CourseDownloadDetailRecyclerAdapter(this)
@@ -289,7 +302,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
         courseBlockDetailRecyclerAdapter?.mPresenter = mPresenter
 
-        detailMergerRecyclerAdapter = ConcatAdapter(downloadRecyclerAdapter,
+        detailMergerRecyclerAdapter = ConcatAdapter(courseImageAdapter, downloadRecyclerAdapter,
             detailRecyclerAdapter, scheduleHeaderAdapter,
             mScheduleListRecyclerAdapter, courseBlockDetailRecyclerAdapter)
 
@@ -306,11 +319,14 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         detailMergerRecyclerView?.adapter = null
         detailMergerRecyclerView = null
 
+        courseImageAdapter = null
         downloadRecyclerAdapter = null
         detailRecyclerAdapter = null
         scheduleHeaderAdapter = null
         mScheduleListRecyclerAdapter = null
         courseBlockDetailRecyclerAdapter = null
+        currentLiveData = null
+        courseBlockLiveData = null
 
     }
 
@@ -320,6 +336,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         set(value) {
             field = value
             detailRecyclerAdapter?.clazz = value
+            courseImageAdapter?.submitList(value?.let { listOf(it) } ?: listOf())
             courseBlockDetailRecyclerAdapter?.timeZone = value?.clazzTimeZone ?: value?.clazzSchool?.schoolTimeZone ?: "UTC"
         }
 
@@ -348,6 +365,10 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
     override fun onClickDownloadAll() {
         mPresenter?.handleDownloadAllClicked()
+    }
+
+    override fun onClickPermissions() {
+        mPresenter?.handleClickPermissions()
     }
 
     companion object {
@@ -402,7 +423,8 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                     CourseBlock.BLOCK_DISCUSSION_TYPE -> {
                         val newDiscussion = newItem.courseDiscussion
                         val oldDiscussion = oldItem.courseDiscussion
-                        //TODO
+                        isSame = isSame
+                                && newDiscussion?.courseDiscussionTitle == oldDiscussion?.courseDiscussionTitle
                     }
                 }
                 return isSame

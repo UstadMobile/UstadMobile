@@ -33,7 +33,9 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -48,6 +50,7 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 
@@ -64,7 +67,8 @@ class ContentEntryEdit2Presenter(
     di,
     lifecycleOwner), ContentEntryAddOptionsListener {
 
-    private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
+    private val pluginManager: ContentPluginManager? by on(accountManager.activeAccount)
+        .instanceOrNull()
 
     private val contentJobManager: ContentJobManager by di.instance()
 
@@ -119,7 +123,7 @@ class ContentEntryEdit2Presenter(
         }
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithBlockAndLanguage? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithBlockAndLanguage {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
         val isLeaf = arguments[ARG_LEAF]?.toBoolean()
         val metaData = arguments[ARG_IMPORTED_METADATA]
@@ -141,6 +145,10 @@ class ContentEntryEdit2Presenter(
             leaf = isLeaf ?: (contentFlags != ContentEntry.FLAG_IMPORTED)
         }
 
+        view.contentEntryPicture = db.onDbThenRepoWithTimeout(2000) { dbToUse, _ ->
+            dbToUse.takeIf { entityUid != 0L }?.contentEntryPictureDao?.findByContentEntryUidAsync(entityUid)
+        } ?: ContentEntryPicture()
+
         entry.block = if(isBlockRequired){
                 entry.block ?: CourseBlock().apply {
                     cbUid = db.doorPrimaryKeyManager.nextId(CourseBlock.TABLE_ID)
@@ -158,7 +166,7 @@ class ContentEntryEdit2Presenter(
         return entry
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): ContentEntryWithBlockAndLanguage? {
+    override fun onLoadFromJson(bundle: Map<String, String>): ContentEntryWithBlockAndLanguage {
         super.onLoadFromJson(bundle)
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         val metaDataStr = bundle[ARG_IMPORTED_METADATA]
@@ -189,6 +197,9 @@ class ContentEntryEdit2Presenter(
         }
 
         view.showUpdateContentButton = editEntity.contentEntryUid != 0L && editEntity.leaf
+        view.contentEntryPicture = bundle[SAVED_STATE_CONTENTENTRY_PICTURE]?.let {
+            json.decodeFromString(ContentEntryPicture.serializer(), it)
+        }
 
         return editEntity
     }
@@ -228,7 +239,10 @@ class ContentEntryEdit2Presenter(
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        savedState.putEntityAsJson(ARG_IMPORTED_METADATA, MetadataResult.serializer(), view.metadataResult)
+        savedState.putEntityAsJson(ARG_IMPORTED_METADATA, MetadataResult.serializer(),
+            view.metadataResult)
+        savedState.putEntityAsJson(SAVED_STATE_CONTENTENTRY_PICTURE,
+            ContentEntryPicture.serializer(), view.contentEntryPicture)
     }
 
     fun loadEntityIntoDateTime(entry: ContentEntryWithBlockAndLanguage){
@@ -313,13 +327,12 @@ class ContentEntryEdit2Presenter(
         }
         view.metadataResult = metadataResult
 
-        val plugin = pluginManager.getPluginById(metadataResult.pluginId)
+        val plugin = pluginManager?.getPluginById(metadataResult.pluginId)
         val uri = metadataResult.entry.sourceUrl ?: ""
         val isRemote = DoorUri.parse(uri).isRemote()
 
         // show video preview
-        if (!isRemote && plugin.supportedMimeTypes.firstOrNull()?.startsWith("video/") == true
-            && !uri.lowercase().startsWith("https://drive.google.com")) {
+        if(!isRemote && plugin?.supportedMimeTypes?.firstOrNull()?.startsWith("video/") == true) {
             view.videoUri = uri
         }
 
@@ -332,8 +345,8 @@ class ContentEntryEdit2Presenter(
         entityVal.publisher = metadataResult.entry.publisher
         entityVal.languageVariantUid = metadataResult.entry.languageVariantUid
         entityVal.primaryLanguageUid = metadataResult.entry.primaryLanguageUid
-        entityVal.thumbnailUrl = metadataResult.entry.thumbnailUrl
         entityVal.contentFlags = metadataResult.entry.contentFlags
+        entityVal.leaf = metadataResult.entry.leaf
 
         return entityVal
     }
@@ -384,26 +397,49 @@ class ContentEntryEdit2Presenter(
 
                 val isNewEntry = entity.contentEntryUid == 0L
 
-                if (entity.contentEntryUid == 0L) {
-                    entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
 
-                    if (entity.entryId == null) {
-                        entity.entryId = accountManager.activeAccount.endpointUrl +
-                                "${entity.contentEntryUid}/${randomUuid()}"
-                        repo.contentEntryDao.updateAsync(entity)
-                    }
-                    val contentEntryJoin = ContentEntryParentChildJoin().apply {
-                        cepcjChildContentEntryUid = entity.contentEntryUid
-                        cepcjParentContentEntryUid = parentEntryUid
-                    }
-                    repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
-                } else {
-                    repo.contentEntryDao.updateAsync(entity)
-                }
+                repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
 
-                val language = entity.language
-                if (language != null && language.langUid == 0L) {
-                    repo.languageDao.insertAsync(language)
+                    if (entity.contentEntryUid == 0L) {
+                        entity.contentOwner = accountManager.activeAccount.personUid
+                        entity.contentEntryUid = txDb.contentEntryDao.insertAsync(entity)
+
+                        if (entity.entryId == null) {
+                            entity.entryId = accountManager.activeAccount.endpointUrl +
+                                    "${entity.contentEntryUid}/${randomUuid()}"
+                            txDb.contentEntryDao.updateAsync(entity)
+                        }
+
+                        if(parentEntryUid != 0L) {
+                            val contentEntryJoin = ContentEntryParentChildJoin().apply {
+                                cepcjChildContentEntryUid = entity.contentEntryUid
+                                cepcjParentContentEntryUid = parentEntryUid
+                            }
+                            txDb.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
+                        }
+                    } else {
+                        txDb.contentEntryDao.updateAsync(entity)
+                    }
+
+                    UmPlatformUtil.runIfNotJsAsync {
+                        val contentEntryPictureVal = view.contentEntryPicture
+                        if(contentEntryPictureVal != null) {
+                            contentEntryPictureVal.cepContentEntryUid = entity.contentEntryUid
+
+                            if(contentEntryPictureVal.cepUid == 0L) {
+                                txDb.contentEntryPictureDao.insertAsync(contentEntryPictureVal)
+                            }else {
+                                txDb.contentEntryPictureDao.updateAsync(contentEntryPictureVal)
+                            }
+                        }
+                    }
+
+
+                    val language = entity.language
+                    if (language != null && language.langUid == 0L) {
+                        txDb.languageDao.insertAsync(language)
+                    }
+
                 }
 
                 val metaData = view.metadataResult
@@ -530,7 +566,7 @@ class ContentEntryEdit2Presenter(
     override fun onClickImportFile() {
         val args = mutableMapOf(
                 SelectFileView.ARG_MIMETYPE_SELECTED to
-                        pluginManager.supportedMimeTypeList.joinToString(";"),
+                        (pluginManager?.supportedMimeTypeList?.joinToString(";") ?: "*/*"),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
         args.putFromOtherMapIfPresent(arguments, BLOCK_REQUIRED)
@@ -609,6 +645,8 @@ class ContentEntryEdit2Presenter(
         const val SAVEDSTATE_KEY_LANGUAGE = "Language"
 
         const val SAVED_STATE_KEY_METADATA = "importedMetadata"
+
+        const val SAVED_STATE_CONTENTENTRY_PICTURE = "contentEntryPicture"
 
         const val HTTP_PARAM_CONVERSION_PARAMS = "conversionParams"
 

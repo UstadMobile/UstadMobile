@@ -6,7 +6,7 @@ import com.ustadmobile.lib.db.entities.@Entity@
 interface @BaseFileName@View: UstadListView<@Entity@, @DisplayEntity@> {
 
     companion object {
-        const val VIEW_NAME = "@Entity@ListView"
+        const val VIEW_NAME = "@Entity@List"
     }
 
 }

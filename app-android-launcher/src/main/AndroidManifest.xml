@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.toughra.ustadmobile.launcher">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:name="com.ustadmobile.port.android.App"
@@ -12,7 +11,10 @@
         android:theme="@style/UmTheme.App"
         android:supportsRtl="true"
         tools:replace="android:allowBackup"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        >
 
         <!--
          The path to the asset containing the app runtime configuration.

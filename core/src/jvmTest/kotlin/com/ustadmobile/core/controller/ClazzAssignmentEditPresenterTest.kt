@@ -7,19 +7,15 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.directActiveRepoInstance
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.captureLastEntityValue
-import com.ustadmobile.core.util.mockEditView
-import com.ustadmobile.core.util.verifyFieldsEnabled
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
-import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.junit.Assert
@@ -256,6 +252,55 @@ class ClazzAssignmentEditPresenterTest {
 
         verify(mockView, timeout(1000)).caGracePeriodError = eq(systemImpl.getString(MessageID.after_deadline_date_error, context))
 
+
+    }
+
+    @Test
+    fun givenExistingAssignmentGroupUidWasChanged_whenSubmissionIsMadeBeforeSave_thenShowError(){
+
+        val assignment = CourseBlockWithEntity().apply {
+            assignment = ClazzAssignment().apply {
+                caGroupUid = 1
+                caTitle = "AssignmentA"
+                caClazzUid = testClazz.clazzUid
+                caUid = repo.clazzAssignmentDao.insert(this)
+            }
+            cbClazzUid = testClazz.clazzUid
+            cbEntityUid = assignment!!.caUid
+            cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+            cbTitle = "AssignmentA"
+            cbUid = repo.courseBlockDao.insert(this)
+        }
+
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+
+        val presenterArgs = mutableMapOf<String, String>()
+        presenterArgs[UstadView.ARG_CLAZZUID] = testClazz.clazzUid.toString()
+        presenterArgs[UstadEditView.ARG_ENTITY_JSON] = safeStringify(di, CourseBlockWithEntity.serializer(), assignment)
+
+        testNavController.navigate(ClazzAssignmentEditView.VIEW_NAME, presenterArgs)
+
+        val presenter = ClazzAssignmentEditPresenter(context,
+            presenterArgs, mockView, mockLifecycleOwner, di)
+        presenter.onCreate(null)
+
+        val initialEntity: CourseBlockWithEntity = mockView.captureLastEntityValue()!!
+
+        initialEntity.assignment?.caGroupUid = 2
+
+        verify(mockView, timeout(1000)).groupSetEnabled = eq(true)
+
+        val submission = CourseAssignmentSubmission().apply {
+            casAssignmentUid = assignment.assignment!!.caUid
+            casSubmitterUid = 1
+            casUid = repo.courseAssignmentSubmissionDao.insert(this)
+        }
+
+        verify(mockView, timeout(5000)).groupSetEnabled = eq(false)
+
+        presenter.handleClickSave(initialEntity)
+
+        verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.error, context)), any(), any())
 
     }
 

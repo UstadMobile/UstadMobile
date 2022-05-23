@@ -79,6 +79,13 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
             }
         }
 
+    override var showPermissionButton: Boolean = false
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
     override var entity: ClazzWithDisplayDetails? = null
         get() = field
         set(value) {

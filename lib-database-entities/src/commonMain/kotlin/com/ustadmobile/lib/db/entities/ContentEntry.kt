@@ -78,6 +78,7 @@ open class ContentEntry() {
      */
     var sourceUrl: String? = null
 
+    @Deprecated("use contentEntryPicture")
     var thumbnailUrl: String? = null
 
     var lastModified: Long = 0
@@ -124,6 +125,9 @@ open class ContentEntry() {
 
     var contentTypeFlag: Int = 0
 
+    /**
+     * The personUid of the owner of the content e.g. the person to add this content
+     */
     var contentOwner: Long = 0
 
     @LocalChangeSeqNum

@@ -104,29 +104,6 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
             }
         }
 
-    private var scopeList: List<ScopedGrantAndName>? = null
-
-    private val scopedGrantListObserver = ObserverFnWrapper<List<ScopedGrantAndName>> {
-        setState {
-            scopeList = it
-        }
-    }
-
-    override var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>? = null
-        set(value) {
-            field?.removeObserver(scopedGrantListObserver)
-            field = value
-            field?.observe(this, scopedGrantListObserver)
-        }
-
-    override var coursePicturePath: String? = null
-        get() = field
-        set(value) {
-            setState {
-                field = value
-            }
-        }
-
     override var coursePicture: CoursePicture? = null
         get() = field
         set(value) {
@@ -167,6 +144,8 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                 attandenceEnabled = value?.isAttendanceEnabledAndRecorded() == true
             }
         }
+
+
 
     override fun onCreateView() {
         super.onCreateView()
@@ -375,24 +354,6 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                             mPresenter?.handleTerminologyClicked()
                         }
                     )
-
-
-                    renderListSectionTitle(getString(MessageID.permissions))
-
-                    mPresenter?.let { presenter ->
-                        scopeList?.let { scopeList ->
-
-                            val newItem = CreateNewItem(true, getString(MessageID.add_person_or_group)){
-                                mPresenter?.scopedGrantOneToManyHelper?.onClickNew()
-                            }
-
-                            renderScopedGrants(presenter.scopedGrantOneToManyHelper,
-                                scopeList.distinctBy { it.name }, newItem){ scope ->
-                                mPresenter?.scopedGrantOneToManyHelper?.onClickEdit(scope)
-                            }
-                        }
-                    }
-
                 }
 
             }

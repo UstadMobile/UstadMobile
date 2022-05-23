@@ -204,7 +204,7 @@ class ContentEntryDetailOverviewPresenter(
     }
 
     fun handleOnClickGroupActivityButton() {
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
             val learnerGroup = LearnerGroup().apply {
                 learnerGroupUid = repo.learnerGroupDao.insertAsync(this)
             }

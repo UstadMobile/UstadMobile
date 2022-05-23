@@ -238,6 +238,13 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
+        mNewStudentListRecyclerViewAdapter = null
+        mStudentListRecyclerViewAdapter = null
+        mStudentListObserver = null
+        mCurrentStudentListLiveData = null
+        mPendingStudentsHeaderRecyclerViewAdapter = null
+        mPendingStudentListRecyclerViewAdapter = null
+        mCurrentPendingStudentListLiveData = null
     }
 
     override val displayTypeRepo: Any?

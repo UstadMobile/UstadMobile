@@ -11,11 +11,16 @@ import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
-class @BaseFileName@Presenter(context: Any, arguments: Map<String, String>, view: @BaseFileName@View,
-                                di: DI, lifecycleOwner: DoorLifecycleOwner,
-                          private val @Entity_VariableName@ItemListener: Default@BaseFileName@ItemListener = Default@BaseFileName@ItemListener(view, ListViewMode.BROWSER, context, di))
-    : UstadListPresenter<@BaseFileName@View, @Entity@>(context, arguments, view, di, lifecycleOwner), @BaseFileName@ItemListener by @Entity_VariableName@ItemListener {
-
+class @BaseFileName@Presenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: @BaseFileName@View,
+    di: DI,
+    lifecycleOwner: DoorLifecycleOwner,
+    private val @Entity_VariableName@ItemListener: Default@BaseFileName@ItemListener = Default@BaseFileName@ItemListener(view, ListViewMode.BROWSER, context, di)
+) : UstadListPresenter<@BaseFileName@View, @Entity@>(context, arguments, view, di, lifecycleOwner),
+    @BaseFileName@ItemListener by @Entity_VariableName@ItemListener
+{
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

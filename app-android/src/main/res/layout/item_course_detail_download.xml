@@ -4,11 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="android.view.View"/>
 
         <variable
             name="fragmentEventHandler"
             type="com.ustadmobile.port.android.view.ClazzDetailOverviewEventListener" />
 
+        <variable
+            name="permissionButtonVisible"
+            type="boolean" />
 
     </data>
 
@@ -18,41 +22,53 @@
         android:background="@color/white"
         android:padding="@dimen/dimen_16dp">
 
-        <TextView
-            android:id="@+id/item_course_download_all_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:drawablePadding="@dimen/dimen_4dp"
-            android:gravity="center"
-            android:text="@string/download_all"
-            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-            android:onClick="@{() -> fragmentEventHandler.onClickShare()}"
-            app:drawableTint="?colorOnIconTint"
-            app:drawableTopCompat="@drawable/ic_file_download_black_24dp"
-            app:layout_constraintEnd_toStartOf="@+id/item_course_share_button"
-            app:layout_constraintHorizontal_chainStyle="spread"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:textColor="?colorOnBackground" />
 
-        <TextView
-            android:id="@+id/item_course_share_button"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/item_course_download_all_button"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:drawablePadding="@dimen/dimen_4dp"
-            android:gravity="center"
-            android:text="@string/share"
-            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:onClick="@{() -> fragmentEventHandler.onClickShare()}"
-            app:drawableTint="?colorOnIconTint"
-            app:drawableTopCompat="@drawable/ic_baseline_share_24"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_chainStyle="spread"
-            app:layout_constraintStart_toEndOf="@id/item_course_download_all_button"
+            android:text="@string/download_all"
+            app:icon="@drawable/ic_file_download_black_24dp"
+            app:iconGravity="top"
             app:layout_constraintTop_toTopOf="parent"
-            app:textColor="?colorOnBackground" />
+            app:layout_constraintEnd_toStartOf="@+id/item_course_share_button"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="gone"
+            tools:layout_editor_absoluteY="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/item_course_share_button"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> fragmentEventHandler.onClickShare()}"
+            android:text="@string/share"
+            app:icon="@drawable/ic_baseline_share_24"
+            app:iconGravity="top"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/item_course_permissions_button"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/item_course_download_all_button"
+            tools:layout_editor_absoluteY="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/item_course_permissions_button"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> fragmentEventHandler.onClickPermissions()}"
+            android:text="@string/permissions"
+            app:icon="@drawable/ic_baseline_security_24"
+            app:iconGravity="top"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/item_course_share_button"
+            android:visibility="@{permissionButtonVisible ? View.VISIBLE : View.GONE}"
+            tools:layout_editor_absoluteY="16dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
