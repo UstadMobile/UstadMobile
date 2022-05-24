@@ -352,6 +352,30 @@ class ClazzAssignmentEditPresenter(context: Any,
                 return@launch
             }
 
+            if(entity.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS &&
+                    entity.assignmentPeerAllocations.isNullOrEmpty()){
+                // assign random peer allocation
+                val submitters = repo.clazzAssignmentDao.getSubmitterListForAssignmentList(
+                    entity.assignment?.caGroupUid ?: 0, entity.cbClazzUid,
+                    systemImpl.getString(MessageID.group_number, context).replace("%1\$s",""))
+
+                val toBucket = submitters.assignRandomly(entity.assignment?.caPeerReviewerCount ?: 0)
+
+                val peerAllocations = mutableListOf<PeerReviewerAllocation>()
+                submitters.forEach { submitter ->
+                    val toList = toBucket[submitter.submitterUid] ?: listOf()
+                    toList.forEach{
+                        peerAllocations.add(PeerReviewerAllocation().apply {
+                            praAssignmentUid = entity.assignment?.caUid ?: 0L
+                            praMarkerSubmitterUid = it
+                            praToMarkerSubmitterUid = submitter.submitterUid
+                        })
+                    }
+                }
+
+                entity.assignmentPeerAllocations = peerAllocations
+            }
+
             // if grace period is not set, set the date to equal the deadline
             if(entity.cbGracePeriodDate == Long.MAX_VALUE){
                 entity.cbGracePeriodDate = entity.cbDeadlineDate

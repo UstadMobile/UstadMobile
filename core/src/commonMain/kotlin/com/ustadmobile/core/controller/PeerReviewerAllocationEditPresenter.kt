@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ext.assignRandomly
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
@@ -114,27 +115,7 @@ class PeerReviewerAllocationEditPresenter(context: Any,
     fun handleRandomAssign(){
         val submitters = view.submitterListWithAllocations ?: return
 
-        val fromBucket = mutableListOf<Long>()
-        val toBucket = mutableMapOf<Long, List<Long>>()
-        // repeat every submitter based on number of reviews per person/group
-        repeat(reviewerCount){
-            fromBucket.addAll(submitters.map { it.submitterUid})
-            fromBucket.shuffle()
-        }
-
-        repeat(reviewerCount){
-            submitters.forEach{
-                val toList = toBucket[it.submitterUid]?.toMutableList() ?: mutableListOf()
-                val reviewerUid = fromBucket
-                    .find { from ->
-                        from != it.submitterUid && from !in toList
-                    } ?: 0L
-
-                toList.add(reviewerUid)
-                toBucket[it.submitterUid] = toList
-                fromBucket.remove(reviewerUid)
-            }
-        }
+        val toBucket = submitters.assignRandomly(reviewerCount)
 
         // assign
         submitters.forEach{

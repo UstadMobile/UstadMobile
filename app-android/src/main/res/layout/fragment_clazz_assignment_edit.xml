@@ -482,19 +482,19 @@
             </com.google.android.material.textfield.TextInputLayout>
 
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/ca_edit_assign_reviewers_button"
                 android:layout_width="@dimen/dimen_0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
                 android:text="@string/assign_reviewers"
-                android:onClick="@{() -> mPresenter.handleAssignReviewersClicked()}"
                 android:visibility="@{blockWithAssignment.assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS ? View.VISIBLE : View.GONE}"
                 app:layout_constraintStart_toEndOf="@id/ca_edit_reviewers_per_user_layout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_marking_type"
                 />
+
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/ca_edit_class_comments"

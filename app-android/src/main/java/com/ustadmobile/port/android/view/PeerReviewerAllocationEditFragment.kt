@@ -61,6 +61,7 @@ class PeerReviewerAllocationEditFragment: UstadEditFragment<PeerReviewerAllocati
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mPresenter?.onCreate(backStackSavedState)
+        ustadFragmentTitle = getString(R.string.assign_reviewers)
     }
 
     override fun handleAssignRandomAllocationClicked() {

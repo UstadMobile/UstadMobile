@@ -1,6 +1,8 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
@@ -73,6 +75,8 @@ abstract class PeerReviewerAllocationDao : BaseDao<PeerReviewerAllocation>, OneT
     @ReplicationCheckPendingNotificationsFor([PeerReviewerAllocation::class])
     abstract suspend fun replicateOnChange()
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun replaceList(entries: List<PeerReviewerAllocation>)
 
     @Query("""
         SELECT *

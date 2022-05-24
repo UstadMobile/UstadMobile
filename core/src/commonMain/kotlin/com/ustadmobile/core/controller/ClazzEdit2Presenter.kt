@@ -190,6 +190,7 @@ class ClazzEdit2Presenter(
                 cbMaxPoints = newAssignment.cbMaxPoints
 
                 assignment = newAssignment.assignment
+                assignmentPeerAllocations = newAssignment.assignmentPeerAllocations
             }
 
             foundBlock.assignment = newAssignment.assignment
@@ -201,6 +202,7 @@ class ClazzEdit2Presenter(
             foundBlock.cbCompletionCriteria = newAssignment.cbCompletionCriteria
             foundBlock.cbLateSubmissionPenalty = newAssignment.cbLateSubmissionPenalty
             foundBlock.cbMaxPoints = newAssignment.cbMaxPoints
+            foundBlock.assignmentPeerAllocations = newAssignment.assignmentPeerAllocations
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
@@ -580,6 +582,13 @@ class ClazzEdit2Presenter(
                     .flatten()
 
                 txDb.discussionTopicDao.deactivateByUids(topicUidsToDelete, systemTimeInMillis())
+
+
+                val peerAllocations = courseBlockList.mapNotNull {
+                    it.assignmentPeerAllocations
+                }.flatten()
+
+                txDb.peerReviewerAllocationDao.replaceList(peerAllocations)
 
                 txDb.courseBlockDao.replaceListAsync(courseBlockList)
                 txDb.courseBlockDao.deactivateByUids(

@@ -47,6 +47,10 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             it.fileRequiredListener = onFileRequiredChanged
             it.textRequiredListener = onTextRequiredChanged
             it.caEditCommonFields.caDeadlineDateTextinput.setEndIconOnClickListener(clearDeadlineListener)
+            // onClick on viewBinding caused problems so set here on the fragment
+            it.caEditAssignReviewersButton.setOnClickListener {
+                mPresenter?.handleAssignReviewersClicked()
+            }
             it.caEditCommonFields.caDeadlineDate.doAfterTextChanged{ editable ->
                 if(editable.isNullOrEmpty()){
                     return@doAfterTextChanged
@@ -233,6 +237,9 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
     override var groupSetEnabled: Boolean = false
         get() = field
         set(value) {
+            if(field == value){
+                return
+            }
             field = value
             mBinding?.groupSetEnabled = value
         }
