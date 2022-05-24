@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -123,12 +124,29 @@ class PeerReviewerAllocationEditPresenterTest {
         nullableArgumentCaptor<List<AssignmentSubmitterWithAllocations>>().apply {
             verify(mockView, timeout(1000).atLeastOnce()).submitterListWithAllocations = capture()
 
-            val value = lastValue!!
+            val result = lastValue!!
 
-            println(value)
+            val toBucket = mutableMapOf<Long, List<Long>>()
+            val size = 2
+            var equallyAssigned = true
+            var allAssigned = true
+            result.forEach {
+                val toList = mutableListOf<Long>()
+                it.allocations?.forEach { peer ->
+                    toList.add(peer.praMarkerSubmitterUid)
+                    if(peer.praMarkerSubmitterUid == 0L){
+                        allAssigned = false
+                    }
+                }
+                if(toList.size != size){
+                    equallyAssigned = true
+                }
+                toBucket[it.submitterUid] = toList
+            }
+
+            Assert.assertEquals("all equally assigned", true, equallyAssigned)
+            Assert.assertEquals("all assigned", true, allAssigned)
         }
-
-
 
     }
 

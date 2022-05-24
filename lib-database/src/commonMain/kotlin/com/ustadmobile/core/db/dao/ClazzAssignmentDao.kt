@@ -195,24 +195,44 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
     ): DoorDataSourceFactory<Int, AssignmentSubmitterSummary>
 
     @Query("""
-         $SUBMITTER_LIST_CTE
+         WITH SubmitterList (submitterId, name)
+            AS (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid AS submitterId, 
+                       Person.firstNames || ' ' || Person.lastName AS name
+                  FROM ClazzEnrolment
+                  
+                       JOIN Person 
+                       ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                       
+                 WHERE :groupUid = 0 
+                   AND clazzEnrolmentClazzUid = :clazzUid
+                   AND clazzEnrolmentActive
+                   AND clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+              GROUP BY submitterId, name
+            UNION                 
+             SELECT DISTINCT CourseGroupMember.cgmGroupNumber AS submitterId,
+                    :group || ' ' || CourseGroupMember.cgmGroupNumber AS name  
+               FROM CourseGroupMember
+                    JOIN CourseGroupSet
+                    ON CourseGroupSet.cgsUid = :groupUid
+              WHERE CourseGroupMember.cgmSetUid = CourseGroupSet.cgsUid
+                AND CourseGroupMember.cgmGroupNumber != 0
+           GROUP BY submitterId, name
+            )
         
          SELECT submitterId AS submitterUid,
                 name, 
                 0 as fileSubmissionStatus,
-                (CASE WHEN ClazzAssignment.caGroupUid = 0 
+                (CASE WHEN :groupUid = 0 
                  THEN 'TRUE' 
                  ELSE 'FALSE' END) AS isGroupAssignment,
                  
                  '' as latestPrivateComment
                  
-          FROM SubmitterList
-                JOIN ClazzAssignment
-                ON ClazzAssignment.caUid = :assignmentUid       
+          FROM SubmitterList    
       ORDER BY name         
     """)
     abstract suspend fun getSubmitterListForAssignmentList(
-        assignmentUid: Long,
+        groupUid: Long,
         clazzUid: Long,
         group: String
     ): List<AssignmentSubmitterSummary>

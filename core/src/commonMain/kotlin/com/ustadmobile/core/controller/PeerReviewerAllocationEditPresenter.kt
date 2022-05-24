@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.PeerReviewerAllocationEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -52,8 +53,17 @@ class PeerReviewerAllocationEditPresenter(context: Any,
 
         presenterScope.launch(doorMainDispatcher()) {
 
+            if(bundle[SAVED_STATE_SUBMITTER_WITH_ALLOCATIONS] != null){
+                val submitterList = safeParseList(di, ListSerializer(AssignmentSubmitterWithAllocations.serializer()),
+                    AssignmentSubmitterWithAllocations::class, bundle[SAVED_STATE_SUBMITTER_WITH_ALLOCATIONS]
+                    ?: "")
+
+                view.submitterListWithAllocations = submitterList
+                return@launch
+            }
+
             val listOfSubmitters = repo.clazzAssignmentDao.getSubmitterListForAssignmentList(
-                assignmentUid,
+                groupUid,
                 clazzUid,
                 systemImpl.getString(MessageID.group_number, context).replace("%1\$s","")
             )
@@ -94,9 +104,14 @@ class PeerReviewerAllocationEditPresenter(context: Any,
         val entityVal = entity
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
+        val submitterWithAllocations = view.submitterListWithAllocations ?: listOf()
+        savedState.putEntityAsJson(
+            SAVED_STATE_SUBMITTER_WITH_ALLOCATIONS,
+            ListSerializer(AssignmentSubmitterWithAllocations.serializer()),
+            submitterWithAllocations)
     }
 
-    fun handleRandomAssign(shuffle: Boolean = true){
+    fun handleRandomAssign(){
         val submitters = view.submitterListWithAllocations ?: return
 
         val fromBucket = mutableListOf<Long>()
@@ -104,7 +119,7 @@ class PeerReviewerAllocationEditPresenter(context: Any,
         // repeat every submitter based on number of reviews per person/group
         repeat(reviewerCount){
             fromBucket.addAll(submitters.map { it.submitterUid})
-            fromBucket.takeIf { shuffle }?.shuffle()
+            fromBucket.shuffle()
         }
 
         repeat(reviewerCount){
@@ -135,16 +150,19 @@ class PeerReviewerAllocationEditPresenter(context: Any,
 
     override fun handleClickSave(entity: PeerReviewerAllocationList) {
 
+        val list = view.submitterListWithAllocations?.flatMap { it.allocations ?: listOf() }?.filter { it.praMarkerSubmitterUid != 0L }
+
+        val newEntity = PeerReviewerAllocationList(list)
 
         finishWithResult(
             safeStringify(di, ListSerializer(PeerReviewerAllocationList.serializer()),
-                listOf(entity))
+                listOf(newEntity))
         )
     }
 
     companion object {
 
-        //TODO: Add constants for keys that would be used for any One To Many Join helpers
+        const val SAVED_STATE_SUBMITTER_WITH_ALLOCATIONS = "submitterWithAllocations"
 
     }
 
