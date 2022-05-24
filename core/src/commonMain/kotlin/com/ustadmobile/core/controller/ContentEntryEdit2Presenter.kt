@@ -65,7 +65,12 @@ class ContentEntryEdit2Presenter(
     arguments,
     view,
     di,
-    lifecycleOwner), ContentEntryAddOptionsListener {
+    lifecycleOwner
+), ContentEntryAddOptionsListener {
+
+    suspend fun DoorUri.isRemoteOrServerUpload() : Boolean{
+        return isRemote() || toString().startsWith(MetadataResult.UPLOAD_TMP_LOCATOR_PREFIX)
+    }
 
     private val pluginManager: ContentPluginManager? by on(accountManager.activeAccount)
         .instanceOrNull()
@@ -449,7 +454,7 @@ class ContentEntryEdit2Presenter(
 
                 if (metaData != null) {
 
-                    if (entity.sourceUrl?.let { DoorUri.parse(it) }?.isRemote() == false) {
+                    if (entity.sourceUrl?.let { DoorUri.parse(it) }?.isRemoteOrServerUpload() == false) {
 
                         val job = ContentJob().apply {
                             toUri = view.storageOptions?.get(view.selectedStorageIndex)?.dirUri
