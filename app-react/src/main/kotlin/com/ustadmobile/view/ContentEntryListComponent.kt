@@ -104,7 +104,7 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
                 },
                 UmDialogOptionItem("note_add",MessageID.add_file,
                     MessageID.add_file_description) {
-                    mPresenter?.handleOnClickAddSupportedFile()
+                    mPresenter?.onClickImportFile()
                 }
             )
 
@@ -142,7 +142,7 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
                 anchorElement = anchorElement,
                 onClose = {
                     setState {
-                        showingEditOptions = false;
+                        showingEditOptions = false
                         anchorElement = null
                     }
                 }) {

@@ -26,7 +26,8 @@ class SelectFilePresenter(
     arguments: Map<String, String>,
     view: SelectFileView,
     lifecycleOwner: DoorLifecycleOwner,
-    di: DI): UstadEditPresenter<SelectFileView, Any>(context, arguments, view, di, lifecycleOwner){
+    di: DI
+): UstadEditPresenter<SelectFileView, Any>(context, arguments, view, di, lifecycleOwner){
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON

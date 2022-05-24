@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
+import com.ustadmobile.core.controller.SelectExtractFilePresenter
 import com.ustadmobile.core.controller.SelectExtractFilePresenterCommon
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
@@ -30,7 +31,7 @@ class SelectExtractFileFragment(private val registry: ActivityResultRegistry? = 
             mPresenter?.handleUriSelected(it?.toString())
         }
 
-        mPresenter = SelectExtractFilePresenterCommon(requireContext(),
+        mPresenter = SelectExtractFilePresenter(requireContext(),
             arguments.toStringMap(),
             this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
