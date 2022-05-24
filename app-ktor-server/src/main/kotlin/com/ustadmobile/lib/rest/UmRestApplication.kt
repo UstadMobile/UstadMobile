@@ -341,6 +341,13 @@ fun Application.umRestApplication(
                 manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))!!
         }
 
+        bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {
+            File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), UPLOAD_TMP_SUBDIR).also {
+                if(!it.exists())
+                    it.mkdirs()
+            }
+        }
+
         try {
             appConfig.config("mail")
 
