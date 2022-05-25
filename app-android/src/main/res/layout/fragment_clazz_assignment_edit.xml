@@ -15,6 +15,7 @@
         <import type="com.ustadmobile.core.controller.ClazzAssignmentEditPresenter"/>
         <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener" />
 
 
         <variable
@@ -102,6 +103,14 @@
         <variable
             name="markingTypeOptions"
             type="java.util.List&lt;IdOption&gt;"/>
+
+        <variable
+            name="peersVisibility"
+            type="Integer" />
+
+        <variable
+            name="markingTypeSelectionListener"
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
         <variable
             name="completionCriteriaOptions"
@@ -449,6 +458,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:selectedMessageIdOption="@={blockWithAssignment.assignment.caMarkingType}"
+                    app:onMessageIdOptionSelected="@{markingTypeSelectionListener}"
                     app:messageIdOptions="@{markingTypeOptions}"
                     />
 
@@ -466,7 +476,7 @@
                 app:hintEnabled="true"
                 app:errorEnabled="@{reviewerCountError != null}"
                 app:errorText="@{reviewerCountError}"
-                android:visibility="@{blockWithAssignment.assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS ? View.VISIBLE : View.GONE}"
+                android:visibility="@{peersVisibility}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/ca_edit_assign_reviewers_button"
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_marking_type">
@@ -489,7 +499,7 @@
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
                 android:text="@string/assign_reviewers"
-                android:visibility="@{blockWithAssignment.assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS ? View.VISIBLE : View.GONE}"
+                android:visibility="@{peersVisibility}"
                 app:layout_constraintStart_toEndOf="@id/ca_edit_reviewers_per_user_layout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ca_edit_marking_type"

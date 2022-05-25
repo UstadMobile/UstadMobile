@@ -11,6 +11,8 @@ class CourseBlockWithEntity: CourseBlockWithEntityDb() {
 
     var assignmentPeerAllocations: List<PeerReviewerAllocation>? = null
 
+    var assignmentPeerAllocationsToRemove: List<Long>? = null
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -21,6 +23,7 @@ class CourseBlockWithEntity: CourseBlockWithEntityDb() {
         if (topics != other.topics) return false
         if (topicUidsToRemove != other.topicUidsToRemove) return false
         if (assignmentPeerAllocations != other.assignmentPeerAllocations) return false
+        if (assignmentPeerAllocationsToRemove != other.assignmentPeerAllocationsToRemove) return false
 
         return true
     }
@@ -30,6 +33,7 @@ class CourseBlockWithEntity: CourseBlockWithEntityDb() {
         result = 31 * result + (topics?.hashCode() ?: 0)
         result = 31 * result + (topicUidsToRemove?.hashCode() ?: 0)
         result = 31 * result + (assignmentPeerAllocations?.hashCode() ?: 0)
+        result = 31 * result + (assignmentPeerAllocationsToRemove?.hashCode() ?: 0)
         return result
     }
 

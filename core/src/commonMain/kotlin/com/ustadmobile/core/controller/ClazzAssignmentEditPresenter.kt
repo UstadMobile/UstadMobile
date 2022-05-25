@@ -29,6 +29,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
+import kotlin.math.abs
 
 
 class ClazzAssignmentEditPresenter(context: Any,
@@ -352,28 +353,59 @@ class ClazzAssignmentEditPresenter(context: Any,
                 return@launch
             }
 
-            if(entity.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS &&
-                    entity.assignmentPeerAllocations.isNullOrEmpty()){
+            if(entity.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS){
 
                 val submitters = repo.clazzAssignmentDao.getSubmitterListForAssignmentList(
                     entity.assignment?.caGroupUid ?: 0, entity.cbClazzUid,
                     systemImpl.getString(MessageID.group_number, context).replace("%1\$s",""))
 
-                val toBucket = submitters.assignRandomly(entity.assignment?.caPeerReviewerCount ?: 0)
+                val reviewerCount = entity.assignment?.caPeerReviewerCount ?: 0
+                val allocatedGroup = entity.assignmentPeerAllocations?.groupBy { it.praToMarkerSubmitterUid }
+                val allocatedCount = allocatedGroup?.values?.firstOrNull()?.size ?: 0
+                val remainingCount = reviewerCount - allocatedCount
 
                 val peerAllocations = mutableListOf<PeerReviewerAllocation>()
-                submitters.forEach { submitter ->
-                    val toList = toBucket[submitter.submitterUid] ?: listOf()
-                    toList.forEach{
-                        peerAllocations.add(PeerReviewerAllocation().apply {
-                            praAssignmentUid = entity.assignment?.caUid ?: 0L
-                            praMarkerSubmitterUid = it
-                            praToMarkerSubmitterUid = submitter.submitterUid
-                        })
+                when{
+                    (remainingCount > 0) -> {
+                        // add any existing allocations
+                        entity.assignmentPeerAllocations?.let { peerAllocations.addAll(it) }
+
+                        // create toBucket for remaining to be allocated
+                        val toBucket = submitters.assignRandomly(remainingCount)
+
+                        // for each submitter add more reviewers based on toBucket
+                        submitters.forEach { submitter ->
+                            val toList = toBucket[submitter.submitterUid] ?: listOf()
+                            toList.forEach {
+                                peerAllocations.add(PeerReviewerAllocation().apply {
+                                        praAssignmentUid = entity.assignment?.caUid ?: 0L
+                                        praMarkerSubmitterUid = it
+                                        praToMarkerSubmitterUid = submitter.submitterUid
+                                })
+                            }
+                        }
+                        entity.assignmentPeerAllocations = peerAllocations
+                    }
+                    remainingCount < 0 -> {
+                        // using the grouped allocations, remove from list and add to allocationsToRemove
+                        val allocationsToRemove = mutableListOf<PeerReviewerAllocation>()
+                        val removeCount = abs(remainingCount)
+                        allocatedGroup?.forEach { map ->
+                            val allocation = map.value.toMutableList()
+                            repeat(removeCount){
+                                allocationsToRemove.add(allocation.removeLast())
+                            }
+                        }
+                        entity.assignmentPeerAllocationsToRemove = allocationsToRemove.map { it.praUid }.filter { it != 0L }
+                        // remove from entity list
+                        val list = entity.assignmentPeerAllocations?.toMutableList()
+                        list?.removeAll(allocationsToRemove)
+                        entity.assignmentPeerAllocations = list
                     }
                 }
-
-                entity.assignmentPeerAllocations = peerAllocations
+            }else{
+                entity.assignmentPeerAllocationsToRemove = entity.assignmentPeerAllocations?.map { it.praUid }?.filter { it != 0L }
+                entity.assignmentPeerAllocations = null
             }
 
             // if grace period is not set, set the date to equal the deadline

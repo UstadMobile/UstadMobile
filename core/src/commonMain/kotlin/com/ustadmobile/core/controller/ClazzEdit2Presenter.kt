@@ -47,6 +47,7 @@ fun CourseBlockWithEntityDb.asCourseBlockWithEntity(
     courseBlockWithEntity.topics = relevantTopics
     courseBlockWithEntity.assignmentPeerAllocations = assignmentAllocations
     courseBlockWithEntity.topicUidsToRemove = listOf()
+    courseBlockWithEntity.assignmentPeerAllocationsToRemove = listOf()
 
 
     return courseBlockWithEntity
@@ -191,6 +192,7 @@ class ClazzEdit2Presenter(
 
                 assignment = newAssignment.assignment
                 assignmentPeerAllocations = newAssignment.assignmentPeerAllocations
+                assignmentPeerAllocationsToRemove = newAssignment.assignmentPeerAllocationsToRemove
             }
 
             foundBlock.assignment = newAssignment.assignment
@@ -203,6 +205,8 @@ class ClazzEdit2Presenter(
             foundBlock.cbLateSubmissionPenalty = newAssignment.cbLateSubmissionPenalty
             foundBlock.cbMaxPoints = newAssignment.cbMaxPoints
             foundBlock.assignmentPeerAllocations = newAssignment.assignmentPeerAllocations
+            foundBlock.assignmentPeerAllocationsToRemove = newAssignment.assignmentPeerAllocationsToRemove
+
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
@@ -589,6 +593,12 @@ class ClazzEdit2Presenter(
                 }.flatten()
 
                 txDb.peerReviewerAllocationDao.replaceListAsync(peerAllocations)
+
+                val peerAllocationUidsToDelete: List<Long> = courseBlockList.mapNotNull{it.assignmentPeerAllocationsToRemove
+                }.flatten()
+
+                txDb.peerReviewerAllocationDao.deactivateByUids(
+                    peerAllocationUidsToDelete, systemTimeInMillis())
 
                 txDb.courseBlockDao.replaceListAsync(courseBlockList)
                 txDb.courseBlockDao.deactivateByUids(
