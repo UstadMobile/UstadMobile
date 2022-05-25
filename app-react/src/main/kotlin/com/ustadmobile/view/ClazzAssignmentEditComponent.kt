@@ -5,10 +5,12 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.FieldLabel
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
 import com.ustadmobile.util.UmProps
@@ -19,6 +21,8 @@ import com.ustadmobile.view.ext.renderCourseBlockCommonFields
 import com.ustadmobile.view.ext.renderListItemWithTitleAndSwitch
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import kotlinx.css.height
+import kotlinx.css.px
 import react.RBuilder
 import react.setState
 import styled.css
@@ -69,6 +73,9 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
     private var submissionPolicyLabel = FieldLabel(text = getString(MessageID.submission_policy))
 
     private var markedByLabel = FieldLabel(text = getString(MessageID.marked_by))
+
+    private var reviewersPerUserLabel = FieldLabel(text = getString(MessageID.reviews_per_user_group))
+    
 
     override var caGracePeriodError: String? = null
         get() = field
@@ -176,6 +183,14 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
         set(value) {
             setState {
                 field = value
+            }
+        }
+    override var reviewerCountError: String? = null
+        get() = field
+        set(value) {
+            setState{
+                field = value
+                reviewersPerUserLabel = reviewersPerUserLabel.copy(errorText = value)
             }
         }
 
@@ -473,7 +488,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
 
 
                     umGridContainer(columnSpacing = GridSpacing.spacing4) {
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                        umItem(GridSize.cells12, GridSize.cells6) {
                             umTextFieldSelect(
                                 "${submissionPolicyLabel.text}",
                                 entity?.assignment?.caSubmissionPolicy.toString(),
@@ -490,7 +505,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                             )
                         }
 
-                        umItem(GridSize.cells12, GridSize.cells6 ) {
+                        umItem(GridSize.cells12, GridSize.cells6) {
                             umTextFieldSelect(
                                 "${markedByLabel.text}",
                                 entity?.assignment?.caMarkingType.toString(),
@@ -506,6 +521,41 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                                 }
                             )
                         }
+
+                        if (entity?.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS) {
+
+                        umItem(GridSize.cells12, GridSize.cells6) {
+                            umTextField(label = "${reviewersPerUserLabel.text}",
+                                helperText = reviewersPerUserLabel.errorText,
+                                value = entity?.assignment?.caPeerReviewerCount.toString(),
+                                error = reviewersPerUserLabel.error,
+                                disabled = !fieldsEnabled,
+                                variant = FormControlVariant.outlined,
+                                onChange = {
+                                    setState {
+                                        entity?.assignment?.caPeerReviewerCount =
+                                            it.toIntOrNull() ?: 0
+                                    }
+                                }
+                            )
+                        }
+
+                        umItem(GridSize.cells12, GridSize.cells6) {
+                            umButton(getString(MessageID.assign_reviewers),
+                                variant = ButtonVariant.contained,
+                                onClick = {
+                                    mPresenter?.handleAssignReviewersClicked()
+                                }) {
+                                css {
+                                    +StyleManager.defaultFullWidth
+                                    +defaultMarginTop
+                                    height = 50.px
+                                }
+                            }
+                        }
+
+                    }
+
                     }
 
                     umItem {

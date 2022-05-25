@@ -195,29 +195,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
     ): DoorDataSourceFactory<Int, AssignmentSubmitterSummary>
 
     @Query("""
-         WITH SubmitterList (submitterId, name)
-            AS (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid AS submitterId, 
-                       Person.firstNames || ' ' || Person.lastName AS name
-                  FROM ClazzEnrolment
-                  
-                       JOIN Person 
-                       ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                       
-                 WHERE :groupUid = 0 
-                   AND clazzEnrolmentClazzUid = :clazzUid
-                   AND clazzEnrolmentActive
-                   AND clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-              GROUP BY submitterId, name
-            UNION                 
-             SELECT DISTINCT CourseGroupMember.cgmGroupNumber AS submitterId,
-                    :group || ' ' || CourseGroupMember.cgmGroupNumber AS name  
-               FROM CourseGroupMember
-                    JOIN CourseGroupSet
-                    ON CourseGroupSet.cgsUid = :groupUid
-              WHERE CourseGroupMember.cgmSetUid = CourseGroupSet.cgsUid
-                AND CourseGroupMember.cgmGroupNumber != 0
-           GROUP BY submitterId, name
-            )
+         $SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE
         
          SELECT submitterId AS submitterUid,
                 name, 
@@ -240,16 +218,14 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
 
 
     @Query("""
-         $SUBMITTER_LIST_CTE
+         $SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE
         
          SELECT COUNT(*) 
-          FROM SubmitterList
-                JOIN ClazzAssignment
-                ON ClazzAssignment.caUid = :assignmentUid       
+          FROM SubmitterList  
       ORDER BY name         
     """)
     abstract suspend fun getSubmitterCountFromAssignment(
-        assignmentUid: Long,
+        groupUid: Long,
         clazzUid: Long,
         group: String
     ): Int
@@ -310,6 +286,33 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
     abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzAssignment?>
 
     companion object{
+
+        const val SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE = """
+             WITH SubmitterList (submitterId, name)
+            AS (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid AS submitterId, 
+                       Person.firstNames || ' ' || Person.lastName AS name
+                  FROM ClazzEnrolment
+                  
+                       JOIN Person 
+                       ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                       
+                 WHERE :groupUid = 0 
+                   AND clazzEnrolmentClazzUid = :clazzUid
+                   AND clazzEnrolmentActive
+                   AND clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+              GROUP BY submitterId, name
+            UNION                 
+             SELECT DISTINCT CourseGroupMember.cgmGroupNumber AS submitterId,
+                    :group || ' ' || CourseGroupMember.cgmGroupNumber AS name  
+               FROM CourseGroupMember
+                    JOIN CourseGroupSet
+                    ON CourseGroupSet.cgsUid = :groupUid
+              WHERE CourseGroupMember.cgmSetUid = CourseGroupSet.cgsUid
+                AND CourseGroupMember.cgmGroupNumber != 0
+           GROUP BY submitterId, name
+            )
+        """
+
 
         const val SUBMITTER_LIST_CTE = """
             WITH SubmitterList (submitterId, name)

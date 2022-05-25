@@ -249,7 +249,7 @@ class ClazzAssignmentEditPresenter(context: Any,
         val reviewerCount = entity?.assignment?.caPeerReviewerCount ?: 0
         presenterScope.launch(doorMainDispatcher()) {
             val totalSubmitterSize = repo.clazzAssignmentDao.getSubmitterCountFromAssignment(
-                assignment.caUid, assignment.caClazzUid, "")
+                assignment.caGroupUid, assignment.caClazzUid, "")
             if((reviewerCount) <= 0 || reviewerCount >= totalSubmitterSize){
                 // show error on view
                 view.reviewerCountError = " "
@@ -324,7 +324,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             if(entity.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS){
                 val reviewerCount = entity.assignment?.caPeerReviewerCount ?: 0
                 val totalSubmitterSize = repo.clazzAssignmentDao.getSubmitterCountFromAssignment(
-                    entity.assignment?.caUid ?: 0, clazzUid, "")
+                    entity.assignment?.caGroupUid ?: 0, clazzUid, "")
                 if((reviewerCount) <= 0 || reviewerCount >= totalSubmitterSize){
                     // show error on view
                     view.reviewerCountError = " "
@@ -354,7 +354,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             if(entity.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS &&
                     entity.assignmentPeerAllocations.isNullOrEmpty()){
-                // assign random peer allocation
+
                 val submitters = repo.clazzAssignmentDao.getSubmitterListForAssignmentList(
                     entity.assignment?.caGroupUid ?: 0, entity.cbClazzUid,
                     systemImpl.getString(MessageID.group_number, context).replace("%1\$s",""))
