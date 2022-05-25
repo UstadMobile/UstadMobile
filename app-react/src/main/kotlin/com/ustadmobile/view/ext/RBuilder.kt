@@ -8,6 +8,7 @@ import com.ustadmobile.core.controller.SubmissionConstants.STATUS_MAP
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.IdOption
+import com.ustadmobile.core.util.UidOption
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
@@ -977,6 +978,40 @@ fun RBuilder.renderListItemWithLeftIconTitleAndOptionOnRight(
                 error = fieldLabel.error,
                 values = options?.map {
                     Pair(it.optionId.toString(), it.toString())
+                }?.toList(),
+                onChange = {
+                    onChange(it)
+                }
+            )
+        }
+    }
+}
+
+fun RBuilder.renderListItemWithTitleAndOptionOnRight(
+    value: String?,
+    title: String?,
+    options: List<UidOption>?,
+    fieldLabel: FieldLabel?,
+    onChange: (String) -> Unit
+){
+    umGridContainer {
+        umItem(GridSize.cells8, GridSize.cells9) {
+            umTypography(title ?: "",
+                variant = TypographyVariant.h6) {
+                css {
+                    +alignTextToStart
+                    marginTop = 2.spacingUnits
+                }
+            }
+        }
+
+        umItem(GridSize.cells2) {
+            umTextFieldSelect(
+                "${fieldLabel?.text}", value,
+                fieldLabel?.errorText ?: "",
+                error = fieldLabel?.error ?: false,
+                values = options?.map {
+                    Pair(it.uidOption.toString(), it.toString())
                 }?.toList(),
                 onChange = {
                     onChange(it)
