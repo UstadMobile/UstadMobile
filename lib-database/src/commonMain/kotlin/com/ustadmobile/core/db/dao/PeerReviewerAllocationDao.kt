@@ -76,7 +76,7 @@ abstract class PeerReviewerAllocationDao : BaseDao<PeerReviewerAllocation>, OneT
     abstract suspend fun replicateOnChange()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun replaceList(entries: List<PeerReviewerAllocation>)
+    abstract suspend fun replaceListAsync(entries: List<PeerReviewerAllocation>)
 
     @Query("""
         SELECT *

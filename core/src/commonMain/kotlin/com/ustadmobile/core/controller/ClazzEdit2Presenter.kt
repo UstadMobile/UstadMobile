@@ -588,7 +588,7 @@ class ClazzEdit2Presenter(
                     it.assignmentPeerAllocations
                 }.flatten()
 
-                txDb.peerReviewerAllocationDao.replaceList(peerAllocations)
+                txDb.peerReviewerAllocationDao.replaceListAsync(peerAllocations)
 
                 txDb.courseBlockDao.replaceListAsync(courseBlockList)
                 txDb.courseBlockDao.deactivateByUids(
