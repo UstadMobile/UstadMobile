@@ -1932,13 +1932,4 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="reviewer">Reviewer #%1$s</string>
 
-
-    <string name="assign_reviewers">Assign reviewers</string>
-
-    <string name="reviews_per_user_group">Reviews per user or group</string>
-
-    <string name="assign_random_reviewers">Assign random reviewers</string>
-
-    <!-- to be displayed as Reviewer #1 etc -->
-    <string name="reviewer">Reviewer #%1$s</string>
 </resources>
