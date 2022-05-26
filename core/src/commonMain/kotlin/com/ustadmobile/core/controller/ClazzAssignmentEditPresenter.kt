@@ -146,6 +146,12 @@ class ClazzAssignmentEditPresenter(context: Any,
                     view.groupSetEnabled = it == true
                 }
 
+            repo.courseAssignmentMarkDao
+                .checkNoSubmissionsMarked(editEntity.assignment?.caUid ?: 0)
+                .observeWithLifecycleOwner(lifecycleOwner){
+                    view.markingTypeEnabled = it == true
+                }
+
             val clazzUid = editEntity.assignment?.caClazzUid ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
             val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
                 it.clazzDao.getClazzWithSchool(clazzUid)
@@ -345,6 +351,20 @@ class ClazzAssignmentEditPresenter(context: Any,
                     view.showSnackBar(systemImpl.getString(MessageID.error , context))
                 }
             }
+
+            val markingTypeDb = repo.clazzAssignmentDao.getMarkingTypeFromAssignment(entity.assignment?.caUid ?: 0L)
+
+            if(markingTypeDb != -1 && markingTypeDb != entity.assignment?.caMarkingType){
+
+                val noSubmissionMarked = repo.courseAssignmentMarkDao
+                    .checkNoSubmissionsMarked(entity.assignment?.caUid ?: 0L).getFirstValue()
+
+                if(!noSubmissionMarked){
+                    foundError = true
+                    view.showSnackBar(systemImpl.getString(MessageID.error , context))
+                }
+            }
+
 
             if(foundError){
                 view.loading = false

@@ -133,6 +133,10 @@
             type="Boolean" />
 
         <variable
+            name="markingTypeEnabled"
+            type="Boolean" />
+
+        <variable
             name="gracePeriodVisibility"
             type="int" />
 
@@ -448,6 +452,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/marked_by"
+                android:enabled="@{markingTypeEnabled}"
                 android:layout_marginVertical="@dimen/dimen_8dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"

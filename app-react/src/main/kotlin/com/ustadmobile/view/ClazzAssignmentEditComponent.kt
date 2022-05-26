@@ -236,6 +236,20 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
     override var groupSetEnabled: Boolean = false
         get() = field
         set(value) {
+            if(field == value){
+                return
+            }
+            setState{
+                field = value
+            }
+        }
+
+    override var markingTypeEnabled: Boolean = false
+        get() = field
+        set(value) {
+            if(field == value){
+                return
+            }
             setState{
                 field = value
             }
@@ -511,6 +525,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                                 entity?.assignment?.caMarkingType.toString(),
                                 markedByLabel.errorText ?: "",
                                 error = markedByLabel.error,
+                                disabled = !markingTypeEnabled,
                                 values = markingTypeOptions?.map {
                                     Pair(it.optionId.toString(), it.toString())
                                 }?.toList(),
