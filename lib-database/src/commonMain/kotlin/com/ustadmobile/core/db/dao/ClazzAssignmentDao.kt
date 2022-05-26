@@ -265,6 +265,14 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
     abstract suspend fun getGroupUidFromAssignment(uid: Long): Long
 
     @Query("""
+          SELECT COALESCE((
+           SELECT caMarkingType
+           FROM ClazzAssignment
+          WHERE caUid = :uid),-1)
+    """)
+    abstract suspend fun getMarkingTypeFromAssignment(uid: Long): Int
+
+    @Query("""
         SELECT * 
           FROM ClazzAssignment
                LEFT JOIN CourseBlock

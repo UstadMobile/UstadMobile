@@ -78,6 +78,14 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
 
 
     @Query("""
+         SELECT NOT EXISTS(SELECT 1
+                        FROM CourseAssignmentMark
+                       WHERE CourseAssignmentMark.camAssignmentUid = :assignmentUid
+                       LIMIT 1)
+    """)
+    abstract fun checkNoSubmissionsMarked(assignmentUid: Long): DoorLiveData<Boolean>
+
+    @Query("""
         SELECT * 
           FROM CourseAssignmentMark               
          WHERE camAssignmentUid = :assignmentUid

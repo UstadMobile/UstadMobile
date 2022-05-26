@@ -41,6 +41,8 @@ interface ClazzAssignmentEditView: UstadEditView<CourseBlockWithEntity> {
 
     var groupSetEnabled: Boolean
 
+    var markingTypeEnabled: Boolean
+
     companion object {
 
         const val VIEW_NAME = "CourseAssignmentEditView"

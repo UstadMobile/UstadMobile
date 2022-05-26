@@ -327,6 +327,57 @@ class ClazzAssignmentEditPresenterTest {
     }
 
     @Test
+    fun givenExistingAssignmentMarkingTypeWasChanged_whenSubmissionMarkedBeforeSave_thenShowError(){
+
+        val assignment = CourseBlockWithEntity().apply {
+            assignment = ClazzAssignment().apply {
+                caMarkingType = ClazzAssignment.MARKED_BY_COURSE_LEADER
+                caTitle = "AssignmentA"
+                caClazzUid = testClazz.clazzUid
+                caUid = repo.clazzAssignmentDao.insert(this)
+            }
+            cbClazzUid = testClazz.clazzUid
+            cbEntityUid = assignment!!.caUid
+            cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+            cbTitle = "AssignmentA"
+            cbUid = repo.courseBlockDao.insert(this)
+        }
+
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+
+        val presenterArgs = mutableMapOf<String, String>()
+        presenterArgs[UstadView.ARG_CLAZZUID] = testClazz.clazzUid.toString()
+        presenterArgs[UstadEditView.ARG_ENTITY_JSON] = safeStringify(di, CourseBlockWithEntity.serializer(), assignment)
+
+        testNavController!!.navigate(ClazzAssignmentEditView.VIEW_NAME, presenterArgs)
+
+        val presenter = ClazzAssignmentEditPresenter(context,
+            presenterArgs, mockView, mockLifecycleOwner, di)
+        presenter.onCreate(null)
+
+        val initialEntity: CourseBlockWithEntity = mockView.captureLastEntityValue()!!
+
+        initialEntity.assignment?.caMarkingType = ClazzAssignment.MARKED_BY_PEERS
+
+        verify(mockView, timeout(1000)).markingTypeEnabled = eq(true)
+
+        val submission = CourseAssignmentMark().apply {
+            camAssignmentUid = assignment.assignment!!.caUid
+            camSubmitterUid = 1
+            camUid = repo.courseAssignmentMarkDao.insert(this)
+        }
+
+        verify(mockView, timeout(5000)).markingTypeEnabled = eq(false)
+
+        presenter.handleClickSave(initialEntity)
+
+        verify(mockView, timeout(1000)).showSnackBar(eq(systemImpl.getString(MessageID.error, context)), any(), any())
+
+    }
+
+
+
+    @Test
     fun givenExistingPeerAllocations_whenPeerCountIncreases_thenAddMorePeerAllocations(){
 
         val coursesBlockWithEntity = CourseBlockWithEntity().apply {
