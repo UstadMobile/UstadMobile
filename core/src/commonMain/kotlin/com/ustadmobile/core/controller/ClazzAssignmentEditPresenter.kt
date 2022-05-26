@@ -82,8 +82,6 @@ class ClazzAssignmentEditPresenter(context: Any,
     class  FileTypeOptionsMessageIdOption(day: FileTypeOptions, context: Any, di: DI)
         : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
-    private var clazzUid: Long = 0L
-
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
 
@@ -148,7 +146,7 @@ class ClazzAssignmentEditPresenter(context: Any,
                     view.groupSetEnabled = it == true
                 }
 
-            clazzUid = editEntity.assignment?.caClazzUid ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
+            val clazzUid = editEntity.assignment?.caClazzUid ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
             val clazzWithSchool = db.onRepoWithFallbackToDb(2000) {
                 it.clazzDao.getClazzWithSchool(clazzUid)
             } ?: ClazzWithSchool()
@@ -232,6 +230,7 @@ class ClazzAssignmentEditPresenter(context: Any,
     }
 
     fun handleSubmissionTypeClicked(){
+        val clazzUid = arguments[ARG_CLAZZUID]
         navigateForResult(
             NavigateForResultOptions(this,
                 null,
@@ -325,7 +324,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             if(entity.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS){
                 val reviewerCount = entity.assignment?.caPeerReviewerCount ?: 0
                 val totalSubmitterSize = repo.clazzAssignmentDao.getSubmitterCountFromAssignment(
-                    entity.assignment?.caGroupUid ?: 0, clazzUid, "")
+                    entity.assignment?.caGroupUid ?: 0, entity.cbClazzUid, "")
                 if((reviewerCount) <= 0 || reviewerCount >= totalSubmitterSize){
                     // show error on view
                     view.reviewerCountError = " "
@@ -355,9 +354,11 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             if(entity.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS){
 
+                // get list of submitters
                 val submitters = repo.clazzAssignmentDao.getSubmitterListForAssignmentList(
                     entity.assignment?.caGroupUid ?: 0, entity.cbClazzUid,
                     systemImpl.getString(MessageID.group_number, context).replace("%1\$s",""))
+
 
                 val reviewerCount = entity.assignment?.caPeerReviewerCount ?: 0
                 val allocatedGroup = entity.assignmentPeerAllocations?.groupBy { it.praToMarkerSubmitterUid }
