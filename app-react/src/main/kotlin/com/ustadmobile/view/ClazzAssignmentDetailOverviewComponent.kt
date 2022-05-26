@@ -177,6 +177,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
         if(entity == null) return
         styledDiv {
             css {
+                +StyleManager.defaultPaddingTop
                 +defaultDoubleMarginTop
                 +contentContainer
             }
