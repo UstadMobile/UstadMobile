@@ -82,6 +82,14 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLongOrNull() ?: MASTER_SERVER_ROOT_ENTRY_UID
         loggedPersonUid = accountManager.activeAccount.personUid
         showHiddenEntries = false
+        view.listFilterOptionChips = if(arguments[ContentEntryList2View.ARG_USE_CHIPS] == true.toString()) {
+            PICKER_CHIP_OPTIONS.map {
+                ListFilterIdOption(systemImpl.getString(it.first, context), it.second)
+            }
+        }else {
+            listOf()
+        }
+
         getAndSetList()
         presenterScope.launch(doorMainDispatcher()) {
             if (contentFilter == ARG_DISPLAY_CONTENT_BY_PARENT) {

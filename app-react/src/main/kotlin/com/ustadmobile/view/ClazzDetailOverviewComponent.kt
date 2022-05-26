@@ -164,6 +164,8 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
                                             mPresenter?.handleClickAssignment(it.assignment as ClazzAssignment)
                                         CourseBlock.BLOCK_CONTENT_TYPE ->
                                             mPresenter?.contentEntryListItemListener?.onClickContentEntry(it.entry!!)
+                                        CourseBlock.BLOCK_TEXT_TYPE ->
+                                            mPresenter?.handleClickTextBlock(it)
                                     }
                                 }
                             }
