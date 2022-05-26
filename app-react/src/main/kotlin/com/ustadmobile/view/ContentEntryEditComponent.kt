@@ -22,6 +22,7 @@ import com.ustadmobile.util.StyleManager.switchMargin
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.view.ext.renderAddContentEntryOptionsDialog
 import com.ustadmobile.view.ext.renderCourseBlockCommonFields
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -286,6 +287,13 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
             }
         }
 
+    private var updateItemOptionsDialogVisible: Boolean = false
+        set(value) {
+            setState {
+                field = value
+            }
+        }
+
 
     override fun onCreateView() {
         super.onCreateView()
@@ -306,10 +314,47 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                 +defaultPaddingTop
             }
 
+            if(updateItemOptionsDialogVisible) {
+                renderAddContentEntryOptionsDialog(
+                    systemImpl,
+                    showCreateNewFolder = false,
+                    onClickAddFile = { mPresenter?.onClickImportFile() },
+                    onClickAddFromLink = { mPresenter?.onClickImportLink() }
+                ) {
+                    setState {
+                        updateItemOptionsDialogVisible = false
+                    }
+                }
+            }
+
             umGridContainer(GridSpacing.spacing4) {
 
                 val showPreviews = entity?.leaf == true && videoUri != null
                         && (showWebPreview || showVideoPreview)
+
+                if(showUpdateContentButton) {
+                    umItem(GridSize.cells12, GridSize.cells4,
+                        alignItems = GridAlignItems.center
+                    ){
+                        umButton(getString(MessageID.update_content),
+                            size = ButtonSize.large,
+                            color = UMColor.secondary,
+                            variant = ButtonVariant.contained,
+                            onClick = {
+                                setState{
+                                    updateItemOptionsDialogVisible = true
+                                }
+                            }){
+                            css{
+                                padding = "15px"
+                                marginTop = LinearDimension("13px")
+                                +StyleManager.defaultFullWidth
+                            }
+                        }
+                    }
+                }
+
+
 
                 if(showPreviews){
                     umItem(GridSize.cells12, GridSize.cells4){
@@ -324,21 +369,6 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                         }
 
                         if(showUpdateContentButton){
-                            umButton(getString(MessageID.update_content),
-                                size = ButtonSize.large,
-                                color = UMColor.secondary,
-                                variant = ButtonVariant.contained,
-                                onClick = {
-                                    //update
-                                }){
-                                css{
-                                    padding = "15px"
-                                    marginTop = LinearDimension("13px")
-                                    +StyleManager.defaultFullWidth
-                                }
-                            }
-
-
                             if(entity?.leaf == true){
                                 umItem(GridSize.cells12){
                                     css{

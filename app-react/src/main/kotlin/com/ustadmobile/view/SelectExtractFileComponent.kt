@@ -27,7 +27,9 @@ import styled.styledDiv
 import styled.styledHeader
 import styled.styledInput
 
-class SelectExtractFileComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props), SelectExtractFileView  {
+class SelectExtractFileComponent(
+    props: UmProps
+): UstadBaseComponent<UmProps, UmState>(props), SelectExtractFileView  {
 
     private var mPresenter: SelectExtractFilePresenter? = null
 
