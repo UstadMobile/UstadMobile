@@ -81,7 +81,7 @@ class SelectExtractFileComponent(
                 URL.Companion.createObjectURL(it)
             }
             Napier.d { "SelectExtractFileComponent: objectUrl = $fileObjectUrl" }
-            mPresenter?.handleUriSelected(fileObjectUrl)
+            mPresenter?.handleUriSelected(fileObjectUrl, selectedFiles.firstOrNull()?.name)
         }
 
         mPresenter?.onCreate(mapOf())

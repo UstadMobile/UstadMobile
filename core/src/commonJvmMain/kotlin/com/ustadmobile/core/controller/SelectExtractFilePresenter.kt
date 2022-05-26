@@ -21,7 +21,7 @@ actual class SelectExtractFilePresenter actual constructor(
 
     private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
 
-    override suspend fun extractMetadata(uri: String): MetadataResult {
+    override suspend fun extractMetadata(uri: String, filename: String): MetadataResult {
         val doorUri = DoorUri.parse(uri)
 
         val tmpDir = createTemporaryDir("content")

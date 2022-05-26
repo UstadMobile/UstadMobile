@@ -23,7 +23,7 @@ actual class SelectExtractFilePresenter actual constructor(
 
     private val json: Json by instance()
 
-    override suspend fun extractMetadata(uri: String): MetadataResult {
+    override suspend fun extractMetadata(uri: String, fileName: String): MetadataResult {
         //turn the object url back into a blob
         val completeableMetadataResult = CompletableDeferred<MetadataResult>()
         Napier.d { "SelectExtractFilePresenter: Reading uri : $uri" }
@@ -31,7 +31,7 @@ actual class SelectExtractFilePresenter actual constructor(
 
         Napier.d { "SelectExtractFilePresenter: starting upload : $uri" }
         val formData = FormData()
-        formData.append("file", blob)
+        formData.append("file", blob, filename = fileName)
         val request = XMLHttpRequest()
         val endPoint = "${accountManager.activeEndpoint.url}contentupload/upload"
         request.open("POST", endPoint)

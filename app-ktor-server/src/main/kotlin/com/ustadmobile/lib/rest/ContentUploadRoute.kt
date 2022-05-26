@@ -52,7 +52,7 @@ fun Route.ContentUploadRoute() {
                         }
 
                         val tmpFile = File(uploadSubDir,
-                            "content-upload-${systemTimeInMillis()}-${part.originalFileName}")
+                            part.originalFileName ?: "content-upload-${systemTimeInMillis()}")
                         try {
                             withContext(Dispatchers.IO) {
                                 part.streamProvider().use { inStream ->

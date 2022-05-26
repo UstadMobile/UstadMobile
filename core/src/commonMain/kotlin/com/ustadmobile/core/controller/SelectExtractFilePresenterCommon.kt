@@ -52,10 +52,10 @@ abstract class SelectExtractFilePresenterCommon(
         view.acceptedMimeTypes =  arguments[SelectFileView.ARG_MIMETYPE_SELECTED].toString().split(";")
     }
 
-    abstract suspend fun extractMetadata(uri: String): MetadataResult
+    abstract suspend fun extractMetadata(uri: String, filename: String): MetadataResult
 
-    fun handleUriSelected(uri: String?){
-        if(uri == null) {
+    fun handleUriSelected(uri: String?, filename: String?){
+        if(uri == null || filename == null) {
             requireNavController().currentBackStackEntry?.viewName?.let {
                 requireNavController().popBackStack(it,true)
             }
@@ -63,9 +63,11 @@ abstract class SelectExtractFilePresenterCommon(
         }
 
         presenterScope.launch {
+            view.loading = true
             try {
                 Napier.d { "SelectExtractFilePresenterCommon: Extracting metadata from $uri "}
-                val metadata = extractMetadata(uri)
+                val metadata = extractMetadata(uri, filename)
+                view.loading = false
 
                 when {
                     (arguments[UstadView.ARG_RESULT_DEST_VIEWNAME] == ContentEntryEdit2View.VIEW_NAME) -> {
@@ -101,6 +103,7 @@ abstract class SelectExtractFilePresenterCommon(
                     }
                 }
             }catch (e: Exception){
+                view.loading = false
                 view.unSupportedFileError = systemImpl.getString(
                     MessageID.import_link_content_not_supported, context)
                 Napier.e("Error extracting metadata", e)
