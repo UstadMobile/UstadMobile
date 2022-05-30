@@ -199,6 +199,9 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     override var listFilterOptionChips: List<ListFilterIdOption>? = null
         get() = field
         set(value) {
+            if(checkedFilterOptionChip == null)
+                checkedFilterOptionChip = listFilterOptionChips?.firstOrNull()
+
             setState {
                 field = value
             }
@@ -493,8 +496,6 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                     }
                 }
             }
-            if(checkedFilterOptionChip == null)
-                checkedFilterOptionChip = listFilterOptionChips?.firstOrNull()
         }
     }
 

@@ -100,7 +100,7 @@ object RouteManager {
         UstadDestination(view = DiscussionTopicDetailView.VIEW_NAME, component = DiscussionTopicDetailComponent::class),
         UstadDestination(view = DiscussionPostEditView.VIEW_NAME, component = DiscussionPostEditComponent::class),
         UstadDestination(view = DiscussionPostDetailView.VIEW_NAME, component = DiscussionPostDetailComponent::class),
-
+        UstadDestination(view = SelectExtractFileView.VIEW_NAME, component = SelectExtractFileComponent::class),
     )
 
     private val componentClassToViewNamesMap: Map<KClass<*>, List<String>> by lazy {

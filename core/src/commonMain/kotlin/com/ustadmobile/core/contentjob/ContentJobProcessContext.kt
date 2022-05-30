@@ -49,8 +49,8 @@ class ContentJobProcessContext(
      * Similar to .use on an inputStream. This will run the block, and then delete any temporary
      * directories.
      */
-    suspend fun use(block: suspend (ContentJobProcessContext) -> Unit) {
-        try {
+    suspend fun <R> use(block: suspend (ContentJobProcessContext) -> R): R {
+        return try {
             block(this)
         }finally {
             tempDirUri.emptyRecursively()

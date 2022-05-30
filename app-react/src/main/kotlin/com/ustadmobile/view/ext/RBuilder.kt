@@ -16,6 +16,7 @@ import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.RegisterAgeRedirectView
 import com.ustadmobile.core.view.SiteTermsDetailView
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.toolbarJsCssToPartialCss
@@ -51,12 +52,9 @@ import com.ustadmobile.util.StyleManager.toolbarTitle
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.*
-import com.ustadmobile.view.ChartOptions
-import com.ustadmobile.view.ChartType
+import com.ustadmobile.view.*
 import com.ustadmobile.view.ClazzAssignmentDetailOverviewComponent.Companion.ASSIGNMENT_STATUS_MAP
 import com.ustadmobile.view.ClazzEditComponent.Companion.BLOCK_ICON_MAP
-import com.ustadmobile.view.ContentEntryListComponent
-import com.ustadmobile.view.umChart
 import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
@@ -2108,4 +2106,25 @@ fun RBuilder.renderRawHtmlOnIframe(content: String?){
             src = "data:text/html;charset=utf-8, <div style='color: white !important;'>$content</div>"
         }
     }
+}
+
+fun RBuilder.renderAddContentEntryOptionsDialog(
+    systemImpl: UstadMobileSystemImpl,
+    showCreateNewFolder: Boolean = true,
+    onClickNewFolder: () -> Unit = { },
+    onClickAddFromLink: () -> Unit,
+    onClickAddFile: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val options = if(showCreateNewFolder) {
+        listOf(UmDialogOptionItem("create_new_folder", MessageID.content_editor_create_new_category,
+            onOptionItemClicked = onClickNewFolder))
+    }else {
+        listOf()
+    } + listOf(UmDialogOptionItem("link",MessageID.add_using_link,
+                MessageID.add_link_description, onClickAddFromLink),
+            UmDialogOptionItem("note_add",MessageID.add_file,
+                MessageID.add_file_description, onClickAddFile))
+
+    renderDialogOptions(systemImpl, options, systemTimeInMillis(), onDialogClosed = onDismiss)
 }

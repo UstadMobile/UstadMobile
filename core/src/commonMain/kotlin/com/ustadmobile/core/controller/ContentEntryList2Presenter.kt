@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, view: ContentEntryList2View,
@@ -47,7 +48,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     private val navController: UstadNavController by instance()
 
-    private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
+    private val pluginManager: ContentPluginManager? by on(accountManager.activeAccount).instanceOrNull()
 
     private var contentFilter = ARG_DISPLAY_CONTENT_BY_PARENT
 
@@ -382,7 +383,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     override fun onClickImportFile() {
         val args = mutableMapOf(
                 SelectFileView.ARG_MIMETYPE_SELECTED to
-                        pluginManager.supportedMimeTypeList.joinToString(";"),
+                        (pluginManager?.supportedMimeTypeList?.joinToString(";") ?: "*/*"),
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
@@ -469,8 +470,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
          * Key used when saving selected items to the savedStateHandle
          */
         const val KEY_SELECTED_ITEMS = "selected_items"
-
-        const val SAVEDSTATE_KEY_ENTRY = "Clazz_ContentEntry"
 
         const val SAVEDSTATE_KEY_FOLDER = "Folder_ContentEntry"
 

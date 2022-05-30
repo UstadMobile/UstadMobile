@@ -7,10 +7,14 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
+import com.ustadmobile.core.controller.SelectExtractFilePresenter
 import com.ustadmobile.core.controller.SelectExtractFilePresenterCommon
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SelectExtractFileView
+import com.ustadmobile.port.android.util.ext.getFileName
+import kotlinx.coroutines.launch
 
 class SelectExtractFileFragment(private val registry: ActivityResultRegistry? = null) : UstadBaseFragment(), SelectExtractFileView {
 
@@ -22,15 +26,18 @@ class SelectExtractFileFragment(private val registry: ActivityResultRegistry? = 
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         activityResultLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument(),
-            registry ?: requireActivity().activityResultRegistry) {
+            registry ?: requireActivity().activityResultRegistry) { uri ->
 
-            mPresenter?.handleUriSelected(it?.toString())
+            viewLifecycleOwner.lifecycleScope.launch {
+                val fileName = uri?.let { requireContext().contentResolver.getFileName(it) }
+                mPresenter?.handleUriSelected(uri?.toString(), fileName)
+            }
         }
 
-        mPresenter = SelectExtractFilePresenterCommon(requireContext(),
+        mPresenter = SelectExtractFilePresenter(requireContext(),
             arguments.toStringMap(),
             this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())

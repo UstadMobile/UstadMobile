@@ -170,6 +170,8 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
                                                     it1
                                                 )
                                             }
+                                        CourseBlock.BLOCK_TEXT_TYPE ->
+                                            mPresenter?.handleClickTextBlock(it)
                                     }
                                 }
                             }
