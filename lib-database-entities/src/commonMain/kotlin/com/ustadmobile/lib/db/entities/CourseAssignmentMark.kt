@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
@@ -14,10 +15,10 @@ import kotlinx.serialization.Serializable
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
                 sqlStatements = [
-                    """REPLACE INTO CourseAssignmentMark(camUid, camAssignmentUid, camSubmitterUid, camMark, camPenalty, camLct) 
-         VALUES (NEW.camUid, NEW.camAssignmentUid, NEW.camSubmitterUid, NEW.camMark, NEW.camPenalty, NEW.camLct) 
+                    """REPLACE INTO CourseAssignmentMark(camUid, camAssignmentUid, camSubmitterUid,camSubmitterPersonUid, camMark, camPenalty, camLct) 
+         VALUES (NEW.camUid, NEW.camAssignmentUid, NEW.camSubmitterUid, NEW.camSubmitterPersonUid, NEW.camMark, NEW.camPenalty, NEW.camLct) 
          /*psql ON CONFLICT (camUid) DO UPDATE 
-         SET camAssignmentUid = EXCLUDED.camAssignmentUid, camSubmitterUid = EXCLUDED.camSubmitterUid, camMark = EXCLUDED.camMark, camPenalty = EXCLUDED.camPenalty, camLct = EXCLUDED.camLct
+         SET camAssignmentUid = EXCLUDED.camAssignmentUid, camSubmitterUid = EXCLUDED.camSubmitterUid, camSubmitterPersonUid = EXCLUDED.camSubmitterPersonUid, camMark = EXCLUDED.camMark, camPenalty = EXCLUDED.camPenalty, camLct = EXCLUDED.camLct
          */"""
                 ]
         )
@@ -31,6 +32,9 @@ class CourseAssignmentMark {
     var camAssignmentUid: Long = 0
 
     var camSubmitterUid: Long = 0
+
+    @ColumnInfo(defaultValue = "0")
+    var camSubmitterPersonUid: Long = 0
 
     var camMark: Float = 0f
 

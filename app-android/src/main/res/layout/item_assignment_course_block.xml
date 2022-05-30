@@ -191,9 +191,8 @@
             android:visibility="@{assignment.progressSummary.hasMetricsPermission ? View.VISIBLE : View.GONE}"
             android:text="@{@string/three_num_items_with_name_with_comma(assignment.progressSummary.calculateNotSubmittedStudents(), @string/not_submitted_cap, assignment.progressSummary.submittedStudents, @string/submitted_cap, assignment.progressSummary.markedStudents, @string/marked)}"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="gone"
             app:layout_constraintStart_toStartOf="@+id/item_block_line1_text"
-            app:layout_constraintTop_toBottomOf="@+id/deadline_barrier"
+            app:layout_constraintTop_toBottomOf="@+id/item_person_file_submission_status"
             tools:text="1 Not submitted, 2 Submitted, 2 Marked" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

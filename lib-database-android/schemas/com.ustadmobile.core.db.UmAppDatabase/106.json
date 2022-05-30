@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 106,
-    "identityHash": "3e25d8093a4bd6e1f249d6712556f189",
+    "identityHash": "2dae763c7029cafbb7e200d3f136189d",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5598,7 +5598,7 @@
       },
       {
         "tableName": "CourseAssignmentMark",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`camUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `camAssignmentUid` INTEGER NOT NULL, `camSubmitterUid` INTEGER NOT NULL, `camMark` REAL NOT NULL, `camPenalty` INTEGER NOT NULL, `camLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`camUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `camAssignmentUid` INTEGER NOT NULL, `camSubmitterUid` INTEGER NOT NULL, `camSubmitterPersonUid` INTEGER NOT NULL DEFAULT 0, `camMark` REAL NOT NULL, `camPenalty` INTEGER NOT NULL, `camLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "camUid",
@@ -5617,6 +5617,13 @@
             "columnName": "camSubmitterUid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "camSubmitterPersonUid",
+            "columnName": "camSubmitterPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "camMark",
@@ -11266,7 +11273,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3e25d8093a4bd6e1f249d6712556f189')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2dae763c7029cafbb7e200d3f136189d')"
     ]
   }
 }

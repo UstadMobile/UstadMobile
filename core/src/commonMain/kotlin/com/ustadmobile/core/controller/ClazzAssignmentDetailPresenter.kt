@@ -11,7 +11,9 @@ import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 
 class ClazzAssignmentDetailPresenter(context: Any,
@@ -67,9 +69,11 @@ class ClazzAssignmentDetailPresenter(context: Any,
                     ARG_ENTITY_UID to entityUid.toString(),
                     ARG_CLAZZUID to assignment.caClazzUid.toString())
 
+            val isPeerMarking = entity?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS
+
             val coreTabs = mutableListOf(
                     ClazzAssignmentDetailOverviewView.VIEW_NAME.appendQueryArgs(commonArgs))
-            if(hasStudentProgressPermission){
+            if(hasStudentProgressPermission || isPeerMarking){
                 coreTabs += ClazzAssignmentDetailStudentProgressOverviewListView.VIEW_NAME.appendQueryArgs(commonArgs)
             }
 
