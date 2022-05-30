@@ -6,6 +6,7 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity"/>
         <import type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics"/>
+        <import type="com.ustadmobile.lib.db.entities.ClazzAssignment"/>
         <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
         <import type="com.ustadmobile.lib.db.entities.CourseAssignmentSubmission"/>
         <import type="com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment"/>
@@ -188,7 +189,7 @@
             android:id="@+id/line3_progress_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:visibility="@{assignment.progressSummary.hasMetricsPermission ? View.VISIBLE : View.GONE}"
+            android:visibility="@{assignment.progressSummary.hasMetricsPermission || assignment.caMarkingType == ClazzAssignment.MARKED_BY_PEERS ? View.VISIBLE : View.GONE}"
             android:text="@{@string/three_num_items_with_name_with_comma(assignment.progressSummary.calculateNotSubmittedStudents(), @string/not_submitted_cap, assignment.progressSummary.submittedStudents, @string/submitted_cap, assignment.progressSummary.markedStudents, @string/marked)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/item_block_line1_text"

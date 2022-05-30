@@ -144,9 +144,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
  
                0 AS notSubmittedStudents,
                
-               (CASE WHEN (SELECT hasPermission 
-                          FROM CtePermissionCheck)
-                     THEN (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casSubmitterUid) 
+              (SELECT COUNT(DISTINCT CourseAssignmentSubmission.casSubmitterUid) 
                              FROM CourseAssignmentSubmission
                                    LEFT JOIN CourseAssignmentMark
                                    ON CourseAssignmentSubmission.casSubmitterUid = CourseAssignmentMark.camSubmitterUid
@@ -156,12 +154,10 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                               AND CourseAssignmentSubmission.casSubmitterUid IN 
                                                     (SELECT submitterId 
                                                       FROM SubmitterList
-                                                     WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid))  
-                      ELSE 0 END) AS submittedStudents,         
+                                                     WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid)
+                    ) AS submittedStudents,         
                
-                (CASE WHEN (SELECT hasPermission 
-                           FROM CtePermissionCheck)       
-                   THEN (SELECT COUNT(DISTINCT CourseAssignmentMark.camSubmitterUid) 
+                (SELECT COUNT(DISTINCT CourseAssignmentMark.camSubmitterUid) 
                            FROM CourseAssignmentMark
                             
                              JOIN CourseAssignmentSubmission
@@ -172,7 +168,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                             AND CourseAssignmentMark.camSubmitterUid IN (SELECT submitterId 
                                                                             FROM SubmitterList
                                                                            WHERE SubmitterList.assignmentUid = ClazzAssignment.caUid))
-                   ELSE 0 END) AS markedStudents,
+                   AS markedStudents,
                    
                    COALESCE((CASE WHEN CourseAssignmentMark.camUid IS NOT NULL 
                           THEN ${CourseAssignmentSubmission.MARKED} 
@@ -310,12 +306,20 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                        ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
                        AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
                        
+                       LEFT JOIN PeerReviewerAllocation
+                       ON PeerReviewerAllocation.praToMarkerSubmitterUid = Person.personUid 
+                       AND PeerReviewerAllocation.praMarkerSubmitterUid = :personUid
+                       AND praActive
+                       
                  WHERE ClazzAssignment.caGroupUid = 0
                    AND clazzEnrolmentClazzUid = :clazzUid
                    AND clazzEnrolmentActive
                    AND clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                    AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft
                    AND ClazzEnrolment.clazzEnrolmentDateJoined <= CourseBlock.cbGracePeriodDate
+                   AND ((SELECT hasPermission FROM CtePermissionCheck)
+                        OR (ClazzAssignment.caMarkingType = ${ClazzAssignment.MARKED_BY_PEERS}
+                        AND PeerReviewerAllocation.praUid IS NOT NULL))
               GROUP BY submitterId, assignmentUid
             UNION                 
              SELECT DISTINCT CourseGroupMember.cgmGroupNumber AS submitterId,
@@ -323,9 +327,21 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                FROM CourseGroupMember
                     JOIN ClazzAssignment
                     ON ClazzAssignment.caClazzUid = :clazzUid
+                    
+                    LEFT JOIN PeerReviewerAllocation
+                    ON PeerReviewerAllocation.praToMarkerSubmitterUid = CourseGroupMember.cgmGroupNumber
+                    AND PeerReviewerAllocation.praMarkerSubmitterUid = (SELECT CourseGroupMember.cgmGroupNumber 
+                                                                          FROM CourseGroupMember 
+                                                                          WHERE cgmSetUid = ClazzAssignment.caGroupUid
+                                                                            AND cgmPersonUid = :personUid)
+                    AND praActive
+                    
               WHERE CourseGroupMember.cgmSetUid = ClazzAssignment.caGroupUid
                 AND ClazzAssignment.caGroupUid != 0
                 AND CourseGroupMember.cgmGroupNumber != 0
+                AND ((SELECT hasPermission FROM CtePermissionCheck)
+                        OR (ClazzAssignment.caMarkingType = ${ClazzAssignment.MARKED_BY_PEERS}
+                        AND PeerReviewerAllocation.praUid IS NOT NULL))
            GROUP BY submitterId, assignmentUid
             )
         """
