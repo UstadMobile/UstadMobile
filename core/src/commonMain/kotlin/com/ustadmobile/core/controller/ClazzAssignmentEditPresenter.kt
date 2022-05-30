@@ -392,7 +392,7 @@ class ClazzAssignmentEditPresenter(context: Any,
                         entity.assignmentPeerAllocations?.let { peerAllocations.addAll(it) }
 
                         // create toBucket for remaining to be allocated
-                        val toBucket = submitters.assignRandomly(remainingCount)
+                        val toBucket = submitters.assignRandomly(remainingCount, entity.assignmentPeerAllocations)
 
                         // for each submitter add more reviewers based on toBucket
                         submitters.forEach { submitter ->

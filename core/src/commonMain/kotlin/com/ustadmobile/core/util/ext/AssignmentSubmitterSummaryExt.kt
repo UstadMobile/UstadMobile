@@ -1,11 +1,23 @@
 package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterSummary
+import com.ustadmobile.lib.db.entities.PeerReviewerAllocation
 
-fun List<AssignmentSubmitterSummary>.assignRandomly(reviewerCount: Int): Map<Long, List<Long>> {
+/**
+ * reviewerCount - number of reviewers per submitter to assign
+ * previousAllocations - list of peer allocations already assigned to each submitter
+ *
+ * @return map of submitters to new list of reviewers to assign to
+ */
+fun List<AssignmentSubmitterSummary>.assignRandomly(
+    reviewerCount: Int,
+    previousAllocation: List<PeerReviewerAllocation>? = null
+): Map<Long, List<Long>> {
 
     val submitters = this
 
+    val previousAllocationMap = previousAllocation?.groupBy { it.praToMarkerSubmitterUid }
+        ?.mapValues { it.value.map { peer -> peer.praMarkerSubmitterUid } }
     val fromBucket = mutableListOf<Long>()
     val toBucket = mutableMapOf<Long, List<Long>>()
     // repeat every submitter based on number of reviews per person/group
@@ -17,9 +29,10 @@ fun List<AssignmentSubmitterSummary>.assignRandomly(reviewerCount: Int): Map<Lon
     repeat(reviewerCount){
         submitters.forEach{
             val toList = toBucket[it.submitterUid]?.toMutableList() ?: mutableListOf()
+            val previousList = previousAllocationMap?.get(it.submitterUid) ?: listOf()
             val reviewerUid = fromBucket
                 .find { from ->
-                    from != it.submitterUid && from !in toList
+                    from != it.submitterUid && from !in toList && from !in previousList
                 } ?: 0L
 
             toList.add(reviewerUid)
