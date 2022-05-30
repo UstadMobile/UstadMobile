@@ -1,12 +1,12 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.DiscussionPostDetailPresenter
+import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
-import com.ustadmobile.lib.db.entities.Chat
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.MessageWithPerson
 import com.ustadmobile.mui.components.*
@@ -24,13 +24,14 @@ import com.ustadmobile.util.Util
 import com.ustadmobile.view.ext.renderConversationListItem
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.ext.umItemThumbnail
 import kotlinx.css.*
 import react.Props
 import react.RBuilder
 import react.setState
 import styled.css
 
-class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props),
+class DiscussionPostDetailComponent(props: UmProps): UstadDetailComponent<DiscussionPostWithDetails>(props),
     DiscussionPostDetailView {
 
     private var mPresenter: DiscussionPostDetailPresenter? = null
@@ -39,7 +40,8 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
 
     private var messages: List<MessageWithPerson> = mutableListOf()
 
-    private var enterNewLine = false
+    override val detailPresenter: UstadDetailPresenter<*, *>?
+        get() = mPresenter
 
     private val observer = ObserverFnWrapper<List<MessageWithPerson>>{
         if(it.isEmpty()) return@ObserverFnWrapper
@@ -81,15 +83,42 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
     override fun onCreateView() {
         super.onCreateView()
         fabManager?.visible = false
-        mPresenter = DiscussionPostDetailPresenter(this, arguments, this, di)
+        mPresenter = DiscussionPostDetailPresenter(this, arguments, this, di, this)
         mPresenter?.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
+
+
+
         umGridContainer {
             css {
                 +contentContainer
                 +defaultPaddingTop
+            }
+
+            umItem(GridSize.cells2,GridSize.cells1) {
+                umItemThumbnail("person", avatarVariant = AvatarVariant.circle)
+            }
+
+            umItem(GridSize.cells8, GridSize.cells9) {
+
+
+                umTypography(entity?.authorPersonFirstNames + " " + entity?.authorPersonLastName,
+                    variant = TypographyVariant.h6) {
+                    css {
+                        +StyleManager.alignTextToStart
+                    }
+
+                }
+
+                umTypography(entity?.discussionPostMessage,
+                    variant = TypographyVariant.body1) {
+                    css {
+                        +StyleManager.alignTextToStart
+                        marginTop = 1.spacingUnits
+                    }
+                }
             }
 
             umItem {
@@ -182,5 +211,7 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
         super.onDestroyView()
         mPresenter = null
     }
+
+
 
 }

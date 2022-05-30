@@ -1118,6 +1118,101 @@ fun RBuilder.renderChatListItemWithCounter(
     }
 }
 
+
+fun RBuilder.renderPostsDetail(
+    userFullName: String?,
+    message: String?,
+    latestMessage: String?,
+    time: String?,
+    counter: Int = 0,
+    systemImpl: UstadMobileSystemImpl
+){
+    umGridContainer {
+
+        umItem(GridSize.cells2,GridSize.cells1) {
+            umItemThumbnail("person", avatarVariant = AvatarVariant.circle)
+        }
+
+        umItem(GridSize.cells8, GridSize.cells9) {
+            umTypography(userFullName,
+                variant = TypographyVariant.h6) {
+                css {
+                    +alignTextToStart
+                }
+            }
+
+            umTypography(message,
+                variant = TypographyVariant.body1) {
+                css {
+                    +alignTextToStart
+                    marginTop = 1.spacingUnits
+                }
+            }
+        }
+
+        umItem(GridSize.cells2, alignItems = GridAlignItems.flexEnd) {
+            umItem {
+                umTypography(time,
+                    variant = TypographyVariant.body1) {
+                    css {
+                        +alignCenterItems
+                    }
+                }
+            }
+
+            umItem {
+                umTypography(
+                    systemImpl.getString(MessageID.num_replies, this).format(counter),
+                    variant = TypographyVariant.body1) {
+                    css {
+                        +alignCenterItems
+                    }
+                }
+            }
+        }
+
+
+
+        umItem(GridSize.cells12, flexDirection = FlexDirection.row){
+            if(latestMessage != null){
+                styledSpan {
+                    css {
+                        padding(right = 1.spacingUnits)
+                    }
+                    umIcon("chat", fontSize = IconFontSize.small) {
+                        css {
+                            marginTop = 1.px
+                        }
+                    }
+                }
+                styledSpan {
+                    css{
+                        padding(right = 4.spacingUnits)
+                    }
+                    umTypography(
+                        latestMessage,
+                        variant = TypographyVariant.body1,
+                        paragraph = true){
+                        css(alignTextToStart)
+                    }
+                }
+            }
+
+
+        }
+
+
+
+
+
+
+
+
+    }
+}
+
+
+
 fun RBuilder.renderCourseBlockTextOrModuleListItem(
     blockType: Int,
     blockLevel: Int,

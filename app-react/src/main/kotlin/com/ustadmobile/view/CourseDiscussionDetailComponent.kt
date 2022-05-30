@@ -55,6 +55,7 @@ class CourseDiscussionDetailComponent(mProps: UmProps): UstadDetailComponent<Cou
     override var entity: CourseDiscussion? = null
         get() = field
         set(value) {
+            ustadComponentTitle = value?.courseDiscussionTitle
             setState {
                 field = value
             }

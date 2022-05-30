@@ -17,10 +17,9 @@ import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
-import com.ustadmobile.view.ext.renderCreateNewItemOnList
-import com.ustadmobile.view.ext.renderListSectionTitle
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.util.ext.fromNow
+import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.ext.*
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
@@ -56,6 +55,7 @@ class DiscussionTopicDetailComponent(mProps: UmProps): UstadDetailComponent<Disc
     override var entity: DiscussionTopic? = null
         get() = field
         set(value) {
+            ustadComponentTitle = value?.discussionTopicTitle
             setState {
                 field = value
             }
@@ -99,9 +99,6 @@ class DiscussionTopicDetailComponent(mProps: UmProps): UstadDetailComponent<Disc
                     }
                 }
 
-                //Add posts heading
-                renderListSectionTitle(getString(MessageID.posts))
-
 
                 //Posts
                 umItem(GridSize.cells12){
@@ -127,17 +124,20 @@ class DiscussionTopicDetailComponent(mProps: UmProps): UstadDetailComponent<Disc
                     onClick.invoke(it.nativeEvent)
                 }
 
-                //TODO
-//                renderListItemWithLeftIconTitleAndDescription(
-//                    "featured_play_list",
-//                    item.discussionTopicTitle?: "",
-//                    item.discussionTopicDesc?:"")
+                renderPostsDetail(
+                    item.authorPersonFirstNames+" " + item.authorPersonLastName,
+                    item.discussionPostMessage,
+                    item.postLatestMessage,
+                    item.postLatestMessageTimestamp.toDate()?.fromNow(systemImpl.getDisplayedLocale(this)),
+                    item.postRepliesCount,
+                    systemImpl
+                )
             }
         }
 
     }
 
-    fun RBuilder.renderPostListDetail(
+    private fun RBuilder.renderPostListDetail(
         entries: List<DiscussionPostWithDetails>,
         onEntryClicked: ((DiscussionPostWithDetails) -> Unit)? = null
     ) = child(PostListDetailComponent::class) {
