@@ -101,6 +101,11 @@ class ClazzAssignmentEditPresenter(context: Any,
             val group = it.firstOrNull() ?: return@observeSavedStateResult
             entity?.assignment?.caGroupUid = group.cgsUid
             view.groupSet = group
+
+            // invalid peer allocations after submissionType changes
+            entity?.assignmentPeerAllocationsToRemove = entity?.assignmentPeerAllocations?.map { peer -> peer.praUid }?.filter { it != 0L }
+            entity?.assignmentPeerAllocations = null
+
             view.entity = entity
             requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
         }
