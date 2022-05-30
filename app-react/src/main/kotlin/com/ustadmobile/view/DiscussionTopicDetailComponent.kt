@@ -64,7 +64,7 @@ class DiscussionTopicDetailComponent(mProps: UmProps): UstadDetailComponent<Disc
     override fun onCreateView() {
         super.onCreateView()
         fabManager?.visible = true
-        fabManager?.text = getString(MessageID.add_topic)
+        fabManager?.text = getString(MessageID.post)
         fabManager?.icon = "add"
         fabManager?.visible = true
 
@@ -73,7 +73,7 @@ class DiscussionTopicDetailComponent(mProps: UmProps): UstadDetailComponent<Disc
         mPresenter?.onCreate(mapOf())
 
         fabManager?.visible = true
-        fabManager?.text = getString(MessageID.add_topic)
+        fabManager?.text = getString(MessageID.post)
         fabManager?.icon = "add"
         fabManager?.visible = true
 
