@@ -1,7 +1,6 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.DiscussionPostDetailPresenter
-import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.view.EditButtonMode
@@ -21,17 +20,16 @@ import com.ustadmobile.util.StyleManager.messageSendButton
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.Util
-import com.ustadmobile.view.ext.renderConversationListItem
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
-import com.ustadmobile.view.ext.umItemThumbnail
+import com.ustadmobile.util.ext.fromNow
+import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.ext.*
 import kotlinx.css.*
 import react.Props
 import react.RBuilder
 import react.setState
 import styled.css
 
-class DiscussionPostDetailComponent(props: UmProps): UstadDetailComponent<DiscussionPostWithDetails>(props),
+class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props),
     DiscussionPostDetailView {
 
     private var mPresenter: DiscussionPostDetailPresenter? = null
@@ -40,8 +38,7 @@ class DiscussionPostDetailComponent(props: UmProps): UstadDetailComponent<Discus
 
     private var messages: List<MessageWithPerson> = mutableListOf()
 
-    override val detailPresenter: UstadDetailPresenter<*, *>?
-        get() = mPresenter
+    private var enterNewLine = false
 
     private val observer = ObserverFnWrapper<List<MessageWithPerson>>{
         if(it.isEmpty()) return@ObserverFnWrapper
@@ -77,13 +74,14 @@ class DiscussionPostDetailComponent(props: UmProps): UstadDetailComponent<Discus
                     ustadComponentTitle = value.discussionPostTitle
                 }
             }
+
         }
 
 
     override fun onCreateView() {
         super.onCreateView()
         fabManager?.visible = false
-        mPresenter = DiscussionPostDetailPresenter(this, arguments, this, di, this)
+        mPresenter = DiscussionPostDetailPresenter(this, arguments, this, di)
         mPresenter?.onCreate(mapOf())
     }
 
@@ -102,8 +100,6 @@ class DiscussionPostDetailComponent(props: UmProps): UstadDetailComponent<Discus
             }
 
             umItem(GridSize.cells8, GridSize.cells9) {
-
-
                 umTypography(entity?.authorPersonFirstNames + " " + entity?.authorPersonLastName,
                     variant = TypographyVariant.h6) {
                     css {
@@ -211,7 +207,5 @@ class DiscussionPostDetailComponent(props: UmProps): UstadDetailComponent<Discus
         super.onDestroyView()
         mPresenter = null
     }
-
-
 
 }
