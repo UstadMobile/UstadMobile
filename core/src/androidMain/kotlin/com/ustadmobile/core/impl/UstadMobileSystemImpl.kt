@@ -427,7 +427,12 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, doorUri: DoorUri, mimeType: String?) {
+    override fun openFileInDefaultViewer(
+        context: Any,
+        doorUri: DoorUri,
+        mimeType: String?,
+        fileName: String?,
+    ) {
         var mMimeType = mimeType
         val ctx = context as Context
         val intent = Intent(Intent.ACTION_VIEW)
