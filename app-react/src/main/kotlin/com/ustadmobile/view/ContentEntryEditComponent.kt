@@ -20,12 +20,11 @@ import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.displayProperty
 import com.ustadmobile.util.StyleManager.switchMargin
 import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.view.ext.renderAddContentEntryOptionsDialog
-import com.ustadmobile.view.ext.renderCourseBlockCommonFields
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.components.AttachmentImageComponent
+import com.ustadmobile.view.ext.*
 import kotlinx.css.*
 import org.w3c.dom.events.MouseEvent
 import react.RBuilder
@@ -328,6 +327,22 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
             }
 
             umGridContainer(GridSpacing.spacing4) {
+
+                umItem(GridSize.cells12, GridSize.cells4){
+                    child(AttachmentImageComponent::class) {
+                        attrs.attachmentUri = contentEntryPicture?.cepUri
+                        attrs.onNewImageSelected = {
+                            setState {
+                                console.log("ClazzEditComponent: setting course picture uri = $it")
+                                contentEntryPicture?.cepUri = it
+                            }
+                        }
+                        attrs.contentBlock = { attachmentImgSrc ->
+                            umEntityAvatar(src = attachmentImgSrc, fallbackSrc = Util.ASSET_ENTRY,
+                                listItem = true)
+                        }
+                    }
+                }
 
                 val showPreviews = entity?.leaf == true && videoUri != null
                         && (showWebPreview || showVideoPreview)

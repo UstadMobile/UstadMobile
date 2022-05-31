@@ -11,8 +11,7 @@ import com.ustadmobile.view.UstadBaseComponent
 import kotlinx.browser.document
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.css.Visibility
-import kotlinx.css.visibility
+import kotlinx.css.*
 import kotlinx.html.InputType
 import kotlinx.html.id
 import org.kodein.di.instance
@@ -23,7 +22,7 @@ import react.*
 import react.dom.onChange
 import react.dom.onClick
 import styled.css
-import styled.styledImg
+import styled.styledDiv
 import styled.styledInput
 
 interface AttachmentImageProps: UmProps {
@@ -31,6 +30,8 @@ interface AttachmentImageProps: UmProps {
     var onNewImageSelected: (String?) -> Unit
 
     var attachmentUri: String?
+
+    var contentBlock: (RBuilder.(attachmentImgSrc: String?) -> Unit)?
 
 }
 
@@ -60,6 +61,7 @@ class AttachmentImageComponent(
         super.componentDidUpdate(prevProps, prevState, snapshot)
 
         if(prevProps.attachmentUri != props.attachmentUri) {
+            //TODO: revoke this when we are sure we are done with it
 //            state.imageSrc?.also {
 //                URL.revokeObjectURL(it)
 //            }
@@ -71,6 +73,7 @@ class AttachmentImageComponent(
     }
 
     override fun componentWillUnmount() {
+        //TODO: revoke this when we are sure we are done with it
 //        state.imageSrc?.also {
 //            URL.revokeObjectURL(it)
 //        }
@@ -95,32 +98,31 @@ class AttachmentImageComponent(
 
 
     override fun RBuilder.render() {
-
-        styledImg(src = state.imageSrc) {
-            attrs.width = "100px"
-            attrs.height = "100px"
+        styledDiv {
             attrs.onClick = {
                 //launch the file picker
-                document.getElementById("foo").asDynamic().click()
+                document.getElementById("imguploadfile").asDynamic().click()
             }
-        }
 
-        styledInput(type = InputType.file) {
-            css {
-                visibility = Visibility.hidden
-            }
-            attrs.id = "foo"
-            attrs.onChange = { evt ->
-                evt.stopPropagation()
-                evt.preventDefault()
+            props.contentBlock?.invoke(this, state.imageSrc)
 
-                GlobalScope.launch {
-                    val file: File = evt.asDynamic().target.files[0] as File
-                    val url = URL.createObjectURL(file)
-                    props.onNewImageSelected(url)
+            styledInput(type = InputType.file) {
+                css {
+                    visibility = Visibility.hidden
+                }
+                attrs.accept = ".jpg,.webp,.png,image/jpg,image/webp,image/png"
+                attrs.id = "imguploadfile"
+                attrs.onChange = { evt ->
+                    evt.stopPropagation()
+                    evt.preventDefault()
+
+                    GlobalScope.launch {
+                        val file: File = evt.asDynamic().target.files[0] as File
+                        val url = URL.createObjectURL(file)
+                        props.onNewImageSelected(url)
+                    }
                 }
             }
         }
-
     }
 }

@@ -17,6 +17,7 @@ import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
+import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.components.AttachmentImageComponent
@@ -61,7 +62,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
     private var courseBlockList: List<CourseBlockWithEntity> = listOf()
 
-    private var attandenceEnabled = false;
+    private var attandenceEnabled = false
 
     private val scheduleObserver = ObserverFnWrapper<List<Schedule>> {
         setState {
@@ -169,7 +170,6 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
             umGridContainer(GridSpacing.spacing4) {
                 umItem(GridSize.cells12, GridSize.cells4){
-                    //umEntityAvatar(fallbackSrc = ASSET_ENTRY, listItem = true)
                     child(AttachmentImageComponent::class) {
                         attrs.attachmentUri = coursePicture?.coursePictureUri
                         attrs.onNewImageSelected = {
@@ -177,6 +177,10 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                                 console.log("ClazzEditComponent: setting course picture uri = $it")
                                 coursePicture?.coursePictureUri = it
                             }
+                        }
+                        attrs.contentBlock = { attachmentImgSrc ->
+                            umEntityAvatar(src = attachmentImgSrc, fallbackSrc = ASSET_ENTRY,
+                                listItem = true)
                         }
                     }
                 }
