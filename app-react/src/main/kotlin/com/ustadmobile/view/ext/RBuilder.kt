@@ -929,7 +929,7 @@ fun RBuilder.renderCourseBlockAssignment(
                         }
                     }
 
-                    if(item.assignment?.progressSummary?.hasMetricsPermission == true){
+                    if(item.assignment?.progressSummary?.hasMetricsPermission == true || item.assignment?.caMarkingType == ClazzAssignment.MARKED_BY_PEERS){
                         umTypography(systemImpl.getString(MessageID.three_num_items_with_name_with_comma,this)
                             .format("${item.assignment?.progressSummary?.calculateNotSubmittedStudents()}",
                                 systemImpl.getString(MessageID.not_submitted_cap, this),
