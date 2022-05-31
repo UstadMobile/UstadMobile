@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
@@ -94,6 +95,18 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
          LIMIT 1
     """)
     abstract fun getMarkOfAssignmentForSubmitterLiveData(assignmentUid: Long, submitterUid: Long): DoorLiveData<CourseAssignmentMark?>
+
+    @Query("""
+         SELECT * 
+          FROM CourseAssignmentMark               
+         WHERE camAssignmentUid = :assignmentUid
+           AND camSubmitterUid = :submitterUid
+      ORDER BY camLct DESC
+    """)
+    abstract fun getAllMarksOfAssignmentForSubmitter(
+        assignmentUid: Long,
+        submitterUid: Long
+    ): DoorDataSourceFactory<Int, CourseAssignmentMark>
 
     @Query("""
         SELECT * 

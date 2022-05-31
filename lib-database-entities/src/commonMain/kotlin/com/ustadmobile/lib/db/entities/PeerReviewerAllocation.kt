@@ -6,7 +6,7 @@ import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @Entity
-@ReplicateEntity(tableId = PeerReviewerAllocation.TABLE_ID, tracker = ClazzAssignmentReplicate::class)
+@ReplicateEntity(tableId = PeerReviewerAllocation.TABLE_ID, tracker = PeerReviewerAllocationReplicate::class)
 @Triggers(arrayOf(
     Trigger(
         name = "peerreviewerallocation_remote_insert",
