@@ -230,6 +230,28 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
     ): List<AssignmentSubmitterSummary>
 
 
+    @Query("""
+        $ASSIGNMENT_PERMISSION
+        
+        SELECT (CASE WHEN caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
+                    THEN (SELECT hasPermission FROM AssignmentPermission)
+                    ELSE PeerReviewerAllocation.praUid IS NOT NULL END)
+          FROM ClazzAssignment
+              
+               LEFT JOIN PeerReviewerAllocation
+               ON PeerReviewerAllocation.praToMarkerSubmitterUid = :selectedPersonUid
+               AND PeerReviewerAllocation.praMarkerSubmitterUid = :submitterUid
+               AND praActive
+         WHERE caUid = :caUid 
+    """)
+    abstract suspend fun canMarkAssignment(
+        caUid: Long,
+        clazzUid: Long,
+        loggedInPersonUid: Long,
+        submitterUid: Long,
+        selectedPersonUid: Long): Boolean
+
+
 
     @Query("""
          $SUBMITTER_LIST_WITHOUT_ASSIGNMENT_CTE

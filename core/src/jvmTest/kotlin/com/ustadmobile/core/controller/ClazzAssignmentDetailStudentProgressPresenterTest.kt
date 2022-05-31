@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.HtmlTextViewDetailView
@@ -23,6 +24,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -63,14 +65,16 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
     private lateinit var accountManager: UstadAccountManager
 
+
+
+    val serverUrl = "https://dummysite.ustadmobile.app/"
+
     @Before
     fun setup() {
         mockView = mock { }
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
-
-        val serverUrl = "https://dummysite.ustadmobile.app/"
 
         accountManager = mock{
             on { activeEndpoint }.thenReturn(Endpoint(serverUrl))
@@ -118,7 +122,13 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
             }
         }
 
-        createPersonAndSubmitStatement(true, loggedInPersonUid)
+        val person = createPersonAndSubmitStatement(true, loggedInPersonUid)
+
+        runBlocking {
+            repo.grantScopedPermission(person,
+                Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT,
+                Clazz.TABLE_ID, testClazz.clazzUid)
+        }
 
     }
 
@@ -147,7 +157,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
         val agent = AgentEntity().apply {
             agentPersonUid = studentId
-            agentHomePage = accountManager.activeAccount.endpointUrl
+            agentHomePage = serverUrl
             agentAccountName = "testuser"
             agentUid = repo.agentDao.insert(this)
         }
@@ -493,6 +503,100 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
            any(),
             eq("video/mp4")
         )
+
+    }
+
+    @Test
+    fun givenAssignmentWithPeerMarkingSelected_whenLoggedInAsTeacher_thenDontShowSubmitButton(){
+        testEntity.caMarkingType = ClazzAssignment.MARKED_BY_PEERS
+        repo.clazzAssignmentDao.update(testEntity)
+
+        val student = createPersonAndSubmitStatement(false , 1)
+
+        val presenterArgs = mapOf(
+            UstadView.ARG_SUBMITER_UID to 1.toString(),
+            ARG_CLAZZ_ASSIGNMENT_UID to testEntity.caUid.toString(),
+            UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()
+        )
+
+        val presenter = ClazzAssignmentDetailStudentProgressPresenter(context, presenterArgs, mockView,
+            di, mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        val entity = mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).markNextStudentVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submitButtonVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submissionScore = eq(null)
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.SUBMITTED)
+
+
+    }
+
+    @Test
+    fun givenAssignmentWithPeerMarkingSelected_whenLoggedInAsStudentWithoutPeerAllocation_thenDontShowSubmitButton(){
+
+        whenever(accountManager.activeAccount).thenReturn(UmAccount(100, "", "", serverUrl))
+
+        testEntity.caMarkingType = ClazzAssignment.MARKED_BY_PEERS
+        repo.clazzAssignmentDao.update(testEntity)
+
+        val student = createPersonAndSubmitStatement(false , 1)
+
+        val presenterArgs = mapOf(
+            UstadView.ARG_SUBMITER_UID to 1.toString(),
+            ARG_CLAZZ_ASSIGNMENT_UID to testEntity.caUid.toString(),
+            UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()
+        )
+
+        val presenter = ClazzAssignmentDetailStudentProgressPresenter(context, presenterArgs, mockView,
+            di, mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        val entity = mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).markNextStudentVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submitButtonVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submissionScore = eq(null)
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.SUBMITTED)
+
+    }
+
+    @Test
+    fun givenAssignmentWithPeerMarkingSelected_whenLoggedInAsStudentWithPeerAllocation_thenShowSubmitButton(){
+        whenever(accountManager.activeAccount).thenReturn(UmAccount(100, "", "", serverUrl))
+
+        testEntity.caMarkingType = ClazzAssignment.MARKED_BY_PEERS
+        repo.clazzAssignmentDao.update(testEntity)
+
+        val student = createPersonAndSubmitStatement(false , 1)
+
+        PeerReviewerAllocation().apply {
+            praAssignmentUid = testEntity.caUid
+            praMarkerSubmitterUid = 100
+            praToMarkerSubmitterUid = student.personUid
+            praUid = repo.peerReviewerAllocationDao.insert(this)
+        }
+
+        val presenterArgs = mapOf(
+            UstadView.ARG_SUBMITER_UID to 1.toString(),
+            ARG_CLAZZ_ASSIGNMENT_UID to testEntity.caUid.toString(),
+            UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()
+        )
+
+        val presenter = ClazzAssignmentDetailStudentProgressPresenter(context, presenterArgs, mockView,
+            di, mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        val entity = mockView.captureLastEntityValue()
+
+        verify(mockView, timeout(1000).times(2)).markNextStudentVisible = eq(false)
+        verify(mockView, timeout(1000).times(2)).submitButtonVisible = eq(true)
+        verify(mockView, timeout(1000).times(2)).submissionScore = eq(null)
+        verify(mockView, timeout(1000).times(2)).submissionStatus = eq(CourseAssignmentSubmission.SUBMITTED)
 
     }
 

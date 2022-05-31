@@ -65,6 +65,8 @@ class ClazzAssignmentDetailStudentProgressPresenter(
 
     private var nextSubmitterToMark: Long = 0L
 
+    private var submitterMarking: Long = 0
+
     override fun onCreate(savedState: Map<String, String>?) {
         selectedSubmitterUid = arguments[ARG_SUBMITER_UID]?.toLong() ?: 0
         selectedClazzAssignmentUid = arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0
@@ -81,14 +83,16 @@ class ClazzAssignmentDetailStudentProgressPresenter(
 
         val isGroup = clazzAssignment.caGroupUid != 0L
 
-        view.submitterName = if(!isGroup){
+        if(!isGroup){
             val person = db.onRepoWithFallbackToDb(2000){
                 it.personDao.findByUidAsync(selectedSubmitterUid)
             }
-            person?.personFullName()
+            view.submitterName =  person?.personFullName()
+            submitterMarking = mLoggedInPersonUid
         }else{
-            systemImpl.getString(MessageID.group_number, context)
+            view.submitterName = systemImpl.getString(MessageID.group_number, context)
                 .replace("%1\$s", "$selectedSubmitterUid")
+            submitterMarking = db.clazzAssignmentDao.getSubmitterUid(clazzAssignment.caUid, mLoggedInPersonUid)
         }
 
         view.clazzCourseAssignmentSubmissionAttachment = db.onRepoWithFallbackToDb(2000){
@@ -113,11 +117,13 @@ class ClazzAssignmentDetailStudentProgressPresenter(
         val submissionCount = repo.courseAssignmentSubmissionDao.countSubmissionsFromSubmitter(
             clazzAssignment.caUid, selectedSubmitterUid)
         val submitButtonVisible = submissionCount > 0
-        view.submitButtonVisible = submitButtonVisible
+        val canMark = repo.clazzAssignmentDao.canMarkAssignment(selectedClazzAssignmentUid,
+            selectedClazzUid, mLoggedInPersonUid, submitterMarking, selectedSubmitterUid)
+        view.submitButtonVisible = submitButtonVisible && canMark
 
         nextSubmitterToMark = repo.courseAssignmentMarkDao.findNextSubmitterToMarkForAssignment(
             selectedClazzAssignmentUid, selectedSubmitterUid)
-        view.markNextStudentVisible = submitButtonVisible && nextSubmitterToMark != 0L
+        view.markNextStudentVisible = submitButtonVisible && canMark && nextSubmitterToMark != 0L
 
 
         if(clazzAssignment.caPrivateCommentsEnabled){
@@ -188,6 +194,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                     camSubmitterUid = selectedSubmitterUid
                     camAssignmentUid = assignment.caUid
                     camMark = gradeAfterPenalty
+                    camSubmitterPersonUid = submitterMarking
                     camPenalty = if(lastSubmission.casTimestamp > (assignment.block?.cbDeadlineDate ?: 0)) penalty else 0
                 })
 
