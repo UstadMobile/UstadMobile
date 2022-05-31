@@ -3978,6 +3978,8 @@ DELETE FROM ContainerEntryFile
             // TODO submitterPersonUid for mark
             if (db.dbType() == DoorDbType.SQLITE) {
 
+
+                stmtList += "ALTER TABLE ClazzAssignment ADD COLUMN caPeerReviewerCount  INTEGER  NOT NULL  DEFAULT 0"
                 stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camSubmitterPersonUid  INTEGER  NOT NULL  DEFAULT 0"
 
                 stmtList += "CREATE TABLE IF NOT EXISTS PeerReviewerAllocation (`praUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `praMarkerSubmitterUid` INTEGER NOT NULL, `praToMarkerSubmitterUid` INTEGER NOT NULL, `praAssignmentUid` INTEGER NOT NULL, `praActive` INTEGER NOT NULL, `praLct` INTEGER NOT NULL)"
@@ -3999,6 +4001,7 @@ DELETE FROM ContainerEntryFile
 
 
             }else{
+                stmtList += "ALTER TABLE ClazzAssignment ADD COLUMN caPeerReviewerCount  INTEGER  NOT NULL  DEFAULT 0"
                 stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camSubmitterPersonUid  BIGINT  NOT NULL  DEFAULT 0"
 
                 stmtList +=
