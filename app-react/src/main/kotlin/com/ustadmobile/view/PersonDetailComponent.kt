@@ -20,6 +20,7 @@ import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.components.AttachmentImageLookupAdapter
 import com.ustadmobile.view.ext.*
 import kotlinx.css.LinearDimension
 import kotlinx.css.marginTop
@@ -142,7 +143,13 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                             css{
                                 marginTop = LinearDimension("12px")
                             }
-                            umEntityAvatar(showIcon = false) {}
+
+                            withAttachmentLocalUrlLookup(entity?.personUid ?: 0,
+                                PERSON_PICTURE_LOOKUP_ADAPTER
+                            ) { pictureLocalUrl ->
+                                umEntityAvatar(src = pictureLocalUrl, showIcon = false) {}
+                            }
+
                         }
 
                         umItem(GridSize.cells12, GridSize.cells8) {
@@ -243,4 +250,13 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
             }
         }
     }
+
+    companion object {
+
+        val PERSON_PICTURE_LOOKUP_ADAPTER = AttachmentImageLookupAdapter { db, entityUid ->
+            db.personPictureDao.findByPersonUidAsync(entityUid)?.personPictureUri
+        }
+
+    }
+
 }

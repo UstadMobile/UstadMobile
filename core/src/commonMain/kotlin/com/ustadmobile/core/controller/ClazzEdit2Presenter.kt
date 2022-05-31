@@ -571,19 +571,16 @@ class ClazzEdit2Presenter(
                     courseBlockOneToManyJoinEditHelper.primaryKeysToDeactivate,
                     systemTimeInMillis())
 
-                UmPlatformUtil.runIfNotJsAsync {
-                    val coursePictureVal = view.coursePicture
-                    if(coursePictureVal != null) {
-                        coursePictureVal.coursePictureClazzUid = entity.clazzUid
+                val coursePictureVal = view.coursePicture
+                if(coursePictureVal != null) {
+                    coursePictureVal.coursePictureClazzUid = entity.clazzUid
 
-                        if(coursePictureVal.coursePictureUid == 0L) {
-                            txDb.coursePictureDao.insertAsync(coursePictureVal)
-                        }else {
-                            txDb.coursePictureDao.updateAsync(coursePictureVal)
-                        }
+                    if(coursePictureVal.coursePictureUid == 0L) {
+                        txDb.coursePictureDao.insertAsync(coursePictureVal)
+                    }else {
+                        txDb.coursePictureDao.updateAsync(coursePictureVal)
                     }
                 }
-
             }
 
             val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight

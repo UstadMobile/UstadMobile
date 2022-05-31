@@ -55,6 +55,8 @@ import com.ustadmobile.util.ext.*
 import com.ustadmobile.view.*
 import com.ustadmobile.view.ClazzAssignmentDetailOverviewComponent.Companion.ASSIGNMENT_STATUS_MAP
 import com.ustadmobile.view.ClazzEditComponent.Companion.BLOCK_ICON_MAP
+import com.ustadmobile.view.components.AttachmentImageLookupAdapter
+import com.ustadmobile.view.components.AttachmentImageLookupComponent
 import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
@@ -207,11 +209,12 @@ fun RBuilder.umEntityAvatar (
 }
 
 //Handle this when attachment system is in place
-fun RBuilder.umProfileAvatar(attachmentId: Long, fallback: String){
-    val src = null
-    umAvatar(src,variant = AvatarVariant.circular){
-        css (personListItemAvatar)
-        if(src == null) umIcon(fallback, className= "${StyleManager.name}-fallBackAvatarClass")
+fun RBuilder.umProfileAvatar(personUid: Long, fallback: String){
+    withAttachmentLocalUrlLookup(personUid, PersonDetailComponent.PERSON_PICTURE_LOOKUP_ADAPTER) { src ->
+        umAvatar(src, variant = AvatarVariant.circular){
+            css (personListItemAvatar)
+            if(src == null) umIcon(fallback, className= "${StyleManager.name}-fallBackAvatarClass")
+        }
     }
 }
 
@@ -1734,16 +1737,22 @@ fun RBuilder.renderContentEntryListItem(
         }
 
         umItem(GridSize.cells4, if(mainList) GridSize.cells2 else GridSize.cells1){
-            umItemThumbnail( if(item.leaf) "class" else "folder", item.thumbnailUrl,width = 80,
-                iconColor = Color(StyleManager.theme.palette.action.disabled),
-                avatarBackgroundColor = Color.transparent)
-            val progress = (item.scoreProgress?.progress ?: 0).toDouble()
-            if(progress > 0){
-                umLinearProgress(progress,
-                    variant = ProgressVariant.determinate){
-                    css (StyleManager.itemContentProgress)
+            withAttachmentLocalUrlLookup(item.contentEntryUid,
+                ContentEntryDetailOverviewComponent.ATTACHMENT_URI_LOOKUP_ADAPTER
+            ) { attachmentSrc ->
+
+                umItemThumbnail( if(item.leaf) "class" else "folder", attachmentSrc ,width = 80,
+                    iconColor = Color(StyleManager.theme.palette.action.disabled),
+                    avatarBackgroundColor = Color.transparent)
+                val progress = (item.scoreProgress?.progress ?: 0).toDouble()
+                if(progress > 0){
+                    umLinearProgress(progress,
+                        variant = ProgressVariant.determinate){
+                        css (StyleManager.itemContentProgress)
+                    }
                 }
             }
+
         }
 
         umItem(GridSize.cells8, if(mainList) GridSize.cells10 else GridSize.cells11){
@@ -2032,4 +2041,20 @@ fun RBuilder.renderAddContentEntryOptionsDialog(
                 MessageID.add_file_description, onClickAddFile))
 
     renderDialogOptions(systemImpl, options, systemTimeInMillis(), onDialogClosed = onDismiss)
+}
+
+
+/**
+ * Shorthand to use AttachmentImageLookupComponent
+ */
+fun RBuilder.withAttachmentLocalUrlLookup(
+    entityUid: Long,
+    lookupAdapter: AttachmentImageLookupAdapter,
+    block: RBuilder.(localSrc: String?) -> Unit,
+) = child(AttachmentImageLookupComponent::class){
+    attrs.entityUid = entityUid
+    attrs.lookupAdapter = lookupAdapter
+    attrs.contentBlock = { attachmentUri ->
+        block(attachmentUri)
+    }
 }

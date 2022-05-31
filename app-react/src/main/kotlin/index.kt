@@ -27,6 +27,7 @@ import com.ustadmobile.util.ThemeManager.createAppTheme
 import com.ustadmobile.view.renderExtraActiveTabWarningComponent
 import com.ustadmobile.view.renderMainComponent
 import com.ustadmobile.view.renderSplashComponent
+import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.browser.document
 import kotlinx.browser.localStorage

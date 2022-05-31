@@ -25,10 +25,8 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util.ASSET_BOOK
 import com.ustadmobile.util.Util.ASSET_FOLDER
 import com.ustadmobile.util.ext.joinString
-import com.ustadmobile.view.ext.renderTopMainAction
-import com.ustadmobile.view.ext.umEntityAvatar
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.components.AttachmentImageLookupAdapter
+import com.ustadmobile.view.ext.*
 import kotlinx.css.*
 import react.RBuilder
 import react.setState
@@ -127,11 +125,16 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                         flexDirection = FlexDirection.column
                     }
 
-                    umEntityAvatar(entity?.thumbnailUrl,
-                        if(entity?.leaf == true) ASSET_BOOK else ASSET_FOLDER,
-                        showIcon = false)
+                    withAttachmentLocalUrlLookup(entity?.contentEntryUid ?: 0,
+                        ATTACHMENT_URI_LOOKUP_ADAPTER
+                    ) { attachmentSrc ->
+                        umEntityAvatar(attachmentSrc,
+                            if(entity?.leaf == true) ASSET_BOOK else ASSET_FOLDER,
+                            showIcon = false)
+                    }
 
-                    if(scoreProgress?.progress ?: 0 > 0){
+
+                    if((scoreProgress?.progress ?: 0) > 0){
                         umLinearProgress((scoreProgress?.progress ?: 0).toDouble(),
                             variant = ProgressVariant.determinate){
                             css (detailContentProgress)
@@ -332,4 +335,13 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
         mPresenter = null
         entity = null
     }
+
+    companion object {
+
+        val ATTACHMENT_URI_LOOKUP_ADAPTER = AttachmentImageLookupAdapter { db, entityUid ->
+            db.contentEntryPictureDao.findByContentEntryUidAsync(entityUid)?.cepUri
+        }
+
+    }
+
 }

@@ -6,7 +6,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.viewUri
 import com.ustadmobile.core.util.ext.isAttendanceEnabledAndRecorded
 import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
@@ -18,9 +17,9 @@ import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
-import com.ustadmobile.util.Util.ASSET_ENTRY
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.components.AttachmentImageComponent
 import com.ustadmobile.view.ext.*
 import io.github.aakira.napier.Napier
 import kotlinx.browser.document
@@ -170,7 +169,16 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
 
             umGridContainer(GridSpacing.spacing4) {
                 umItem(GridSize.cells12, GridSize.cells4){
-                    umEntityAvatar(fallbackSrc = ASSET_ENTRY, listItem = true)
+                    //umEntityAvatar(fallbackSrc = ASSET_ENTRY, listItem = true)
+                    child(AttachmentImageComponent::class) {
+                        attrs.attachmentUri = coursePicture?.coursePictureUri
+                        attrs.onNewImageSelected = {
+                            setState {
+                                console.log("ClazzEditComponent: setting course picture uri = $it")
+                                coursePicture?.coursePictureUri = it
+                            }
+                        }
+                    }
                 }
 
                 umItem(GridSize.cells12, GridSize.cells8){
