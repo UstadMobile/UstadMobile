@@ -323,7 +323,7 @@ class ClazzAssignmentDetailOverviewPresenter(
         val uri = fileSubmission.casaUri ?: return
         val doorUri = if(uri.startsWith("door-attachment://")) repo.retrieveAttachment(uri) else DoorUri.parse(uri)
         try{
-            systemImpl.openFileInDefaultViewer(context, doorUri, fileSubmission.casaMimeType)
+            systemImpl.openFileInDefaultViewer(context, doorUri, fileSubmission.casaMimeType, courseSubmission.attachment?.casaFileName)
         }catch (e: Exception){
             if (e is NoAppFoundException) {
                 view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
