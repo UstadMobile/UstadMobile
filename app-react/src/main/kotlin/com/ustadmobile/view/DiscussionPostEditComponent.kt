@@ -28,9 +28,9 @@ class DiscussionPostEditComponent (mProps: UmProps): UstadEditComponent<Discussi
     override val mEditPresenter: UstadEditPresenter<*, DiscussionPost>?
         get() = mPresenter
 
-    private var titleLabel = FieldLabel(text = getString(MessageID.add_topic))
+    private var titleLabel = FieldLabel(text = getString(MessageID.title))
 
-    private var descriptionLabel = FieldLabel(text = getStringWithOptionalLabel(MessageID.description))
+    private var descriptionLabel = FieldLabel(text = getStringWithOptionalLabel(MessageID.message))
 
 
     override var blockTitleError: String? = null
@@ -62,7 +62,7 @@ class DiscussionPostEditComponent (mProps: UmProps): UstadEditComponent<Discussi
     override fun onCreateView() {
         super.onCreateView()
         mPresenter = DiscussionPostEditPresenter(this, arguments, this,di, this)
-        setEditTitle(MessageID.add_module, MessageID.edit_module)
+        setEditTitle(MessageID.post, MessageID.post)
         Napier.d("DiscussionPostEditComponent: navController viewName = ${navController.currentBackStackEntry?.viewName}" +
             "stateHandle=${(navController.currentBackStackEntry?.savedStateHandle as? UstadSavedStateHandleJs)?.dumpToString()}")
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
