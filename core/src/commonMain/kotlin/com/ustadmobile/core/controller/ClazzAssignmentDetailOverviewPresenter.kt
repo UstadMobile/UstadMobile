@@ -219,7 +219,6 @@ class ClazzAssignmentDetailOverviewPresenter(
                     casSubmitterUid = submitterUid
                     casAssignmentUid = entity.caUid
                     casSubmitterPersonUid = accountManager.activeAccount.personUid
-                    casText = doorUri.getFileName(context)
                     casType = CourseAssignmentSubmission.SUBMISSION_TYPE_FILE
                     casUid = db.doorPrimaryKeyManager.nextIdAsync(CourseAssignmentSubmission.TABLE_ID)
                 }
@@ -227,7 +226,7 @@ class ClazzAssignmentDetailOverviewPresenter(
                     casaUid =  db.doorPrimaryKeyManager.nextIdAsync(CourseAssignmentSubmissionAttachment.TABLE_ID)
                     casaSubmissionUid = submission.casUid
                     casaUri = uri
-                    casaMd5
+                    casaFileName = doorUri.getFileName(context)
                     casaMimeType = doorUri.guessMimeType(context, di)
                 }
                 submission.attachment = attachment
