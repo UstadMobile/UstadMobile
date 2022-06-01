@@ -65,6 +65,7 @@ class SubmissionAdapter(
     override fun onBindViewHolder(holder: FileSubmissionViewHolder, position: Int) {
         val item =  getItem(position)
         holder.binding.fileSubmission = item
+        holder.binding.fileNameText = item?.attachment?.casaFileName ?: item?.casText
         holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK_FILE_SUBMISSION)
     }
 
