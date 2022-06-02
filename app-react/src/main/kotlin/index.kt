@@ -104,6 +104,7 @@ fun main() {
 
             val systemImpl = di.direct.instance<UstadMobileSystemImpl>()
             document.title = systemImpl.getString(MessageID.app_name, Any())
+            document.getElementById("loading")?.remove()
 
             render(rootElement){
                 val theme = createAppTheme()
