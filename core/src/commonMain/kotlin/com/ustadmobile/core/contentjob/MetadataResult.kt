@@ -11,4 +11,14 @@ data class MetadataResult(
      * The pluginId that provided this metadata
      */
     val pluginId: Int
-)
+) {
+
+    companion object {
+
+        const val UPLOAD_TMP_PROTO_NAME = "upload-tmp"
+
+        const val UPLOAD_TMP_LOCATOR_PREFIX = "$UPLOAD_TMP_PROTO_NAME:///"
+
+    }
+
+}

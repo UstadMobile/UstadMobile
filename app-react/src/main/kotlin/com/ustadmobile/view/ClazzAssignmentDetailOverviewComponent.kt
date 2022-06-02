@@ -14,6 +14,7 @@ import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultDoubleMarginTop
 import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.*
 import com.ustadmobile.view.ext.*
 import kotlinx.css.FlexDirection
@@ -177,6 +178,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
         if(entity == null) return
         styledDiv {
             css {
+                +StyleManager.defaultPaddingTop
                 +defaultDoubleMarginTop
                 +contentContainer
             }
@@ -315,7 +317,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                                     val dates = submission.casTimestamp.toDate()
                                     renderItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
                                         "class","delete",
-                                        DraftJsUtil.clean(submission.casText ?: ""),
+                                        DraftJsUtil.clean(submission.attachment?.casaFileName ?: submission.casText ?: ""),
                                         if(dates == null ) ""
                                         else  "${getString(MessageID.submitted_cap)} " +
                                                 ": ${submission.casTimestamp.toDate()?.standardFormat(timeZone)}",
@@ -352,8 +354,12 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
 
                         courseAssignmentSubmissions.forEach { submission ->
                             umListItem {
+                                attrs.onClick = {
+                                    Util.stopEventPropagation(it)
+                                    mPresenter?.handleOpenSubmission(submission)
+                                }
                                 renderListItemWithLeftIconTitleAndDescription(
-                                    "class", DraftJsUtil.clean(submission.casText ?: ""),
+                                    "class", DraftJsUtil.clean(submission.attachment?.casaFileName ?: submission.casText),
                                     getString(MessageID.submitted_cap) +
                                             " : ${submission.casTimestamp.toDate()?.standardFormat(timeZone)}",
                                     onMainList = true

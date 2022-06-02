@@ -50,6 +50,7 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 
@@ -64,9 +65,15 @@ class ContentEntryEdit2Presenter(
     arguments,
     view,
     di,
-    lifecycleOwner), ContentEntryAddOptionsListener {
+    lifecycleOwner
+), ContentEntryAddOptionsListener {
 
-    private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
+    suspend fun DoorUri.isRemoteOrServerUpload() : Boolean{
+        return isRemote() || toString().startsWith(MetadataResult.UPLOAD_TMP_LOCATOR_PREFIX)
+    }
+
+    private val pluginManager: ContentPluginManager? by on(accountManager.activeAccount)
+        .instanceOrNull()
 
     private val contentJobManager: ContentJobManager by di.instance()
 
@@ -325,13 +332,12 @@ class ContentEntryEdit2Presenter(
         }
         view.metadataResult = metadataResult
 
-        val plugin = pluginManager.getPluginById(metadataResult.pluginId)
+        val plugin = pluginManager?.getPluginById(metadataResult.pluginId)
         val uri = metadataResult.entry.sourceUrl ?: ""
         val isRemote = DoorUri.parse(uri).isRemote()
 
         // show video preview
-        if (!isRemote && plugin.supportedMimeTypes.firstOrNull()?.startsWith("video/") == true
-            && !uri.lowercase().startsWith("https://drive.google.com")) {
+        if(!isRemote && plugin?.supportedMimeTypes?.firstOrNull()?.startsWith("video/") == true) {
             view.videoUri = uri
         }
 
@@ -420,19 +426,17 @@ class ContentEntryEdit2Presenter(
                         txDb.contentEntryDao.updateAsync(entity)
                     }
 
-                    UmPlatformUtil.runIfNotJsAsync {
-                        val contentEntryPictureVal = view.contentEntryPicture
-                        if(contentEntryPictureVal != null) {
-                            contentEntryPictureVal.cepContentEntryUid = entity.contentEntryUid
 
-                            if(contentEntryPictureVal.cepUid == 0L) {
-                                txDb.contentEntryPictureDao.insertAsync(contentEntryPictureVal)
-                            }else {
-                                txDb.contentEntryPictureDao.updateAsync(contentEntryPictureVal)
-                            }
+                    val contentEntryPictureVal = view.contentEntryPicture
+                    if(contentEntryPictureVal != null) {
+                        contentEntryPictureVal.cepContentEntryUid = entity.contentEntryUid
+
+                        if(contentEntryPictureVal.cepUid == 0L) {
+                            txDb.contentEntryPictureDao.insertAsync(contentEntryPictureVal)
+                        }else {
+                            txDb.contentEntryPictureDao.updateAsync(contentEntryPictureVal)
                         }
                     }
-
 
                     val language = entity.language
                     if (language != null && language.langUid == 0L) {
@@ -448,7 +452,7 @@ class ContentEntryEdit2Presenter(
 
                 if (metaData != null) {
 
-                    if (entity.sourceUrl?.let { DoorUri.parse(it) }?.isRemote() == false) {
+                    if (entity.sourceUrl?.let { DoorUri.parse(it) }?.isRemoteOrServerUpload() == false) {
 
                         val job = ContentJob().apply {
                             toUri = view.storageOptions?.get(view.selectedStorageIndex)?.dirUri
@@ -565,7 +569,7 @@ class ContentEntryEdit2Presenter(
     override fun onClickImportFile() {
         val args = mutableMapOf(
                 SelectFileView.ARG_MIMETYPE_SELECTED to
-                        pluginManager.supportedMimeTypeList.joinToString(";"),
+                        (pluginManager?.supportedMimeTypeList?.joinToString(";") ?: "*/*"),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
         args.putFromOtherMapIfPresent(arguments, BLOCK_REQUIRED)

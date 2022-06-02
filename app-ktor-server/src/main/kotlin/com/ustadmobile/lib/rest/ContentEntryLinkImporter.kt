@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJob
 import com.ustadmobile.lib.db.entities.ContentJobItem
@@ -24,6 +25,7 @@ import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
 import kotlinx.coroutines.withTimeout
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.on
@@ -62,9 +64,23 @@ fun Route.ContentEntryLinkImporter() {
         }
 
         post("downloadLink") {
+            val di = closestDI()
+
             try {
                 val parentUid = call.request.queryParameters["parentUid"]?.toLong()
-                val url = call.request.queryParameters["url"]?: ""
+
+                val url = (call.request.queryParameters["url"]?: "").let {
+                    if(it.startsWith(MetadataResult.UPLOAD_TMP_LOCATOR_PREFIX)) {
+                        val uploadTmpDir: File = di.direct.on(call).instance(
+                            tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR)
+                        val uploadTmpPath = it.substringAfter(MetadataResult.UPLOAD_TMP_LOCATOR_PREFIX)
+                        File(uploadTmpDir, uploadTmpPath).toDoorUri().toString()
+                    }else {
+                        it
+                    }
+                }
+
+
                 Napier.i("Downloadlink: $url")
 
                 val contentEntry = call.receive<ContentEntryWithLanguage>()
@@ -91,7 +107,7 @@ fun Route.ContentEntryLinkImporter() {
                 }
                 ContentJobItem().apply {
                     cjiJobUid = job.cjUid
-                    sourceUri = URL(url).toURI().toString()
+                    sourceUri = DoorUri.parse(url).toString()
                     cjiItemTotal = sourceUri?.let { DoorUri.parse(it).getSize(context, closestDI())  } ?: 0L
                     cjiPluginId = pluginId
                     cjiContentEntryUid = contentEntry.contentEntryUid

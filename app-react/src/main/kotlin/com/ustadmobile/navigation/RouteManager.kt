@@ -93,7 +93,14 @@ object RouteManager {
         UstadDestination(view = CourseGroupSetEditView.VIEW_NAME, component = CourseGroupSetEditComponent::class),
         UstadDestination(view = CourseGroupSetDetailView.VIEW_NAME, component = CourseGroupSetDetailComponent::class),
         UstadDestination(view = ChatDetailView.VIEW_NAME, component = ChatDetailComponent::class),
-        UstadDestination(view = ReportDetailView.VIEW_NAME, component = ReportDetailComponent::class)
+        UstadDestination(view = ReportDetailView.VIEW_NAME, component = ReportDetailComponent::class),
+        UstadDestination(view = CourseDiscussionEditView.VIEW_NAME, component = CourseDiscussionEditComponent::class),
+        UstadDestination(view = DiscussionTopicEditView.VIEW_NAME, component = DiscussionTopicEditComponent::class),
+        UstadDestination(view = CourseDiscussionDetailView.VIEW_NAME, component = CourseDiscussionDetailComponent::class),
+        UstadDestination(view = DiscussionTopicDetailView.VIEW_NAME, component = DiscussionTopicDetailComponent::class),
+        UstadDestination(view = DiscussionPostEditView.VIEW_NAME, component = DiscussionPostEditComponent::class),
+        UstadDestination(view = DiscussionPostDetailView.VIEW_NAME, component = DiscussionPostDetailComponent::class),
+        UstadDestination(view = SelectExtractFileView.VIEW_NAME, component = SelectExtractFileComponent::class),
     )
 
     private val componentClassToViewNamesMap: Map<KClass<*>, List<String>> by lazy {

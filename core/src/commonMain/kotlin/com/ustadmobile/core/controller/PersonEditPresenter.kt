@@ -292,16 +292,14 @@ class PersonEditPresenter(
                     }
                 }
 
-                UmPlatformUtil.runIfNotJsAsync {
-                    val personPictureVal = view.personPicture
-                    if(personPictureVal != null) {
-                        personPictureVal.personPicturePersonUid = entity.personUid
+                val personPictureVal = view.personPicture
+                if(personPictureVal != null) {
+                    personPictureVal.personPicturePersonUid = entity.personUid
 
-                        if(personPictureVal.personPictureUid == 0L) {
-                            repo.personPictureDao.insertAsync(personPictureVal)
-                        }else {
-                            repo.personPictureDao.updateAsync(personPictureVal)
-                        }
+                    if(personPictureVal.personPictureUid == 0L) {
+                        repo.personPictureDao.insertAsync(personPictureVal)
+                    }else {
+                        repo.personPictureDao.updateAsync(personPictureVal)
                     }
                 }
 

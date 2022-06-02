@@ -27,6 +27,7 @@ import com.ustadmobile.util.ThemeManager.createAppTheme
 import com.ustadmobile.view.renderExtraActiveTabWarningComponent
 import com.ustadmobile.view.renderMainComponent
 import com.ustadmobile.view.renderSplashComponent
+import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
@@ -103,6 +104,7 @@ fun main() {
 
             val systemImpl = di.direct.instance<UstadMobileSystemImpl>()
             document.title = systemImpl.getString(MessageID.app_name, Any())
+            document.getElementById("loading")?.remove()
 
             render(rootElement){
                 val theme = createAppTheme()

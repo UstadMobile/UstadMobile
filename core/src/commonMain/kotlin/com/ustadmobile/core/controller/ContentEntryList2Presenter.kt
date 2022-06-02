@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, view: ContentEntryList2View,
@@ -47,7 +48,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     private val navController: UstadNavController by instance()
 
-    private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
+    private val pluginManager: ContentPluginManager? by on(accountManager.activeAccount).instanceOrNull()
 
     private var contentFilter = ARG_DISPLAY_CONTENT_BY_PARENT
 
@@ -82,6 +83,14 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLongOrNull() ?: MASTER_SERVER_ROOT_ENTRY_UID
         loggedPersonUid = accountManager.activeAccount.personUid
         showHiddenEntries = false
+        view.listFilterOptionChips = if(arguments[ContentEntryList2View.ARG_USE_CHIPS] == true.toString()) {
+            PICKER_CHIP_OPTIONS.map {
+                ListFilterIdOption(systemImpl.getString(it.first, context), it.second)
+            }
+        }else {
+            listOf()
+        }
+
         getAndSetList()
         presenterScope.launch(doorMainDispatcher()) {
             if (contentFilter == ARG_DISPLAY_CONTENT_BY_PARENT) {
@@ -374,7 +383,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     override fun onClickImportFile() {
         val args = mutableMapOf(
                 SelectFileView.ARG_MIMETYPE_SELECTED to
-                        pluginManager.supportedMimeTypeList.joinToString(";"),
+                        (pluginManager?.supportedMimeTypeList?.joinToString(";") ?: "*/*"),
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
@@ -462,8 +471,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
          */
         const val KEY_SELECTED_ITEMS = "selected_items"
 
-        const val SAVEDSTATE_KEY_ENTRY = "Clazz_ContentEntry"
-
         const val SAVEDSTATE_KEY_FOLDER = "Folder_ContentEntry"
 
         const val CHIP_ID_MY_CONTENT = 1
@@ -479,7 +486,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
         val PICKER_CHIP_OPTIONS = listOf(
             MessageID.my_content to CHIP_ID_MY_CONTENT,
-            MessageID.from_my_courses to CHIP_ID_FROM_MY_COURSES,
+            MessageID.from_my_classes to CHIP_ID_FROM_MY_COURSES,
             MessageID.library to CHIP_ID_LIBRARY,
         )
 

@@ -106,9 +106,6 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
     override fun onCreateView() {
         super.onCreateView()
         showEmptyState = false
-        updateUiWithStateChangeDelay {
-            showCreateNewItem = true
-        }
         addNewEntryText = getString(MessageID.add_a_teacher)
         filterByClazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0
         mPresenter = ClazzMemberListPresenter(this, arguments, this, di, this)
