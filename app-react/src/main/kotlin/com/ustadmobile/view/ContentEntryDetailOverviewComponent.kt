@@ -7,6 +7,8 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.DoorMediatorLiveData
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
@@ -220,7 +222,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
 
                             umItem(GridSize.cells12) {
                                 css{
-                                    display = displayProperty(scoreProgress?.progress ?: 0 > 0)
+                                    display = displayProperty((scoreProgress?.progress ?: 0) > 0)
                                 }
 
                                 umGridContainer {
@@ -339,9 +341,16 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
     companion object {
 
         val ATTACHMENT_URI_LOOKUP_ADAPTER = AttachmentImageLookupAdapter { db, entityUid ->
-            db.contentEntryPictureDao.findByContentEntryUidAsync(entityUid)?.cepUri
-        }
+            object: DoorMediatorLiveData<String?>(), DoorObserver<ContentEntryPicture?> {
+                init {
+                    addSource(db.contentEntryPictureDao.findByContentEntryUidLive(entityUid), this)
+                }
 
+                override fun onChanged(t: ContentEntryPicture?) {
+                    postValue(t?.cepUri)
+                }
+            }
+        }
     }
 
 }

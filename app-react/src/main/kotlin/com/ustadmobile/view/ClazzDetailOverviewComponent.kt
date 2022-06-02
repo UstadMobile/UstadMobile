@@ -6,6 +6,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.DoorMediatorLiveData
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
@@ -261,7 +263,15 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
     companion object {
 
         val CLAZZ_PICTURE_LOOKUP_ADAPTER = AttachmentImageLookupAdapter { db, entityUid ->
-            db.coursePictureDao.findByClazzUidAsync(entityUid)?.coursePictureUri
+            object: DoorMediatorLiveData<String?>(), DoorObserver<CoursePicture?> {
+                init {
+                    addSource(db.coursePictureDao.findByClazzUidLive(entityUid), this)
+                }
+
+                override fun onChanged(t: CoursePicture?) {
+                    postValue(t?.coursePictureUri)
+                }
+            }
         }
 
     }

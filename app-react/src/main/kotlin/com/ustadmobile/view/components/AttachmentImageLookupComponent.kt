@@ -1,21 +1,21 @@
 package com.ustadmobile.view.components
 
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.mui.components.AvatarVariant
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.view.UstadBaseComponent
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import org.w3c.dom.HTMLImageElement
 import org.w3c.dom.url.URL
 import react.RBuilder
-import react.dom.html.ImgHTMLAttributes
 import react.setState
 
 /**
@@ -23,10 +23,7 @@ import react.setState
  */
 fun interface AttachmentImageLookupAdapter {
 
-    suspend fun lookupAttachmentUri(
-        db: UmAppDatabase,
-        entityUid: Long
-    ): String?
+    fun lookupAttachmentUri(db: UmAppDatabase, entityUid: Long): DoorLiveData<String?>
 
 }
 
@@ -63,39 +60,22 @@ open class AttachmentImageLookupComponent(
     props: AttachmentImageLookupProps
 ): UstadBaseComponent<AttachmentImageLookupProps, AttachmentImageLookupState>(props) {
 
-    override fun onCreateView() {
-        super.onCreateView()
+    private var lastAttachmentUri: String? = null
 
-        lookupImage()
-    }
+    private var imageLookupJob: Job? = null
 
-    override fun componentDidUpdate(
-        prevProps: AttachmentImageLookupProps,
-        prevState: AttachmentImageLookupState,
-        snapshot: Any
-    ) {
-        super.componentDidUpdate(prevProps, prevState, snapshot)
+    private var currentLiveData: DoorLiveData<String?>? = null
 
-        if(prevProps.entityUid != props.entityUid || prevProps.lookupAdapter != props.lookupAdapter)
-            lookupImage()
-    }
+    private lateinit var db: UmAppDatabase
 
-    override fun componentWillUnmount() {
-        super.componentWillUnmount()
+    private val uriObserver = DoorObserver<String?> { attachmentUri ->
+        if(attachmentUri == lastAttachmentUri)
+            return@DoorObserver
 
-        state.imgSrc?.also {
-            console.log("AttachmentImageLookupComp: unmount / revoke $it")
-            URL.revokeObjectURL(it)
-        }
-    }
-
-    fun lookupImage(){
-        GlobalScope.launch {
-            val accountManager: UstadAccountManager by di.instance()
-            val db: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
-
+        imageLookupJob?.cancel()
+        lastAttachmentUri = attachmentUri
+        imageLookupJob = GlobalScope.launch {
             console.log("AttachmentImageLookupComp: Lookup entity uid = ${props.entityUid}")
-            val attachmentUri = props.lookupAdapter?.lookupAttachmentUri(db, props.entityUid)
 
             //If there was a previously created URL, revoke it.
             state.imgSrc?.also {
@@ -108,6 +88,40 @@ open class AttachmentImageLookupComponent(
             setState {
                 imgSrc = imgSrcUrl?.toString()
             }
+        }
+    }
+
+    private fun setupLiveData() {
+        currentLiveData?.removeObserver(uriObserver)
+        currentLiveData = props.lookupAdapter?.lookupAttachmentUri(db, props.entityUid)
+        currentLiveData?.observe(this, uriObserver)
+    }
+
+    override fun onCreateView() {
+        super.onCreateView()
+        db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
+
+        setupLiveData()
+    }
+
+    override fun componentDidUpdate(
+        prevProps: AttachmentImageLookupProps,
+        prevState: AttachmentImageLookupState,
+        snapshot: Any
+    ) {
+        super.componentDidUpdate(prevProps, prevState, snapshot)
+
+        if(prevProps.entityUid != props.entityUid || prevProps.lookupAdapter != props.lookupAdapter)
+            setupLiveData()
+    }
+
+    override fun componentWillUnmount() {
+        super.componentWillUnmount()
+
+        currentLiveData?.removeObserver(uriObserver)
+        state.imgSrc?.also {
+            console.log("AttachmentImageLookupComp: unmount / revoke $it")
+            URL.revokeObjectURL(it)
         }
     }
 

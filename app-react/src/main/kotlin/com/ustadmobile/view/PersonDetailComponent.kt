@@ -8,8 +8,11 @@ import com.ustadmobile.core.util.ext.outcomeToString
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.DoorMediatorLiveData
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
+import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager.alignTextToStart
@@ -254,7 +257,14 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
     companion object {
 
         val PERSON_PICTURE_LOOKUP_ADAPTER = AttachmentImageLookupAdapter { db, entityUid ->
-            db.personPictureDao.findByPersonUidAsync(entityUid)?.personPictureUri
+            object: DoorMediatorLiveData<String?>(), DoorObserver<PersonPicture?> {
+                init {
+                    addSource(db.personPictureDao.findByPersonUidLive(entityUid), this)
+                }
+                override fun onChanged(t: PersonPicture?) {
+                    postValue(t?.personPictureUri)
+                }
+            }
         }
 
     }
