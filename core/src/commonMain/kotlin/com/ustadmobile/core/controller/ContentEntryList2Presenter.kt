@@ -486,7 +486,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
         val PICKER_CHIP_OPTIONS = listOf(
             MessageID.my_content to CHIP_ID_MY_CONTENT,
-            MessageID.from_my_courses to CHIP_ID_FROM_MY_COURSES,
+            MessageID.from_my_classes to CHIP_ID_FROM_MY_COURSES,
             MessageID.library to CHIP_ID_LIBRARY,
         )
 

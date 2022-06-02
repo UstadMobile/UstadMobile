@@ -34,7 +34,7 @@ class DiscussionTopicDetailPresenter(
         get() = PersistenceMode.LIVEDATA
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        return false
+        return true
     }
 
     override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<DiscussionTopic?>? {

@@ -61,6 +61,7 @@ class DiscussionPostDetailPresenter(
             view.entity = post
             clazzUid = post?.discussionPostClazzUid?:0L
 
+
         }
 
     }
