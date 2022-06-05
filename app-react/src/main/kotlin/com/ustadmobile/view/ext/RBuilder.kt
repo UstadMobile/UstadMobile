@@ -1,6 +1,7 @@
 package com.ustadmobile.view.ext
 
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.controller.BitmaskEditPresenter
@@ -8,14 +9,13 @@ import com.ustadmobile.core.controller.SubmissionConstants.STATUS_MAP
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.IdOption
+import com.ustadmobile.core.util.UstadUrlComponents
+import com.ustadmobile.core.util.encodeURI
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
 import com.ustadmobile.core.util.ext.roundTo
-import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.core.view.RegisterAgeRedirectView
-import com.ustadmobile.core.view.SiteTermsDetailView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
@@ -57,11 +57,14 @@ import com.ustadmobile.view.ClazzAssignmentDetailOverviewComponent.Companion.ASS
 import com.ustadmobile.view.ClazzEditComponent.Companion.BLOCK_ICON_MAP
 import com.ustadmobile.view.components.AttachmentImageLookupAdapter
 import com.ustadmobile.view.components.AttachmentImageLookupComponent
+import io.github.aakira.napier.Napier
 import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import mui.material.GridProps
 import mui.material.GridWrap
+import org.kodein.di.DI
+import org.kodein.di.instance
 import org.w3c.dom.HTMLImageElement
 import org.w3c.dom.events.Event
 import react.*
@@ -99,7 +102,8 @@ fun RBuilder.errorFallBack(text: String) {
  */
 private fun guardRoute(
     component: KClass<out Component<UmProps, *>>,
-    systemImpl: UstadMobileSystemImpl
+    accountManager: UstadAccountManager,
+    systemImpl: UstadMobileSystemImpl,
 ): ReactElement?  = createElement {
     val viewName = getViewNameFromUrl()
     val accessibleViews = listOf(Login2View.VIEW_NAME, PersonEditView.VIEW_NAME_REGISTER,
@@ -107,24 +111,39 @@ private fun guardRoute(
     val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
     val logout = activeSession == null && viewName != null
             && accessibleViews.indexOf(viewName) == -1 && viewName != "/"
-    //Protest access to app's content without being logged in.
-    if(logout){
-        window.location.href = "./"
+
+    if(logout) {
+        val urlComponents = UstadUrlComponents.parse(window.location.href)
+        val loginWithNextParamUrl = "${urlComponents.endpoint}#/${Login2View.VIEW_NAME}?${UstadView.ARG_NEXT}=${encodeURI(urlComponents.viewUri)}"
+        Napier.d { "User is not logged in : should not see $viewName . Go to $loginWithNextParamUrl"}
+        window.location.href = loginWithNextParamUrl
+
+        //systemImpl.goToDeepLink(window.location.href, accountManager, Any())
     }
+
     child(component){}
+
+    //Protest access to app's content without being logged in.
+//    if(logout){
+//        window.location.href = "./"
+//    }
+
 }
 
-fun RBuilder.renderRoutes(systemImpl: UstadMobileSystemImpl) {
+fun RBuilder.renderRoutes(di: DI) {
+    val systemImpl: UstadMobileSystemImpl by di.instance()
+    val accountManager: UstadAccountManager by di.instance()
+
     HashRouter{
         Routes{
             Route{
                 attrs.path = "/"
-                attrs.element = guardRoute(defaultDestination.component, systemImpl)
+                attrs.element = guardRoute(defaultDestination.component, accountManager, systemImpl)
             }
             destinationList.forEach {
                 Route{
                     attrs.path = "/${it.view}"
-                    attrs.element = guardRoute(it.component, systemImpl)
+                    attrs.element = guardRoute(it.component, accountManager, systemImpl)
                 }
             }
         }
