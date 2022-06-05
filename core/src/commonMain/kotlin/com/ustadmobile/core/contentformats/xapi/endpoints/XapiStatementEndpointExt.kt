@@ -3,9 +3,7 @@ package com.ustadmobile.core.contentformats.xapi.endpoints
 import com.ustadmobile.core.contentformats.xapi.*
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMTinCanUtil
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 
 fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: ContentEntry,
                                                  progress: Int, duration: Long, contextRegistration: String,
@@ -90,4 +88,90 @@ fun XapiStatementEndpoint.storeCompletedStatement(account: UmAccount, entry: Con
     }
 
     storeStatements(listOf(statement), "", entry.contentEntryUid, clazzUid)
+}
+
+fun XapiStatementEndpoint.storeSubmitSubmissionStatement(account: UmAccount,
+                                                         contextRegistration: String,
+                                                         assignment: ClazzAssignment
+){
+
+    val statement = Statement().apply {
+        this.actor = Actor().apply {
+            this.account = Account().apply {
+                this.homePage = account.endpointUrl
+                this.name = account.username
+            }
+        }
+        this.verb = Verb().apply {
+            this.id = VerbEntity.VERB_SUBMITTED_URL
+            this.display = mapOf("en-US" to "submitted")
+        }
+        this.context = XContext().apply {
+            registration = contextRegistration
+        }
+        this.result = Result().apply {
+            this.completion = false
+            success = false
+        }
+        this.`object` = XObject().apply {
+            this.id = UMFileUtil.joinPaths(account.endpointUrl,
+                    "/clazzAssignment/${assignment.caUid}")
+            this.objectType = "Activity"
+            this.definition = Definition().apply {
+                this.name = mapOf("en-US" to (assignment.caTitle ?: ""))
+                this.description = mapOf("en-US" to (assignment.caDescription ?: ""))
+            }
+        }
+    }
+
+    storeStatements(listOf(statement), "", 0, assignment.caClazzUid)
+
+
+
+}
+
+
+
+fun XapiStatementEndpoint.storeMarkedStatement(
+        account: UmAccount, student: Person, contextRegistration: String,
+        grade: Int, assignment: ClazzAssignmentWithCourseBlock, studentSubmitStatement: StatementEntity?){
+
+    val statement = Statement().apply {
+        this.actor = Actor().apply {
+            this.account = Account().apply {
+                this.homePage = account.endpointUrl
+                this.name = student.username
+            }
+        }
+        this.verb = Verb().apply {
+            this.id = VerbEntity.VERB_SCORED_URL
+            this.display = mapOf("en-US" to "scored")
+        }
+        this.context = XContext().apply {
+            registration = contextRegistration
+            instructor = Actor().apply {
+                this.account = Account().apply {
+                    this.homePage = account.endpointUrl
+                    this.name = account.username
+                }
+            }
+        }
+        this.result = Result().apply {
+            this.completion = true
+            this.extensions = mapOf("https://w3id.org/xapi/cmi5/result/extensions/progress" to 100)
+                success = true
+                score = Score().apply {
+                    raw = grade.toLong()
+                    max = assignment.block?.cbMaxPoints?.toLong() ?: 0L
+                    scaled = (grade.toFloat() / (assignment.block?.cbMaxPoints ?: 1))
+                }
+        }
+        this.`object` = XObject().apply {
+            this.id = studentSubmitStatement?.statementId
+            this.objectType = "StatementRef"
+            this.statementRefUid = studentSubmitStatement?.statementUid ?: 0
+        }
+    }
+
+    storeStatements(listOf(statement), "", 0, assignment.caClazzUid)
 }

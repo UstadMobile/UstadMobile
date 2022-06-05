@@ -8,7 +8,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.Person
@@ -35,7 +35,7 @@ class VideoContentPresenterTest {
 
     private var context: Any = Any()
 
-    private lateinit var mockView: VideoPlayerView
+    private lateinit var mockView: VideoContentView
 
     private lateinit var mockEndpoint: XapiStatementEndpoint
 

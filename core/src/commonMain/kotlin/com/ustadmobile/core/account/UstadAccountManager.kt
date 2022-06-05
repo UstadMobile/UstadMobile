@@ -3,7 +3,10 @@ package com.ustadmobile.core.account
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.ext.encryptWithPbkdf2
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.ext.toUmAccount
+import com.ustadmobile.core.util.ext.withEndpoint
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
@@ -171,8 +174,11 @@ class UstadAccountManager(
     }
 
 
-    suspend fun register(person: PersonWithAccount, endpointUrl: String,
-                         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()): PersonWithAccount = withContext(Dispatchers.Default){
+    suspend fun register(
+        person: PersonWithAccount,
+        endpointUrl: String,
+        accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()
+    ): PersonWithAccount = withContext(Dispatchers.Default){
         val parentVal = accountRegisterOptions.parentJoin
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
@@ -221,7 +227,7 @@ class UstadAccountManager(
 
 
         val userSession = UserSession().apply {
-            usClientNodeId = (endpointRepo as DoorDatabaseRepository).config.nodeId
+            usClientNodeId = (endpointRepo as DoorDatabaseRepository).config.nodeId.toLong()
             usPersonUid = person.personUid
             usStartTime = systemTimeInMillis()
             usSessionType = UserSession.TYPE_STANDARD
@@ -261,7 +267,7 @@ class UstadAccountManager(
 
     private fun commitActiveEndpointsToPref() {
         val json = Json.encodeToString(ListSerializer(String.serializer()),
-            endpointsWithActiveSessions.map { it.url })
+            endpointsWithActiveSessions.toSet().map { it.url }.toList())
         systemImpl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, json, appContext)
     }
 
@@ -314,7 +320,7 @@ class UstadAccountManager(
         val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_DB)
 
         val nodeId = (repo as? DoorDatabaseRepository)?.config?.nodeId
-                ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
+            ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
 
         val loginResponse = httpClient.post<HttpResponse> {
             url("${endpointUrl.removeSuffix("/")}/auth/login")
@@ -337,17 +343,18 @@ class UstadAccountManager(
         }
 
         val responseAccount = loginResponse.receive<UmAccount>()
-
         responseAccount.endpointUrl = endpointUrl
-        var personInDb = db.personDao.findByUid(responseAccount.personUid)
-        if(personInDb == null) {
+
+        var personInDb = db.personDao.findByUidAsync(responseAccount.personUid)
+
+        if(personInDb == null){
             val personOnServerResponse = httpClient.get<HttpResponse> {
                 url("${endpointUrl.removeSuffix("/")}/auth/person")
                 parameter("personUid", responseAccount.personUid)
             }
             if(personOnServerResponse.status.value == 200) {
                 val personObj = personOnServerResponse.receive<Person>()
-                repo.personDao.insert(personObj)
+                repo.personDao.insertAsync(personObj)
                 personInDb = personObj
             }else {
                 throw IllegalStateException("Internal error: could not get person object")

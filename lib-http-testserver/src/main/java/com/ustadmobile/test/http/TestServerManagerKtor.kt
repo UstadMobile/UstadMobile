@@ -108,7 +108,7 @@ fun Application.testServerManager() {
                 .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
 
             val umRestServer = embeddedServer(Netty, port = appPort, host= proxyHost, module = {
-                umRestApplication(devMode = true, singletonDbName = dbName)
+                umRestApplication(singletonDbName = dbName)
             })
             umRestServer.start()
             val token = UUID.randomUUID().toString()

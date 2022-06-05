@@ -1,21 +1,32 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
+import com.ustadmobile.lib.db.entities.CommentsWithPerson
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
 
 
-interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignment> {
+interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignmentWithCourseBlock> {
 
-    var person: Person?
-    var studentScore: ContentEntryStatementScoreProgress?
+    var submitMarkError: String?
 
-    var clazzAssignmentContent
-            : DoorDataSourceFactory<Int, ContentWithAttemptSummary>?
+    var submitterName: String?
+
+    var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
 
     var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>?
 
+    var submissionScore: CourseAssignmentMark?
+
+    var submissionStatus: Int
+
+    var markNextStudentVisible: Boolean
+
+    var submitButtonVisible: Boolean
+
     companion object {
-        const val VIEW_NAME = "ClazzAssignmentDetailStudentProgressListView"
+        const val VIEW_NAME = "CourseAssignmentDetailStudentProgressListView"
     }
 
 }

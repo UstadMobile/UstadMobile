@@ -2,22 +2,23 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.SchoolMemberDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.approvePendingSchoolMember
 import com.ustadmobile.core.util.ext.enrollPersonToSchool
 import com.ustadmobile.core.util.ext.toQueryLikeParam
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.PersonDetailView
-import com.ustadmobile.core.view.SchoolMemberListView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ROLE
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
@@ -54,7 +55,6 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
 
     override suspend fun onLoadFromDb() {
         super.onLoadFromDb()
-
         updateListOnView()
     }
 
@@ -93,7 +93,8 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
     override fun handleClickEntry(entry: SchoolMember) {
 
         when (mListMode) {
-            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
+            ListViewMode.PICKER -> finishWithResult(safeStringify(di,
+                ListSerializer(SchoolMember.serializer()), listOf(entry)))
             ListViewMode.BROWSER -> systemImpl.go(PersonDetailView.VIEW_NAME,
                     mapOf(UstadView.ARG_ENTITY_UID to entry.schoolMemberPersonUid.toString()), context)
         }
@@ -120,6 +121,20 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
     override fun onClickSort(sortOption: SortOrderOption) {
         super.onClickSort(sortOption)
         updateListOnView()
+    }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
+        navigateForResult(
+            NavigateForResultOptions(
+                this,null,
+                PersonListView.VIEW_NAME,
+                Person::class,
+                Person.serializer(),
+                destinationResultKey,
+                true,
+                arguments = args?.toMutableMap() ?: mutableMapOf(),
+            )
+        )
     }
 
 

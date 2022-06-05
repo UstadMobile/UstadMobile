@@ -1,33 +1,42 @@
 package com.ustadmobile.core.controller
 
-import SelectFolderView
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.SupportedContent.EPUB_EXTENSIONS
+import com.ustadmobile.core.contentjob.SupportedContent.EPUB_MIME_TYPES
+import com.ustadmobile.core.contentjob.SupportedContent.H5P_EXTENSIONS
+import com.ustadmobile.core.contentjob.SupportedContent.H5P_MIME_TYPES
+import com.ustadmobile.core.contentjob.SupportedContent.XAPI_MIME_TYPES
+import com.ustadmobile.core.contentjob.SupportedContent.ZIP_EXTENSIONS
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_CLAZZ
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_OPTION
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DISPLAY_CONTENT_BY_PARENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SHOW_ONLY_FOLDER_FILTER
+import com.ustadmobile.core.view.SelectFileView.Companion.SELECTION_MODE_GALLERY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, view: ContentEntryList2View,
                                  di: DI, lifecycleOwner: DoorLifecycleOwner,
@@ -38,6 +47,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         ContentEntryListItemListener by contentEntryListItemListener, ContentEntryAddOptionsListener {
 
     private val navController: UstadNavController by instance()
+
+    private val pluginManager: ContentPluginManager? by on(accountManager.activeAccount).instanceOrNull()
 
     private var contentFilter = ARG_DISPLAY_CONTENT_BY_PARENT
 
@@ -52,11 +63,12 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     private val parentEntryUid: Long
         get() = parentEntryUidStack.lastOrNull() ?: 0L
 
+
+    private var selectedChipOption: Int = 0
+
     private val editVisible = CompletableDeferred<Boolean>()
 
     private var showHiddenEntries = false
-
-    private var selectedClazzUid: Long = 0L
 
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
@@ -69,12 +81,19 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         contentFilter = arguments[ARG_DISPLAY_CONTENT_BY_OPTION] ?: ARG_DISPLAY_CONTENT_BY_PARENT
         onlyFolderFilter = arguments[ARG_SHOW_ONLY_FOLDER_FILTER]?.toBoolean() ?: false
         parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLongOrNull() ?: MASTER_SERVER_ROOT_ENTRY_UID
-        selectedClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
         loggedPersonUid = accountManager.activeAccount.personUid
         showHiddenEntries = false
+        view.listFilterOptionChips = if(arguments[ContentEntryList2View.ARG_USE_CHIPS] == true.toString()) {
+            PICKER_CHIP_OPTIONS.map {
+                ListFilterIdOption(systemImpl.getString(it.first, context), it.second)
+            }
+        }else {
+            listOf()
+        }
+
         getAndSetList()
-        GlobalScope.launch(doorMainDispatcher()) {
-            if (contentFilter == ARG_DISPLAY_CONTENT_BY_PARENT || contentFilter == ARG_DISPLAY_CONTENT_BY_CLAZZ) {
+        presenterScope.launch(doorMainDispatcher()) {
+            if (contentFilter == ARG_DISPLAY_CONTENT_BY_PARENT) {
                 view.editOptionVisible = onCheckUpdatePermission()
                 editVisible.complete(view.editOptionVisible)
             }
@@ -99,20 +118,27 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
 
     private fun getAndSetList() {
-        view.list = when (contentFilter) {
-            ARG_DISPLAY_CONTENT_BY_PARENT -> {
+        view.list = when {
+            selectedChipOption == CHIP_ID_MY_CONTENT -> {
+                repo.contentEntryDao.getContentByOwner(loggedPersonUid)
+            }
+            selectedChipOption == CHIP_ID_FROM_MY_COURSES -> {
+                repo.contentEntryDao.getContentFromMyCourses(loggedPersonUid)
+            }
+            selectedChipOption == CHIP_ID_LIBRARY -> {
+                repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
+                    parentEntryUid, 0, 0, loggedPersonUid, false, onlyFolderFilter,
+                    selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
+            }
+            contentFilter == ARG_DISPLAY_CONTENT_BY_PARENT -> {
                 repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
                         parentEntryUid, 0, 0, loggedPersonUid, showHiddenEntries, onlyFolderFilter,
-                        selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
-            }
-            ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
-                repo.contentEntryDao.getClazzContent(selectedClazzUid, loggedPersonUid, showHiddenEntries,
                         selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
             }
             else -> null
         }
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
             db.takeIf { parentEntryUid != 0L }?.contentEntryDao?.findTitleByUidAsync(parentEntryUid)?.let { titleStr ->
                 view.takeIf { titleStr.isNotBlank() }?.title = titleStr
             }
@@ -124,12 +150,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         return when(contentFilter) {
             ARG_DISPLAY_CONTENT_BY_PARENT -> {
                 if (isVisible) listOf(SelectionOption.MOVE, SelectionOption.HIDE) else listOf()
-            }
-            ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
-                if(isVisible) listOf(SelectionOption.HIDE) else listOf()
-
-            }
-            else -> {
+            }else -> {
                 listOf()
             }
         }
@@ -141,59 +162,79 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         }
 
        when(contentFilter){
-
             ARG_DISPLAY_CONTENT_BY_PARENT ->{
                 view.selectionOptions = if (t.all { it.ceInactive })
                     listOf(SelectionOption.MOVE, SelectionOption.UNHIDE)
                 else
                     listOf(SelectionOption.MOVE, SelectionOption.HIDE)
             }
-           ARG_DISPLAY_CONTENT_BY_CLAZZ ->{
-                view.selectionOptions = listOf(SelectionOption.HIDE)
-            }
-
         }
     }
 
     override fun handleClickSelectionOption(selectedItem: List<ContentEntry>, option: SelectionOption) {
-        GlobalScope.launch(doorMainDispatcher()) {
+        val selectedContentEntryUids = selectedItem.map { it.contentEntryUid }
+        val selectedContentEntryParentChildUids = selectedItem.mapNotNull {
+            (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
+        }
+
+        presenterScope.launch(doorMainDispatcher()) {
             when (option) {
                 SelectionOption.MOVE -> {
-                    handleClickMove(selectedItem)
+                    handleClickMove(selectedContentEntryParentChildUids)
                 }
                 SelectionOption.HIDE -> {
                     when(contentFilter){
                         ARG_DISPLAY_CONTENT_BY_PARENT ->{
                             repo.contentEntryDao.toggleVisibilityContentEntryItems(true,
-                                selectedItem.map { it.contentEntryUid }, systemTimeInMillis())
-                        }
-                        ARG_DISPLAY_CONTENT_BY_CLAZZ ->{
-                            repo.clazzContentJoinDao.toggleVisibilityClazzContent(false,
-                                selectedItem.map { it.contentEntryUid }, systemTimeInMillis())
+                                selectedContentEntryUids, systemTimeInMillis())
                         }
                     }
                 }
                 SelectionOption.UNHIDE -> {
                     repo.contentEntryDao.toggleVisibilityContentEntryItems(false,
-                        selectedItem.map { it.contentEntryUid }, systemTimeInMillis())
+                        selectedContentEntryUids, systemTimeInMillis())
+                }
+                else -> {
+                    //Do nothing
                 }
             }
         }
     }
 
+    override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {
+        selectedChipOption = filterOptionId.optionId
+        parentEntryUidStack.clear()
+        if(filterOptionId.optionId == CHIP_ID_LIBRARY) {
+            presenterScope.launch {
+                view.addMode = if(onCheckUpdatePermission()) {
+                    ListViewAddMode.FIRST_ITEM
+                }else {
+                    ListViewAddMode.NONE
+                }
+            }
+
+            parentEntryUidStack += MASTER_SERVER_ROOT_ENTRY_UID
+        }else {
+            //If any chip other than library was selected, new content created should not have
+            // any parentEntryUid
+            parentEntryUidStack += 0L
+            view.addMode = ListViewAddMode.FIRST_ITEM
+        }
+
+        getAndSetList()
+    }
+
     /**
      * Show ContentEntryList in picker mode so the user can select a folder to move entries to.
      *
-     * @param childrenToMove list of child entries selected to move
+     * @param childrenToMove list of content entry parent child join uids that will be
+     * moved
      */
-    fun handleClickMove(childrenToMove: List<ContentEntry>){
-
+    private fun handleClickMove(childrenToMove: List<Long>){
         val args = mutableMapOf(ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
                 ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_PARENT,
                 ARG_SHOW_ONLY_FOLDER_FILTER to true.toString(),
-                KEY_SELECTED_ITEMS to childrenToMove.mapNotNull {
-                    (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
-                }.joinToString(","))
+                KEY_SELECTED_ITEMS to childrenToMove.joinToString(","))
 
         navigateForResult(
                 NavigateForResultOptions(this,
@@ -207,10 +248,11 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
 
     fun handleMoveContentEntries(parentChildJoinUids: List<Long>, destContentEntryUid: Long) {
-        if (!parentChildJoinUids.isNullOrEmpty()) {
-            GlobalScope.launch(doorMainDispatcher()) {
+        if (parentChildJoinUids.isNotEmpty()) {
+            presenterScope.launch(doorMainDispatcher()) {
 
-                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(destContentEntryUid, parentChildJoinUids)
+                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
+                    destContentEntryUid, parentChildJoinUids, systemTimeInMillis())
 
                 view.showSnackBar(systemImpl.getString(MessageID.moved_x_entries, context).replace("%1\$s",
                         parentChildJoinUids.size.toString()), actionMessageId = MessageID.open_folder,
@@ -246,34 +288,50 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         return false
     }
 
-    override fun handleClickCreateNewFab() {
-        when (contentFilter) {
-            ARG_DISPLAY_CONTENT_BY_CLAZZ -> {
+    fun handleEntrySelectedFromPicker(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+        if(arguments.containsKey(ContentEntryEdit2View.BLOCK_REQUIRED)){
+            val args = mutableMapOf<String, String>()
+            args[ARG_LEAF] = true.toString()
+            args[ARG_PARENT_ENTRY_UID] = parentEntryUid.toString()
+            args[ARG_ENTITY_UID] = entry.contentEntryUid.toString()
+            args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
+            args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
 
-                val args = mutableMapOf(
-                        ARG_DISPLAY_CONTENT_BY_OPTION to ARG_DISPLAY_CONTENT_BY_PARENT,
-                        ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString())
-
-                navigateForResult(
-                        NavigateForResultOptions(this,
-                                null, ContentEntryList2View.VIEW_NAME,
-                                ContentEntry::class,
-                                ContentEntry.serializer(),
-                                SAVEDSTATE_KEY_ENTRY,
-                                arguments = args)
+            navigateForResult(
+                NavigateForResultOptions(
+                    this, null,
+                    ContentEntryEdit2View.VIEW_NAME,
+                    ContentEntryWithBlockAndLanguage::class,
+                    ContentEntryWithBlockAndLanguage.serializer(),
+                    arguments = args
                 )
-            }
-            else -> {
-                view.showContentEntryAddOptions()
-            }
+            )
+        }else{
+            finishWithResult(
+                safeStringify(di, ListSerializer(ContentEntry.serializer()), listOf(entry))
+            )
         }
+    }
 
+    override fun handleClickCreateNewFab() {
+        view.showContentEntryAddOptions()
+    }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
+        handleClickCreateNewFab()
     }
 
 
     fun handleClickEditFolder() {
-        systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to parentEntryUid.toString()), context)
+        val args = mutableMapOf(ARG_ENTITY_UID to parentEntryUid.toString())
+
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null, ContentEntryEdit2View.VIEW_NAME,
+                ContentEntry::class,
+                ContentEntry.serializer(),
+                arguments = args)
+        )
     }
 
     fun handleClickShowHiddenItems() {
@@ -283,22 +341,62 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     override fun onClickNewFolder() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_FILE,
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to false.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(ContentEntryEdit2View.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            ContentEntryEdit2View.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
+    }
+
+
+    fun handleOnClickAddSupportedFile(){
+        val supportedMimeTypes = mutableListOf(
+            EPUB_MIME_TYPES.joinToString(";"),
+            EPUB_EXTENSIONS.joinToString(";"),
+            XAPI_MIME_TYPES.joinToString(";"),
+            ZIP_EXTENSIONS.joinToString(";"),
+            H5P_MIME_TYPES.joinToString(";"),
+            H5P_EXTENSIONS.joinToString(";"),
+            SELECTION_MODE_GALLERY
+        ).joinToString (";")
+        val args = mutableMapOf(
+            SelectFileView.ARG_MIMETYPE_SELECTED to supportedMimeTypes,
+            ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
+            ARG_LEAF to true.toString())
+        args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectFileView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickImportFile() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_FILE,
+                SelectFileView.ARG_MIMETYPE_SELECTED to
+                        (pluginManager?.supportedMimeTypeList?.joinToString(";") ?: "*/*"),
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+        args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
+        args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
 
-        navController.navigate(SelectFileView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectExtractFileView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickImportLink() {
@@ -306,18 +404,34 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+        args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
+        args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
 
-        navController.navigate(ContentEntryImportLinkView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            ContentEntryImportLinkView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickImportGallery() {
         val args = mutableMapOf(
-                SelectFileView.ARG_SELECTION_MODE to SelectFileView.SELECTION_MODE_GALLERY,
+                SelectFileView.ARG_MIMETYPE_SELECTED to SELECTION_MODE_GALLERY,
                 ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
+        args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
+        args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
 
-        navController.navigate(SelectFileView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectExtractFileView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
     override fun onClickAddFolder() {
@@ -326,16 +440,24 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 ARG_LEAF to true.toString())
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
 
-        navController.navigate(SelectFolderView.VIEW_NAME, args)
+        navigateForResult(NavigateForResultOptions(
+            this, null,
+            SelectFolderView.VIEW_NAME,
+            ContentEntry::class,
+            ContentEntry.serializer(),
+            arguments = args)
+        )
     }
 
-    fun handleMoveWithSelectedEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
-
-        GlobalScope.launch(doorMainDispatcher()) {
+    fun handleMoveWithSelectedEntry(
+        entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    ) {
+        presenterScope.launch(doorMainDispatcher()) {
             if (arguments.containsKey(KEY_SELECTED_ITEMS)) {
-                val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")?.map { it.trim().toLong() }
-                        ?: listOf()
-                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(entry.contentEntryUid, selectedItems)
+                val selectedItems = arguments[KEY_SELECTED_ITEMS]?.split(",")
+                    ?.map { it.trim().toLong() } ?: listOf()
+                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(
+                    entry.contentEntryUid, selectedItems, systemTimeInMillis())
             }
         }
     }
@@ -349,13 +471,23 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
          */
         const val KEY_SELECTED_ITEMS = "selected_items"
 
-        const val SAVEDSTATE_KEY_ENTRY = "Clazz_ContentEntry"
-
         const val SAVEDSTATE_KEY_FOLDER = "Folder_ContentEntry"
+
+        const val CHIP_ID_MY_CONTENT = 1
+
+        const val CHIP_ID_FROM_MY_COURSES = 2
+
+        const val CHIP_ID_LIBRARY = 3
 
         val SORT_OPTIONS = listOf(
                 SortOrderOption(MessageID.title, ContentEntryDao.SORT_TITLE_ASC, true),
                 SortOrderOption(MessageID.title, ContentEntryDao.SORT_TITLE_DESC, false)
+        )
+
+        val PICKER_CHIP_OPTIONS = listOf(
+            MessageID.my_content to CHIP_ID_MY_CONTENT,
+            MessageID.from_my_classes to CHIP_ID_FROM_MY_COURSES,
+            MessageID.library to CHIP_ID_LIBRARY,
         )
 
     }

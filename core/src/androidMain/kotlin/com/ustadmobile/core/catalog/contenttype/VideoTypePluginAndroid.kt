@@ -18,6 +18,7 @@ import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.network.NetworkProgressListenerAdapter
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
@@ -76,9 +77,8 @@ class VideoTypePluginAndroid(
             val videoTempDir = makeTempDir(prefix = "tmp")
             val newVideo = File(videoTempDir,
                     localUri.getFileName(context))
-            val params: Map<String, String> = Json.decodeFromString(
-                    MapSerializer(String.serializer(), String.serializer()),
-                    jobItem.contentJob?.params ?: "")
+            val params: Map<String, String> = safeParse(di, MapSerializer(String.serializer(), String.serializer()),
+                jobItem.contentJob?.params ?: "")
             val compressVideo: Boolean = params["compress"]?.toBoolean() ?: false
             val mediaTransformer = MediaTransformer(context as Context)
             val videoIsProcessed = contentJobItem.cjiContainerUid != 0L
@@ -194,8 +194,11 @@ class VideoTypePluginAndroid(
                             }
 
                     contentJobItem.cjiContainerUid = container.containerUid
-                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
+                    process.withContentJobItemTransactionMutex { txDb ->
+                        txDb.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
                             container.containerUid)
+                    }
+
 
                     val containerFolder = jobItem.contentJob?.toUri
                             ?: defaultContainerDir.toURI().toString()
@@ -215,13 +218,16 @@ class VideoTypePluginAndroid(
                     contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                         jobProgress)
 
-                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
+                    val haveConnectivityToContinueJob = process.withContentJobItemTransactionMutex { txDb ->
+                        txDb.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
 
-                    contentJobItem.cjiConnectivityNeeded = true
-                    db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
+                        contentJobItem.cjiConnectivityNeeded = true
+                        txDb.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
 
-                    val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
+                        txDb.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
                             ?: 0)
+                    }
+
                     if (!haveConnectivityToContinueJob) {
                         return@withContext ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
                     }
@@ -231,7 +237,7 @@ class VideoTypePluginAndroid(
                 if(contentNeedUpload) {
                     return@withContext ProcessResult(uploader.upload(contentJobItem,
                         NetworkProgressListenerAdapter(jobProgress, contentJobItem),
-                        httpClient, endpoint)
+                        httpClient, endpoint, process)
                     )
                 }
 

@@ -15,15 +15,17 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemClazzmemberListItemBinding
 import com.toughra.ustadmobile.databinding.ItemClazzmemberPendingListItemBinding
 import com.ustadmobile.core.controller.ClazzMemberListPresenter
+import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toListFilterOptions
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
@@ -32,11 +34,9 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
-import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
-import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolmentDetails, PersonWithClazzEnrolmentDetails>(),
@@ -101,11 +101,11 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
     private var filterByClazzUid: Long = 0
 
     private val mOnClickAddStudent: View.OnClickListener = View.OnClickListener {
-        navigateToPickNewMember(ClazzEnrolment.ROLE_STUDENT)
+        mPresenter?.handlePickNewMemberClicked(ClazzEnrolment.ROLE_STUDENT)
     }
 
     private val mOnClickAddTeacher: View.OnClickListener = View.OnClickListener {
-        navigateToPickNewMember(ClazzEnrolment.ROLE_TEACHER)
+        mPresenter?.handlePickNewMemberClicked(ClazzEnrolment.ROLE_TEACHER)
     }
 
     override var addTeacherVisible: Boolean = false
@@ -118,6 +118,18 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         set(value) {
             field = value
             mNewStudentListRecyclerViewAdapter?.newItemVisible = value
+        }
+
+    override var termMap: Map<String, String>? = null
+        set(value) {
+            field = value
+            mUstadListHeaderRecyclerViewAdapter?.createNewText = value?.get(TerminologyKeys.ADD_TEACHER_KEY)
+
+            mUstadListHeaderRecyclerViewAdapter?.headerStringText = value?.get(TerminologyKeys.TEACHERS_KEY)
+
+            mNewStudentListRecyclerViewAdapter?.createNewText = value?.get(TerminologyKeys.ADD_STUDENT_KEY)
+
+            mNewStudentListRecyclerViewAdapter?.headerStringText = value?.get(TerminologyKeys.STUDENTS_KEY)
         }
 
     class ClazzMemberListViewHolder(val itemBinding: ItemClazzmemberListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
@@ -204,26 +216,6 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         fabManager?.visible = false
     }
 
-    private fun navigateToPickNewMember(role: Int) {
-
-        val bundle = bundleOf(
-                ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
-                ARG_FILTER_BY_ENROLMENT_ROLE to role.toString(),
-                ARG_CLAZZUID to (arguments?.get(ARG_CLAZZUID) ?: "-1"),
-                ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME,
-                ARG_POPUPTO_ON_FINISH to ClazzMemberListView.VIEW_NAME,
-                ARG_HIDE_CLAZZES to true.toString(),
-                ARG_SAVE_TO_DB to true.toString()).also {
-
-            if(role == ClazzEnrolment.ROLE_STUDENT){
-                it.putString(ARG_CODE_TABLE,Clazz.TABLE_ID.toString())
-            }
-        }
-
-        navigateToPickEntityFromList(ClazzEnrolment::class.java, R.id.personlist_dest,
-                bundle, overwriteDestination = true)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -246,6 +238,13 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
+        mNewStudentListRecyclerViewAdapter = null
+        mStudentListRecyclerViewAdapter = null
+        mStudentListObserver = null
+        mCurrentStudentListLiveData = null
+        mPendingStudentsHeaderRecyclerViewAdapter = null
+        mPendingStudentListRecyclerViewAdapter = null
+        mCurrentPendingStudentListLiveData = null
     }
 
     override val displayTypeRepo: Any?

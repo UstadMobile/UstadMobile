@@ -15,6 +15,7 @@ import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.isStatusActiveOrQueued
 import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.*
@@ -77,12 +78,14 @@ class DownloadDialogPresenter(
         Napier.i("Starting download presenter for $contentEntryUid")
         view.setWifiOnlyOptionVisible(false)
         GlobalScope.launch(doorMainDispatcher()) {
-            contentJobItemStatusLiveData = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
-                appDatabase.contentJobItemDao.findStatusForActiveContentJobItem(contentEntryUid)
+            contentJobItemStatusLiveData = RateLimitedLiveData(appDatabase,
+                listOf("ContentJobItem"), 1000
+            ) {
+                appDatabase.contentEntryDao.statusForDownloadDialog(contentEntryUid)
             }
-            val activeJobItem = appDatabase.contentJobItemDao.getActiveContentJobItem()
 
-            currentJobId = activeJobItem?.cjiJobUid ?: 0
+            currentJobId = appDatabase.contentJobItemDao
+                .getActiveContentJobIdByContentEntryUid(contentEntryUid)
             contentJobCompletable.complete(true)
 
             val status = contentJobItemStatusLiveData.getValue() ?: 0
@@ -104,7 +107,7 @@ class DownloadDialogPresenter(
         currentContentJobItemStatus = t ?: 0
         when{
 
-            currentContentJobItemStatus == ContentJobItem.STATUS_COMPLETE -> {
+            currentContentJobItemStatus == JobStatus.COMPLETE -> {
                 deleteFileOptions = true
                 view.setCalculatingViewVisible(false)
                 view.setStackOptionsVisible(false)
@@ -117,7 +120,7 @@ class DownloadDialogPresenter(
                         MessageID.cancel, context))
                 view.setWifiOnlyOptionVisible(false)
             }
-            currentContentJobItemStatus == ContentJobItem.STATUS_RUNNING -> {
+            currentContentJobItemStatus.isStatusActiveOrQueued() -> {
                 view.setCalculatingViewVisible(false)
                 deleteFileOptions = false
                 view.setStackOptionsVisible(true)
@@ -143,7 +146,7 @@ class DownloadDialogPresenter(
         }
 
         val currentJobSizeTotals = jobSizeTotals.value
-        if(currentContentJobItemStatus != ContentJobItem.STATUS_RUNNING && currentJobSizeTotals == null
+        if(currentContentJobItemStatus != JobStatus.RUNNING && currentJobSizeTotals == null
                 && !jobSizeLoading.compareAndSet(expect = true, update = true)) {
             view.setBottomPositiveButtonEnabled(false)
             GlobalScope.launch {
@@ -243,7 +246,7 @@ class DownloadDialogPresenter(
      */
     fun handleClickPositive() {
         when (currentContentJobItemStatus) {
-            ContentJobItem.STATUS_COMPLETE -> GlobalScope.launch {
+            JobStatus.COMPLETE -> GlobalScope.launch {
                 createDeleteJob()
             }
             else -> GlobalScope.launch {

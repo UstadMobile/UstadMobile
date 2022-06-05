@@ -92,9 +92,10 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
 
 
     override fun onDestroy() {
-        super.onDestroy()
         checkTextLinkJob = null
         site = null
+
+        super.onDestroy()
     }
 
     companion object {

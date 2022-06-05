@@ -4,9 +4,15 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.*
+import com.ustadmobile.core.util.IdOption
+import com.ustadmobile.core.util.ListFilterIdOption
+import com.ustadmobile.core.util.OnListFilterOptionSelectedListener
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.determineListMode
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ListViewAddMode
+import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.SelectionOption
+import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -17,11 +23,15 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 
-abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>,
-                                                               view: V, di: DI,
-                                                    val lifecycleOwner: DoorLifecycleOwner)
-    : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected,
-        OnSearchSubmitted, OnListFilterOptionSelectedListener {
+abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(
+    context: Any,
+    arguments: Map<String, String>,
+    view: V,
+    di: DI,
+    val lifecycleOwner: DoorLifecycleOwner
+) : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected,
+    OnSearchSubmitted, OnListFilterOptionSelectedListener
+{
 
     open val mListMode : ListViewMode by lazy {
         arguments.determineListMode()
@@ -46,7 +56,7 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        GlobalScope.launch(doorMainDispatcher()) {
+        presenterScope.launch(doorMainDispatcher()) {
             onLoadFromDb()
         }
     }
@@ -70,9 +80,7 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
      * If ListMode is BROWSE then the child implementation should call systemImpl.go itself to direct
      * the user to the detail view (or otherwise)
      */
-    open fun handleClickEntry(entry: RT) {
-        view.takeIf { mListMode == ListViewMode.PICKER }?.finishWithResult(listOf(entry))
-    }
+    open fun handleClickEntry(entry: RT) {}
 
     open fun handleClickSelectionOption(selectedItem: List<RT>, option: SelectionOption) {
 
@@ -99,6 +107,7 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
     override fun onClickSort(sortOption: SortOrderOption) {
         selectedSortOption = sortOption
     }
+
     override fun onSearchSubmitted(text: String?) {
 
     }
@@ -112,6 +121,14 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
     }
 
     abstract fun handleClickCreateNewFab()
+
+    /**
+     * Called when the user clicks the add new item that appears in the list (e.g. when this list
+     * presenter is operating in picker mode)
+     */
+    abstract fun handleClickAddNewItem(
+        args: Map<String, String>? = null,
+        destinationResultKey: String? = null)
 
     open fun handleSelectionOptionChanged(t: List<RT>){
 

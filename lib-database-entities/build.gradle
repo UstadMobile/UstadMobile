@@ -24,6 +24,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 31
     }
+    namespace 'com.ustadmobile.lib.db.entities'
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
@@ -53,17 +54,16 @@ kotlin {
 
     android()
 
-    /* JS is disabled until after Kotlin 1.4 upgrade
-    js {
-        nodejs()
-
-        compilations.main.kotlinOptions {
-            metaInfo = true
-            sourceMap = true
-            moduleKind = "commonjs"
+    js(LEGACY) {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless() //change to useChrome to run the actual browser
+                    webpackConfig.cssSupport.enabled = true
+                }
+            }
         }
     }
-    */
 
     jvm {
         compilations.main.kotlinOptions {

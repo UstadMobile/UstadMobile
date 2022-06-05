@@ -1,22 +1,24 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.SiteEditView
+import com.ustadmobile.core.view.SiteTermsEditView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.Site
-
-import kotlinx.coroutines.*
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import org.kodein.di.DI
-import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
+import org.kodein.di.DI
 
 
 class SiteEditPresenter(context: Any,
@@ -28,19 +30,16 @@ class SiteEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    val siteTermsOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<SiteTermsWithLanguage>(SiteTerms::sTermsUid,
-            "state_SiteTerms_list", ListSerializer(SiteTerms.serializer()),
-            ListSerializer(SiteTermsWithLanguage.serializer()), this, SiteTermsWithLanguage::class) {
-        sTermsUid = it
-    }
+    private val siteTermsOneToManyJoinEditHelper = OneToManyJoinEditHelperMp(
+        SiteTermsWithLanguage::sTermsUid,
+        ARG_SAVEDSTATE_TERMS,
+        ListSerializer(SiteTerms.serializer()),
+        ListSerializer(SiteTermsWithLanguage.serializer()),
+        this, requireSavedStateHandle(),
+        SiteTermsWithLanguage::class) { sTermsUid = it }
 
-    fun handleAddOrEditSiteTerms(siteTerms: SiteTermsWithLanguage) {
-        siteTermsOneToManyJoinEditHelper.onEditResult(siteTerms)
-    }
-
-    fun handleRemoveSiteTerms(siteTerms: SiteTermsWithLanguage) {
-        siteTermsOneToManyJoinEditHelper.onDeactivateEntity(siteTerms)
-    }
+    val siteTermsOneToManyJoinListener = siteTermsOneToManyJoinEditHelper.createNavigateForResultListener(
+        SiteTermsEditView.VIEW_NAME, SiteTermsWithLanguage.serializer())
 
 
     /*
@@ -49,7 +48,6 @@ class SiteEditPresenter(context: Any,
      */
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
         view.siteTermsList = siteTermsOneToManyJoinEditHelper.liveList
     }
 
@@ -97,14 +95,15 @@ class SiteEditPresenter(context: Any,
             siteTermsOneToManyJoinEditHelper.commitToDatabase(repo.siteTermsDao) {
                 //no need to set the foreign key
             }
-
-            view.finishWithResult(listOf(entity))
+            finishWithResult(safeStringify(di, ListSerializer(Site.serializer()), listOf(entity)))
         }
     }
 
     companion object {
 
         //TODO: Add constants for keys that would be used for any One To Many Join helpers
+
+        const val ARG_SAVEDSTATE_TERMS = "terms"
 
     }
 

@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
+import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
@@ -35,6 +36,8 @@ class EpubFileTypePluginTest {
 
     private lateinit var mockWebServer: MockWebServer
 
+    private lateinit var db: UmAppDatabase
+
     @Before
     fun setup(){
 
@@ -45,9 +48,9 @@ class EpubFileTypePluginTest {
         }
 
         val accountManager: UstadAccountManager by di.instance()
-        val umAppDatabase: UmAppDatabase = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
+        db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
         val connectivityStatus = ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "NetworkSSID")
-        umAppDatabase.connectivityStatusDao.insert(connectivityStatus)
+        db.connectivityStatusDao.insert(connectivityStatus)
 
         mockWebServer = MockWebServer()
         mockWebServer.dispatcher = ContentDispatcher()
@@ -70,7 +73,7 @@ class EpubFileTypePluginTest {
         runBlocking {
             val epubUri = DoorUri.parse(tempEpubFile.toURI().toString())
             val processContext = ContentJobProcessContext(epubUri, tempUri, params = mutableMapOf(),
-                    di)
+                    DummyContentJobItemTransactionRunner(db), di)
             val metadata = epubPlugin.extractMetadata(epubUri, processContext)
             Assert.assertEquals("Got ContentEntry with expected title",
                     "A Textbook of Sources for Teachers and Teacher-Training Classes",
@@ -93,7 +96,8 @@ class EpubFileTypePluginTest {
         runBlocking{
 
             val doorUri = DoorUri.parse(mockWebServer.url("/com/ustadmobile/core/contenttype/childrens-literature.epub").toString())
-            val processContext = ContentJobProcessContext(doorUri, tempUri, mutableMapOf(), di)
+            val processContext = ContentJobProcessContext(doorUri, tempUri, mutableMapOf(),
+                DummyContentJobItemTransactionRunner(db), di)
 
             val uid = repo.contentEntryDao.insert(ContentEntry().apply{
                 title = "hello"

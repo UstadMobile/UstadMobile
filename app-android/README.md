@@ -55,3 +55,7 @@ maven {
 
 Add the Ustad Mobile app library as a dependency to build.gradle:
 
+### Known issues
+
+* InputMethodManager memory leak on debug variant: known issue caused by pre-v10 Android
+  [as per this report](https://github.com/square/leakcanary/issues/256).

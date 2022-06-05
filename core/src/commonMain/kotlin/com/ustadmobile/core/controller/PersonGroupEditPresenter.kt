@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.PersonGroupEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -11,7 +12,7 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.PersonGroup
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -52,10 +53,10 @@ class PersonGroupEditPresenter(context: Any,
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: PersonGroup? = null
-        if(entityJsonStr != null) {
-            editEntity = safeParse(di, PersonGroup.serializer(), entityJsonStr)
+        editEntity = if(entityJsonStr != null) {
+            safeParse(di, PersonGroup.serializer(), entityJsonStr)
         }else {
-            editEntity = PersonGroup()
+            PersonGroup()
         }
 
         return editEntity
@@ -79,7 +80,7 @@ class PersonGroupEditPresenter(context: Any,
             }
 
             //TODO: Call commitToDatabase on any onetomany join helpers
-            view.finishWithResult(listOf(entity))
+            finishWithResult(safeStringify(di, ListSerializer(PersonGroup.serializer()), listOf(entity)))
         }
     }
 

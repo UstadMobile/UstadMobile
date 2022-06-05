@@ -64,7 +64,7 @@ class ContentJobRunnerWorker(
         val notification = createNotification(job)
 
         val liveData = RateLimitedLiveData(db, listOf("ContentJobItem"), 1000) {
-                 db.contentJobItemDao.findByJobId(jobId)
+                 db.contentJobItemDao.findRootJobItemByJobId(jobId)
         }
 
         val jobObserver = DoorObserver<ContentJobItem?> {
@@ -129,7 +129,7 @@ class ContentJobRunnerWorker(
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createChannel() {
         val mNotificationChannel = NotificationChannel(NOTIFICATION_CHANNEL_ID,
-                NOTIFICATION_CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH)
+                NOTIFICATION_CHANNEL_ID, NotificationManager.IMPORTANCE_LOW)
 
         mNotificationChannel.vibrationPattern = longArrayOf(0)
         mNotificationChannel.enableVibration(false)

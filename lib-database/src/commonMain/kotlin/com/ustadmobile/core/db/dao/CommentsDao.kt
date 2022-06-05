@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
@@ -95,18 +95,24 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
 
 
     @Query("""
-        SELECT Comments.*, Person.* FROM Comments
-        LEFT JOIN Person ON Person.personUid = Comments.commentsPersonUid 
-        WHERE Comments.commentsEntityType = :entityType 
-        AND Comments.commentsEntityUid = :entityUid
-        AND (Comments.commentsPersonUid = :personUid OR Comments.commentsToPersonUid = :personUid)  
-        AND CAST(Comments.commentsFlagged AS INTEGER) = 0
-        AND CAST(Comments.commentsInActive AS INTEGER) = 0
-        AND CAST(Comments.commentsPublic AS INTEGER) = 0
-        ORDER BY Comments.commentsDateTimeAdded DESC 
+            SELECT Comments.*, 
+                   Person.* 
+              FROM Comments
+                   LEFT JOIN Person 
+                   ON Person.personUid = Comments.commentsPersonUid
+             WHERE Comments.commentsEntityType = :entityType 
+               AND Comments.commentsEntityUid = :entityUid
+               AND Comments.commentSubmitterUid = :submitterUid  
+               AND CAST(Comments.commentsFlagged AS INTEGER) = 0
+               AND CAST(Comments.commentsInActive AS INTEGER) = 0
+               AND CAST(Comments.commentsPublic AS INTEGER) = 0
+          ORDER BY Comments.commentsDateTimeAdded DESC 
     """)
-    abstract fun findPrivateByEntityTypeAndUidAndForPersonLive2(entityType: Int, entityUid: Long,
-                                                               personUid: Long):
+    abstract fun findPrivateByEntityTypeAndUidAndForPersonLive2(
+        entityType: Int,
+        entityUid: Long,
+        submitterUid: Long
+    ):
             DoorDataSourceFactory<Int, CommentsWithPerson>
 
     @Query("""
@@ -170,14 +176,20 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
             List<CommentsWithPerson>
 
     @Query("""
-        UPDATE Comments SET commentsInActive = :inActive WHERE 
-        Comments.commentsUid = :uid
+        UPDATE Comments 
+           SET commentsInActive = :inActive,
+               commentsLct = :changeTime
+         WHERE Comments.commentsUid = :uid
     """)
-    abstract suspend fun updateInActiveByCommentUid(uid: Long, inActive: Boolean)
+    abstract suspend fun updateInActiveByCommentUid(
+        uid: Long,
+        inActive: Boolean,
+        changeTime: Long
+    )
 
-    override suspend fun deactivateByUids(uidList: List<Long>) {
+    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
         uidList.forEach {
-            updateInActiveByCommentUid(it, true)
+            updateInActiveByCommentUid(it, true, changeTime)
         }
     }
 }

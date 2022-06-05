@@ -72,6 +72,7 @@ abstract class ContentJobDao {
      *  It's only purpose is to check if the connectivity is acceptable for the job
      *  e.g. connectivity == unmetered or (connectivity == metered and meteredNetworkAllowed == true)
      */
+    //language=RoomSql
     @Query("""
           WITH ConnectivityStateCte(state) AS 
              (SELECT COALESCE(
@@ -79,12 +80,14 @@ abstract class ContentJobDao {
                         FROM ConnectivityStatus 
                        LIMIT 1), 0))
    
-           SELECT COALESCE((SELECT 1 
-            FROM ContentJob 
-           WHERE cjUid = :jobId
-             AND (cjIsMeteredAllowed 
-             AND (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_METERED})
-			  OR (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_UNMETERED}),0)
+           SELECT COALESCE((
+                  SELECT 1 
+                    FROM ContentJob 
+                   WHERE cjUid = :jobId
+                    AND ((cjIsMeteredAllowed 
+                         AND (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_METERED})
+			             OR (SELECT state FROM ConnectivityStateCte) = ${ConnectivityStatus.STATE_UNMETERED})
+                  ) ,0)
     """)
     abstract suspend fun isConnectivityAcceptableForJob(jobId: Long): Boolean
 

@@ -1,30 +1,23 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.*
-import androidx.navigation.fragment.findNavController
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSiteTermsEditBinding
-import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.controller.SiteTermsEditPresenter
-import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SiteTermsEditView
-import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
-import com.ustadmobile.port.android.util.ext.*
-import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import org.wordpress.aztec.Aztec
 import org.wordpress.aztec.ITextFormat
 import org.wordpress.aztec.plugins.CssUnderlinePlugin
 import org.wordpress.aztec.toolbar.IAztecToolbarClickListener
 
-
-interface SiteTermsEditFragmentEventHandler {
-    fun onClickLanguage()
-}
-
-class SiteTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), SiteTermsEditView, SiteTermsEditFragmentEventHandler,
+class SiteTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), SiteTermsEditView,
     IAztecToolbarClickListener{
 
     private var mBinding: FragmentSiteTermsEditBinding? = null
@@ -47,7 +40,7 @@ class SiteTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), SiteTer
         val rootView: View
         mBinding = FragmentSiteTermsEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.activityEventHandler = this
+            it.mPresenter = mPresenter
             aztec = Aztec.with(it.editor,  it.formattingToolbar, this).also {
                 it.visualEditor.setCalypsoMode(false)
                 it.addPlugin(CssUnderlinePlugin())
@@ -63,19 +56,6 @@ class SiteTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), SiteTer
         return rootView
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-            Language::class.java) {
-            val selectedLang = it.firstOrNull() ?: return@observeResult
-            entity?.stLanguage = selectedLang
-            entity?.sTermsLang = selectedLang.iso_639_1_standard
-            entity?.sTermsLangUid = selectedLang.langUid
-            mBinding?.siteTerms = entity
-        }
-    }
-
     override fun onSaveStateToBackStackStateHandle() {
         mBinding?.siteTerms?.termsHtml = aztec?.visualEditor?.toHtml()
         super.onSaveStateToBackStackStateHandle()
@@ -87,11 +67,6 @@ class SiteTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), SiteTer
         }
 
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onClickLanguage() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
     }
 
     override fun onToolbarCollapseButtonClicked() {

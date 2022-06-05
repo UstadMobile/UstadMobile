@@ -31,36 +31,28 @@
 
 package com.ustadmobile.core.impl
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.AsyncTask
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.*
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.toNavOptions
 import com.ustadmobile.core.io.ext.isGzipped
-import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.toFile
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
-import org.kodein.di.android.di
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.*
@@ -105,30 +97,16 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
     )
 
-    private abstract class UmCallbackAsyncTask<A, P, R>
-    (protected var umCallback: UmCallback<R>) : AsyncTask<A, P, R>() {
-
-        protected var error: Throwable? = null
-
-        override fun onPostExecute(r: R) {
-            if (error == null) {
-                umCallback.onSuccess(r)
-            } else {
-                umCallback.onFailure(error)
-            }
-        }
-    }
-
     /**
      * Simple async task to handle getting the setup file
      * Param 0 = boolean - true to zip, false otherwise
      */
-    private class GetSetupFileAsyncTask(doneCallback: UmCallback<*>, private val context: Context)
-        : UmCallbackAsyncTask<Boolean, Void, String>(doneCallback as UmCallback<String>) {
-        override fun doInBackground(vararg params: Boolean?): String {
+    private class GetSetupFileAsyncTask(private val zipIt: Boolean,private val context: Context){
+
+       suspend fun getFile(): String {
             val apkFile = File(context.applicationInfo.sourceDir)
             //TODO: replace this with something from appconfig.properties
-            val di: DI by di(context)
+            val di: DI by closestDI(context)
             val impl : UstadMobileSystemImpl = di.direct.instance()
 
             val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context) + "-" +
@@ -140,7 +118,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             if (!outDir.isDirectory)
                 outDir.mkdirs()
 
-            if (params[0]!!) {
+            if (zipIt) {
                 var zipOut: ZipOutputStream? = null
                 val outZipFile = File(outDir, "$baseName.zip")
                 try {
@@ -383,12 +361,11 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @param context System context
      * @param zip if true, the app setup file should be delivered within a zip.
-     * @param callback callback to call when complete or if any error occurs.
      */
-    actual override fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>) {
-        val setupFileAsyncTask = GetSetupFileAsyncTask(callback,
-                context as Context)
-        setupFileAsyncTask.execute(zip)
+    actual override suspend fun getAppSetupFile(context: Any, zip: Boolean): String {
+        val setupFileAsyncTask = GetSetupFileAsyncTask(zip,
+            context as Context)
+       return setupFileAsyncTask.getFile()
     }
 
 
@@ -450,30 +427,40 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?) {
+    override fun openFileInDefaultViewer(
+        context: Any,
+        doorUri: DoorUri,
+        mimeType: String?,
+        fileName: String?,
+    ) {
         var mMimeType = mimeType
         val ctx = context as Context
         val intent = Intent(Intent.ACTION_VIEW)
         intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-        var file = File(path)
+        val uri: Uri
+        if(doorUri.uri.toString().startsWith("content://")){
+            uri = doorUri.uri
+        }else{
+            var file = doorUri.toFile()
 
-        if (file.isGzipped()) {
+            if (file.isGzipped()) {
 
-            var gzipIn: GZIPInputStream? = null
-            var destOut: FileOutputStream? = null
-            try {
-                gzipIn = GZIPInputStream(FileInputStream(File(path)))
-                var destFile = File(file.parentFile, file.name + "unzip")
-                destOut = FileOutputStream(destFile)
-                gzipIn.copyTo(destOut)
-                file = destFile
-            } finally {
-                gzipIn?.close()
-                destOut?.flush()
-                destOut?.close()
+                var gzipIn: GZIPInputStream? = null
+                var destOut: FileOutputStream? = null
+                try {
+                    gzipIn = GZIPInputStream(FileInputStream(file))
+                    val destFile = File(file.parentFile, file.name + "unzip")
+                    destOut = FileOutputStream(destFile)
+                    gzipIn.copyTo(destOut)
+                    file = destFile
+                } finally {
+                    gzipIn?.close()
+                    destOut?.flush()
+                    destOut?.close()
+                }
             }
+            uri = FileProvider.getUriForFile(ctx, "${context.packageName}.provider", file)
         }
-        val uri = FileProvider.getUriForFile(ctx, "${context.packageName}.provider", file)
         if (mMimeType.isNullOrEmpty()) {
             mMimeType = "*/*"
         }
@@ -496,39 +483,13 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
 
     /**
-     * Check if the directory is writable
-     * @param dir Directory to be checked
-     * @return True if is writable otherwise is read only
-     */
-    actual fun canWriteFileInDir(dirPath: String): Boolean {
-        var canWriteFiles = false
-        val testFile = File(dirPath, System.currentTimeMillis().toString() + ".txt")
-        try {
-            val writer = FileWriter(testFile)
-            writer.append("sampletest")
-            writer.flush()
-            writer.close()
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-            canWriteFiles = false
-        } catch (e: IOException) {
-            e.printStackTrace()
-            canWriteFiles = false
-        }
-
-        if (testFile.exists()) {
-            canWriteFiles = testFile.delete()
-        }
-        return canWriteFiles
-    }
-
-    /**
      * Open the given link in a browser and/or tab depending on the platform
      */
-    actual fun openLinkInBrowser(url: String, context: Any) {
+    actual override fun openLinkInBrowser(url: String, context: Any) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         (context as Context).startActivity(intent)
     }
+
 
 
     actual companion object {
@@ -541,16 +502,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
         const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
 
-
-        /**
-         * Get an instance of the system implementation - relies on the platform
-         * specific factory method
-         *
-         * @return A singleton instance
-         */
-        @JvmStatic
-        @Deprecated("This old static getter should not be used! Use DI instead!")
-        actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
     }
 

@@ -90,8 +90,11 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         mBinding?.username = ""
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         val rootView: View
         mBinding = FragmentLogin2Binding.inflate(inflater, container, false).also {
             rootView = it.root
@@ -99,11 +102,16 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
             it.fieldsEnabled = true
         }
 
-        mPresenter = Login2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this,
-                di).withViewLifecycle()
+        return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        mPresenter = Login2Presenter(requireContext(), arguments.toStringMap(),this,
+            di).withViewLifecycle()
         mBinding?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toStringMap())
-        return rootView
     }
 
     override fun onDestroyView() {

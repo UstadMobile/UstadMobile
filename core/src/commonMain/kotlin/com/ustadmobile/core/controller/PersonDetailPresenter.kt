@@ -2,16 +2,19 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class PersonDetailPresenter(context: Any,
@@ -30,7 +33,7 @@ class PersonDetailPresenter(context: Any,
 
         GlobalScope.launch(doorMainDispatcher()) {
             val person = repo.onRepoWithFallbackToDb(5000) { dbToUse ->
-                dbToUse.takeIf { entityUid != 0L }?.personDao?.findByUid(entityUid)
+                dbToUse.takeIf { entityUid != 0L }?.personDao?.findByUidAsync(entityUid)
             } ?: Person()
 
             //Reset password uses additional seeked permission
@@ -40,6 +43,8 @@ class PersonDetailPresenter(context: Any,
             )
             view.changePasswordVisible = person.username != null
                     && (activePersonUid == entityUid || hasAuthPermission)
+
+            view.chatVisibility = person.personUid != activePersonUid
 
             view.showCreateAccountVisible =  person.username == null && hasAuthPermission
         }
@@ -59,22 +64,31 @@ class PersonDetailPresenter(context: Any,
         )
     }
 
-    override fun handleClickEdit() {
+    override fun handleClickEdit() = navigateToEditScreen(PersonEditView.VIEW_NAME)
+
+    fun handleChangePassword() = navigateToEditScreen()
+
+    fun handleCreateAccount() = navigateToEditScreen()
+
+    private fun navigateToEditScreen(destination: String = PersonAccountEditView.VIEW_NAME){
         val personUid = view.entity?.personUid ?: return
-        systemImpl.go(PersonEditView.VIEW_NAME,
-                mapOf(ARG_ENTITY_UID to personUid.toString()), context)
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null, destination,
+                PersonWithAccount::class,
+                PersonWithAccount.serializer(), SAVEDSTATE_KEY_PERSON,
+                arguments = mutableMapOf(ARG_ENTITY_UID to personUid.toString())
+            )
+        )
     }
 
-    fun handleChangePassword(){
-        val personUid = view.entity?.personUid ?: return
-        systemImpl.go(PersonAccountEditView.VIEW_NAME,
-                mapOf(ARG_ENTITY_UID to personUid.toString()), context)
-    }
-
-    fun handleCreateAccount(){
-        val personUid = view.entity?.personUid ?: return
-        systemImpl.go(PersonAccountEditView.VIEW_NAME,
-                mapOf(ARG_ENTITY_UID to personUid.toString()), context)
+    fun handleClickChat(){
+        systemImpl.go(
+            ChatDetailView.VIEW_NAME,
+            mapOf(
+                ARG_PERSON_UID to (arguments[ARG_ENTITY_UID]?.toLong() ?: 0L).toString(),
+            ),
+            context)
     }
 
     fun handleClickManageParentalConsent() {
@@ -87,6 +101,10 @@ class PersonDetailPresenter(context: Any,
         }else {
             view.showSnackBar(systemImpl.getString(MessageID.error, context))
         }
+    }
+
+    companion object {
+        const val SAVEDSTATE_KEY_PERSON = "Person"
     }
 
 

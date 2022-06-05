@@ -241,6 +241,12 @@ fun ImageView.setIconOnProgressFlag(progress: ContentEntryStatementScoreProgress
     }
 }
 
+@BindingAdapter(value = ["scopedGrantEnabledIcon"])
+fun ImageView.setScopedGrantEnabledIcon(enabled: Boolean) {
+    setImageResource(if(enabled) R.drawable.ic_done_white_24dp else R.drawable.ic_close_black_24dp)
+    contentDescription = context.getString(if(enabled) R.string.enabled else R.string.disabled)
+}
+
 @Suppress("UNCHECKED_CAST")
 private fun ImageView.updateFromImageLookupMap() {
     val lookupKey = getTag(R.id.tag_imagelookup_key) as? Int
@@ -296,5 +302,14 @@ private val ICON_ID_MAP : Map<Int, Int> by lazy {
 @BindingAdapter("imageResIdInt")
 fun ImageView.setImageResIdInt(resId: Int) {
     setImageResource(resId)
+}
+
+@BindingAdapter("messageIconVisibility")
+fun View.setMessageIconVisibility(message: MessageWithPerson){
+    visibility = if(message.messageTableId == DiscussionPost.TABLE_ID){
+        View.VISIBLE
+    }else{
+        View.GONE
+    }
 }
 

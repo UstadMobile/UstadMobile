@@ -64,8 +64,15 @@ class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
             it.showButton = false
             it.showProgress = false
         }
+
+        return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         mPresenter = SiteEnterLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di).withViewLifecycle()
+            this, di).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         mBinding?.presenter = mPresenter
         mBinding?.organisationLink?.addTextChangedListener(object: TextWatcher {
@@ -77,8 +84,6 @@ class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
                 inputCheckHandler.postDelayed(inputCheckerCallback, inputCheckDelay)
             }
         })
-
-        return rootView
     }
 
     override fun onDestroyView() {

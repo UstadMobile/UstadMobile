@@ -1,22 +1,25 @@
 
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.contentjob.ContentPluginIds
 import com.ustadmobile.core.db.JobStatus
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.runBlocking
@@ -24,10 +27,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.instance
-import org.kodein.di.singleton
+import org.kodein.di.*
 import java.lang.Thread.sleep
 
 class ContentEntryDetailOverviewPresenterTest {
@@ -62,8 +62,13 @@ class ContentEntryDetailOverviewPresenterTest {
         }
         context = Any()
 
+
+
         di = DI {
             import(ustadTestRule.diModule)
+            bind<Boolean>(tag = UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with singleton {
+                true
+            }
         }
 
         val db: UmAppDatabase by di.activeDbInstance()
@@ -79,6 +84,7 @@ class ContentEntryDetailOverviewPresenterTest {
 
         entryContainer = Container().apply {
             containerContentEntryUid = createdEntry?.contentEntryUid ?: 0L
+            fileSize = 1000
             cntLastModified = getSystemTimeInMillis()
             containerUid = repo.containerDao.insert(this)
         }
@@ -87,7 +93,7 @@ class ContentEntryDetailOverviewPresenterTest {
     }
 
     @Test
-    fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntryAndMonitorAvailability(){
+    fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntry(){
         val presenter = ContentEntryDetailOverviewPresenter(context,
                 presenterArgs!!, mockView, di, mockLifecycleOwner)
 
@@ -116,9 +122,12 @@ class ContentEntryDetailOverviewPresenterTest {
 
         presenter.handleClickEdit()
 
-        verify(systemImpl).go(eq(ContentEntryEdit2View.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString(),
-                UstadView.ARG_LEAF to true.toString())), any())
+        val testNavController: UstadNavController = di.direct.instance()
+
+        verify(testNavController).navigate(eq(ContentEntryEdit2View.VIEW_NAME),
+            eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString(),
+            UstadView.ARG_LEAF to true.toString())), any())
+
     }
 
     @Test
@@ -152,7 +161,7 @@ class ContentEntryDetailOverviewPresenterTest {
         sleep(defaultTimeout)
 
         argumentCaptor<List<ContentJobItemProgress>> {
-            verify(mockView).contentJobItemProgress = capture()
+            verify(mockView).activeContentJobItems = capture()
             val contentJobItemCaptured = this.firstValue[0]
             Assert.assertEquals("progress match",
                     contentJobItem.cjiItemProgress.toInt(), contentJobItemCaptured.progress)
@@ -161,5 +170,175 @@ class ContentEntryDetailOverviewPresenterTest {
         }
 
     }
+
+    @Test
+    fun givenEntryNotYetDownloaded_whenOnCreatedCalled_thenShouldShowDownloadButtonNotOthers() {
+        val presenter = ContentEntryDetailOverviewPresenter(context,
+            presenterArgs!!, mockView, di, mockLifecycleOwner)
+
+        presenter.onCreate(null)
+        nullableArgumentCaptor<ContentEntryButtonModel> {
+            verify(mockView, timeout(5000).atLeastOnce()).contentEntryButtons = capture()
+            Assert.assertTrue(lastValue!!.showDownloadButton)
+            Assert.assertFalse(lastValue!!.showOpenButton)
+            Assert.assertFalse(lastValue!!.showUpdateButton)
+            Assert.assertFalse(lastValue!!.showDeleteButton)
+            Assert.assertFalse(lastValue!!.showManageDownloadButton)
+        }
+    }
+
+    @Test
+    fun givenEntryDownloadInProgress_whenOnCreatedCalled_thenShouldShowManageDownloadButtonNotOthers() {
+        val db: UmAppDatabase by di.activeDbInstance()
+
+        runBlocking {
+            db.contentJobItemDao.insertJobItem(ContentJobItem().apply {
+                cjiContentEntryUid = createdEntry?.contentEntryUid ?: 0
+                cjiPluginId = ContentPluginIds.CONTAINER_DOWNLOAD_PLUGIN
+                cjiItemProgress = 50
+                cjiItemTotal = 100
+                cjiRecursiveStatus = JobStatus.RUNNING
+                cjiStatus = JobStatus.RUNNING
+            })
+        }
+
+        val presenter = ContentEntryDetailOverviewPresenter(context,
+            presenterArgs!!, mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        nullableArgumentCaptor<ContentEntryButtonModel> {
+            verify(mockView, timeout(5000).atLeastOnce()).contentEntryButtons = capture()
+            Assert.assertFalse(lastValue!!.showDownloadButton)
+            Assert.assertFalse(lastValue!!.showOpenButton)
+            Assert.assertFalse(lastValue!!.showUpdateButton)
+            Assert.assertFalse(lastValue!!.showDeleteButton)
+            Assert.assertTrue(lastValue!!.showManageDownloadButton)
+        }
+    }
+
+    @Test
+    fun givenEntryDownloadedNoUpdateAvailable_whenOnCreatedCalled_thenShouldShowOpenAndDeleteButton() {
+        val db: UmAppDatabase by di.activeDbInstance()
+
+        runBlocking {
+            val cefUid = db.containerEntryFileDao.insert(ContainerEntryFile().apply {
+                cefPath = "/dummy"
+            })
+
+            db.containerEntryDao.insert(ContainerEntry().apply {
+                ceCefUid = cefUid
+                ceContainerUid = entryContainer.containerUid
+            })
+        }
+
+        val presenter = ContentEntryDetailOverviewPresenter(context,
+            presenterArgs!!, mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        nullableArgumentCaptor<ContentEntryButtonModel> {
+            verify(mockView, timeout(5000).atLeastOnce()).contentEntryButtons = capture()
+            Assert.assertFalse(lastValue!!.showDownloadButton)
+            Assert.assertTrue(lastValue!!.showOpenButton)
+            Assert.assertFalse(lastValue!!.showUpdateButton)
+            Assert.assertTrue(lastValue!!.showDeleteButton)
+            Assert.assertFalse(lastValue!!.showManageDownloadButton)
+        }
+    }
+
+    @Test
+    fun givenEntryDownloadedWithUpdateAvailable_whenOnCreateCalled_thenShouldShowOpenUpdateAndDeleteButton() {
+        val db: UmAppDatabase by di.activeDbInstance()
+
+        runBlocking {
+            val cefUid = db.containerEntryFileDao.insert(ContainerEntryFile().apply {
+                cefPath = "/dummy"
+            })
+
+            db.containerEntryDao.insert(ContainerEntry().apply {
+                ceCefUid = cefUid
+                ceContainerUid = entryContainer.containerUid
+            })
+
+            db.containerDao.insert(Container().apply {
+                fileSize = 800
+                containerContentEntryUid = createdEntry?.contentEntryUid ?: 0
+                cntLastModified = systemTimeInMillis()
+            })
+        }
+
+        val presenter = ContentEntryDetailOverviewPresenter(context,
+            presenterArgs!!, mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        nullableArgumentCaptor<ContentEntryButtonModel> {
+            verify(mockView, timeout(5000).atLeastOnce()).contentEntryButtons = capture()
+            Assert.assertFalse(lastValue!!.showDownloadButton)
+            Assert.assertTrue(lastValue!!.showOpenButton)
+            Assert.assertTrue(lastValue!!.showUpdateButton)
+            Assert.assertTrue(lastValue!!.showDeleteButton)
+            Assert.assertFalse(lastValue!!.showManageDownloadButton)
+        }
+    }
+
+    @Test
+    fun givenEntryNotDownloadedContainerNotReady_whenOnCreateCalled_thenNoButtonsAvailable() {
+        val db: UmAppDatabase by di.activeDbInstance()
+
+        runBlocking {
+            entryContainer.fileSize = 0
+            db.containerDao.update(entryContainer)
+        }
+
+        val presenter = ContentEntryDetailOverviewPresenter(context,
+            presenterArgs!!, mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        nullableArgumentCaptor<ContentEntryButtonModel> {
+            verify(mockView, timeout(5000).atLeastOnce()).contentEntryButtons = capture()
+            Assert.assertFalse(lastValue!!.showDownloadButton)
+            Assert.assertFalse(lastValue!!.showOpenButton)
+            Assert.assertFalse(lastValue!!.showUpdateButton)
+            Assert.assertFalse(lastValue!!.showDeleteButton)
+            Assert.assertFalse(lastValue!!.showManageDownloadButton)
+        }
+
+    }
+
+    @Test
+    fun givenEntryDownloadedWithUpdateNotReady_whenOnCreateCalled_thenShouldShowOpenAndDeleteButton() {
+        val db: UmAppDatabase by di.activeDbInstance()
+
+        runBlocking {
+            val cefUid = db.containerEntryFileDao.insert(ContainerEntryFile().apply {
+                cefPath = "/dummy"
+            })
+
+            db.containerEntryDao.insert(ContainerEntry().apply {
+                ceCefUid = cefUid
+                ceContainerUid = entryContainer.containerUid
+            })
+
+            db.containerDao.insert(Container().apply {
+                fileSize = 0
+                containerContentEntryUid = createdEntry?.contentEntryUid ?: 0
+                cntLastModified = systemTimeInMillis()
+            })
+        }
+
+        val presenter = ContentEntryDetailOverviewPresenter(context,
+            presenterArgs!!, mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        nullableArgumentCaptor<ContentEntryButtonModel> {
+            verify(mockView, timeout(5000).atLeastOnce()).contentEntryButtons = capture()
+            Assert.assertFalse(lastValue!!.showDownloadButton)
+            Assert.assertTrue(lastValue!!.showOpenButton)
+            Assert.assertFalse(lastValue!!.showUpdateButton)
+            Assert.assertTrue(lastValue!!.showDeleteButton)
+            Assert.assertFalse(lastValue!!.showManageDownloadButton)
+        }
+    }
+
+
 
 }

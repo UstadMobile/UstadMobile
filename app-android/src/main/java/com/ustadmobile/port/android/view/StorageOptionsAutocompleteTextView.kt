@@ -8,13 +8,13 @@ import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import org.kodein.di.DI
-import org.kodein.di.android.di
+import org.kodein.di.android.closestDI
 import org.kodein.di.direct
 import org.kodein.di.instance
 
 class StorageOptionsAutocompleteTextView: DropDownListAutoCompleteTextView<ContainerStorageDir> {
 
-    private val di: DI by di(context)
+    private val di: DI by closestDI()
 
     private val messageIdDropdownAdapter = object: DropDownListAutoCompleteAdapter<ContainerStorageDir> {
 

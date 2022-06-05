@@ -1,12 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.util.randomUuid
@@ -83,7 +79,7 @@ abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun insertListAsync(entityList: List<Person>)
 
     class PersonUidAndPasswordHash {
-        var passwordHash: String = ""
+        var passwordHash: String? = null
 
         var personUid: Long = 0
 
@@ -182,7 +178,7 @@ abstract class PersonDao : BaseDao<Person> {
 
     @JsName("findByUid")
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
-    abstract suspend fun findByUid(uid: Long): Person?
+    abstract fun findByUid(uid: Long): Person?
 
     @JsName("findPersonAccountByUid")
     @Query("SELECT Person.*, null as newPassword, null as currentPassword,null as confirmedPassword" +

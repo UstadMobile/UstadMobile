@@ -1,7 +1,6 @@
 
 package com.ustadmobile.core.controller
 
-import org.mockito.kotlin.*
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.weeks
 import com.ustadmobile.core.account.UstadAccountManager
@@ -10,7 +9,10 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.ext.createNewClazzAndGroups
+import com.ustadmobile.core.util.ext.grantScopedPermission
+import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
+import com.ustadmobile.core.util.ext.processEnrolmentIntoClass
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
@@ -28,6 +30,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import org.mockito.kotlin.*
 
 
 class ClazzMemberListPresenterTest {
@@ -90,9 +93,9 @@ class ClazzMemberListPresenterTest {
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzEnrolmentDaoSpy, timeout(5000)).findByClazzUidAndRole(eq(42L),
-                eq(ClazzEnrolment.ROLE_STUDENT), eq(1), eq("%"), eq(0), any(), any())
+                eq(ClazzEnrolment.ROLE_STUDENT), eq(1), eq("%"), eq(1), any(), any())
         verify(repoClazzEnrolmentDaoSpy, timeout(5000)).findByClazzUidAndRole(eq(42L),
-                eq(ClazzEnrolment.ROLE_TEACHER), eq(1), eq("%"), eq(0), any(), any())
+                eq(ClazzEnrolment.ROLE_TEACHER), eq(1), eq("%"), eq(1), any(), any())
 
         verify(mockView, timeout(5000)).list = any()
         verify(mockView, timeout(5000)).studentList = any()
@@ -135,7 +138,8 @@ class ClazzMemberListPresenterTest {
     @Test
     fun givenActiveAccountHasAddPermissions_whenPendingStudentApproved_thenShouldUpdate() {
         val testClazz = Clazz("Test clazz")
-        runBlocking { repo.createNewClazzAndGroups(testClazz, di.direct.instance(), context) }
+        runBlocking { repo.createNewClazzAndGroups(testClazz, di.direct.instance(), mapOf(),
+            context) }
 
         val activePerson = Person().apply {
             firstNames = "Test"

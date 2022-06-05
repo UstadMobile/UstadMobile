@@ -1,57 +1,44 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.util.randomUuid
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.gson.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import org.kodein.di.ktor.DIFeature
-import kotlin.random.Random
 import io.ktor.application.install
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
+import com.ustadmobile.core.contentjob.ContentPluginManager
+import com.ustadmobile.core.contentjob.DummyContentPluginUploader
+import com.ustadmobile.core.contentjob.MetadataResult
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import com.ustadmobile.core.impl.di.commonJvmDiModule
-import io.ktor.client.request.forms.*
 import org.junit.Before
 import org.junit.Test
 import java.io.File
 import com.ustadmobile.door.ext.writeToFile
 import io.ktor.http.content.*
 import io.ktor.routing.*
-import kotlin.io.readBytes
 import java.util.UUID
 import java.io.FileInputStream
 import io.ktor.utils.io.streams.asInput
 import kotlinx.serialization.json.Json
-import com.ustadmobile.core.contentjob.UploadResult
 import org.junit.Assert
-import com.ustadmobile.core.db.JobStatus
 import org.kodein.di.*
 import org.kodein.di.ktor.closestDI
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.ContainerStorageManager
+import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.toDoorUri
-import io.ktor.http.ContentDisposition.Companion.File
 import org.mockito.kotlin.mock
-import com.ustadmobile.core.contentjob.ContentJobManager
-import com.ustadmobile.core.contentjob.ContentJobManagerJvm
-import com.ustadmobile.core.contentjob.ContentPluginManager
-import com.ustadmobile.core.networkmanager.ConnectivityLiveData
-import org.quartz.Scheduler
-import org.quartz.impl.StdSchedulerFactory
-import javax.naming.InitialContext
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
-import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
-import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 
 class ContentUploadRouteIntegrationTest {
 
@@ -96,22 +83,11 @@ class ContentUploadRouteIntegrationTest {
                 bind<ContainerStorageManager>() with scoped(endpointScope).singleton {
                     mockContainerStorageManager
                 }
-                bind<ContentJobManager>() with singleton {
-                    ContentJobManagerJvm(di)
-                }
 
                 bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
-                    ContentPluginManager(listOf(EpubTypePluginCommonJvm(Any(), context, di,
+                    ContentPluginManager(listOf(
+                        EpubTypePluginCommonJvm(Any(), context, di,
                         DummyContentPluginUploader())))
-                }
-
-                bind<Scheduler>() with singleton {
-                    InitialContext().apply {
-                        initQuartzDb("java:/comp/env/jdbc/quartzds")
-                    }
-                    StdSchedulerFactory.getDefaultScheduler().also {
-                        it.context.put("di", di)
-                    }
                 }
 
                 bind<ConnectivityLiveData>() with scoped(EndpointScope.Default).singleton {
@@ -119,15 +95,11 @@ class ContentUploadRouteIntegrationTest {
                     ConnectivityLiveData(db.connectivityStatusDao.statusLive())
                 }
 
+                bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {
+                    temporaryFolder.newFolder()
+                }
                 registerContextTranslator { _: ApplicationCall ->
                     Endpoint("localhost")
-                }
-
-                onReady {
-                    instance<Scheduler>().start()
-                    Runtime.getRuntime().addShutdownHook(Thread{
-                        instance<Scheduler>().shutdown()
-                    })
                 }
             }
 
@@ -161,14 +133,16 @@ class ContentUploadRouteIntegrationTest {
             val db: UmAppDatabase = di.direct.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_DB)
 
             val responseStr = response.content!!
-            val processResult = Json.decodeFromString(UploadResult.serializer(), responseStr)
-            Assert.assertEquals("Upload result is finished", JobStatus.COMPLETE,
-                processResult.status)
+            val metadataResult = Json.decodeFromString(MetadataResult.serializer(), responseStr)
+            val uploadedUri = metadataResult.entry.sourceUrl
+            val uploadPath = uploadedUri?.substringAfter(MetadataResult.UPLOAD_TMP_LOCATOR_PREFIX)
 
-            val contentEntryUid = processResult.contentEntryUid
-            val contentEntryInDb = db.contentEntryDao.findByUid(contentEntryUid)
-            Assert.assertEquals("Content entry in db has expected title",
-                "ರುಮ್ನಿಯಾ", contentEntryInDb?.title)
+            val uploadTmpDir: File by di.on(Endpoint("localhost")).instance(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR)
+            val uploadedFile = File(uploadTmpDir, uploadPath!!)
+            Assert.assertArrayEquals("File tmp content is the same",
+                tempEpubFile.readBytes(), uploadedFile.readBytes())
+            Assert.assertEquals("Metadata got expected content entry title",
+                "ರುಮ್ನಿಯಾ", metadataResult.entry.title)
         }
     }
 

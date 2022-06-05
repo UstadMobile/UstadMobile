@@ -1,36 +1,26 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSiteEditBinding
 import com.toughra.ustadmobile.databinding.ItemSiteTermsEditBinding
 import com.ustadmobile.core.controller.SiteEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SiteEditView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
-import com.ustadmobile.port.android.util.ext.*
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 
-interface SiteEditFragmentEventHandler {
 
-    fun onClickEditSiteTerms(workspaceTerms: SiteTermsWithLanguage?)
-
-    fun onClickNewSiteTerms()
-
-}
-
-class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView, SiteEditFragmentEventHandler {
+class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView {
 
     private var mBinding: FragmentSiteEditBinding? = null
 
@@ -40,8 +30,7 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView, SiteEditFragmen
         get() = mPresenter
 
 
-    class SiteTermsRecyclerAdapter(val activityEventHandler: SiteEditFragmentEventHandler,
-                                   var presenter: SiteEditPresenter?): ListAdapter<SiteTermsWithLanguage, SiteTermsRecyclerAdapter.SiteTermsViewHolder>(DIFF_CALLBACK_WORKSPACETERMS) {
+    class SiteTermsRecyclerAdapter(var presenter: SiteEditPresenter?): ListAdapter<SiteTermsWithLanguage, SiteTermsRecyclerAdapter.SiteTermsViewHolder>(DIFF_CALLBACK_WORKSPACETERMS) {
 
             class SiteTermsViewHolder(val binding: ItemSiteTermsEditBinding): RecyclerView.ViewHolder(binding.root)
 
@@ -49,7 +38,6 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView, SiteEditFragmen
                 val viewHolder = SiteTermsViewHolder(ItemSiteTermsEditBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false))
                 viewHolder.binding.mPresenter = presenter
-                viewHolder.binding.mEventHandler = activityEventHandler
                 return viewHolder
             }
 
@@ -74,40 +62,23 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView, SiteEditFragmen
         t -> siteTermsRecyclerAdapter?.submitList(t)
     }
 
-    override fun onClickEditSiteTerms(workspaceTerms: SiteTermsWithLanguage?) {
-        onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(workspaceTerms, R.id.site_terms_edit_dest, SiteTermsWithLanguage::class.java)
-    }
-
-    override fun onClickNewSiteTerms() = onClickEditSiteTerms(null)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentSiteEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
 
-            siteTermsRecyclerAdapter = SiteTermsRecyclerAdapter(this, null)
+            siteTermsRecyclerAdapter = SiteTermsRecyclerAdapter(mPresenter)
             it.siteTermsRv.adapter = siteTermsRecyclerAdapter
             it.siteTermsRv.layoutManager = LinearLayoutManager(requireContext())
-            it.activityEventHandler = this
+            it.mPresenter = mPresenter
         }
-
-
-
-
 
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                SiteTermsWithLanguage::class.java) {
-            val workspaceTerms = it.firstOrNull() ?: return@observeResult
-
-            mPresenter?.handleAddOrEditSiteTerms(workspaceTerms)
-        }
 
         mPresenter = SiteEditPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di).withViewLifecycle()

@@ -3,11 +3,13 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.VerbEntityListView
 import com.ustadmobile.core.view.VerbEntityListView.Companion.ARG_EXCLUDE_VERBUIDS_LIST
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.VerbDisplay
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class VerbEntityListPresenter(context: Any, arguments: Map<String, String>, view: VerbEntityListView,
@@ -24,14 +26,18 @@ class VerbEntityListPresenter(context: Any, arguments: Map<String, String>, view
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
-    class VerbEntityListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    class VerbEntityListSortOption(
+        val sortOrder: SortOrder,
+        context: Any,
+        di: DI
+    ) : MessageIdOption(sortOrder.messageId, context, di = di)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         filterExcludeList = arguments[ARG_EXCLUDE_VERBUIDS_LIST]?.split(",")?.filter { it.isNotEmpty() }?.map { it.toLong() }
                 ?: listOf()
         updateListOnView()
-        view.sortOptions = SortOrder.values().toList().map { VerbEntityListSortOption(it, context) }
+        view.sortOptions = SortOrder.values().toList().map { VerbEntityListSortOption(it, context, di) }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -57,7 +63,9 @@ class VerbEntityListPresenter(context: Any, arguments: Map<String, String>, view
 
     }
 
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
+
     override fun handleClickEntry(entry: VerbDisplay) {
-        view.finishWithResult(listOf(entry))
+        finishWithResult(safeStringify(di, ListSerializer(VerbDisplay.serializer()), listOf(entry)))
     }
 }

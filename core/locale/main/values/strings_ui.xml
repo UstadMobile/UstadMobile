@@ -653,6 +653,11 @@
     <string name="feedback_thanks">Thank you for the feedback.</string>
     <string name="start_date">Start date</string>
     <string name="end_date">End date</string>
+
+
+    <!--
+    Used in the context of showing when a topic, post, or user was most recently active.
+    -->
     <string name="last_active">Last active</string>
     <string name="save">Save</string>
     <string name="change_password">Change Password</string>
@@ -1009,13 +1014,11 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="site_link">Site link</string>
 
-    <string name="please_enter_the_linK">Please enter the link for your site provided by your teacher or administrator:</string>
+    <string name="please_enter_the_linK">Please enter the link for your learning environment provided by your teacher or administrator:</string>
 
     <string name="or">OR</string>
 
-    <string name="sites_can_be_help_text">Sites can be created for schools, projects, and organizations, etc. Each site can have its\' own users, administrators, content, classes, schools, and more.</string>
-
-    <string name="connect_to_site">Connect to site</string>
+    <string name="connect">Connect</string>
 
     <string name="terms_and_policies_text">Terms and policies text</string>
 
@@ -1463,5 +1466,470 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="parent">Parent</string>
 
+    <string name="upload">Upload</string>
+
+    <string name="selected_file_summary">Selected %1$s (%2$s)</string>
+
+    <string name="drag_and_drop_or_click_to_add_file">Drag and drop a file here or click</string>
+
+    <string name="extra_active_tab_warning">We do not support multiple tabs running at the same time, close this tab.</string>
+
+    <string name="saved">Saved</string>
+
+    <!-- Used as an option for assignment submission: in this mode, each individual in the class
+    must submit an assignment
+    -->
+    <string name="individual">Individual</string>
+
+    <!-- Used as an option for assignment submission: in this mode, assignments will be submitted
+    by groups of students (not by each student individually)
+    -->
+    <string name="group">Group</string>
+
+    <!--
+    Used for an option for teachers and admins for content to stay hidden for students until
+    a certain date and time.
+    -->
+    <string name="dont_show_before">Don\'t show before</string>
+    <string name="require_file_submission">Require file submission</string>
+    <string name="require_text_submission">Require text submission</string>
+
+    <!-- used to display the size limit of a file a user can upload -->
+    <string name="maximum">Maximum</string>
+    <string name="size_limit">Size limit (MB)</string>
+    <string name="limit">Limit</string>
+
+    <!-- The maximum number of files a user can attach when submitting an assignment -->
+    <string name="number_of_files">Maximum number of files</string>
+
+    <!--
+    Yes/No option where the teacher can allow set a policy on whether or not students can change
+    their submission for an assisgnment after they submitted it
+    -->
+    <string name="edit_after_submission">Editing after submission</string>
+
+    <!--
+    Policy for assignment submissions editing option: students are allowed to change their
+    assignments until the deadline
+    -->
+    <string name="allowed_till_deadline">Allowed till deadline</string>
+
+    <!--
+    Policy for assignment submissino editing option: students are allowed to change their
+    assignment submission until the end of the grace period
+    -->
+    <string name="allowed_till_grace">Allowed till end of grace period</string>
+
+    <string name="not_allowed">Not allowed</string>
+
+    <!--
+    Used in the context of assignments: teacher or admin can set who will mark the assignment. This
+    could be teacher or peers (e.g. other class members).
+    -->
+    <string name="marked_by">Marked by</string>
+    <string name="peers">Peers</string>
+
+    <!--
+    Header for options where the teacher or admin can set what kind of files the user can
+    submit
+    -->
+    <string name="file_type">File type</string>
+    <string name="file_type_chosen">Type:</string>
+
+    <string name="file_type_any">Any</string>
+    <string name="file_document">Document (pdf, docx, odt)</string>
+    <string name="file_image">Image</string>
+
+    <!-- Used to show the student the maximum number of files that can be submitted for an
+     assignment. %1$s will be replaced with the actual number (e.g. 1, 2, 3 etc) -->
+    <string name="max_number_of_files">Maximum number of files: %1$s</string>
+
+    <!--
+    Button for the teacher to submit their grade for an assignment submission
+    -->
+    <string name="submit_grade">Submit grade</string>
+
+    <!--
+    Button for a teacher to submit their grade for an assignment submission, and then move to marking
+    the next submission.
+    -->
+    <string name="submit_grade_and_mark_next">Submit grade and mark next</string>
+
+    <!--
+    Status for an assignment submission: it has been graded
+    -->
+    <string name="graded">Graded</string>
+
+    <!-- used to display as an error if the maximum score for an assignment = 0 when creating a new assignment-->
+    <string name="score_greater_than_zero">Must be greater than 0</string>
+    <string name="words">Words</string>
+    <string name="characters">Characters</string>
+    <!--- Used to show the timezone a clazz is set in. %1$s will be replaced with the actual time zone -->
+    <string name="class_timezone_set">Class timezone: %1$s</string>
+
+    <!-- The maximum number of points for a specific item -->
+    <string name="maximum_points">Maximum points</string>
+    <string name="penalty_label">If completed after deadline but before end of grace period</string>
+    <string name="submissions">Submissions</string>
+    <string name="add_text">Add text</string>
+
+
+    <!--
+    Course blocks are elements that are used to create a course e.g. Content (video, ebooks,
+    interactive content, etc), assignments, discussion baords, etc.
+    -->
+    <string name="course_blocks">Course blocks</string>
+
+    <!--
+    Option to add a course block.
+
+    Course blocks are elements that are used to create a course e.g. Content (video, ebooks,
+    interactive content, etc), assignments, discussion baords, etc.
+    -->
+    <string name="add_block">Add block</string>
+
+    <!--
+    Option to edit a course block.
+
+    Course blocks are elements that are used to create a course e.g. Content (video, ebooks,
+    interactive content, etc), assignments, discussion baords, etc.
+    -->
+    <string name="edit_block">Edit block</string>
+
+
+    <!--A sub-unit of a course -->
+    <string name="module">Module</string>
+
+    <!--Description of a subunit of a course -->
+    <string name="course_module">Course module</string>
+
+    <!-- Description for adding a course text block -->
+    <string name="formatted_text_to_show_to_course_participants">Block that will display formatted text</string>
+
+    <!-- Description for adding a content course block -->
+    <string name="add_course_block_content_desc">Add audio, video, ebooks, or interactive content (H5P, xAPI, etc) from files or links</string>
+
+    <!-- Description for adding an assignment course block -->
+    <string name="add_assignment_block_content_desc">Assignment for course participants to complete</string>
+
+    <string name="discussion_board">Discussion board</string>
+
+    <!-- Description for adding a discussion board content block -->
+    <string name="add_discussion_board_desc">Organized discussion with topics and threads</string>
+
+    <!--Module is a subunit of a course -->
+    <string name="new_module">New module</string>
+
+    <!--Module is a subunit of a course -->
+    <string name="edit_module">Edit module</string>
+
+    <string name="indent">Indent</string>
+
+    <string name="unindent">Unindent</string>
+
+    <!--
+    An organization or group that is offering a course for example a school, a teacher training
+    institution, a university, etc.
+    -->
+    <string name="institution">Institution</string>
+
+    <!--
+    Allows a teacher or admin to set the policy for how students can enrol in a course
+    -->
+    <string name="student_enrolment_policy">Student enrolment policy</string>
+
+    <!--
+    Allows a teacher or admin to set the policy for how teachers are added to a course
+    -->
+    <string name="teacher_enrolment_policy">Teacher enrolment policy</string>
+
+    <!--
+    Course enrolment policy where anyone can enrol without the need for approval
+    -->
+    <string name="open_enrolment">Open enrolment</string>
+
+    <!--
+    Course enrolment policy where the admin or teacher must approve anyone who requests to enrol
+    in the course.
+    -->
+    <string name="enrolment_requests_must_be_approved">Enrolment requests must be approved</string>
+
+    <!--
+    Course enrolment policy where any request to join is automatically approved.
+    -->
+    <string name="accept_enrolment_requests_automatically">Accept enrolment requests automatically</string>
+
+    <!-- Used in the context of options for who can see something in the system (e.g. a course) -->
+    <string name="visibility">Visibility</string>
+
+    <!--
+    Course visibility option : the course is not displayed to anyone not enroled in it. Users must
+    be sent a link or individual invitation
+     -->
+    <string name="hidden_enrolment_via_links_code_or_invitation">Hidden (enrolment via links, code, or invitation)</string>
+
+    <!--
+    Course visibility option: the course is visible for all
+    -->
+    <string name="visible_for_all">Visible for all</string>
+
+    <!--
+    Course terminology allows the teacher or admin to set what words are used for teacher, student,
+    etc (e.g. use the word 'course participant' instead of 'student').
+    -->
+    <string name="terminology">Terminology</string>
+
+    <!--
+    Course terminology allows the teacher or admin to set what words are used for teacher, student,
+    etc (e.g. use the word 'course participant' instead of 'student').
+
+    This is used as a header when the user selects the terminology to use
+    -->
+    <string name="select_terminology">Select terminology</string>
+
+    <!--
+    Course terminology allows the teacher or admin to set what words are used for teacher, student,
+    etc (e.g. use the word 'course participant' instead of 'student').
+
+    This phrase is used to give the user the option to create a new set of terminology.
+    -->
+    <string name="add_new_terminology">Add new terminology</string>
+
+    <!--
+    Course terminology allows the teacher or admin to set what words are used for teacher, student,
+    etc (e.g. use the word 'course participant' instead of 'student').
+
+    This phrase is the header when the terms are being edited
+    -->
+    <string name="edit_terminology">Edit terminology</string>
+
+    <!--
+    Course terminology allows the teacher or admin to set what words are used for teacher, student,
+    etc (e.g. use the word 'course participant' instead of 'student').
+
+    This phrase is used as a prompt so users can enter their own words below.
+    -->
+    <string name="your_words_for">Your words for</string>
+
+    <!-- Header for course options such as visibility, enrolment policies, and terminology -->
+    <string name="course_setup">Course setup</string>
+
+    <!--
+    Groups can be created in courses. When creating a group, a teacher can set how many groups
+    they want to be created
+    -->
+    <string name="number_of_groups">Number of groups</string>
+
+    <!--
+    Used when creating groups in courses. This button allows a teacher to assign all students
+    in the course to random groups
+    -->
+    <string name="assign_to_random_groups">Assign to random groups</string>
+
+    <!--
+    Option for a teacher or admin to create new groups
+    -->
+    <string name="add_new_groups">Add new groups</string>
+
+    <!--
+    Used to display the number of replies to a post on a discussion board thread. %1$d will be
+    replaced with the number of replies (e.g. 0, 1, 2, etc)
+    -->
+    <string name="num_replies">%1$d replies</string>
+
+    <!--
+    Header for the list of topics on a discussion board
+    -->
+    <string name="topics">Topics</string>
+
+    <!--
+    Option to add a topic for a discussion board
+    -->
+    <string name="add_topic">Add topic</string>
+
+    <!--
+    Hint text that is displayed in discussion boards for the user to add their reply
+    -->
+    <string name="add_a_reply">Add a reply</string>
+
+    <!--
+    Section of the app for users to message each other (e.g. similar to WhatsApp etc)
+    -->
+    <string name="messages">Messages</string>
+
+    <string name="message">Message</string>
+
+    <!--
+    Library section of the app with resources (e.g. ebooks, videos, interactive content etc) that
+    are not directly linked to courses.
+    -->
+    <string name="library">Library</string>
+
+    <string name="courses">Courses</string>
+
+    <string name="course">Course</string>
+
+    <string name="reports_and_analytics">Reports and analytics</string>
+
+    <!--
+    Comments for an assignment that are visible for everyone in the course to see.
+    -->
+    <string name="course_comments">Course comments</string>
+
+    <string name="currently_enroled">Currently enroled</string>
+
+    <string name="past_enrolments">Past enrolments</string>
+
+    <string name="standard">Standard</string>
+
+    <!-- used to show what group a member of a course would be in. The
+    %1$s% will be replaced with the number of the group e.g. Group 1, Group 2, etc-->
+    <string name="group_number" formatted="false">Group %1$s</string>
+
+    <!-- This is a code that the teacher can give to students to allow them to join the course -->
+    <string name="course_code">Course code</string>
+
+    <string name="add_group">Add group</string>
+
+    <string name="edit_group">Edit group</string>
+
+    <string name="new_group_set">New group set</string>
+
+    <string name="edit_text">Edit text</string>
+
+    <!--Module is a subunit of a course -->
+    <string name="add_module">Add module</string>
+
+    <string name="add_a_new_course">Add a new course</string>
+    <string name="join_existing_course">Join existing course</string>
+    <string name="edit_course">Edit course</string>
+    <string name="currently_enrolled">Currently enrolled</string>
+    <string name="past_enrollments">Past enrollments</string>
+
+    <string name="unread">Unread</string>
+    <string name="new_chat">New chat</string>
+    <string name="new_group">New group</string>
+    <string name="chat">Chat</string>
+    <string name="you">You</string>
+
+
+    <string name="edit_topic">Edit topic</string>
+
+    <!-- As per Microsoft Terminology:
+    Post: A message that appears in a newsgroup, public folder, or other forum, such as Facebook or Twitter,
+    accessible by a number of individuals.
+     -->
+    <string name="posts">Posts</string>
+
+    <!-- As per Microsoft Terminology:
+    Post: A message that appears in a newsgroup, public folder, or other forum, such as Facebook or Twitter,
+    accessible by a number of individuals.
+     -->
+    <string name="post">Post</string>
+
+    <!-- Used in the context of assignments. E.g. each person in the class submits their own assignment,
+         not in groups.
+    -->
+    <string name="individual_submission">Individual submission</string>
+
+    <!-- Shown next to students who are not assigned to any group -->
+    <string name="unassigned">Unassigned</string>
+
+    <!-- used to display as an error when text is above the character or word limit -->
+    <string name="error_too_long_text">Text too long</string>
+
+    <!-- Used as an option for the course enrolment policy. When this option is selected, enrolment
+         is managed by the teacher or admin, and students must be invited or approved to join
+     -->
+    <string name="managed_enrolment">Managed - must be invited or approved</string>
+
+    <!-- used to display as an error when is editing an assignment with text or file submission turned off-->
+    <string name="text_file_submission_error">Must use text and/or file submission</string>
+
+    <!-- Used as an option on assignments. When selected, students must submit their assignment all
+         together at one time -->
+    <string name="submit_all_at_once_submission_policy">Must submit all at once</string>
+
+    <!-- Used as an option on assignments. When selected, students can submit their assignment in
+         multiple submissions (e.g. they can revise it)
+    -->
+    <string name="multiple_submission_allowed_submission_policy">Can make multiple submissions</string>
+
+    <!-- Used on course options to select enrolment policy for a course e.g. open, managed etc. -->
+    <string name="enrolment_policy">Enrolment policy</string>
+
+    <!-- Used on assignment options to select the policy for assignment submission -->
+    <string name="submission_policy">Submission policy</string>
+
+    <!-- Used to display as an error if student tries to submit assignment more than once when this
+         has been set as not allowed by the teacher or course admin
+     -->
+    <string name="submission_already_made">Submission already made</string>
+
+    <!-- used to display as an error when the teacher submits a grade thats greater than the maximum grade-->
+    <string name="grade_out_of_range">Grade must be between 0 and %1$s</string>
+
+    <!--
+    Button for the teacher to update their grade for an assignment submission
+    -->
+    <string name="update_grade">Update grade</string>
+
+    <!--
+    Button for a teacher to update their grade for an assignment submission, and then move to marking
+    the next submission.
+    -->
+    <string name="update_grade_and_mark_next">Update grade and mark next</string>
+
+
+    <!-- Used when adding a discussion block to a course -->
+    <string name="add_discussion">Add discussion</string>
+
+    <!-- Used when editing the options for a discussion block on a course -->
+    <string name="edit_discussion">Edit discussion</string>
+
+    <string name="type_here">Type here…</string>
+
+    <string name="deadline_has_passed">Deadline has passed</string>
+
+    <!-- used to display as an error to the user when he is not assigned in a group for an assignment -->
+    <string name="unassigned_error">Can\'t submit: you\'re enroled in the course, but not assigned to a group</string>
+
+    <!-- E.g. an option in the app that is enabled -->
+    <string name="enabled">Enabled</string>
+
+    <!-- Used in the context of an option the app that is disabled -->
+    <string name="disabled">Disabled</string>
+
+    <!-- Used in the context of selecting something e.g. select content from my courses etc -->
+    <string name="from_my_courses">From my courses</string>
+
+
+    <!--
+    Used in the context of an assignment that uses peer review (students mark
+    each others work), this button allows the teacher or admin to assign the reviewer who will mark
+    submissions (e.g. Student A marks Student B, Student B marks Student C, Student C marks Student A)
+    -->
+    <string name="assign_reviewers">Assign reviewers</string>
+
+    <!--
+    Used in the context of an assignment that uses peer review (students mark
+    each others work). Used next to a text field where the teacher or admin can set how many
+    reviews of each submission will be done.
+    -->
+    <string name="reviews_per_user_group">Reviews per user or group</string>
+
+
+    <!--
+    Used in the context of an assignment that uses peer review (students mark
+    each others work), this button allows the teacher or admin to automatically assign reviewers
+    at random.
+    -->
+    <string name="assign_random_reviewers">Assign random reviewers</string>
+
+    <!--
+    Used in the context of an assignment that uses peer review (students mark
+    each others work). %1$s will be replaced with a number e.g. Reviewer #1, Reviewer #2 etc
+    -->
+    <string name="reviewer">Reviewer #%1$s</string>
 
 </resources>

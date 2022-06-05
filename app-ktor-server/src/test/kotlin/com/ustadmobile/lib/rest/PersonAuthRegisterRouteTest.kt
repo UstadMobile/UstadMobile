@@ -105,7 +105,7 @@ class PersonAuthRegisterRouteTest {
         }.apply {
             verifyBlocking(mockNotificationSender) {
                 sendEmail(eq("parent@email.com"), any(), argWhere {
-                    it.contains("https://org.ustadmobile.app/umapp/index.html#${ParentalConsentManagementView.VIEW_NAME}")
+                    it.contains("https://org.ustadmobile.app/umapp/#/${ParentalConsentManagementView.VIEW_NAME}")
                 })
             }
         }

@@ -6,25 +6,26 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ConcatenatedInputStream2
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
+import com.ustadmobile.core.util.ext.filterNotInDirectory
 import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
+import org.kodein.di.*
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.lang.Exception
 import java.util.concurrent.atomic.AtomicLong
+import com.ustadmobile.core.util.ext.getContentEntryJsonFilesFromDir
 
 @Suppress("BlockingMethodInNonBlockingContext")
 class ConcatenatedInputStreamExtTest {
@@ -97,9 +98,16 @@ class ConcatenatedInputStreamExtTest {
 
         val concatIn = ConcatenatedInputStream2(ByteArrayInputStream(entryOut.toByteArray()))
         runBlocking {
-            concatIn.readAndSaveToDir(temporaryFolder.newFolder(), temporaryFolder.newFolder(),
-                    destDb, AtomicLong(), md5s.toMutableList(), "concattest")
-            destDb.linkExistingContainerEntries(container.containerUid, entriesToWrite)
+            val destDir = temporaryFolder.newFolder()
+            concatIn.readAndSaveToDir(
+                destDir, temporaryFolder.newFolder(),
+                AtomicLong(), md5s.toMutableList(), "concattest", di.direct.instance()
+            )
+            val downloadedEntries = destDir.getContentEntryJsonFilesFromDir(di.direct.instance())
+            destDb.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                txDb.containerEntryFileDao.insertListAsync(downloadedEntries)
+                txDb.linkExistingContainerEntries(container.containerUid, entriesToWrite)
+            }
         }
 
         sourceDb.assertContainerEqualToOther(container.containerUid, destDb)
@@ -107,11 +115,12 @@ class ConcatenatedInputStreamExtTest {
 
     @Test
     fun givenFirstStreamCorrupted_whenReadAndSaveCalledTwice_thenCanResumeAndSucceed() {
+        val destDir = temporaryFolder.newFolder()
         for(j in 0 .. 1) {
             val concatOut = ByteArrayOutputStream()
             val entriesRemaining = runBlocking {
                 destDb.linkExistingContainerEntries(container.containerUid, entriesToWrite)
-            }.entriesWithoutMatchingFile.sortedBy { it.cefMd5 }
+            }.entriesWithoutMatchingFile.sortedBy { it.cefMd5 }.filterNotInDirectory(destDir)
 
             val md5s = entriesRemaining.distinctMds5sSorted()
             val concatResponse = sourceDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
@@ -132,9 +141,16 @@ class ConcatenatedInputStreamExtTest {
             val concatIn = ConcatenatedInputStream2(ByteArrayInputStream(concatBytes))
             try {
                 runBlocking {
-                    concatIn.readAndSaveToDir(temporaryFolder.newFolder(), temporaryFolder.newFolder(),
-                            destDb, AtomicLong(), md5s.toMutableList(), "concattest")
-                    destDb.linkExistingContainerEntries(container.containerUid, entriesToWrite)
+                    concatIn.readAndSaveToDir(
+                        destDir, temporaryFolder.newFolder(),
+                        AtomicLong(), md5s.toMutableList(), "concattest", di.direct.instance()
+                    )
+
+                    val downloadedEntries = destDir.getContentEntryJsonFilesFromDir(di.direct.instance())
+                    destDb.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                        txDb.containerEntryFileDao.insertListAsync(downloadedEntries)
+                        txDb.linkExistingContainerEntries(container.containerUid, entriesToWrite)
+                    }
                 }
             }catch(e: Exception) {
                 e.printStackTrace()

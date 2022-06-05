@@ -3,12 +3,13 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Holiday
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -51,7 +52,7 @@ class HolidayEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: Holiday) {
-        view.finishWithResult(listOf(entity))
+        finishWithResult(safeStringify(di, ListSerializer(Holiday.serializer()), listOf(entity)))
     }
 
     companion object {

@@ -27,6 +27,7 @@ android {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
     }
+    namespace 'com.ustadmobile.lib.util'
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
@@ -62,6 +63,17 @@ kotlin {
     }
 
     android()
+
+    js(LEGACY) {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless() //change to useChrome to run the actual browser
+                    webpackConfig.cssSupport.enabled = true
+                }
+            }
+        }
+    }
 
     sourceSets {
         commonMain {

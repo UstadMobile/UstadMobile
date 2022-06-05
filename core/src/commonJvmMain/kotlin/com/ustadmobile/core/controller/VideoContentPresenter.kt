@@ -2,19 +2,20 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.lib.db.entities.Container
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
 
 actual class VideoContentPresenter actual constructor(context: Any, arguments: Map<String, String>,
-                                                      view: VideoPlayerView, di: DI)
+                                                      view: VideoContentView, di: DI)
     : VideoContentPresenterCommon(context, arguments, view, di) {
 
     var container: Container? = null
+
+    private val systemImpl: UstadMobileSystemImpl by instance()
 
     actual override fun handleOnResume() {
         GlobalScope.launch {
@@ -23,7 +24,7 @@ actual class VideoContentPresenter actual constructor(context: Any, arguments: M
 
                 val containerResult = db.containerDao.findByUidAsync(containerUid)
                 if (containerResult == null) {
-                    view.showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, context), {}, 0)
+                    view.showSnackBar(systemImpl.getString(MessageID.no_video_file_found, context), {}, 0)
                     view.loading = false
                     return@launch
                 }
@@ -62,7 +63,7 @@ actual class VideoContentPresenter actual constructor(context: Any, arguments: M
                     }
                 })
 
-                srtLangList.add(0, UstadMobileSystemImpl.instance.getString(MessageID.no_subtitle, context))
+                srtLangList.add(0, systemImpl.getString(MessageID.no_subtitle, context))
                 if (defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
 
             }

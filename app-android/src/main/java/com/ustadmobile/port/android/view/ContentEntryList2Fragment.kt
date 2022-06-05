@@ -2,38 +2,33 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
-import androidx.navigation.fragment.findNavController
-import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
-import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.KEY_SELECTED_ITEMS
-import com.ustadmobile.core.controller.ContentEntryList2Presenter.Companion.SAVEDSTATE_KEY_FOLDER
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.ext.determineListMode
-import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_SELECT_FOLDER_VISIBLE
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_USE_CHIPS
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.on
 
 class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>(),
         ContentEntryList2View, View.OnClickListener, FragmentBackHandler{
+
+    private val systemImpl: UstadMobileSystemImpl by instance()
 
     private var mPresenter: ContentEntryList2Presenter? = null
 
@@ -71,9 +66,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val accountManager: UstadAccountManager by di.instance()
-
-
         mPresenter = ContentEntryList2Presenter(requireContext(), arguments.toStringMap(),
                 this, di, viewLifecycleOwner).withViewLifecycle()
 
@@ -81,9 +73,12 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 arguments?.toStringMap()?.determineListMode().toString(),
                 arguments?.get(ARG_SELECT_FOLDER_VISIBLE)?.toString()?.toBoolean(),
                 viewLifecycleOwner, di)
+
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-                requireContext().getString(R.string.add_new_content), onClickSort = this,
-                sortOrderOption = mPresenter?.sortOptions?.get(0))
+            requireContext().getString(R.string.add_new_content),
+            onClickSort = this,
+            onFilterOptionSelected = mPresenter,
+            sortOrderOption = mPresenter?.sortOptions?.get(0))
 
         setHasOptionsMenu(true)
 
@@ -109,16 +104,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         entryAddOption.show(childFragmentManager, entryAddOption.tag)
     }
 
-    /**
-     * OnClick function that will handle
-     * when the user clicks to create a new item
-     */
-    override fun onClick(view: View?) {
-        if (view?.id == R.id.item_createnew_layout)
-            mPresenter?.handleClickCreateNewFab()
-        else
-            super.onClick(view)
-    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -182,7 +167,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                         oldItem.description == newItem.description &&
                         oldItem.contentTypeFlag == newItem.contentTypeFlag &&
                         oldItem.mostRecentContainer?.fileSize == newItem.mostRecentContainer?.fileSize &&
-                        oldItem.thumbnailUrl == newItem.thumbnailUrl &&
                         oldItem.ceInactive == newItem.ceInactive
             }
         }

@@ -1,3 +1,5 @@
+import org.json.JSONObject
+
 import java.util.concurrent.atomic.AtomicInteger
 
 plugins {
@@ -7,9 +9,6 @@ plugins {
     id 'com.android.library'
     id 'maven-publish'
 }
-
-group rootProject.group
-version rootProject.version
 
 
 android {
@@ -41,6 +40,7 @@ android {
         //This will apparently prevent Android Studio from recognizing the project
         //coreLibraryDesugaringEnabled true
     }
+    namespace 'com.ustadmobile.core'
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
@@ -54,6 +54,7 @@ targetCompatibility = '1.8'
 
 group rootProject.group
 version rootProject.version
+def reactLocaleOutPath = "${rootDir.absolutePath}/app-react/src/main/resources/"
 
 // workaround for https://youtrack.jetbrains.com/issue/KT-27170
 configurations {
@@ -76,10 +77,25 @@ kotlin {
 
     android()
 
+    js(LEGACY) {
+        browser {
+            dceTask {
+                keep("kotlin.defineModule") //To avoid  e.defineModule is not a function error
+            }
+            testTask {
+                useKarma {
+                    useChromeHeadless() //change to useChrome to run the actual browser
+                    webpackConfig.cssSupport.enabled = true
+                }
+            }
+        }
+    }
+
     sourceSets {
 
         commonMain {
             kotlin.srcDirs += "build/generated/source/umlocale/"
+            kotlin.srcDirs += "build/generated/source/umlocale-namemap"
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
@@ -101,8 +117,9 @@ kotlin {
         }
 
         commonJvmMain {
-            kotlin.srcDirs += "build/generated/source/umlocale-namemap"
             dependencies {
+                implementation kotlin('stdlib-common')
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
@@ -110,6 +127,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
@@ -207,6 +225,25 @@ kotlin {
             }
         }
 
+        jsMain {
+            dependencies {
+                implementation "io.ktor:ktor-client-js:$version_ktor"
+                implementation "io.ktor:ktor-client-json-js:$version_ktor"
+                implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
+                implementation "org.jetbrains.kotlin-wrappers:kotlin-extensions:$version_kotlin_extensions"
+                implementation npm("asmcrypto.js","$version_npm_asmcrypto")
+                implementation npm("buffer","$version_npm_buffer")
+            }
+        }
+
+        jsTest {
+            dependencies {
+                implementation kotlin('test-js')
+                implementation npm("moment","$version_npm_moment")
+                implementation npm("moment-timezone","$version_npm_moment_timezone")
+            }
+        }
+
     }
 }
 /*
@@ -281,6 +318,49 @@ task prepareLocale {
     }
 }
 
+task copyStringValuesToWebAssets {
+    File outDir = project.file("${reactLocaleOutPath}/locales/")
+    if(!outDir.exists()){
+        outDir.mkdirs()
+    }
+    rootProject.fileTree(dir: "core/locale/main").each() { File file ->
+        def localeCode = "en"
+
+        def pathString = file.absolutePath.substring(file.absolutePath.lastIndexOf("values"))
+        if(pathString.split("-").size() > 1){
+            localeCode = file.getParent().substring(file.getParent().lastIndexOf("-") + 1)
+        }
+        FileWriter writer = new FileWriter(project.file("${outDir.absolutePath}/${localeCode}.xml").absolutePath)
+        writer.write(file.getText())
+        writer.flush()
+    }
+}
+
+task prepareAppConfigs{
+    try {
+        File outFile = project.file("${reactLocaleOutPath}appconfig.json")
+        File configFile =  project.file("${rootDir.absolutePath}/core/src/main/assets/" +
+                "com/ustadmobile/core/appconfig.properties")
+        Scanner scanner = new Scanner(configFile)
+        def configContent = new JSONObject()
+        while(scanner.hasNextLine()){
+            String line = scanner.nextLine()
+            if(!line.startsWith("#") && !line.isEmpty()){
+                def keyValue = line.replace(" ","").split("=")
+                if(keyValue.length > 1){
+                    configContent.put(keyValue[0],keyValue[1])
+                }
+            }
+        }
+        FileWriter jsonFile = new FileWriter(outFile.absolutePath)
+        jsonFile.write(configContent.toString(4))
+        jsonFile.flush()
+
+    }catch(FileNotFoundException e){
+        e.printStackTrace()
+    }
+}
+
 tasks.whenTaskAdded { task ->
     if (task.name == "compileTestKotlinJvm") {
         task.dependsOn(copyTestResources)
@@ -292,7 +372,7 @@ tasks.whenTaskAdded { task ->
 }
 
 gradle.projectsEvaluated {
-    preBuild.dependsOn(prepareLocale)
+    preBuild.dependsOn(prepareLocale, copyStringValuesToWebAssets, prepareAppConfigs)
 }
 
 publishing {

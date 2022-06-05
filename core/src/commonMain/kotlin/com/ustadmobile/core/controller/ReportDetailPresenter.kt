@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ext.generateChartData
 import com.ustadmobile.core.util.ext.generateStatementList
 import com.ustadmobile.core.util.safeParse
@@ -12,7 +13,9 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
@@ -97,8 +100,16 @@ class ReportDetailPresenter(context: Any,
 
     override fun handleClickEdit() {
         val report = arguments[ARG_ENTITY_UID]?.toLong() ?: return
-        systemImpl.go(ReportEditView.VIEW_NAME, mapOf(ARG_ENTITY_UID to report.toString()),
-                context)
+        navigateForResult(
+            NavigateForResultOptions(
+                this, null,
+                ReportEditView.VIEW_NAME,
+                Report::class,
+                Report.serializer(),
+                RESULT_REPORT_KEY,
+                arguments = mutableMapOf(ARG_ENTITY_UID to report.toString())
+            )
+        )
     }
 
 
@@ -119,6 +130,10 @@ class ReportDetailPresenter(context: Any,
             report.reportOwnerUid = 0
             repo.reportDao.insertAsync(report)
         }
+    }
+
+    companion object {
+        const val RESULT_REPORT_KEY = "Report"
     }
 
 }

@@ -1,9 +1,9 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.door.DoorDataSourceFactory
 
 enum class ListViewMode(val mode: String) {
     BROWSER("browser"),
@@ -55,7 +55,5 @@ interface UstadListView<RT, DT>: UstadView {
      * onListFilterOptionSelected when this is changed.
      */
     var checkedFilterOptionChip: ListFilterIdOption?
-
-    fun finishWithResult(result: List<RT>)
 
 }

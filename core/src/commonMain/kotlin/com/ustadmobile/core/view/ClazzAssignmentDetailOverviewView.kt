@@ -1,14 +1,17 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
+import com.ustadmobile.lib.db.entities.CommentsWithPerson
+import com.ustadmobile.lib.db.entities.CourseAssignmentMark
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmissionWithAttachment
 
 
-interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignment> {
+interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignmentWithCourseBlock> {
 
-    var clazzMetrics: ContentEntryStatementScoreProgress?
-    var clazzAssignmentContent
-            : DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
+    var submittedCourseAssignmentSubmission: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
+
+    var addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment>?
 
     var timeZone: String?
 
@@ -17,9 +20,21 @@ interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignment> {
 
     var showPrivateComments: Boolean
 
+    var showSubmission: Boolean
+
+    var addTextSubmissionVisible: Boolean
+
+    var addFileSubmissionVisible: Boolean
+
+    var submissionMark: CourseAssignmentMark?
+
+    var submissionStatus: Int
+
+    var unassignedError: String?
+
     companion object {
 
-        const val VIEW_NAME = "ClazzAssignmentDetailOverviewView"
+        const val VIEW_NAME = "CourseAssignmentDetailOverviewView"
 
     }
 

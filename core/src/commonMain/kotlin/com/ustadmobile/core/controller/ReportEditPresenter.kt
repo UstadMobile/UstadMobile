@@ -2,14 +2,17 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.toDateRangeMoment
 import com.ustadmobile.core.util.ext.toDisplayString
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
+import com.ustadmobile.core.view.ReportFilterEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
@@ -18,7 +21,9 @@ import com.ustadmobile.lib.db.entities.Moment.Companion.MONTHS_REL_UNIT
 import com.ustadmobile.lib.db.entities.Moment.Companion.TYPE_FLAG_RELATIVE
 import com.ustadmobile.lib.db.entities.Moment.Companion.WEEKS_REL_UNIT
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import kotlin.math.max
@@ -30,9 +35,9 @@ class ReportEditPresenter(context: Any,
                           lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<ReportEditView, ReportWithSeriesWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
-    private val seriesCounter = atomic(0)
+    private val seriesCounter = atomic(1)
 
-    private val filterCounter = atomic(0)
+    private val filterCounter = atomic(1)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -44,8 +49,8 @@ class ReportEditPresenter(context: Any,
                 MessageID.line_chart)
     }
 
-    class VisualTypeMessageIdOption(day: VisualTypeOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class VisualTypeMessageIdOption(day: VisualTypeOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class XAxisOptions(val optionVal: Int, val messageId: Int) {
         DAY(Report.DAY,
@@ -66,8 +71,8 @@ class ReportEditPresenter(context: Any,
                 MessageID.class_enrolment_leaving)
     }
 
-    class XAxisMessageIdOption(day: XAxisOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class XAxisMessageIdOption(day: XAxisOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class DateRangeOptions(val code: Int, val messageId: Int,
                                 var dateRange: DateRangeMoment?) {
@@ -147,8 +152,8 @@ class ReportEditPresenter(context: Any,
                 MessageID.class_enrolment_leaving)
     }
 
-    class SubGroupByMessageIdOption(day: SubGroupOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class SubGroupByMessageIdOption(day: SubGroupOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class YAxisOptions(val optionVal: Int, val messageId: Int) {
         TOTAL_DURATION(ReportSeries.TOTAL_DURATION,
@@ -183,18 +188,69 @@ class ReportEditPresenter(context: Any,
                 MessageID.number_unique_students_attending)
     }
 
-    class YAxisMessageIdOption(data: YAxisOptions, context: Any)
-        : MessageIdOption(data.messageId, context, data.optionVal)
+    class YAxisMessageIdOption(data: YAxisOptions, context: Any, di: DI)
+        : MessageIdOption(data.messageId, context, data.optionVal, di = di)
 
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        view.visualTypeOptions = VisualTypeOptions.values().map { VisualTypeMessageIdOption(it, context) }
-        view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context) }
-        view.yAxisOptions = YAxisOptions.values().map { YAxisMessageIdOption(it, context) }
+        view.visualTypeOptions = VisualTypeOptions.values().map { VisualTypeMessageIdOption(it, context, di) }
+        view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context, di) }
+        view.yAxisOptions = YAxisOptions.values().map { YAxisMessageIdOption(it, context, di) }
         view.dateRangeOptions = DateRangeOptions.values().filter { it.dateRange != null }
-                .map {  ObjectMessageIdOption(it.messageId, context, it.code, it.dateRange) }
+                .map {  ObjectMessageIdOption(it.messageId, context, it.code, it.dateRange, di) }
+    }
+
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        observeSavedStateResult(
+            RESULT_REPORT_FILTER_KEY,
+            ListSerializer(ReportFilter.serializer()), ReportFilter::class) {
+            val newFilter = it.firstOrNull() ?: return@observeSavedStateResult
+            val entityVal = entity
+            val newSeriesList = entityVal?.reportSeriesWithFiltersList?.toMutableList()
+                ?: mutableListOf()
+            val seriesToAddFilter = newSeriesList.find { it.reportSeriesUid == newFilter.reportFilterSeriesUid }
+                ?: return@observeSavedStateResult
+
+            newSeriesList.remove(seriesToAddFilter)
+            val newFilterList = seriesToAddFilter.reportSeriesFilters?.toMutableList()
+                ?: mutableListOf()
+
+            // new filter
+            if (newFilter.reportFilterUid == 0) {
+                newFilter.reportFilterUid = filterCounter.incrementAndGet()
+                newFilterList.add(newFilter)
+            } else {
+                val indexOfFilter = newFilterList.indexOfFirst { it.reportFilterUid == newFilter.reportFilterUid }
+                newFilterList[indexOfFilter] = newFilter
+            }
+
+            newSeriesList.add(ReportSeries().apply {
+                reportSeriesUid = seriesToAddFilter.reportSeriesUid
+                reportSeriesVisualType = seriesToAddFilter.reportSeriesVisualType
+                reportSeriesYAxis = seriesToAddFilter.reportSeriesYAxis
+                reportSeriesSubGroup = seriesToAddFilter.reportSeriesSubGroup
+                reportSeriesName = seriesToAddFilter.reportSeriesName
+                reportSeriesFilters = newFilterList.toList()
+            })
+
+            entityVal?.reportSeriesWithFiltersList = newSeriesList.toList()
+            view.entity = entityVal
+            requireSavedStateHandle()[RESULT_REPORT_FILTER_KEY] = null
+
+        }
+
+
+        observeSavedStateResult(
+            RESULT_DATE_RANGE_KEY,
+            ListSerializer(DateRangeMoment.serializer()), DateRangeMoment::class) {
+            val dateRangeMoment = it.firstOrNull() ?: return@observeSavedStateResult
+            handleAddCustomRange(dateRangeMoment)
+            requireSavedStateHandle()[RESULT_DATE_RANGE_KEY] = null
+        }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ReportWithSeriesWithFilters? {
@@ -204,7 +260,7 @@ class ReportEditPresenter(context: Any,
             it.takeIf { entityUid != 0L }?.reportDao?.findByUid(entityUid)
         } ?: Report()
 
-        handleXAxisSelected(XAxisOptions.values().map { XAxisMessageIdOption(it, context) }.find { it.code == report.xAxis } as MessageIdOption)
+        handleXAxisSelected(XAxisOptions.values().map { XAxisMessageIdOption(it, context, di) }.find { it.code == report.xAxis } as MessageIdOption)
         if(report.reportDateRangeSelection == Report.CUSTOM_RANGE){
             handleAddCustomRange(report.toDateRangeMoment())
         }
@@ -240,14 +296,13 @@ class ReportEditPresenter(context: Any,
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        val editEntity: ReportWithSeriesWithFilters
-        editEntity = if (entityJsonStr != null) {
+        val editEntity = if (entityJsonStr != null) {
             safeParse(di, ReportWithSeriesWithFilters.serializer(), entityJsonStr)
         } else {
             ReportWithSeriesWithFilters()
         }
 
-        handleXAxisSelected(XAxisOptions.values().map { XAxisMessageIdOption(it, context) }.find { it.code == editEntity.xAxis } as MessageIdOption)
+        handleXAxisSelected(XAxisOptions.values().map { XAxisMessageIdOption(it, context, di) }.find { it.code == editEntity.xAxis } as MessageIdOption)
         if(editEntity.reportDateRangeSelection == Report.CUSTOM_RANGE){
             handleAddCustomRange(editEntity.toDateRangeMoment())
         }
@@ -296,7 +351,7 @@ class ReportEditPresenter(context: Any,
     fun handleAddCustomRange(dateRangeMoment: DateRangeMoment) {
         view.dateRangeOptions = DateRangeOptions.values().map {
             ObjectMessageIdOption(it.messageId, context, it.code, it.dateRange ?: dateRangeMoment,
-                    if(it.dateRange != null) null else dateRangeMoment.toDisplayString())
+                    di, if(it.dateRange != null) null else dateRangeMoment.toDisplayString())
         }
         view.selectedDateRangeMoment = dateRangeMoment
         val entityVal = entity ?: return
@@ -325,38 +380,6 @@ class ReportEditPresenter(context: Any,
         view.entity = entityVal
     }
 
-    fun handleAddFilter(newFilter: ReportFilter) {
-        val entityVal = entity
-        val newSeriesList = entityVal?.reportSeriesWithFiltersList?.toMutableList()
-                ?: mutableListOf()
-        val seriesToAddFilter = newSeriesList.find { it.reportSeriesUid == newFilter.reportFilterSeriesUid }
-                ?: return
-
-        newSeriesList.remove(seriesToAddFilter)
-        val newFilterList = seriesToAddFilter.reportSeriesFilters?.toMutableList()
-                ?: mutableListOf()
-
-        // new filter
-        if (newFilter.reportFilterUid == 0) {
-            newFilter.reportFilterUid = filterCounter.incrementAndGet()
-            newFilterList.add(newFilter)
-        } else {
-            val indexOfFilter = newFilterList.indexOfFirst { it.reportFilterUid == newFilter.reportFilterUid }
-            newFilterList[indexOfFilter] = newFilter
-        }
-
-        newSeriesList.add(ReportSeries().apply {
-            reportSeriesUid = seriesToAddFilter.reportSeriesUid
-            reportSeriesVisualType = seriesToAddFilter.reportSeriesVisualType
-            reportSeriesYAxis = seriesToAddFilter.reportSeriesYAxis
-            reportSeriesSubGroup = seriesToAddFilter.reportSeriesSubGroup
-            reportSeriesName = seriesToAddFilter.reportSeriesName
-            reportSeriesFilters = newFilterList.toList()
-        })
-
-        entityVal?.reportSeriesWithFiltersList = newSeriesList.toList()
-        view.entity = entityVal
-    }
 
     fun handleRemoveFilter(filter: ReportFilter) {
         val entityVal = entity
@@ -383,6 +406,32 @@ class ReportEditPresenter(context: Any,
     }
 
 
+    fun handleOnFilterClicked(filter: ReportFilter) {
+        navigateForResult(
+            NavigateForResultOptions(
+                this, filter,
+                ReportFilterEditView.VIEW_NAME,
+                ReportFilter::class,
+                ReportFilter.serializer(),
+                RESULT_REPORT_FILTER_KEY
+            )
+        )
+    }
+
+
+    fun handleDateRangeChange() {
+        navigateForResult(
+            NavigateForResultOptions(
+                this, null,
+                XapiPackageContentView.VIEW_NAME,
+                DateRangeMoment::class,
+                DateRangeMoment.serializer(),
+                RESULT_DATE_RANGE_KEY
+            )
+        )
+    }
+
+
     override fun handleClickSave(entity: ReportWithSeriesWithFilters) {
         if (entity.reportTitle.isNullOrEmpty()) {
             view.titleErrorText = systemImpl.getString(MessageID.field_required_prompt, context)
@@ -401,7 +450,9 @@ class ReportEditPresenter(context: Any,
                 repo.reportDao.updateAsync(entity)
 
                 withContext(doorMainDispatcher()) {
-                    view.finishWithResult(listOf(entity))
+                    finishWithResult(safeStringify(di,
+                        ListSerializer(ReportWithSeriesWithFilters.serializer()),
+                        listOf(entity)))
                 }
 
             } else {
@@ -416,7 +467,7 @@ class ReportEditPresenter(context: Any,
 
     fun handleXAxisSelected(selectedOption: IdOption) {
         if (selectedOption.optionId == Report.DAY || selectedOption.optionId == Report.MONTH || selectedOption.optionId == Report.WEEK) {
-            view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
+            view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context, di) }
                     .filter {
                         it.code == Report.GENDER ||
                                 it.code == Report.CONTENT_ENTRY ||
@@ -429,7 +480,7 @@ class ReportEditPresenter(context: Any,
                 selectedOption.optionId == Report.GENDER ||
                 selectedOption.optionId == Report.ENROLMENT_LEAVING_REASON ||
                 selectedOption.optionId == Report.ENROLMENT_OUTCOME) {
-            view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
+            view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context, di) }
         }
     }
 
@@ -439,6 +490,11 @@ class ReportEditPresenter(context: Any,
         }
         val dateRangeFound = view.dateRangeOptions?.find { it.code == selectedOption.optionId } ?: return
         view.selectedDateRangeMoment = dateRangeFound.obj
+    }
+
+    companion object {
+        const val RESULT_REPORT_FILTER_KEY = "Filters"
+        const val RESULT_DATE_RANGE_KEY = "DateRanges"
     }
 
 }

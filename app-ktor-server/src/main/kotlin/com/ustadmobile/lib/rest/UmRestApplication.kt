@@ -11,7 +11,6 @@ import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
-import com.ustadmobile.core.db.UmAppDatabase_ReplicationRunOnChangeRunner
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.di.commonJvmDiModule
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
@@ -26,9 +25,7 @@ import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.io.UploadSessionManager
-import com.ustadmobile.core.util.ext.addInvalidationListener
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
@@ -51,22 +48,16 @@ import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
-import java.net.InetAddress
-import java.net.URL
 import java.nio.file.Files
 import javax.naming.InitialContext
-import com.ustadmobile.door.ext.asRepository
-import com.ustadmobile.door.replication.ReplicationNotificationDispatcher
-import com.ustadmobile.lib.rest.ext.initAdminUser
-import com.ustadmobile.lib.rest.ext.ktorInitRepo
-import com.ustadmobile.door.ext.doorDatabaseMetadata
-import kotlinx.coroutines.GlobalScope
-import com.ustadmobile.door.ext.nodeIdAuthCache
 import com.ustadmobile.door.util.NodeIdAuthCache
 import com.ustadmobile.core.db.PermissionManagementIncomingReplicationListener
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 import io.ktor.response.*
-import kotlinx.coroutines.delay
+import kotlinx.serialization.json.Json
+import com.ustadmobile.core.util.SysPathUtil
+import io.ktor.client.*
+import io.ktor.websocket.*
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -77,17 +68,52 @@ const val CONF_DBMODE_SINGLETON = "singleton"
 const val CONF_GOOGLE_API = "secret"
 
 /**
+ * List of external commands (e.g. media converters) that must be found or have locations specified
+ */
+val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
+
+/**
+ * List of prefixes which are always answered by the KTOR server. When using JsDev proxy mode, any
+ * other url will be sent to the JS dev proxy
+ */
+val KTOR_SERVER_ROUTES = listOf("/UmAppDatabase", "/ConcatenatedContainerFiles2",
+    "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
+    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket")
+
+
+/**
  * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
  * containers, etc).
  */
-private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBMODE_SINGLETON) = if(dbMode == CONF_DBMODE_SINGLETON) {
+private fun Endpoint.identifier(
+    dbMode: String,
+    singletonName: String = CONF_DBMODE_SINGLETON
+) = if(dbMode == CONF_DBMODE_SINGLETON) {
     singletonName
 }else {
     sanitizeDbNameFromUrl(url)
 }
 
-fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: String? = null,
-                                  singletonDbName: String = "UmAppDatabase") {
+fun Application.umRestApplication(
+    dbModeOverride: String? = null,
+    singletonDbName: String = "UmAppDatabase"
+) {
+    val appConfig = environment.config
+
+    val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
+
+    //Check for required external commands
+    REQUIRED_EXTERNAL_COMMANDS.forEach { command ->
+        if(!SysPathUtil.commandExists(command,
+                manuallySpecifiedLocation = appConfig.commandFileProperty(command))
+        ) {
+            val message = "FATAL ERROR: Required external command \"$command\" not found in path or " +
+                   "manually specified location does not exist. Please set it in application.conf"
+            Napier.e(message)
+            throw IllegalStateException(message)
+        }
+    }
+
 
     if (devMode) {
         install(CORS) {
@@ -96,6 +122,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             method(HttpMethod.Put)
             method(HttpMethod.Options)
             header(HttpHeaders.ContentType)
+            header(HttpHeaders.AccessControlAllowOrigin)
+            header("X-nid")
+            header("door-dbversion")
+            header("door-node")
             anyHost()
         }
     }
@@ -114,7 +144,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     }
 
     val tmpRootDir = Files.createTempDirectory("upload").toFile()
-    val appConfig = environment.config
 
     val dbMode = dbModeOverride ?:
         appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
@@ -233,12 +262,12 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             val doorNode = instance<NodeIdAndAuth>()
             val repo: UmAppDatabase = db.asRepository(repositoryConfig(Any(), "http://localhost/",
-                    doorNode.nodeId, doorNode.auth, instance(), instance()) {
+                doorNode.nodeId, doorNode.auth, instance(), instance()) {
                 useReplicationSubscription = false
             })
 
-            repo.preload()
-            repo.ktorInitRepo()
+            runBlocking { repo.preload() }
+            repo.ktorInitRepo(di)
             runBlocking {
                 repo.initAdminUser(context, di)
             }
@@ -296,6 +325,29 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             ContentJobManagerJvm(di)
         }
 
+        bind<Json>() with singleton {
+            Json { encodeDefaults = true }
+        }
+
+        bind<File>(tag = DiTag.TAG_FILE_FFMPEG) with singleton {
+            //The availability of ffmpeg is checked on startup
+            SysPathUtil.findCommandInPath("ffmpeg",
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffmpeg"))!!
+        }
+
+        bind<File>(tag = DiTag.TAG_FILE_FFPROBE) with singleton {
+            //The availability of ffmpeg is checked on startup
+            SysPathUtil.findCommandInPath("ffprobe",
+                manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))!!
+        }
+
+        bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {
+            File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), UPLOAD_TMP_SUBDIR).also {
+                if(!it.exists())
+                    it.mkdirs()
+            }
+        }
+
         try {
             appConfig.config("mail")
 
@@ -336,10 +388,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 instance<Scheduler>().shutdown()
             })
         }
-
-
-
-
     }
 
     //Ensure that older clients that make http calls to pages that no longer exist will not make
@@ -347,11 +395,37 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     install(StatusPages) {
         status(HttpStatusCode.NotFound) {
             Napier.e("NOT FOUND! ${call.request.uri}!")
-            delay(10000L)
             call.respondText("Not found", ContentType.Text.Plain, HttpStatusCode.NotFound)
         }
     }
 
+    val jsDevServer = appConfig.propertyOrNull("ktor.ustad.jsDevServer")?.getString()
+    if(jsDevServer != null) {
+        install(WebSockets)
+
+        intercept(ApplicationCallPipeline.Setup) {
+            val requestUri = call.request.uri.let {
+                if(it.startsWith("//")) {
+                    //This is an edge case with the ContainerFetcher. The ContainerFetcher uses //
+                    // at the start of a URI. This workaround will be removed when ContainerFetcher
+                    // is removed and replaced with Retriever.
+                    it.removePrefix("/")
+                }else {
+                    it
+                }
+            }
+
+            if(!KTOR_SERVER_ROUTES.any { requestUri.startsWith(it) }) {
+                call.respondReverseProxy(jsDevServer)
+                return@intercept finish()
+            }
+        }
+    }
+
+    /**
+     * Note: to facilitate Javascript development, make sure that any route prefixes used are listed
+     * in UstadAppReactProxy
+     */
     install(Routing) {
         ContainerDownload()
         personAuthRegisterRoute()
@@ -364,20 +438,28 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ContentEntryLinkImporter()
         ContentUploadRoute()
 
-        /*
-          This is a temporary redirect approach for users who open an app link but don't
-          have the app installed. Because the uri scheme of views is #ViewName?args, this
-          won't be included in the referrer header when the user goes to get the app.
-
-          The static route will redirect /umapp/#ViewName?args to
-          /getapp/?uri=(encoded full uri including #ViewName?args)
-         */
-        static("umapp") {
-            resource("/", "/static/getappredirect/index.html")
-        }
         GetAppRoute()
+
         if (devMode) {
             DevModeRoute()
+        }
+
+        static("umapp") {
+            resources("umapp")
+            static("/") {
+                defaultResource("umapp/index.html")
+            }
+        }
+
+        //Handle default route when running behind proxy
+        if(!jsDevServer.isNullOrBlank()) {
+            webSocketProxyRoute(jsDevServer)
+        }else {
+            route("/"){
+                get{
+                    call.respondRedirect("umapp/")
+                }
+            }
         }
     }
 }

@@ -18,6 +18,45 @@ Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file f
 See [app-ktor-server](app-ktor-server/) for instructions on building the server JAR. Then see
 [INSTALL.md](INSTALL.md) for instructions on running the server.
 
+## Getting started building from source:
+
+* __Install latest Node-14x__ as per [Instructions on Node website](https://nodejs.org/en/download/).
+  Kotlin/JS depends on it to build
+
+* __Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
+https://github.com/UstadMobile/UstadMobile.git and wait for the project to import.
+
+* __Build it__ :
+Linux command line:
+```
+./gradlew -Pktorbundleproductionjs=true build
+```
+Windows command line:
+```
+gradlew  -Pktorbundleproductionjs=true build
+```
+
+If you see compilation errors regarding MessageID, this seems to be caused by a gradle dependency
+ordering issue. Run:
+```
+gradlew core:prepareLocale
+```
+Then try again (Sorry).
+
+Start the server:
+
+You should now be able to open the web version on http://localhost:8087/ . The admin password will
+be found in ./app-ktor-server/data/singleton/admin.txt
+
+* __Install and run the Android app__ : run
+```
+adb install ./app-android-launcher/build/outputs/apk/debug/app-android-launcher-debug.apk
+```
+
+You should now be able to open the Android app. When the Android app starts, enter the address of
+the rest server
+e.g. http://192.168.1.123:8087/ where 192.168.1.123 is the IP address of your development machine.
+
 ## Contributing
 
 Contributions are welcome! If you're unsure about anything, please create an issue and label it as
@@ -43,10 +82,11 @@ This multi-module Gradle project built using Kotlin Multiplatform. It builds for
 
 Code is contained (mostly) in the following modules:
 * [core](core/) : Contains presenters, view interfaces, and core business logic.
-* [sharedse](sharedse/): Contains implementation for operating systems with a disk
+* [sharedse](sharedse/): Contains some shared implementations for operating systems with a disk (JVM/Android)
 * [app-ktor-server](app-ktor-server/): Contains the HTTP rest server (implemented using KTOR)
 * [app-android](app-android/): Contains Android implementation, forms the basis of the app in
   app-android-launcher but can also be used as a library in other apps.
+* [app-react](app-react/): Contains the web version implemented using Kotlin/JS
 * [app-android-launcher/](app-android-launcher/): Standalone app launcher that uses app-android.
 * [lib-database](lib-database/): core Database and Data Access Object (DAO) classes. See this
 module's README for further details on the relationship between different database modules.

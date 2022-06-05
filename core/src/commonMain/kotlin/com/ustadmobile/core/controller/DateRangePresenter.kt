@@ -5,6 +5,7 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.toFixedDatePair
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.DateRangeView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -14,6 +15,7 @@ import com.ustadmobile.lib.db.entities.Moment
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -38,23 +40,22 @@ class DateRangePresenter(context: Any,
                 MessageID.year)
     }
 
-    class RelUnitMessageIdOption(day: RelUnitOption, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class RelUnitMessageIdOption(day: RelUnitOption, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
 
     enum class RelToOption(val optionVal: Int, val messageId: Int) {
-        DAY(Moment.TODAY_REL_TO,
-                MessageID.today),
+        DAY(Moment.TODAY_REL_TO, MessageID.today),
     }
 
-    class RelToMessageIdOption(day: RelToOption, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class RelToMessageIdOption(day: RelToOption, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        view.relToOptions =  RelToOption.values().map { RelToMessageIdOption(it, context) }
-        view.relUnitOptions = RelUnitOption.values().map { RelUnitMessageIdOption(it, context) }
+        view.relToOptions =  RelToOption.values().map { RelToMessageIdOption(it, context, di) }
+        view.relUnitOptions = RelUnitOption.values().map { RelUnitMessageIdOption(it, context, di) }
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): DateRangeMoment? {
@@ -118,7 +119,8 @@ class DateRangePresenter(context: Any,
 
         GlobalScope.launch(doorMainDispatcher()) {
             withContext(doorMainDispatcher()) {
-                view.finishWithResult(listOf(entity))
+                finishWithResult(safeStringify(di,
+                    ListSerializer(DateRangeMoment.serializer()), listOf(entity)))
             }
         }
     }

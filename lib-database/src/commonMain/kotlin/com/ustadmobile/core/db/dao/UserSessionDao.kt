@@ -37,8 +37,9 @@ abstract class UserSessionDao {
                           ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
                      JOIN UserSession
                           ON UserSession.usPersonUid = PrsGrpMbr.groupMemberPersonUid
+          WHERE UserSessionSubject.usClientNodeId = UserSessionSubject.usClientNodeId                
           --notpsql              
-          WHERE UserSessionSubject.usLct != COALESCE(
+            AND UserSessionSubject.usLct != COALESCE(
                 (SELECT usVersionId
                    FROM UserSessionReplicate
                   WHERE UserSessionReplicate.usPk = UserSessionSubject.usUid
@@ -74,6 +75,7 @@ abstract class UserSessionDao {
                 JOIN UserSession UserSessionSubject
                      ON UserSessionSubject.usPersonUid = Person.personUid
                         AND UserSessionSubject.usSessionType = ${UserSession.TYPE_STANDARD}
+                        AND UserSessionSubject.usClientNodeId = :newNodeId
           WHERE UserSession.usClientNodeId = :newNodeId
           --notpsql
             AND UserSessionSubject.usLct != COALESCE(
@@ -135,10 +137,10 @@ abstract class UserSessionDao {
            SET usAuth = null,
                usStatus = :newStatus,
                usReason = :reason,
-               usLcb = (SELECT COALESCE(
+               usLcb = COALESCE(
                                (SELECT nodeClientId
                                   FROM SyncNode
-                                 LIMIT 1), 0))
+                                 LIMIT 1), 0)
          WHERE UserSession.usUid = :sessionUid                        
                
     """)

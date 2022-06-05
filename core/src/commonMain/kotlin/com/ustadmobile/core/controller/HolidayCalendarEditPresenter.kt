@@ -1,10 +1,12 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.HolidayCalendarEditView
+import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -27,31 +29,28 @@ class HolidayCalendarEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
+    private val holidayOneToManyJoinEditHelper
+            = OneToManyJoinEditHelperMp(Holiday::holUid,
+        ARG_SAVED_STATE_HOLIDAY,
+        ListSerializer(Holiday.serializer()),
+        ListSerializer(Holiday.serializer()),
+        this,
+        requireSavedStateHandle(),
+        Holiday::class) {holUid = it}
 
-    val holidayOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<Holiday>(Holiday::holUid,
-            "state_Holiday_list",
-            ListSerializer(Holiday.serializer()),
-            ListSerializer(Holiday.serializer()), this, Holiday::class) { holUid = it }
-
-    fun handleAddOrEditHoliday(holiday: Holiday) {
-        holidayOneToManyJoinEditHelper.onEditResult(holiday)
-    }
-
-    fun handleRemoveHoliday(holiday: Holiday) {
-        holidayOneToManyJoinEditHelper.onDeactivateEntity(holiday)
-    }
+    val holidayToManyJoinListener = holidayOneToManyJoinEditHelper.createNavigateForResultListener(
+        HolidayEditView.VIEW_NAME, Holiday.serializer())
 
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
         view.holidayList = holidayOneToManyJoinEditHelper.liveList
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): HolidayCalendar? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val holidayCalendar = withTimeoutOrNull(2000) {
-            db.holidayCalendarDao.findByUid(entityUid)
+            db.holidayCalendarDao.findByUidAsync(entityUid)
         } ?: HolidayCalendar()
 
         val holidayList = withTimeoutOrNull(2000) {
@@ -67,10 +66,10 @@ class HolidayCalendarEditPresenter(context: Any,
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: HolidayCalendar? = null
-        if(entityJsonStr != null) {
-            editEntity = safeParse(di, HolidayCalendar.serializer(), entityJsonStr)
+        editEntity = if(entityJsonStr != null) {
+            safeParse(di, HolidayCalendar.serializer(), entityJsonStr)
         }else {
-            editEntity = HolidayCalendar()
+            HolidayCalendar()
         }
 
         return editEntity
@@ -95,7 +94,9 @@ class HolidayCalendarEditPresenter(context: Any,
                 it.holHolidayCalendarUid = entity.umCalendarUid
             }
 
-            view.finishWithResult(listOf(entity))
+            finishWithResult(safeStringify(di, ListSerializer(HolidayCalendar.serializer()),
+                listOf(entity))
+            )
         }
     }
 
@@ -103,7 +104,7 @@ class HolidayCalendarEditPresenter(context: Any,
     companion object {
 
         //TODO: Add constants for keys that would be used for any One To Many Join helpers
-
+        const val ARG_SAVED_STATE_HOLIDAY = "Holiday"
     }
 
 }

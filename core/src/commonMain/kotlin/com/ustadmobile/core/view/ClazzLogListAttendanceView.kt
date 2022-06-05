@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzLog
 
@@ -20,7 +19,7 @@ interface ClazzLogListAttendanceView: UstadListView<ClazzLog, ClazzLog> {
     var recordAttendanceOptions: List<ClazzLogListAttendancePresenter.RecordAttendanceOption>?
 
     companion object {
-        const val VIEW_NAME = "ClazzLogListAttendanceView"
+        const val VIEW_NAME = "CourseLogListAttendanceView"
     }
 
 }

@@ -1,7 +1,5 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.lib.db.entities.UmAccount
-
 interface Login2View : UstadView {
 
     var isEmptyPassword: Boolean
@@ -24,7 +22,7 @@ interface Login2View : UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "Login2View"
+        const val VIEW_NAME = "LoginView"
 
         const val ARG_NO_GUEST = "NoGuest"
 

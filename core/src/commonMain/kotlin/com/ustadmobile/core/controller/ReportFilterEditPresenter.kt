@@ -1,14 +1,15 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
-import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.impl.NavigateForResultOptions
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.OUTCOME_TO_MESSAGE_ID_MAP
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.core.view.ReportFilterEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
@@ -20,15 +21,16 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
-class ReportFilterEditPresenter(context: Any,
-                                arguments: Map<String, String>, view: ReportFilterEditView,
-                                di: DI,
-                                lifecycleOwner: DoorLifecycleOwner)
-    : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
+class ReportFilterEditPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: ReportFilterEditView,
+    di: DI,
+    lifecycleOwner: DoorLifecycleOwner
+) : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
+    private val fieldRequiredText = systemImpl.getString(MessageID.field_required_prompt, context)
 
-    val fieldRequiredText = systemImpl.getString(MessageID.field_required_prompt, context)
-
-    val uidhelperDeferred = CompletableDeferred<Boolean>()
+    private val uidhelperDeferred = CompletableDeferred<Boolean>()
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
@@ -44,8 +46,8 @@ class ReportFilterEditPresenter(context: Any,
         ENROLMENT_LEAVING_REASON(ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON, MessageID.class_enrolment_leaving)
     }
 
-    class FieldMessageIdOption(day: FieldOption, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class FieldMessageIdOption(day: FieldOption, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class ConditionOption(val optionVal: Int, val messageId: Int) {
         IS_CONDITION(ReportFilter.CONDITION_IS, MessageID.condition_is),
@@ -57,8 +59,8 @@ class ReportFilterEditPresenter(context: Any,
         NOT_IN_LIST_CONDITION(ReportFilter.CONDITION_NOT_IN_LIST, MessageID.condition_not_in_list)
     }
 
-    class ConditionMessageIdOption(day: ConditionOption, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class ConditionMessageIdOption(day: ConditionOption, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class ContentCompletionStatusOption(val optionVal: Int, val messageId: Int) {
         COMPLETED(StatementEntity.CONTENT_COMPLETE, MessageID.completed),
@@ -66,8 +68,8 @@ class ReportFilterEditPresenter(context: Any,
         FAILED(StatementEntity.CONTENT_FAILED, MessageID.failed)
     }
 
-    class ContentCompletionStatusMessageIdOption(day: ContentCompletionStatusOption, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class ContentCompletionStatusMessageIdOption(day: ContentCompletionStatusOption, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di)
 
 
     enum class FilterValueType {
@@ -82,7 +84,7 @@ class ReportFilterEditPresenter(context: Any,
             ListSerializer(UidAndLabel.serializer()),
             ListSerializer(UidAndLabel.serializer()), this, UidAndLabel::class) { uid = it }
 
-    fun handleAddOrEditUidAndLabel(entry: UidAndLabel) {
+    private fun handleAddOrEditUidAndLabel(entry: UidAndLabel) {
         GlobalScope.launch(doorMainDispatcher()) {
             uidhelperDeferred.await()
             uidAndLabelOneToManyHelper.onEditResult(entry)
@@ -103,7 +105,7 @@ class ReportFilterEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.fieldOptions = FieldOption.values().map { FieldMessageIdOption(it, context) }
+        view.fieldOptions = FieldOption.values().map { FieldMessageIdOption(it, context, di) }
         view.uidAndLabelList = uidAndLabelOneToManyHelper.liveList
     }
 
@@ -114,10 +116,10 @@ class ReportFilterEditPresenter(context: Any,
         val entity = safeParse(di, ReportFilter.serializer(), entityJsonStr)
 
         if (entity.reportFilterField != 0) {
-            handleFieldOptionSelected(FieldOption.values().map { FieldMessageIdOption(it, context) }.find { it.code == entity.reportFilterField } as MessageIdOption)
+            handleFieldOptionSelected(FieldOption.values().map { FieldMessageIdOption(it, context, di) }.find { it.code == entity.reportFilterField } as MessageIdOption)
         }
         if (entity.reportFilterCondition != 0) {
-            handleConditionOptionSelected(ConditionOption.values().map { ConditionMessageIdOption(it, context) }.find { it.code == entity.reportFilterCondition } as MessageIdOption)
+            handleConditionOptionSelected(ConditionOption.values().map { ConditionMessageIdOption(it, context, di) }.find { it.code == entity.reportFilterCondition } as MessageIdOption)
         }
         uidAndLabelOneToManyHelper.onLoadFromJsonSavedState(bundle)
 
@@ -157,31 +159,34 @@ class ReportFilterEditPresenter(context: Any,
             ReportFilter.FIELD_PERSON_GENDER -> {
 
                 view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
-                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
+                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context, di) }
 
                 view.valueType = FilterValueType.DROPDOWN
                 view.dropDownValueOptions = genderMap
-                        .map { MessageIdOption(it.value, context, it.key) }
+                        .map { MessageIdOption(it.value, context, it.key, di) }
             }
 
             ReportFilter.FIELD_PERSON_AGE -> {
 
                 view.conditionsOptions = listOf(ConditionOption.GREATER_THAN_CONDITION,
-                        ConditionOption.LESS_THAN_CONDITION, ConditionOption.BETWEEN_CONDITION).map { ConditionMessageIdOption(it, context) }
+                        ConditionOption.LESS_THAN_CONDITION, ConditionOption.BETWEEN_CONDITION
+                ).map {
+                    ConditionMessageIdOption(it, context, di)
+                }
                 view.valueType = FilterValueType.INTEGER
 
             }
             ReportFilter.FIELD_CONTENT_COMPLETION -> {
 
-                view.conditionsOptions = listOf(ConditionOption.IS_CONDITION).map { ConditionMessageIdOption(it, context) }
+                view.conditionsOptions = listOf(ConditionOption.IS_CONDITION).map { ConditionMessageIdOption(it, context, di) }
                 view.valueType = FilterValueType.DROPDOWN
                 view.dropDownValueOptions = ContentCompletionStatusOption.values()
-                        .map { ContentCompletionStatusMessageIdOption(it, context) }
+                        .map { ContentCompletionStatusMessageIdOption(it, context, di) }
             }
             ReportFilter.FIELD_CONTENT_ENTRY -> {
 
                 view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
-                        ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context) }
+                        ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context, di) }
                 view.valueType = FilterValueType.LIST
                 view.createNewFilter = systemImpl.getString(MessageID.add_content_filter, context)
 
@@ -189,19 +194,19 @@ class ReportFilterEditPresenter(context: Any,
             ReportFilter.FIELD_ATTENDANCE_PERCENTAGE, ReportFilter.FIELD_CONTENT_PROGRESS -> {
 
                 view.conditionsOptions = listOf(ConditionOption.BETWEEN_CONDITION)
-                        .map { ConditionMessageIdOption(it, context) }
+                        .map { ConditionMessageIdOption(it, context, di) }
                 view.valueType = FilterValueType.BETWEEN
             }
             ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME -> {
                 view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
-                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
+                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context, di) }
                 view.valueType = FilterValueType.DROPDOWN
                 view.dropDownValueOptions = OUTCOME_TO_MESSAGE_ID_MAP.map {
-                    MessageIdOption(it.value, context, it.key) }
+                    MessageIdOption(it.value, context, it.key, di) }
             }
             ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON -> {
                 view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
-                        ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context) }
+                        ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context, di) }
                 view.valueType = FilterValueType.LIST
                 view.createNewFilter = systemImpl.getString(MessageID.add_leaving_reason, context)
             }
@@ -232,6 +237,58 @@ class ReportFilterEditPresenter(context: Any,
         savedState.putEntityAsJson(ARG_ENTITY_JSON, ReportFilter.serializer(), entityVal)
     }
 
+
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        observeSavedStateResult(
+            RESULT_LEAVING_REASON_KEY,
+            ListSerializer(LeavingReason.serializer()), LeavingReason::class) {
+            val reason = it.firstOrNull() ?: return@observeSavedStateResult
+            handleAddOrEditUidAndLabel(UidAndLabel().apply {
+                uid = reason.leavingReasonUid
+                labelName = reason.leavingReasonTitle
+            })
+        }
+
+        observeSavedStateResult(
+            RESULT_CONTENT_KEY,
+            ListSerializer(ContentEntry.serializer()), ContentEntry::class) {
+            val entry = it.firstOrNull() ?: return@observeSavedStateResult
+            handleAddOrEditUidAndLabel(UidAndLabel().apply {
+                uid = entry.contentEntryUid
+                labelName = entry.title
+            })
+        }
+    }
+
+    fun handleAddLeavingReasonClicked(){
+        navigateForResult(
+            NavigateForResultOptions(
+                this, null,
+                LeavingReasonListView.VIEW_NAME,
+                LeavingReason::class,
+                LeavingReason.serializer(),
+                RESULT_LEAVING_REASON_KEY
+            )
+        )
+    }
+
+    fun handleAddContentClicked(){
+        navigateForResult(
+            NavigateForResultOptions(
+                this, null,
+                ContentEntryList2View.VIEW_NAME,
+                ContentEntry::class,
+                ContentEntry.serializer(),
+                RESULT_CONTENT_KEY,
+                arguments = mutableMapOf(ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_OPTION to
+                        ContentEntryList2View.ARG_DISPLAY_CONTENT_BY_PARENT,
+                    UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString())
+            )
+        )
+    }
+
     override fun handleClickSave(entity: ReportFilter) {
         if (entity.reportFilterField == 0) {
             view.fieldErrorText = fieldRequiredText
@@ -250,6 +307,7 @@ class ReportFilterEditPresenter(context: Any,
             entity.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
                     ?.joinToString { it.uid.toString() }
         }
+
         if (entity.reportFilterDropDownValue == 0 && entity.reportFilterValue.isNullOrBlank() &&
                 (entity.reportFilterValueBetweenX.isNullOrEmpty() ||
                         entity.reportFilterValueBetweenY.isNullOrEmpty())) {
@@ -258,12 +316,19 @@ class ReportFilterEditPresenter(context: Any,
         } else {
             view.valuesErrorText = null
         }
-        view.finishWithResult(listOf(entity))
+
+        val serializedResult = safeStringify(di, ListSerializer(ReportFilter.serializer()),
+            listOf(entity))
+        finishWithResult(serializedResult)
     }
 
     companion object {
 
         val genderMap = PersonConstants.GENDER_MESSAGE_ID_MAP
+
+        const val RESULT_CONTENT_KEY = "Content"
+
+        const val RESULT_LEAVING_REASON_KEY = "LeavingReason"
 
     }
 

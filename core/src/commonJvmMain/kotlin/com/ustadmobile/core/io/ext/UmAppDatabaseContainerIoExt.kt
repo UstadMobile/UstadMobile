@@ -2,7 +2,6 @@ package com.ustadmobile.core.io.ext
 
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.*
@@ -20,10 +19,11 @@ import java.util.zip.ZipInputStream
 import com.ustadmobile.door.ext.openInputStream
 import org.kodein.di.DI
 import com.ustadmobile.core.contentformats.har.HarEntry
-import java.util.Base64
+import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.ext.maxQueryParamListSize
 import kotlinx.coroutines.NonCancellable
-import kotlin.coroutines.cancellation.CancellationException
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import java.util.*
 
 actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
                                                    recursive: Boolean, context:Any, di: DI,
@@ -44,14 +44,22 @@ actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: D
         containerUid, getSystemTimeInMillis())
 }
 
-actual suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri: DoorUri,
-                                                    pathInContainer: String,  context: Any, di: org.kodein.di.DI, addOptions: ContainerAddOptions) {
+actual suspend fun UmAppDatabase.addFileToContainer(
+    containerUid: Long,
+    fileUri: DoorUri,
+    pathInContainer: String,
+    context: Any,
+    di: org.kodein.di.DI,
+    addOptions: ContainerAddOptions
+) {
     val repo = this as? DoorDatabaseRepository
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase
     withContext(NonCancellable) {
         db.addFileToContainerInternal(containerUid, fileUri.toFile(), false,
                 addOptions, "", pathInContainer, context, di)
+        containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(
+            containerUid, getSystemTimeInMillis())
     }
 }
 
@@ -71,14 +79,16 @@ fun File.toContainerEntryFile(totalSize: Long, md5Sum: ByteArray, gzipped: Boole
 /**
  * @param containerUid container uid we a
  */
-private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
-                                                             file: File,
-                                                             recursive: Boolean,
-                                                             addOptions: ContainerAddOptions,
-                                                             relativePathPrefix: String,
-                                                             fixedPath: String? = null,
-                                                             context: Any,
-                                                             di: DI) {
+private suspend fun UmAppDatabase.addFileToContainerInternal(
+    containerUid: Long,
+    file: File,
+    recursive: Boolean,
+    addOptions: ContainerAddOptions,
+    relativePathPrefix: String,
+    fixedPath: String? = null,
+    context: Any,
+    di: DI
+) {
 
     val storageDirFile = addOptions.storageDirUri.toFile()
     val containerUidFolder = File(storageDirFile, "$containerUid")
@@ -207,45 +217,112 @@ suspend fun UmAppDatabase.addContainerFromUri(containerUid: Long, uri: com.ustad
         containerUid, getSystemTimeInMillis())
 }
 
-suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
-                                                       zipInputStream: ZipInputStream, addOptions: ContainerAddOptions) {
+suspend fun UmAppDatabase.addEntriesToContainerFromZip(
+    containerUid: Long,
+    zipInputStream: ZipInputStream,
+    addOptions: ContainerAddOptions
+) {
 
-    val (db, repo) = requireDbAndRepo()
+    val db = if(this is DoorDatabaseRepository) {
+        this.db as UmAppDatabase
+    }else {
+        this
+    }
+
+    class FileToAdd(
+        val tmpFile: File,
+        val md5Sum: ByteArray,
+        val pathInContainer: String,
+        val isCompressed: Boolean,
+        val uncompressedSize: Long
+    ) {
+        val md5Base64: String by lazy(LazyThreadSafetyMode.NONE) {
+            md5Sum.encodeBase64()
+        }
+    }
+
     withContext(Dispatchers.IO) {
-        val containerEntriesToAdd = mutableListOf<ContainerEntry>()
+        val storageDirFile = addOptions.storageDirUri.toFile()
+        val containerDir = File(storageDirFile, containerUid.toString())
+        containerDir.takeIf { !it.exists() } ?.mkdirs()
+
+        val zipFilesToAdd = mutableListOf<FileToAdd>()
         zipInputStream.use { zipIn ->
-            var zipEntry: ZipEntry? = null
+            lateinit var zipEntry: ZipEntry
+
+            var fileCounter = 0
             while(zipIn.nextEntry?.also { zipEntry = it } != null) {
-                val zipEntryVal = zipEntry ?: throw IllegalStateException("ZipEntry is not null in loop")
-                val nameInZip = zipEntryVal.name
+                //Do not include zip directories
+                if(zipEntry.isDirectory)
+                    continue
 
-                val containerFile = withContext(NonCancellable) {
-                    db.insertOrLookupContainerEntryFile(containerUid, zipIn, zipEntryVal.size,
-                                nameInZip, addOptions)
-                }
+                val nameInZip = addOptions.fileNamer.nameContainerFile(zipEntry.name,
+                    zipEntry.name)
 
-                val entryPath = addOptions.fileNamer.nameContainerFile(nameInZip, nameInZip)
-
-                containerEntriesToAdd.add(ContainerEntry().apply {
-                    this.cePath = entryPath
-                    this.ceContainerUid = containerUid
-                    this.ceCefUid = containerFile.cefUid
-                })
-
+                val entryTmpFile = File(containerDir, "${fileCounter++}.tmp")
+                val useGzip = addOptions.compressionFilter.shouldCompress(nameInZip, null)
+                val entryMd5 = zipIn.writeToFileAndGetMd5(entryTmpFile, useGzip)
+                zipFilesToAdd += FileToAdd(entryTmpFile, entryMd5, nameInZip, useGzip, zipEntry.size)
             }
         }
 
-        db.containerEntryDao.insertListAsync(containerEntriesToAdd)
+        val existingMd5s = db.containerEntryFileDao.findExistingMd5SumsByMd5SumsSafe(
+            zipFilesToAdd.map { it.md5Base64 }, maxQueryParamListSize).filterNotNull().toSet()
+        val filesToStore = mutableMapOf<String, FileToAdd>()
+        val filesToDelete = mutableListOf<FileToAdd>()
 
-        repo.containerDao.takeIf { addOptions.updateContainer }
-            ?.updateContainerSizeAndNumEntriesAsync(containerUid, getSystemTimeInMillis())
+        //Need to handle the edge case where we have a zip that contains two or more entries with
+        // the same md5
+        zipFilesToAdd.forEach {
+            if(it.md5Base64 !in existingMd5s && !filesToStore.containsKey(it.md5Base64))
+                filesToStore[it.md5Base64] = it
+            else
+                filesToDelete += it
+        }
+
+        val containerEntryFilesToInsert = filesToStore.map { fileToAddEntry ->
+            val fileToAdd = fileToAddEntry.value
+            val destFile = File(containerDir, fileToAdd.md5Sum.toHexString())
+            if(!fileToAdd.tmpFile.renameTo(destFile))
+                throw IOException("Could not rename ${fileToAdd.tmpFile.absolutePath} to " +
+                    "${destFile.absolutePath} container uid $containerUid path = ${fileToAdd.pathInContainer}")
+
+            ContainerEntryFile().apply {
+                cefMd5 = fileToAdd.md5Base64
+                compression = if(fileToAdd.isCompressed) {
+                    ContainerEntryFile.COMPRESSION_GZIP
+                }else {
+                    ContainerEntryFile.COMPRESSION_NONE
+                }
+                ceCompressedSize = destFile.length()
+                ceTotalSize = fileToAdd.uncompressedSize
+                cefPath = destFile.absolutePath
+            }
+        }
+
+        filesToDelete.forEach {
+            it.tmpFile.delete()
+        }
+
+
+        db.withDoorTransactionAsync(UmAppDatabase::class) { txDb: UmAppDatabase ->
+            txDb.containerEntryFileDao.insertListAsync(containerEntryFilesToInsert)
+            zipFilesToAdd.forEach {
+                txDb.containerEntryDao.insertWithMd5SumsAsync(containerUid, it.pathInContainer,
+                    it.md5Base64)
+            }
+            txDb.containerDao.takeIf { addOptions.updateContainer }
+                ?.updateContainerSizeAndNumEntriesAsync(containerUid, getSystemTimeInMillis())
+        }
     }
 }
 
-actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
-                                                              zipUri: com.ustadmobile.door.DoorUri,
-                                                              addOptions: ContainerAddOptions,
-                                                              context: Any) {
+actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(
+    containerUid: Long,
+    zipUri: com.ustadmobile.door.DoorUri,
+    addOptions: ContainerAddOptions,
+    context: Any
+) {
     withContext(Dispatchers.IO) {
         val zipInputStream = ZipInputStream(zipUri.openInputStream(context))
         addEntriesToContainerFromZip(containerUid, zipInputStream, addOptions)

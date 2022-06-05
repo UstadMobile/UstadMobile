@@ -34,6 +34,17 @@ kotlin {
         }
     }
 
+    js(LEGACY) {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless() //change to useChrome to run the actual browser
+                    webpackConfig.cssSupport.enabled = true
+                }
+            }
+        }
+    }
+
     sourceSets {
         //This adds a common DAO. It must be in the source so the annotation processor can see
         // parameter names etc.

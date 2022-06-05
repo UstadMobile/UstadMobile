@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.PersonGroupEditView
 import com.ustadmobile.core.view.PersonGroupListView
@@ -10,6 +11,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonGroup
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, view: PersonGroupListView,
@@ -24,12 +26,16 @@ class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, vie
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
-    class PersonGroupListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    class PersonGroupListSortOption(
+        val sortOrder: SortOrder,
+        context: Any,
+        di: DI
+    ) : MessageIdOption(sortOrder.messageId, context, di = di)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         updateListOnView()
-        view.sortOptions = SortOrder.values().toList().map { PersonGroupListSortOption(it, context) }
+        view.sortOptions = SortOrder.values().toList().map { PersonGroupListSortOption(it, context, di) }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -51,7 +57,8 @@ class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, vie
         /* TODO: Add code to go to the appropriate detail view or make a selection
         */
         when(mListMode) {
-            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
+            ListViewMode.PICKER -> finishWithResult(
+                safeStringify(di, ListSerializer(PersonGroup.serializer()), listOf(entry)))
             ListViewMode.BROWSER -> systemImpl.go(PersonGroupEditView.VIEW_NAME,
                     mapOf(UstadView.ARG_ENTITY_UID to entry.groupUid.toString()), context)
         }
@@ -60,6 +67,8 @@ class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, vie
     override fun handleClickCreateNewFab() {
         systemImpl.go(PersonGroupEditView.VIEW_NAME, mapOf(), context)
     }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {}
 
     override fun handleClickSortOrder(sortOption: IdOption) {
         val sortOrder = (sortOption as? PersonGroupListSortOption)?.sortOrder ?: return

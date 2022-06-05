@@ -118,9 +118,12 @@ data class ContentJobItem(
      */
     var cjiUploadSessionUid: String? = null,
 
-        /**
-         *  If contentJobItem is cancelled, then contentEntry needs to be deleted
-          */
+    /**
+     *  If true, if this ContentJobItem is cancelled, then any associated contentEntry should be set
+     *  as inactive (e.g. if something is being imported as new content, but the job is canceled,
+     *  the ContentEntry itself must be removed. If this is an update or something else, then we
+     *  don't make the contententry inactive
+     */
     var cjiContentDeletedOnCancellation:  Boolean = false,
 
     /**
@@ -128,25 +131,4 @@ data class ContentJobItem(
      */
     var cjiContainerProcessed: Boolean = false
 
-) {
-    companion object {
-
-        const val STATUS_DOWNLOAD = 0
-
-        const val STATUS_RUNNING = 5
-
-        const val STATUS_COMPLETE = 10
-
-        const val ACCEPT_NONE = 1
-
-        const val ACCEPT_UNMETERED = 2
-
-        const val ACCEPT_AT_LEAST_ONE_PEER = 4
-
-        const val ACCEPT_METERED = 8
-
-        const val ACCEPT_ANY = ACCEPT_NONE + ACCEPT_UNMETERED + ACCEPT_AT_LEAST_ONE_PEER +
-                ACCEPT_METERED
-
-    }
-}
+)

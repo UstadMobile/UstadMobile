@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toListFilterOptions
@@ -37,7 +38,7 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
+        clazzList2ItemListener.presenter = this
         filterExcludeMembersOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
         filterAlreadySelectedList = arguments[ClazzList2View.ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST]
                 ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
@@ -61,14 +62,14 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
                 searchText.toQueryLikeParam(),
                 loggedInPersonUid, filterAlreadySelectedList,
                 filterExcludeMembersOfSchool, selectedSortOption?.flag ?: 0,
-                view.checkedFilterOptionChip?.optionId ?: 0,
+                view.checkedFilterOptionChip?.optionId ?: ClazzDao.FILTER_CURRENTLY_ENROLLED,
                 systemTimeInMillis(), filterByPermission, 0)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         //All user should be able to see the plus button - but only those with permission can create a new class
         view.newClazzListOptionVisible = repo.entityRoleDao.userHasTableLevelPermission(
-                loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
+            loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
 
         return when(mListMode){
             ListViewMode.PICKER -> view.newClazzListOptionVisible
@@ -82,6 +83,20 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     fun handleClickJoinClazz() {
         systemImpl.go(JoinWithCodeView.VIEW_NAME, mapOf(UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString()), context)
+    }
+
+    override fun handleClickAddNewItem(args: Map<String, String>?, destinationResultKey: String?) {
+        navigateForResult(
+            NavigateForResultOptions(
+                this,null,
+                ClazzEdit2View.VIEW_NAME,
+                Clazz::class,
+                Clazz.serializer(),
+                destinationResultKey ?: CLAZZ_RESULT_KEY,
+                true,
+                arguments = args?.toMutableMap() ?: arguments.toMutableMap(),
+            )
+        )
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {
@@ -101,6 +116,8 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     companion object {
 
+        const val CLAZZ_RESULT_KEY = "Clazz"
+
         val SORT_OPTIONS = listOf(
                 SortOrderOption(MessageID.name, ClazzDao.SORT_CLAZZNAME_ASC, true),
                 SortOrderOption(MessageID.name, ClazzDao.SORT_CLAZZNAME_DESC, false),
@@ -108,7 +125,9 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
                 SortOrderOption(MessageID.attendance, ClazzDao.SORT_ATTENDANCE_DESC, false)
         )
 
-        val FILTER_OPTIONS = listOf(MessageID.active_classes to ClazzDao.FILTER_ACTIVE_ONLY,
-                MessageID.all to 0)
+        val FILTER_OPTIONS = listOf(
+            MessageID.currently_enrolled to ClazzDao.FILTER_CURRENTLY_ENROLLED,
+            MessageID.past_enrollments to ClazzDao.FILTER_PAST_ENROLLMENTS,
+            MessageID.all to 0)
     }
 }

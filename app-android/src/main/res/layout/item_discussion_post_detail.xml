@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.DiscussionPostWithDetails"/>
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+
+        <variable
+            name="discussionPost"
+            type="DiscussionPostWithDetails" />
+
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        >
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/item_discussion_post_list_detail_sender_person_pic"
+            app:imageForeignKey="@{discussionPost.discussionPostStartedPersonUid}"
+            app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
+            app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
+            tools:src="@drawable/ic_account_circle_black_24dp"
+            android:tint="?colorOnIconTint"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <!-- Line 1-->
+        <TextView
+            android:id="@+id/item_discussion_post_list_detail_sender_person_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:text="@{discussionPost.authorPersonFirstNames + ' ' + discussionPost.authorPersonLastName}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            app:layout_constraintStart_toEndOf="@+id/item_discussion_post_list_detail_sender_person_pic"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Eddy Grant" />
+
+        <!-- Line 2-->
+        <TextView
+            android:id="@+id/item_discussion_post_list_detail_post_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:visibility="gone"
+            android:text="@{discussionPost.discussionPostTitle}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            app:layout_constraintStart_toStartOf="@+id/item_discussion_post_list_detail_sender_person_name"
+            app:layout_constraintTop_toBottomOf="@+id/item_discussion_post_list_detail_sender_person_name"
+            tools:text="Hi I'm from Electric Avenue" />
+
+        <!-- Line 3-->
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:visibility="gone"
+            android:layout_marginTop="2dp"
+            android:src="@drawable/ic_baseline_chat_24"
+            app:layout_constraintStart_toEndOf="@+id/item_discussion_post_list_detail_sender_person_pic"
+            app:layout_constraintTop_toBottomOf="@+id/item_discussion_post_list_detail_post_title"
+            app:tint="@color/grey" />
+
+        <TextView
+            android:id="@+id/item_discussion_post_detail_latest_message"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/item_discussion_post_list_detail_post_title"
+            app:layout_constraintTop_toBottomOf="@+id/item_discussion_post_list_detail_post_title"
+            tools:text="I am also from Electric Avenue and I want to take it higher.." />
+
+
+        <TextView
+            android:id="@+id/item_discussion_post_list_detail_timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/item_discussion_post_list_detail_sender_person_name"
+            app:relativeTime="@{discussionPost.discussionPostLct}"
+            tools:text="02/Feb/2022" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

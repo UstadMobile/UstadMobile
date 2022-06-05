@@ -79,6 +79,7 @@ import java.io.File
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
+import java.time.Duration
 import java.util.*
 import javax.xml.parsers.ParserConfigurationException
 import javax.xml.transform.TransformerException
@@ -265,7 +266,7 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
         val driver = ContentScraperUtil.setupLogIndexChromeDriver()
 
         driver.get(scrapeUrl.toString())
-        val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
+        val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM)
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
         try {
             waitDriver.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#questionController"))).click()
@@ -319,31 +320,31 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
                         val plixJs = FileUtils.readFileToString(file, UTF_ENCODING)
                         val doc = Jsoup.parse(plixJs)
 
-                        doc.selectFirst("div.read-more-container").remove()
-                        doc.selectFirst("div#portraitView").remove()
-                        doc.selectFirst("div#ToolBarView").remove()
-                        doc.selectFirst("div#deviceCompatibilityAlertPlix").remove()
-                        doc.selectFirst("div#leftBackWrapper").remove()
+                        doc.selectFirst("div.read-more-container")?.remove()
+                        doc.selectFirst("div#portraitView")?.remove()
+                        doc.selectFirst("div#ToolBarView")?.remove()
+                        doc.selectFirst("div#deviceCompatibilityAlertPlix")?.remove()
+                        doc.selectFirst("div#leftBackWrapper")?.remove()
 
                         val head = doc.head()
                         head.append(css)
 
                         val iframe = doc.selectFirst("div.plixIFrameContainer")
-                        iframe.removeClass("plixIFrameContainer")
+                        iframe?.removeClass("plixIFrameContainer")
 
                         val leftWrapper = doc.selectFirst("div#plixLeftWrapper")
-                        leftWrapper.removeClass("plixLeftWrapper")
-                        leftWrapper.addClass("small-12")
-                        leftWrapper.addClass("medium-6")
-                        leftWrapper.addClass("large-6")
-                        val leftAttr = leftWrapper.attr("style")
-                        leftWrapper.attr("style", leftAttr + "display: block;")
+                        leftWrapper?.removeClass("plixLeftWrapper")
+                        leftWrapper?.addClass("small-12")
+                        leftWrapper?.addClass("medium-6")
+                        leftWrapper?.addClass("large-6")
+                        val leftAttr = leftWrapper?.attr("style")
+                        leftWrapper?.attr("style", leftAttr + "display: block;")
 
                         val rightWrapper = doc.selectFirst("div#plixRightWrapper")
-                        rightWrapper.removeClass("small-6")
-                        rightWrapper.addClass("small-12")
-                        rightWrapper.addClass("medium-6")
-                        rightWrapper.addClass("large-6")
+                        rightWrapper?.removeClass("small-6")
+                        rightWrapper?.addClass("small-12")
+                        rightWrapper?.addClass("medium-6")
+                        rightWrapper?.addClass("large-6")
 
                         FileUtils.writeStringToFile(file, doc.html(), UTF_ENCODING)
 
@@ -397,14 +398,14 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
         var urlString = Jsoup.parse(videoElement.outerHtml()).select("[src]").attr("src")
 
         if (urlString.startsWith("//")) {
-            urlString = Jsoup.connect("https:$urlString").get().selectFirst("video source").attr("src")
+            urlString = Jsoup.connect("https:$urlString").get().selectFirst("video source")?.attr("src")
         } else if (urlString.startsWith("/flx")) {
             var html = Jsoup.connect("https://www.ck12.org$urlString").followRedirects(true).get()
-            var urlSrc = Jsoup.parse(getIframefromHtml(html).outerHtml()).selectFirst("[src]").attr("src")
-            if (urlSrc.contains(".mp4")) {
+            var urlSrc = Jsoup.parse(getIframefromHtml(html).outerHtml()).selectFirst("[src]")?.attr("src")
+            if (urlSrc?.contains(".mp4") == true) {
                 urlString = urlSrc
-            } else if (urlSrc.startsWith("//")) {
-                urlString = Jsoup.connect("https:$urlSrc").get().selectFirst("video source").attr("src")
+            } else if (urlSrc?.startsWith("//") == true) {
+                urlString = Jsoup.connect("https:$urlSrc").get().selectFirst("video source")?.attr("src")
             } else {
                 UMLogUtil.logError("found flx video - might be youtube at $urlSrc")
                 isContentUpdated = false

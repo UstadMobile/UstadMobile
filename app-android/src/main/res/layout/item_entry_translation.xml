@@ -11,10 +11,6 @@
             name="mPresenter"
             type="com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter" />
 
-        <variable
-            name="mActivity"
-            type="com.ustadmobile.port.android.view.ContentEntryDetailFragmentEventHandler" />
-
     </data>
 
     <androidx.appcompat.widget.AppCompatButton

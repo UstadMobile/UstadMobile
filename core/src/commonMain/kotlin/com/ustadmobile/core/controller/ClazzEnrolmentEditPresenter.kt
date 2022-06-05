@@ -3,25 +3,29 @@ package com.ustadmobile.core.controller
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.processEnrolmentIntoClass
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.view.ClazzEnrolmentEditView
-import com.ustadmobile.door.DoorLifecycleOwner
-
-import kotlinx.coroutines.*
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import org.kodein.di.DI
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.ClazzEnrolmentEditView
+import com.ustadmobile.core.view.LeavingReasonListView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.*
+import kotlinx.serialization.builtins.ListSerializer
+import org.kodein.di.DI
 
 
 class ClazzEnrolmentEditPresenter(context: Any,
@@ -38,8 +42,8 @@ class ClazzEnrolmentEditPresenter(context: Any,
         TEACHER(ClazzEnrolment.ROLE_TEACHER, MessageID.teacher)
     }
 
-    class RoleMessageIdOption(day: RoleOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class RoleMessageIdOption(day: RoleOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     enum class OutcomeOptions(val optionVal: Int, val messageId: Int) {
         INPROGRESS(ClazzEnrolment.OUTCOME_IN_PROGRESS, MessageID.in_progress),
@@ -48,8 +52,8 @@ class ClazzEnrolmentEditPresenter(context: Any,
         DROPPED_OUT(ClazzEnrolment.OUTCOME_DROPPED_OUT, MessageID.dropped_out),
     }
 
-    class OutcomeMessageIdOption(day: OutcomeOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
+    class OutcomeMessageIdOption(day: OutcomeOptions, context: Any, di: DI)
+        : MessageIdOption(day.messageId, context, day.optionVal, di = di)
 
     var selectedPerson: Long = 0L
     var selectedClazz: Long = 0L
@@ -66,7 +70,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
         super.onCreate(savedState)
 
-        view.statusList = OutcomeOptions.values().map { OutcomeMessageIdOption(it, context) }
+        view.statusList = OutcomeOptions.values().map { OutcomeMessageIdOption(it, context, di) }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzEnrolmentWithLeavingReason? {
@@ -90,6 +94,20 @@ class ClazzEnrolmentEditPresenter(context: Any,
         return clazzEnrolment
     }
 
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        observeSavedStateResult(SAVEDSTATE_KEY_LEAVING_REASON, ListSerializer(LeavingReason.serializer()),
+            LeavingReason::class) {
+            val reason = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.leavingReason = reason
+            entity?.clazzEnrolmentLeavingReasonUid = reason.leavingReasonUid
+            view.entity = entity
+            requireSavedStateHandle()[SAVEDSTATE_KEY_LEAVING_REASON] = null
+        }
+
+    }
+
     private suspend fun setupRoleListOptions(){
         hasAddStudentPermission = repo.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
                 selectedClazz,  Role.PERMISSION_CLAZZ_ADD_STUDENT)
@@ -98,10 +116,10 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
         val roleList = mutableListOf<RoleMessageIdOption>()
         if(hasAddStudentPermission){
-            roleList.add(RoleMessageIdOption(RoleOptions.STUDENT, context))
+            roleList.add(RoleMessageIdOption(RoleOptions.STUDENT, context, di))
         }
         if(hasAddTeacherPermission){
-            roleList.add(RoleMessageIdOption(RoleOptions.TEACHER, context))
+            roleList.add(RoleMessageIdOption(RoleOptions.TEACHER, context, di))
         }
         view.roleList = roleList.toList()
 
@@ -139,7 +157,6 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
     override fun handleClickSave(entity: ClazzEnrolmentWithLeavingReason) {
         presenterScope.launch {
-
             // must be filled
             if(entity.clazzEnrolmentRole == 0){
                 view.roleSelectionError = systemImpl.getString(MessageID.field_required_prompt, context)
@@ -182,9 +199,24 @@ class ClazzEnrolmentEditPresenter(context: Any,
                 repo.clazzEnrolmentDao.updateAsync(entity)
             }
 
-            view.finishWithResult(listOf(entity))
+            finishWithResult(
+                safeStringify(di, ListSerializer(ClazzEnrolmentWithLeavingReason.serializer()) ,
+                    listOf(entity))
+            )
         }
     }
 
+    fun handleReasonLeavingClicked(){
+        navigateForResult(
+            NavigateForResultOptions(this, null,
+                LeavingReasonListView.VIEW_NAME,
+                LeavingReason::class,
+                LeavingReason.serializer())
+        )
+    }
+
+    companion object {
+        val SAVEDSTATE_KEY_LEAVING_REASON = "LeavingReason"
+    }
 
 }

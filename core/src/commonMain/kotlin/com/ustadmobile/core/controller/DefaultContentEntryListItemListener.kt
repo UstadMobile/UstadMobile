@@ -1,13 +1,19 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryDetailView
+import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 
-class DefaultContentEntryListItemListener(var view: ContentEntryList2View? = null,
+class DefaultContentEntryListItemListener(var view: UstadView? = null,
                                           var presenter: ContentEntryList2Presenter? = null,
                                           var mListMode: ListViewMode = ListViewMode.BROWSER,
                                           var clazzUid: Long,
@@ -16,6 +22,9 @@ class DefaultContentEntryListItemListener(var view: ContentEntryList2View? = nul
 
     val systemImpl: UstadMobileSystemImpl by instance()
 
+    var serializationStrategy: KSerializer<List<ContentEntry>> =
+        ListSerializer(ContentEntry.serializer())
+
     override fun onClickContentEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         when{
             mListMode == ListViewMode.PICKER && !entry.leaf -> {
@@ -23,7 +32,7 @@ class DefaultContentEntryListItemListener(var view: ContentEntryList2View? = nul
             }
 
             mListMode == ListViewMode.PICKER && entry.leaf -> {
-                view?.finishWithResult(listOf(entry))
+                presenter?.handleEntrySelectedFromPicker(entry)
             }
 
             mListMode == ListViewMode.BROWSER -> {
@@ -46,7 +55,7 @@ class DefaultContentEntryListItemListener(var view: ContentEntryList2View? = nul
 
         presenter?.handleMoveWithSelectedEntry(entry)
 
-        view?.finishWithResult(listOf(entry))
+        presenter?.handleEntrySelectedFromPicker(entry)
     }
 
     override fun onClickDownloadContentEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {

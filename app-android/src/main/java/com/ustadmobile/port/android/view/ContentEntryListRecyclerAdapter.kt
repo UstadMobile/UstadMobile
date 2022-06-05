@@ -10,34 +10,40 @@ import com.ustadmobile.core.controller.ContentEntryListItemListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.lib.db.entities.ContentJobItemProgress
+import com.ustadmobile.lib.db.entities.ContentJobItemProgressAndStatus
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemListener?,
-                                      private val pickerMode: String?, private val selectFolderVisible: Boolean?,
-                                      /**
-                                       * The lifecycle owner is needed for use of livedata observers
-                                       * Unfortunately findViewTreeLifecycleOwner is flaky when used
-                                       * with a recyclerview item
-                                       */
-                                      private var lifecycleOwner: LifecycleOwner?, di: DI)
-    : SelectablePagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, ContentEntryListRecyclerAdapter.ContentEntryListViewHolder>(ContentEntryList2Fragment.DIFF_CALLBACK) {
+class ContentEntryListRecyclerAdapter(
+    var itemListener: ContentEntryListItemListener?,
+    private val pickerMode: String?,
+    private val selectFolderVisible: Boolean?,
+    /**
+    * The lifecycle owner is needed for use of livedata observers
+    * Unfortunately findViewTreeLifecycleOwner is flaky when used
+    * with a recyclerview item
+    */
+    private var lifecycleOwner: LifecycleOwner?,
+    di: DI
+) : SelectablePagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
+    ContentEntryListRecyclerAdapter.ContentEntryListViewHolder>(ContentEntryList2Fragment.DIFF_CALLBACK)
+{
 
     private val accountManager: UstadAccountManager by di.instance()
 
     private val appDatabase: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
 
-    private val boundViewHolders = mutableSetOf<ContentEntryListViewHolder>()
-
-    inner class ContentEntryListViewHolder(val itemBinding: ItemContentEntryListBinding): RecyclerView.ViewHolder(itemBinding.root),
-        DoorObserver<Int>{
-        var downloadJobItemLiveData: RateLimitedLiveData<Int>? = null
+    class ContentEntryListViewHolder(
+        val itemBinding: ItemContentEntryListBinding,
+        val lifecycleOwner: LifecycleOwner?
+    ): RecyclerView.ViewHolder(itemBinding.root), DoorObserver<ContentJobItemProgressAndStatus?>{
+        var downloadJobItemLiveData: DoorLiveData<ContentJobItemProgressAndStatus?>? = null
             set(value) {
                 field?.removeObserver(this)
                 field = value
@@ -46,29 +52,20 @@ class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemList
                 }
             }
 
-        var contentJobItemProgress: RateLimitedLiveData<ContentJobItemProgress?>? = null
-            set(value){
-                field = value
-                lifecycleOwner?.also {
-                    value?.observe(it){ progress ->
-                        itemBinding.downloadStatusButton.contentJobItemProgress = progress
-                    }
+
+        override fun onChanged(t: ContentJobItemProgressAndStatus?) {
+            if(t != null) {
+                itemBinding.downloadStatusButton.contentJobItemStatus = t.status
+
+                if(t.total > 0){
+                    itemBinding.downloadStatusButton.progress = ((t.progress * 100) / t.total).toInt()
                 }
+            }else {
+                itemBinding.downloadStatusButton.progress = 0
+                itemBinding.downloadStatusButton.contentJobItemStatus = 0
             }
-
-
-        override fun onChanged(t: Int?) {
-            itemBinding.downloadStatusButton.contentJobItemStatus = t
         }
     }
-
-    fun onLocalAvailabilityUpdated(localAvailabilityMap: Map<Long, Boolean>) {
-        boundViewHolders.forEach {
-            it.itemBinding.locallyAvailable = localAvailabilityMap.getOrElse(
-                    it.itemBinding.contentEntry?.mostRecentContainer?.containerUid ?: -1) { false }
-        }
-    }
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentEntryListViewHolder {
         val itemBinding = ItemContentEntryListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -76,30 +73,22 @@ class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemList
         itemBinding.selectablePagedListAdapter = this
         itemBinding.isPickerMode = pickerMode == ListViewMode.PICKER.toString()
         itemBinding.selectFolderVisible = selectFolderVisible ?: true
-        return ContentEntryListViewHolder(itemBinding)
+        return ContentEntryListViewHolder(itemBinding, lifecycleOwner)
     }
 
     override fun onBindViewHolder(holder: ContentEntryListViewHolder, position: Int) {
         val item = getItem(position)
-        boundViewHolders += holder
         holder.itemBinding.contentEntry = item
         holder.itemView.setSelectedIfInList(item, selectedItems, ContentEntryList2Fragment.DIFF_CALLBACK)
         if(item != null) {
             holder.downloadJobItemLiveData = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
-                appDatabase.contentJobItemDao.findStatusForActiveContentJobItem(item.contentEntryUid)
-            }
-            holder.contentJobItemProgress = RateLimitedLiveData(appDatabase, listOf("ContentJobItem"), 1000) {
-                appDatabase.contentJobItemDao.findLatestProgressForActiveContentJobItem(item.contentEntryUid)
+                appDatabase.contentEntryDao.statusForContentEntryList(item.contentEntryUid)
             }
         }else{
             holder.downloadJobItemLiveData = null
-            holder.contentJobItemProgress = null
         }
     }
 
-    override fun onViewRecycled(holder: ContentEntryListViewHolder) {
-        boundViewHolders -= holder
-    }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)

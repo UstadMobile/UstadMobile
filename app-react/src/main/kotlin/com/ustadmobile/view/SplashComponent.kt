@@ -1,0 +1,75 @@
+package com.ustadmobile.view
+
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.themeContext
+import com.ustadmobile.mui.components.umLinearProgress
+import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.util.StyleManager
+import com.ustadmobile.util.StyleManager.alignEndItems
+import com.ustadmobile.util.StyleManager.partnersList
+import com.ustadmobile.util.StyleManager.splashComponentContainer
+import com.ustadmobile.util.ThemeManager
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.UmState
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.ext.umPartner
+import kotlinx.css.FlexDirection
+import kotlinx.css.LinearDimension
+import kotlinx.css.width
+import react.RBuilder
+import react.RComponent
+import styled.css
+import styled.styledDiv
+import styled.styledImg
+
+class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props) {
+
+    override fun RBuilder.render() {
+        themeContext.Consumer { _ ->
+            styledDiv {
+                css (splashComponentContainer)
+
+                styledDiv {
+                    css(StyleManager.splashComponentPreloadContainer)
+                    umGridContainer {
+                        css(StyleManager.alignCenterItems)
+                        umItem(GridSize.cells12) {
+                            css(StyleManager.alignCenterItems)
+                            styledImg {
+                                css{
+                                    width = LinearDimension("90%")
+                                }
+                                attrs.src = "assets/logo.png"
+                            }
+                        }
+
+                        umItem(GridSize.cells12) {
+                            css(StyleManager.alignCenterItems)
+                            val color = when {
+                                ThemeManager.isDarkModeActive() -> UMColor.secondary
+                                else -> UMColor.primary
+                            }
+
+                            umLinearProgress(color = color) {
+                                css {
+                                    width = LinearDimension("100%")
+                                }
+                            }
+                        }
+                    }
+                }
+
+                umItem(GridSize.cells12, flexDirection = FlexDirection.rowReverse) {
+                    css{
+                        +partnersList
+                        +alignEndItems
+                    }
+                    umPartner("irc.png")
+                    umPartner("expo.png")
+                }
+            }
+        }
+    }
+}
+fun RBuilder.renderSplashComponent() = child(SplashComponent::class) {}

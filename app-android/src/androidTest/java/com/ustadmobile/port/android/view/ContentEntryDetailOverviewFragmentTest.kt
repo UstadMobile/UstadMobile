@@ -319,9 +319,8 @@ class ContentEntryDetailOverviewFragmentTest : TestCase() {
                     hasText(entryTitle)
                 }
 
-                downloadOpenButton{
+                openButton{
                     isDisplayed()
-                    hasText(R.string.open)
                 }
 
                 progressRecycler{

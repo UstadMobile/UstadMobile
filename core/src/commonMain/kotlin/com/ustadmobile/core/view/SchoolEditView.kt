@@ -11,7 +11,7 @@ interface SchoolEditView: UstadEditView<SchoolWithHolidayCalendar> {
 
     companion object {
 
-        const val VIEW_NAME = "SchoolEdit"
+        const val VIEW_NAME = "InstitutionEditView"
 
     }
 

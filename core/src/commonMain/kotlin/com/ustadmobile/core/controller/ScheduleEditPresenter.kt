@@ -9,7 +9,6 @@ import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Schedule
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: ScheduleEditView,
@@ -24,7 +23,11 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
         WEEKLY(Schedule.SCHEDULE_FREQUENCY_WEEKLY, MessageID.weekly)
     }
 
-    class FrequencyMessageIdOption(frequency: FrequencyOption, context: Any) : MessageIdOption(frequency.messageId, context, frequency.optionVal)
+    class FrequencyMessageIdOption(
+        frequency: FrequencyOption,
+        context: Any,
+        di: DI
+    ) : MessageIdOption(frequency.messageId, context, frequency.optionVal, di)
 
     enum class DayOptions(val optionVal: Int, val messageId: Int) {
         SUNDAY(Schedule.DAY_SUNDAY, MessageID.sunday),
@@ -36,7 +39,11 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
         SATURDAY(Schedule.DAY_SATURDAY, MessageID.saturday)
     }
 
-    class DayMessageIdOption(day: DayOptions, context: Any) : MessageIdOption(day.messageId, context, day.optionVal)
+    class DayMessageIdOption(
+        day: DayOptions,
+        context: Any,
+        di: DI
+    ) : MessageIdOption(day.messageId, context, day.optionVal, di)
 
     var schedule: Schedule? = null
 
@@ -44,7 +51,7 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
         super.onCreate(savedState)
 
         //view.frequencyOptions = FrequencyOption.values().map { FrequencyMessageIdOption(it, context) }
-        view.dayOptions = DayOptions.values().map { DayMessageIdOption(it, context) }
+        view.dayOptions = DayOptions.values().map { DayMessageIdOption(it, context, di) }
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): Schedule? {
@@ -64,21 +71,26 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
         view.fromTimeError = null
         view.toTimeError = null
 
-        if(entity.sceduleStartTime == 0L) {
-            view.fromTimeError = systemImpl.getString(MessageID.field_required_prompt,
-                context)
-            return
-        }else if(entity.scheduleEndTime == 0L) {
-            view.toTimeError = systemImpl.getString(MessageID.field_required_prompt,
-                context)
-            return
-        }else if(entity.scheduleEndTime <= entity.sceduleStartTime) {
-            view.toTimeError = systemImpl.getString(MessageID.end_is_before_start_error,
-                context)
-            return
+        when {
+            entity.sceduleStartTime == 0L -> {
+                view.fromTimeError = systemImpl.getString(MessageID.field_required_prompt,
+                    context)
+                return
+            }
+            entity.scheduleEndTime == 0L -> {
+                view.toTimeError = systemImpl.getString(MessageID.field_required_prompt,
+                    context)
+                return
+            }
+            entity.scheduleEndTime <= entity.sceduleStartTime -> {
+                view.toTimeError = systemImpl.getString(MessageID.end_is_before_start_error,
+                    context)
+                return
+            }
+            else -> finishWithResult(
+                safeStringify(di, ListSerializer(Schedule.serializer()), listOf(entity))
+            )
         }
 
-        finishWithResult(
-            safeStringify(di, ListSerializer(Schedule.serializer()), listOf(entity)))
     }
 }

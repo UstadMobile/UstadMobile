@@ -3,25 +3,29 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.BLOCK_REQUIRED
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
-import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.ContentEntry
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -38,7 +42,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
     fun handleClickDone(link: String) {
         presenterScope.launch(doorMainDispatcher()) {
 
-            view.showHideProgress(false)
+            view.inProgress = true
             try {
                 currentHttpClient.post<HttpStatement>() {
                     url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
@@ -50,33 +54,44 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                     val status = it.status
                     if (status.value != 200) {
                         view.validLink = false
-                        view.showHideProgress(true)
+                        view.inProgress = false
                         return@execute
                     }
 
                     val data = it.receive<MetadataResult>()
-                    view.showHideProgress(true)
+                    view.inProgress = false
 
-                    if (arguments.containsKey(ARG_RESULT_DEST_KEY)) {
-                        view.finishWithResult(data)
+                    if (arguments[ARG_RESULT_DEST_VIEWNAME] == ContentEntryEdit2View.VIEW_NAME) {
+                        finishWithResult(safeStringify(di, ListSerializer(MetadataResult.serializer()),
+                            listOf(data)))
                     } else {
                         val args = mutableMapOf<String, String>()
                         args.putEntityAsJson(ContentEntryEdit2View.ARG_IMPORTED_METADATA,
                                 MetadataResult.serializer(), data)
-                        args[ARG_POPUPTO_ON_FINISH] = ContentEntryImportLinkView.VIEW_NAME
                         args.putFromOtherMapIfPresent(arguments, ARG_LEAF)
                         args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
-                        systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
-                                args, context)
+                        args.putFromOtherMapIfPresent(arguments, BLOCK_REQUIRED)
+                        args.putFromOtherMapIfPresent(arguments, UstadView.ARG_CLAZZUID)
+
+                        navigateForResult(
+                            NavigateForResultOptions(
+                                this@ContentEntryImportLinkPresenter,
+                                null,
+                                ContentEntryEdit2View.VIEW_NAME,
+                                ContentEntry::class,
+                                ContentEntry.serializer(),
+                                arguments = args)
+                        )
+
                     }
 
 
                 }
 
             } catch (e: Exception) {
-                view.showHideProgress(true)
+                view.inProgress = false
                 view.showSnackBar(systemImpl.getString(MessageID.import_link_error, context))
-                dumpException(e)
+                Napier.e("Exception attempting to input import link url", e)
             }
         }
 

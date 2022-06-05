@@ -28,6 +28,16 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                  ON ${StatementEntity.FROM_SCOPEDGRANT_TO_STATEMENT_JOIN_ON_CLAUSE}
        WHERE UserSession.usClientNodeId = :newNodeId
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
+         -- Temporary measure to prevent admin user getting clogged up
+         -- Restrict to the last 30 days of data
+         AND StatementEntity.timestamp > ( 
+       --notpsql
+       strftime('%s', 'now') * 1000
+       --endnotpsql
+       /*psql
+       ROUND(EXTRACT(epoch from NOW())*1000)
+       */
+       - (30 * CAST(86400000 AS BIGINT)))
        --notpsql
          AND StatementEntity.statementLct != COALESCE(
              (SELECT seVersionId
@@ -135,6 +145,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 ELSE 0 END) AS resultScaled, 
             MAX(ResultSource.extensionProgress) AS progress,
             0 AS penalty,
+            0 as resultWeight,
             'FALSE' AS contentComplete,
             0 AS success,
             
@@ -143,7 +154,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 
             1 as totalContent, 
             
-             
+            0 as fileSubmissionStatus, 
          
             '' AS latestPrivateComment
         
@@ -197,6 +208,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 COALESCE(StatementEntity.extensionProgress,0) AS progress, 
                 COALESCE(StatementEntity.resultCompletion,'FALSE') AS contentComplete,
                 COALESCE(StatementEntity.resultSuccess, 0) AS success,
+                0 as resultWeight,
                 
                 COALESCE((CASE WHEN resultCompletion 
                 THEN 1 ELSE 0 END),0) AS totalCompletedContent,
@@ -217,6 +229,63 @@ abstract class StatementDao : BaseDao<StatementEntity> {
        WHERE contentEntryUid = :contentEntryUid
     """)
     abstract suspend fun getBestScoreForContentForPerson(contentEntryUid: Long, accountPersonUid: Long): ContentEntryStatementScoreProgress?
+
+
+    @Query("""
+         SELECT COALESCE((
+                SELECT DISTINCT(statementpersonUid)
+                  FROM ClazzAssignment 
+                      JOIN ClazzEnrolment
+                       ON ClazzEnrolment.clazzEnrolmentClazzUid = ClazzAssignment.caClazzUid
+                       
+                       JOIN CourseBlock
+                       ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
+                       AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
+                       
+          	           JOIN StatementEntity AS SubmissionStatement
+          	           ON SubmissionStatement.statementUid = (SELECT statementUid 
+                                   FROM StatementEntity
+                                  WHERE StatementEntity.statementContentEntryUid = 0
+                                    AND xObjectUid = ClazzAssignment.caXObjectUid
+                                    AND StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                                    AND StatementEntity.timestamp 
+                                        BETWEEN CourseBlock.cbHideUntilDate
+                                        AND CourseBlock.cbGracePeriodDate
+                               ORDER BY timestamp DESC LIMIT 1)
+                               
+          	           LEFT JOIN XObjectEntity
+                       ON XObjectEntity.objectStatementRefUid = SubmissionStatement.statementUid  
+               
+                 WHERE ClazzAssignment.caUid = :assignmentUid
+                   AND XObjectEntity.xobjectUid IS NULL
+                   AND ClazzEnrolment.clazzEnrolmentActive
+                   AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                   AND ClazzEnrolment.clazzEnrolmentPersonUid != :currentStudentUid
+            LIMIT 1),0)
+    """)
+    abstract suspend fun findNextStudentNotMarkedForAssignment(assignmentUid: Long,
+                                                               currentStudentUid: Long): Long
+
+
+    @Query("""
+        SELECT * 
+          FROM StatementEntity
+         WHERE statementPersonUid = :studentUid
+           AND statementVerbUid = ${VerbEntity.VERB_SUBMITTED_UID}
+           AND xObjectUid = :assignmentObjectUid    
+      ORDER BY timestamp                
+    """)
+    abstract suspend fun findSubmittedStatementFromStudent(studentUid: Long, assignmentObjectUid: Long): StatementEntity?
+
+    @Query("""
+        SELECT * 
+          FROM StatementEntity
+         WHERE statementPersonUid = :studentUid
+           AND statementVerbUid = ${VerbEntity.VERB_SCORED_UID}
+      ORDER BY timestamp                
+    """)
+    abstract fun findScoreStatementForStudent(studentUid: Long): StatementEntity?
+
 
     @Query("""
         SELECT MIN(timestamp) AS startDate, 
@@ -291,10 +360,11 @@ abstract class StatementDao : BaseDao<StatementEntity> {
         SELECT SUM(resultScoreRaw) AS resultScore, 
                SUM(resultScoreMax) AS resultMax,
                MAX(extensionProgress) AS progress,
+               0 as resultWeight,
                0 as penalty,
                0 as success,
                'FALSE' as contentComplete,
-               0 AS resultScaled,
+               0 AS resultScaled, 
                COALESCE((CASE WHEN resultCompletion 
                THEN 1 ELSE 0 END),0) AS totalCompletedContent,
                 
@@ -316,6 +386,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                resultScoreMax AS resultMax,
                extensionProgress AS progress,
                0 AS penalty,
+               0 as resultWeight,
                resultSuccess AS success,
                resultCompletion AS contentComplete, 
                resultScoreScaled AS resultScaled,

@@ -142,8 +142,11 @@ open class DropDownListAutoCompleteTextView<T: Any>: androidx.appcompat.widget.A
 
         set(value) {
             val itemIndex = dropDownOptions.indexOfFirst { dropDownListAdapter?.getId(it) == value }
-            if(itemIndex == -1)
+            if(itemIndex == -1){
+                // setting the text to empty to show no option selected
+                setText("")
                 return
+            }
 
             selectedItem = dropDownOptions[itemIndex]
             setText(dropDownListAdapter?.getText(dropDownOptions[itemIndex]), false)

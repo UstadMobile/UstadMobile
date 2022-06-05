@@ -1,7 +1,10 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.*
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -10,8 +13,6 @@ import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.port.android.util.ext.saveStateToCurrentBackStackStateHandle
-import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
-import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 
 abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> {
 
@@ -24,10 +25,6 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
                 activity?.invalidateOptionsMenu()
             }
         }
-
-    override fun finishWithResult(result: List<T>) {
-        saveResultToBackStackSavedStateHandle(result)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -79,6 +76,8 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
         outState.putAll(mutableMapOf<String, String>().apply { mEditPresenter?.onSaveInstanceState(this) }.toBundle())
     }
 
+    @Deprecated("This should not be used. Saving to the state handle should be done in " +
+        "multiplatform code by the presenter.")
     protected open fun onSaveStateToBackStackStateHandle() = mEditPresenter?.saveStateToCurrentBackStackStateHandle(findNavController())
 
 }

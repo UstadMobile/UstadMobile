@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseDiscussion"/>
+        <import type="com.ustadmobile.port.android.view.ClazzEditFragment"/>
+        <import type="android.view.View"/>
+
+        <variable
+            name="discussion"
+            type="CourseDiscussion" />
+
+        <variable
+            name="block"
+            type="CourseBlockWithCompleteEntity" />
+
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ClazzDetailOverviewPresenter" />
+
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="@{() -> presenter.handleClickCourseDiscussion(discussion)}"
+        android:background="?attr/selectableItemBackground"
+        app:courseBlockIndent="@{block.cbIndentLevel}">
+
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/item_course_block_icon"
+            app:srcCompat="@drawable/ic_menu_white_24dp"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            app:imageLookupKey="@{block.cbType}"
+            app:imageLookupMap="@{ClazzEditFragment.BLOCK_ICON_MAP}"
+            app:tint="?colorOnIconTint"
+            app:strokeColor="?colorOnIconTint"
+            android:scaleType="centerInside"
+            app:strokeWidth="@dimen/dimen_2dp"
+            android:padding="@dimen/dimen_2dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+            android:layout_margin="@dimen/dimen_16dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <!-- Line 1-->
+        <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:id="@+id/item_block_line1_text"
+            android:text="@{block.cbTitle}"
+            tools:text="Main discussion board"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_course_block_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_margin="@dimen/dimen_16dp"/>
+
+
+        <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            android:id="@+id/item_block_line2_desc"
+            android:text="@{block.cbDescription}"
+            tools:text="This is the main discussion board for this course."
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:maxLines="3"
+            android:visibility="@{block.cbDescription == null ? View.GONE : View.VISIBLE}"
+            app:layout_constraintTop_toBottomOf="@id/item_block_line1_text"
+            app:layout_constraintStart_toStartOf="@id/item_block_line1_text"
+            app:layout_constraintEnd_toEndOf="@+id/item_block_line1_text"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

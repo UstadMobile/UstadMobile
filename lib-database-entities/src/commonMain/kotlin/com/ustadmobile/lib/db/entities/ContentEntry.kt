@@ -78,6 +78,7 @@ open class ContentEntry() {
      */
     var sourceUrl: String? = null
 
+    @Deprecated("use contentEntryPicture")
     var thumbnailUrl: String? = null
 
     var lastModified: Long = 0
@@ -113,15 +114,20 @@ open class ContentEntry() {
     /**
      *  Represents if the entry is marked as completed by the content, student or min score
      */
+    @Deprecated("use on courseBlock, will be removed soon")
     var completionCriteria: Int = COMPLETION_CRITERIA_AUTOMATIC
 
     /**
      * Minimum score for content to mark as complete if completion criteria is set to min score
      */
+    @Deprecated("use on courseBlock, will be removed soon")
     var minScore: Int = 0
 
     var contentTypeFlag: Int = 0
 
+    /**
+     * The personUid of the owner of the content e.g. the person to add this content
+     */
     var contentOwner: Long = 0
 
     @LocalChangeSeqNum

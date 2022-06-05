@@ -31,13 +31,13 @@ import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.*
 import org.junit.*
 import org.junit.rules.TemporaryFolder
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
+import com.ustadmobile.core.util.ext.getContentEntryJsonFilesFromDir
+import com.ustadmobile.core.util.ext.filterNotInDirectory
+import kotlinx.serialization.json.Json
+import org.kodein.di.*
 
 
 class ContainerFetcherOkHttpTest {
@@ -137,13 +137,12 @@ class ContainerFetcherOkHttpTest {
     fun givenValidRequest_whenDownloadCalled_thenShouldDownloadContainerFiles() {
         val containerEntriesToDownload = serverDb.containerEntryDao.findByContainer(container.containerUid)
                 .map { it.toContainerEntryWithMd5() }
-        val md5List = containerEntriesToDownload.map { it.cefMd5!! }
 
         val downloadDestDir = temporaryFolder.newFolder()
 
         val siteUrl = mockWebServer.url("/").toString()
         val request = ContainerFetcherRequest2(containerEntriesToDownload, siteUrl, siteUrl,
-            downloadDestDir.toKmpUriString())
+            downloadDestDir.toDoorUri().toString())
 
         val mockListener = mock<ContainerFetcherListener2> { }
         val downloaderJob = ContainerFetcherOkHttp(request, mockListener, clientDi)
@@ -152,8 +151,13 @@ class ContainerFetcherOkHttpTest {
             downloaderJob.download().also {
                 val clientDb: UmAppDatabase = clientDi.on(Endpoint(request.siteUrl)).direct
                     .instance(tag = DoorTag.TAG_DB)
-                clientDb.linkExistingContainerEntries(container.containerUid,
-                    containerEntriesToDownload)
+                val downloadedContainerFiles = downloadDestDir.getContentEntryJsonFilesFromDir(
+                    clientDi.direct.instance())
+                clientDb.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                    txDb.containerEntryFileDao.insertListAsync(downloadedContainerFiles)
+                    txDb.linkExistingContainerEntries(container.containerUid,
+                        containerEntriesToDownload)
+                }
             }
         }
 
@@ -190,6 +194,7 @@ class ContainerFetcherOkHttpTest {
                         allContainerEntryFilesToDownload.mapNotNull { it.cefMd5 })
                 val entriesToDownload = allContainerEntryFilesToDownload
                         .filter { entry -> ! entriesInDb.any { dbEntry -> dbEntry.cefMd5 ==  entry.cefMd5} }
+                        .filterNotInDirectory(downloadDestDir)
 
                 val request = ContainerFetcherRequest2(entriesToDownload, siteUrl, siteUrl,
                         downloadDestDir.toKmpUriString())
@@ -206,8 +211,15 @@ class ContainerFetcherOkHttpTest {
         }
 
         runBlocking {
-            clientDb.linkExistingContainerEntries(container.containerUid,
-                allContainerEntryFilesToDownload)
+            val fileEntriesDownloaded = downloadDestDir.getContentEntryJsonFilesFromDir(
+                clientDi.direct.instance())
+
+            clientDb.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                txDb.containerEntryFileDao.insertListAsync(fileEntriesDownloaded)
+                txDb.linkExistingContainerEntries(container.containerUid,
+                    allContainerEntryFilesToDownload)
+            }
+
         }
 
         serverDb.assertContainerEqualToOther(container.containerUid, clientDb)

@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
@@ -15,10 +16,10 @@ import kotlinx.serialization.Serializable
      on = Trigger.On.RECEIVEVIEW,
      events = [Trigger.Event.INSERT],
      sqlStatements = [
-         """REPLACE INTO XObjectEntity(xObjectUid, objectType, objectId, definitionType, interactionType, correctResponsePattern, objectContentEntryUid, xObjectMasterChangeSeqNum, xObjectocalChangeSeqNum, xObjectLastChangedBy, xObjectLct) 
-         VALUES (NEW.xObjectUid, NEW.objectType, NEW.objectId, NEW.definitionType, NEW.interactionType, NEW.correctResponsePattern, NEW.objectContentEntryUid, NEW.xObjectMasterChangeSeqNum, NEW.xObjectocalChangeSeqNum, NEW.xObjectLastChangedBy, NEW.xObjectLct) 
+         """REPLACE INTO XObjectEntity(xObjectUid, objectType, objectId, definitionType, interactionType, correctResponsePattern, objectContentEntryUid, objectStatementRefUid, xObjectMasterChangeSeqNum, xObjectocalChangeSeqNum, xObjectLastChangedBy, xObjectLct) 
+         VALUES (NEW.xObjectUid, NEW.objectType, NEW.objectId, NEW.definitionType, NEW.interactionType, NEW.correctResponsePattern, NEW.objectContentEntryUid, NEW.objectStatementRefUid, NEW.xObjectMasterChangeSeqNum, NEW.xObjectocalChangeSeqNum, NEW.xObjectLastChangedBy, NEW.xObjectLct) 
          /*psql ON CONFLICT (xObjectUid) DO UPDATE 
-         SET objectType = EXCLUDED.objectType, objectId = EXCLUDED.objectId, definitionType = EXCLUDED.definitionType, interactionType = EXCLUDED.interactionType, correctResponsePattern = EXCLUDED.correctResponsePattern, objectContentEntryUid = EXCLUDED.objectContentEntryUid, xObjectMasterChangeSeqNum = EXCLUDED.xObjectMasterChangeSeqNum, xObjectocalChangeSeqNum = EXCLUDED.xObjectocalChangeSeqNum, xObjectLastChangedBy = EXCLUDED.xObjectLastChangedBy, xObjectLct = EXCLUDED.xObjectLct
+         SET objectType = EXCLUDED.objectType, objectId = EXCLUDED.objectId, definitionType = EXCLUDED.definitionType, interactionType = EXCLUDED.interactionType, correctResponsePattern = EXCLUDED.correctResponsePattern, objectContentEntryUid = EXCLUDED.objectContentEntryUid,objectStatementRefUid =  EXCLUDED.objectStatementRefUid, xObjectMasterChangeSeqNum = EXCLUDED.xObjectMasterChangeSeqNum, xObjectocalChangeSeqNum = EXCLUDED.xObjectocalChangeSeqNum, xObjectLastChangedBy = EXCLUDED.xObjectLastChangedBy, xObjectLct = EXCLUDED.xObjectLct
          */"""
      ]
  )
@@ -40,6 +41,9 @@ class XObjectEntity {
 
     var objectContentEntryUid: Long = 0
 
+    @ColumnInfo(defaultValue = "0")
+    var objectStatementRefUid: Long = 0
+
     @MasterChangeSeqNum
     var xObjectMasterChangeSeqNum: Long = 0
 
@@ -57,13 +61,14 @@ class XObjectEntity {
 
     }
 
-    constructor(id: String?, objectType: String?, type: String?, interactionType: String?, responsePattern: String?, objectContentEntryUid: Long = 0) {
+    constructor(id: String?, objectType: String?, type: String?, interactionType: String?, responsePattern: String?, objectContentEntryUid: Long = 0, statementRefUid: Long = 0) {
         this.objectId = id
         this.objectType = objectType
         this.definitionType = type
         this.interactionType = interactionType
         this.correctResponsePattern = responsePattern
         this.objectContentEntryUid = objectContentEntryUid
+        this.objectStatementRefUid = statementRefUid
     }
 
 
@@ -75,6 +80,7 @@ class XObjectEntity {
         result = 31 * result + (interactionType?.hashCode() ?: 0)
         result = 31 * result + (correctResponsePattern?.hashCode() ?: 0)
         result = 31 * result + objectContentEntryUid.hashCode()
+        result = 31 * result + objectStatementRefUid.hashCode()
         return result
     }
 
@@ -91,6 +97,7 @@ class XObjectEntity {
         if (interactionType != other.interactionType) return false
         if (correctResponsePattern != other.correctResponsePattern) return false
         if (objectContentEntryUid != other.objectContentEntryUid) return false
+        if(objectStatementRefUid != other.objectStatementRefUid) return false
 
         return true
     }

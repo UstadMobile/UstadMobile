@@ -6,6 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -15,6 +16,7 @@ import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -61,6 +63,7 @@ class PersonAccountEditPresenter(context: Any,
             db.takeIf { entityUid != 0L }?.personDao?.findPersonAccountByUid(entityUid)
         } ?: PersonWithAccount()
         createAccount = person.username.isNullOrEmpty()
+        view.usernameVisible = person.username.isNullOrBlank()
         return person
     }
 
@@ -141,8 +144,7 @@ class PersonAccountEditPresenter(context: Any,
             }
 
             authManager.setAuth(entity.personUid, newPassword)
-
-            view.finishWithResult(listOf(entity))
+            finishWithResult(safeStringify(di, ListSerializer(PersonWithAccount.serializer()), listOf(entity)))
         }
     }
 

@@ -24,10 +24,10 @@ import com.ustadmobile.port.android.util.ext.createTempFileForDestination
  * This LifecycleObserver is used to support two-way viewbinding for an image uri on PersonPicture
  */
 class ImageViewLifecycleObserver2(
-        private var registry: ActivityResultRegistry?,
-        var inverseBindingListener: InverseBindingListener?,
-        private var registryId: Int) : DefaultLifecycleObserver,
-        DialogInterface.OnClickListener, View.OnClickListener {
+    private var registry: ActivityResultRegistry?,
+    var inverseBindingListener: InverseBindingListener?,
+    private var registryId: Int
+) : DefaultLifecycleObserver, DialogInterface.OnClickListener, View.OnClickListener {
 
     var view: ImageView? = null
         set(value) {
@@ -59,9 +59,10 @@ class ImageViewLifecycleObserver2(
         })
 
         galleryLauncher = registry?.register("galleryFilePath_${registryId}", owner,
-            ActivityResultContracts.GetContent(), ActivityResultCallback {
+            ActivityResultContracts.GetContent()
+        ) {
             onPictureTakenOrSelected(it)
-        })
+        }
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
@@ -71,6 +72,8 @@ class ImageViewLifecycleObserver2(
         galleryLauncher = null
         inverseBindingListener = null
         view?.setOnClickListener(null)
+        view = null
+        registry = null
     }
 
     fun showOptionsDialog() {

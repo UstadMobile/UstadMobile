@@ -12,8 +12,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentListBinding
@@ -33,9 +33,7 @@ import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.port.android.view.ext.repoLoadingStatus
-import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
-import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -280,7 +278,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         }
 
     override var list: DataSource.Factory<Int, DT>? = null
-        get() = field
         set(value) {
             currentLiveData?.removeObserver(this)
             val displayTypeRepoVal = displayTypeRepo ?: return
@@ -325,10 +322,10 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     override fun onClick(v: View?) {
         if(v?.id == R.id.item_sort_selected_layout)
             showSortOptionsFrag()
-    }
-
-    override fun finishWithResult(result: List<RT>) {
-        saveResultToBackStackSavedStateHandle(result)
+        else if(v?.id == R.id.item_createnew_layout) {
+            //This is the "Add new " item in picker mode.
+            listPresenter?.handleClickAddNewItem()
+        }
     }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {

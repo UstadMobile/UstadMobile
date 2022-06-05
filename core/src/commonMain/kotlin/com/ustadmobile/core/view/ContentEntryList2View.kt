@@ -22,11 +22,7 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
         const val ARG_DISPLAY_CONTENT_BY_OPTION = "displayOption"
 
-        const val ARG_DISPLAY_CONTENT_BY_CLAZZ = "displayContentByClazz"
-
         const val ARG_DISPLAY_CONTENT_BY_PARENT = "displayContentByParent"
-
-        const val ARG_CLAZZ_ASSIGNMENT_FILTER = "clazzAssignmentFilter"
 
         //Used to make the item on the home screen seen as a different screen
         const val VIEW_NAME_HOME = "ContentEntryListHome"
@@ -40,6 +36,12 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
         const val ARG_MOVING_COUNT = "moveCount"
 
         const val ARG_SELECT_FOLDER_VISIBLE = "selectFolderVisible"
+
+        /**
+         * Show chips for My content, from my courses, and library (e.g. when selecting content that
+         * is going to be added to a course).
+         */
+        const val ARG_USE_CHIPS = "contentEntryListChips"
 
     }
 

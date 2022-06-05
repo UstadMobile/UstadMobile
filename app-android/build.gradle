@@ -66,12 +66,14 @@ afterEvaluate {
 }
 
 //Start the test server that Espresso tests can use when we need to test communicating with a real server
+/* Disabled 10/Mar/22 as this is not in use, but will be restored in the near future
 tasks.whenTaskAdded { task ->
     if (task.name.toLowerCase().startsWith("connected") && task.name.toLowerCase().endsWith("androidtest")) {
         task.dependsOn(":lib-http-testserver:startServer")
         task.finalizedBy(":lib-http-testserver:stopServer")
     }
 }
+*/
 
 android {
     buildFeatures {
@@ -157,6 +159,7 @@ android {
     lint {
         abortOnError false
     }
+    namespace 'com.toughra.ustadmobile'
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8
@@ -356,9 +359,6 @@ dependencies {
     implementation "io.ktor:ktor-client-okhttp:$version_ktor"
     implementation "io.ktor:ktor-client-cio:$version_ktor"
 
-    //Codec2 (low bitrate voice) Android library
-    implementation "com.ustadmobile.codec2:libcodec2-android:0.8-SNAPSHOT64-2"
-
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
@@ -377,16 +377,20 @@ dependencies {
     implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
     //HTML editor
-    implementation "com.github.wordpress-mobile.WordPress-Aztec-Android:aztec:$version_android_aztec"
+    implementation "org.wordpress:aztec:$version_android_aztec"
 
     // Dependencies of Aztec: Versions must be fixed to ensure that they point to versions available
     // on mavenCentral after jcenter shutdown.
-    implementation "org.wordpress:utils:$version_android_wordpress_utils"
+    //implementation "org.wordpress:utils:$version_android_wordpress_utils"
     implementation "com.android.volley:volley:$version_android_volley"
 
     //Persian-Date-Picker
     implementation 'com.github.varunasingh:Persian-Date-Picker-Dialog-Strings:primary-SNAPSHOT'
 
+    implementation 'com.ernestoyaquello.dragdropswiperecyclerview:drag-drop-swipe-recyclerview:1.1.1'
+
+    //Better Link Movement Method
+    implementation "me.saket:better-link-movement-method:$version_better_link_movement"
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
@@ -409,7 +413,18 @@ dependencies {
     androidTestImplementation project(":lib-test-common")
     androidTestImplementation "androidx.test:core:$version_android_junit_runner"
     androidTestImplementation "androidx.test:core-ktx:$version_android_junit_runner"
-    androidTestImplementation "com.kaspersky.android-components:kaspresso:$version_kaspresso"
+
+    /*
+     * 15/Apr/2022
+     * If we do not exclude checkerframework there are duplicate class errors as per:
+     * https://github.com/android/android-test/issues/861
+     * See also:
+     * https://github.com/google/ExoPlayer/issues/10007
+     */
+    androidTestImplementation ("com.kaspersky.android-components:kaspresso:$version_kaspresso")  {
+        exclude group: "org.checkerframework", module: "checker"
+        exclude group: "org.checkerframework", module: "check-qual"
+    }
 
     androidTestImplementation "io.ktor:ktor-server-servlet:$version_ktor"
     androidTestImplementation "junit:junit:$version_junit"
@@ -419,10 +434,24 @@ dependencies {
     androidTestImplementation "androidx.test:runner:$version_android_junit_runner"
     androidTestImplementation "androidx.test:rules:$version_android_junit_runner"
     androidTestUtil "androidx.test:orchestrator:$version_android_junit_runner"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
-    androidTestImplementation "androidx.test.espresso:espresso-contrib:$version_android_espresso"
-    androidTestImplementation "androidx.test.espresso:espresso-intents:$version_android_espresso"
-    androidTestImplementation "androidx.test.espresso:espresso-web:$version_android_espresso"
+
+    //As per
+    androidTestImplementation ("androidx.test.espresso:espresso-core:$version_android_espresso")  {
+        exclude group: "org.checkerframework", module: "checker"
+        exclude group: "org.checkerframework", module: "check-qual"
+    }
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:$version_android_espresso") {
+        exclude group: "org.checkerframework", module: "checker"
+        exclude group: "org.checkerframework", module: "check-qual"
+    }
+    androidTestImplementation ("androidx.test.espresso:espresso-intents:$version_android_espresso") {
+        exclude group: "org.checkerframework", module: "checker"
+        exclude group: "org.checkerframework", module: "check-qual"
+    }
+    androidTestImplementation ("androidx.test.espresso:espresso-web:$version_android_espresso") {
+        exclude group: "org.checkerframework", module: "checker"
+        exclude group: "org.checkerframework", module: "check-qual"
+    }
     androidTestImplementation "androidx.fragment:fragment-testing:$version_androidx_fragment"
     androidTestImplementation "androidx.navigation:navigation-testing:$version_android_navigation"
     androidTestImplementation "androidx.test.ext:junit:$version_androidx_test_ext_junit"

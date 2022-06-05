@@ -5,9 +5,8 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
+import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
-import com.ustadmobile.core.io.ext.addEntryToContainerFromResource
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
 import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorUri
@@ -15,9 +14,11 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -25,6 +26,8 @@ import org.mockito.kotlin.stub
 import java.io.File
 import java.io.IOException
 import kotlin.test.Test
+import com.ustadmobile.core.util.ext.encodeStringMapToString
+import com.ustadmobile.door.ext.toFile
 
 class TestContentJobRunner {
 
@@ -47,6 +50,14 @@ class TestContentJobRunner {
     var connectivityCancelledExceptionCalled = false
     var cancellationExceptionCalled = false
 
+    private lateinit var json: Json
+
+    private var jobContentParmas: Map<String, String>? = null
+
+    @JvmField
+    @Rule
+    var temporaryFolder = TemporaryFolder()
+
     inner class DummyPlugin(override val di: DI, endpoint: Endpoint) : ContentPlugin{
         override val pluginId: Int
             get() = TEST_PLUGIN_ID
@@ -58,7 +69,7 @@ class TestContentJobRunner {
 
         private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-        private val containerFolder: File by on(endpoint).instance(tag =  DiTag.TAG_DEFAULT_CONTAINER_DIR)
+        private val containerStorageManager: ContainerStorageManager by on(endpoint).instance()
 
         override suspend fun extractMetadata(
             uri: DoorUri,
@@ -75,6 +86,7 @@ class TestContentJobRunner {
             process: ContentJobProcessContext,
             progress: ContentJobProgressListener
         ): ProcessResult {
+            jobContentParmas = process.params
             return withContext(Dispatchers.Default) {
                 processJobCalled = true
                 println("processJobCalled")
@@ -83,7 +95,8 @@ class TestContentJobRunner {
                     repo.addEntriesToContainerFromZipResource(
                             jobItem.contentJobItem!!.cjiContainerUid, this::class.java,
                             "/com/ustadmobile/core/contentformats/epub/test.epub",
-                            ContainerAddOptions(containerFolder.toDoorUri()))
+                            ContainerAddOptions(
+                                DoorUri.parse(containerStorageManager.storageList.first().dirUri)))
 
                     delay(100)
                 } catch (c: CancellationException) {
@@ -111,9 +124,15 @@ class TestContentJobRunner {
         processJobCalled = false
         connectivityCancelledExceptionCalled = false
         cancellationExceptionCalled = false
+        jobContentParmas = null
         jobCompleted = false
         di = DI {
             import(ustadTestRule.diModule)
+
+            bind<ContainerStorageManager>() with scoped(ustadTestRule.endpointScope).singleton {
+                ContainerStorageManager(listOf(temporaryFolder.newFolder()))
+            }
+
             bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
                 mock{
                     on { getPluginById(any()) }.thenAnswer {
@@ -133,6 +152,7 @@ class TestContentJobRunner {
                 ConnectivityLiveData(db.connectivityStatusDao.statusLive())
             }
         }
+        json = di.direct.instance()
 
         val accountManager: UstadAccountManager = di.direct.instance()
         endpoint = accountManager.activeEndpoint
@@ -154,7 +174,8 @@ class TestContentJobRunner {
 
         runBlocking {
             db.contentJobItemDao.insertJobItems(jobItems)
-            db.contentJobDao.insertAsync(ContentJob(cjUid = 2L))
+            db.contentJobDao.insertAsync(ContentJob(cjUid = 2L,
+                params = json.encodeStringMapToString(mapOf("compress" to "true"))))
         }
 
         val runner = ContentJobRunner(2, endpoint, di, 5)
@@ -175,6 +196,9 @@ class TestContentJobRunner {
                 db.contentEntryDao.findByUid(it.cjiContentEntryUid))
             Assert.assertEquals("jobStatus complete", JobStatus.COMPLETE, it.cjiStatus)
         }
+
+        Assert.assertEquals("Content job params were provided as inserted on db",
+            mapOf("compress" to "true"), jobContentParmas)
     }
 
     @Test
@@ -358,7 +382,7 @@ class TestContentJobRunner {
 
             delay(5000)
 
-            val job = db.contentJobItemDao.findByJobId(2)!!
+            val job = db.contentJobItemDao.findRootJobItemByJobId(2)!!
             Assert.assertTrue("connectivity exception called from plugin", connectivityCancelledExceptionCalled)
             Assert.assertFalse("job not completed", jobCompleted)
             Assert.assertTrue("content Entry got created from extract metadata", job.cjiContentEntryUid != 0L)
@@ -371,6 +395,7 @@ class TestContentJobRunner {
 
     @Test
     fun givenJobCreated_whenJobCancelled_thenContentEntryShouldBeInvalidAndContainerDeleted(){
+        val contentJobId = 2L
         runBlocking {
             ContentEntry().apply {
                 contentEntryUid = 3
@@ -381,7 +406,7 @@ class TestContentJobRunner {
                 containerContentEntryUid = 3
                 repo.containerDao.insert(this)
             }
-            db.contentJobDao.insertAsync(ContentJob(cjUid = 2))
+            db.contentJobDao.insertAsync(ContentJob(cjUid = contentJobId))
             db.contentJobItemDao.insertJobItem(ContentJobItem().apply {
                 this.cjiJobUid = 2
                 cjiContentEntryUid = 3
@@ -409,17 +434,36 @@ class TestContentJobRunner {
             println("job cancelled")
 
 
-            Assert.assertTrue("cancellation exception called from plugin", cancellationExceptionCalled)
+            Assert.assertTrue("cancellation exception called from plugin",
+                cancellationExceptionCalled)
             Assert.assertFalse("job not completed", jobCompleted)
-            val containerFolder: File = di.onActiveAccount().direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+            val contentJobItemFromDb = db.contentJobItemDao.findRootJobItemByJobId(contentJobId)
+
+            Assert.assertEquals("Root ContentJobItem status is canceled", JobStatus.CANCELED,
+                contentJobItemFromDb?.cjiStatus ?: -1)
+
+            Assert.assertEquals("Root ContentJobItem recursive status is canceled",
+                JobStatus.CANCELED,contentJobItemFromDb?.cjiRecursiveStatus ?: -1)
+
+            val containerStorageManager: ContainerStorageManager = di.onActiveAccountDirect()
+                .instance()
+            val containerFolder = DoorUri.parse(containerStorageManager.storageList.first().dirUri)
+                .toFile()
             val allJobItems = runBlocking { db.contentJobItemDao.findAll() }
             allJobItems.forEach {
-                Assert.assertEquals("job is cancelled", JobStatus.CANCELED, it.cjiStatus)
+                Assert.assertEquals("job is cancelled", JobStatus.CANCELED,
+                    it.cjiStatus)
                 val entry = db.contentEntryDao.findByUid(it.cjiContentEntryUid)
                 Assert.assertEquals("entry is inActive", true, entry!!.ceInactive)
                 val listOfEntryAndFile = db.containerEntryDao.findByContainer(it.cjiContainerUid)
-                Assert.assertEquals("no files and containerEntry remain", 0, listOfEntryAndFile.size)
-                Assert.assertTrue("container folder doesnt exist", !File(containerFolder, "${it.cjiContainerUid}").exists())
+                Assert.assertEquals("no files and containerEntry remain", 0,
+                    listOfEntryAndFile.size)
+                Assert.assertTrue("container folder doesnt exist", !File(containerFolder,
+                    "${it.cjiContainerUid}").exists())
+                Assert.assertEquals("ContentJobItem recursive status is canceled",
+                    JobStatus.CANCELED, it.cjiRecursiveStatus)
+                Assert.assertEquals("ContentJobItem status is canceled",
+                    JobStatus.CANCELED, it.cjiStatus)
             }
 
         }

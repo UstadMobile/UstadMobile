@@ -8,19 +8,27 @@ class XObject {
 
     var objectType: String? = null
 
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || this::class != o::class) return false
+    var statementRefUid: Long = 0
 
-        val `object` = o as XObject?
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
 
-        if (if (id != null) id != `object`!!.id else `object`!!.id != null) return false
-        return if (objectType != null) objectType == `object`.objectType else `object`.objectType == null
+        other as XObject
+
+        if (id != other.id) return false
+        if (objectType != other.objectType) return false
+        if (statementRefUid != other.statementRefUid) return false
+
+        return true
     }
 
     override fun hashCode(): Int {
-        var result = if (id != null) id!!.hashCode() else 0
-        result = 31 * result + if (objectType != null) objectType!!.hashCode() else 0
+        var result = id?.hashCode() ?: 0
+        result = 31 * result + (objectType?.hashCode() ?: 0)
+        result = 31 * result + statementRefUid.hashCode()
         return result
     }
+
+
 }

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.contentjob
 
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.downloadUrlIfRemote
 import com.ustadmobile.core.io.ext.emptyRecursively
 import com.ustadmobile.core.io.ext.isRemote
@@ -33,6 +34,9 @@ class ContentJobProcessContext(
      * A map of params that will be
      */
     val params: MutableMap<String, String>,
+
+    private val transactionRunner: ContentJobItemTransactionRunner?,
+
     override val di: DI
 ) : DIAware {
 
@@ -45,12 +49,25 @@ class ContentJobProcessContext(
      * Similar to .use on an inputStream. This will run the block, and then delete any temporary
      * directories.
      */
-    suspend fun use(block: suspend (ContentJobProcessContext) -> Unit) {
-        try {
+    suspend fun <R> use(block: suspend (ContentJobProcessContext) -> R): R {
+        return try {
             block(this)
         }finally {
             tempDirUri.emptyRecursively()
         }
+    }
+
+    /**
+     * Concurrent updates to ContentJobItem can cause a transaction deadlock on postgres. Therefor
+     * all updates to ContentJobItem need to be done in a Mutex (e.g. progress, etc).
+     *
+     * This function will use a Mutex and start a database transaction.
+     *
+     * WARNING: This is NOT a Reentrant lock.
+     */
+    suspend fun <R> withContentJobItemTransactionMutex(block: suspend (UmAppDatabase) -> R): R {
+        return transactionRunner?.withContentJobItemTransaction(block)
+            ?: throw IllegalStateException("withContentJobItemTransaction requires contentJobItemRunner")
     }
 
     suspend fun getLocalOrCachedUri(): DoorUri {

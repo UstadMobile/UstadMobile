@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +15,6 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
@@ -112,6 +112,7 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
                 holder.binding.clazzlogViewpager2.currentItem = min(holder.binding.clazzlogViewpager2.currentItem + 1,
                         holder.mClazzLogList?.size ?: 0)
             }
+            Locale.ENGLISH
 
             holder.binding.prevButton.setOnClickListener {
                 holder.binding.clazzlogViewpager2.currentItem = max(holder.binding.clazzlogViewpager2.currentItem - 1, 0)
@@ -256,11 +257,19 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
 
     companion object {
         val DIFFUTIL_CLAZZATTENDANCERECORD = object: DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson>() {
-            override fun areItemsTheSame(oldItem: ClazzLogAttendanceRecordWithPerson, newItem: ClazzLogAttendanceRecordWithPerson): Boolean {
-                return oldItem === newItem
+            override fun areItemsTheSame(
+                oldItem: ClazzLogAttendanceRecordWithPerson,
+                newItem: ClazzLogAttendanceRecordWithPerson
+            ): Boolean {
+                return oldItem == newItem
             }
 
-            override fun areContentsTheSame(oldItem: ClazzLogAttendanceRecordWithPerson, newItem: ClazzLogAttendanceRecordWithPerson): Boolean {
+            //Required because we are using two way binding on a recycler view
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(
+                oldItem: ClazzLogAttendanceRecordWithPerson,
+                newItem: ClazzLogAttendanceRecordWithPerson
+            ): Boolean {
                 return oldItem === newItem
             }
         }
@@ -275,33 +284,37 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
             }
         }
 
-        val DIFFUTIL_TIME_TIMEZONEPAIR = object: DiffUtil.ItemCallback<Pair<Long, TimeZone>>() {
-            override fun areItemsTheSame(oldItem: Pair<Long, TimeZone>, newItem: Pair<Long, TimeZone>): Boolean {
-                return oldItem == newItem
-            }
-
-            override fun areContentsTheSame(oldItem: Pair<Long, TimeZone>, newItem: Pair<Long, TimeZone>): Boolean {
-                return oldItem == newItem
-            }
-        }
-
         val DIFFUTIL_CLAZZLOG = object  : DiffUtil.ItemCallback<ClazzLog>() {
-            override fun areItemsTheSame(oldItem: ClazzLog, newItem: ClazzLog): Boolean {
+            override fun areItemsTheSame(
+                oldItem: ClazzLog,
+                newItem: ClazzLog
+            ): Boolean {
                 return oldItem.clazzLogUid == newItem.clazzLogUid
             }
 
-            override fun areContentsTheSame(oldItem: ClazzLog, newItem: ClazzLog): Boolean {
-                return oldItem == newItem
+            //Two way binding within recycler view
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(
+                oldItem: ClazzLog,
+                newItem: ClazzLog
+            ): Boolean {
+                return oldItem === newItem
             }
         }
 
         //The clazz logs at the top (clazzlog date selector) are never changed after loading, always return true
         val DIFFUTIL_CLAZZLOGLIST = object  : DiffUtil.ItemCallback<List<ClazzLog>>() {
-            override fun areItemsTheSame(oldItem: List<ClazzLog>, newItem: List<ClazzLog>): Boolean {
+            override fun areItemsTheSame(
+                oldItem: List<ClazzLog>,
+                newItem: List<ClazzLog>
+            ): Boolean {
                 return true
             }
 
-            override fun areContentsTheSame(oldItem: List<ClazzLog>, newItem: List<ClazzLog>): Boolean {
+            override fun areContentsTheSame(
+                oldItem: List<ClazzLog>,
+                newItem: List<ClazzLog>
+            ): Boolean {
                 return true
             }
         }

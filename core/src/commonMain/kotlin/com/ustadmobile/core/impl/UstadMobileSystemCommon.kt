@@ -6,14 +6,17 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.KSerializer
 import kotlin.js.JsName
 
 /**
@@ -46,7 +49,12 @@ abstract class UstadMobileSystemCommon {
             /**
              * If true, then popup include popUpToViewName.
              */
-            val popUpToInclusive: Boolean = false) {
+            val popUpToInclusive: Boolean = false,
+
+            /**
+             * Serialization strategy, i.e On JS there is no way to serialize without a strategy
+             */
+            val serializer: KSerializer<*>? = null) {
 
         companion object {
             val Default = UstadGoOptions(null, false)
@@ -64,11 +72,10 @@ abstract class UstadMobileSystemCommon {
      *
      * @param context System context
      * @param zip if true, the app setup file should be delivered within a zip.
-     * @param callback callback to call when complete or if any error occurs.
      */
 
     @JsName("getAppSetupFile")
-    abstract fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>)
+    abstract suspend fun getAppSetupFile(context: Any, zip: Boolean): String
 
 
     /**
@@ -228,7 +235,6 @@ abstract class UstadMobileSystemCommon {
     @JsName("getSystemLocale")
     abstract fun getSystemLocale(context: Any): String
 
-
     /**
      * Provides the language code of the currently active locale. This is different to getLocale. If
      * the locale is currently set to LOCALE_USE_SYSTEM then that language will be resolved and the
@@ -366,6 +372,42 @@ abstract class UstadMobileSystemCommon {
     }
 
 
+    abstract fun openLinkInBrowser(url: String, context: Any)
+
+    /**
+     * Handle clicking link that decides to open on the web or to open in the browser
+     */
+    fun handleClickLink(url: String, accountManager: UstadAccountManager, context: Any){
+        if(url.contains(LINK_ENDPOINT_VIEWNAME_DIVIDER)) {
+            val components = UstadUrlComponents.parse(url)
+            if(components.endpoint == accountManager.activeEndpoint.url){
+                goToViewLink(components.viewUri, context)
+            }else{
+                goToDeepLink(url, accountManager, context)
+            }
+        }else{
+            //Send link to system
+            openLinkInBrowser(url, context)
+        }
+    }
+
+    /**
+     * Open the given DoorUri in the default viewer. On Android this means using a VIEW intent.
+     * On the web, this will result in a file download in the browser so the user can open the
+     * file
+     *
+     * @param context
+     * @param doorUri DoorUri of item to open
+     * @param mimeType MimeType to open (used to control which apps will open it on Android)
+     * @param fileName Controls the name given to the file when opened on the browser
+     */
+    abstract fun openFileInDefaultViewer(
+        context: Any,
+        doorUri: DoorUri,
+        mimeType: String?,
+        fileName: String? = null,
+    )
+
     companion object {
         private val MIME_TYPES = mapOf("image/jpg" to "jpg", "image/jpg" to "jpg",
                 "image/jpeg" to "jpg", "image/png" to "png", "image/gif" to "gif",
@@ -427,7 +469,7 @@ abstract class UstadMobileSystemCommon {
          * viewname will start with a # (as it uses the REACT hash router). Therefor this string is
          * used as a divider between the endpoint URL and the view name and its view arguments
          */
-        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/index.html#"
+        const val LINK_ENDPOINT_VIEWNAME_DIVIDER = "/umapp/#/"
 
         const val SUBDIR_SITEDATA_NAME = "sitedata"
 
@@ -439,6 +481,8 @@ abstract class UstadMobileSystemCommon {
          * The RedirectFragment will remove itself from the view stack.
          */
         const val PREF_ROOT_VIEWNAME = "rootViewName"
+
+        const val TAG_CLIENT_ID = "client_id"
 
     }
 }

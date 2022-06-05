@@ -1,23 +1,24 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2
-import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
+import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 
 @Repository
 @Dao
-abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
+abstract class ClazzDao : BaseDao<Clazz> {
 
     @Query("""
      REPLACE INTO ClazzReplicate(clazzPk, clazzDestination)
@@ -95,11 +96,22 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Clazz?
 
-    @Query("""SELECT Clazz.*, HolidayCalendar.*, School.* FROM Clazz 
-            LEFT JOIN HolidayCalendar ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
-            LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
-            WHERE Clazz.clazzUid = :uid""")
-    abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendarAndSchool?
+    @Query("""
+        SELECT Clazz.*, 
+               HolidayCalendar.*, 
+               School.*,
+               CourseTerminology.*
+          FROM Clazz 
+               LEFT JOIN HolidayCalendar 
+               ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
+               
+               LEFT JOIN School 
+               ON School.schoolUid = Clazz.clazzSchoolUid
+               
+               LEFT JOIN CourseTerminology
+               ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+         WHERE Clazz.clazzUid = :uid""")
+    abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendarAndSchoolAndTerminology?
 
     @Update
     abstract suspend fun updateAsync(entity: Clazz): Int
@@ -115,13 +127,9 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
             : DoorDataSourceFactory<Int,Clazz>
 
 
-    @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid WHERE clazzUid = :clazzUid ")
+    @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid, " +
+            " clazzLastChangedBy =  ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} WHERE clazzUid = :clazzUid ")
     abstract suspend fun updateSchoolOnClazzUid(clazzUid: Long, schoolUid: Long)
-
-    /**
-     * Does not deactivate the clazz, dissassociates a school from the class.
-     */
-    override suspend fun deactivateByUids(uidList: List<Long>) = assignClassesToSchool(uidList, 0L)
 
     suspend fun assignClassesToSchool(uidList: List<Long>, schoolUid: Long) {
         uidList.forEach {
@@ -144,7 +152,8 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                    AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
                         AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers,
                '' AS teacherNames,
-               0 AS lastRecorded
+               0 AS lastRecorded,
+               CourseTerminology.*
           FROM PersonGroupMember
                ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT1}
                     :permission
@@ -157,6 +166,9 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                          WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
                            AND ClazzEnrolment.clazzEnrolmentActive
                            AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid LIMIT 1), 0)
+                LEFT JOIN CourseTerminology   
+                ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid           
+
          WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
            AND PersonGroupMember.groupMemberActive 
            AND CAST(Clazz.isClazzActive AS INTEGER) = 1
@@ -164,9 +176,12 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
            AND (Clazz.clazzUid NOT IN (:excludeSelectedClazzList))
            AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
            AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
-           AND ( :filter != $FILTER_ACTIVE_ONLY OR (:currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime))
+           AND ( :filter = 0 OR (CASE WHEN :filter = $FILTER_CURRENTLY_ENROLLED 
+                                      THEN :currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime
+                                      ELSE :currentTime > Clazz.clazzEndTime 
+                                      END))
            AND ( :selectedSchool = 0 OR Clazz.clazzSchoolUid = :selectedSchool)
-      GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid
+      GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid, CourseTerminology.ctUid
       ORDER BY CASE :sortOrder
                WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
                ELSE 0
@@ -184,7 +199,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                ELSE ''
                END DESC
     """)
-    @QueryLiveTables(["Clazz", "ClazzEnrolment", "ScopedGrant", "PersonGroupMember"])
+    @QueryLiveTables(["Clazz", "ClazzEnrolment", "ScopedGrant", "PersonGroupMember","CourseTerminology"])
     abstract fun findClazzesWithPermission(
         searchQuery: String,
         accountPersonUid: Long,
@@ -252,16 +267,46 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     abstract suspend fun personHasPermissionWithClazz(accountPersonUid: Long, clazzUid: Long,
                                                       permission: Long) : Boolean
 
-    @Query("""SELECT Clazz.*, HolidayCalendar.*, School.*,
-        (SELECT COUNT(*) FROM ClazzEnrolment WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
-        AND clazzEnrolmentRole = $ROLE_STUDENT AND :currentTime BETWEEN 
-        ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numStudents,
-        (SELECT COUNT(*) FROM ClazzEnrolment WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
-        AND clazzEnrolmentRole = $ROLE_TEACHER AND :currentTime BETWEEN 
-        ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers
-        FROM Clazz 
-        LEFT JOIN HolidayCalendar ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
-        LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
+    @Query("""
+        SELECT ScopedGrant.sgPermissions
+          FROM Clazz
+               JOIN ScopedGrant
+                    ON ${Clazz.JOIN_SCOPEDGRANT_ON_CLAUSE}
+               JOIN PersonGroupMember AS PrsGrpMbr
+                    ON ScopedGrant.sgGroupUid = PrsGrpMbr.groupMemberGroupUid
+         WHERE Clazz.clazzUid = :clazzUid
+           AND (ScopedGrant.sgPermissions & ${Role.PERMISSION_PERSON_DELEGATE}) > 0
+           AND PrsGrpMbr.groupMemberPersonUid = :accountPersonUid
+    """)
+    abstract suspend fun selectDelegatablePermissions(
+        accountPersonUid: Long,
+        clazzUid: Long
+    ): List<Long>
+
+    @Query("""
+        SELECT Clazz.*, 
+               HolidayCalendar.*, 
+               School.*,
+               (SELECT COUNT(*) 
+                  FROM ClazzEnrolment 
+                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+                   AND clazzEnrolmentRole = $ROLE_STUDENT 
+                   AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+                        AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numStudents,
+               (SELECT COUNT(*) 
+                  FROM ClazzEnrolment 
+                 WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+                   AND clazzEnrolmentRole = $ROLE_TEACHER 
+                   AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
+                       AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers,
+                CourseTerminology.*      
+         FROM Clazz 
+              LEFT JOIN HolidayCalendar 
+              ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
+              LEFT JOIN School 
+              ON School.schoolUid = Clazz.clazzSchoolUid
+              LEFT JOIN CourseTerminology
+              ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
         WHERE Clazz.clazzUid = :clazzUid""")
     abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): DoorLiveData<ClazzWithDisplayDetails?>
 
@@ -272,15 +317,28 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
      * specified for the associated school.
      */
     @Query("""
-        SELECT Clazz.*, HolidayCalendar.*, School.*
-        FROM Clazz 
-        LEFT JOIN HolidayCalendar ON ((clazz.clazzHolidayUMCalendarUid != 0 AND HolidayCalendar.umCalendarUid = clazz.clazzHolidayUMCalendarUid)
-         OR clazz.clazzHolidayUMCalendarUid = 0 AND clazz.clazzSchoolUid = 0 AND HolidayCalendar.umCalendarUid = 
-            (SELECT schoolHolidayCalendarUid FROM School WHERE schoolUid = clazz.clazzSchoolUid))
-        LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
-        WHERE :filterUid = 0 OR Clazz.clazzUid = :filterUid
+        SELECT Clazz.*, 
+               HolidayCalendar.*, 
+               School.*,
+               CourseTerminology.*
+         FROM Clazz 
+              LEFT JOIN HolidayCalendar 
+              ON ((clazz.clazzHolidayUMCalendarUid != 0 
+                AND HolidayCalendar.umCalendarUid = clazz.clazzHolidayUMCalendarUid)
+                OR clazz.clazzHolidayUMCalendarUid = 0 AND clazz.clazzSchoolUid = 0 
+                AND HolidayCalendar.umCalendarUid = (SELECT schoolHolidayCalendarUid 
+                                                       FROM School 
+                                                      WHERE schoolUid = clazz.clazzSchoolUid))
+              LEFT JOIN School 
+              ON School.schoolUid = Clazz.clazzSchoolUid
+              
+              LEFT JOIN CourseTerminology
+              ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+                
+        WHERE :filterUid = 0 
+           OR Clazz.clazzUid = :filterUid
     """)
-    abstract fun findClazzesWithEffectiveHolidayCalendarAndFilter(filterUid: Long): List<ClazzWithHolidayCalendarAndSchool>
+    abstract fun findClazzesWithEffectiveHolidayCalendarAndFilter(filterUid: Long): List<ClazzWithHolidayCalendarAndSchoolAndTerminology>
 
     @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
     abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
@@ -296,6 +354,10 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         const val SORT_ATTENDANCE_DESC = 4
 
         const val FILTER_ACTIVE_ONLY = 1
+
+        const val FILTER_CURRENTLY_ENROLLED = 5
+
+        const val FILTER_PAST_ENROLLMENTS = 6
 
         private const val SELECT_ACTIVE_CLAZZES = "SELECT * FROM Clazz WHERE CAST(isClazzActive AS INTEGER) = 1"
     }

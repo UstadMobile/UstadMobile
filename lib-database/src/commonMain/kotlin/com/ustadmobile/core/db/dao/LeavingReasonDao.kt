@@ -68,7 +68,7 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
 
     @JsName("findByUidList")
     @Query("SELECT leavingReasonUid FROM LeavingReason WHERE leavingReasonUid IN (:uidList)")
-    abstract fun findByUidList(uidList: List<Long>): List<Long>
+    abstract suspend fun findByUidList(uidList: List<Long>): List<Long>
 
     @JsName("findByUidLive")
     @Query("SELECT * FROM LeavingReason WHERE leavingReasonUid = :uid")
@@ -82,12 +82,12 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
 
     @JsName("replaceList")
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun replaceList(entityList: List<LeavingReason>)
+    abstract suspend fun replaceList(entityList: List<LeavingReason>)
 
     @Update
     abstract suspend fun updateAsync(entity: LeavingReason): Int
 
-    fun initPreloadedLeavingReasons() {
+    suspend fun initPreloadedLeavingReasons() {
         val uidsInserted = findByUidList(LeavingReason.FIXED_UIDS.values.toList())
         val uidsToInsert = LeavingReason.FIXED_UIDS.filter { it.value !in uidsInserted }
         val verbListToInsert = uidsToInsert.map { reason ->

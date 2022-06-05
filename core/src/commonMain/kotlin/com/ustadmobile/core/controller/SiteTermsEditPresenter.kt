@@ -1,16 +1,20 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NavigateForResultOptions
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.core.view.SiteTermsEditView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
+import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -33,6 +37,22 @@ class SiteTermsEditPresenter(context: Any,
         //TODO: Set any additional fields (e.g. joinlist) on the view
     }
 
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        observeSavedStateResult(
+            SAVEDSTATE_KEY_LANGUAGE,
+            ListSerializer(Language.serializer()), Language::class) {
+            val selectedLang = it.firstOrNull() ?: return@observeSavedStateResult
+            entity?.stLanguage = selectedLang
+            entity?.sTermsLang = selectedLang.iso_639_1_standard
+            entity?.sTermsLangUid = selectedLang.langUid
+            view.entity = entity
+            requireSavedStateHandle()[SAVEDSTATE_KEY_LANGUAGE] = null
+        }
+
+    }
+
     override fun onLoadFromJson(bundle: Map<String, String>): SiteTermsWithLanguage? {
         super.onLoadFromJson(bundle)
 
@@ -51,9 +71,9 @@ class SiteTermsEditPresenter(context: Any,
                 repo.onDbThenRepoWithTimeout(5000) { db, lastResult ->
                     val uiLanguage = db.languageDao.takeIf { lastResult == null }?.findByTwoCodeAsync(displayLocale)
                     if(uiLanguage != null) {
-                        editEntity?.stLanguage = uiLanguage
-                        editEntity?.sTermsLang = displayLocale
-                        editEntity?.sTermsLangUid = uiLanguage.langUid
+                        editEntity.stLanguage = uiLanguage
+                        editEntity.sTermsLang = displayLocale
+                        editEntity.sTermsLangUid = uiLanguage.langUid
                         view.entity = editEntity
                     }
                 }
@@ -61,6 +81,17 @@ class SiteTermsEditPresenter(context: Any,
         }
 
         return editEntity
+    }
+
+
+    fun handleClickLanguage() {
+        navigateForResult(
+            NavigateForResultOptions(this,
+                null,
+                LanguageListView.VIEW_NAME,
+                Language::class,
+                Language.serializer(), SAVEDSTATE_KEY_LANGUAGE)
+        )
     }
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
@@ -83,12 +114,15 @@ class SiteTermsEditPresenter(context: Any,
         presenterScope.launch {
 
             //TODO: Call commitToDatabase on any onetomany join helpers
-            view.finishWithResult(listOf(entity))
+            val serializedResult = safeStringify(di, ListSerializer(SiteTermsWithLanguage.serializer()),
+                listOf(entity))
+            finishWithResult(serializedResult)
         }
     }
 
     companion object {
 
+        const val SAVEDSTATE_KEY_LANGUAGE = "Language"
         //TODO: Add constants for keys that would be used for any One To Many Join helpers
 
     }

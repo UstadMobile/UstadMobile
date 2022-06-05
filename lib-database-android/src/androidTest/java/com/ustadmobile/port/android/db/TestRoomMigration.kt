@@ -5,9 +5,10 @@ import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.core.db.*
 import com.ustadmobile.door.asRoomMigration
+import com.ustadmobile.door.util.systemTimeInMillis
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
-import kotlin.random.Random
 
 
 class TestRoomMigration {
@@ -555,9 +556,129 @@ class TestRoomMigration {
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 97, true,
-            UmAppDatabase.MIGRATION_96_97.asRoomMigration())
+                UmAppDatabase.MIGRATION_96_97.asRoomMigration())
     }
 
+    @Test
+    fun migrate97to98() {
+        helper.createDatabase(TEST_DB, 97).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 98, true,
+            UmAppDatabase.MIGRATION_97_98.asRoomMigration())
+    }
+
+    @Test
+    fun migrate98to99() {
+        helper.createDatabase(TEST_DB, 98).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 99, true,
+                UmAppDatabase.MIGRATION_98_99.asRoomMigration())
+    }
+
+
+    @Test
+    fun migrate99to100() {
+        helper.createDatabase(TEST_DB, 99).apply {
+            execSQL("INSERT INTO ContainerEntryFile(cefUid, cefMd5, cefPath, ceTotalSize, ceCompressedSize, compression, lastModified) " +
+                    "VALUES(1, 'abc', '/abc', 200, 100, 1, ${systemTimeInMillis()})")
+            execSQL("INSERT INTO ContainerEntryFile(cefUid, cefMd5, cefPath, ceTotalSize, ceCompressedSize, compression, lastModified) " +
+                    "VALUES(2, 'abc', '/abc', 200, 100, 1, ${systemTimeInMillis()})")
+            execSQL("INSERT INTO ContainerEntryFile(cefUid, cefMd5, cefPath, ceTotalSize, ceCompressedSize, compression, lastModified) " +
+                    "VALUES(3, 'def', '/def', 300, 100, 1, ${systemTimeInMillis()})")
+
+
+            execSQL("INSERT INTO ContainerEntry(ceUid, ceContainerUid, cePath, ceCefUid) " +
+                    "VALUES(1, 1, 'abc.txt', 1)")
+            execSQL("INSERT INTO ContainerEntry(ceUid, ceContainerUid, cePath, ceCefUid) " +
+                    "VALUES(2, 2, 'abc.txt', 2)")
+            execSQL("INSERT INTO ContainerEntry(ceUid, ceContainerUid, cePath, ceCefUid)" +
+                    "VALUES(3, 2, 'def', 3)")
+
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 100, true,
+            UmAppDatabase.MIGRATION_99_100.asRoomMigration()
+        ).apply {
+
+            val cefUidChangeCursor = query("SELECT ceCefUid FROM ContainerEntry WHERE ceUid = 2")
+            cefUidChangeCursor.moveToFirst()
+            val cefUid = cefUidChangeCursor.getInt(0)
+            Assert.assertEquals(
+                "ContainerEntry 2 link was changed to the first available containerentryfile",
+                1, cefUid)
+            cefUidChangeCursor.close()
+
+            val ceRemovedCursor = query("SELECT cefUid FROM ContainerEntryFile WHERE cefUid = 2")
+            Assert.assertFalse("Duplicate container entry file was removed",
+                ceRemovedCursor.moveToFirst())
+        }
+    }
+
+    @Test
+    fun migrate100to101() {
+        helper.createDatabase(TEST_DB, 100).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 101, true,
+            UmAppDatabase.MIGRATION_100_101.asRoomMigration())
+    }
+
+    @Test
+    fun migrate101to102() {
+        helper.createDatabase(TEST_DB, 101).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 102, true,
+            UmAppDatabase.MIGRATION_101_102.asRoomMigration())
+    }
+
+    @Test
+    fun migrate102to103() {
+        helper.createDatabase(TEST_DB, 102).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 103, true,
+            UmAppDatabase.MIGRATION_102_103.asRoomMigration())
+    }
+
+    @Test
+    fun migrate103to104() {
+        helper.createDatabase(TEST_DB, 103).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 104, true,
+            UmAppDatabase.MIGRATION_103_104.asRoomMigration())
+    }
+
+    @Test
+    fun migrate104to105() {
+        helper.createDatabase(TEST_DB, 104).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 105, true,
+            UmAppDatabase.MIGRATION_104_105.asRoomMigration())
+    }
+
+
+    @Test
+    fun migrate105to106() {
+        helper.createDatabase(TEST_DB, 105).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 106, true,
+            UmAppDatabase.MIGRATION_105_106.asRoomMigration())
+    }
 
 
     companion object {

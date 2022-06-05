@@ -7,13 +7,14 @@
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
         <import type="com.ustadmobile.core.impl.ContainerStorageDir" />
+        <import type="com.ustadmobile.core.util.ext.StringExtKt"/>
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
 
         <variable
             name="contentEntry"
-            type="com.ustadmobile.lib.db.entities.ContentEntryWithLanguage" />
+            type="com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage" />
 
         <variable
             name="metadataResult"
@@ -39,9 +40,6 @@
             name="selectedStorageIndex"
             type="Integer" />
 
-        <variable
-            name="fileImportInfoVisibility"
-            type="Integer" />
 
         <variable
             name="videoPreviewVisibility"
@@ -78,16 +76,77 @@
             type="boolean" />
 
         <variable
-            name="showCompletionCriteria"
-            type="boolean" />
-
-        <variable
             name="storageOptions"
             type="java.util.List&lt;ContainerStorageDir&gt;"/>
 
         <variable
             name="completionCriteriaListener"
             type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
+
+        <variable
+            name="showUpdateContentButton"
+            type="boolean" />
+
+        <variable
+            name="timeZone"
+            type="String" />
+
+
+        <variable
+            name="startDate"
+            type="long" />
+
+        <variable
+            name="startTime"
+            type="long" />
+
+        <variable
+            name="deadlineDate"
+            type="long" />
+
+        <variable
+            name="deadlineTime"
+            type="long" />
+
+        <variable
+            name="gracePeriodDate"
+            type="long" />
+
+        <variable
+            name="gracePeriodTime"
+            type="long" />
+
+        <variable
+            name="caGracePeriodError"
+            type="String" />
+
+        <variable
+            name="caDeadlineError"
+            type="String" />
+
+        <variable
+            name="caStartDateError"
+            type="String" />
+
+        <variable
+            name="caMaxPointsError"
+            type="String" />
+
+        <variable
+            name="gracePeriodVisibility"
+            type="int" />
+
+        <variable
+            name="contentEntryPicture"
+            type="com.ustadmobile.lib.db.entities.ContentEntryPicture"/>
+
+        <variable
+            name="contentEntryPictureUri"
+            type="String" />
+
+        <variable
+            name="imageViewLifecycleObserver"
+            type="com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2" />
 
 
     </data>
@@ -107,6 +166,30 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/content_entry_edit_image_view"
+                android:layout_width="@dimen/dimen_48dp"
+                android:layout_height="@dimen/dimen_48dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:civ_circle_background_color="?colorSecondary"
+                app:imageUri="@={contentEntryPicture.cepUri}"
+                app:imageViewLifecycleObserver="@{imageViewLifecycleObserver}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/item_presenter_field_row_picture_photoicon"
+                android:layout_width="@dimen/dimen_24dp"
+                android:layout_height="@dimen/dimen_24dp"
+                android:onClick="@{() -> contentEntryEditImageView.callOnClick()}"
+                app:layout_constraintBottom_toBottomOf="@+id/content_entry_edit_image_view"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/content_entry_edit_image_view"
+                app:srcCompat="@drawable/ic_add_a_photo_24"
+                app:tint="?colorOnError" />
+
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/content_entry_select_file"
@@ -119,15 +202,15 @@
                 android:onClick="@{()-> activityEventHandler.onClickUpdateContent()}"
                 android:padding="@dimen/dimen_20dp"
                 android:text="@string/update_content"
-                android:visibility="@{(contentEntry.leaf || contentEntry.contentEntryUid != 0) ? View.VISIBLE: View.GONE}"
+                android:visibility="@{showUpdateContentButton ? View.VISIBLE: View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/content_entry_edit_image_view"
                 tools:text="@string/update_content" />
 
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-                android:visibility="@{fileImportInfoVisibility}"
+                android:visibility="@{showUpdateContentButton ? View.VISIBLE : View.GONE}"
                 android:layout_margin="@dimen/dimen_20dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -234,62 +317,32 @@
             </com.google.android.material.textfield.TextInputLayout>
 
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_marginTop="@dimen/dimen_20dp"
-                android:id="@+id/entry_content_completion"
+
+            <include
+                android:id="@+id/entry_edit_common_fields"
+                layout="@layout/item_course_block_common_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/dimen_16dp"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:visibility="@{showCompletionCriteria ? View.VISIBLE : View.GONE}"
-                android:enabled="@{fieldsEnabled}"
-                app:layout_constraintEnd_toStartOf="@id/entry_content_min_score"
-                app:layout_constraintTop_toBottomOf="@+id/entry_description">
-
-                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:enabled="@{fieldsEnabled}"
-                    app:onMessageIdOptionSelected="@{completionCriteriaListener}"
-                    app:selectedMessageIdOption="@={contentEntry.completionCriteria}"
-                    app:messageIdOptions="@{completionCriteriaOptions}"
-                    android:hint="@string/completion_criteria"/>
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_marginTop="@dimen/dimen_16dp"
-                android:id="@+id/entry_content_min_score"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_20dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:hintEnabled="true"
-                app:suffixText="@string/points"
-                app:suffixTextAppearance="@style/UmTheme.TextAppearance.Body2"
-                android:enabled="@{fieldsEnabled}"
-                android:visibility="@{minScoreVisible ? View.VISIBLE : View.GONE}"
-                app:layout_constraintWidth_percent="0.3"
-                app:layout_constraintStart_toEndOf="@id/entry_content_completion"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/entry_description">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/ca_edit_min_score"
-                    android:enabled="@{fieldsEnabled}"
-                    android:digits="0123456789"
-                    android:inputType="number"
-                    app:minValue="@{0}"
-                    app:maxValue="@{100}"
-                    android:text="@={`` + contentEntry.minScore}"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-
+                app:layout_constraintTop_toBottomOf="@id/entry_description"
+                android:visibility="@{contentEntry.block == null ? View.GONE : View.VISIBLE}"
+                app:block="@={contentEntry.block}"
+                app:timeZone="@{timeZone}"
+                app:startDate="@={startDate}"
+                app:startTime="@={startTime}"
+                app:deadlineDate="@={deadlineDate}"
+                app:deadlineTime="@={deadlineTime}"
+                app:gracePeriodDate="@={gracePeriodDate}"
+                app:gracePeriodTime="@={gracePeriodTime}"
+                app:caGracePeriodError="@{caGracePeriodError}"
+                app:caDeadlineError="@{caDeadlineError}"
+                app:caStartDateError="@{caStartDateError}"
+                app:caMaxPointsError="@{caMaxPointsError}"
+                app:completionCriteriaOptions="@{completionCriteriaOptions}"
+                app:gracePeriodVisibility="@{gracePeriodVisibility}"
+                app:minScoreVisible="@{minScoreVisible}"
+                app:completionCriteriaListener="@{completionCriteriaListener}"
+                />
 
 
             <com.google.android.material.textfield.TextInputLayout
@@ -304,7 +357,7 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/entry_content_completion">
+                app:layout_constraintTop_toBottomOf="@+id/entry_edit_common_fields">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1"

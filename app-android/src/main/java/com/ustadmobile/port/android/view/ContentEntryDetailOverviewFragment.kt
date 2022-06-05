@@ -18,20 +18,17 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntry2DetailBinding
-import com.toughra.ustadmobile.databinding.ItemContentEntryListBinding
 import com.toughra.ustadmobile.databinding.ItemContentJobItemProgressBinding
 import com.toughra.ustadmobile.databinding.ItemEntryTranslationBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
-import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.direct
@@ -41,7 +38,9 @@ import org.kodein.di.on
 
 interface ContentEntryDetailFragmentEventHandler {
 
-    fun handleOnClickOpenDownloadButton()
+    fun handleOnClickOpen()
+
+    fun handleOnClickDownload()
 
     fun handleOnClickDeleteButton()
 
@@ -50,7 +49,8 @@ interface ContentEntryDetailFragmentEventHandler {
     fun handleOnClickMarkComplete()
 }
 
-class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMostRecentContainer>(), ContentEntryDetailOverviewView, ContentEntryDetailFragmentEventHandler{
+class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMostRecentContainer>(
+), ContentEntryDetailOverviewView, ContentEntryDetailFragmentEventHandler{
 
     private var mBinding: FragmentContentEntry2DetailBinding? = null
 
@@ -91,27 +91,14 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
             mBinding?.markCompleteVisible = value
         }
 
-    override var canDownload: Boolean = false
-        set(value) {
-            field = value
-            mBinding?.canDownload = value
-        }
-    override var canUpdate: Boolean = false
-        set(value) {
-            field =value
-            mBinding?.canUpdate = value
-        }
 
-    override var canDelete: Boolean = false
+    override var contentEntryButtons: ContentEntryButtonModel?
+        get() = mBinding?.contentEntryButtons
         set(value) {
-            field = value
-            mBinding?.canDelete = value
-        }
+            if(mBinding?.contentEntryButtons?.showOpenButton != value?.showOpenButton)
+                activity?.invalidateOptionsMenu()
 
-    override var canOpen: Boolean = false
-        set(value) {
-            field = value
-            mBinding?.canOpen = value
+            mBinding?.contentEntryButtons = value
         }
 
     private inner class PresenterViewLifecycleObserver: DefaultLifecycleObserver {
@@ -130,16 +117,18 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         get() = mPresenter
 
 
-
-    override fun handleOnClickOpenDownloadButton() {
-        mPresenter?.handleOnClickOpenDownloadButton()
+    override fun handleOnClickOpen() {
+        mPresenter?.handleClickOpenButton()
     }
 
+    override fun handleOnClickDownload() {
+        mPresenter?.handleClickDownloadButton()
+    }
 
     override fun handleOnClickDeleteButton() {
         MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.confirm)
-                .setPositiveButton(R.string.delete) { _, _ -> mPresenter?.handleOnClickDeleteButton() }
+                .setPositiveButton(R.string.delete) { _, _ -> mPresenter?.handleOnClickConfirmDelete() }
                 .setNegativeButton(R.string.cancel) { dialog, _ ->  dialog.cancel() }
                 .setMessage(R.string.confirm_delete_message)
                 .show()
@@ -171,7 +160,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         systemImpl.go("DownloadDialog", args, requireContext())
     }
 
-    override var contentJobItemProgress: List<ContentJobItemProgress>? = null
+    override var activeContentJobItems: List<ContentJobItemProgress>? = null
         set(value){
             field = value
             mBinding?.contentJobItemProgressList?.visibility = if(value != null && value.isNotEmpty())
@@ -179,29 +168,6 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
             progressListAdapter?.submitList(value)
         }
 
-    override var contentJobItemStatus: Int = 0
-        set(value) {
-            if((field == ContentJobItem.STATUS_COMPLETE) != (value == ContentJobItem.STATUS_COMPLETE))
-                activity?.invalidateOptionsMenu()
-
-            mBinding?.contentJobItemStatus = value
-            if(currentDownloadJobItemStatus != value) {
-                when {
-                    value == ContentJobItem.STATUS_COMPLETE -> {
-                        mBinding?.entryDownloadOpenBtn?.visibility = View.VISIBLE
-                    }
-
-                    value == ContentJobItem.STATUS_RUNNING -> {
-                        mBinding?.entryDownloadOpenBtn?.visibility = View.GONE
-                    }
-                    else -> {
-                        mBinding?.entryDownloadOpenBtn?.visibility = View.VISIBLE
-                    }
-                }
-                currentDownloadJobItemStatus = value
-            }
-            field = value
-        }
     override var scoreProgress: ContentEntryStatementScoreProgress? = null
         get() = field
         set(value) {
@@ -248,7 +214,6 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
             val viewHolder = TranslationViewHolder(ItemEntryTranslationBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false))
             viewHolder.binding.mPresenter = presenter
-            viewHolder.binding.mActivity = activityEventHandler
             return viewHolder
         }
 
@@ -299,7 +264,8 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_content_entry, menu)
-        menu.findItem(R.id.content_entry_group_activity).isVisible = currentDownloadJobItemStatus == ContentJobItem.STATUS_COMPLETE
+        menu.findItem(R.id.content_entry_group_activity).isVisible =
+            (contentEntryButtons?.showOpenButton == true)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -348,13 +314,20 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
         val DIFF_CALLBACK_CONTENT_JOB_PROGRESS: DiffUtil.ItemCallback<ContentJobItemProgress> =
                 object: DiffUtil.ItemCallback<ContentJobItemProgress>(){
-                    override fun areItemsTheSame(oldItem: ContentJobItemProgress,
-                                                 newItem: ContentJobItemProgress): Boolean {
+                    override fun areItemsTheSame(
+                        oldItem: ContentJobItemProgress,
+                        newItem: ContentJobItemProgress
+                    ): Boolean {
                       return oldItem.cjiUid == newItem.cjiUid
                     }
 
-                    override fun areContentsTheSame(oldItem: ContentJobItemProgress, newItem: ContentJobItemProgress): Boolean {
-                        return oldItem == newItem
+                    override fun areContentsTheSame(
+                        oldItem: ContentJobItemProgress,
+                        newItem: ContentJobItemProgress
+                    ): Boolean {
+                        return (oldItem.progress == newItem.progress
+                                && oldItem.total == newItem.total
+                                && oldItem.progressTitle == newItem.progressTitle)
                     }
 
                 }
