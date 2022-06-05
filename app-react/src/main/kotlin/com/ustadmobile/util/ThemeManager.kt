@@ -28,11 +28,11 @@ object ThemeManager {
      */
     fun createAppTheme(): Theme {
         themeOptions.palette?.mode = if(isDarkModeActive()) "dark" else "light"
-        themeOptions.palette?.primary.light = "#48a999" //if(isDarkModeActive()) "#424242" else "#48a999"
-        themeOptions.palette?.primary.main = "#00796b" //if(isDarkModeActive()) "#303030" else "#00796b"
-        themeOptions.palette?.primary.dark = "#005E55" // if(isDarkModeActive()) "#00796b" else "#005E55"
+        themeOptions.palette?.primary.light = "#6ab7ff" //if(isDarkModeActive()) "#424242" else "#48a999"
+        themeOptions.palette?.primary.main = "#1e88e5" //if(isDarkModeActive()) "#303030" else "#00796b"
+        themeOptions.palette?.primary.dark = "#005cb2" // if(isDarkModeActive()) "#00796b" else "#005E55"
         themeOptions.palette?.primary.contrastText = "#fff"
-        themeOptions.palette?.secondary.main = if(isDarkModeActive()) "#00796b" else "#ff9800"
+        themeOptions.palette?.secondary.main = if(isDarkModeActive()) "#bbdefb" else "#bbdefb"
         themeOptions.palette?.secondary.contrastText = if(isDarkModeActive()) "#fff" else "#000000"
         return createMuiTheme(themeOptions)
     }
