@@ -141,10 +141,16 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
 
 
     @Query("""
-        SELECT NOT EXISTS(SELECT 1
+         SELECT COALESCE((SELECT NOT EXISTS(SELECT 1
                         FROM CourseAssignmentSubmission
                        WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
-                       LIMIT 1)
+                       LIMIT 1)),1)
+    """)
+    @PostgresQuery("""
+         SELECT COALESCE((SELECT NOT EXISTS(SELECT 1
+                        FROM CourseAssignmentSubmission
+                       WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
+                       LIMIT 1)),TRUE)
     """)
     abstract fun checkNoSubmissionsMade(assignmentUid: Long): DoorLiveData<Boolean>
 
