@@ -144,7 +144,7 @@ import kotlin.jvm.JvmField
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 106)
+], version = 107)
 @MinReplicationVersion(60)
 abstract class UmAppDatabase : DoorDatabase() {
 
@@ -3974,6 +3974,14 @@ DELETE FROM ContainerEntryFile
 
         val MIGRATION_105_106 = DoorMigrationStatementList(105, 106) { db ->
             val stmtList = mutableListOf<String>()
+            stmtList += "ALTER TABLE CourseAssignmentSubmissionAttachment ADD COLUMN casaFileName TEXT"
+
+            stmtList
+
+        }
+
+        val MIGRATION_106_107 = DoorMigrationStatementList(106, 107) { db ->
+            val stmtList = mutableListOf<String>()
             if (db.dbType() == DoorDbType.SQLITE) {
 
 
@@ -4036,7 +4044,6 @@ DELETE FROM ContainerEntryFile
 
 
 
-
         fun migrationList(nodeId: Long) = listOf<DoorMigration>(
             MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
             MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
@@ -4053,7 +4060,7 @@ DELETE FROM ContainerEntryFile
             UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
             MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98, MIGRATION_98_99,
             MIGRATION_99_100, MIGRATION_100_101, MIGRATION_101_102, MIGRATION_102_103,
-            MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106
+            MIGRATION_103_104, MIGRATION_104_105, MIGRATION_105_106, MIGRATION_106_107
         )
 
         internal fun migrate67to68(nodeId: Long)= DoorMigrationSync(67, 68) { database ->

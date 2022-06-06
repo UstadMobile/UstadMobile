@@ -37,6 +37,10 @@
             type="Boolean" />
 
         <variable
+            name="fileNameText"
+            type="String" />
+
+        <variable
             name="selectablePagedListAdapter"
             type="SubmissionAdapter" />
 
@@ -77,7 +81,7 @@
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
-            android:text='@{fileSubmission.casText != null ? Html.fromHtml(fileSubmission.casText) : SpannedString.valueOf("")}'
+            android:text='@{fileNameText != null ? Html.fromHtml(fileNameText) : SpannedString.valueOf("")}'
             android:maxLines="3"
             android:ellipsize="end"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"

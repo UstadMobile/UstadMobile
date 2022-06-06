@@ -170,7 +170,8 @@ ContentEntryOpenerTest {
 
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)
-            verify(impl).openFileInDefaultViewer(eq(context), any(), eq("video/wav"))
+            verify(impl).openFileInDefaultViewer(eq(context), any(), eq("video/wav"),
+                anyOrNull())
         }
 
     }

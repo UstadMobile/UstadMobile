@@ -23,6 +23,7 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI

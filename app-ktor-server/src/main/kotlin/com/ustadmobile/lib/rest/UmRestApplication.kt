@@ -341,6 +341,13 @@ fun Application.umRestApplication(
                 manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))!!
         }
 
+        bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {
+            File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), UPLOAD_TMP_SUBDIR).also {
+                if(!it.exists())
+                    it.mkdirs()
+            }
+        }
+
         try {
             appConfig.config("mail")
 
@@ -397,7 +404,17 @@ fun Application.umRestApplication(
         install(WebSockets)
 
         intercept(ApplicationCallPipeline.Setup) {
-            val requestUri = call.request.uri
+            val requestUri = call.request.uri.let {
+                if(it.startsWith("//")) {
+                    //This is an edge case with the ContainerFetcher. The ContainerFetcher uses //
+                    // at the start of a URI. This workaround will be removed when ContainerFetcher
+                    // is removed and replaced with Retriever.
+                    it.removePrefix("/")
+                }else {
+                    it
+                }
+            }
+
             if(!KTOR_SERVER_ROUTES.any { requestUri.startsWith(it) }) {
                 call.respondReverseProxy(jsDevServer)
                 return@intercept finish()

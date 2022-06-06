@@ -200,7 +200,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                                     }
                                     renderListItemWithLeftIconTitleAndDescription(
                                         "class",
-                                        clean(submission.casText),
+                                        clean(submission.attachment?.casaFileName ?: submission.casText),
                                         "${getString(MessageID.submitted_cap)} " +
                                                 ": ${submission.casTimestamp.toDate()?.formatFullDate()}",
                                         true,

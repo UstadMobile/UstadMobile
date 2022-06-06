@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
@@ -135,7 +136,7 @@ abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
             Person.firstNames as authorPersonFirstNames,
             Person.lastName as authorPersonLastName,
             '' AS postLatestMessage,
-            '' AS postRepliesCount, 
+            0 AS postRepliesCount, 
             DiscussionPost.discussionPostLct AS postLatestMessageTimestamp
              
           FROM DiscussionPost     
@@ -144,6 +145,21 @@ abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
            
     """)
     abstract suspend fun findWithDetailsByUid(uid: Long): DiscussionPostWithDetails?
+
+    @Query("""
+        SELECT DiscussionPost.*,
+            Person.firstNames as authorPersonFirstNames,
+            Person.lastName as authorPersonLastName,
+            '' AS postLatestMessage,
+            0 AS postRepliesCount, 
+            DiscussionPost.discussionPostLct AS postLatestMessageTimestamp
+             
+          FROM DiscussionPost     
+          LEFT JOIN Person ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
+         WHERE DiscussionPost.discussionPostUid = :uid
+           
+    """)
+    abstract fun findWithDetailsByUidLive(uid: Long): DoorLiveData<DiscussionPostWithDetails?>
 
     @Update
     abstract suspend fun updateAsync(entity: DiscussionPost): Int

@@ -501,7 +501,8 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
         verify(systemImpl, timeout(1000)).openFileInDefaultViewer(
             eq(context),
            any(),
-            eq("video/mp4")
+            eq("video/mp4"),
+            anyOrNull(),
         )
 
     }

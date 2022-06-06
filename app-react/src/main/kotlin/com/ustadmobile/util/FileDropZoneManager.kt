@@ -20,7 +20,8 @@ interface OnFileAttached {
  */
 class FileDropZoneManager(
     dropZoneId: String = "um-dropzone",
-    val acceptedMimeTypesAndExtensions: List<String>) {
+    val acceptedMimeTypesAndExtensions: List<String>
+) {
 
     private val mimeTypeMatcher = MimeTypeMatcher(acceptedMimeTypesAndExtensions)
 
