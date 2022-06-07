@@ -1934,4 +1934,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <string name="most_recent">Most Recent</string>
 
+    <string name="comment">Comment</string>
+
 </resources>

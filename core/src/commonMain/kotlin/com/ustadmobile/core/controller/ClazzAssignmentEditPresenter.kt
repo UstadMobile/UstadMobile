@@ -22,6 +22,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.getFirstValue
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
@@ -358,7 +359,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             if(dbGroupUid != -1L && dbGroupUid != entity.assignment?.caGroupUid){
 
                 val noSubmissionMade = repo.courseAssignmentSubmissionDao
-                    .checkNoSubmissionsMade(entity.assignment?.caUid ?: 0L).getValue() ?: true
+                    .checkNoSubmissionsMade(entity.assignment?.caUid ?: 0L).getFirstValue()
 
                 if(!noSubmissionMade){
                     foundError = true
@@ -371,7 +372,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             if(markingTypeDb != -1 && markingTypeDb != entity.assignment?.caMarkingType){
 
                 val noSubmissionMarked = repo.courseAssignmentMarkDao
-                    .checkNoSubmissionsMarked(entity.assignment?.caUid ?: 0L).getValue() ?: true
+                    .checkNoSubmissionsMarked(entity.assignment?.caUid ?: 0L).getFirstValue()
 
                 if(!noSubmissionMarked){
                     foundError = true

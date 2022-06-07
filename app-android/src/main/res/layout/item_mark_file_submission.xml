@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:visibility="@{markStudentVisible ? View.VISIBLE : View.GONE}"
-            android:hint="@{@string/private_comments}"
+            android:hint="@{@string/comment}"
             app:hintEnabled="true"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
