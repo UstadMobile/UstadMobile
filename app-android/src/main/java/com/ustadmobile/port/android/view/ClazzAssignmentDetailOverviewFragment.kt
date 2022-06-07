@@ -19,6 +19,7 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailOverviewPresenter
 import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.door.DoorDataSourceFactory
@@ -26,6 +27,7 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -47,6 +49,8 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         OpenSheetListener, FileSubmissionListItemListener {
 
 
+    private var gradesHeaderAdapter: ListHeaderRecyclerViewAdapter? = null
+    private var marksAdapter: GradesListAdapter? = null
     private var submitButtonAdapter: SubmitButtonAdapter? = null
     private var dbRepo: UmAppDatabase? = null
     private var mBinding: FragmentClazzAssignmentDetailOverviewBinding? = null
@@ -92,6 +96,16 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     }
 
 
+    private var courseMarkLiveData: LiveData<PagedList<CourseAssignmentMarkWithPersonMarker>>? = null
+
+    private val courseMarkObserver = Observer<PagedList<CourseAssignmentMarkWithPersonMarker>?> {
+            t -> run{
+
+    }
+    }
+
+
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentClazzAssignmentDetailOverviewBinding.inflate(inflater, container, false).also {
@@ -116,6 +130,15 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         addSubmissionAdapter = AddSubmissionListAdapter(fileSubmissionEditListener).also {
             it.isSubmitted = false
         }
+
+        gradesHeaderAdapter = ListHeaderRecyclerViewAdapter(
+            headerStringId = R.string.grades_class_age,
+            headerLayoutId = R.layout.item_simple_list_header,
+            filterOptions = ClazzAssignmentDetailOverviewPresenter.FILTER_OPTIONS.toListFilterOptions(
+                requireContext(), di),
+            onFilterOptionSelected = mPresenter)
+
+        marksAdapter = GradesListAdapter()
 
         // 5 submit button adapter
         submitButtonAdapter = SubmitButtonAdapter(this)
@@ -170,6 +193,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
         mPresenter = ClazzAssignmentDetailOverviewPresenter(requireContext(),
                 arguments.toStringMap(), this, viewLifecycleOwner, di)
+        gradesHeaderAdapter?.onFilterOptionSelected = mPresenter
 
         detailMergerRecyclerAdapter = ConcatAdapter(detailRecyclerAdapter, submissionStatusHeaderAdapter,
                 addSubmissionButtonsAdapter, addSubmissionAdapter, submitButtonAdapter,
@@ -224,6 +248,15 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             submissionAttachmentLiveDataCourse = value?.asRepositoryLiveData(dvRepoVal.courseAssignmentSubmissionDao)
             field = value
             submissionAttachmentLiveDataCourse?.observeIfFragmentViewIsReady(this, courseSubmissionWithAttachmentObserver)
+        }
+
+    override var markList: DoorDataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>? = null
+        set(value) {
+            val dvRepoVal = dbRepo?: return
+            courseMarkLiveData?.removeObserver(courseMarkObserver)
+            courseMarkLiveData = value?.asRepositoryLiveData(dvRepoVal.courseAssignmentMarkDao)
+            field = value
+            courseMarkLiveData?.observeIfFragmentViewIsReady(this, courseMarkObserver)
         }
 
 
@@ -291,7 +324,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             addSubmissionButtonsAdapter?.addFileVisible = value
         }
 
-    override var submissionMark: CourseAssignmentMark? = null
+    override var submissionMark: AverageCourseAssignmentMark? = null
         set(value) {
             field = value
             submissionStatusHeaderAdapter?.courseAssignmentMark = value

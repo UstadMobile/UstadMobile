@@ -27,18 +27,22 @@ fun List<AssignmentSubmitterSummary>.assignRandomly(
     }
 
     repeat(reviewerCount){
-        submitters.forEach{
-            val toList = toBucket[it.submitterUid]?.toMutableList() ?: mutableListOf()
-            val previousList = previousAllocationMap?.get(it.submitterUid) ?: listOf()
-            val reviewerUid = fromBucket
-                .find { from ->
-                    from != it.submitterUid && from !in toList && from !in previousList
-                } ?: 0L
+        submitters.forEach {
+                val toList = toBucket[it.submitterUid]?.toMutableList() ?: mutableListOf()
+                val previousList = previousAllocationMap?.get(it.submitterUid) ?: listOf()
+                val reviewerUid = fromBucket
+                    .find { from ->
+                        from != it.submitterUid && from !in toList && from !in previousList
+                    } ?: 0L
 
-            toList.add(reviewerUid)
-            toBucket[it.submitterUid] = toList
-            fromBucket.remove(reviewerUid)
+                toList.add(reviewerUid)
+                toBucket[it.submitterUid] = toList
+                fromBucket.remove(reviewerUid)
         }
+    }
+
+    if(toBucket.values.flatten().contains(0)) {
+        // TODO
     }
 
     return toBucket

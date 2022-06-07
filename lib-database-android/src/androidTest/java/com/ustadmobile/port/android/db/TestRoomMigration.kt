@@ -681,13 +681,13 @@ class TestRoomMigration {
 
 
     @Test
-    fun migrate105to106() {
-        helper.createDatabase(TEST_DB, 105).apply {
+    fun migrate106to107() {
+        helper.createDatabase(TEST_DB, 106).apply {
             close()
         }
 
-        helper.runMigrationsAndValidate(TEST_DB, 106, true,
-            UmAppDatabase.MIGRATION_105_106.asRoomMigration())
+        helper.runMigrationsAndValidate(TEST_DB, 107, true,
+            UmAppDatabase.MIGRATION_106_107.asRoomMigration())
     }
 
 

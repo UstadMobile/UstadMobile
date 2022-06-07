@@ -2,10 +2,13 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.CourseAssignmentMarkDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.io.ext.guessMimeType
+import com.ustadmobile.core.util.ListFilterIdOption
+import com.ustadmobile.core.util.OnListFilterOptionSelectedListener
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -42,7 +45,7 @@ class ClazzAssignmentDetailOverviewPresenter(
     context,
     arguments,
     view, di, lifecycleOwner
-) {
+), OnListFilterOptionSelectedListener {
     
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
 
@@ -104,6 +107,8 @@ class ClazzAssignmentDetailOverviewPresenter(
             view.unassignedError = if(submitterUid == 0L) unassignedMessage else null
 
             checkCanAddFileOrText(clazzAssignment)
+
+            loadMarks(clazzAssignment.caUid, submitterUid, CourseAssignmentMarkDao.ARG_FILTER_RECENT_SCORES)
 
             // don't show private comments if unassigned in group
             view.showPrivateComments = clazzAssignment.caPrivateCommentsEnabled && submitterUid != 0L
@@ -176,6 +181,14 @@ class ClazzAssignmentDetailOverviewPresenter(
         }
 
         return entity
+    }
+
+    fun loadMarks(assignmentUid: Long, submitterUid: Long, filter: Int){
+        presenterScope.launch(doorMainDispatcher()) {
+            view.markList = db.courseAssignmentMarkDao.getAllMarksOfAssignmentForSubmitter(
+                assignmentUid, submitterUid, filter)
+        }
+
     }
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
@@ -416,6 +429,15 @@ class ClazzAssignmentDetailOverviewPresenter(
         )
     }
 
+    override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {
+        presenterScope.launch {
+            val caUid = entity?.caUid ?: arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+            val submitterUid = db.clazzAssignmentDao.getSubmitterUid(caUid,
+                accountManager.activeAccount.personUid)
+            loadMarks(caUid, submitterUid, filterOptionId.optionId)
+        }
+    }
+
     fun handleAddTextClicked(){
         val args = mutableMapOf(TextAssignmentEditView.ASSIGNMENT_ID to entity?.caUid.toString())
         args[EDIT_ENABLED] = true.toString()
@@ -437,6 +459,9 @@ class ClazzAssignmentDetailOverviewPresenter(
             ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED to MessageID.multiple_submission_allowed_submission_policy,
             ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE to MessageID.submit_all_at_once_submission_policy)
 
+        val FILTER_OPTIONS = listOf(MessageID.almost_done to CourseAssignmentMarkDao.ARG_FILTER_RECENT_SCORES,
+            MessageID.all to CourseAssignmentMarkDao.ARG_FILTER_ALL_SCORES)
+
         const val SAVED_STATE_KEY_URI = "URI"
 
         const val SAVED_STATE_KEY_TEXT = "TEXT"
@@ -446,5 +471,7 @@ class ClazzAssignmentDetailOverviewPresenter(
         //TODO: Add constants for keys that would be used for any One To Many Join helpers
         const val  SAVEDSTATE_KEY_CLAZZ_ASSIGNMENT = "ClassAssignment"
     }
+
+
 
 }

@@ -3982,11 +3982,12 @@ DELETE FROM ContainerEntryFile
 
         val MIGRATION_106_107 = DoorMigrationStatementList(106, 107) { db ->
             val stmtList = mutableListOf<String>()
+            stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camMarkerComment TEXT"
+            stmtList += "ALTER TABLE ClazzAssignment ADD COLUMN caPeerReviewerCount  INTEGER  NOT NULL  DEFAULT 0"
             if (db.dbType() == DoorDbType.SQLITE) {
 
-
-                stmtList += "ALTER TABLE ClazzAssignment ADD COLUMN caPeerReviewerCount  INTEGER  NOT NULL  DEFAULT 0"
-                stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camSubmitterPersonUid  INTEGER  NOT NULL  DEFAULT 0"
+                stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camMarkerSubmitterUid  INTEGER  NOT NULL  DEFAULT 0"
+                stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camMarkerPersonUid  INTEGER  NOT NULL  DEFAULT 0"
 
                 stmtList += "CREATE TABLE IF NOT EXISTS PeerReviewerAllocation (`praUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `praMarkerSubmitterUid` INTEGER NOT NULL, `praToMarkerSubmitterUid` INTEGER NOT NULL, `praAssignmentUid` INTEGER NOT NULL, `praActive` INTEGER NOT NULL, `praLct` INTEGER NOT NULL)"
                 stmtList += "CREATE TABLE IF NOT EXISTS PeerReviewerAllocationReplicate (`prarPk` INTEGER NOT NULL, `prarVersionId` INTEGER NOT NULL DEFAULT 0, `prarDestination` INTEGER NOT NULL, `prarPending` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`prarPk`, `prarDestination`))"
@@ -4007,8 +4008,8 @@ DELETE FROM ContainerEntryFile
 
 
             }else{
-                stmtList += "ALTER TABLE ClazzAssignment ADD COLUMN caPeerReviewerCount  INTEGER  NOT NULL  DEFAULT 0"
-                stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camSubmitterPersonUid  BIGINT  NOT NULL  DEFAULT 0"
+                stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camMarkerSubmitterUid  BIGINT  NOT NULL  DEFAULT 0"
+                stmtList += "ALTER TABLE CourseAssignmentMark ADD COLUMN camMarkerPersonUid  BIGINT  NOT NULL  DEFAULT 0"
 
                 stmtList +=
                     "CREATE TABLE IF NOT EXISTS PeerReviewerAllocation (  praMarkerSubmitterUid  BIGINT  NOT NULL , praToMarkerSubmitterUid  BIGINT  NOT NULL , praAssignmentUid  BIGINT  NOT NULL , praActive  BOOL  NOT NULL , praLct  BIGINT  NOT NULL , praUid  BIGSERIAL  PRIMARY KEY  NOT NULL )"

@@ -5,10 +5,7 @@ import androidx.room.Query
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.CourseAssignmentMark
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UserSession
+import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
@@ -87,26 +84,56 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
     abstract fun checkNoSubmissionsMarked(assignmentUid: Long): DoorLiveData<Boolean>
 
     @Query("""
-        SELECT * 
-          FROM CourseAssignmentMark               
-         WHERE camAssignmentUid = :assignmentUid
-           AND camSubmitterUid = :submitterUid
-      ORDER BY camLct DESC
-         LIMIT 1
+         WITH ScoreByMarker (score, penalty) AS (
+                 SELECT AVG(camMark), AVG(camPenalty)
+                   FROM courseAssignmentMark
+                        JOIN ClazzAssignment
+                        ON caUid = :assignmentUid         
+                    AND camAssignmentUid = :assignmentUid
+                    AND camSubmitterUid = :submitterUid
+                  WHERE camLct = (SELECT MAX(mark.camLct) 
+                                    FROM CourseAssignmentMark As mark
+                                    WHERE mark.camAssignmentUid = :assignmentUid
+                                     AND mark.camSubmitterUid = :submitterUid
+                                     AND (caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
+                                       OR mark.camMarkerSubmitterUid = courseAssignmentMark.camMarkerSubmitterUid))
+                 GROUP BY camMarkerSubmitterUid                                                                           
+                ORDER BY camLct DESC)                       
+                                       
+      
+         SELECT *
+           FROM ScoreByMarker
     """)
-    abstract fun getMarkOfAssignmentForSubmitterLiveData(assignmentUid: Long, submitterUid: Long): DoorLiveData<CourseAssignmentMark?>
+    abstract fun getMarkOfAssignmentForSubmitterLiveData(
+        assignmentUid: Long,
+        submitterUid: Long,
+    ): DoorLiveData<AverageCourseAssignmentMark?>
 
     @Query("""
-         SELECT * 
-          FROM CourseAssignmentMark               
-         WHERE camAssignmentUid = :assignmentUid
-           AND camSubmitterUid = :submitterUid
-      ORDER BY camLct DESC
+          WITH ScoreByMarker AS (
+                 SELECT *
+                   FROM courseAssignmentMark    
+                  WHERE camAssignmentUid = :assignmentUid
+                    AND camSubmitterUid = :submitterUid
+                    AND (:filter = $ARG_FILTER_ALL_SCORES OR camLct = (SELECT MAX(mark.camLct) 
+                                    FROM CourseAssignmentMark As mark
+                                    WHERE mark.camAssignmentUid = :assignmentUid
+                                      AND mark.camSubmitterUid = :submitterUid
+                                      AND mark.camMarkerSubmitterUid = courseAssignmentMark.camMarkerSubmitterUid
+                                      ))                 
+                ORDER BY camLct DESC)    
+                
+          SELECT * 
+            FROM ScoreByMarker
+                 JOIN Person As marker
+                 ON Marker.personUid = ScoreByMarker.camMarkerPersonUid
     """)
+    @QueryLiveTables(value = ["courseAssignmentMark","ClazzAssignment"])
     abstract fun getAllMarksOfAssignmentForSubmitter(
         assignmentUid: Long,
-        submitterUid: Long
-    ): DoorDataSourceFactory<Int, CourseAssignmentMark>
+        submitterUid: Long,
+        filter: Int
+    ): DoorDataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>
 
     @Query("""
         SELECT * 
@@ -128,10 +155,31 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
                    ON CourseAssignmentMark.camSubmitterUid = CourseAssignmentSubmission.casSubmitterUid
                    AND CourseAssignmentMark.camAssignmentUid = :assignmentUid
                    
+                   LEFT JOIN PeerReviewerAllocation
+                   ON praAssignmentUid = :assignmentUid
+                   AND praToMarkerSubmitterUid = :submitterUid
+                   
+                   JOIN ClazzAssignment
+                   ON ClazzAssignment.caUid = :assignmentUid
+                   
              WHERE CourseAssignmentSubmission.casSubmitterUid != :submitterUid
+               AND CourseAssignmentSubmission.casSubmitterUid != :markerUid
                AND CourseAssignmentMark.camUid IS NULL
+               AND (ClazzAssignment.caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER} 
+                    OR PeerReviewerAllocation.praMarkerSubmitterUid = :markerUid)
           GROUP BY casSubmitterUid
          LIMIT 1),0)
     """)
-    abstract suspend fun findNextSubmitterToMarkForAssignment(assignmentUid: Long, submitterUid: Long): Long
+    abstract suspend fun findNextSubmitterToMarkForAssignment(assignmentUid: Long,
+                                                              submitterUid: Long,
+                                                              markerUid: Long): Long
+
+
+    companion object{
+
+        const val ARG_FILTER_RECENT_SCORES = 1
+
+        const val ARG_FILTER_ALL_SCORES = 0
+
+    }
 }

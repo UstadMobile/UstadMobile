@@ -15,16 +15,16 @@ import kotlinx.serialization.Serializable
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
                 sqlStatements = [
-                    """REPLACE INTO CourseAssignmentMark(camUid, camAssignmentUid, camSubmitterUid,camSubmitterPersonUid, camMark, camPenalty, camLct) 
-         VALUES (NEW.camUid, NEW.camAssignmentUid, NEW.camSubmitterUid, NEW.camSubmitterPersonUid, NEW.camMark, NEW.camPenalty, NEW.camLct) 
+                    """REPLACE INTO CourseAssignmentMark(camUid, camAssignmentUid, camSubmitterUid,camMarkerSubmitterUid, camMarkerPersonUid, camMarkerComment, camMark, camPenalty, camLct) 
+         VALUES (NEW.camUid, NEW.camAssignmentUid, NEW.camSubmitterUid, NEW.camMarkerSubmitterUid, NEW.camMarkerPersonUid, NEW.camMarkerComment, NEW.camMark, NEW.camPenalty, NEW.camLct) 
          /*psql ON CONFLICT (camUid) DO UPDATE 
-         SET camAssignmentUid = EXCLUDED.camAssignmentUid, camSubmitterUid = EXCLUDED.camSubmitterUid, camSubmitterPersonUid = EXCLUDED.camSubmitterPersonUid, camMark = EXCLUDED.camMark, camPenalty = EXCLUDED.camPenalty, camLct = EXCLUDED.camLct
+         SET camAssignmentUid = EXCLUDED.camAssignmentUid, camSubmitterUid = EXCLUDED.camSubmitterUid, camMarkerSubmitterUid = EXCLUDED.camMarkerSubmitterUid, camMarkerPersonUid = EXCLUDED.camMarkerPersonUid, camMarkerComment = EXCLUDED.camMarkerComment, camMark = EXCLUDED.camMark, camPenalty = EXCLUDED.camPenalty, camLct = EXCLUDED.camLct
          */"""
                 ]
         )
 ))
 @Serializable
-class CourseAssignmentMark {
+open class CourseAssignmentMark {
 
     @PrimaryKey(autoGenerate = true)
     var camUid: Long = 0
@@ -34,7 +34,12 @@ class CourseAssignmentMark {
     var camSubmitterUid: Long = 0
 
     @ColumnInfo(defaultValue = "0")
-    var camSubmitterPersonUid: Long = 0
+    var camMarkerSubmitterUid: Long = 0
+
+    @ColumnInfo(defaultValue = "0")
+    var camMarkerPersonUid: Long = 0
+
+    var camMarkerComment: String? = null
 
     var camMark: Float = 0f
 

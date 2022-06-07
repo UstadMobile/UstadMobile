@@ -41,6 +41,8 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
 
     private var courseAssignmentSubmissions : List<CourseAssignmentSubmissionWithAttachment> = listOf()
 
+    private var courseMarks : List<CourseAssignmentMarkWithPersonMarker> = listOf()
+
     private val classCommentsObserver = ObserverFnWrapper<List<CommentsWithPerson>>{
         if(it.isEmpty()) return@ObserverFnWrapper
         setState {
@@ -63,6 +65,13 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
         }
     }
 
+    private val courseMarkObserver = ObserverFnWrapper<List<CourseAssignmentMarkWithPersonMarker>>{
+        if(it.isEmpty()) return@ObserverFnWrapper
+        setState {
+            courseMarks = it
+        }
+    }
+
     override var submittedCourseAssignmentSubmission: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
         set(value) {
             field = value
@@ -70,6 +79,15 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
             liveData?.removeObserver(assignmentSubmissionObserver)
             liveData?.observe(this, assignmentSubmissionObserver)
         }
+
+    override var markList: DoorDataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>? = null
+        set(value) {
+            field = value
+            val liveData = value?.getData(0,Int.MAX_VALUE)
+            liveData?.removeObserver(courseMarkObserver)
+            liveData?.observe(this, courseMarkObserver)
+        }
+
 
     override var addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment>? = listOf()
         get() = field
@@ -132,7 +150,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
             }
         }
 
-    override var submissionMark: CourseAssignmentMark? = null
+    override var submissionMark: AverageCourseAssignmentMark? = null
         get() = field
         set(value) {
             setState {
@@ -220,9 +238,9 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                     val mark = submissionMark
                     if(mark != null){
 
-                        val marks = "${mark.camMark} / ${entity?.block?.cbMaxPoints} ${getString(MessageID.points)}"
+                        val marks = "${mark.score} / ${entity?.block?.cbMaxPoints} ${getString(MessageID.points)}"
 
-                        val penalty = if(mark.camPenalty != 0)
+                        val penalty = if(mark.penalty != 0)
                             " ${getString(MessageID.late_penalty).format(entity?.block?.cbLateSubmissionPenalty ?: "")}"
                         else
                             ""

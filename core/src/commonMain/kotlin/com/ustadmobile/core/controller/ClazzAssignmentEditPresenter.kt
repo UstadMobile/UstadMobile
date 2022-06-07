@@ -24,6 +24,7 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.getFirstValue
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -38,6 +39,7 @@ class ClazzAssignmentEditPresenter(context: Any,
                                    di: DI)
     : UstadEditPresenter<ClazzAssignmentEditView, CourseBlockWithEntity>(context, arguments, view, di, lifecycleOwner) {
 
+    private val onLoadJsonComplete = CompletableDeferred<Boolean>()
 
     private val json: Json by instance()
 
@@ -99,23 +101,30 @@ class ClazzAssignmentEditPresenter(context: Any,
             SAVEDSTATE_KEY_SUBMISSION_TYPE,
             ListSerializer(CourseGroupSet.serializer()), CourseGroupSet::class) {
             val group = it.firstOrNull() ?: return@observeSavedStateResult
-            entity?.assignment?.caGroupUid = group.cgsUid
-            view.groupSet = group
+            presenterScope.launch(doorMainDispatcher()) {
+                onLoadJsonComplete.await()
+                entity?.assignment?.caGroupUid = group.cgsUid
 
-            // invalid peer allocations after submissionType changes
-            entity?.assignmentPeerAllocationsToRemove = entity?.assignmentPeerAllocations?.map { peer -> peer.praUid }?.filter { it != 0L }
-            entity?.assignmentPeerAllocations = null
+                // invalid peer allocations after submissionType changes
+                entity?.assignmentPeerAllocationsToRemove = entity?.assignmentPeerAllocations?.map { peer -> peer.praUid }?.filter { it != 0L }
+                entity?.assignmentPeerAllocations = null
 
-            view.entity = entity
-            requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
+                view.entity = entity
+                view.groupSet = group
+                requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
+            }
         }
         observeSavedStateResult(ARG_SAVED_STATE_PEER_ALLOCATION,
             ListSerializer(PeerReviewerAllocationList.serializer()), PeerReviewerAllocationList::class){
             val allocations = it.firstOrNull() ?: return@observeSavedStateResult
-            entity?.assignmentPeerAllocations = allocations.allocations
-            view.entity = entity
+            presenterScope.launch(doorMainDispatcher()) {
+                onLoadJsonComplete.await()
+                entity?.assignmentPeerAllocations = allocations.allocations
+                view.entity = entity
 
-            requireSavedStateHandle()[ARG_SAVED_STATE_PEER_ALLOCATION] = null
+                requireSavedStateHandle()[ARG_SAVED_STATE_PEER_ALLOCATION] = null
+            }
+
         }
 
     }
@@ -173,6 +182,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             val timeZone = clazzWithSchool.effectiveTimeZone()
             view.timeZone = timeZone
             loadEntityIntoDateTime(editEntity)
+            onLoadJsonComplete.complete(true)
         }
 
         return editEntity

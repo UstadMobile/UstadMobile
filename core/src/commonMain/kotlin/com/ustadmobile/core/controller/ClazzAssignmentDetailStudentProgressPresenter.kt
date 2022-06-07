@@ -2,9 +2,12 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.CourseAssignmentMarkDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.util.ListFilterIdOption
+import com.ustadmobile.core.util.OnListFilterOptionSelectedListener
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.util.ext.roundTo
@@ -16,6 +19,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_SUBMITER_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.attachments.retrieveAttachment
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.*
@@ -45,7 +49,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
     view,
     di,
     lifecycleOwner
-), NewCommentItemListener by newPrivateCommentListener {
+), NewCommentItemListener by newPrivateCommentListener, OnListFilterOptionSelectedListener {
 
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
@@ -65,7 +69,9 @@ class ClazzAssignmentDetailStudentProgressPresenter(
 
     private var nextSubmitterToMark: Long = 0L
 
-    private var submitterMarking: Long = 0
+    private var markerSubmitterUid: Long = 0
+
+    private var selectedFilter = CourseAssignmentMarkDao.ARG_FILTER_RECENT_SCORES
 
     override fun onCreate(savedState: Map<String, String>?) {
         selectedSubmitterUid = arguments[ARG_SUBMITER_UID]?.toLong() ?: 0
@@ -88,11 +94,11 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                 it.personDao.findByUidAsync(selectedSubmitterUid)
             }
             view.submitterName =  person?.personFullName()
-            submitterMarking = mLoggedInPersonUid
+            markerSubmitterUid = mLoggedInPersonUid
         }else{
             view.submitterName = systemImpl.getString(MessageID.group_number, context)
                 .replace("%1\$s", "$selectedSubmitterUid")
-            submitterMarking = db.clazzAssignmentDao.getSubmitterUid(clazzAssignment.caUid, mLoggedInPersonUid)
+            markerSubmitterUid = db.clazzAssignmentDao.getSubmitterUid(clazzAssignment.caUid, mLoggedInPersonUid)
         }
 
         view.clazzCourseAssignmentSubmissionAttachment = db.onRepoWithFallbackToDb(2000){
@@ -101,11 +107,16 @@ class ClazzAssignmentDetailStudentProgressPresenter(
             )
         }
 
+        view.markList = db.onRepoWithFallbackToDb(2000){
+            it.courseAssignmentMarkDao.getAllMarksOfAssignmentForSubmitter(
+                clazzAssignment.caUid, selectedSubmitterUid, 0)
+        }
+
         db.courseAssignmentMarkDao.getMarkOfAssignmentForSubmitterLiveData(
             clazzAssignment.caUid, selectedSubmitterUid)
             .observeWithLifecycleOwner(lifecycleOwner){
-                        view.submissionScore = it
-                    }
+                view.submissionScore = it
+            }
 
         db.courseAssignmentSubmissionDao
             .getStatusOfAssignmentForSubmitter(
@@ -114,15 +125,17 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                     view.submissionStatus = it ?: 0
                 }
 
+        loadMarksList()
+
         val submissionCount = repo.courseAssignmentSubmissionDao.countSubmissionsFromSubmitter(
             clazzAssignment.caUid, selectedSubmitterUid)
         val submitButtonVisible = submissionCount > 0
         val canMark = repo.clazzAssignmentDao.canMarkAssignment(selectedClazzAssignmentUid,
-            selectedClazzUid, mLoggedInPersonUid, submitterMarking, selectedSubmitterUid)
+            selectedClazzUid, mLoggedInPersonUid, markerSubmitterUid, selectedSubmitterUid)
         view.submitButtonVisible = submitButtonVisible && canMark
 
         nextSubmitterToMark = repo.courseAssignmentMarkDao.findNextSubmitterToMarkForAssignment(
-            selectedClazzAssignmentUid, selectedSubmitterUid)
+            selectedClazzAssignmentUid, selectedSubmitterUid, markerSubmitterUid)
         view.markNextStudentVisible = submitButtonVisible && canMark && nextSubmitterToMark != 0L
 
 
@@ -134,6 +147,16 @@ class ClazzAssignmentDetailStudentProgressPresenter(
 
         return clazzAssignment
     }
+
+    fun loadMarksList(){
+        presenterScope.launch(doorMainDispatcher()) {
+            view.markList = db.onRepoWithFallbackToDb(2000){
+                it.courseAssignmentMarkDao.getAllMarksOfAssignmentForSubmitter(
+                   selectedClazzAssignmentUid, selectedSubmitterUid, selectedFilter)
+            }
+        }
+    }
+
 
     fun onClickOpenSubmission(submissionCourse: CourseAssignmentSubmissionWithAttachment){
         presenterScope.launch {
@@ -167,7 +190,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
     }
 
 
-    fun onClickSubmitGrade(grade: Float): Boolean {
+    fun onClickSubmitGrade(grade: Float, comment: String?): Boolean {
         val maxPoints = entity?.block?.cbMaxPoints ?: 10
         if(grade < 0 || (grade > maxPoints)){
            // to highlight the textfield to show error
@@ -195,7 +218,9 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                     camSubmitterUid = selectedSubmitterUid
                     camAssignmentUid = assignment.caUid
                     camMark = gradeAfterPenalty
-                    camSubmitterPersonUid = submitterMarking
+                    camMarkerComment = comment
+                    camMarkerSubmitterUid = markerSubmitterUid
+                    camMarkerPersonUid = accountManager.activeAccount.personUid
                     camPenalty = if(lastSubmission.casTimestamp > (assignment.block?.cbDeadlineDate ?: 0)) penalty else 0
                 })
 
@@ -270,8 +295,8 @@ class ClazzAssignmentDetailStudentProgressPresenter(
         return true
     }
 
-    fun onClickSubmitGradeAndMarkNext(grade: Float) {
-        val isValid = onClickSubmitGrade(grade)
+    fun onClickSubmitGradeAndMarkNext(grade: Float, comment: String?) {
+        val isValid = onClickSubmitGrade(grade, comment)
         if(!isValid){
             return
         }
@@ -282,6 +307,11 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                         ARG_CLAZZUID to selectedClazzUid.toString()),
             context,
             UstadMobileSystemCommon.UstadGoOptions(CURRENT_DEST, true))
+    }
+
+    override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {
+        selectedFilter = filterOptionId.optionId
+        loadMarksList()
     }
 
 }
