@@ -140,7 +140,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             repo.courseAssignmentSubmissionDao
                 .checkNoSubmissionsMade(editEntity.assignment?.caUid ?: 0)
                 .observeWithLifecycleOwner(lifecycleOwner){
-                    view.groupSetEnabled = it == true
+                    view.groupSetEnabled = (it ?: true) == true
                 }
 
             clazzUid = editEntity.assignment?.caClazzUid ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
@@ -293,7 +293,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             if(dbGroupUid != -1L && dbGroupUid != entity.assignment?.caGroupUid){
 
                 val noSubmissionMade = repo.courseAssignmentSubmissionDao
-                    .checkNoSubmissionsMade(entity.assignment?.caUid ?: 0L).getFirstValue()
+                    .checkNoSubmissionsMade(entity.assignment?.caUid ?: 0L).getValue() ?: true
 
                 if(!noSubmissionMade){
                     foundError = true
