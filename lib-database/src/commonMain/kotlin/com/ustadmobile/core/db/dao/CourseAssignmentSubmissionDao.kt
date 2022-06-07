@@ -141,7 +141,7 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
 
 
     @Query("""
-        SELECT NOT EXISTS(SELECT 1
+         SELECT NOT EXISTS(SELECT 1
                         FROM CourseAssignmentSubmission
                        WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
                        LIMIT 1)
