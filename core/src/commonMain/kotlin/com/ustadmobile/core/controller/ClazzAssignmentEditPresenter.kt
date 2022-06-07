@@ -293,7 +293,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             if(dbGroupUid != -1L && dbGroupUid != entity.assignment?.caGroupUid){
 
                 val noSubmissionMade = repo.courseAssignmentSubmissionDao
-                    .checkNoSubmissionsMade(entity.assignment?.caUid ?: 0L).getValue() ?: true
+                    .checkNoSubmissionsMade(entity.assignment?.caUid ?: 0L).getFirstValue()
 
                 if(!noSubmissionMade){
                     foundError = true
