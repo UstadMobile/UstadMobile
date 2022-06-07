@@ -341,9 +341,7 @@ class ClazzEdit2Presenter(
 
             courseBlockOneToManyJoinEditHelper.onEditResult(foundBlock)
 
-            UmPlatformUtil.runIfNotJs {
-                requireSavedStateHandle()[SAVEDSTATE_KEY_DISCUSSION] = null
-            }
+            requireSavedStateHandle()[SAVEDSTATE_KEY_DISCUSSION] = null
         }
     }
 
