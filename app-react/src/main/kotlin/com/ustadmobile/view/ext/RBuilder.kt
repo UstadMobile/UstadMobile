@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.encodeURI
+import com.ustadmobile.core.util.encodeURIComponent
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
@@ -98,36 +99,37 @@ fun RBuilder.errorFallBack(text: String) {
 }
 
 /**
- * Prevent unauthorized access
+ * Prevent users who have not logged in accessing screens that require an account for access
  */
 private fun guardRoute(
     component: KClass<out Component<UmProps, *>>,
     accountManager: UstadAccountManager,
     systemImpl: UstadMobileSystemImpl,
 ): ReactElement?  = createElement {
-    val viewName = getViewNameFromUrl()
-    val accessibleViews = listOf(Login2View.VIEW_NAME, PersonEditView.VIEW_NAME_REGISTER,
-        RegisterAgeRedirectView.VIEW_NAME, SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS)
-    val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
-    val logout = activeSession == null && viewName != null
-            && accessibleViews.indexOf(viewName) == -1 && viewName != "/"
+    try {
+        val ustadUrlComponents = UstadUrlComponents.parse(window.location.href)
+        val accessibleViews = listOf(Login2View.VIEW_NAME, PersonEditView.VIEW_NAME_REGISTER,
+            RegisterAgeRedirectView.VIEW_NAME, SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS,
+            RegisterMinorWaitForParentView.VIEW_NAME)
+        val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
 
-    if(logout) {
-        val urlComponents = UstadUrlComponents.parse(window.location.href)
-        val loginWithNextParamUrl = "${urlComponents.endpoint}#/${Login2View.VIEW_NAME}?${UstadView.ARG_NEXT}=${encodeURI(urlComponents.viewUri)}"
-        Napier.d { "User is not logged in : should not see $viewName . Go to $loginWithNextParamUrl"}
-        window.location.href = loginWithNextParamUrl
-
-        //systemImpl.goToDeepLink(window.location.href, accountManager, Any())
+        /**
+         * If there is no active session, and the user is not accessing login, registration,
+         * terms, or the age redirect screen (or related), then redirect the browser to the login
+         * screen. Set arg_next so that they will continue to the desired screen after clicking
+         * login.
+         */
+        if(activeSession == null && ustadUrlComponents.viewName !in accessibleViews) {
+            val urlComponents = UstadUrlComponents.parse(window.location.href)
+            val loginWithNextParamUrl = "${urlComponents.endpoint}#/${Login2View.VIEW_NAME}?${UstadView.ARG_NEXT}=${encodeURIComponent(urlComponents.viewUri)}"
+            Napier.d { "User is not logged in : should not see ${ustadUrlComponents.viewName} . Go to $loginWithNextParamUrl"}
+            window.location.href = loginWithNextParamUrl
+        }
+    }catch(e: Exception) {
+        Napier.d { "${window.location.href} not an UstadUrl, not doing anything" }
     }
 
     child(component){}
-
-    //Protest access to app's content without being logged in.
-//    if(logout){
-//        window.location.href = "./"
-//    }
-
 }
 
 fun RBuilder.renderRoutes(di: DI) {

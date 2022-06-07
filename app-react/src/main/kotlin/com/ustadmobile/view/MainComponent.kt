@@ -1,6 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.core.view.SettingsView
@@ -82,7 +83,14 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
      * i.e Side Nav, Bottom nav e.tc
      */
     private fun onDestinationChanged() {
-        val destination = lookupDestinationName(getViewNameFromUrl()) ?: defaultDestination
+        var viewName: String? = null
+        try {
+            viewName = UstadUrlComponents.parse(window.location.href).viewName
+        }catch(e: Exception) {
+            //not an UstadUrl (yet)
+        }
+
+        val destination = lookupDestinationName(viewName) ?: defaultDestination
         destination.takeIf { it.labelId != 0 && it.labelId != MessageID.content}?.apply {
             ustadComponentTitle = getString(labelId)
         }
