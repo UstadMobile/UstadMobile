@@ -46,6 +46,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             rootView = it.root
             it.fileRequiredListener = onFileRequiredChanged
             it.textRequiredListener = onTextRequiredChanged
+            it.groupSetEnabled = true
             it.caEditCommonFields.caDeadlineDateTextinput.setEndIconOnClickListener(clearDeadlineListener)
             it.caEditCommonFields.caDeadlineDate.doAfterTextChanged{ editable ->
                 if(editable.isNullOrEmpty()){
@@ -224,9 +225,12 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             mBinding?.markingTypeOptions = value
         }
 
-    override var groupSetEnabled: Boolean = false
+    override var groupSetEnabled: Boolean = true
         get() = field
         set(value) {
+            if(field == value){
+                return
+            }
             field = value
             mBinding?.groupSetEnabled = value
         }
