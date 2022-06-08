@@ -16,10 +16,10 @@ import kotlinx.serialization.Serializable
                 on = Trigger.On.RECEIVEVIEW,
                 events = [Trigger.Event.INSERT],
                 sqlStatements = [
-                    """REPLACE INTO CourseAssignmentSubmissionAttachment(casaUid, casaSubmissionUid, casaMimeType, casaUri, casaMd5, casaSize, casaTimestamp) 
-         VALUES (NEW.casaUid, NEW.casaSubmissionUid, NEW.casaMimeType, NEW.casaUri, NEW.casaMd5, NEW.casaSize, NEW.casaTimestamp) 
+                    """REPLACE INTO CourseAssignmentSubmissionAttachment(casaUid, casaSubmissionUid, casaMimeType,casaFileName, casaUri, casaMd5, casaSize, casaTimestamp) 
+         VALUES (NEW.casaUid, NEW.casaSubmissionUid, NEW.casaMimeType, NEW.casaFileName, NEW.casaUri, NEW.casaMd5, NEW.casaSize, NEW.casaTimestamp) 
          /*psql ON CONFLICT (casaUid) DO UPDATE 
-         SET casaSubmissionUid = EXCLUDED.casaSubmissionUid, casaMimeType = EXCLUDED.casaMimeType, casaUri = EXCLUDED.casaUri, casaMd5 = EXCLUDED.casaMd5, casaSize = EXCLUDED.casaSize, casaTimestamp = EXCLUDED.casaTimestamp
+         SET casaSubmissionUid = EXCLUDED.casaSubmissionUid, casaMimeType = EXCLUDED.casaMimeType, casaFileName = EXCLUDED.casaFileName, casaUri = EXCLUDED.casaUri, casaMd5 = EXCLUDED.casaMd5, casaSize = EXCLUDED.casaSize, casaTimestamp = EXCLUDED.casaTimestamp
          */"""
                     ])
     )
@@ -33,6 +33,8 @@ class CourseAssignmentSubmissionAttachment {
     var casaSubmissionUid: Long = 0
 
     var casaMimeType: String? = null
+
+    var casaFileName: String? = null
 
     @AttachmentUri
     var casaUri: String? = null

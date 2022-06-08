@@ -144,7 +144,8 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                 val uri = attachment.casaUri ?: return@launch
                 val doorUri = repo.retrieveAttachment(uri)
                 try {
-                    systemImpl.openFileInDefaultViewer(context, doorUri, attachment.casaMimeType)
+                    systemImpl.openFileInDefaultViewer(context, doorUri, attachment.casaMimeType,
+                        submissionCourse.attachment?.casaFileName)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
                         view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))

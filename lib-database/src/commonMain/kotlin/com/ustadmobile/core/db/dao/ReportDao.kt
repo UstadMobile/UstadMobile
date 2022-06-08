@@ -4,11 +4,8 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
-import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
 
@@ -107,20 +104,22 @@ abstract class ReportDao : BaseDao<Report> {
             """)
     abstract fun findAllActiveReportList(isTemplate: Boolean): List<Report>
 
-    @Query("""UPDATE Report SET reportInactive = :inactive,
-                reportLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
-                WHERE reportUid = :uid""")
-    abstract fun updateReportInactive(inactive: Boolean, uid: Long)
-
     @JsName("findByUidList")
     @Query("SELECT reportUid FROM Report WHERE reportUid IN (:uidList)")
     abstract fun findByUidList(uidList: List<Long>): List<Long>
 
 
-    @Query("""UPDATE Report SET reportInactive = :toggleVisibility, 
-                reportLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
-                WHERE reportUid IN (:selectedItem)""")
-    abstract suspend fun toggleVisibilityReportItems(toggleVisibility: Boolean, selectedItem: List<Long>)
+    @Query("""
+        UPDATE Report 
+           SET reportInactive = :toggleVisibility,
+               reportLct = :updateTime 
+         WHERE reportUid IN (:selectedItem)
+    """)
+    abstract suspend fun toggleVisibilityReportItems(
+        toggleVisibility: Boolean,
+        selectedItem: List<Long>,
+        updateTime: Long,
+    )
 
 
     @JsName("replaceList")

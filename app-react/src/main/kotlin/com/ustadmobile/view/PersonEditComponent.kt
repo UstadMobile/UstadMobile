@@ -20,6 +20,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.components.AttachmentImageComponent
 import com.ustadmobile.view.ext.umEntityAvatar
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
@@ -240,7 +241,19 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                     css{
                         marginTop = LinearDimension("12px")
                     }
-                    umEntityAvatar {}
+
+                    child(AttachmentImageComponent::class) {
+                        attrs.attachmentUri = personPicture?.personPictureUri
+                        attrs.onNewImageSelected = {
+                            setState {
+                                console.log("ClazzEditComponent: setting course picture uri = $it")
+                                personPicture?.personPictureUri = it
+                            }
+                        }
+                        attrs.contentBlock = { attachmentImgSrc ->
+                            umEntityAvatar(src = attachmentImgSrc) {}
+                        }
+                    }
                 }
 
                 umItem(GridSize.cells12, GridSize.cells8){

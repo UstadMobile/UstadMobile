@@ -97,13 +97,13 @@ object UMFileUtil {
      * resolvePath("http://www.server.com/some/dir", "../img.jpg");
      * returns http://www.server.com/some/img.jpg
      *
-     * @param base The absolute base path
+     * @param baseLink The absolute base path
      * @param link The link given relative to the base
      * @return
      */
     fun resolveLink(baseLink: String, link: String): String {
         var base = baseLink
-        val linkLower = link.toLowerCase()
+        val linkLower = link.lowercase()
         var charFoundIndex: Int
 
         charFoundIndex = linkLower.indexOf("://")
@@ -210,7 +210,7 @@ object UMFileUtil {
     }
 
     fun isUriAbsolute(uri: String): Boolean {
-        return isUriAbsoluteLcase(uri.toLowerCase())
+        return isUriAbsoluteLcase(uri.lowercase())
     }
 
 
@@ -624,14 +624,27 @@ object UMFileUtil {
     }
 
     fun getContentType(filePath: String): ContentType {
-        val extension = filePath.substring(filePath.lastIndexOf("."))
+        val extension = filePath.substring(filePath.lastIndexOf(".")).lowercase()
         val extensionMap = mapOf(
-                ".html" to ContentType.Text.Html,".xml" to ContentType.Text.Xml,
-                ".css" to ContentType.Text.CSS, ".js" to ContentType.Text.JavaScript,
-                ".txt" to ContentType.Text.Html, ".xhtml" to ContentType.Text.Html,
-                ".jpg" to ContentType.Image.JPEG,".png" to ContentType.Image.PNG,
-                ".gif" to ContentType.Image.GIF, ".mp4" to ContentType.Video.MP4,
-                ".mpeg" to ContentType.Video.MPEG, ".json" to ContentType.Application.Json)
+                ".html" to ContentType.Text.Html,
+                ".xml" to ContentType.Text.Xml,
+                ".css" to ContentType.Text.CSS,
+                ".js" to ContentType.Text.JavaScript,
+                ".json" to ContentType.Application.Json,
+                ".txt" to ContentType.Text.Html,
+                ".xhtml" to ContentType.Text.Html,
+                ".jpg" to ContentType.Image.JPEG,
+                ".png" to ContentType.Image.PNG,
+                ".gif" to ContentType.Image.GIF,
+                ".webp" to ContentType("image", "webp"),
+                ".mp4" to ContentType.Video.MP4,
+                ".mpeg" to ContentType.Video.MPEG,
+                ".m4v" to ContentType("video", "x-m4v"),
+                ".webm" to ContentType("video", "webm"),
+                ".ogv" to ContentType("video", "ogg"),
+                ".mp3" to ContentType.Audio.MPEG,
+                ".ogg" to ContentType("audio", "ogg"),
+        )
         return extensionMap[extension] ?: ContentType.Any
     }
 

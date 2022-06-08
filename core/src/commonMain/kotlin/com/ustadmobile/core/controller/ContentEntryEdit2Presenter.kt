@@ -426,19 +426,17 @@ class ContentEntryEdit2Presenter(
                         txDb.contentEntryDao.updateAsync(entity)
                     }
 
-                    UmPlatformUtil.runIfNotJsAsync {
-                        val contentEntryPictureVal = view.contentEntryPicture
-                        if(contentEntryPictureVal != null) {
-                            contentEntryPictureVal.cepContentEntryUid = entity.contentEntryUid
 
-                            if(contentEntryPictureVal.cepUid == 0L) {
-                                txDb.contentEntryPictureDao.insertAsync(contentEntryPictureVal)
-                            }else {
-                                txDb.contentEntryPictureDao.updateAsync(contentEntryPictureVal)
-                            }
+                    val contentEntryPictureVal = view.contentEntryPicture
+                    if(contentEntryPictureVal != null) {
+                        contentEntryPictureVal.cepContentEntryUid = entity.contentEntryUid
+
+                        if(contentEntryPictureVal.cepUid == 0L) {
+                            txDb.contentEntryPictureDao.insertAsync(contentEntryPictureVal)
+                        }else {
+                            txDb.contentEntryPictureDao.updateAsync(contentEntryPictureVal)
                         }
                     }
-
 
                     val language = entity.language
                     if (language != null && language.langUid == 0L) {

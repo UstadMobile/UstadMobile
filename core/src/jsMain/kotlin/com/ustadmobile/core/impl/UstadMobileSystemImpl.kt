@@ -9,6 +9,10 @@ import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlin.js.Date
 import com.ustadmobile.door.DoorUri
+import kotlinx.browser.document
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.w3c.dom.HTMLAnchorElement
 
 /**
  * SystemImpl provides system methods for tasks such as copying files, reading
@@ -137,8 +141,19 @@ actual open class UstadMobileSystemImpl(
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, doorUri: DoorUri, mimeType: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun openFileInDefaultViewer(
+        context: Any,
+        doorUri: DoorUri,
+        mimeType: String?,
+        fileName: String?,
+    ) {
+        val aElement = document.createElement("a") as HTMLAnchorElement
+        GlobalScope.launch {
+            aElement.asDynamic().style.display = "none"
+            aElement.href = doorUri.toString()
+            fileName?.also { aElement.download = it }
+            aElement.click()
+        }
     }
 
 

@@ -231,7 +231,12 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, doorUri: DoorUri, mimeType: String?){
+    override fun openFileInDefaultViewer(
+        context: Any,
+        doorUri: DoorUri,
+        mimeType: String?,
+        fileName: String?
+    ) {
 
     }
 

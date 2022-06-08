@@ -12,6 +12,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT_MESSAGE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -389,6 +390,23 @@ abstract class UstadMobileSystemCommon {
             openLinkInBrowser(url, context)
         }
     }
+
+    /**
+     * Open the given DoorUri in the default viewer. On Android this means using a VIEW intent.
+     * On the web, this will result in a file download in the browser so the user can open the
+     * file
+     *
+     * @param context
+     * @param doorUri DoorUri of item to open
+     * @param mimeType MimeType to open (used to control which apps will open it on Android)
+     * @param fileName Controls the name given to the file when opened on the browser
+     */
+    abstract fun openFileInDefaultViewer(
+        context: Any,
+        doorUri: DoorUri,
+        mimeType: String?,
+        fileName: String? = null,
+    )
 
     companion object {
         private val MIME_TYPES = mapOf("image/jpg" to "jpg", "image/jpg" to "jpg",

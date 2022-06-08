@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
@@ -57,12 +58,13 @@ class ReportTemplateListPresenter(context: Any, arguments: Map<String, String>, 
                     val listToHide =  selectedItem.map { it.reportUid }
                             .filter { it != Report.TEMPLATE_BLANK_REPORT_UID }
                     if(listToHide.isNotEmpty()) {
-                        repo.reportDao.toggleVisibilityReportItems(true, listToHide)
+                        repo.reportDao.toggleVisibilityReportItems(true, listToHide,
+                            systemTimeInMillis())
                         view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context),
                                 {
                                     GlobalScope.launch(doorMainDispatcher()) {
                                         repo.reportDao.toggleVisibilityReportItems(false,
-                                                listToHide)
+                                                listToHide, systemTimeInMillis())
                                     }
                                 }, MessageID.undo)
                     }

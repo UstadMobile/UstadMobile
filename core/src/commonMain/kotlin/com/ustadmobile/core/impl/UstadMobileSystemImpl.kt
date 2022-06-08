@@ -126,10 +126,6 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
      */
     override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
 
-
-    fun openFileInDefaultViewer(context: Any, doorUri: DoorUri, mimeType: String?)
-
-
     /**
      * Open the given link in a browser and/or tab depending on the platform
      */

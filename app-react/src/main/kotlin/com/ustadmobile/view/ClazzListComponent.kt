@@ -20,10 +20,7 @@ import com.ustadmobile.util.StyleManager.maxLines
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.wordBreakLimit
-import com.ustadmobile.view.ext.statusCircleIndicator
-import com.ustadmobile.view.ext.umEntityAvatar
-import com.ustadmobile.view.ext.umGridContainer
-import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.ext.*
 import kotlinx.css.*
 import react.RBuilder
 import react.setState
@@ -58,10 +55,15 @@ class ClazzListComponent (props: UmProps): UstadListComponent<Clazz,
                 position = Position.relative
             }
 
-            umEntityAvatar(
-                className = "${StyleManager.name}-clazzItemClass",
-                listItem = true,
-                fallbackSrc = "assets/entry_placeholder.jpeg")
+            withAttachmentLocalUrlLookup(item.clazzUid,
+                ClazzDetailOverviewComponent.CLAZZ_PICTURE_LOOKUP_ADAPTER,
+            ) { attachmentSrc ->
+                umEntityAvatar(
+                    src = attachmentSrc,
+                    className = "${StyleManager.name}-clazzItemClass",
+                    listItem = true,
+                    fallbackSrc = "assets/entry_placeholder.jpeg")
+            }
 
             val memberRole = "${item.clazzActiveEnrolment?.roleToString(this,systemImpl)}"
 
