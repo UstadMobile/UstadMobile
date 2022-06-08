@@ -27,7 +27,6 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
-import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -49,7 +48,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         OpenSheetListener, FileSubmissionListItemListener {
 
 
-    private var gradesHeaderAdapter: ListHeaderRecyclerViewAdapter? = null
+    private var gradesHeaderAdapter: GradesHeaderAdapter? = null
     private var marksAdapter: GradesListAdapter? = null
     private var submitButtonAdapter: SubmitButtonAdapter? = null
     private var dbRepo: UmAppDatabase? = null
@@ -100,7 +99,8 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
     private val courseMarkObserver = Observer<PagedList<CourseAssignmentMarkWithPersonMarker>?> {
             t -> run{
-
+        gradesHeaderAdapter?.visible = t.isNotEmpty()
+        marksAdapter?.submitList(t)
     }
     }
 
@@ -119,6 +119,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
         // 1
         detailRecyclerAdapter = ClazzAssignmentBasicDetailRecyclerAdapter()
+        detailRecyclerAdapter?.timeZone = "UTC"
 
         // 2
         submissionStatusHeaderAdapter = SubmissionStatusHeaderAdapter()
@@ -130,15 +131,6 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         addSubmissionAdapter = AddSubmissionListAdapter(fileSubmissionEditListener).also {
             it.isSubmitted = false
         }
-
-        gradesHeaderAdapter = ListHeaderRecyclerViewAdapter(
-            headerStringId = R.string.grades_class_age,
-            headerLayoutId = R.layout.item_simple_list_header,
-            filterOptions = ClazzAssignmentDetailOverviewPresenter.FILTER_OPTIONS.toListFilterOptions(
-                requireContext(), di),
-            onFilterOptionSelected = mPresenter)
-
-        marksAdapter = GradesListAdapter()
 
         // 5 submit button adapter
         submitButtonAdapter = SubmitButtonAdapter(this)
@@ -152,6 +144,13 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
         submittedSubmissionAdapter = SubmissionAdapter(this).also {
             it.isSubmitted = true
         }
+
+        gradesHeaderAdapter = GradesHeaderAdapter(
+            filterOptions = ClazzAssignmentDetailOverviewPresenter.FILTER_OPTIONS.toListFilterOptions(
+                requireContext(), di),
+            onFilterOptionSelected = mPresenter)
+
+        marksAdapter = GradesListAdapter()
 
         // 8 class
         classCommentsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
@@ -193,12 +192,12 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
         mPresenter = ClazzAssignmentDetailOverviewPresenter(requireContext(),
                 arguments.toStringMap(), this, viewLifecycleOwner, di)
-        gradesHeaderAdapter?.onFilterOptionSelected = mPresenter
+        gradesHeaderAdapter?.listener = mPresenter
 
         detailMergerRecyclerAdapter = ConcatAdapter(detailRecyclerAdapter, submissionStatusHeaderAdapter,
                 addSubmissionButtonsAdapter, addSubmissionAdapter, submitButtonAdapter,
-                submissionHeaderAdapter, submittedSubmissionAdapter,
-                classCommentsHeadingRecyclerAdapter,
+                submissionHeaderAdapter, submittedSubmissionAdapter, gradesHeaderAdapter,
+                marksAdapter, classCommentsHeadingRecyclerAdapter,
                 newClassCommentRecyclerAdapter, classCommentsRecyclerAdapter, privateCommentsHeadingRecyclerAdapter,
                 newPrivateCommentRecyclerAdapter, privateCommentsRecyclerAdapter)
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
@@ -351,6 +350,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             submittedSubmissionAdapter?.assignment = value
             addSubmissionButtonsAdapter?.assignment = value
             addSubmissionAdapter?.assignment = value
+            marksAdapter?.courseblock = value?.block
 
             detailRecyclerAdapter?.visible = true
 

@@ -50,6 +50,8 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             it.fileRequiredListener = onFileRequiredChanged
             it.textRequiredListener = onTextRequiredChanged
             it.markingTypeSelectionListener = this
+            it.groupSetEnabled = true
+            it.markingTypeEnabled = true
             it.caEditCommonFields.caDeadlineDateTextinput.setEndIconOnClickListener(clearDeadlineListener)
             // onClick on viewBinding caused problems so set here on the fragment
             it.caEditAssignReviewersButton.setOnClickListener {
@@ -240,7 +242,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             mBinding?.markingTypeOptions = value
         }
 
-    override var groupSetEnabled: Boolean = false
+    override var groupSetEnabled: Boolean = true
         get() = field
         set(value) {
             if(field == value){
@@ -250,7 +252,7 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
             mBinding?.groupSetEnabled = value
         }
 
-    override var markingTypeEnabled: Boolean = false
+    override var markingTypeEnabled: Boolean = true
         get() = field
         set(value) {
             if(field == value){

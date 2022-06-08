@@ -28,7 +28,6 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
-import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -48,7 +47,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         OpenSheetListener, FileSubmissionListItemListener {
 
     private var marksAdapter: GradesListAdapter? = null
-    private var gradesHeaderAdapter: ListHeaderRecyclerViewAdapter? = null
+    private var gradesHeaderAdapter: GradesHeaderAdapter? = null
     private var dbRepo: UmAppDatabase? = null
 
     val accountManager: UstadAccountManager by instance()
@@ -75,7 +74,8 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     private var courseMarkLiveData: LiveData<PagedList<CourseAssignmentMarkWithPersonMarker>>? = null
     private val courseMarkObserver = Observer<PagedList<CourseAssignmentMarkWithPersonMarker>?> {
             t -> run {
-
+        gradesHeaderAdapter?.visible = t.isNotEmpty()
+        marksAdapter?.submitList(t)
     }
     }
 
@@ -126,10 +126,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         // 4 mark grade
         markSubmissionAdapter = MarkFileSubmissionAdapter(this)
 
-
-        gradesHeaderAdapter = ListHeaderRecyclerViewAdapter(
-            headerStringId = R.string.grades_class_age,
-            headerLayoutId = R.layout.item_simple_list_header,
+        gradesHeaderAdapter = GradesHeaderAdapter(
             filterOptions = ClazzAssignmentDetailOverviewPresenter.FILTER_OPTIONS.toListFilterOptions(
                 requireContext(), di),
             onFilterOptionSelected = mPresenter)
@@ -154,10 +151,12 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             privateCommentsObserver = PagedListSubmitObserver(it)
         }
 
-        detailMergerRecyclerAdapter = ConcatAdapter(submissionsHeaderAdapter,
-                submissionStatusHeaderAdapter, submissionAdapter,
-                markSubmissionAdapter, privateCommentsHeadingRecyclerAdapter,
-                newPrivateCommentRecyclerAdapter, privateCommentsRecyclerAdapter)
+        detailMergerRecyclerAdapter = ConcatAdapter(
+            submissionsHeaderAdapter, submissionStatusHeaderAdapter, submissionAdapter,
+            markSubmissionAdapter, gradesHeaderAdapter, marksAdapter,
+            privateCommentsHeadingRecyclerAdapter, newPrivateCommentRecyclerAdapter,
+            privateCommentsRecyclerAdapter
+        )
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
@@ -272,6 +271,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
             markSubmissionAdapter?.assignment = value
             submissionAdapter?.assignment = value
             submissionStatusHeaderAdapter?.assignment = value
+            marksAdapter?.courseblock = value?.block
         }
 
     override fun onSubmitGradeClicked() {

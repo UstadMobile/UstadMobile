@@ -123,10 +123,12 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
                                       ))                 
                 ORDER BY camLct DESC)    
                 
-          SELECT * 
+          SELECT marker.*, ScoreByMarker.*, (ClazzAssignment.caGroupUid != 0) AS isGroup
             FROM ScoreByMarker
                  JOIN Person As marker
                  ON Marker.personUid = ScoreByMarker.camMarkerPersonUid
+                 JOIN ClazzAssignment
+                 ON ClazzAssignment.caUid = :assignmentUid
     """)
     @QueryLiveTables(value = ["courseAssignmentMark","ClazzAssignment"])
     abstract fun getAllMarksOfAssignmentForSubmitter(

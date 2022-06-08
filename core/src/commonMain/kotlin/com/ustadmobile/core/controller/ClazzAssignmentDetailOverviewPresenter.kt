@@ -459,7 +459,7 @@ class ClazzAssignmentDetailOverviewPresenter(
             ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED to MessageID.multiple_submission_allowed_submission_policy,
             ClazzAssignment.SUBMISSION_POLICY_SUBMIT_ALL_AT_ONCE to MessageID.submit_all_at_once_submission_policy)
 
-        val FILTER_OPTIONS = listOf(MessageID.almost_done to CourseAssignmentMarkDao.ARG_FILTER_RECENT_SCORES,
+        val FILTER_OPTIONS = listOf(MessageID.most_recent to CourseAssignmentMarkDao.ARG_FILTER_RECENT_SCORES,
             MessageID.all to CourseAssignmentMarkDao.ARG_FILTER_ALL_SCORES)
 
         const val SAVED_STATE_KEY_URI = "URI"

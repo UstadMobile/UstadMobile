@@ -7,11 +7,16 @@
 
 
         <import type="com.ustadmobile.core.util.IdOption"/>
-
+        <import type="android.view.View"/>
+        <import type="com.ustadmobile.lib.db.entities.CourseBlock"/>
 
         <variable
             name="markWithPerson"
             type="com.ustadmobile.lib.db.entities.CourseAssignmentMarkWithPersonMarker" />
+
+        <variable
+            name="block"
+            type="CourseBlock" />
 
         <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
 
@@ -23,6 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_listitem"
+        android:paddingBottom="@dimen/dimen_16dp"
         >
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -48,8 +54,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_12dp"
             android:text='@{markWithPerson.marker.fullName()}'
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             app:layout_constraintStart_toEndOf="@+id/item_marker_person_cl"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Bob Dylan" />
@@ -60,46 +67,68 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_16dp"
-            android:text='@{markWithPerson.marker.fullName()}'
-            app:layout_constraintEnd_toEndOf="parent"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:paddingStart="@dimen/dimen_10dp"
+            android:text='@{"(" + @string/group_number(markWithPerson.camMarkerSubmitterUid) + ")"}'
+            android:visibility="@{markWithPerson.group &amp; markWithPerson.camMarkerSubmitterUid != 0 ? View.VISIBLE : View.GONE}"
+            app:layout_constraintEnd_toStartOf="@+id/item_marker_time"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             app:layout_constraintStart_toEndOf="@+id/item_marker_person_name"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Group 1" />
+            tools:text="(Group 1)" />
 
         <TextView
             android:id="@+id/item_marker_mark"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/dimen_16dp"
-            android:text='@{markWithPerson.marker.fullName()}'
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:layout_marginStart="@dimen/dimen_12dp"
+            android:drawablePadding="@dimen/dimen_5dp"
+            app:drawableStartCompat="@drawable/ic_baseline_emoji_events_24"
+            android:text='@{markWithPerson.camMark + &quot;/&quot; + block.cbMaxPoints + " " + @string/points}'
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             app:layout_constraintStart_toEndOf="@+id/item_marker_person_cl"
             app:layout_constraintTop_toBottomOf="@id/item_marker_person_name"
-            tools:text="Group 1" />
+            tools:text="9/10 points" />
 
         <TextView
             android:id="@+id/item_marker_mark_penalty"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/dimen_16dp"
-            android:text='@{markWithPerson.marker.fullName()}'
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:paddingStart="@dimen/dimen_5dp"
+            tools:text="(20% late penalty)"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            android:textColor="@color/errorColor"
+            app:layout_constraintBaseline_toBaselineOf="@id/item_marker_mark"
+            android:text="@{@string/late_penalty(block.cbLateSubmissionPenalty)}"
+            android:visibility="@{markWithPerson.camPenalty != 0 ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toEndOf="@+id/item_marker_mark"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_marker_person_name"
-            tools:text="20% penalty" />
+            app:layout_constraintTop_toBottomOf="@id/item_marker_person_name" />
 
         <TextView
             android:id="@+id/item_marker_comment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_12dp"
             android:text='@{markWithPerson.camMarkerComment}'
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             app:layout_constraintStart_toEndOf="@+id/item_marker_person_cl"
             app:layout_constraintTop_toBottomOf="@id/item_marker_mark"
             tools:text="Comment" />
+
+
+        <TextView
+            android:id="@+id/item_marker_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            app:relativeTime="@{markWithPerson.camLct}"
+            app:layout_constraintBottom_toTopOf="@+id/item_marker_mark"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/item_marker_person_name"
+            tools:text="4:20" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
