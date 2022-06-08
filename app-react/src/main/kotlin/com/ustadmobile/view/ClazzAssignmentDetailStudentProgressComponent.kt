@@ -46,7 +46,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
 
     private var markLabel = FieldLabel(text = getString(MessageID.points))
 
-    private var commentLabel = FieldLabel(text = getString(MessageID.private_comments))
+    private var commentLabel = FieldLabel(text = getString(MessageID.comment))
 
     private var privateComments: List<CommentsWithPerson> = listOf()
 
