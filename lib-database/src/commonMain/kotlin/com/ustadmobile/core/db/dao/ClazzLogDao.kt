@@ -3,12 +3,10 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.DoorDataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UserSession
 
 
 @Repository

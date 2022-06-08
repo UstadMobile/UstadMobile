@@ -5,6 +5,8 @@ package com.ustadmobile.core.util
  */
 external fun encodeURI(uri: String?): String
 
+external fun encodeURIComponent(uriComponent: String?): String?
+
 /**
  * External JS function to decode URI
  */

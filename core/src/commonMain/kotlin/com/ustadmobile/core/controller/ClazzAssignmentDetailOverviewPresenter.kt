@@ -248,8 +248,8 @@ class ClazzAssignmentDetailOverviewPresenter(
 
                 checkCanAddFileOrText(entity)
 
+                requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
             }
-            requireSavedStateHandle()[SAVED_STATE_KEY_URI] = null
         }
 
         observeSavedStateResult(SAVED_STATE_KEY_TEXT, ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
@@ -273,9 +273,9 @@ class ClazzAssignmentDetailOverviewPresenter(
                 view.addedCourseAssignmentSubmission = submissionList
                 checkCanAddFileOrText(entity)
 
+                requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
             }
 
-            requireSavedStateHandle()[SAVED_STATE_KEY_TEXT] = null
 
         }
 

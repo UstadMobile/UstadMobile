@@ -5,7 +5,6 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
@@ -126,16 +125,6 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract fun findAllClazzesBySchoolLive(schoolUid: Long)
             : DoorDataSourceFactory<Int,Clazz>
 
-
-    @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid, " +
-            " clazzLastChangedBy =  ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} WHERE clazzUid = :clazzUid ")
-    abstract suspend fun updateSchoolOnClazzUid(clazzUid: Long, schoolUid: Long)
-
-    suspend fun assignClassesToSchool(uidList: List<Long>, schoolUid: Long) {
-        uidList.forEach {
-            updateSchoolOnClazzUid(it, schoolUid)
-        }
-    }
 
     @Query("""
         SELECT Clazz.*, ClazzEnrolment.*,

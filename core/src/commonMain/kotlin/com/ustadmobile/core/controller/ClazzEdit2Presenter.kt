@@ -872,7 +872,7 @@ class ClazzEdit2Presenter(
         if(foundBlock.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
             newList.forEach{
                 it.takeIf { it.cbModuleParentBlockUid == foundBlock.cbUid }
-                    ?.cbHidden = !it.cbHidden
+                    ?.cbHidden = foundBlock.cbHidden
             }
         }
         courseBlockOneToManyJoinEditHelper.liveList.sendValue(newList)
