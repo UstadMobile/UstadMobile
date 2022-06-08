@@ -359,21 +359,23 @@ fun RBuilder.renderGradesHeaderWithChipsAndList(
     umSpacer(top = 2.spacingUnits)
     renderListSectionTitle(systemImpl.getString(MessageID.grades_class_age, this))
 
-    gradeFilterChips?.forEach { chip ->
-        val mColor = if (chip.optionId == selectedFilter)
-            if (ThemeManager.isDarkModeActive()) ChipColor.secondary
-            else ChipColor.primary
-        else ChipColor.default
-        umChip(
-            chip.description,
-            color = mColor
-        ) {
-            css {
-                margin(1.spacingUnits)
-            }
-            attrs.onClick = {
-                stopEventPropagation(it)
-                onClick?.invoke(chip, it.nativeEvent)
+    umItem(flexDirection = FlexDirection.row) {
+        gradeFilterChips?.forEach { chip ->
+            val mColor = if (chip.optionId == selectedFilter)
+                if (ThemeManager.isDarkModeActive()) ChipColor.secondary
+                else ChipColor.primary
+            else ChipColor.default
+            umChip(
+                chip.description,
+                color = mColor
+            ) {
+                css {
+                    margin(1.spacingUnits)
+                }
+                attrs.onClick = {
+                    stopEventPropagation(it)
+                    onClick?.invoke(chip, it.nativeEvent)
+                }
             }
         }
     }
