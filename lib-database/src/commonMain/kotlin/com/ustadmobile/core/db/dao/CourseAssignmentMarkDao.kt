@@ -153,19 +153,20 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
             SELECT casSubmitterUid
               FROM CourseAssignmentSubmission
               
+                   JOIN ClazzAssignment
+                   ON ClazzAssignment.caUid = CourseAssignmentSubmission.casAssignmentUid
+              
                    LEFT JOIN CourseAssignmentMark
                    ON CourseAssignmentMark.camSubmitterUid = CourseAssignmentSubmission.casSubmitterUid
-                   AND CourseAssignmentMark.camAssignmentUid = :assignmentUid
+                   AND CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
                    
                    LEFT JOIN PeerReviewerAllocation
-                   ON praAssignmentUid = :assignmentUid
+                   ON praAssignmentUid = ClazzAssignment.caUid
                    AND praToMarkerSubmitterUid = :submitterUid
-                   
-                   JOIN ClazzAssignment
-                   ON ClazzAssignment.caUid = :assignmentUid
                    
              WHERE CourseAssignmentSubmission.casSubmitterUid != :submitterUid
                AND CourseAssignmentSubmission.casSubmitterUid != :markerUid
+               AND CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
                AND CourseAssignmentMark.camUid IS NULL
                AND (ClazzAssignment.caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER} 
                     OR PeerReviewerAllocation.praMarkerSubmitterUid = :markerUid)
