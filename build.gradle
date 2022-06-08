@@ -229,6 +229,9 @@ ext {
     version_npm_draft_js_html_export = "^1.4.1"
     version_npm_striptags = "^3.2.0"
     version_npm_react_easy_sort = "^1.4.1"
+    version_react_linkify = "^1.0.0-alpha"
+    //version_linkify_js = "^3.0.5"
+    //version_linkify_react = "^3.0.4"
 
 }
 

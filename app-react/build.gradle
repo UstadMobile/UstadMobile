@@ -77,5 +77,9 @@ dependencies {
     implementation npm("react-easy-sort","$version_npm_react_easy_sort")
     implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "io.github.aakira:napier:$version_napier"
+    implementation npm("react-linkify", "$version_react_linkify")
+
+//   implementation npm("linkifyjs", "$version_linkify_js")
+//    implementation npm("linkify-react", "$version_linkify_react")
 }
 

@@ -1012,19 +1012,8 @@ fun RBuilder.renderConversationListItem(
                     else
                         if(systemImpl.isRtlActive()) TextAlign.left else TextAlign.right
                 }
-                umTypography(message, variant = TypographyVariant.body1){
-                    css{
-                        +chatMessageContent
-                        if(left) if(systemImpl.isRtlActive()) +chatRight else +chatLeft
-                        else if(systemImpl.isRtlActive()) +chatLeft else +chatRight
-                        if(left){
-                            backgroundColor = Color(theme.palette.action.selected)
-                        }else {
-                            backgroundColor = Color(theme.palette.primary.dark)
-                            color = Color.white
-                        }
-                    }
-                }
+
+                linkifyMessage(message, left, systemImpl, null)
 
                 umTypography(messageTime.toDate()?.fromNow(systemImpl.getDisplayedLocale(this)),
                     variant = TypographyVariant.body2){
