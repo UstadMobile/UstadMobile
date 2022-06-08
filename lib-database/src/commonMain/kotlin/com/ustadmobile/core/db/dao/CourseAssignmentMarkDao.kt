@@ -96,18 +96,21 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
          LIMIT 1
     """)
     abstract fun getMarkOfAssignmentForStudent(assignmentUid: Long, submitterUid: Long): CourseAssignmentMark?
-
-
+    
     @Query("""
          SELECT COALESCE((
             SELECT casSubmitterUid
               FROM CourseAssignmentSubmission
               
+                   JOIN ClazzAssignment
+                   ON ClazzAssignment.caUid = CourseAssignmentSubmission.casAssignmentUid
+              
                    LEFT JOIN CourseAssignmentMark
                    ON CourseAssignmentMark.camSubmitterUid = CourseAssignmentSubmission.casSubmitterUid
-                   AND CourseAssignmentMark.camAssignmentUid = :assignmentUid
+                   AND CourseAssignmentMark.camAssignmentUid = ClazzAssignment.caUid
                    
              WHERE CourseAssignmentSubmission.casSubmitterUid != :submitterUid
+               AND CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
                AND CourseAssignmentMark.camUid IS NULL
           GROUP BY casSubmitterUid
          LIMIT 1),0)
