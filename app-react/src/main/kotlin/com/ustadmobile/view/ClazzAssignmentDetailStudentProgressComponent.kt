@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressPrese
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
@@ -53,7 +54,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
 
     private var submissions : List<CourseAssignmentSubmissionWithAttachment> = listOf()
 
-    private var courseMarks : List<CourseAssignmentMark> = listOf()
+    private var courseMarks : List<CourseAssignmentMarkWithPersonMarker> = listOf()
 
     private val privateCommentsObserver = ObserverFnWrapper<List<CommentsWithPerson>>{
         if(it.isEmpty()) return@ObserverFnWrapper
@@ -97,6 +98,24 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                 field = value
                 ustadComponentTitle = value
             }
+        }
+
+    private var selectedFilter: Int? = null
+        set(value){
+            setState{
+                field = value
+            }
+        }
+
+    override var gradeFilterChips: List<ListFilterIdOption>?= null
+        set(value) {
+            if(selectedFilter == null)
+                selectedFilter = value?.firstOrNull()?.optionId
+
+            setState{
+                field = value
+            }
+
         }
     override var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
         set(value) {
@@ -336,6 +355,17 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                             }
                         }
                     }
+                }
+
+                if(!courseMarks.isNullOrEmpty()){
+
+                        renderGradesHeaderWithChipsAndList(
+                            systemImpl, gradeFilterChips,
+                            selectedFilter ?: 0, courseMarks, entity?.block
+                        ) { chip, event ->
+                            selectedFilter = chip.optionId
+                            mPresenter?.onListFilterOptionSelected(chip)
+                        }
                 }
 
                 if(entity?.caPrivateCommentsEnabled == true){

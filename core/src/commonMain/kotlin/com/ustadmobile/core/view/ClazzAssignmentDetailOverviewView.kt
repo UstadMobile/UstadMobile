@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
@@ -11,6 +12,8 @@ interface ClazzAssignmentDetailOverviewView: UstadDetailView<ClazzAssignmentWith
     var markList: DoorDataSourceFactory<Int, CourseAssignmentMarkWithPersonMarker>?
 
     var addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment>?
+
+    var gradeFilterChips: List<ListFilterIdOption>?
 
     var timeZone: String?
 

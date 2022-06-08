@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.OnListFilterOptionSelectedListener
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.*
@@ -110,6 +111,7 @@ class ClazzAssignmentDetailOverviewPresenter(
 
             loadMarks(clazzAssignment.caUid, submitterUid, CourseAssignmentMarkDao.ARG_FILTER_RECENT_SCORES)
 
+            view.gradeFilterChips = FILTER_OPTIONS.toListFilterOptions(context, di)
             // don't show private comments if unassigned in group
             view.showPrivateComments = clazzAssignment.caPrivateCommentsEnabled && submitterUid != 0L
 

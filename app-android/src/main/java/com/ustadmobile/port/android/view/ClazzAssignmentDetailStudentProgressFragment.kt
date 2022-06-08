@@ -15,12 +15,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailOverviewBinding
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.controller.ClazzAssignmentDetailOverviewPresenter
 import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressPresenter
 import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.toListFilterOptions
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.door.DoorDataSourceFactory
@@ -127,8 +126,6 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         markSubmissionAdapter = MarkFileSubmissionAdapter(this)
 
         gradesHeaderAdapter = GradesHeaderAdapter(
-            filterOptions = ClazzAssignmentDetailOverviewPresenter.FILTER_OPTIONS.toListFilterOptions(
-                requireContext(), di),
             onFilterOptionSelected = mPresenter)
 
         marksAdapter = GradesListAdapter()
@@ -191,6 +188,12 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
                 accountManager.activeAccount.personUid,  mPresenter?.newPrivateCommentListener)
         sendCommentSheet.show(childFragmentManager, sendCommentSheet.tag)
     }
+
+    override var gradeFilterChips: List<ListFilterIdOption>? = null
+        set(value) {
+            field = value
+            gradesHeaderAdapter?.filterOptions = value
+        }
 
 
     override var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null

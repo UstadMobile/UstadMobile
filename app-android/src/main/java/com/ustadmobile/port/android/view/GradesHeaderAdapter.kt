@@ -8,9 +8,7 @@ import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.OnListFilterOptionSelectedListener
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
-class GradesHeaderAdapter(val filterOptions: List<ListFilterIdOption> = listOf(),
-                          onFilterOptionSelected: OnListFilterOptionSelectedListener? = null,
-                          selectedOption: ListFilterIdOption? = filterOptions.firstOrNull())
+class GradesHeaderAdapter(onFilterOptionSelected: OnListFilterOptionSelectedListener? = null)
     : SingleItemRecyclerViewAdapter<GradesHeaderAdapter.GradesHeaderViewHolder>(false) {
 
     class GradesHeaderViewHolder(var itemBinding: HeaderGradesBinding)
@@ -18,13 +16,19 @@ class GradesHeaderAdapter(val filterOptions: List<ListFilterIdOption> = listOf()
 
     var viewHolder: GradesHeaderViewHolder? = null
 
+    var filterOptions: List<ListFilterIdOption>? = null
+        set(value){
+            field = value
+            viewHolder?.itemBinding?.filterOptions = value
+        }
+
     var listener: OnListFilterOptionSelectedListener? = onFilterOptionSelected
         set(value){
             field = value
             viewHolder?.itemBinding?.onListFilterOptionSelected = value
         }
 
-    var selectedFilterOption: Int = selectedOption?.optionId ?: 0
+    var selectedFilterOption: Int = 0
         set(value){
             field = value
             viewHolder?.itemBinding?.selectedFilterOption = value

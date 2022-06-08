@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
@@ -9,6 +10,8 @@ interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignm
     var submitMarkError: String?
 
     var submitterName: String?
+
+    var gradeFilterChips: List<ListFilterIdOption>?
 
     var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
 

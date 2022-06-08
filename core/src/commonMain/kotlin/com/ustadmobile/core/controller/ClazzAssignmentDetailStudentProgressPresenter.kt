@@ -11,6 +11,7 @@ import com.ustadmobile.core.util.OnListFilterOptionSelectedListener
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.util.ext.roundTo
+import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.HtmlTextViewDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
@@ -126,6 +127,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
                 }
 
         loadMarksList()
+        view.gradeFilterChips = ClazzAssignmentDetailOverviewPresenter.FILTER_OPTIONS.toListFilterOptions(context, di)
 
         val submissionCount = repo.courseAssignmentSubmissionDao.countSubmissionsFromSubmitter(
             clazzAssignment.caUid, selectedSubmitterUid)

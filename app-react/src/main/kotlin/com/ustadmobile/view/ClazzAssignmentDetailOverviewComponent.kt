@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailOverviewPresenter
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
@@ -42,6 +43,13 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
     private var courseAssignmentSubmissions : List<CourseAssignmentSubmissionWithAttachment> = listOf()
 
     private var courseMarks : List<CourseAssignmentMarkWithPersonMarker> = listOf()
+
+    var selectedFilter: Int? = null
+        set(value){
+            setState{
+                field = value
+            }
+        }
 
     private val classCommentsObserver = ObserverFnWrapper<List<CommentsWithPerson>>{
         if(it.isEmpty()) return@ObserverFnWrapper
@@ -88,6 +96,15 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
             liveData?.observe(this, courseMarkObserver)
         }
 
+    override var gradeFilterChips: List<ListFilterIdOption>? = null
+        set(value){
+            if(selectedFilter == null)
+                selectedFilter = value?.firstOrNull()?.optionId
+
+            setState{
+                field = value
+            }
+        }
 
     override var addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment>? = listOf()
         get() = field
@@ -386,6 +403,16 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
                         }
                     }
                 }
+
+                if(!courseMarks.isNullOrEmpty()){
+
+                    renderGradesHeaderWithChipsAndList(systemImpl, gradeFilterChips,
+                        selectedFilter ?: 0, courseMarks, entity?.block){ chip, event ->
+                        selectedFilter = chip.optionId
+                        mPresenter?.onListFilterOptionSelected(chip)
+                    }
+                }
+
 
 
                 if(entity?.caClassCommentEnabled == true){

@@ -19,7 +19,7 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailOverviewPresenter
 import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.toListFilterOptions
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.door.DoorDataSourceFactory
@@ -145,10 +145,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             it.isSubmitted = true
         }
 
-        gradesHeaderAdapter = GradesHeaderAdapter(
-            filterOptions = ClazzAssignmentDetailOverviewPresenter.FILTER_OPTIONS.toListFilterOptions(
-                requireContext(), di),
-            onFilterOptionSelected = mPresenter)
+        gradesHeaderAdapter = GradesHeaderAdapter(onFilterOptionSelected = mPresenter)
 
         marksAdapter = GradesListAdapter()
 
@@ -258,6 +255,11 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             courseMarkLiveData?.observeIfFragmentViewIsReady(this, courseMarkObserver)
         }
 
+    override var gradeFilterChips: List<ListFilterIdOption>? = null
+        set(value) {
+            field = value
+            gradesHeaderAdapter?.filterOptions = value
+        }
 
     override var addedCourseAssignmentSubmission: List<CourseAssignmentSubmissionWithAttachment>? = null
         set(value) {
