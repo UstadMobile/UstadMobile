@@ -233,7 +233,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                 field = value
             }
         }
-    override var groupSetEnabled: Boolean = false
+    override var groupSetEnabled: Boolean = true
         get() = field
         set(value) {
             if(field == value){
@@ -244,7 +244,7 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
             }
         }
 
-    override var markingTypeEnabled: Boolean = false
+    override var markingTypeEnabled: Boolean = true
         get() = field
         set(value) {
             if(field == value){

@@ -266,7 +266,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
         verify(mockView, timeout(1000).atLeastOnce()).submissionStatus = eq(CourseAssignmentSubmission.MARKED)
         verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
-            this.score == 5f
+            this.averageScore == 5f
         }
 
         val mark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, 1)
@@ -316,7 +316,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
         verify(mockView, timeout(1000).atLeastOnce()).submissionStatus = eq(CourseAssignmentSubmission.MARKED)
         verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
-            this.score == 4f
+            this.averageScore == 4f
         }
 
         val mark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, 1)
@@ -400,7 +400,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
         verify(mockView, timeout(1000).atLeastOnce()).submissionStatus = eq(CourseAssignmentSubmission.MARKED)
         verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
-            this.score == 5f
+            this.averageScore == 5f
         }
 
         val mark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, 1)
@@ -657,7 +657,7 @@ class ClazzAssignmentDetailStudentProgressPresenterTest {
 
         verify(mockView, timeout(1000).atLeastOnce()).submissionStatus = eq(CourseAssignmentSubmission.MARKED)
         verify(mockView, timeout(1000).atLeastOnce()).submissionScore = argThat {
-            this.score == 5f
+            this.averageScore == 5f
         }
 
         val mark = repo.courseAssignmentMarkDao.getMarkOfAssignmentForStudent(testEntity.caUid, student.personUid)

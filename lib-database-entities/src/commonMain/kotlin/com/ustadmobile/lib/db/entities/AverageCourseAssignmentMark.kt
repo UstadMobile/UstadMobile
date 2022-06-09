@@ -1,9 +1,12 @@
 package com.ustadmobile.lib.db.entities
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class AverageCourseAssignmentMark {
 
-    var score: Float = 0f
+    var averageScore: Float = 0f
 
-    var penalty: Int = 0
+    var averagePenalty: Int = 0
 
 }

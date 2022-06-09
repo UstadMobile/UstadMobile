@@ -123,7 +123,7 @@
             android:layout_marginStart="@dimen/dimen_12dp"
             app:layout_goneMarginStart="@dimen/dimen_0dp"
             android:visibility="@{assignment.mark != null ? View.VISIBLE : View.GONE}"
-            android:text='@{assignment.mark.camMark + &quot;/&quot; + block.cbMaxPoints + " " + @string/points}'
+            android:text='@{assignment.mark.averageScore + &quot;/&quot; + block.cbMaxPoints + " " + @string/points}'
             app:layout_constraintStart_toEndOf="@id/line3_deadline"
             app:layout_constraintTop_toBottomOf="@id/item_block_line2_desc"
             tools:text="8/10 points" />
@@ -140,7 +140,7 @@
             android:textColor="@color/errorColor"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:text="@{@string/late_penalty(block.cbLateSubmissionPenalty)}"
-            android:visibility="@{assignment.mark != null &amp; assignment.mark.camPenalty != 0 ? View.VISIBLE : View.GONE}"
+            android:visibility="@{assignment.mark != null &amp; assignment.mark.averagePenalty != 0 ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toEndOf="@+id/submission_status_score_value"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_block_line2_desc"

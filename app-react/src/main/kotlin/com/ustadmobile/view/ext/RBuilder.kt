@@ -1045,7 +1045,7 @@ fun RBuilder.renderCourseBlockAssignment(
                             css{
                                 padding(right = 4.spacingUnits)
                             }
-                            umTypography("${item.assignment?.mark?.camMark} / ${item.cbMaxPoints} ${systemImpl.getString(MessageID.points, this)}",
+                            umTypography("${item.assignment?.mark?.averageScore} / ${item.cbMaxPoints} ${systemImpl.getString(MessageID.points, this)}",
                                 variant = TypographyVariant.body1,
                                 paragraph = true){
                                 css(alignTextToStart)
@@ -1054,7 +1054,7 @@ fun RBuilder.renderCourseBlockAssignment(
                     }
 
 
-                    if(item.assignment?.mark != null && item.assignment?.mark?.camPenalty != 0){
+                    if(item.assignment?.mark != null && item.assignment?.mark?.averagePenalty != 0){
                         styledSpan {
                             css {
                                 padding(right = 4.spacingUnits)

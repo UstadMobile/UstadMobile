@@ -84,11 +84,11 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
     abstract fun checkNoSubmissionsMarked(assignmentUid: Long): DoorLiveData<Boolean>
 
     @Query("""
-         WITH ScoreByMarker (score, penalty) AS (
+         WITH ScoreByMarker (averageScore, averagePenalty) AS (
                  SELECT AVG(camMark), AVG(camPenalty)
                    FROM courseAssignmentMark
                         JOIN ClazzAssignment
-                        ON caUid = :assignmentUid         
+                        ON caUid = courseAssignmentMark.camAssignmentUid         
                     AND camAssignmentUid = :assignmentUid
                     AND camSubmitterUid = :submitterUid
                   WHERE camLct = (SELECT MAX(mark.camLct) 
@@ -97,10 +97,8 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
                                      AND mark.camSubmitterUid = :submitterUid
                                      AND (caMarkingType = ${ClazzAssignment.MARKED_BY_COURSE_LEADER}
                                        OR mark.camMarkerSubmitterUid = courseAssignmentMark.camMarkerSubmitterUid))
-                 GROUP BY camMarkerSubmitterUid                                                                           
-                ORDER BY camLct DESC)                       
-                                       
-      
+                )                       
+
          SELECT *
            FROM ScoreByMarker
     """)

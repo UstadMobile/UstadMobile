@@ -214,9 +214,9 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                     val mark = submissionScore
                     if(mark != null){
 
-                        val marks = "${mark.score} / ${entity?.block?.cbMaxPoints} ${getString(MessageID.points)}"
+                        val marks = "${mark.averageScore} / ${entity?.block?.cbMaxPoints} ${getString(MessageID.points)}"
 
-                        val penalty = if(mark.penalty != 0)
+                        val penalty = if(mark.averagePenalty != 0)
                             " ${getString(MessageID.late_penalty).format(entity?.block?.cbLateSubmissionPenalty ?: "")}"
                         else
                             ""

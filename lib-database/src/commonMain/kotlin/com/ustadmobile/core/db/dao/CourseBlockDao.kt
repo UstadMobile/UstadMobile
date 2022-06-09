@@ -114,7 +114,20 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                  WHERE Clazz.clazzUid = :clazzUid
                    AND PrsGrpMbr.groupMemberPersonUid = :personUid)), 
                    
-        $SUBMITTER_LIST_IN_CLAZZ_CTE           
+        $SUBMITTER_LIST_IN_CLAZZ_CTE, 
+        
+        ScoreByMarker (score, penalty, assignmentUid, camSubmitterUid) AS (
+                 SELECT camMark, camPenalty, camAssignmentUid, camSubmitterUid
+                   FROM courseAssignmentMark
+                        JOIN ClazzAssignment
+                        ON ClazzAssignment.caUid = courseAssignmentMark.camAssignmentUid        
+                  WHERE camLct = (SELECT MAX(mark.camLct) 
+                                    FROM CourseAssignmentMark As mark
+                                    WHERE mark.camAssignmentUid = ClazzAssignment.caUid
+                                     AND (caMarkingType = 1
+                                       OR mark.camMarkerSubmitterUid = courseAssignmentMark.camMarkerSubmitterUid))
+                                                                                   
+                )     
                    
 
         SELECT CourseBlock.*, ClazzAssignment.*, ContentEntry.*, CourseDiscussion.*, ContentEntryParentChildJoin.*, 
@@ -175,8 +188,38 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                           WHEN CourseAssignmentSubmission.casUid IS NOT NULL 
                           THEN ${CourseAssignmentSubmission.SUBMITTED} 
                           ELSE ${CourseAssignmentSubmission.NOT_SUBMITTED} END), 
-                               ${CourseAssignmentSubmission.NOT_SUBMITTED}) AS fileSubmissionStatus
-                
+                               ${CourseAssignmentSubmission.NOT_SUBMITTED}) AS fileSubmissionStatus,
+                               
+                  (SELECT AVG(score) 
+                     FROM ScoreByMarker 
+                    WHERE assignmentUid = ClazzAssignment.caUid 
+                      AND camSubmitterUid = (SELECT (CASE WHEN ref.caGroupUid = 0 
+                                                          THEN :personUid 
+                                                          WHEN CourseGroupMember.cgmUid IS NULL 
+                                                          THEN 0 
+                                                          ELSE CourseGroupMember.cgmGroupNumber 
+                                                           END) as submitterUid
+                                               FROM ClazzAssignment AS ref
+                                                     LEFT JOIN CourseGroupMember
+                                                     ON cgmSetUid = ClazzAssignment.caGroupUid
+                                                     AND cgmPersonUid = :personUid
+                                               WHERE ref.caUid = ClazzAssignment.caUid)) as averageScore,
+                                                            
+                 (SELECT AVG(penalty) 
+                     FROM ScoreByMarker 
+                    WHERE assignmentUid = ClazzAssignment.caUid 
+                      AND camSubmitterUid = (SELECT (CASE WHEN ref.caGroupUid = 0 
+                                                          THEN :personUid 
+                                                          WHEN CourseGroupMember.cgmUid IS NULL 
+                                                          THEN 0 
+                                                          ELSE CourseGroupMember.cgmGroupNumber 
+                                                           END) as submitterUid
+                                               FROM ClazzAssignment AS ref
+                                                     LEFT JOIN CourseGroupMember
+                                                     ON cgmSetUid = ClazzAssignment.caGroupUid
+                                                     AND cgmPersonUid = :personUid
+                                               WHERE ref.caUid = ClazzAssignment.caUid)) as averagePenalty                                             
+                                      
                 
           FROM CourseBlock 
           
