@@ -53,10 +53,15 @@ class NavControllerJs(
                 return historyStateIndex
             }else {
                 //User must have gone forward to a new page that should be in the nav stack
-                val currentViewUri = UstadUrlComponents.parse(window.location.href, ustadUrlDivider).viewUri
-                val index = navStack.indexOfLast { it.jsViewUri == currentViewUri }
-                Napier.d("CurrentStackIndex: user went forward to index=$index currentViewUri=$currentViewUri")
-                return index
+                try {
+                    val currentViewUri = UstadUrlComponents.parse(window.location.href, ustadUrlDivider).viewUri
+                    val index = navStack.indexOfLast { it.jsViewUri == currentViewUri }
+                    Napier.d("NavControllerJs: CurrentStackIndex index=$index")
+                    return index
+                }catch(e: IllegalArgumentException) {
+                    Napier.d(throwable = e) { "NavControllerJs: current location is not yet an ustadurl "}
+                    return -1
+                }
             }
         }
 
@@ -117,31 +122,34 @@ class NavControllerJs(
 
         val storedStackSize = sessionStorage.getItem("$storagePrefix.$SUBKEY_STACKSIZE")?.toInt() ?: 0
 
-        if(storedStackSize == 0) {
-            Napier.d("$logPrefix: creating new stack")
-            //Put the current location into the navstack as the starting point (unless something is already in storage)
-            var initUrlComponents: UstadUrlComponents
-            try {
-                initUrlComponents = UstadUrlComponents.parse(window.location.href, ustadUrlDivider)
-            }catch (e: Exception) {
-                initUrlComponents = UstadUrlComponents(window.location.href, RedirectView.VIEW_NAME, "")
-            }
-
-            //Set the initial stack
-            navStack += UstadBackStackEntryJs(initUrlComponents.viewName, initUrlComponents.arguments,
-                initUrlComponents.viewUri, "$storagePrefix.$SUBKEY_STACKITEMS.0", json)
-            window.history.stateIndex = 0
-            saveStackSizeAndIndex()
-
-            Napier.d("$logPrefix: init: navStack = ${dumpNavStackToString()}")
-        }else {
+        if(storedStackSize != 0) {
             Napier.d("$logPrefix: loading stack from session storage")
             //rebuild the stack
             for(i in 0 until storedStackSize) {
                 navStack.add(UstadBackStackEntryJs.loadFromSessionStorage(
-                        "$storagePrefix.$SUBKEY_STACKITEMS.$i", json))
+                    "$storagePrefix.$SUBKEY_STACKITEMS.$i", json))
             }
         }
+
+        Napier.d("$logPrefix: creating new stack")
+
+        var initUrlComponents: UstadUrlComponents
+        try {
+            initUrlComponents = UstadUrlComponents.parse(window.location.href, ustadUrlDivider)
+        }catch (e: Exception) {
+            initUrlComponents = UstadUrlComponents(window.location.href, RedirectView.VIEW_NAME, "")
+        }
+
+        //If the current url is not on the stack (e.g. freshly loaded, or redirect using window.location
+        // from another screen ( e.g. by guardRoute ), then add the current screen to the nav stack.
+        if(navStack.lastOrNull()?.jsViewUri != initUrlComponents.viewUri) {
+            navStack += UstadBackStackEntryJs(initUrlComponents.viewName, initUrlComponents.arguments,
+                initUrlComponents.viewUri, "$storagePrefix.$SUBKEY_STACKITEMS.${navStack.size}", json)
+            window.history.stateIndex = (navStack.size - 1)
+            saveStackSizeAndIndex()
+        }
+
+        Napier.d("$logPrefix: init: navStack = ${dumpNavStackToString()}")
 
         window.addEventListener("hashchange", hashChangeListener)
     }
@@ -253,7 +261,7 @@ class NavControllerJs(
         goOptions: UstadMobileSystemCommon.UstadGoOptions
     ) {
         Napier.d("$logPrefix NAVIGATE to $viewName popUpTo='${goOptions.popUpToViewName}' " +
-            "(inclusive=${goOptions.popUpToInclusive})")
+            "(inclusive=${goOptions.popUpToInclusive}) Current Stack=${dumpNavStackToString()}")
         val popUpToViewName = goOptions.popUpToViewName
 
         val stepsToGoBack = if(popUpToViewName != null) {
