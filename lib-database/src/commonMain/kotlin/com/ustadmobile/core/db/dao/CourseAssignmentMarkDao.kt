@@ -99,7 +99,7 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
                                        OR mark.camMarkerSubmitterUid = courseAssignmentMark.camMarkerSubmitterUid))
                 )                       
 
-         SELECT *
+         SELECT COALESCE(averageScore, -1) AS averageScore, COALESCE(averagePenalty, -1) AS averagePenalty
            FROM ScoreByMarker
     """)
     abstract fun getMarkOfAssignmentForSubmitterLiveData(

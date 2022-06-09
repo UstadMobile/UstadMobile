@@ -387,7 +387,9 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                         disabled = !groupSetEnabled,
                         variant = FormControlVariant.outlined,
                         onClick = {
-                            mPresenter?.handleSubmissionTypeClicked()
+                            if(groupSetEnabled){
+                                mPresenter?.handleSubmissionTypeClicked()
+                            }
                         }
                     )
 

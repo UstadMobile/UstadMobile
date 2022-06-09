@@ -135,7 +135,11 @@ class ClazzAssignmentDetailOverviewPresenter(
             db.courseAssignmentMarkDao.getMarkOfAssignmentForSubmitterLiveData(
                     clazzAssignment.caUid, submitterUid)
                     .observeWithLifecycleOwner(lifecycleOwner){
-                        view.submissionMark = it
+                        if(it?.averageScore == -1f){
+                            view.submissionMark = null
+                        }else{
+                            view.submissionMark = it
+                        }
                     }
         }
 
