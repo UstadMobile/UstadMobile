@@ -108,13 +108,7 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
 
                 }
 
-                umTypography(entity?.discussionPostMessage,
-                    variant = TypographyVariant.body1) {
-                    css {
-                        +StyleManager.alignTextToStart
-                        marginTop = 1.spacingUnits
-                    }
-                }
+                linkifyReactTextView(entity?.discussionPostMessage, null)
             }
 
             umItem {

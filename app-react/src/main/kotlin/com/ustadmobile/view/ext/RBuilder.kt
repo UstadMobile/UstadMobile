@@ -1037,7 +1037,8 @@ fun RBuilder.renderConversationListItem(
                         if(systemImpl.isRtlActive()) TextAlign.left else TextAlign.right
                 }
 
-                linkifyMessage(message, left, systemImpl, null)
+                //linkifyMessage(message, left, systemImpl, null)
+                linkifyReactMessage(message, left, null, systemImpl, null)
 
                 umTypography(messageTime.toDate()?.fromNow(systemImpl.getDisplayedLocale(this)),
                     variant = TypographyVariant.body2){
