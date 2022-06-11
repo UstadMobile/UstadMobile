@@ -101,7 +101,10 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                         if(fromMe) getString(MessageID.you) else it.messagePerson?.fullName(),
                         it.messageText,
                         systemImpl,
-                        it.messageTimestamp
+                        accountManager,
+                        this,
+                        it.messageTimestamp,
+
                     )
                 }
             }

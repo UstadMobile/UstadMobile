@@ -1013,6 +1013,8 @@ fun RBuilder.renderConversationListItem(
     messageOwner: String?,
     message: String?,
     systemImpl: UstadMobileSystemImpl,
+    accountManager: UstadAccountManager,
+    context: Any,
     messageTime: Long
 ){
     umGridContainer(GridSpacing.spacing1,
@@ -1037,8 +1039,7 @@ fun RBuilder.renderConversationListItem(
                         if(systemImpl.isRtlActive()) TextAlign.left else TextAlign.right
                 }
 
-                //linkifyMessage(message, left, systemImpl, null)
-                linkifyReactMessage(message, left, null, systemImpl, null)
+                linkifyReactMessage(message, left, LinkifyOptions(), systemImpl, accountManager, context)
 
                 umTypography(messageTime.toDate()?.fromNow(systemImpl.getDisplayedLocale(this)),
                     variant = TypographyVariant.body2){

@@ -108,7 +108,7 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
 
                 }
 
-                linkifyReactTextView(entity?.discussionPostMessage, null)
+                linkifyReactTextView(entity?.discussionPostMessage, systemImpl, accountManager, this)
             }
 
             umItem {
@@ -122,6 +122,8 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
                         if(fromMe) getString(MessageID.you) else it.messagePerson?.fullName(),
                         it.messageText,
                         systemImpl,
+                        accountManager,
+                        this,
                         it.messageTimestamp
                     )
                 }

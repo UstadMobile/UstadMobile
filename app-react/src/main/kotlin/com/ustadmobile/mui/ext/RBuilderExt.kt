@@ -1,9 +1,6 @@
 package com.ustadmobile.mui.ext
 
-import react.ComponentType
-import react.PropsWithClassName
-import react.RBuilder
-import react.ReactElement
+import react.*
 import styled.StyledElementBuilder
 import styled.StyledHandler
 
