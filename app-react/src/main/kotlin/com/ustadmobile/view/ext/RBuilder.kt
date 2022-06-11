@@ -98,18 +98,30 @@ fun RBuilder.errorFallBack(text: String) {
     }
 }
 
+//
+// Yeah a global variable like this is not really a good thing... but it might be needed until
+// we update architecture to MVVM. This prevents multiple redirects being made if render is called
+// multiple times until the next screen (and new context) starts
+//
+private var routeGuardRedirected = false
+
 /**
- * Prevent users who have not logged in accessing screens that require an account for access
+ * Prevent users who have not logged in accessing screens that require an account for access. The
+ * redirect will be done by actually reloading the page and redirecting to the login screen, with
+ * ARG_NEXT set.
  */
 private fun guardRoute(
     component: KClass<out Component<UmProps, *>>,
     accountManager: UstadAccountManager,
     systemImpl: UstadMobileSystemImpl,
 ): ReactElement?  = createElement {
+
+    var screenRequiresLocationRedirect = false
+
     try {
         val ustadUrlComponents = UstadUrlComponents.parse(window.location.href)
         val accessibleViews = listOf(Login2View.VIEW_NAME, PersonEditView.VIEW_NAME_REGISTER,
-            RegisterAgeRedirectView.VIEW_NAME, SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS,
+            RedirectView.VIEW_NAME, RegisterAgeRedirectView.VIEW_NAME, SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS,
             RegisterMinorWaitForParentView.VIEW_NAME)
         val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
 
@@ -119,17 +131,23 @@ private fun guardRoute(
          * screen. Set arg_next so that they will continue to the desired screen after clicking
          * login.
          */
-        if(activeSession == null && ustadUrlComponents.viewName !in accessibleViews) {
+        screenRequiresLocationRedirect = activeSession == null && ustadUrlComponents.viewName !in accessibleViews
+
+        if(screenRequiresLocationRedirect && !routeGuardRedirected) {
             val urlComponents = UstadUrlComponents.parse(window.location.href)
             val loginWithNextParamUrl = "${urlComponents.endpoint}#/${Login2View.VIEW_NAME}?${UstadView.ARG_NEXT}=${encodeURIComponent(urlComponents.viewUri)}"
             Napier.d { "User is not logged in : should not see ${ustadUrlComponents.viewName} . Go to $loginWithNextParamUrl"}
+            routeGuardRedirected = true
             window.location.href = loginWithNextParamUrl
         }
     }catch(e: Exception) {
         Napier.d { "${window.location.href} not an UstadUrl, not doing anything" }
     }
 
-    child(component){}
+    if(!screenRequiresLocationRedirect) {
+        child(component){ }
+    }
+
 }
 
 fun RBuilder.renderRoutes(di: DI) {
