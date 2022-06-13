@@ -806,6 +806,9 @@ fun RBuilder.renderListItemWithPersonTitleDescriptionAndAvatarOnLeft(
     title: String,
     subTitle: String? = null,
     iconName: String,
+    systemImpl: UstadMobileSystemImpl,
+    accountManager: UstadAccountManager,
+    context: Any,
     personUid: Long = -1L,
     onClick: (() -> Unit)? = null){
     umGridContainer {
@@ -830,11 +833,7 @@ fun RBuilder.renderListItemWithPersonTitleDescriptionAndAvatarOnLeft(
             }
 
             umItem(GridSize.cells12){
-                umTypography(subTitle,
-                    variant = TypographyVariant.body1,
-                    paragraph = true){
-                    css(alignTextToStart)
-                }
+                linkifyReactTextView(subTitle, systemImpl, accountManager, context)
             }
         }
     }
@@ -1031,6 +1030,8 @@ fun RBuilder.renderConversationListItem(
     messageOwner: String?,
     message: String?,
     systemImpl: UstadMobileSystemImpl,
+    accountManager: UstadAccountManager,
+    context: Any,
     messageTime: Long
 ){
     umGridContainer(GridSpacing.spacing1,
@@ -1054,19 +1055,8 @@ fun RBuilder.renderConversationListItem(
                     else
                         if(systemImpl.isRtlActive()) TextAlign.left else TextAlign.right
                 }
-                umTypography(message, variant = TypographyVariant.body1){
-                    css{
-                        +chatMessageContent
-                        if(left) if(systemImpl.isRtlActive()) +chatRight else +chatLeft
-                        else if(systemImpl.isRtlActive()) +chatLeft else +chatRight
-                        if(left){
-                            backgroundColor = Color(theme.palette.action.selected)
-                        }else {
-                            backgroundColor = Color(theme.palette.primary.dark)
-                            color = Color.white
-                        }
-                    }
-                }
+
+                linkifyReactMessage(message, left, LinkifyOptions(), systemImpl, accountManager, context)
 
                 umTypography(messageTime.toDate()?.fromNow(systemImpl.getDisplayedLocale(this)),
                     variant = TypographyVariant.body2){
