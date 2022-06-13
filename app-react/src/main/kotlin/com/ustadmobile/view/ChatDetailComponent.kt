@@ -98,10 +98,14 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                 messages.forEach {
                     val fromMe = accountManager.activeAccount.personUid == it.messagePerson?.personUid
                     //Update message read
-                    mPresenter?.updateMessageRead(
-                        MessageRead(accountManager.activeAccount.personUid, it.messageUid,
-                            it.messageEntityUid?:0L)
-                    )
+                    if(it.messageRead == null) {
+                        val messageRead = MessageRead(
+                            accountManager.activeAccount.personUid, it.messageUid,
+                            it.messageEntityUid ?: 0L
+                        )
+                        mPresenter?.updateMessageRead(messageRead)
+                        it.messageRead = messageRead
+                    }
                     renderConversationListItem(
                         !fromMe,
                         if(fromMe) getString(MessageID.you) else it.messagePerson?.fullName(),
