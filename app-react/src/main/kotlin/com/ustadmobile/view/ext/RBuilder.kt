@@ -806,6 +806,9 @@ fun RBuilder.renderListItemWithPersonTitleDescriptionAndAvatarOnLeft(
     title: String,
     subTitle: String? = null,
     iconName: String,
+    systemImpl: UstadMobileSystemImpl,
+    accountManager: UstadAccountManager,
+    context: Any,
     personUid: Long = -1L,
     onClick: (() -> Unit)? = null){
     umGridContainer {
@@ -830,11 +833,7 @@ fun RBuilder.renderListItemWithPersonTitleDescriptionAndAvatarOnLeft(
             }
 
             umItem(GridSize.cells12){
-                umTypography(subTitle,
-                    variant = TypographyVariant.body1,
-                    paragraph = true){
-                    css(alignTextToStart)
-                }
+                linkifyReactTextView(subTitle, systemImpl, accountManager, context)
             }
         }
     }
