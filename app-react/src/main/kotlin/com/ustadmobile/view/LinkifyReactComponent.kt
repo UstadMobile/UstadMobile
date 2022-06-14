@@ -9,19 +9,18 @@ import com.ustadmobile.mui.components.umTypography
 import com.ustadmobile.mui.ext.createStyledComponent
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmState
-import com.ustadmobile.util.Util
-import com.ustadmobile.util.Util.stopEventPropagation
-import io.github.aakira.napier.Napier
 import kotlinx.css.Color
 import kotlinx.css.backgroundColor
 import kotlinx.css.color
 import kotlinx.css.marginTop
 import org.w3c.dom.events.Event
 import react.*
-import styled.StyledElementBuilder
-import styled.StyledProps
 import styled.css
 
+/**
+ * Refer to linkify-react documentation to expand / edit functionality:
+ * https://linkify.js.org/docs/linkify-react.html
+ */
 
 @JsModule("linkify-react")
 @JsNonModule
@@ -31,8 +30,6 @@ private external val linkifyReact: dynamic
 private val linkifyReactComponent: RComponent<UMListItemProps, UmState> = linkifyReact.default
 
 external interface LinkifyReactProps: UMListItemProps {
-    var id: String
-    var label: String
     var options: LinkifyOptions
 }
 
@@ -43,7 +40,6 @@ class LinkifyOptionsAttributes(){
 }
 class LinkifyOptions(){
     var tagName: String? = "a"
-    var className: String? = null
     var attributes: LinkifyOptionsAttributes? = null
 
 }
@@ -57,10 +53,7 @@ fun RBuilder.linkifyReactMessage(
     context: Any
 ) = createStyledComponent(linkifyReactComponent.unsafeCast<ComponentType<LinkifyReactProps>>(),
     "Linkify"){
-    attrs.id = "Linkify"
-    attrs.options = options
 
-    val optionsTest = LinkifyOptions()
     val attributes = LinkifyOptionsAttributes()
     attributes.onClick = {
         it.preventDefault()
@@ -68,9 +61,9 @@ fun RBuilder.linkifyReactMessage(
         systemImpl.handleClickLink(it.target.toString(), accountManager, context)
 
     }
-    optionsTest.attributes = attributes
-    attrs.options = optionsTest
+    options.attributes = attributes
 
+    attrs.options = options
 
     umTypography(
         message,
@@ -95,11 +88,11 @@ fun RBuilder.linkifyReactTextView(
     message: String?,
     systemImpl: UstadMobileSystemImpl,
     accountManager: UstadAccountManager,
-    context: Any
+    context: Any,
+    options: LinkifyOptions = LinkifyOptions()
 ) = createStyledComponent(linkifyReactComponent.unsafeCast<ComponentType<LinkifyReactProps>>(),
     "Linkify"){
 
-    val optionsTest = LinkifyOptions()
     val attributes = LinkifyOptionsAttributes()
     attributes.onClick = {
         it.preventDefault()
@@ -107,8 +100,8 @@ fun RBuilder.linkifyReactTextView(
         systemImpl.handleClickLink(it.target.toString(), accountManager, context)
 
     }
-    optionsTest.attributes = attributes
-    attrs.options = optionsTest
+    options.attributes = attributes
+    attrs.options = options
 
     umTypography(message,
         variant = TypographyVariant.body1) {
