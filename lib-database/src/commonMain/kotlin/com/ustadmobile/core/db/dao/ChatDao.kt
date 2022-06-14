@@ -155,11 +155,28 @@ abstract class ChatDao: BaseDao<Chat>{
          WHERE :searchBit != '%'
            AND PersonGroupMember.groupMemberPersonUid = :personUid
            AND Person.personUid != :personUid
+        
            AND Person.personUid NOT IN
-               (SELECT p.personUid
-                  FROM ChatMember c
-                       LEFT JOIN Person p 
-                            ON p.personUid = c.chatMemberPersonUid)
+			   (
+				SELECT chatpeople.personUid 
+				  FROM ChatMember cmm
+					   LEFT JOIN Chat cc 
+							  ON cc.chatUid = cmm.chatMemberChatUid 
+			   
+				 LEFT JOIN Person chatpeople 
+                    ON chatpeople.personUid =
+                       (SELECT chatpeopleother.personUid
+                          FROM ChatMember cm
+                               LEFT JOIN Person chatpeopleother 
+                                    ON chatpeopleother.personUid = cm.chatMemberPersonUid
+                         WHERE cm.chatMemberChatUid = cc.chatUid
+                           AND cm.chatMemberPersonUid != :personUid
+                         LIMIT 1)
+						 
+				 WHERE cc.chatUid != 0 
+				   AND cmm.chatMemberPersonUid = :personUid
+				 )
+                            
            AND Person.firstNames||' '||Person.lastName LIKE :searchBit 
          ORDER BY latestMessageTimestamp DESC
     """)

@@ -1,6 +1,7 @@
 package com.ustadmobile.view.ext
 
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.controller.BitmaskEditPresenter
@@ -8,14 +9,14 @@ import com.ustadmobile.core.controller.SubmissionConstants.STATUS_MAP
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.IdOption
+import com.ustadmobile.core.util.UstadUrlComponents
+import com.ustadmobile.core.util.encodeURI
+import com.ustadmobile.core.util.encodeURIComponent
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.util.ext.isContentComplete
 import com.ustadmobile.core.util.ext.roundTo
-import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.core.view.RegisterAgeRedirectView
-import com.ustadmobile.core.view.SiteTermsDetailView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
@@ -57,11 +58,14 @@ import com.ustadmobile.view.ClazzAssignmentDetailOverviewComponent.Companion.ASS
 import com.ustadmobile.view.ClazzEditComponent.Companion.BLOCK_ICON_MAP
 import com.ustadmobile.view.components.AttachmentImageLookupAdapter
 import com.ustadmobile.view.components.AttachmentImageLookupComponent
+import io.github.aakira.napier.Napier
 import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import mui.material.GridProps
 import mui.material.GridWrap
+import org.kodein.di.DI
+import org.kodein.di.instance
 import org.w3c.dom.HTMLImageElement
 import org.w3c.dom.events.Event
 import react.*
@@ -94,37 +98,72 @@ fun RBuilder.errorFallBack(text: String) {
     }
 }
 
+//
+// Yeah a global variable like this is not really a good thing... but it might be needed until
+// we update architecture to MVVM. This prevents multiple redirects being made if render is called
+// multiple times until the next screen (and new context) starts
+//
+private var routeGuardRedirected = false
+
 /**
- * Prevent unauthorized access
+ * Prevent users who have not logged in accessing screens that require an account for access. The
+ * redirect will be done by actually reloading the page and redirecting to the login screen, with
+ * ARG_NEXT set.
  */
 private fun guardRoute(
     component: KClass<out Component<UmProps, *>>,
-    systemImpl: UstadMobileSystemImpl
+    accountManager: UstadAccountManager,
+    systemImpl: UstadMobileSystemImpl,
 ): ReactElement?  = createElement {
-    val viewName = getViewNameFromUrl()
-    val accessibleViews = listOf(Login2View.VIEW_NAME, PersonEditView.VIEW_NAME_REGISTER,
-        RegisterAgeRedirectView.VIEW_NAME, SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS)
-    val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
-    val logout = activeSession == null && viewName != null
-            && accessibleViews.indexOf(viewName) == -1 && viewName != "/"
-    //Protest access to app's content without being logged in.
-    if(logout){
-        window.location.href = "./"
+
+    var screenRequiresLocationRedirect = false
+
+    try {
+        val ustadUrlComponents = UstadUrlComponents.parse(window.location.href)
+        val accessibleViews = listOf(Login2View.VIEW_NAME, PersonEditView.VIEW_NAME_REGISTER,
+            RedirectView.VIEW_NAME, RegisterAgeRedirectView.VIEW_NAME, SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS,
+            RegisterMinorWaitForParentView.VIEW_NAME)
+        val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
+
+        /**
+         * If there is no active session, and the user is not accessing login, registration,
+         * terms, or the age redirect screen (or related), then redirect the browser to the login
+         * screen. Set arg_next so that they will continue to the desired screen after clicking
+         * login.
+         */
+        screenRequiresLocationRedirect = activeSession == null && ustadUrlComponents.viewName !in accessibleViews
+
+        if(screenRequiresLocationRedirect && !routeGuardRedirected) {
+            val urlComponents = UstadUrlComponents.parse(window.location.href)
+            val loginWithNextParamUrl = "${urlComponents.endpoint}#/${Login2View.VIEW_NAME}?${UstadView.ARG_NEXT}=${encodeURIComponent(urlComponents.viewUri)}"
+            Napier.d { "User is not logged in : should not see ${ustadUrlComponents.viewName} . Go to $loginWithNextParamUrl"}
+            routeGuardRedirected = true
+            window.location.href = loginWithNextParamUrl
+        }
+    }catch(e: Exception) {
+        Napier.d { "${window.location.href} not an UstadUrl, not doing anything" }
     }
-    child(component){}
+
+    if(!screenRequiresLocationRedirect) {
+        child(component){ }
+    }
+
 }
 
-fun RBuilder.renderRoutes(systemImpl: UstadMobileSystemImpl) {
+fun RBuilder.renderRoutes(di: DI) {
+    val systemImpl: UstadMobileSystemImpl by di.instance()
+    val accountManager: UstadAccountManager by di.instance()
+
     HashRouter{
         Routes{
             Route{
                 attrs.path = "/"
-                attrs.element = guardRoute(defaultDestination.component, systemImpl)
+                attrs.element = guardRoute(defaultDestination.component, accountManager, systemImpl)
             }
             destinationList.forEach {
                 Route{
                     attrs.path = "/${it.view}"
-                    attrs.element = guardRoute(it.component, systemImpl)
+                    attrs.element = guardRoute(it.component, accountManager, systemImpl)
                 }
             }
         }
@@ -767,6 +806,9 @@ fun RBuilder.renderListItemWithPersonTitleDescriptionAndAvatarOnLeft(
     title: String,
     subTitle: String? = null,
     iconName: String,
+    systemImpl: UstadMobileSystemImpl,
+    accountManager: UstadAccountManager,
+    context: Any,
     personUid: Long = -1L,
     onClick: (() -> Unit)? = null){
     umGridContainer {
@@ -791,11 +833,7 @@ fun RBuilder.renderListItemWithPersonTitleDescriptionAndAvatarOnLeft(
             }
 
             umItem(GridSize.cells12){
-                umTypography(subTitle,
-                    variant = TypographyVariant.body1,
-                    paragraph = true){
-                    css(alignTextToStart)
-                }
+                linkifyReactTextView(subTitle, systemImpl, accountManager, context)
             }
         }
     }
@@ -992,6 +1030,8 @@ fun RBuilder.renderConversationListItem(
     messageOwner: String?,
     message: String?,
     systemImpl: UstadMobileSystemImpl,
+    accountManager: UstadAccountManager,
+    context: Any,
     messageTime: Long
 ){
     umGridContainer(GridSpacing.spacing1,
@@ -1015,19 +1055,8 @@ fun RBuilder.renderConversationListItem(
                     else
                         if(systemImpl.isRtlActive()) TextAlign.left else TextAlign.right
                 }
-                umTypography(message, variant = TypographyVariant.body1){
-                    css{
-                        +chatMessageContent
-                        if(left) if(systemImpl.isRtlActive()) +chatRight else +chatLeft
-                        else if(systemImpl.isRtlActive()) +chatLeft else +chatRight
-                        if(left){
-                            backgroundColor = Color(theme.palette.action.selected)
-                        }else {
-                            backgroundColor = Color(theme.palette.primary.dark)
-                            color = Color.white
-                        }
-                    }
-                }
+
+                linkifyReactMessage(message, left, LinkifyOptions(), systemImpl, accountManager, context)
 
                 umTypography(messageTime.toDate()?.fromNow(systemImpl.getDisplayedLocale(this)),
                     variant = TypographyVariant.body2){

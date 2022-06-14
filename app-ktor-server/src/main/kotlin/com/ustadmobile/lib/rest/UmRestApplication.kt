@@ -58,6 +58,7 @@ import kotlinx.serialization.json.Json
 import com.ustadmobile.core.util.SysPathUtil
 import io.ktor.client.*
 import io.ktor.websocket.*
+import java.util.*
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -142,6 +143,9 @@ fun Application.umRestApplication(
             register(ContentType.Any, GsonConverter())
         }
     }
+
+    //Avoid sending the body of content if it has not changed since the client last requested it.
+    install(ConditionalHeaders)
 
     val tmpRootDir = Files.createTempDirectory("upload").toFile()
 

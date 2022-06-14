@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.*
 import java.util.*
 import com.ustadmobile.core.util.parse8601Duration
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 object XapiUtil {
 
@@ -269,7 +270,8 @@ object XapiUtil {
 
     fun deleteAndInsertNewStateContent(stateContentDao: StateContentDao, content: HashMap<String, Any>, stateEntity: StateEntity) {
 
-        stateContentDao.setInActiveStateContentByKeyAndUid(false, stateEntity.stateUid)
+        stateContentDao.setInActiveStateContentByKeyAndUid(false, stateEntity.stateUid,
+            getSystemTimeInMillis())
 
         insertOrUpdateStateContent(stateContentDao, content, stateEntity)
 
@@ -361,7 +363,8 @@ object XapiUtil {
                         statusFlag == StatementEntity.CONTENT_PASSED ||
                         statementEntity.resultCompletion)){
             progress = 100
-            repo.statementDao.updateProgress(statementEntity.statementUid, progress)
+            repo.statementDao.updateProgress(statementEntity.statementUid, progress,
+                getSystemTimeInMillis())
         }
     }
 

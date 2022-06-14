@@ -108,13 +108,7 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
 
                 }
 
-                umTypography(entity?.discussionPostMessage,
-                    variant = TypographyVariant.body1) {
-                    css {
-                        +StyleManager.alignTextToStart
-                        marginTop = 1.spacingUnits
-                    }
-                }
+                linkifyReactTextView(entity?.discussionPostMessage, systemImpl, accountManager, this)
             }
 
             umItem {
@@ -128,6 +122,8 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
                         if(fromMe) getString(MessageID.you) else it.messagePerson?.fullName(),
                         it.messageText,
                         systemImpl,
+                        accountManager,
+                        this,
                         it.messageTimestamp
                     )
                 }

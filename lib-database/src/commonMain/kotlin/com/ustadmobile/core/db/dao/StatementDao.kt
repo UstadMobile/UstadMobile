@@ -122,10 +122,12 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     abstract fun getXLangMap(): XLangMapEntry?
 
 
-    @Query("""UPDATE StatementEntity SET extensionProgress = :progress,
-            statementLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
+    @Query("""
+        UPDATE StatementEntity 
+           SET extensionProgress = :progress,
+               statementLct = :updateTime 
             WHERE statementUid = :uid""")
-    abstract fun updateProgress(uid: Long, progress: Int)
+    abstract fun updateProgress(uid: Long, progress: Int, updateTime: Long)
 
 
     @Query("""
