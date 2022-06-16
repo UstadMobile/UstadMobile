@@ -43,9 +43,12 @@ import org.kodein.di.on
  * https://github.com/RusticiSoftware/launch/blob/master/lms_lrs.md
  *
  */
-class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view: XapiPackageContentView,
-                                  di: DI)
-    : UstadBaseController<XapiPackageContentView>(context, args, view, di) {
+class XapiPackageContentPresenter(
+    context: Any,
+    args: Map<String, String>,
+    view: XapiPackageContentView,
+    di: DI
+): UstadBaseController<XapiPackageContentView>(context, args, view, di) {
 
     private var tinCanXml: TinCanXML? = null
 
@@ -124,8 +127,15 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                         "registration" to contextRegistration,
                         "activity_id" to (tinCanXml?.launchActivity?.id ?: "xapi_id"))
                 if (launchHref != null) {
-                    val launchUrl = UMFileUtil.joinPaths(mountedPath, launchHref) + "?" +
-                            launchMethodParams.toQueryString()
+                    //temporary resolution: the web version is not running an xAPI server on KTOR
+                    // so we should not include this in the url on web
+                    val launchParams = if(UmPlatformUtil.isWeb) {
+                        ""
+                    } else {
+                        "?" + launchMethodParams.toQueryString()
+                    }
+
+                    val launchUrl = UMFileUtil.joinPaths(mountedPath, launchHref) + launchParams
                     Napier.d { "XapiPackageContentPresenter: opening launch url = $launchUrl" }
                     view.contentTitle = tinCanXml?.launchActivity?.name ?: ""
                     view.url = launchUrl
