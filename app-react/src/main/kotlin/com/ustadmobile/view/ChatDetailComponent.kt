@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Chat
+import com.ustadmobile.lib.db.entities.MessageRead
 import com.ustadmobile.lib.db.entities.MessageWithPerson
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.targetInputValue
@@ -96,12 +97,24 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                 }
                 messages.forEach {
                     val fromMe = accountManager.activeAccount.personUid == it.messagePerson?.personUid
+                    //Update message read
+                    if(it.messageRead == null) {
+                        val messageRead = MessageRead(
+                            accountManager.activeAccount.personUid, it.messageUid,
+                            it.messageEntityUid ?: 0L
+                        )
+                        mPresenter?.updateMessageRead(messageRead)
+                        it.messageRead = messageRead
+                    }
                     renderConversationListItem(
                         !fromMe,
                         if(fromMe) getString(MessageID.you) else it.messagePerson?.fullName(),
                         it.messageText,
                         systemImpl,
-                        it.messageTimestamp
+                        accountManager,
+                        this,
+                        it.messageTimestamp,
+
                     )
                 }
             }

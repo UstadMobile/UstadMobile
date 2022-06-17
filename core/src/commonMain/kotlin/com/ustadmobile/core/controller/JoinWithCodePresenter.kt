@@ -77,6 +77,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
         view.loading = true
         presenterScope.launch {
             if(entityTableId == Clazz.TABLE_ID){
+                Napier.d { "attempting to join class with code ${code.trim()}"}
                 var clazzToJoin = dbRepo.clazzDao.findByClazzCode(code.trim())
                 if(clazzToJoin == null) {
                     try {
@@ -84,15 +85,17 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                         if(clazzToJoin != null)
                             dbRepo.clazzDao.insertAsync(clazzToJoin)
                     }catch(e: Exception) {
-                        Napier.w("Could not retrieve class using class code ${code.trim()} by http",
+                        Napier.e("Could not retrieve class using class code ${code.trim()} by http",
                             e)
                     }
                 }
 
+                Napier.d { "JoinWithCode: attempting to join course ${clazzToJoin?.clazzName}"}
                 val personToEnrol = dbRepo.takeIf { clazzToJoin != null }?.personDao
                         ?.findByUidAsync(accountManager.activeAccount.personUid)
                 try {
                     if(clazzToJoin  != null && personToEnrol != null) {
+                        Napier.d { "JoinWithCode: enroling into course "}
                         dbRepo.enrolPersonIntoClazzAtLocalTimezone(personToEnrol,
                             clazzToJoin.clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING)
                         val message = systemImpl.getString(MessageID.please_wait_for_approval, context)

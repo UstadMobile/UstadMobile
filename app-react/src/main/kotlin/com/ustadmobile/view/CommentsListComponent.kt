@@ -21,7 +21,11 @@ class CommentsListComponent(mProps: SimpleListProps<CommentsWithPerson>): UstadS
             renderListItemWithPersonTitleDescriptionAndAvatarOnLeft(
                 item.commentsPerson?.fullName() ?: "",
                 item.commentsText,
-                "person")
+                "person",
+                systemImpl,
+                accountManager,
+                this
+            )
         }
     }
 

@@ -16,13 +16,13 @@ import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.http.HttpStatusCode
-import io.ktor.response.respond
 import org.kodein.di.instance
 import org.kodein.di.on
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.view.UstadView
 import io.ktor.application.*
 import io.ktor.request.*
+import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import org.kodein.di.DI
@@ -150,6 +150,25 @@ fun Route.personAuthRegisterRoute() {
             }else {
                 call.respond(HttpStatusCode.NoContent)
             }
+        }
+
+        /**
+         * Temporary manual way to hash a password. Can be used for manual resets if required.
+         */
+        get("hash") {
+            val di: DI by closestDI()
+            val pbkdf2Params: Pbkdf2Params by di.instance()
+            val db: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_DB)
+            val password = call.request.queryParameters["password"]
+                ?: throw IllegalArgumentException("No password to hash")
+
+            val site: Site = db.siteDao.getSiteAsync() ?: throw IllegalStateException("No site!")
+            val authSalt = site.authSalt ?: throw IllegalStateException("No auth salt!")
+
+            val passwordDoubleHashed = password.doublePbkdf2Hash(authSalt, pbkdf2Params)
+                .encodeBase64()
+
+            call.respondText { "Hashed password = $passwordDoubleHashed" }
         }
     }
 }

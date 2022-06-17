@@ -17,10 +17,12 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.getFirstValue
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -34,6 +36,7 @@ class ClazzAssignmentEditPresenter(context: Any,
                                    di: DI)
     : UstadEditPresenter<ClazzAssignmentEditView, CourseBlockWithEntity>(context, arguments, view, di, lifecycleOwner) {
 
+    private val onLoadJsonComplete = CompletableDeferred<Boolean>()
 
     private val json: Json by instance()
 
@@ -98,10 +101,14 @@ class ClazzAssignmentEditPresenter(context: Any,
             SAVEDSTATE_KEY_SUBMISSION_TYPE,
             ListSerializer(CourseGroupSet.serializer()), CourseGroupSet::class) {
             val group = it.firstOrNull() ?: return@observeSavedStateResult
-            entity?.assignment?.caGroupUid = group.cgsUid
-            view.groupSet = group
-            view.entity = entity
-            requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
+            presenterScope.launch(doorMainDispatcher()) {
+                onLoadJsonComplete.await()
+
+                entity?.assignment?.caGroupUid = group.cgsUid
+                view.groupSet = group
+                view.entity = entity
+                requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
+            }
         }
     }
 
@@ -133,7 +140,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             repo.courseAssignmentSubmissionDao
                 .checkNoSubmissionsMade(editEntity.assignment?.caUid ?: 0)
                 .observeWithLifecycleOwner(lifecycleOwner){
-                    view.groupSetEnabled = it == true
+                    view.groupSetEnabled = (it ?: true) == true
                 }
 
             clazzUid = editEntity.assignment?.caClazzUid ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
@@ -152,6 +159,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             val timeZone = clazzWithSchool.effectiveTimeZone()
             view.timeZone = timeZone
             loadEntityIntoDateTime(editEntity)
+            onLoadJsonComplete.complete(true)
         }
 
         return editEntity

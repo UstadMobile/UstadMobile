@@ -6,7 +6,6 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -116,7 +115,6 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""
         UPDATE ClazzEnrolment 
           SET clazzEnrolmentDateLeft = :endDate,
-              clazzEnrolmentLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL},
               clazzEnrolmentLct = :updateTime
         WHERE clazzEnrolmentUid = :clazzEnrolmentUid""")
     abstract suspend fun updateDateLeftByUid(clazzEnrolmentUid: Long, endDate: Long, updateTime: Long)
@@ -206,7 +204,6 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""
                 UPDATE ClazzEnrolment
                    SET clazzEnrolmentActive = :active,
-                       clazzEnrolmentLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL},
                        clazzEnrolmentLct= :changeTime
                 WHERE clazzEnrolmentPersonUid = :personUid 
                       AND clazzEnrolmentClazzUid = :clazzUid
@@ -306,9 +303,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""
             UPDATE ClazzEnrolment 
                SET clazzEnrolmentRole = :newRole,
-                   clazzEnrolmentLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL},
                    clazzEnrolmentLct = :updateTime      
-                   
              -- Avoid potential for duplicate approvals if user was previously refused      
              WHERE clazzEnrolmentUid = COALESCE( 
                     (SELECT clazzEnrolmentUid

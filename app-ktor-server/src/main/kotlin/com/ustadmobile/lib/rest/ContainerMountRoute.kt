@@ -135,16 +135,17 @@ suspend fun Route.serve(call: ApplicationCall, isHeadRequest: Boolean){
                 }
             }
 
-            val eTag = Integer.toHexString(("${actualFile.name}${actualFile.lastModified()}${actualFile.length()}").hashCode())
-            call.response.header(HttpHeaders.ETag, eTag)
-            call.response.header(HttpHeaders.CacheControl, "cache; max-age=${TimeUnit.MINUTES.toSeconds(60)}")
+            val eTag = entryWithContainerEntryFile.containerEntryFile?.cefMd5
+            if(eTag != null) {
+                call.response.header(HttpHeaders.ETag, eTag)
+            }
 
-            //To be fixed post-alpha: handle if-none-match headers
-            //val ifNonMatch = call.request.headers[HttpHeaders.IfNoneMatch]
-            /*if(ifNonMatch != null && eTag == ifNonMatch){
+            call.response.header(HttpHeaders.CacheControl, "cache; max-age=${TimeUnit.MINUTES.toSeconds(120)}")
+
+            if(call.request.headers[HttpHeaders.IfNoneMatch] == eTag) {
                 call.respond(HttpStatusCode.NotModified)
                 return
-            }*/
+            }
 
             val contentType = UMFileUtil.getContentType(pathInContainer)
             val mimeType = "${contentType.contentType}/${contentType.contentSubtype}"
