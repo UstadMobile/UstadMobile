@@ -58,7 +58,6 @@
     <string name="downloaded">دانلود شد</string>
     <string name="new_password">رمز عبور جدید</string>
     <string name="phone">تیلفون</string>
-    <string name="tablet">تبلت</string>
     <string name="preparing">در حال آماده سازی</string>
     <string name="field_required_prompt">این بخش الزامی است</string>
     <!-- Registration dialog feedback -->
@@ -81,19 +80,15 @@
     <string name="no_video_file_found">پرونده ویدیویی یافت نشد</string>
     <string name="error_this_device_doesnt_support_bluetooth_sharing">ببخشید، این دستگاه از ارسال فایل از طریق بلوتوت حمایت نمیکند.</string>
     <string name="share_offline_zip_checkbox_label">ارسال در پرونده فشرده شده</string>
-    <string name="content_font_36">اندازه متن 36</string>
     <string name="location_permission_details">این اپلیکیشن با استفاده بلوتوت و وایفای، کاربران دیگر را در نزدیکی تان پیدا میکند. سپس، این اپلیکیشن با کاربران نزدیک وصل میگردد تا محتویات را با سرعت بالا بدون دسترسی به انترنت دانلود نماید. به دلیل اینکه نتایج این اسکن برای موقعیت‌یابی شما بکار برده می‌شود، ضروری هست تا شما به موقعیت‌یابی اجازه بدهید تا این ویژگی فعال گردد. این اپلیکیشن نتیجه این اسکن‌ها را ذخیره نمیکند و موقعیت شما را نیز به هیچ وجه ثبت نمیکند. این اپلیکیشن از کود منبع باز ساخته شده که در آدرس ذیل آنرا دیده میتوانید: github.com/ustadmobile/ustadmobile</string>
     <string name="field_password_error_min">رمز عبور باید حد اقل 5 حرف باشد</string>
-    <string name="content_untitled_document">مدرک بدون عنوان</string>
     <string name="filed_password_no_match">رمز عبور یکسان نیست، دوباره کوشش نمائید</string>
     <string name="profile">نمایه</string>
-    <string name="content_editor_link_error">پیوند متن و یا url خالی بوده نمیتواند، دوباره کوشش نمائید</string>
     <string name="dialog_download_from_playstore_message">دسترسی و اشتراک‌گذاری آفلاین محتویات آموزشی</string>
     <string name="dialog_download_from_playstore_ok">همین حالا دانلود نمائید (رایگان)</string>
     <string name="dialog_download_from_playstore_cancel">در ویبسایت باشید</string>
     <string name="onboarding_get_started_label">آغاز نمائید</string>
     <string name="onboarding_no_internet_headline">انترنت ندارید؟ مشکلی نیست.</string>
-    <string name="content_folder_image_message">حمایت برای علاوه ساختن عکس، به زودی</string>
     <string name="onboarding_no_internet_subheadline">همه چیز بشکل آفلاین کار می‌دهد</string>
     <string name="onboarding_offline_sharing">آفلاین شریک سازید</string>
     <string name="onboarding_offline_sharing_subheading">با استفاده از اشتراک‌گذاری آفلاین سریع‌السیر در زمان و مصرف داده‌هایتان صرفه‌جویی کنید</string>
@@ -115,74 +110,44 @@
     <string name="download_state_downloaded"><b> دانلود گردید </b> مجموعاً %1$s اشیأ، که در حافظۀ دستگاه شما %2$s جای را گرفته است.</string>
     <string name="download_downloading_placeholder">در حال دانلود %1$s از مجموع %2$s</string>
     <string name="insufficient_space">فضای ذخیره سازی کافی نیست</string>
-    <string name="download_cancel_all">لغو همه</string>
     <string name="download_cancel_label">لغو دانلود</string>
     <string name="download_storage_option_device">%1$s استفاده شده - %2$s خالی</string>
-    <string name="download_storage_permission_title">اجازه فایل لازمی است</string>
     <string name="download_storage_permission_message">این اپلیکیشن به اجازه روی کارت حافظه نیاز دارد تا محتویات دانلود و ذخیره گردد</string>
     <string name="download_locally_availability">در نزدیکی‌تان موجود است</string>
     <string name="download_cloud_availability">موجود بروی ابر</string>
     <string name="xapi_day" value="300">روز</string>
-    <string name="clear_history">پاک کردن تایخچه</string>
     <string name="download_entry_state_paused">مکث شده</string>
     <string name="get_app">اپلیکیشن را بدست بیاورید</string>
     <string name="no_app_found">هیچ اپلیکشن دریافت نگردید تا پرونده باز گردد</string>
     <string name="entry_details_author">نویسنده</string>
-    <string name="entry_details_description">تشریح</string>
     <string name="library_reading_level">سطح خواندن</string>
     <string name="file_not_found">پرونده یافت نشد</string>
-    <string name="content_type_multimedia">چند رسانه</string>
     <string name="multiple_choice">چند گزینه‌ای</string>
-    <string name="content_type_fill_the_blanks">جاهای خالی را پر نمائید</string>
     <string name="content_type_link">پیوند</string>
-    <string name="content_format_text">متن</string>
     <string name="content_format_paragraph">پاراگراف</string>
-    <string name="content_direction_ltr">از چپ به راست</string>
     <string name="content_direction_rtl">از راست به چپ</string>
-    <string name="content_font_8">اندازه متن 8</string>
     <string name="content_font_10">اندازه متن 10</string>
-    <string name="content_font_12">اندازه متن 12</string>
     <string name="content_font_14">اندازه متن 14</string>
-    <string name="content_font_18">اندازه متن 18</string>
     <string name="confirm">تأیید کردن</string>
-    <string name="create_new_account">ثبت نام</string>
     <string name="field_password_min">حد اقل پنج حرف</string>
     <string name="entry_details_license">مجوز:</string>
-    <string name="content_font_24">اندازه متن 24</string>
     <string name="content_insert_options">درج کردن</string>
-    <string name="content_source_device">از دستگاه</string>
     <string name="content_choose_file">فایل را انتخاب کنید</string>
-    <string name="content_prepare_file">در حال آماده ساختن فایل...</string>
     <string name="video">ویدیو</string>
-    <string name="content_media_title">نوع رسانه</string>
     <string name="content_blank_doc_click_label">کلیک</string>
-    <string name="content_blank_doc_start_label">برای آغاز ویرایش.</string>
     <string name="content_option_page">صفحه جدید</string>
-    <string name="content_untitled_page">صفحه بدون عنوان</string>
     <string name="content_add_page">صفحه علاوه کنید</string>
-    <string name="content_update_page_title">بهنگام سازی صفحه</string>
     <string name="content_update_document_title">بهنگام سازی مدرک</string>
-    <string name="content_editor_page_delete_failure_message">ببخشید، شما نمیتوانید این صفحه را حذف نمائید</string>
     <string name="content_editor_menu_undo">ناکرده ساختن</string>
-    <string name="content_editor_menu_pages">صفحات</string>
     <string name="content_editor_menu_indent">فاصله در شروع متن</string>
-    <string name="content_editor_menu_unorderd_list">لست نا منظم</string>
     <string name="content_editor_menu_orderd_list">لست منظم</string>
-    <string name="content_editor_menu_strikesthrough">کشیدن خط از وسط</string>
     <string name="content_editor_menu_italic">کج</string>
-    <string name="content_editor_menu_bold">پر رنگ</string>
     <string name="content_editor_menu_fontsize">اندازه خط</string>
-    <string name="content_editor_menu_align_left">چپ</string>
     <string name="content_editor_menu_align_right">راست</string>
-    <string name="content_editor_menu_superscript">متن عالی</string>
     <string name="content_editor_link_text">پیوند متن</string>
-    <string name="content_editor_link_url">پیوند Url</string>
     <string name="content_editor_link_insert">پیوند را درج نمائید</string>
-    <string name="content_editor_link_remove">دور ساختن پیوند</string>
     <string name="permission_camera_title">اجازه کامره و فایل لازمی است</string>
-    <string name="content_editor_create_new">علاوه ساختن جدید</string>
     <string name="content_editor_create_new_import_link">وارد ساختن پیوند</string>
-    <string name="content_editor_create_new_content">ایجاد محتوای جدید</string>
     <string name="content_editor_create_new_title">علاوه ساختن محتوا</string>
     <string name="content_from_file">از پرونده</string>
     <string name="licence">مجوز</string>
@@ -190,9 +155,7 @@
     <string name="file_required_prompt">پرونده که باید وارد گردد انتخاب نشده است، دوباره کوشش نمائید</string>
     <string name="content_creation_folder_new_message">دوسیۀ جدید مؤفقانه اضافه گردید</string>
     <string name="content_creation_folder_update_message">دوسیه مؤفقانه بروزرسانی شد</string>
-    <string name="empty_state_libraries">هیچ دوسیه دریافت نگردید</string>
     <string name="empty_state_downloaded">هیچ دانلود دریافت نگردید</string>
-    <string name="empty_state_recycle">چیز بازیابی شده وجود ندارد</string>
     <string name="error_message_update_document">بروزرسانی مدرک نامؤفق بود</string>
     <string name="content_editor_save_error">خطا در هنگام ذخیره‌سازی، دوباره کوشش کنید</string>
     <string name="export">صادر کردن</string>
@@ -200,23 +163,16 @@
     <string name="invalid_register_code">کود ثبت‌نام درست نیست</string>
     <string name="enter_register_code">کود ثبت‌نام را وارد نمائید</string>
     <string name="bar_chart" value="100">نمودار میله‌ای</string>
-    <string name="line_graph" value="101">گراف خطی</string>
     <string name="score" value="200">نمرۀ اوسط</string>
-    <string name="total_duration" value="201">مجموع مدت زمان</string>
     <string name="average_duration" value="202">اوسط مدت زمان</string>
-    <string name="count_activity" value="203">تعداد فعالیتها</string>
     <string name="xapi_week" value="301">هفته</string>
     <string name="xapi_month" value="302">ماه</string>
     <string name="xapi_custom_date" value="303">تاریخ دلخواه</string>
     <string name="xapi_content_entry" value="304">داخل ساختن محتوا</string>
-    <string name="xapi_location" value="305">موقعیت</string>
     <string name="xapi_gender" value="306">جنسیت</string>
     <string name="xapi_clear">پاک کردن</string>
-    <string name="xapi_today">امروز</string>
     <string name="from">از</string>
-    <string name="tocao">به</string>
     <string name="date_range">محدوده تاریخ</string>
-    <string name="select_locations">انتخاب موقعیت ها</string>
     <string name="select_entries">انتخاب ورودی ها</string>
     <string name="xapi_options_general">عمومی</string>
     <string name="xapi_options_report_title">عنوان گزارش</string>
@@ -230,61 +186,43 @@
     <string name="xapi_options_did">انجام داد</string>
     <string name="xapi_options_what">چی</string>
     <string name="xapi_options_where">کجا</string>
-    <string name="activity_preview_xapi">پیش دید</string>
     <string name="add_to_dashboard">علاوه ساختن در صفحه گزارشات</string>
     <string name="activity_import_link">وارد نمودن پیوند</string>
     <string name="xapi_hours">ساعات</string>
     <string name="xapi_minutes">دقایق</string>
     <string name="xapi_seconds">ثانیه‌ها</string>
-    <string name="xapi_person_header">شخص</string>
     <string name="xapi_verb_header">چه کار انجام داد</string>
     <string name="xapi_result_header">نتیجه</string>
-    <string name="xapi_when_header">چه وقت</string>
     <string name="xapi_score">امتیاز (%)</string>
-    <string name="import_link_video">عنوان</string>
     <string name="import_title_not_entered">عنوان وارد نشده</string>
     <string name="no_account">شما حساب ندارید؟</string>
     <string name="enter_url">آدرس ویب را داخل نمائید</string>
-    <string name="import_link_invalid_url">Url درست نیست</string>
     <string name="import_link_content_not_supported">از محتوی پشتیبانی نمی‌شود</string>
     <string name="import_link_big_size">اندازه فایل بسیار زیاد است</string>
     <string name="import_link_error">اشتباه در وارد ساختن</string>
-    <string name="error_not_found_status">404 !</string>
     <string name="error_not_found_tag">ببخشید، صفحۀ که شما در جستجوی آن هستید، دریافت شده نمیتواند.</string>
     <string name="offline_sharing_enable_bluetooth_prompt">شریک سازی آفلاین به بلوتوت نیاز دارد</string>
     <string name="offline_sharing_enable_wifi_promot">برای شریک سازی آفلاین نیاز است تا وای‌فای روشن گردد</string>
     <string name="enable">فعال کردن</string>
     <string name="more_information">معلومات بیشتر</string>
-    <string name="less_information">معلومات کمتر</string>
     <string name="repo_loading_status_loading_cloud">در حال بارگیری از ابر</string>
     <string name="repo_loading_status_loading_mirror">در حال بارگیری از همتا</string>
-    <string name="repo_loading_status_loaded_empty">هیج محتوا دریافت نگردید</string>
     <string name="repo_loading_status_failed_noconnection">ارتباط و یا همتا وجود ندارد</string>
     <string name="repo_loading_status_failed_connection_error">خطا در اتصال</string>
     <string name="publicly_accessible">در دسترس عمومی</string>
     <string name="error_message_load_page">بارگذاری صفحه نامؤفق بود</string>
     <string name="xapi_options_when">چه وقت</string>
-    <string name="content_source_camera">از کامره</string>
     <string name="content_preview_title">پیش دید...</string>
-    <string name="content_blank_page_title">صفحه خالی</string>
     <string name="content_action_page_remove">دور ساختن صفحه</string>
-    <string name="content_editor_page_view_hint">عنوان</string>
     <string name="content_editor_menu_text_formatting">قالب سازی متن</string>
-    <string name="content_editor_menu_underline">کشیدن خط در پائین</string>
     <string name="content_editor_menu_align_center">مرکز</string>
-    <string name="content_editor_preview">پیش دید</string>
     <string name="content_editor_edit_category">ویرایش</string>
     <string name="content_from_link">از پیوند</string>
     <string name="supported_files">پرونده‌های مورد پشتیبانی: <b> ویدیو، صوت، EPUB، زاپی، فشرده شده، H5P </b></string>
-    <string name="content_media_photo">عکس</string>
     <string name="content_media_message">چه نوع رسانه را میخواهید بگیرید؟</string>
-    <string name="content_editor_directionality">جهت داری</string>
     <string name="content_editor_menu_redo">انجام مجدد</string>
-    <string name="content_editor_menu_outdent">برآمدگی در شروع متن</string>
     <string name="content_editor_menu_subscript">متن فرعی</string>
-    <string name="permission_camera_message">این اپلیکیشن به اجازه کامره و فایل نیاز دارد تا عکس بگیرد و ویدیو ثبت نماید</string>
     <string name="content_editor_create_new_import">وارد ساختن فایل</string>
-    <string name="content_editor_action_done">تمام</string>
     <string name="content_update_massage">به روز رسانی مؤفقانه صورت گرفت</string>
     <string name="done">تمام</string>
     <string name="content_editor_create_new_category">دوسیه جدید</string>
@@ -292,45 +230,32 @@
     <string name="option_value">مقدار گزینه</string>
     <string name="contents">محتویات</string>
     <string name="sort_by_name_desc">نام (نزولی)</string>
-    <string name="home_address">آدرس خانه</string>
     <string name="basic_details">جزئیات اساسی</string>
     <string name="locations">موقعیت ها</string>
     <string name="locations_setting_desc">مدیریت موقعیت ها</string>
     <string name="add_group">اضافه کردن گروه</string>
-    <string name="group_name">نام گروه</string>
     <string name="add_people">اضافه کردن مردم</string>
-    <string name="enroll_group_member">ثبت نام کردن شخص</string>
     <string name="add_location">اضافه کردن موقعیت</string>
-    <string name="location_title">عنوان موقعیت</string>
     <string name="parent_location">موقعیت اصلی</string>
-    <string name="changed_by">تغییر داده شده توسط</string>
     <string name="custom_field">ساحه دلخواه</string>
     <string name="custom_fields_desc">اضافه، حذف و تنظیم مجدد ساحات دلخواه</string>
-    <string name="add_field">اضافه ساختن ساحه</string>
     <string name="entity">نهاد</string>
-    <string name="field_name_english">ساحۀ نام (به انگلیسی)</string>
     <string name="field_type">نوع ساحه</string>
     <string name="text">متن</string>
     <string name="options">گزینه‌ها</string>
-    <string name="add_modify_option">علاوه ساختن و تنظیم اختیار</string>
     <string name="change_password">تغییر رمز عبور</string>
     <string name="current_password">رمز عبور فعلی</string>
     <string name="password_unchanged">رمز عبور (تغییر نشده)</string>
-    <string name="default_value">مقدار اصلی</string>
     <string name="add">اضافه نمودن</string>
     <string name="users">کاربران</string>
     <string name="users_settings_desc">اضافه، حذف ، تغییر کاربران، یا تنظیم مجدد رمز عبور آن‌ها</string>
     <string name="groups">گروه ها</string>
     <string name="group_setting_desc">اضافه، حذف و یا تنظیم مجدد گروه ها</string>
     <string name="add_person">اضافه کردن شخص</string>
-    <string name="update_picture">بهنگام ساختن تصویر</string>
     <string name="birthday">روز تولد</string>
     <string name="first_names">نامهای اول</string>
-    <string name="confirm_password_unchanged">تأید رمز عبور (تغییر نخورده)</string>
     <string name="permission_person_insert">اضافه کردن مردم</string>
-    <string name="enroll_new_group_member">ثبت نام کردن عضو جدید گروه</string>
     <string name="custom_fields">ساحات دلخواه</string>
-    <string name="new_person">شخص جدید</string>
     <string name="sub_locations">موقعیتهای فرعی</string>
     <string name="group_activity">گروپ 
 \nفعالیت</string>
@@ -349,7 +274,6 @@
     <string name="sort_by_name_asc">نام (صعودی)</string>
     <string name="date_enroll">تاریخ ثبت نام</string>
     <string name="created_partnership">ایجاد شده در مشارکت با:</string>
-    <string name="class_enrolment_status">وضعیت ثبت نام صنف</string>
     <string name="notes">یادداشت‌ها</string>
     <string name="error_start_date_before_clazz_date">قبل از تاریخ آغاز صنف ثبت نام آغاز شده نمیتواند</string>
     <string name="date_left">تاریخ رها کردن</string>
@@ -361,9 +285,7 @@
     <string name="content_total_duration" value="200">استفاده محتوی - مجموع مدت</string>
     <string name="new_leaving_reason">دلیل نتیجه ثبت نام جدید</string>
     <string name="title">عنوان</string>
-    <string name="current_status">وضعیت فعلی</string>
     <string name="leaving_reason">دلیل ترک نمودن</string>
-    <string name="reason">دلیل</string>
     <string name="view_profile">دیدن نمایه</string>
     <string name="currently_enroled">ثبت نام شدگان فعلی</string>
     <string name="class_enrolment_leaving">دلیل برای ترک نمودن ثبت نام صنف</string>
@@ -386,7 +308,6 @@
     <string name="add_a_new_school">اضافه نمودن یک مکتب جدید</string>
     <string name="edit_school">ویرایش مکتب</string>
     <string name="preview">پیش‌نمایش</string>
-    <string name="content_type">نوع محتوی</string>
     <string name="interaction_recorded" value="203">استفاده محتوی - تعداد کارکردهای ثبت شده</string>
     <string name="number_students_completed" value="206">استفاده محتوی - تعداد شاگردانی که محتوی را تکمیل نموده اند</string>
     <string name="total_lates" value="210">حاضری - مجموع شاگردان که ناوقت آمدند</string>
@@ -487,7 +408,6 @@
     <string name="class_id">شناسۀ صنف</string>
     <string name="gender_literal" value="306">جنسیت</string>
     <string name="search">جستجو</string>
-    <string name="connect_to_site">اتصال به سایت</string>
     <string name="over">تمام</string>
     <string name="sync">همگام سازی</string>
     <string name="not_recorded">ضبط نشده</string>
@@ -501,7 +421,6 @@
     <string name="permission_person_update">بروز ساختن اشخاص</string>
     <string name="licence_type_all_rights">تمام حقوق محفوظ است</string>
     <string name="permission_clazz_add_teacher">اضافه نمودن استادان به صنف</string>
-    <string name="roles_setting_desc">مدیریت صلاحیت های که به نقشها داده شده</string>
     <string name="permission_attendance_select">مشاهده حاضری</string>
     <string name="permission_attendance_insert">گرفتن حاضری</string>
     <string name="permission_attendance_update">بروزرسانی حاضری</string>
@@ -531,7 +450,6 @@
     <string name="mixed">مختلط</string>
     <string name="permission_activity_insert">گرفتن فعالیت صنف</string>
     <string name="lets_get_started_label">بیایید شروع کنیم</string>
-    <string name="link">پیوند</string>
     <string name="id_verbentity_urlid">شناسه: %s</string>
     <string name="invalid_link">پیوند نادست</string>
     <string name="due_date">تاریخ سررسید</string>
@@ -635,7 +553,6 @@
     <string name="person_exists">شخص قبلاً موجود است، نام دیگری انتخاب نمایید</string>
     <string name="edit_enrolment">ویرایش ثبت نام</string>
     <string name="new_enrolment">ثبت نام جدید</string>
-    <string name="select_reason">انتخاب دلیل</string>
     <string name="enrolment">ثبت نام</string>
     <string name="time_present">حاضر</string>
     <string name="select_one">انتخاب یکی</string>
@@ -707,7 +624,6 @@
     <string name="site_link">پیوند سایت</string>
     <string name="please_enter_the_linK">لطفاً پیوند محیط آموزشی تان که توسط استاد شما و یا مدیر برایتان ارائه شده، را وارد نمایید:</string>
     <string name="or">یا</string>
-    <string name="sites_can_be_help_text">سایتها برای مکاتب، پروژه ها، و سازمانها، و غیره ایجاد شده میتواند. هر سایت استفاده کنندۀ گان، مدیران، محتویات، صنوف، مکاتب، و دیگر موارد خود را داشته میتواند.</string>
     <string name="terms_and_policies_text">متن شرایط و پالیسی ها</string>
     <string name="scope_description">انتخاب محدوده (مثلاً: صنف، مکتب و یا فرد مشخص) که بر آن مجوزها وضع خواهد گردید.</string>
     <string name="copied_to_clipboard">در کلیپ بورد کاپی گردید</string>
