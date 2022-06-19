@@ -124,7 +124,7 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
            SET discussionTopicVisible = :active, 
                discussionTopicLct = :changeTime
          WHERE discussionTopicUid = :uid""")
-    abstract fun updateActiveByUid(uid: Long, active: Boolean,  changeTime: Long)
+    abstract suspend fun updateActiveByUid(uid: Long, active: Boolean,  changeTime: Long)
 
     override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
         uidList.forEach {

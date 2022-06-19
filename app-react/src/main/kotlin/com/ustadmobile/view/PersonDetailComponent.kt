@@ -8,8 +8,11 @@ import com.ustadmobile.core.util.ext.outcomeToString
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.DoorMediatorLiveData
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
+import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager.alignTextToStart
@@ -20,6 +23,7 @@ import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
+import com.ustadmobile.view.components.AttachmentImageLookupAdapter
 import com.ustadmobile.view.ext.*
 import kotlinx.css.LinearDimension
 import kotlinx.css.marginTop
@@ -142,7 +146,13 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
                             css{
                                 marginTop = LinearDimension("12px")
                             }
-                            umEntityAvatar(showIcon = false) {}
+
+                            withAttachmentLocalUrlLookup(entity?.personUid ?: 0,
+                                PERSON_PICTURE_LOOKUP_ADAPTER
+                            ) { pictureLocalUrl ->
+                                umEntityAvatar(src = pictureLocalUrl, showIcon = false) {}
+                            }
+
                         }
 
                         umItem(GridSize.cells12, GridSize.cells8) {
@@ -243,4 +253,20 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
             }
         }
     }
+
+    companion object {
+
+        val PERSON_PICTURE_LOOKUP_ADAPTER = AttachmentImageLookupAdapter { db, entityUid ->
+            object: DoorMediatorLiveData<String?>(), DoorObserver<PersonPicture?> {
+                init {
+                    addSource(db.personPictureDao.findByPersonUidLive(entityUid), this)
+                }
+                override fun onChanged(t: PersonPicture?) {
+                    postValue(t?.personPictureUri)
+                }
+            }
+        }
+
+    }
+
 }

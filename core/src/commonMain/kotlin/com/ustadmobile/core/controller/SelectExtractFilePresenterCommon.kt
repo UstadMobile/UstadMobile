@@ -28,7 +28,12 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class SelectExtractFilePresenterCommon(
+/**
+ * SelectExtractFilePresenterCommon is a file selector for Content Entry import purposes. It will
+ * extract the metadata from the selecting file and return this as a result or pass it on to the
+ * next destination.
+ */
+abstract class SelectExtractFilePresenterCommon(
     context: Any,
     arguments: Map<String, String>,
     view: SelectExtractFileView,
@@ -37,7 +42,6 @@ class SelectExtractFilePresenterCommon(
 
     val accountManager: UstadAccountManager by instance()
 
-    private val pluginManager: ContentPluginManager by on(accountManager.activeAccount).instance()
 
     val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
@@ -48,9 +52,10 @@ class SelectExtractFilePresenterCommon(
         view.acceptedMimeTypes =  arguments[SelectFileView.ARG_MIMETYPE_SELECTED].toString().split(";")
     }
 
-    fun handleUriSelected(uri: String?){
+    abstract suspend fun extractMetadata(uri: String, filename: String): MetadataResult
 
-        if(uri == null) {
+    fun handleUriSelected(uri: String?, filename: String?){
+        if(uri == null || filename == null) {
             requireNavController().currentBackStackEntry?.viewName?.let {
                 requireNavController().popBackStack(it,true)
             }
@@ -58,55 +63,53 @@ class SelectExtractFilePresenterCommon(
         }
 
         presenterScope.launch {
+            view.loading = true
+            try {
+                Napier.d { "SelectExtractFilePresenterCommon: Extracting metadata from $uri "}
+                val metadata = extractMetadata(uri, filename)
+                view.loading = false
 
-            val doorUri = DoorUri.parse(uri)
-            ContentJobProcessContext(doorUri, createTemporaryDir("content"),
-                mutableMapOf(), null, di).use { processContext ->
-                try {
-                    val metadata = pluginManager.extractMetadata(DoorUri.parse(uri), processContext)
-
-                    when {
-                        (arguments[UstadView.ARG_RESULT_DEST_VIEWNAME] == ContentEntryEdit2View.VIEW_NAME) -> {
-                            finishWithResult(
-                                safeStringify(
-                                    di,
-                                    ListSerializer(MetadataResult.serializer()),
-                                    listOf(metadata)
-                                )
+                when {
+                    (arguments[UstadView.ARG_RESULT_DEST_VIEWNAME] == ContentEntryEdit2View.VIEW_NAME) -> {
+                        finishWithResult(
+                            safeStringify(
+                                di,
+                                ListSerializer(MetadataResult.serializer()),
+                                listOf(metadata)
                             )
-                        }
-                        else -> {
-                            val args = mutableMapOf<String, String>()
-                            args.putEntityAsJson(
-                                ContentEntryEdit2View.ARG_IMPORTED_METADATA,
-                                MetadataResult.serializer(), metadata
-                            )
-                            args.putFromOtherMapIfPresent(arguments, UstadView.ARG_LEAF)
-                            args.putFromOtherMapIfPresent(arguments, UstadView.ARG_PARENT_ENTRY_UID)
-                            args.putFromOtherMapIfPresent(arguments, BLOCK_REQUIRED)
-                            args.putFromOtherMapIfPresent(arguments, UstadView.ARG_CLAZZUID)
-
-                            navigateForResult(
-                                NavigateForResultOptions(
-                                    this@SelectExtractFilePresenterCommon,
-                                    null,
-                                    ContentEntryEdit2View.VIEW_NAME,
-                                    ContentEntry::class,
-                                    ContentEntry.serializer(),
-                                    arguments = args
-                                )
-                            )
-                        }
+                        )
                     }
-                }catch (e: Exception){
-                    view.unSupportedFileError = systemImpl.getString(MessageID.import_link_content_not_supported, context)
-                    Napier.e("Error extracting metadata", e)
-                    repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e,
-                        this@SelectExtractFilePresenterCommon)
+                    else -> {
+                        val args = mutableMapOf<String, String>()
+                        args.putEntityAsJson(
+                            ContentEntryEdit2View.ARG_IMPORTED_METADATA,
+                            MetadataResult.serializer(), metadata
+                        )
+                        args.putFromOtherMapIfPresent(arguments, UstadView.ARG_LEAF)
+                        args.putFromOtherMapIfPresent(arguments, UstadView.ARG_PARENT_ENTRY_UID)
+                        args.putFromOtherMapIfPresent(arguments, BLOCK_REQUIRED)
+                        args.putFromOtherMapIfPresent(arguments, UstadView.ARG_CLAZZUID)
+
+                        navigateForResult(
+                            NavigateForResultOptions(
+                                this@SelectExtractFilePresenterCommon,
+                                null,
+                                ContentEntryEdit2View.VIEW_NAME,
+                                ContentEntry::class,
+                                ContentEntry.serializer(),
+                                arguments = args
+                            )
+                        )
+                    }
                 }
-
+            }catch (e: Exception){
+                view.loading = false
+                view.unSupportedFileError = systemImpl.getString(
+                    MessageID.import_link_content_not_supported, context)
+                Napier.e("Error extracting metadata", e)
+                repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e,
+                    this@SelectExtractFilePresenterCommon)
             }
-
         }
 
     }

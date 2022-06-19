@@ -1,8 +1,6 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.writeToFile
-import com.ustadmobile.door.util.NullOutputStream
+import com.ustadmobile.core.contentjob.*
 import io.ktor.application.*
 import io.ktor.http.content.*
 import io.ktor.request.*
@@ -12,45 +10,32 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.on
 import java.io.File
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.lib.rest.ext.dbModeToEndpoint
-import com.ustadmobile.core.contentjob.ContentJobManager
 import java.io.FileOutputStream
-import com.ustadmobile.lib.db.entities.ContentJob
-import com.ustadmobile.lib.db.entities.ContentJobItem
-import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.door.DoorObserver
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.withTimeoutOrNull
-import org.quartz.spi.JobStore
-import com.ustadmobile.core.contentjob.UploadResult
+import com.ustadmobile.door.util.systemTimeInMillis
+import io.github.aakira.napier.Napier
 import io.ktor.http.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.kodein.di.DI
+import java.util.*
 
-//The timeout for running an import
-const val PLUGIN_IMPORT_TIMEOUT = 15000L
+const val UPLOAD_TMP_SUBDIR = "upload-tmp"
 
 /**
  * This route provides a simple endpoint that will take content files submitted via the web client
- * as 'normal' multipart file uploads and attempt to import them as content.
+ * as 'normal' multipart file uploads, store them in a temporary directory, and return the
+ * MetadataResult.
  *
  * Use as follows
  * POST a multipart request with one file field
- * Returns UploadResult (as JSON)
+ * Returns MetadataResult (as JSON)
  *
  */
 fun Route.ContentUploadRoute() {
     route("contentupload") {
         post("upload") {
-            val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
-            val repo: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_REPO)
-            val contentJobManager: ContentJobManager by closestDI().on(call).instance()
-            val endpoint = call.application.environment.config.dbModeToEndpoint(call = call)
-            val containerStorageManager: ContainerStorageManager by closestDI().on(call).instance()
-
-
             val multipartData = call.receiveMultipart()
 
             var filePartFound = false
@@ -59,49 +44,35 @@ fun Route.ContentUploadRoute() {
                     is PartData.FileItem -> {
                         filePartFound = true
                         val fileName = part.originalFileName
-                        val tmpFile = File.createTempFile("contentupload-", fileName)
+                        val di: DI by closestDI()
+                        val uploadTmpDir: File by di.on(call).instance(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR)
+                        val uploadSubDirName = UUID.randomUUID().toString()
+                        val uploadSubDir = File(uploadTmpDir, uploadSubDirName).also {
+                            it.mkdirs()
+                        }
+
+                        val tmpFile = File(uploadSubDir,
+                            part.originalFileName ?: "content-upload-${systemTimeInMillis()}")
                         try {
-                            part.streamProvider().use {
-                                it.copyTo(FileOutputStream(tmpFile))
+                            withContext(Dispatchers.IO) {
+                                part.streamProvider().use { inStream ->
+                                    FileOutputStream(tmpFile).use { outStream ->
+                                        inStream.copyTo(outStream)
+                                    }
+                                }
                             }
 
-                            //Create the content job
-                            val job = ContentJob().apply {
-                                toUri = containerStorageManager.storageList.first().dirUri
-                                cjIsMeteredAllowed = true
-                                cjUid = db.contentJobDao.insertAsync(this)
-                            }
+                            val pluginManager: ContentPluginManager by closestDI().on(call).instance()
+                            val metadataResult = pluginManager.extractMetadata(tmpFile.toDoorUri(),
+                                ContentJobProcessContext(tmpFile.toDoorUri(), uploadSubDir.toDoorUri(),
+                                    mutableMapOf(), null, di))
+                            metadataResult.entry.sourceUrl =
+                                "${MetadataResult.UPLOAD_TMP_LOCATOR_PREFIX}$uploadSubDirName/${tmpFile.name}"
 
-                            val jobItem = ContentJobItem().apply {
-                                cjiJobUid = job.cjUid
-                                sourceUri = tmpFile.toDoorUri().toString()
-                                cjiItemTotal = tmpFile.length()
-                                cjiStatus = JobStatus.QUEUED
-                                cjiUid = db.contentJobItemDao.insertJobItem(this)
-                            }
-
-                            contentJobManager.enqueueContentJob(endpoint, job.cjUid)
-
-                            val completeableDeferred = CompletableDeferred<ContentJobItem>()
-                            val observer = DoorObserver<ContentJobItem?> {
-                                if(it != null && it.cjiStatus == JobStatus.COMPLETE)
-                                    completeableDeferred.complete(it)
-                            }
-
-                            db.contentJobItemDao.getJobItemByUidLive(jobItem.cjiUid).observeForever(observer)
-                            val completedJobItem = withTimeoutOrNull(PLUGIN_IMPORT_TIMEOUT) {
-                                completeableDeferred.await()
-                            }
-
-                            if(completedJobItem != null) {
-                                call.respond(UploadResult(JobStatus.COMPLETE, completedJobItem.cjiContentEntryUid))
-                            }else {
-                                call.respond(UploadResult(
-                                    completedJobItem?.cjiStatus ?: JobStatus.FAILED, 0)
-                                )
-                            }
-                        }finally {
-                            tmpFile.delete()
+                            call.respond(metadataResult)
+                        }catch(e: Exception) {
+                            Napier.e(e) { "ContentUploadRoute: Exception receiving file: $fileName" }
+                            call.respond(HttpStatusCode.InternalServerError, "Upload failed $e")
                         }
                     }
                     else -> {

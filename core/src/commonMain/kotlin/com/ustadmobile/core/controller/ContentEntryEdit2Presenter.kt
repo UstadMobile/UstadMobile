@@ -65,7 +65,12 @@ class ContentEntryEdit2Presenter(
     arguments,
     view,
     di,
-    lifecycleOwner), ContentEntryAddOptionsListener {
+    lifecycleOwner
+), ContentEntryAddOptionsListener {
+
+    suspend fun DoorUri.isRemoteOrServerUpload() : Boolean{
+        return isRemote() || toString().startsWith(MetadataResult.UPLOAD_TMP_LOCATOR_PREFIX)
+    }
 
     private val pluginManager: ContentPluginManager? by on(accountManager.activeAccount)
         .instanceOrNull()
@@ -421,19 +426,17 @@ class ContentEntryEdit2Presenter(
                         txDb.contentEntryDao.updateAsync(entity)
                     }
 
-                    UmPlatformUtil.runIfNotJsAsync {
-                        val contentEntryPictureVal = view.contentEntryPicture
-                        if(contentEntryPictureVal != null) {
-                            contentEntryPictureVal.cepContentEntryUid = entity.contentEntryUid
 
-                            if(contentEntryPictureVal.cepUid == 0L) {
-                                txDb.contentEntryPictureDao.insertAsync(contentEntryPictureVal)
-                            }else {
-                                txDb.contentEntryPictureDao.updateAsync(contentEntryPictureVal)
-                            }
+                    val contentEntryPictureVal = view.contentEntryPicture
+                    if(contentEntryPictureVal != null) {
+                        contentEntryPictureVal.cepContentEntryUid = entity.contentEntryUid
+
+                        if(contentEntryPictureVal.cepUid == 0L) {
+                            txDb.contentEntryPictureDao.insertAsync(contentEntryPictureVal)
+                        }else {
+                            txDb.contentEntryPictureDao.updateAsync(contentEntryPictureVal)
                         }
                     }
-
 
                     val language = entity.language
                     if (language != null && language.langUid == 0L) {
@@ -449,7 +452,7 @@ class ContentEntryEdit2Presenter(
 
                 if (metaData != null) {
 
-                    if (entity.sourceUrl?.let { DoorUri.parse(it) }?.isRemote() == false) {
+                    if (entity.sourceUrl?.let { DoorUri.parse(it) }?.isRemoteOrServerUpload() == false) {
 
                         val job = ContentJob().apply {
                             toUri = view.storageOptions?.get(view.selectedStorageIndex)?.dirUri

@@ -18,7 +18,7 @@ actual suspend fun DoorUri.getSize(context: Any, di: DI): Long {
  * This will be done by underlying mechanisms on the platform
  */
 actual suspend fun DoorUri.guessMimeType(context: Any, di: DI): String? {
-    TODO("Not yet implemented")
+    return DoorUri.getDoorUriProps(this.uri.toString())?.mimeType ?: "application/octet-stream"
 }
 
 actual suspend fun DoorUri.downloadUrlIfRemote(destination: DoorUri, di: DI) {

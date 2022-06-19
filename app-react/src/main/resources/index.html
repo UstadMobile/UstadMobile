@@ -1,17 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
-    <title>.....</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
-</head>
-<body>
-<script src="app-react.js"></script>
-<div id="root">
+    <head>
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>.....</title>
 
-</div>
-</body>
+        <!--
+        Defer this CSS to speed up first render as per
+        https://web.dev/defer-non-critical-css/
+        -->
+        <link rel="preload" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500"
+              as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+        <link rel="preload" href="https://fonts.googleapis.com/icon?family=Material+Icons"
+              as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+        <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png"/>
+        <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png"/>
+
+        <!--
+        Loading indicator is contained within the loading div, 100% plain image and css. This is intended
+        to render without waiting for any script to load.
+
+        Loading animation as per https://codepen.io/shalimano/pen/wBmNGJ
+
+        Once loading is complete, the loading div is removed from the DOM.
+        -->
+
+        <style type="text/css">
+            #loading {
+                position: absolute;
+                width: 20vw;
+                margin-left: calc(50% - 10vw);
+                margin-right: calc(50% - 10vw);
+                top: 50%;
+                margin-top: -20vh;
+                text-align: center;
+            }
+
+            #loading img {
+                width: 20vw;
+            }
+
+            .slider{
+              position:absolute;
+              width:20vw;
+              height:5px;
+              overflow-x: hidden;
+            }
+
+            .line{
+              margin-left: auto;
+              margin-right: auto;
+              position:absolute;
+              opacity: 0.4;
+              background:#4a8df8;
+              width:150%;
+              height:5px;
+            }
+
+            .subline{
+              position:absolute;
+              background:#4a8df8;
+              height:5px;
+            }
+            .inc{
+            animation: increase 2s infinite;
+            }
+            .dec{
+            animation: decrease 2s 0.5s infinite;
+            }
+
+            @keyframes increase {
+             from { left: -5%; width: 5%; }
+             to { left: 130%; width: 100%;}
+            }
+            @keyframes decrease {
+             from { left: -80%; width: 80%; }
+             to { left: 110%; width: 10%;}
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <script src="app-react.js" defer="defer"></script>
+        <div id="root">
+
+            <div id="loading" style="">
+                <img src="assets/logo.png" alt="Logo"/>
+                <br/>
+                <div class="slider">
+                    <div class="line"></div>
+                    <div class="subline inc"></div>
+                    <div class="subline dec"></div>
+                </div>
+            </div>
+
+        </div>
+    </body>
 </html>

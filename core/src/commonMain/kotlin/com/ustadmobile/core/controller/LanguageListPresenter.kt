@@ -14,6 +14,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
@@ -95,12 +96,12 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
             when (option) {
                 SelectionOption.HIDE -> {
                     repo.languageDao.toggleVisibilityLanguage(true,
-                            selectedItem.map { it.langUid })
+                            selectedItem.map { it.langUid }, getSystemTimeInMillis())
                     view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context), {
 
                         GlobalScope.launch(doorMainDispatcher()){
                             repo.languageDao.toggleVisibilityLanguage(false,
-                                    selectedItem.map { it.langUid })
+                                    selectedItem.map { it.langUid }, getSystemTimeInMillis())
                         }
 
                     }, MessageID.undo)

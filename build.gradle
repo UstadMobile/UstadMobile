@@ -22,7 +22,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0'
+        classpath 'com.android.tools.build:gradle:7.2.1'
         classpath 'com.google.gms:google-services:4.3.10'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
@@ -82,7 +82,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 229
 
-    version_door = "0.0.58"
+    version_door = "0.0.59f"
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.20'
 
@@ -229,6 +229,9 @@ ext {
     version_npm_draft_js_html_export = "^1.4.1"
     version_npm_striptags = "^3.2.0"
     version_npm_react_easy_sort = "^1.4.1"
+    version_react_linkify = "^1.0.0-alpha"
+    version_linkify_js = "^3.0.5"
+    version_linkify_react = "^3.0.4"
 
 }
 

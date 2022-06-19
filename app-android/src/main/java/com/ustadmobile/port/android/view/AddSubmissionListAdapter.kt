@@ -63,6 +63,7 @@ class AddSubmissionListAdapter(
 
     override fun onBindViewHolder(holder: AddSubmissionViewHolder, position: Int) {
         val item =  getItem(position)
+        holder.binding.fileNameText = item.attachment?.casaFileName ?: item.casText
         holder.binding.fileSubmission = item
     }
 

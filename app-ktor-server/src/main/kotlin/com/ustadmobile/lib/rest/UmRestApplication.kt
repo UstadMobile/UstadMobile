@@ -58,6 +58,7 @@ import kotlinx.serialization.json.Json
 import com.ustadmobile.core.util.SysPathUtil
 import io.ktor.client.*
 import io.ktor.websocket.*
+import java.util.*
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -142,6 +143,9 @@ fun Application.umRestApplication(
             register(ContentType.Any, GsonConverter())
         }
     }
+
+    //Avoid sending the body of content if it has not changed since the client last requested it.
+    install(ConditionalHeaders)
 
     val tmpRootDir = Files.createTempDirectory("upload").toFile()
 
@@ -341,6 +345,13 @@ fun Application.umRestApplication(
                 manuallySpecifiedLocation = appConfig.commandFileProperty("ffprobe"))!!
         }
 
+        bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {
+            File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), UPLOAD_TMP_SUBDIR).also {
+                if(!it.exists())
+                    it.mkdirs()
+            }
+        }
+
         try {
             appConfig.config("mail")
 
@@ -397,7 +408,17 @@ fun Application.umRestApplication(
         install(WebSockets)
 
         intercept(ApplicationCallPipeline.Setup) {
-            val requestUri = call.request.uri
+            val requestUri = call.request.uri.let {
+                if(it.startsWith("//")) {
+                    //This is an edge case with the ContainerFetcher. The ContainerFetcher uses //
+                    // at the start of a URI. This workaround will be removed when ContainerFetcher
+                    // is removed and replaced with Retriever.
+                    it.removePrefix("/")
+                }else {
+                    it
+                }
+            }
+
             if(!KTOR_SERVER_ROUTES.any { requestUri.startsWith(it) }) {
                 call.respondReverseProxy(jsDevServer)
                 return@intercept finish()

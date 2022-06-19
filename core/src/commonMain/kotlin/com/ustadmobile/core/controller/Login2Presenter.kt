@@ -95,6 +95,9 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
 
         view.loading = false
         view.inProgress = false
+
+        if(view.errorMessage == impl.getString(MessageID.login_network_error, context))
+            view.errorMessage = ""
     }
 
     /**
@@ -106,6 +109,9 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
                 arguments[ARG_POPUPTO_ON_FINISH] ?: UstadView.ROOT_DEST,
                 false)
+        Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
+
+        //This seems wrong: if nextdestination has arguments, what then?
         impl.go(nextDestination, mapOf(), context, goOptions)
     }
 

@@ -27,5 +27,8 @@ object DiTag {
 
     const val TAG_FILE_FFPROBE = 31
 
+    const val TAG_FILE_UPLOAD_TMP_DIR = 32
+
+
 
 }

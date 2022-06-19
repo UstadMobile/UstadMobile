@@ -140,7 +140,7 @@ class ParentalConsentManagementComponent (mProps: UmProps): UstadEditComponent<P
                                     relationshipLabel.errorText ?: "",
                                     error = relationshipLabel.error,
                                     values = relationshipFieldOptions?.map {
-                                        Pair(it.optionId.toString(), it.description)
+                                        Pair(it.optionId.toString(), it.toString())
                                     }?.toList(),
                                     onChange = {
                                         setState {
