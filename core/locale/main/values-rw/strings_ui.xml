@@ -319,9 +319,7 @@
     <string name="record_attendance_for_most_recent_occurrence">Andika mu bwitabire ingeso/ikintu giherutse kuba vuba mu ishuri</string>
     <string name="site_link">Ihuzarubuga</string>
     <string name="please_enter_the_linK">Urasabwa kwinjiza ihuzarubuga yawe wahawe na mwarimu cg umuyobozi:</string>
-    <string name="sites_can_be_help_text">Imbuga zishobora gushyirirwaho ibigo by\'amashuri, imishinga, n\'imiryango yabishyize hamwe, n\'ibindi. Buri rubugarushobora kwiharira abarukoresha , abayobozi,ibirukubiyemo, amashuri, n\'ibindi byinshi.</string>
     <string name="profile">Ibiranga umuntu</string>
-    <string name="connect_to_site">Injira ku rubuga</string>
     <string name="dialog_download_from_playstore_ok">Kuraho inyigisho ( Ni ubuntu)</string>
     <string name="strings_not_allowed">Inyuguti zihariye ntizemerewe kuzuzwa hano</string>
     <string name="undo">Garuraho</string>
