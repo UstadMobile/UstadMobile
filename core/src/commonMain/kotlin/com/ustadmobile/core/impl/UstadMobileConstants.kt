@@ -60,7 +60,8 @@ object UstadMobileConstants {
             "bn" to "বাংলা",
             "ne" to "नेपाली",
             "my" to "မြန်မာစာ",
-            "ru" to "Русский")
+            "ru" to "Русский",
+            "rw" to "Kinyarwanda")
 
     /**
      * A list known RTL languages
