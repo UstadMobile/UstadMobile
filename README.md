@@ -1,8 +1,7 @@
 # Ustad Mobile
 
-Ustad Mobile enables learners to access and share content offline. It uses peer-to-peer offline
-networking (using Bluetooth Low Energy and WiFi Direct) to enable users to share content directly
-without any additional hardware.
+Ustad Mobile enables users to teach, learn, and share: online or offline. It is a learning
+management system (LMS) built from the ground up to work with or without connectivity.
 
 Supported content formats:
 * [EPUB content](http://idpf.org/epub): Anything you can do with HTML5 can be in EPUB (video,
@@ -62,8 +61,8 @@ e.g. http://192.168.1.123:8087/ where 192.168.1.123 is the IP address of your de
 Contributions are welcome! If you're unsure about anything, please create an issue and label it as
 a question.
 
-* __Localization__ - Localization is powered by our Weblate server at [https://weblate.ustadmobile.com](https://weblate.ustadmobile.com).
- Please register on the weblate server [create an issue](https://github.com/UstadMobile/UstadMobile/issues/new) 
+* __Localization__ - Localization is done using on our [Weblate project](https://weblate.ustadmobile.com/projects/ustad-mobile/).
+ Please register on Weblate and then [create an issue](https://github.com/UstadMobile/UstadMobile/issues/new) 
  with the subject "Localization - language name" and let us know what language you would like to 
  translate into. We can then give you permission to start translating!
 * __Feature requests__ - Let us know what features you would like to see. [Create an issue](https://github.com/UstadMobile/UstadMobile/issues/new)

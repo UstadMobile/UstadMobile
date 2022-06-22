@@ -28,6 +28,22 @@ kotlin {
 
 android {
 
+    //APK splitting would interfere with sideloading the app between different targets and the size
+    //reduction will be minimal
+    bundle {
+        language {
+            enableSplit = false
+        }
+
+        density {
+            enableSplit = false
+        }
+
+        abi {
+            enableSplit = false
+        }
+    }
+
     buildFeatures {
         dataBinding true
     }
@@ -120,6 +136,10 @@ tasks.whenTaskAdded { task ->
     if (task.name.startsWith("lint")) {
         task.enabled = false
     }
+
+    if(task.name == "bundleRelease") {
+        build.dependsOn(task)
+    }
 }
 
 dependencies {
@@ -148,4 +168,3 @@ dependencies {
 
     testImplementation "junit:junit:$version_junit"
 }
-

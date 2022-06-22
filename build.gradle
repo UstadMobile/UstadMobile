@@ -22,7 +22,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0'
+        classpath 'com.android.tools.build:gradle:7.2.1'
         classpath 'com.google.gms:google-services:4.3.10'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
@@ -70,7 +70,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.1"
+version = "0.4.2"
 group = "com.ustadmobile.app"
 
 /**
@@ -80,7 +80,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 229
+    ustadVersionCode = 230
 
     version_door = "0.0.59f"
     version_retriever = "0.0.1e"

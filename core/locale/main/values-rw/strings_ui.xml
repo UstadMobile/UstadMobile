@@ -27,8 +27,8 @@
     <string name="report">Raporo</string>
     <string name="create_a_new_report">Hanga raporo nshya</string>
     <string name="condition_is">Nibyo</string>
-    <string name="active">Iri gukora</string>
-    <string name="question_text">Inyadiko ibaza</string>
+    <string name="active">Ikora</string>
+    <string name="question_text">Ibibazo</string>
     <string name="wrong_user_pass_combo">Izina rikoreshwa/ijambobanga siryo: Ongera ugerageze.</string>
     <string name="last_month_date_range">Ukwezi gushize</string>
     <string name="last_three_months_date_range">Amezi atatu ashize</string>
@@ -150,9 +150,9 @@
     <string name="duration">Igihe igikorwa kimara</string>
     <string name="how_did_it_go">Byagenze bite\?</string>
     <string name="notes">Ibisobanuro</string>
-    <string name="sort_by_name">Tondekaka ukurikije amazina</string>
-    <string name="activity_enter_any_notes">Injiza ubusobanuro ubwo aribwo bwose burebana n\'iki gikorwa</string>
-    <string name="sel_question_set_desc">Genzura Ibibazo byo Ku myigire y\'imibanire n\'abandi n\'imbamutima</string>
+    <string name="sort_by_name">Tondeka ukurikije amazina</string>
+    <string name="activity_enter_any_notes">Gira icyo wongera kuri iki gikorwa</string>
+    <string name="sel_question_set_desc">Genzura ibibazo byo ku myigire y\'imibanire n\'abandi n\'imbamutima</string>
     <string name="field_content_progress">Iterambere mu mikorerwe y\'ibikubiye mu nyigisho</string>
     <string name="field_attendance_percentage">Ijanisha ry\'ubwitabire</string>
     <string name="condition_is_not">Sibyo</string>
@@ -170,15 +170,15 @@
     <string name="class_id">Ibiranga ishuri</string>
     <string name="gender_literal">Igitsina</string>
     <string name="country">Igihugu</string>
-    <string name="home_internet_access">Gukoresha interineti yo murugo</string>
-    <string name="mobile_internet_access">Gukoresha interineti yo kuri telefone igendanwa</string>
-    <string name="connectivity_limited">Iyo hari igarukirizo - Nirinda gukurura/kudawunirodinga ibintu byinshi</string>
-    <string name="connectivity_full">Iyo yuzuye - Nkurura/ndawunirodinga byinshi nkuko mbishaka</string>
-    <string name="prefer_not_to_say">Ntushaka kugira icyo uvuga</string>
+    <string name="home_internet_access">Gukoresha murandasi yo murugo</string>
+    <string name="mobile_internet_access">Gukoresha murandasi yo kuri telefone igendanwa</string>
+    <string name="connectivity_limited">Iyo ari nke - Nirinda kuvana ibintu byinshi kuri murandasi</string>
+    <string name="connectivity_full">Iyo yuzuye - Mvanaho byinshi nk\'uko mbishaka</string>
+    <string name="prefer_not_to_say">Sinshaka kugira icyo mvuga</string>
     <string name="permission">Uruhushya</string>
     <string name="role_name">Izina ry\'inshingano</string>
-    <string name="members">Abanyetsinda</string>
-    <string name="member">Umunyetsinda</string>
+    <string name="members">Abagize itsinda</string>
+    <string name="member">Ugize itsinda</string>
     <string name="role_assignment">Umukoro ku inshingano</string>
     <string name="scope_by">Bigaragajwe na</string>
     <string name="assign_to">Birakorwa na</string>
@@ -196,11 +196,11 @@
     <string name="permission_activity_insert">Hitamo igikorwa cy\'ishuri</string>
     <string name="permission_activity_update">Vugurura igikorwa cy\'ishuri</string>
     <string name="permission_sel_question_select">Reba mu bibazo birebana n\'imyigire y\'imibanire n\'abandi n\'imbamutima</string>
-    <string name="permission_sel_update">Vugurura Ibisubizo byo ku myigire y\'imibanire nabandi n\'imbamutima</string>
-    <string name="permission_sel_question_insert">Ongeraho Ibibazo birebana n\'imyigire y\'imibanire nabandi n\'imbamutima</string>
+    <string name="permission_sel_update">Vugurura ibisubizo byo ku myigire y\'imibanire nabandi n\'imbamutima</string>
+    <string name="permission_sel_question_insert">Ongeraho Ibibazo birebana n\'imyigire y\'imibanire n\'abandi n\'imbamutima</string>
     <string name="custom_fields">Imbuga zuzuzwaho amakuru</string>
     <string name="custom_field">Urubuga rwuzuzwaho amakuru</string>
-    <string name="custom_fields_desc">Ongeraho,kuraho unatandukanye imbuga zuzuzwaho amakuru</string>
+    <string name="custom_fields_desc">Ongeraho,kuraho unahindure imbuga zuzuzwaho amakuru</string>
     <string name="field_type">Ubwoko bw\'ahandikwa</string>
     <string name="text">Umwandiko</string>
     <string name="dropdown">Urutonde rw\'ibyo wahisemo</string>
@@ -208,19 +208,19 @@
     <string name="option_value">Agaciro ko guhitamo</string>
     <string name="errors">Amakosa</string>
     <string name="shake_feedback">Cugusa igikoresho cyawe maze utange amakuru kubyo uri bubone</string>
-    <string name="feedback_hint">Injiza amakuru yawe uhisemo</string>
-    <string name="send_feedback">Ohereza amakuru wahisemo</string>
-    <string name="feedback_thanks">Urakoze kubwa\'amakuru utanze.</string>
+    <string name="feedback_hint">Injiza ubujyanama nkurikirane</string>
+    <string name="send_feedback">Ohereza ubujyanama nkurikirane</string>
+    <string name="feedback_thanks">Urakoze gutanga ubujyanama nkurikirane.</string>
     <string name="start_date">Itariki yo gutangira</string>
     <string name="end_date">Itariki yo gusoza</string>
-    <string name="last_active">Iherutse kumurongo</string>
+    <string name="last_active">Aho uherukiye ku murongo</string>
     <string name="save">Bika</string>
     <string name="change_password">Hindura Ijambobanga</string>
     <string name="current_password">Ijambobanga ukoresha ubu</string>
     <string name="password_unchanged">Ijambobanga(Ntiryahindutse)</string>
     <string name="timezone">Isaha ndangakarere</string>
-    <string name="users_settings_desc">Oneraho,ukureho , utandukanye abakoresha porogramu,cg ugarure ijambobanga ryabo</string>
-    <string name="add">Ongeera</string>
+    <string name="users_settings_desc">Oneraho,ukureho , uhindure abakoresha porogramu,cyangwa wongere ukore ijambobanga ryabo</string>
+    <string name="add">Ongeraho</string>
     <string name="school">Ikigo cy\'amashuri</string>
     <string name="download_continue_btn_label">Komeza</string>
     <string name="add_a_new_school">Ongeraho ikigo gishya</string>
@@ -247,19 +247,19 @@
         <item quantity="one">%d Isegona</item>
         <item quantity="other">%d Amasegonda</item>
     </plurals>
-    <string name="store_description_full">Ustad Mobile ni porogramu iboneka kuri murandasi yemerera uburenganzira kd igafasha abayikoresha kwinjira no gukoresha imfashanyigisho zubwoko butandukanye z\'uburezi zibonekaho ,waba ufite interineti cg utayifite. Yaba Porogaramu ndetse n\'ibiyikubiyemo ,bishobora koherezwa nta interineti ikoreshejwe mubikoresho biri kohererezanya. 
+    <string name="store_description_full">Ustad Mobile ni porogramu iboneka kuri murandasi iha uburenganzira kd igafasha abayikoresha kwinjira no gukoresha imfashanyigisho zubwoko butandukanye z\'uburezi zibonekaho ,waba ufite murandasi cyangwa utayifite. Yaba Porogaramu ndetse n\'ibiyikubiyemo ,bishobora koherezwa nta murandasi ikoreshejwe mubikoresho biri kohererezanya.
 \n
-\n Ustad Mobile irangwaho no kuba yatanze kumugaragaro uburenganzira bwo gukoresha bimwe mubikubiyemo(kontenti) biva ku mbuga zimwe na zimwe ziyoboye kuri interineti zitangaho imfashanyigisho z\'uburezi kubantu bose bazikenera. 
+\n Ustad Mobile irangwaho no kuba yatanze kumugaragaro uburenganzira bwo gukoresha bimwe mubikubiyemo(kontenti) biva ku mbuga zimwe na zimwe ziyoboye kuri murandasi zitangaho imfashanyigisho z\'uburezi kubantu bose bazikenera.
 \n
 \n Ibitabo by\'inkuru ya Africa
 \n ETakkatho
 \n Global Digital Library(Isomero ry\'isi muburyo bw\'iyakure)
-\n Khan Academy (Harimo no kuba wabona amashusho n\'imyitozo nta interinet ikoreshejwe)
+\n Khan Academy (Harimo no kuba wabona amashusho n\'imyitozo nta murandasi ikoreshejwe)
 \n PHET
 \n Ibitabo bya Pratham
 \n Ijwi Rya America
 \n
-\n Ibikubiye muri porogramu bitangwanwa uburenganzira bwo kubikoresha na batanze izo kontenti bo hanze ya kampani. Ustad Mobile, Ibyo ikora bibaye bidasobanutse, nta numwe muri bene abo batanga kontenti wayivugira ryiza.</string>
+\n Ibikubiye muri porogram bitangwa ku burenganzira bw\'abakoze inyigisho. Ustad Mobile, Ibyo ikora bibaye bidasobanutse, nta numwe muri bene abo batanga ibikubiye munyigisho wayivugira ryiza.</string>
     <string name="subjects">Imitwe y\'amagambo (Ibyigwa)</string>
     <string name="select_item">Toranya%1$s</string>
     <string name="from_to_date">%1$s - %2$s</string>
@@ -286,16 +286,16 @@
     <string name="visible_from_date">Bigaragarira ku itariki</string>
     <string name="add_another">Shyiraho indi%1$s</string>
     <string name="logged_in_as">Yinjiyemo nka%1$s ku %2$s</string>
-    <string name="incorrect_current_password">Ijambobanga ukosha ryanditse nabi</string>
+    <string name="incorrect_current_password">Ijambobanga ukosha siryo</string>
     <string name="sel_question_type_free_text">Inyandiko uhabwa na sisiteme</string>
-    <string name="sel_question_type_multiple_choice">Ihitamo ritandukanye</string>
+    <string name="sel_question_type_multiple_choice">Ahitamo anyuranye</string>
     <string name="add_option">Ongeraho ubundi buryo bwo guhitamo</string>
     <string name="roles_and_permissions">Inshingano n\'impushya</string>
     <string name="question_type">Ubwoko bw\'ikibazo</string>
     <string name="import_link_error">Habaye ikosa mu kwinjiza</string>
     <string name="add_role_permission">"Ongeraho inshingano   uruhushya"</string>
     <string name="scope">Imiterere</string>
-    <string name="role_description">Icyo umuntu ashinzwe (e.g.umwarimu,umunyeshuri,...) kimuha uburenganzira butandukanye(e.g. Kureba amakuru aranga umuntu,Kwandika ubwitabire,...) ibyo bikorwa hashingiwe ku miterere wahisemo haruguru.</string>
+    <string name="role_description">Icyo umuntu ashinzwe (urugero: umwarimu,umunyeshuri, n\'ibindi) kimuha uburenganzira butandukanye(e.g. Kureba amakuru aranga umuntu,Kwandika ubwitabire,...) ibyo bikorwa hashingiwe ku miterere wahisemo haruguru.</string>
     <string name="invite_link_desc">Uwaba ufite iri huza(linki) ashobora kuhinjirira hanyuma agasaba kwihuza %1$s.Ushobora kwemera cg guhakana ubusabe bwabo bwo kwiga.</string>
     <string name="copy_link">Koporora ihuza(ilinki)</string>
     <string name="copy_code">Koporora ikode</string>
@@ -319,9 +319,7 @@
     <string name="record_attendance_for_most_recent_occurrence">Andika mu bwitabire ingeso/ikintu giherutse kuba vuba mu ishuri</string>
     <string name="site_link">Ihuzarubuga</string>
     <string name="please_enter_the_linK">Urasabwa kwinjiza ihuzarubuga yawe wahawe na mwarimu cg umuyobozi:</string>
-    <string name="sites_can_be_help_text">Imbuga zishobora gushyirirwaho ibigo by\'amashuri, imishinga, n\'imiryango yabishyize hamwe, n\'ibindi. Buri rubugarushobora kwiharira abarukoresha , abayobozi,ibirukubiyemo, amashuri, n\'ibindi byinshi.</string>
     <string name="profile">Ibiranga umuntu</string>
-    <string name="connect_to_site">Injira ku rubuga</string>
     <string name="dialog_download_from_playstore_ok">Kuraho inyigisho ( Ni ubuntu)</string>
     <string name="strings_not_allowed">Inyuguti zihariye ntizemerewe kuzuzwa hano</string>
     <string name="undo">Garuraho</string>
@@ -500,9 +498,9 @@
     <string name="add_a_new_holiday_calendar">Ongeraho karindari nshya y\'ikiruhuko</string>
     <string name="features_enabled">Ibirimo byemejwe</string>
     <string name="once">Incuro imwe</string>
-    <string name="weekly">Ku icyumweru</string>
-    <string name="yearly">Ku mwaka</string>
-    <string name="monthly">Ku kwezi</string>
+    <string name="weekly">Mu cyumweru</string>
+    <string name="yearly">Mu mwaka</string>
+    <string name="monthly">Mu kwezi</string>
     <string name="sunday">Ku cyumweru</string>
     <string name="daily">Buri munsi w\'akazi</string>
     <string name="tuesday">kuwa kabiri</string>
@@ -517,8 +515,8 @@
     <string name="home">Ahabanza</string>
     <string name="date_enroll">Itariki zanditsweho</string>
     <string name="date_left">Itariki zisigaye</string>
-    <string name="enroled">Abanditswe</string>
-    <string name="class_enrolment">Ukwiyandikisha kw\'ishuri</string>
+    <string name="enroled">Abiyandikishije</string>
+    <string name="class_enrolment">Ukwiyandikisha ku ishuri</string>
     <string name="dialog_download_from_playstore_message">Koresha &amp; Usangize ibikubiye munyigisho z\'uburezi udafite interineti</string>
     <string name="graduated">Abasoje kwiga</string>
     <string name="dropped_out">Abavuye mu ishuri</string>
@@ -528,7 +526,7 @@
     <string name="new_enrolment">Abiyandikishije bashya</string>
     <string name="edit_leaving_reason">Hindura impamvu zirebana no kwandika abanyeshuri</string>
     <string name="edit_enrolment">Hindura ibirebana no kwiyandikisha</string>
-    <string name="entry">Ukwinjiza</string>
+    <string name="entry">kwinjira</string>
     <string name="download_storage_option_device">Koresha%1$s - %2$s kubuntu</string>
     <string name="leaving_reason">Impamvu yo kugenda</string>
     <string name="select_leaving_reason">Hitamo impamvu yo kugenda</string>
@@ -537,8 +535,8 @@
     <string name="leaving_reasons">Impamvu zo kugenda</string>
     <string name="leaving_reason_manage">Ongeraho,Kuraho unatandukanye impamvu zokugenda zashingirwagaho iyo umunyeshuri yavaga mu ishuri agiye</string>
     <string name="view_profile">Reba ibimuranga</string>
-    <string name="class_enrolment_outcome">Umusaruro wo kwandika abanyeshuri bashya</string>
-    <string name="class_enrolment_leaving">Impamvu yokwandika abanyeshuri hanyuma bakagenda</string>
+    <string name="class_enrolment_outcome">Icyavuye mu kwandika abanyeshuri bashya</string>
+    <string name="class_enrolment_leaving">Impamvu yokwandika abanyeshuri bagiye</string>
     <string name="outcome">Umusaruro</string>
     <string name="person_enrolment_in_class">%1$s Abiyandikishije mu %2$s</string>
     <string name="enrolment">Abiyandikishije</string>
@@ -549,8 +547,8 @@
     <string name="xapi_clear">Siba</string>
     <string name="descending">Itonde rimanuka</string>
     <string name="sort_by_text">Tondeka ugendeye</string>
-    <string name="attendance_high_to_low">Ubwitabire( Bwo hejuru uyjya kubwo hasi)</string>
-    <string name="attendance_low_to_high">Ubwitabie ( Uva kubwo hasi ujya hejuru)</string>
+    <string name="attendance_high_to_low">Ubwitabire( Uva kubwo hejuru ujya kubwo hasi)</string>
+    <string name="attendance_low_to_high">Ubwitabire ( Uva kubwo hasi ujya kubwo hejuru)</string>
     <string name="add_a_teacher">Ongeraho umwarimu</string>
     <string name="teacher">Umwarimu</string>
     <string name="partial">Igice</string>
@@ -564,7 +562,7 @@
     <string name="activity_went_bad">Igikorwa nticyagenze neza</string>
     <string name="uom_frequency_title">Ni inshuro zingahe</string>
     <string name="uom_duration_title">Uburebure bw\'igihe</string>
-    <string name="uom_boolean_title">Nibyo cg sibyo</string>
+    <string name="uom_boolean_title">Nibyo cyangwa sibyo</string>
     <string name="uom_default_title">Ingero z\'ibipimo</string>
     <string name="add_activity">Ongeraho igikorwa gishya...</string>
     <string name="last_three_months">Amezi atatu ashize</string>
@@ -578,7 +576,7 @@
     <string name="apply">Emeza</string>
     <string name="file_selected">Idosiye yatoranyijwe:</string>
     <string name="all">Zose</string>
-    <string name="sel_question_set_to_use">Ibibazo byakoresha ku myigire y\'imibaire n\'abandi n\'imbamutima</string>
+    <string name="sel_question_set_to_use">Ibibazo byakoreshwa ku myigire y\'imibanire n\'abandi n\'imbamutima</string>
     <string name="search">Shakisha</string>
     <string name="attendance_percentage">Ijanisha ry\'ubwitabire:</string>
     <string name="filter">Muyunguruzi</string>
@@ -587,14 +585,14 @@
     <string name="not_recorded">Nti byanditse</string>
     <string name="activity">Igikorwa</string>
     <string name="groups">Amatsinda</string>
-    <string name="group_setting_desc">Ongeraho,kuraho cg utandukanye amatsinda</string>
+    <string name="group_setting_desc">Ongeraho,kuraho cyangwa uhindure amatsinda</string>
     <string name="role">Inshingano</string>
     <string name="roles">Inshingano nyinshi</string>
     <string name="add_a_new_role">Ongeraho inshingano nshya</string>
-    <string name="role_assignment_setting_desc">Ha inshingano ukoresha porogaramu cg itsinda</string>
+    <string name="role_assignment_setting_desc">Ha inshingano ukoresha porogaramu cyangwa itsinda</string>
     <string name="edit_role">Hindura inshingano</string>
-    <string name="locations">Ahantu ndanganturo</string>
-    <string name="locations_setting_desc">Genzura ahantu ndanganturo</string>
+    <string name="locations">Ahantu</string>
+    <string name="locations_setting_desc">Genzura ahantu</string>
     <string name="rols_assignment">Umukoro ku inshingano</string>
     <string name="audit_log">Genzura iyandikabikorwa</string>
     <string name="permissions">Impushya</string>
@@ -605,7 +603,7 @@
     <string name="clazz_work">Umwitozo w\'ishuri</string>
     <string name="download_wifi_only">WiFi yonyine</string>
     <string name="permission_clazz_select">Reba iby\'amashuri</string>
-    <string name="permission_clazz_insert">Teranyaho amashyuri</string>
+    <string name="permission_clazz_insert">Ongeraho amashuri</string>
     <string name="permission_attendance_select">Reba iby\'ubwitabire</string>
     <string name="percentage_complete" formatted="false">%1$s%% warasojwe</string>
     <string name="percentage_score" formatted="false">Amanota%1$s%%</string>
@@ -615,10 +613,10 @@
     </plurals>
     <string name="mixed">Baravanze</string>
     <string name="store_title">Ustad Mobile - Imfashanyigisho z\'uburezi ziboneka nta interineti ikoreshejwe</string>
-    <string name="store_description_short">Injira ukoreshe ibikubiye muburezi maze unabisangize abandi nta interineti ufite</string>
+    <string name="store_description_short">Injira ukoreshe ibikubiye muburezi maze unabisangize abandi udakoresheje murandasi</string>
     <string name="content">Ibikubiye muri porogaramu</string>
-    <string name="add_new_content">Ongeraho ibikubirwamo bishya</string>
-    <string name="add_content">Ongeraho ibikubirwamo</string>
+    <string name="add_new_content">Ongeraho amasomo mashya</string>
+    <string name="add_content">Ongeraho amasomo</string>
     <string name="student_progress">Iterambere ry\'umunyeshuri</string>
     <string name="status">Imiterere</string>
     <string name="use_device_language">Koresha ururimi ruri mugikoresho</string>
@@ -627,17 +625,17 @@
     <string name="permission_clazz_assignment_view">Reba imikoro y\'ishuri</string>
     <string name="submission_type">Uburyo bwo kohereza</string>
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
-    <string name="add_to">Teranyaho %1$s</string>
-    <string name="remove_from">Kura ku%1$s</string>
+    <string name="add_to">Ongeraho %1$s</string>
+    <string name="remove_from">Kuraho kuva kuri%1$s</string>
     <string name="items_selected">%1$d byatoranyijwe</string>
-    <string name="select_new_photo_from_gallery">Hitamo Ifoto nshya mububiko bw\'amafoto</string>
+    <string name="select_new_photo_from_gallery">Hitamo ifoto nshya mububiko bw\'amafoto</string>
     <string name="permission_clazz_asignment_edit">Hanga unahindure imikoro y\'ishuri</string>
     <string name="add_new">Ongeraho igishya</string>
     <string name="staff">Abakozi</string>
     <string name="x_teachers_y_students">%1$d abarimu, %2$d abanyeshuri</string>
     <string name="call">Hamagara</string>
     <string name="entity_code">%1$s ikode</string>
-    <string name="organization_id">Ibiranga Umuryago/Ikigo</string>
+    <string name="organization_id">Ikiranga Umuryago/Ikigo</string>
     <string name="student">Umunyeshuri</string>
     <string name="untitled">Ntibifite umutwe</string>
     <string name="school_code">Ikode y\'ikigo</string>
@@ -660,21 +658,21 @@
     <string name="edit_filters">Hindura uburyo bwo kuvangura</string>
     <string name="edit_report">Hindura raporo</string>
     <string name="no_submission_required">Kohereza ntabwo bikenewe</string>
-    <string name="short_text">Umwandiko mugufi</string>
+    <string name="short_text">Inyandiko ngufi</string>
     <string name="deadline">Igihe ntarengwa</string>
-    <string name="class_timezone">Igihe ndangakarere ishuri riherereyemo</string>
-    <string name="maximum_score">Amanota menshi</string>
-    <string name="quiz">Ihurizo</string>
-    <string name="allow_private_comments_from_students">Emera kwakira ibitekerezo by\'ibanga by\'abanyeshuri</string>
+    <string name="class_timezone">Igihe cyagenwe ku ishuri</string>
+    <string name="maximum_score">Amanota yo hejuru</string>
+    <string name="quiz">Ibazwa</string>
+    <string name="allow_private_comments_from_students">Emera kwakira ibitekerezo by\'abanyeshuri</string>
     <string name="submission">Ukohereza</string>
-    <string name="public_comments">Ibitekerezo byo m\'uruhame</string>
-    <string name="private_comments">Ibitekerezo byo mu ibanga</string>
-    <string name="quiz_questions">Ibibazo by\'ihurizo</string>
+    <string name="public_comments">Ibitekerezo rusange</string>
+    <string name="private_comments">Ibitekerezo byihariye</string>
+    <string name="quiz_questions">Ibibazo by\'ibazwa</string>
     <string name="time">Igihe</string>
     <string name="submit_your_answer">Ohereza igisubizo cyawe</string>
     <string name="add_class_comment">Ongeraho igitekerezo cy\'ishuri</string>
-    <string name="add_private_comment">Ongeraho igitekerezo cy\'ibanga</string>
-    <string name="class_comments">Igitekerezo cy\'ishuri</string>
+    <string name="add_private_comment">Ongeraho igitekerezo cyihariye</string>
+    <string name="class_comments">Ibitekerezo by\'ishuri</string>
     <string name="submit">Ohereza</string>
     <string name="marking">Gukosora</string>
     <string name="field_person_gender">Igitsina</string>
@@ -683,7 +681,7 @@
     <string name="three_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d %6$s</string>
     <string name="dashboard">Imbonerahamwe y\'amakuru</string>
     <string name="add_class">Ongeraho ishuri</string>
-    <string name="in_progress">Biri Kwigwaho</string>
+    <string name="in_progress">Biri gukorwa</string>
     <string name="add_activity_literal">Ongeraho igikorwa</string>
     <string name="select_one">Hitamo kimwe</string>
     <string name="measurement_type">Ubwoko bw\'igipimo</string>
@@ -691,14 +689,14 @@
     <string name="frequency">Igipimo</string>
     <string name="time_period">Igihe</string>
     <string name="location">Ahantu</string>
-    <string name="return_and_mark_next">Garuka ukosore igikurikira</string>
+    <string name="return_and_mark_next">Garuka maze ukosore igikurikira</string>
     <string name="workspace">Aho gukorera</string>
     <string name="connect_as_guest">Ihuze nk\'umushyitsi</string>
     <string name="holiday_calendars">Karindari y\'ibiruhuko</string>
-    <string name="holiday_calendars_desc">Ongeraho,kuraho unatandukanye karindari y\'ibiruhuko</string>
-    <string name="return_only">Garuka usoze</string>
+    <string name="holiday_calendars_desc">Ongeraho,kuraho unahindure karindari y\'ibiruhuko</string>
+    <string name="return_only">Garuka maze usoze</string>
     <string name="copied_to_clipboard">Bishyizwe k\'ububikokoporora</string>
-    <string name="sel_question_set">Ibibazoshingiro byo Ku myigire y\'imibanire n\'abandi n\'imbamutima</string>
+    <string name="sel_question_set">Ibibazoshingiro byo ku myigire y\'imibanire n\'abandi n\'imbamutima</string>
     <string name="users">Abakoresha porogaramu</string>
     <string name="ask_your_teacher_for_code">Saba mwarimu wawe ikode y\'ishuri, Noneho uyinjizemo hepfo:</string>
     <string name="download_all">Bikure kuri murandasi byose</string>
@@ -738,7 +736,7 @@
     <string name="organisation">Ikigo%1$s</string>
     <string name="assign_role">Gena inshingano</string>
     <string name="create_account">Hanga ikonti</string>
-    <string name="my">%1$s yange</string>
+    <string name="my">%1$s yanjye</string>
     <string name="scope_description">Hitamo imiterere(e.g. Ishuri, ikigo cg umuntu runaka) uzahabwa uburenganzira.</string>
     <string name="pending_requests">Abasabye kwiga bataremererwa</string>
     <string name="more_information">Amakuru menshi</string>
@@ -815,9 +813,9 @@
     <string name="allow_class_comments">Tanga urubuga rw\'ibitekerezo by\'abanyeshuri mu ishuri</string>
     <string name="after_deadline_date_error">Bigomba kuba nyuma y\'itariki ntarengwa</string>
     <string name="points">Amanota</string>
-    <string name="automatic">Ukwikoresha</string>
+    <string name="automatic">Byikora</string>
     <string name="end_of_grace_period">Isoza ry\'igihe cy\'impuhwe</string>
-    <string name="minimum_score">Amanota makeya</string>
+    <string name="minimum_score">Amanota make</string>
     <string name="student_marks_content">Abanyeshuri barikosora</string>
     <string name="completion_criteria">Ibigenderwaho mu gusoza</string>
     <string name="content_pieces_completed">Uduce tugize ibikubiye muri porogramu twasojwe</string>
@@ -844,9 +842,9 @@
     <string name="supported_link">Ubwoko bw\'ihuza (linki) bukorana na sisiteme: Google Driver (folder or file) and plain HTTP links</string>
     <string name="clazz_assignment">Umukoro</string>
     <string name="new_assignment">Umukoro mushya</string>
-    <string name="mark_complete">Shira akamenyetso ku \"umusozo\"</string>
+    <string name="mark_complete">Garagaza ko birangiye</string>
     <string name="late_penalty">(%1$s%% igihano cy\'ubukererwe)</string>
-    <string name="mark_penalty">Shyiraho igihano</string>
+    <string name="mark_penalty">Garagaza igihano</string>
     <string name="late_submission_penalty">Igihano cy\'ubukererwe mukohereza</string>
     <string name="moved_x_entries">Ibyinjijwe %1$s byimuwe</string>
     <string name="select_account_to_continue">Hitamo ikonti ushaka gukoresha ubone gukomeza</string>
