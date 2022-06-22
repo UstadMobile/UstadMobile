@@ -232,7 +232,8 @@ ext {
     version_react_linkify = "^1.0.0-alpha"
     version_linkify_js = "^3.0.5"
     version_linkify_react = "^3.0.4"
-
+    version_pdfview_android = "1.1.0"
+    version_pdfbox_apache = "3.0.0-RC1"
 }
 
 /*

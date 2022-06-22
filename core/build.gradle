@@ -118,6 +118,7 @@ kotlin {
 
         commonJvmMain {
             dependencies {
+                implementation "org.apache.pdfbox:pdfbox:$version_pdfbox_apache"
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
@@ -188,6 +189,9 @@ kotlin {
             dependsOn commonJvmMain
 
             dependencies {
+
+                implementation "com.dmitryborodin:pdfview-android:$version_pdfview_android"
+
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
@@ -222,7 +226,12 @@ kotlin {
                 implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
 
                 implementation "com.google.android.material:material:$version_android_material"
+
+
+
             }
+
+
         }
 
         jsMain {
