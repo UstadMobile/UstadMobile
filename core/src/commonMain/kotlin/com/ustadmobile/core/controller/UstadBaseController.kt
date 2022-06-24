@@ -44,6 +44,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import kotlin.js.JsName
 
@@ -80,6 +81,9 @@ abstract class UstadBaseController<V : UstadView>(
     protected val ustadNavController: UstadNavController? by instanceOrNull()
 
     private var backStackEntry: UstadBackStackEntry? = null
+
+    protected val json: Json by instance()
+
 
     /**
      * The last time the contents of this presenter was saved to the back stack saved state handle.

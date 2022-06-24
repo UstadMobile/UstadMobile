@@ -39,8 +39,6 @@ class CourseTerminologyEditPresenter(
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    private val json: Json by instance()
-
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): CourseTerminology? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val entity =  db.onRepoWithFallbackToDb(2000) {
@@ -86,7 +84,7 @@ class CourseTerminologyEditPresenter(
         )*/
         entityVal?.ctTerminology = safeStringify(di, MapSerializer(String.serializer(), String.serializer()),
             view.terminologyTermList?.associate { it.id to it.term.toString() } ?: mapOf())
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, CourseTerminology.serializer(),
                 entityVal)
     }
 

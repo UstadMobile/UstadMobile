@@ -18,10 +18,11 @@ import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GU
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_PERSONGROUP
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.http.content.*
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Dispatchers
@@ -180,15 +181,15 @@ class UstadAccountManager(
         accountRegisterOptions: AccountRegisterOptions = AccountRegisterOptions()
     ): PersonWithAccount = withContext(Dispatchers.Default){
         val parentVal = accountRegisterOptions.parentJoin
-        val httpStmt = httpClient.post<HttpStatement>() {
+        val httpStmt = httpClient.preparePost {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
             contentType(ContentType.Application.Json)
-            body = RegisterRequest(person, parentVal, endpointUrl)
+            setBody(RegisterRequest(person, parentVal, endpointUrl))
         }
 
         val (registeredPerson: Person?, status: Int) = httpStmt.execute { response ->
             if(response.status.value == 200) {
-                Pair(response.receive<PersonWithAccount>(), 200)
+                Pair(response.body<PersonWithAccount>(), 200)
             }else {
                 Pair(null, response.status.value)
             }
@@ -322,7 +323,7 @@ class UstadAccountManager(
         val nodeId = (repo as? DoorDatabaseRepository)?.config?.nodeId
             ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
 
-        val loginResponse = httpClient.post<HttpResponse> {
+        val loginResponse = httpClient.post {
             url("${endpointUrl.removeSuffix("/")}/auth/login")
             parameter("username", username)
             parameter("password", password)
@@ -342,18 +343,18 @@ class UstadAccountManager(
             throw IllegalStateException("Server error - response ${loginResponse.status.value}")
         }
 
-        val responseAccount = loginResponse.receive<UmAccount>()
+        val responseAccount = loginResponse.body<UmAccount>()
         responseAccount.endpointUrl = endpointUrl
 
         var personInDb = db.personDao.findByUidAsync(responseAccount.personUid)
 
         if(personInDb == null){
-            val personOnServerResponse = httpClient.get<HttpResponse> {
+            val personOnServerResponse = httpClient.get {
                 url("${endpointUrl.removeSuffix("/")}/auth/person")
                 parameter("personUid", responseAccount.personUid)
             }
             if(personOnServerResponse.status.value == 200) {
-                val personObj = personOnServerResponse.receive<Person>()
+                val personObj = personOnServerResponse.body<Person>()
                 repo.personDao.insertAsync(personObj)
                 personInDb = personObj
             }else {
@@ -379,12 +380,12 @@ class UstadAccountManager(
         val db = (repo as DoorDatabaseRepository).db as UmAppDatabase
         val siteInDb = db.siteDao.getSiteAsync()
         if(siteInDb == null) {
-            val siteResponse = httpClient.get<HttpResponse> {
+            val siteResponse = httpClient.get {
                 doorNodeAndVersionHeaders(repo as DoorDatabaseRepository)
                 url("${endpointUrl.removeSuffix("/")}/UmAppDatabase/SiteDao/getSiteAsync")
             }
             if(siteResponse.status.value == 200) {
-                val siteObj = siteResponse.receive<Site>()
+                val siteObj = siteResponse.body<Site>()
                 repo.siteDao.replaceAsync(siteObj)
             }else {
                 throw IllegalStateException("Internal error: no Site in database and could not fetch it from server")

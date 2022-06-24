@@ -82,7 +82,7 @@ abstract class SelectExtractFilePresenterCommon(
                     else -> {
                         val args = mutableMapOf<String, String>()
                         args.putEntityAsJson(
-                            ContentEntryEdit2View.ARG_IMPORTED_METADATA,
+                            ContentEntryEdit2View.ARG_IMPORTED_METADATA, json,
                             MetadataResult.serializer(), metadata
                         )
                         args.putFromOtherMapIfPresent(arguments, UstadView.ARG_LEAF)

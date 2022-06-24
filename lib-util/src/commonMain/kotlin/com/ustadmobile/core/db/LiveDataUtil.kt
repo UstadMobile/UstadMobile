@@ -11,7 +11,7 @@ suspend fun <T> waitForLiveData(liveData: DoorLiveData<T>, timeout: Long, checke
     val observerFn = object : DoorObserver<T> {
         override fun onChanged(t: T) {
             if(checker.invoke(t))
-                channel.offer(t)
+                channel.trySend(t)
         }
     }
     liveData.observeForever(observerFn)

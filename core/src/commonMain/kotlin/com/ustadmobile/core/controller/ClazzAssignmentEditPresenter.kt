@@ -38,8 +38,6 @@ class ClazzAssignmentEditPresenter(context: Any,
 
     private val onLoadJsonComplete = CompletableDeferred<Boolean>()
 
-    private val json: Json by instance()
-
     enum class TextLimitTypeOptions(val optionVal: Int, val messageId: Int){
         WORDS(ClazzAssignment.TEXT_WORD_LIMIT, MessageID.words),
         CHARS(ClazzAssignment.TEXT_CHAR_LIMIT, MessageID.characters)
@@ -171,7 +169,7 @@ class ClazzAssignmentEditPresenter(context: Any,
         if (entityVal != null) {
             saveDateTimeIntoEntity(entityVal)
         }
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, CourseBlockWithEntity.serializer(),
                 entityVal)
     }
 

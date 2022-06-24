@@ -1,10 +1,9 @@
-package com.ustadmobile.port.sharedse.contentformats.xapi
+package com.ustadmobile.core.contentformats.xapi
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
-import com.ustadmobile.core.contentformats.xapi.*
 
 import java.lang.reflect.Type
 
@@ -23,7 +22,9 @@ class StatementSerializer : JsonSerializer<Statement> {
         jsonObject.add("authority", context.serialize(src.authority, Actor::class.java))
         jsonObject.addProperty("version", src.version)
         jsonObject.addProperty("id", src.id)
-        jsonObject.add("attachments", context.serialize(src.attachments, StatementDeserializer.listType))
+        jsonObject.add("attachments", context.serialize(src.attachments,
+            StatementDeserializer.listType
+        ))
         jsonObject.addProperty("objectType", src.objectType)
 
         if (src.subStatement != null) {

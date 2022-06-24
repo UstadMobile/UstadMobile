@@ -1,17 +1,7 @@
 apply plugin: 'com.android.library'
-apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: "kotlin-android"
 apply plugin: 'kotlin-kapt'
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath "digital.wup:android-maven-publish:$version_android_maven_publish"
-    }
-}
+apply plugin: "maven-publish"
 
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
@@ -94,7 +84,7 @@ dependencies {
     implementation "io.ktor:ktor-client-core:$version_ktor"
     implementation "io.ktor:ktor-client-json:$version_ktor"
     implementation "io.ktor:ktor-client-okhttp:$version_ktor"
-    implementation "io.ktor:ktor-client-gson:$version_ktor"
+    implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
 
     //ViewModel and LiveData
@@ -105,7 +95,7 @@ dependencies {
     //Room persistence
     implementation "androidx.room:room-runtime:$version_android_room"
     implementation "androidx.room:room-ktx:$version_android_room"
-    kapt "androidx.room:room-compiler:$version_android_room"
+    annotationProcessor "androidx.room:room-compiler:$version_android_room"
 
 
     //Logging
@@ -135,21 +125,34 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
 }
 
-publishing {
-    publications {
-        mavenAar(MavenPublication) {
-            from components.android
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
 
-            groupId rootProject.group
-            artifactId project.name
-            version "${rootProject.version}"
+                // You can then customize attributes of the publication as shown below.
+                groupId = rootProject.group
+                artifactId = project.name
+                version = rootProject.version
+            }
+            // Creates a Maven publication called “debug”.
+            debug(MavenPublication) {
+                // Applies the component for the debug build variant.
+                from components.debug
+
+                groupId = rootProject.group
+                artifactId = project.name
+                version = rootProject.version
+            }
         }
-    }
 
-    repositories {
-        //Set this in projectdir/extrasettings.gradle
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
+
+        repositories {
+            maven {
+                url rootProject.ext.buildConfigProperties['repo.dir']
+            }
         }
     }
 }

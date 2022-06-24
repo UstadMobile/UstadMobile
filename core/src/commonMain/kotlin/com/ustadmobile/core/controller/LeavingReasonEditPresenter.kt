@@ -48,9 +48,7 @@ class LeavingReasonEditPresenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, LeavingReason.serializer(),
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, LeavingReason.serializer(), entity)
     }
 
     override fun handleClickSave(entity: LeavingReason) {

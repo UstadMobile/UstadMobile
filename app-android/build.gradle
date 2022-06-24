@@ -107,9 +107,6 @@ android {
         }
     }
 
-    dexOptions {
-        javaMaxHeapSize "2g"
-    }
 
     signingConfigs {
         release {
@@ -164,22 +161,6 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8
     }
-}
-
-/*
- * Disable running tests of the vanilla build (this requires multidex, so we use vanillamultidex instead)
- */
-gradle.taskGraph.useFilter { task ->
-    if (task.name.equals("connectedVanillaDebugAndroidTest")
-            || task.name.equals("createVanillaDebugCoverageReport")
-            || task.name.equals("testVanillaDebugUnitTest")
-            || task.name.equals("testVanillaReleaseUnitTest")
-            || task.name.equals("processVanillaDebugAndroidTestManifest")
-            || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
-        return false
-    }
-
-    return true
 }
 
 task generateCoreStringToAndroidResMap {
@@ -355,8 +336,9 @@ dependencies {
 
 
     //KTOR
-    implementation "io.ktor:ktor-client-gson:$version_ktor"
+    implementation "io.ktor:ktor-serialization-gson:$version_ktor"
     implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+    implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
     implementation "io.ktor:ktor-client-cio:$version_ktor"
 
     //http server

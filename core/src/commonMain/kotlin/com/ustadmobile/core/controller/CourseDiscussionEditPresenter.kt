@@ -144,7 +144,7 @@ class CourseDiscussionEditPresenter(context: Any,
             saveDateTimeIntoEntity(entityVal)
             entityVal.topics = topicsOneToManyJoinEditHelper.liveList.getValue()
         }
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, CourseBlockWithEntity.serializer(),
                 entityVal)
     }
 

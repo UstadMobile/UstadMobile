@@ -24,8 +24,8 @@ import com.ustadmobile.util.commontest.ext.mockResponseForConcatenatedFiles2Requ
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.json.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.*
@@ -36,6 +36,8 @@ import kotlin.random.Random
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.core.util.ext.getContentEntryJsonFilesFromDir
 import com.ustadmobile.core.util.ext.filterNotInDirectory
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.gson.*
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 
@@ -85,7 +87,9 @@ class ContainerFetcherOkHttpTest {
         Napier.baseDebugIfNotEnabled()
         serverOkHttpClient = OkHttpClient()
         serverHttpClient = HttpClient(OkHttp) {
-            install(JsonFeature)
+            install(ContentNegotiation) {
+                gson()
+            }
             install(HttpTimeout)
             engine {
                 preconfigured = serverOkHttpClient

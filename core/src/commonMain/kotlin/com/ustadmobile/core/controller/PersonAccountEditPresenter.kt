@@ -80,7 +80,7 @@ class PersonAccountEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, PersonWithAccount.serializer(), entityVal)
     }
 
     override fun handleClickSave(entity: PersonWithAccount) {

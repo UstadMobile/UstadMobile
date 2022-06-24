@@ -345,7 +345,8 @@ class ReportEditPresenter(context: Any,
         val entityVal = entity ?: return
         entityVal.reportSeries = safeStringify(di, ListSerializer(ReportSeries.serializer()),
             entityVal.reportSeriesWithFiltersList ?: listOf())
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, ReportWithSeriesWithFilters.serializer(),
+            entityVal)
     }
 
     fun handleAddCustomRange(dateRangeMoment: DateRangeMoment) {

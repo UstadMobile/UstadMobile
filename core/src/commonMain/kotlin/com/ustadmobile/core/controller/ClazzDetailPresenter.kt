@@ -67,9 +67,9 @@ class ClazzDetailPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, Clazz.serializer(),
                 entityVal)
-        savedState.putEntityAsJson(ARG_TABS, null, view.tabs)
+        savedState.putEntityAsJson(ARG_TABS, json, ListSerializer(String.serializer()), view.tabs)
     }
 
 

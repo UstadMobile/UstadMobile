@@ -101,6 +101,9 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
 
                     }, MessageID.undo)
                 }
+                else -> {
+                    // Do nothing
+                }
             }
         }
     }

@@ -23,11 +23,13 @@ import com.ustadmobile.lib.rest.ext.ktorInitRepo
 import com.ustadmobile.lib.util.randomString
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
-import io.ktor.application.*
+import io.ktor.server.application.*
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.json.*
-import io.ktor.routing.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.json.*
+import io.ktor.serialization.gson.*
+import io.ktor.server.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
@@ -41,7 +43,7 @@ import org.junit.Assert
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import org.junit.rules.TemporaryFolder
-import org.kodein.di.ktor.DIFeature
+import org.kodein.di.ktor.di
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
@@ -203,7 +205,9 @@ class DbReplicationIntegrationTest {
         okHttpClient = OkHttpClient.Builder().build()
 
         httpClient = HttpClient(OkHttp) {
-            install(JsonFeature)
+            install(ContentNegotiation) {
+                gson()
+            }
             engine {
                 preconfigured = okHttpClient
             }
@@ -249,7 +253,7 @@ class DbReplicationIntegrationTest {
             requestReadTimeoutSeconds = 600
             responseWriteTimeoutSeconds = 600
         }) {
-            install(DIFeature){
+            di {
                 extend(remoteDi)
             }
 

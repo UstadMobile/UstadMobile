@@ -69,6 +69,9 @@ class ReportTemplateListPresenter(context: Any, arguments: Map<String, String>, 
                                 }, MessageID.undo)
                     }
                 }
+                else -> {
+                    // do nothing
+                }
             }
         }
     }

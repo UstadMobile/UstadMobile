@@ -57,7 +57,7 @@ kotlin {
             dependencies {
                 implementation project(":lib-database")
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
                 implementation "io.github.aakira:napier-jvm:$version_napier"
             }
         }

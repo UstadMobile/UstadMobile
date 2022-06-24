@@ -35,8 +35,8 @@ import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.util.test.nav.TestUstadNavController
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.json.*
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
@@ -49,6 +49,8 @@ import java.nio.file.Files
 import javax.naming.InitialContext
 import kotlin.random.Random
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.gson.*
 import kotlinx.serialization.json.Json
 
 fun DI.onActiveAccount(): DI {
@@ -106,7 +108,9 @@ class UstadTestRule(
         okHttpClient = OkHttpClient.Builder().build()
 
         httpClient = HttpClient(OkHttp) {
-            install(JsonFeature)
+            install(ContentNegotiation) {
+                gson()
+            }
             install(HttpTimeout)
 
             engine {

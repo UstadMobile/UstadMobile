@@ -95,11 +95,9 @@ class CourseGroupSetEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(SAVED_STATE_MEMBER_LIST,
-            ListSerializer(CourseGroupMemberPerson.serializer()),
-            view.memberList ?: listOf())
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(SAVED_STATE_MEMBER_LIST, json,
+            ListSerializer(CourseGroupMemberPerson.serializer()), view.memberList ?: listOf())
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, CourseGroupSet.serializer(), entityVal)
     }
 
     override fun handleClickSave(entity: CourseGroupSet) {

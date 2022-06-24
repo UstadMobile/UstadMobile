@@ -234,7 +234,7 @@ class ReportFilterEditPresenter(
             entityVal.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
                     ?.joinToString { it.uid.toString() }
         }
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, ReportFilter.serializer(), entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, ReportFilter.serializer(), entityVal)
     }
 
 

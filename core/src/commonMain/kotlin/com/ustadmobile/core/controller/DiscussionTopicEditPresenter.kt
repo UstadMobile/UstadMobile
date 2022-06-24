@@ -53,7 +53,8 @@ class DiscussionTopicEditPresenter(context: Any,
         super.onSaveInstanceState(savedState)
         val entityVal = entity
 
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, DiscussionTopic.serializer(),
+            entityVal)
     }
 
 

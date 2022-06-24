@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.jvm.JvmStatic
@@ -180,8 +181,9 @@ class ClazzAssignmentDetailOverviewPresenter(
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        savedState.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, ClazzAssignment.serializer(), entity)
-        savedState.putEntityAsJson(SAVED_STATE_ADD_SUBMISSION_LIST,
+        savedState.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, json,
+            ClazzAssignment.serializer(), entity)
+        savedState.putEntityAsJson(SAVED_STATE_ADD_SUBMISSION_LIST, json,
                 ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
                 submissionList)
     }
@@ -281,7 +283,7 @@ class ClazzAssignmentDetailOverviewPresenter(
     fun handleEditSubmission(courseSubmission: CourseAssignmentSubmissionWithAttachment){
         if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
             val args = mutableMapOf<String, String>()
-            args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON,
+            args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, json,
                 CourseAssignmentSubmissionWithAttachment.serializer(), courseSubmission)
             args[EDIT_ENABLED] = true.toString()
 

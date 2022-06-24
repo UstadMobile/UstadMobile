@@ -14,7 +14,10 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 
 class BitmaskEditPresenter(context: Any, arguments: Map<String, String>, view: BitmaskEditView,
@@ -62,8 +65,8 @@ class BitmaskEditPresenter(context: Any, arguments: Map<String, String>, view: B
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, LongWrapper.serializer(),
+            entityVal)
     }
 
     override fun handleClickSave(entity: LongWrapper) {

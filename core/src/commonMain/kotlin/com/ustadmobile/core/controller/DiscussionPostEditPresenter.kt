@@ -63,8 +63,7 @@ class DiscussionPostEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, DiscussionPost.serializer(), entityVal)
     }
 
     override fun handleClickSave(entity: DiscussionPost) {

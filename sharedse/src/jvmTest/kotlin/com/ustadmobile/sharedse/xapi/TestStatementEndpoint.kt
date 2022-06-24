@@ -14,16 +14,17 @@ import com.ustadmobile.core.util.parse8601Duration
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
-import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
 import com.ustadmobile.util.test.checkJndiSetup
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.json.*
 import io.ktor.utils.io.*
 import okhttp3.OkHttpClient
 import org.junit.Assert
@@ -32,7 +33,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -73,7 +73,7 @@ class TestStatementEndpoint {
 
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp){
-            install(JsonFeature)
+            install(ContentNegotiation)
             install(HttpTimeout)
             engine {
                 preconfigured = okHttpClient

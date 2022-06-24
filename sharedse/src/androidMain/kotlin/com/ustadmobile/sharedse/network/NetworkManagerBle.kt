@@ -27,7 +27,9 @@ import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.json.*
+import io.ktor.serialization.gson.*
 import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.DI
@@ -344,8 +346,8 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
                 engine {
                     preconfigured = localOkHttpClientVal
                 }
-                install(JsonFeature) {
-                    serializer = di.direct.instance<GsonSerializer>()
+                install(ContentNegotiation) {
+                    gson()
                 }
             }
 

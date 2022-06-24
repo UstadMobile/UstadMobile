@@ -3,9 +3,9 @@ package com.ustadmobile.lib.rest
 import com.google.gson.Gson
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
-import io.ktor.application.*
+import io.ktor.server.application.*
 import io.ktor.http.*
-import io.ktor.routing.*
+import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import org.junit.Test
 import org.kodein.di.ktor.DIFeature
@@ -29,7 +29,7 @@ import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.rest.ext.insertDefaultSite
 import io.ktor.features.*
-import io.ktor.gson.*
+import io.ktor.serialization.gson.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Rule

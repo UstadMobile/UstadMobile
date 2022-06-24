@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.contentformats.xapi
+package com.ustadmobile.core.contentformats.xapi
 
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
@@ -6,8 +6,6 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParseException
 import com.google.gson.reflect.TypeToken
-import com.ustadmobile.core.contentformats.xapi.ContextActivity
-import com.ustadmobile.core.contentformats.xapi.XObject
 
 import java.lang.reflect.Type
 import java.util.ArrayList

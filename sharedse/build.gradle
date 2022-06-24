@@ -116,7 +116,8 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
-                implementation "io.ktor:ktor-gson:$version_ktor"
+                implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
                 implementation "io.github.aakira:napier:$version_napier"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
 
@@ -143,7 +144,7 @@ kotlin {
                 implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
                 implementation "io.ktor:ktor-io-jvm:$version_ktor"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
@@ -175,7 +176,7 @@ kotlin {
 
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
@@ -201,7 +202,7 @@ kotlin {
 
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
 
                 //Begin Android and JVM dependencies

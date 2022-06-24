@@ -101,6 +101,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "com.soywiz.korlibs.klock:klock:$version_klock"
                 implementation "io.github.aakira:napier:$version_napier"
@@ -122,7 +123,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
@@ -177,8 +178,8 @@ kotlin {
 
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "io.ktor:ktor-gson:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
             }
@@ -209,7 +210,7 @@ kotlin {
                 //Image loading library
                 implementation "com.squareup.picasso:picasso:$version_android_picasso"
                 implementation "io.ktor:ktor-client-android:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
                 implementation "com.linkedin.android.litr:litr:$version_android_litr"
 

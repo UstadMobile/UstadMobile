@@ -52,6 +52,7 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.*
 import org.kodein.di.DI
@@ -162,7 +163,7 @@ class EpubContentPresenter(context: Any,
     private suspend fun handleMountedContainer(){
         try {
             val client : HttpClient = di.direct.instance()
-            val ocfContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, OCF_CONTAINER_PATH))
+            val ocfContent: String = client.get(UMFileUtil.joinPaths(mountedPath, OCF_CONTAINER_PATH)).body()
             val xppFactoryNsAware: XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSAWARE)
 
             ocf = OcfDocument()
@@ -174,7 +175,7 @@ class EpubContentPresenter(context: Any,
             val opfUrl = ocf?.rootFiles?.get(0)?.fullPath?.let {
                 UMFileUtil.joinPaths(mountedPath, it)
             }
-            val opfContent = client.get<String>(opfUrl.toString())
+            val opfContent: String = client.get(opfUrl.toString()).body()
 
             val opf = OpfDocument()
             val xppFactoryNsUnaware: XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSUNAWARE)
@@ -237,7 +238,7 @@ class EpubContentPresenter(context: Any,
             val navUrlToLoad = navXhtmlUrl ?: ncxUrl
 
             if(navUrlToLoad != null) {
-                val navContent = client.get<String>(navUrlToLoad)
+                val navContent: String = client.get(navUrlToLoad).body()
 
                 val navDocument = EpubNavDocument().also {
                     mNavDocument = it

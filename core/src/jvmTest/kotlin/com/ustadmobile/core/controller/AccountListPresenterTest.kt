@@ -21,8 +21,8 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.UserSession
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.json.*
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.runBlocking
@@ -37,6 +37,8 @@ import org.kodein.di.singleton
 import com.ustadmobile.core.db.waitUntil
 import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
 import com.ustadmobile.util.test.rules.bindPresenterCoroutineRule
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.gson.*
 import org.junit.Assert
 import org.junit.Rule
 
@@ -137,7 +139,9 @@ class AccountListPresenterTest {
             bind<UstadAccountManager>() with singleton { accountManager }
             bind<HttpClient>() with singleton {
                 HttpClient(OkHttp) {
-                    install(JsonFeature)
+                    install(ContentNegotiation) {
+                        gson()
+                    }
                     install(HttpTimeout)
                 }
             }

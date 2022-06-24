@@ -106,6 +106,9 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
 
                     }, MessageID.undo)
                 }
+                else -> {
+                    // do nothing
+                }
             }
         }
     }

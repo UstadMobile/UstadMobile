@@ -45,19 +45,15 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
-import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -217,10 +213,6 @@ open class UstadApp : Application(), DIAware {
             builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
             builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
             builder.create()
-        }
-
-        bind<GsonSerializer>() with singleton {
-            GsonSerializer()
         }
 
         bind<XapiStatementEndpoint>() with scoped(EndpointScope.Default).singleton {

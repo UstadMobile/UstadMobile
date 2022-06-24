@@ -178,7 +178,7 @@ class ChatListPresenterTest {
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoChatDaoSpy, timeout(5000)).findAllChatsForUser(
-                eq("%"), eq(accountManager.activeAccount?.personUid))
+                eq("%"), eq(accountManager.activeAccount.personUid))
         verify(mockView, timeout(5000)).list = any()
 
     }

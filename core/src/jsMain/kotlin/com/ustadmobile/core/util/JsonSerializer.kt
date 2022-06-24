@@ -1,6 +1,6 @@
 package com.ustadmobile.core.util
 
-import io.ktor.client.features.json.serializer.*
+import io.ktor.client.plugins.json.serializer.*
 
 /**
  * Set default serializer to be used, without setting this it will

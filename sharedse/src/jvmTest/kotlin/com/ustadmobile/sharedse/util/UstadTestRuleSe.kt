@@ -26,14 +26,14 @@ import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.json.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import okhttp3.OkHttpClient
@@ -46,6 +46,8 @@ import java.nio.file.Files
 import javax.naming.InitialContext
 import kotlin.random.Random
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.gson.*
 import kotlinx.coroutines.runBlocking
 
 fun DI.onActiveAccount(): DI {
@@ -90,7 +92,9 @@ class UstadTestRule: TestWatcher() {
         systemImplSpy = spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance(), tmpFolder))
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {
-            install(JsonFeature)
+            install(ContentNegotiation) {
+                gson()
+            }
             install(HttpTimeout)
             engine {
                 preconfigured = okHttpClient

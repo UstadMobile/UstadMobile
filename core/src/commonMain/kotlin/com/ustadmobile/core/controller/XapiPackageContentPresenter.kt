@@ -21,6 +21,7 @@ import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Runnable
@@ -94,7 +95,7 @@ class XapiPackageContentPresenter(
                 val client: HttpClient = di.direct.instance()
                 val tinCanPath = UMFileUtil.joinPaths(mountedPath, "tincan.xml")
                 Napier.d { "XapiPackageContentPresenter: Loading $tinCanPath " }
-                val tincanContent = client.get<String>(tinCanPath)
+                val tincanContent: String = client.get(tinCanPath).body()
 
                 val xppFactory: XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSAWARE)
                 val xpp = xppFactory.newPullParser()

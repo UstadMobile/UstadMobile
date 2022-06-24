@@ -134,8 +134,7 @@ class PersonEditPresenter(
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, PersonWithAccount.serializer(), entityVal)
     }
 
     private fun PersonEditView.hasErrors(): Boolean =

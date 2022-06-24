@@ -55,8 +55,6 @@ class ClazzEdit2Presenter(
     context, arguments, view, di, lifecycleOwner
 ), TreeOneToManyJoinEditListener<CourseBlockWithEntity>, ItemTouchHelperListener {
 
-    private val json: Json by di.instance()
-
     enum class EnrolmentPolicyOptions(val optionVal: Int, val messageId: Int) {
         OPEN(Clazz.CLAZZ_ENROLMENT_POLICY_OPEN,
             MessageID.open_enrolment),
@@ -410,8 +408,10 @@ class ClazzEdit2Presenter(
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = view.entity ?: return
-        savedState.putEntityAsJson(SAVEDSTATE_KEY_COURSEPICTURE, null, view.coursePicture)
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
+        savedState.putEntityAsJson(SAVEDSTATE_KEY_COURSEPICTURE, json, CoursePicture.serializer(),
+            view.coursePicture)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json,
+            ClazzWithHolidayCalendarAndSchoolAndTerminology.serializer(), entityVal)
     }
 
     fun handleClickTimezone() {
