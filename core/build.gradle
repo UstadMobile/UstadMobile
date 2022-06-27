@@ -118,7 +118,7 @@ kotlin {
 
         commonJvmMain {
             dependencies {
-                implementation "org.apache.pdfbox:pdfbox:$version_pdfbox_apache"
+
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
@@ -147,6 +147,7 @@ kotlin {
             resources.srcDirs += ["locale/main", "src/main/assets"]
 
             dependencies {
+                implementation "org.apache.pdfbox:pdfbox:$version_pdfbox_apache"
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"

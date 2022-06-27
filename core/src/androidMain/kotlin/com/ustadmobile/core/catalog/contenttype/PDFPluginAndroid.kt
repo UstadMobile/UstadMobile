@@ -80,7 +80,7 @@ class PDFPluginAndroid(
                 jobProgress, context, di)
 
             val pdfTempDir = makeTempDir(prefix = "tmp")
-            val newVideo = File(pdfTempDir,
+            val newPDF = File(pdfTempDir,
                 localUri.getFileName(context))
             val params: Map<String, String> = safeParse(di, MapSerializer(String.serializer(), String.serializer()),
                 jobItem.contentJob?.params ?: "")
@@ -145,7 +145,7 @@ class PDFPluginAndroid(
             }catch(c: CancellationException){
 
                 withContext(NonCancellable){
-                    newVideo.delete()
+                    newPDF.delete()
                     pdfTempDir.deleteRecursively()
                     if(pdfUri.isRemote()){
                         localUri.toFile().delete()
@@ -163,7 +163,7 @@ class PDFPluginAndroid(
     private suspend fun getEntry(doorUri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         return withContext(Dispatchers.Default) {
 
-            val localUri = process.getLocalOrCachedUri()
+            val localUri: DoorUri = process.getLocalOrCachedUri()
 
             val fileName: String = localUri.getFileName(context)
 
@@ -171,12 +171,14 @@ class PDFPluginAndroid(
                 return@withContext null
             }
 
-
-            val pdfDescriptor = ParcelFileDescriptor.open(
-                File(fileName),
-                ParcelFileDescriptor.MODE_READ_ONLY)
-            val renderer = PdfRenderer(pdfDescriptor)
-            if(renderer.pageCount < 1){
+            val fileDescriptor: ParcelFileDescriptor? =
+                (context as Context).contentResolver.openFileDescriptor(localUri.uri,"r")
+            if(fileDescriptor != null){
+                val renderer = PdfRenderer(fileDescriptor)
+                if(renderer.pageCount < 1){
+                    return@withContext null
+                }
+            }else{
                 return@withContext null
             }
 

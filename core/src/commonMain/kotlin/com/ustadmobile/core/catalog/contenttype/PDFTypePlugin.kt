@@ -25,7 +25,7 @@ abstract class PDFTypePlugin : ContentPlugin {
         val PDF_EXT_LIST = listOf(".pdf")
 
 
-        const val PLUGIN_ID = 14
+        const val PLUGIN_ID = 18
 
     }
 
