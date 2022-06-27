@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
 import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
 import com.ustadmobile.core.catalog.contenttype.VideoTypePluginJvm
+import com.ustadmobile.core.catalog.contenttype.PDFTypePluginJvm
 import com.ustadmobile.core.catalog.contenttype.XapiTypePluginCommonJvm
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerJvm
@@ -249,6 +250,9 @@ fun Application.umRestApplication(
         bind<VideoTypePluginJvm>() with scoped(EndpointScope.Default).singleton{
             VideoTypePluginJvm(Any(), context, di, DummyContentPluginUploader())
         }
+        bind<PDFTypePluginJvm>() with scoped(EndpointScope.Default).singleton{
+            PDFTypePluginJvm(Any(), context, di, DummyContentPluginUploader())
+        }
         bind<ApacheIndexerPlugin>() with scoped(EndpointScope.Default).singleton{
             ApacheIndexerPlugin(Any(), context, di)
         }
@@ -259,6 +263,7 @@ fun Application.umRestApplication(
                     di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
                     di.on(context).direct.instance<VideoTypePluginJvm>(),
+                    di.on(context).direct.instance<PDFTypePluginJvm>(),
                     di.on(context).direct.instance<ApacheIndexerPlugin>()))
         }
 
