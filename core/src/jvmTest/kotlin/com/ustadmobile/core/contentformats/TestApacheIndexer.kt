@@ -67,6 +67,9 @@ class TestApacheIndexer {
             bind<VideoTypePluginJvm>() with scoped(ustadTestRule.endpointScope).singleton {
                 VideoTypePluginJvm(Any(), context, di)
             }
+            bind<PDFTypePluginJvm>() with scoped(ustadTestRule.endpointScope).singleton {
+                PDFTypePluginJvm(Any(), context, di)
+            }
             bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
                 ContentPluginManager(listOf(
                         EpubTypePluginCommonJvm(Any(), context, di)
