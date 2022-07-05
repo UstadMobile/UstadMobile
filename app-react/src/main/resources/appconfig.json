@@ -1,0 +1,18 @@
+{
+    "app.login_before_open": "false",
+    "first_dest_login_required": "false",
+    "app.select_server": "true",
+    "pbkdf2.keylength": "512",
+    "app.contentonlymode": "false",
+    "appBaseName": "UstadMobile",
+    "app.ui_languages": "en,fa,ps,ar,tg,bn,ne,my",
+    "app.no_iframe_domans": "KhanAcademy",
+    "app.register_allowed": "true",
+    "app.ui_default_language": "en",
+    "first_dest": "ContentEntryListHome",
+    "app.guest_allowed": "true",
+    "apiUrl": "http://localhost:8087/",
+    "pbkdf2.iterations": "10000",
+    "doordb.endpoint.url": "http://localhost:8087/",
+    "app.register_before_open": "true"
+}

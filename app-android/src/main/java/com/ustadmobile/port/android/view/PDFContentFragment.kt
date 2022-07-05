@@ -46,7 +46,7 @@ class PDFContentFragment : UstadBaseFragment(), PDFContentView {
             rootView = it.root
             pdfView = it.fragmentPdfContentPdfview
         }
-        pdfView?.setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_OUTSIDE)
+        pdfView?.setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
 
         val accountManager: UstadAccountManager = di.direct.instance()
         db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)

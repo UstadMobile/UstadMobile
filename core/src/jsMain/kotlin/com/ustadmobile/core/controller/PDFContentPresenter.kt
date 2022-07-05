@@ -26,8 +26,6 @@ actual class PDFContentPresenter actual constructor(context: Any, arguments: Map
             val params: VideoContentPresenterCommon.VideoParams = JSON.parse(videoContent)
             val pdfPath = UMFileUtil.joinPaths(baseMountUrl,params.videoPath?:"")
 
-            //TODO this
-
             view.filePath = pdfPath
             view.loading = false
         }
