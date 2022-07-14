@@ -180,7 +180,8 @@ class PDFTypePluginJvm(
             try {
                 val pdfPDDocument: PDDocument = Loader.loadPDF(file) ?: return@withContext null
                 val entry = ContentEntryWithLanguage().apply {
-                    if(pdfPDDocument.documentInformation.title.isEmpty()){
+                    if(pdfPDDocument.documentInformation.title == null ||
+                        (pdfPDDocument.documentInformation.title != null && pdfPDDocument.documentInformation.title.isEmpty())){
                         this.title = fileName
                     }else {
                         this.title = pdfPDDocument.documentInformation.title

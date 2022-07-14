@@ -123,6 +123,29 @@ class PDFTypePluginJvmTest {
 
     }
 
+    @Test
+    fun givenIssue363ValidPDF_whenExtractMetadata_shouldMatch(){
+
+
+        val inputStream = this::class.java.getResourceAsStream(
+            "/com/ustadmobile/core/container/test2.pdf")!!
+        val tempPDFFile = tmpFolder.newFile("test2.pdf")
+        tempPDFFile.copyInputStreamToFile(inputStream)
+        val pdfURI = DoorUri.parse(tempPDFFile.toURI().toString())
+        val processContext = ContentJobProcessContext(pdfURI, tmpFolder.newFolder().toDoorUri(),
+            params = mutableMapOf(), DummyContentJobItemTransactionRunner(db), di)
+
+        val pdfPlugin = PDFTypePluginJvm(Any(), Endpoint("http://localhost/dummy"), di)
+
+        runBlocking {
+            val metadataResult = pdfPlugin.extractMetadata(pdfURI, processContext)!!
+            Assert.assertEquals("title match pdf", "test2.pdf",
+                metadataResult.entry.title)
+            Assert.assertEquals("contentType is PDF", ContentEntry.TYPE_PDF,
+                metadataResult.entry.contentTypeFlag)
+        }
+    }
+
 
     @Test
     fun givenValidPDF_whenExtractMetadata_shouldMatch(){
