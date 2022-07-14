@@ -9,6 +9,8 @@ import com.ustadmobile.util.UmState
 import kotlinext.js.jsObject
 import kotlinx.browser.window
 import kotlinx.css.*
+import kotlinx.js.jso
+import mui.material.AppBarPosition
 import react.RBuilder
 import react.setState
 import styled.css
@@ -35,7 +37,7 @@ class TabsComponent(mProps: TabsProps): UstadBaseComponent<TabsProps,UmState>(mP
 
     private fun updateTabIndexState(selected: String) {
         val index = props.tabs.indexOfFirst { it.title == selected }
-        val state = window.history.state ?: jsObject()
+        val state = window.history.state ?: jso()
         state.asDynamic().tabIndex = index
         window.history.replaceState(state, "")
     }

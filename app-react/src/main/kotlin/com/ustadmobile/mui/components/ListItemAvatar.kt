@@ -1,6 +1,7 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.ext.createStyledComponent
+import mui.material.AvatarVariant
 import mui.material.ListItemAvatar
 import mui.material.ListItemAvatarProps
 import org.w3c.dom.HTMLImageElement

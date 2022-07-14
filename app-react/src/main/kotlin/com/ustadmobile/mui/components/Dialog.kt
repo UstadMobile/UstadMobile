@@ -17,7 +17,7 @@ fun RBuilder.umDialog(
     attrs.open = open
     attrs.fullWidth = fullWidth
     attrs.maxWidth = maxWidth
-    attrs.onClose = {
+    attrs.onClose = { _, _ ->
         onClose.invoke()
     }
 }
@@ -28,6 +28,7 @@ fun RBuilder.umDialogTitle(
     className: String? = null,
     handler: StyledHandler<DialogTitleProps>? = null
 ) = createStyledComponent(DialogTitle, className, handler){
+
     attrs.title = title
 }
 

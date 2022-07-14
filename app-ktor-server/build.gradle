@@ -34,13 +34,13 @@ sourceSets.main {
 
 dependencies {
     implementation "io.ktor:ktor-client-core:$version_ktor"
-    implementation "io.ktor:ktor-client-json:$version_ktor"
+    implementation "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
+    implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
     implementation "io.ktor:ktor-io:$version_ktor"
     implementation "com.soywiz.korlibs.klock:klock:$version_klock"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "io.ktor:ktor-server-netty:$version_ktor"
-    implementation "io.ktor:ktor-server-servlet:$version_ktor"
     implementation "io.ktor:ktor-server-cors:$version_ktor"
     implementation "io.ktor:ktor-server-call-logging:$version_ktor"
     implementation "io.ktor:ktor-server-content-negotiation:$version_ktor"

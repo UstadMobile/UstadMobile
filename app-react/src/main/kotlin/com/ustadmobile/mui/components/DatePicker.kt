@@ -10,6 +10,8 @@ import kotlinx.css.RuleSet
 import kotlinx.css.color
 import mui.lab.*
 import mui.material.BaseTextFieldProps
+import muix.pickers.MobileDatePickerProps
+import muix.pickers.MobileTimePickerProps
 import react.RBuilder
 import react.ReactElement
 import styled.StyledElementBuilder
@@ -43,7 +45,8 @@ private fun RBuilder.renderTextField(
     return umTextField(
         label = label,
         helperText = helperText,
-        error = error){
+        error = error
+    ){
         attrs.onClick = {
             props.inputProps?.onClick?.invoke(it.asDynamic())
         }

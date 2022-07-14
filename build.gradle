@@ -2,10 +2,10 @@
 import org.apache.tools.ant.filters.*
 
 buildscript {
-    ext.version_kotlin = '1.7.0'
+    ext.version_kotlin = '1.7.10'
     ext.version_shadow = "7.1.0"
     ext.version_gradle_versions_plugin = "0.28.0"
-    ext.atomicfu_version = '0.18.0'
+    ext.atomicfu_version = '0.18.2'
     ext.version_execfork = "0.2.0"
     ext.version_android_adbscreenrecorder = "0.1-alpha12"
 
@@ -26,6 +26,7 @@ buildscript {
         classpath 'com.google.gms:google-services:4.3.10'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
+        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$version_kotlin-1.0.6"
         classpath "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicfu_version"
         classpath "com.gradle:gradle-enterprise-gradle-plugin:3.10.2"
         classpath "com.github.ben-manes:gradle-versions-plugin:$version_gradle_versions_plugin"
@@ -70,7 +71,7 @@ allprojects {
 }
 
 //Major.minor.database version
-version = "0.4.2"
+version = "0.4.3"
 group = "com.ustadmobile.app"
 
 /**
@@ -80,7 +81,7 @@ group = "com.ustadmobile.app"
  */
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 230
+    ustadVersionCode = 231
 
     version_door = "0.0.60"
     version_retriever = "0.0.1e"
@@ -93,7 +94,7 @@ ext {
     version_klock = "2.4.13"
     version_ktor = "2.0.2"
     version_coroutines = "1.6.3"
-    version_atomicfu = "0.18.0"
+    version_atomicfu = "0.18.2"
 
     version_junit = "4.13"
     version_nanohttpd = "2.3.1"

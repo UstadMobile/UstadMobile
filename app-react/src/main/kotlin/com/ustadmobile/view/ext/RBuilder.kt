@@ -62,6 +62,8 @@ import io.github.aakira.napier.Napier
 import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
+import mui.material.AppBarPosition
+import mui.material.AvatarVariant
 import mui.material.GridProps
 import mui.material.GridWrap
 import org.kodein.di.DI
@@ -1448,7 +1450,7 @@ fun RBuilder.renderListItemWithIconAndTitle(
             onClick?.invoke()
         }
         umItem(GridSize.cells2, GridSize.cells1){
-            umAvatar(variant = AvatarVariant.circle) {
+            umAvatar(variant = AvatarVariant.circular) {
                 umIcon(iconName)
             }
         }

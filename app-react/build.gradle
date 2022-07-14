@@ -66,8 +66,9 @@ dependencies {
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation npm("react-google-charts","$version_npm_google_charts")
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+    implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
     implementation "io.ktor:ktor-client-js:$version_ktor"
-    implementation "io.ktor:ktor-client-json-js:$version_ktor"
+    implementation "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
     implementation npm("timezones.json","$version_npm_timezones")
     implementation npm("striptags","$version_npm_striptags")
     implementation npm("mime-matcher","$version_npm_mime_matcher")

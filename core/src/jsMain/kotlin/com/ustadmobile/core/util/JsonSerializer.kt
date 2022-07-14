@@ -1,6 +1,7 @@
 package com.ustadmobile.core.util
 
-import io.ktor.client.plugins.json.serializer.*
+import io.ktor.client.plugins.kotlinx.serializer.*
+
 
 /**
  * Set default serializer to be used, without setting this it will
