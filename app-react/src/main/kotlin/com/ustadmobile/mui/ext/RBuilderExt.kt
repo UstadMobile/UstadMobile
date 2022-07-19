@@ -4,6 +4,10 @@ import react.*
 import styled.StyledElementBuilder
 import styled.StyledHandler
 
+/**
+ * Creating MUI styled component, this makes sure components used current application's theme
+ * as set from react.
+ */
 fun <P : PropsWithClassName> RBuilder. createStyledComponent(
     componentType: ComponentType<P>,
     className: String? = null,
