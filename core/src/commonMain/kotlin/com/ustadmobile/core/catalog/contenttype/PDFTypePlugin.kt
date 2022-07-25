@@ -20,7 +20,8 @@ abstract class PDFTypePlugin : ContentPlugin {
     companion object {
 
         var PDF_MIME_MAP = mapOf("application/pdf" to ".pdf" ,
-                                "application/x-pdf" to ".pdf" )
+                                "application/x-pdf" to ".pdf" ,
+                                "application/octet-stream" to ".pdf")
 
         val PDF_EXT_LIST = listOf(".pdf")
 

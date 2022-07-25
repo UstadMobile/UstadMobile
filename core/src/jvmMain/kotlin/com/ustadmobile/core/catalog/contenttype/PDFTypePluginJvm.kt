@@ -80,9 +80,14 @@ class PDFTypePluginJvm(
             var pathInContainer = if(!pdfUri.isRemote()) {
                 pdfFile.name
             }else {
-                val extension = pdfUri.guessMimeType(context, di)?.let { mimeType ->
+                val theMimeType = pdfUri.guessMimeType(context, di)
+                val extension = theMimeType?.let { mimeType ->
                     PDF_MIME_MAP[mimeType]
                 } ?: throw IllegalArgumentException("Unknown mime type for $pdfUri")
+
+                //Note: Some pdf links eg: raw.github throw a wrong mimetype.
+                // Forcing a pdf extension here.
+                //val extension = ".pdf"
 
                 pdfUri.getFileName(context).requirePostfix(extension)
             }
