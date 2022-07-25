@@ -10,7 +10,9 @@ import com.ustadmobile.door.DoorMediatorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.mui.components.umTypography
 import com.ustadmobile.util.DraftJsUtil.clean
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -23,6 +25,7 @@ import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.formatDateRange
 import com.ustadmobile.view.components.AttachmentImageLookupAdapter
 import com.ustadmobile.view.ext.*
+import mui.material.styles.TypographyVariant
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState

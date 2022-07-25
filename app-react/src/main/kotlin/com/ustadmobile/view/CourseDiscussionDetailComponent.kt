@@ -8,7 +8,6 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.CourseDiscussion
 import com.ustadmobile.lib.db.entities.DiscussionTopicListDetail
-import com.ustadmobile.mui.components.FormControlComponent
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.mui.components.umTypography
@@ -130,7 +129,6 @@ class CourseDiscussionDetailComponent(mProps: UmProps): UstadDetailComponent<Cou
     ) = child(TopicListDetailComponent::class) {
         attrs.entries = entries
         attrs.hideDivider = true
-        FormControlComponent.div
 
         attrs.onEntryClicked = { topic ->
             mPresenter?.onClickTopic(topic)

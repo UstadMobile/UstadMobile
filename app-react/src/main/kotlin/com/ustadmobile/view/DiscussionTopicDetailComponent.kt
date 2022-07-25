@@ -8,8 +8,6 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.DiscussionTopic
-import com.ustadmobile.lib.db.entities.Holiday
-import com.ustadmobile.mui.components.FormControlComponent
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.mui.components.umTypography
@@ -19,7 +17,9 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.fromNow
 import com.ustadmobile.util.ext.toDate
-import com.ustadmobile.view.ext.*
+import com.ustadmobile.view.ext.renderPostsDetail
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
@@ -143,7 +143,6 @@ class DiscussionTopicDetailComponent(mProps: UmProps): UstadDetailComponent<Disc
     ) = child(PostListDetailComponent::class) {
         attrs.entries = entries
         attrs.hideDivider = true
-        FormControlComponent.div
         attrs.onEntryClicked = { post ->
             mPresenter?.onClickPost(post as DiscussionPostWithDetails)
         }

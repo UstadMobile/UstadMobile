@@ -8,7 +8,10 @@ import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.mui.components.umIcon
+import com.ustadmobile.mui.components.umTypography
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -20,6 +23,8 @@ import com.ustadmobile.view.ext.*
 import kotlinx.css.paddingBottom
 import kotlinx.css.paddingTop
 import kotlinx.css.px
+import mui.material.IconSize
+import mui.material.styles.TypographyVariant
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
@@ -183,7 +188,7 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
                         umItem(GridSize.cells12, GridSize.cells6){
                             css(StyleManager.umItemWithIconAndText)
 
-                            umIcon("people",fontSize = IconFontSize.small)
+                            umIcon("people",size = IconSize.small)
 
                             val numOfStudentTeachers = getString(MessageID.x_teachers_y_students)
                                 .format(item.numTeachers, item.numStudents)

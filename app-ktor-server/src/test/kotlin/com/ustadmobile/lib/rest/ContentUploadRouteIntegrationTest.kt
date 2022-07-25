@@ -40,6 +40,7 @@ import io.github.aakira.napier.Napier
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
+import io.ktor.server.config.*
 import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.ktor.di
@@ -70,7 +71,7 @@ class ContentUploadRouteIntegrationTest {
             ))
         }
 
-        this::class.java.getResourceAsStream("/com/ustadmobile/core/contentformats/epub/test.epub")
+        this::class.java.getResourceAsStream("/com/ustadmobile/core/contentformats/epub/test.epub")!!
             .writeToFile(tempEpubFile)
 
         endpointScope = EndpointScope()
@@ -103,6 +104,10 @@ class ContentUploadRouteIntegrationTest {
 
     private fun testContentUploadApplication(block: ApplicationTestBuilder.() -> Unit) {
         testApplication {
+            environment {
+                config = MapApplicationConfig("ktor.environment" to "test")
+            }
+
             application {
                 install(ContentNegotiation) {
                     gson {
@@ -128,9 +133,6 @@ class ContentUploadRouteIntegrationTest {
     fun givenRequestWithValidContent_whenUploaded_thenShouldSaveAsTempFileAndReturnMetaData() = testContentUploadApplication {
         runBlocking {
             val response = client.post("/contentupload/upload") {
-                val boundary = UUID.randomUUID().toString()
-                header(HttpHeaders.ContentType,
-                    ContentType.MultiPart.FormData.withParameter("boundary", boundary).toString())
                 setBody(MultiPartFormDataContent(
                     formData {
                          append("test.", FileInputStream(tempEpubFile).readBytes(), Headers.build {

@@ -17,6 +17,9 @@ import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umItemThumbnail
 import kotlinx.css.*
+import mui.material.AvatarVariant
+import mui.material.ChipColor
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css
@@ -118,7 +121,7 @@ class ClazzLogListAttendanceComponent (mProps: UmProps) : UstadListComponent<Cla
             umItem(GridSize.cells3, GridSize.cells1) {
                 umItemThumbnail(
                     "calendar_today",
-                    avatarVariant = AvatarVariant.circle
+                    avatarVariant = AvatarVariant.circular
                 )
             }
 

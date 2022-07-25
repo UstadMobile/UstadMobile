@@ -15,12 +15,12 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.GridSpacing
-import com.ustadmobile.mui.components.TypographyVariant
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 

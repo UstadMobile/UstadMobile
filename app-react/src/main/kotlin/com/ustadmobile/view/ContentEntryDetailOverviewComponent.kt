@@ -12,7 +12,6 @@ import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.chipSetFilter
@@ -30,6 +29,11 @@ import com.ustadmobile.util.ext.joinString
 import com.ustadmobile.view.components.AttachmentImageLookupAdapter
 import com.ustadmobile.view.ext.*
 import kotlinx.css.*
+import mui.material.ButtonColor
+import mui.material.ButtonVariant
+import mui.material.LinearProgressVariant
+import mui.material.Size
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css
@@ -138,7 +142,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
 
                     if((scoreProgress?.progress ?: 0) > 0){
                         umLinearProgress((scoreProgress?.progress ?: 0).toDouble(),
-                            variant = ProgressVariant.determinate){
+                            variant = LinearProgressVariant.determinate){
                             css (detailContentProgress)
                         }
                     }
@@ -147,8 +151,8 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
                         MessageID.download else MessageID.open
 
                     umButton(getString(buttonLabelId),
-                        size = ButtonSize.large,
-                        color = UMColor.secondary,
+                        size = Size.large,
+                        color = ButtonColor.secondary,
                         variant = ButtonVariant.contained,
                         onClick = {
                            if(contentEntryButtons?.showDownloadButton == true){

@@ -10,7 +10,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.UstadUrlComponents
-import com.ustadmobile.core.util.encodeURI
 import com.ustadmobile.core.util.encodeURIComponent
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
@@ -21,19 +20,16 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.toolbarJsCssToPartialCss
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.navigation.RouteManager.defaultDestination
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.navigation.UstadDestination
 import com.ustadmobile.redux.ReduxAppState
-import com.ustadmobile.util.*
 import com.ustadmobile.util.DraftJsUtil.clean
+import com.ustadmobile.util.FieldLabel
+import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.alignEndItems
 import com.ustadmobile.util.StyleManager.alignTextToStart
-import com.ustadmobile.util.StyleManager.chatLeft
-import com.ustadmobile.util.StyleManager.chatMessageContent
-import com.ustadmobile.util.StyleManager.chatRight
 import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.displayProperty
@@ -50,6 +46,8 @@ import com.ustadmobile.util.StyleManager.personListItemAvatar
 import com.ustadmobile.util.StyleManager.textGrayedOut
 import com.ustadmobile.util.StyleManager.theme
 import com.ustadmobile.util.StyleManager.toolbarTitle
+import com.ustadmobile.util.UmProps
+import com.ustadmobile.util.Util
 import com.ustadmobile.util.Util.ASSET_ACCOUNT
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.util.ext.*
@@ -62,8 +60,8 @@ import io.github.aakira.napier.Napier
 import kotlinx.browser.window
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
-import mui.material.GridProps
-import mui.material.GridWrap
+import mui.material.*
+import mui.material.styles.TypographyVariant
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.w3c.dom.HTMLImageElement
@@ -114,7 +112,7 @@ private fun guardRoute(
     component: KClass<out Component<UmProps, *>>,
     accountManager: UstadAccountManager,
     systemImpl: UstadMobileSystemImpl,
-): ReactElement?  = createElement {
+): ReactElement<UmProps>?  = createElement {
 
     var screenRequiresLocationRedirect = false
 
@@ -228,8 +226,11 @@ fun RBuilder.umEntityAvatar (
         }
     }
 
-    umAvatar(src = if(src.isNullOrEmpty()) fallbackSrc else src,
-        variant = variant, imgProps = imgProps, className = className) {
+    umAvatar(
+        src = if(src.isNullOrEmpty()) fallbackSrc else src,
+        variant = variant,
+        imgProps = imgProps,
+        className = className) {
         styledSpan{
             css{
                 position = Position.absolute
@@ -237,7 +238,9 @@ fun RBuilder.umEntityAvatar (
                 //padding = "20px"
             }
             if(clickEvent != null){
-                attrs.onClickFunction = clickEvent
+                attrs.onClickFunction = {
+                    clickEvent.invoke(it.asDynamic())
+                }
             }
 
             if(showIcon){
@@ -374,7 +377,7 @@ fun RBuilder.renderListItemWithLeftIconTitleAndDescription(
     title: String? = null,
     description: String? = null,
     onMainList: Boolean = false,
-    avatarVariant: AvatarVariant = AvatarVariant.circle,
+    avatarVariant: AvatarVariant = AvatarVariant.circular,
     titleVariant: TypographyVariant = TypographyVariant.body1
 ){
 
@@ -456,7 +459,7 @@ fun RBuilder.renderItemWithLeftIconTitleDescriptionAndIconBtnOnRight(
                 css{
                     width = 40.px
                 }
-                umIconButton(iconName, size = IconButtonSize.medium,
+                umIconButton(iconName, size = Size.medium,
                     onClick = {
                         stopEventPropagation(it)
                         onClick.invoke(true, it)
@@ -528,7 +531,7 @@ fun RBuilder.renderListItemWithPersonAttendanceAndPendingRequests(
                                                     onClickAccept?.invoke()
                                                 },
                                                 className = "${StyleManager.name}-successClass",
-                                                size = IconButtonSize.small)
+                                                size = Size.small)
                                         }
                                     }
 
@@ -543,7 +546,7 @@ fun RBuilder.renderListItemWithPersonAttendanceAndPendingRequests(
                                                     onClickDecline?.invoke()
                                                 },
                                                 className = "${StyleManager.name}-errorClass",
-                                                size = IconButtonSize.small)
+                                                size = Size.small)
                                         }
                                     }
                                 }
@@ -599,7 +602,7 @@ fun RBuilder.renderPersonWithAttemptProgress(
                             css{
                                 padding(right = 2.spacingUnits)
                             }
-                            umIcon("timer", fontSize = IconFontSize.small){
+                            umIcon("timer", size = IconSize.small){
                                 css{
                                     marginTop = 1.px
                                 }
@@ -630,10 +633,10 @@ fun RBuilder.renderPersonWithAttemptProgress(
                     }
                 }
 
-                if(item.scoreProgress?.progress ?: 0 > 0){
+                if((item.scoreProgress?.progress ?: 0) > 0){
                     umItem (GridSize.cells12, flexDirection = FlexDirection.row){
                         umLinearProgress(item.scoreProgress?.progress?.toDouble(),
-                            variant = ProgressVariant.determinate){
+                            variant= LinearProgressVariant.determinate){
                             css (StyleManager.studentProgressBar)
                         }
 
@@ -651,10 +654,10 @@ fun RBuilder.renderPersonWithAttemptProgress(
                     }
                 }
 
-                if(item.scoreProgress?.resultMax ?: 0 > 0){
+                if((item.scoreProgress?.resultMax ?: 0) > 0){
                     umItem (GridSize.cells12, flexDirection = FlexDirection.row){
                         umLinearProgress(item.scoreProgress?.resultMax?.toDouble(),
-                            variant = ProgressVariant.determinate){
+                            variant= LinearProgressVariant.determinate){
                             css (StyleManager.studentProgressBar)
                         }
                         styledSpan {
@@ -681,7 +684,7 @@ fun RBuilder.renderPersonWithAttemptProgress(
                             css {
                                 padding(right = 4.spacingUnits)
                             }
-                            umIcon("comment", fontSize = IconFontSize.small){
+                            umIcon("comment", size = IconSize.small){
                                 css{
                                     marginTop = 1.px
                                 }
@@ -730,7 +733,7 @@ fun RBuilder.renderAssignmentSubmittedProgress(
                             css {
                                 padding(right = 4.spacingUnits)
                             }
-                            umIcon("comment", fontSize = IconFontSize.small){
+                            umIcon("comment", size = IconSize.small){
                                 css{
                                     marginTop = 1.px
                                 }
@@ -753,7 +756,7 @@ fun RBuilder.renderAssignmentSubmittedProgress(
                     css {
                         padding(right = 1.spacingUnits)
                     }
-                    umIcon("check", fontSize = IconFontSize.small){
+                    umIcon("check", size = IconSize.small){
                         css{
                             marginTop = 1.px
                         }
@@ -852,7 +855,7 @@ fun RBuilder.renderCourseBlockAssignment(
         }
 
         umItem(GridSize.cells2, GridSize.cells1){
-            umItemThumbnail("assignment", avatarVariant = AvatarVariant.circle)
+            umItemThumbnail("assignment", avatarVariant = AvatarVariant.circular)
         }
 
         umItem(GridSize.cells10, GridSize.cells11){
@@ -889,7 +892,7 @@ fun RBuilder.renderCourseBlockAssignment(
                             css {
                                 padding(right = 1.spacingUnits)
                             }
-                            umIcon("event", fontSize = IconFontSize.small) {
+                            umIcon("event", size = IconSize.small) {
                                 css {
                                     marginTop = 1.px
                                 }
@@ -950,7 +953,7 @@ fun RBuilder.renderCourseBlockAssignment(
                                 umIcon(
                                     ASSIGNMENT_STATUS_MAP[item.assignment?.fileSubmissionStatus
                                         ?: 0] ?: "",
-                                    fontSize = IconFontSize.small
+                                    size = IconSize.small
                                 ) {
                                     css {
                                         marginTop = 1.px
@@ -996,7 +999,7 @@ fun RBuilder.renderListItemWithLeftIconTitleAndOptionOnRight(
 ){
     umGridContainer {
         umItem(GridSize.cells2,GridSize.cells1) {
-            umItemThumbnail(icon, avatarVariant = AvatarVariant.circle)
+            umItemThumbnail(icon, avatarVariant = AvatarVariant.circular)
         }
 
         umItem(GridSize.cells8, GridSize.cells9) {
@@ -1043,7 +1046,7 @@ fun RBuilder.renderConversationListItem(
 
         if(left){
             umItem(GridSize.cells2, GridSize.cells1) {
-                umItemThumbnail("person", avatarVariant = AvatarVariant.circle)
+                umItemThumbnail("person", avatarVariant = AvatarVariant.circular)
             }
         }
 
@@ -1087,7 +1090,7 @@ fun RBuilder.renderChatListItemWithCounter(
 ){
     umGridContainer {
         umItem(GridSize.cells2,GridSize.cells1) {
-            umItemThumbnail("person", avatarVariant = AvatarVariant.circle)
+            umItemThumbnail("person", avatarVariant = AvatarVariant.circular)
         }
 
         umItem(GridSize.cells8, GridSize.cells9) {
@@ -1160,7 +1163,7 @@ fun RBuilder.renderPostsDetail(
     umGridContainer {
 
         umItem(GridSize.cells2,GridSize.cells1) {
-            umItemThumbnail("person", avatarVariant = AvatarVariant.circle)
+            umItemThumbnail("person", avatarVariant = AvatarVariant.circular)
         }
 
         umItem(GridSize.cells8, GridSize.cells9) {
@@ -1209,7 +1212,7 @@ fun RBuilder.renderPostsDetail(
                     css {
                         padding(right = 1.spacingUnits)
                     }
-                    umIcon("chat", fontSize = IconFontSize.small) {
+                    umIcon("chat", size = IconSize.small) {
                         css {
                             marginTop = 1.px
                         }
@@ -1274,7 +1277,7 @@ fun RBuilder.renderCourseBlockTextOrModuleListItem(
                 css {
                     paddingLeft = leftPadding
                 }
-                umItemThumbnail(iconName, avatarVariant = AvatarVariant.circle)
+                umItemThumbnail(iconName, avatarVariant = AvatarVariant.circular)
             }
         }
 
@@ -1448,7 +1451,7 @@ fun RBuilder.renderListItemWithIconAndTitle(
             onClick?.invoke()
         }
         umItem(GridSize.cells2, GridSize.cells1){
-            umAvatar(variant = AvatarVariant.circle) {
+            umAvatar(variant = AvatarVariant.circular) {
                 umIcon(iconName)
             }
         }
@@ -1811,7 +1814,7 @@ fun RBuilder.renderListItemWithTitleAndSwitch(title: String, enabled: Boolean, o
             css{
                 +StyleManager.switchMargin
             }
-            umSwitch(enabled, color = UMColor.secondary)
+            umSwitch(enabled, color = SwitchColor.secondary)
         }
 
         css{
@@ -1871,7 +1874,7 @@ fun RBuilder.renderContentEntryListItem(
                 val progress = (item.scoreProgress?.progress ?: 0).toDouble()
                 if(progress > 0){
                     umLinearProgress(progress,
-                        variant = ProgressVariant.determinate){
+                        variant = LinearProgressVariant.determinate){
                         css (StyleManager.itemContentProgress)
                     }
                 }
@@ -1932,7 +1935,7 @@ fun RBuilder.renderContentEntryListItem(
                                                 width = 45.px
                                             }
                                             umIconButton(if(downloaded) "check_circle" else "download",
-                                                size = IconButtonSize.medium, onClick = {
+                                                size = Size.medium, onClick = {
                                                     stopEventPropagation(it)
                                                     //onSecondaryAction?.invoke()
                                                 }){
@@ -1946,7 +1949,7 @@ fun RBuilder.renderContentEntryListItem(
                                         css(alignCenterItems)
                                         umButton(systemImpl.getString(MessageID.select_item, this).format(""),
                                             variant = ButtonVariant.outlined,
-                                            color = UMColor.secondary,
+                                            color = ButtonColor.secondary,
                                             onClick = {
                                                 stopEventPropagation(it)
                                                 onSecondaryAction?.invoke()

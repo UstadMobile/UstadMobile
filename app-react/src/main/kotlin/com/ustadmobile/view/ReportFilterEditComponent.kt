@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.ReportFilterEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -12,6 +11,7 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.UidAndLabel
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
@@ -23,6 +23,7 @@ import com.ustadmobile.view.ext.renderCreateNewItemOnList
 import com.ustadmobile.view.ext.renderListItemWithTitleDescriptionAndRightAction
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import mui.material.FormControlVariant
 import react.RBuilder
 import react.dom.html.InputType
 import react.setState

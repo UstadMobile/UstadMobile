@@ -1,7 +1,6 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
-import com.ustadmobile.mui.components.FormControlComponent
 import com.ustadmobile.util.Util
 import com.ustadmobile.view.ext.renderListItemWithPersonTitleDescriptionAndAvatarOnLeft
 import com.ustadmobile.view.ext.umGridContainer
@@ -37,6 +36,5 @@ fun RBuilder.renderComments(
 ) = child(CommentsListComponent::class) {
     attrs.entries = entries
     attrs.hideDivider = true
-    FormControlComponent.div
     attrs.onEntryClicked = onEntryClicked
 }

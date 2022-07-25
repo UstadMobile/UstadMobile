@@ -14,7 +14,10 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.mui.components.umDivider
+import com.ustadmobile.mui.components.umTypography
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
@@ -28,6 +31,7 @@ import com.ustadmobile.view.ext.*
 import kotlinx.css.LinearDimension
 import kotlinx.css.marginTop
 import kotlinx.css.padding
+import mui.material.styles.TypographyVariant
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState

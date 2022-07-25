@@ -6,7 +6,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.CourseGroupSetDetailView
 import com.ustadmobile.lib.db.entities.CourseGroupMemberPerson
 import com.ustadmobile.lib.db.entities.CourseGroupSet
-import com.ustadmobile.mui.components.TypographyVariant
 import com.ustadmobile.mui.components.umList
 import com.ustadmobile.mui.components.umListItem
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -18,6 +17,7 @@ import com.ustadmobile.view.ext.renderListItemWithLeftIconTitleAndDescription
 import com.ustadmobile.view.ext.renderListSectionTitle
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umSpacer
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css

@@ -39,13 +39,14 @@ kotlin {
 
 dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-react:$version_kotlin_react"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-dom:$version_kotlin_react"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-styled:$version_kotlin_styled"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom:$version_kotlin_react_router_dom"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-redux:$version_kotlin_redux"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux:$version_kotlin_react_redux"
-    implementation "org.jetbrains.kotlin-wrappers:kotlin-mui:$version_kotlin_mui"
+    implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-dom"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-styled"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-router-dom"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-redux"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-mui"
     implementation project(":lib-database-mpp")
     implementation project(":core")
     implementation project(":lib-util")
@@ -66,8 +67,9 @@ dependencies {
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation npm("react-google-charts","$version_npm_google_charts")
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
+    implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
     implementation "io.ktor:ktor-client-js:$version_ktor"
-    implementation "io.ktor:ktor-client-json-js:$version_ktor"
+    implementation "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
     implementation npm("timezones.json","$version_npm_timezones")
     implementation npm("striptags","$version_npm_striptags")
     implementation npm("mime-matcher","$version_npm_mime_matcher")
@@ -77,8 +79,8 @@ dependencies {
     implementation npm("react-easy-sort","$version_npm_react_easy_sort")
     implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
     implementation "io.github.aakira:napier:$version_napier"
-
-   implementation npm("linkifyjs", "$version_linkify_js")
+    implementation npm("linkifyjs", "$version_linkify_js")
     implementation npm("linkify-react", "$version_linkify_react")
 }
+
 

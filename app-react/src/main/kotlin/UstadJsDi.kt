@@ -1,8 +1,10 @@
+
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.navigation.NavControllerJs
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
 import com.ustadmobile.core.util.ContentEntryOpener
@@ -12,7 +14,6 @@ import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.core.navigation.NavControllerJs
 import com.ustadmobile.redux.ReduxAppStateManager
 import com.ustadmobile.redux.ReduxThemeState
 import com.ustadmobile.util.ContainerMounterJs
@@ -21,7 +22,8 @@ import com.ustadmobile.xmlpullparserkmp.XmlSerializer
 import io.ktor.client.*
 import io.ktor.client.engine.js.*
 import io.ktor.client.plugins.*
-import io.ktor.client.plugins.json.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -117,7 +119,9 @@ internal fun ustadJsDi(
 
     bind<HttpClient>() with singleton {
         HttpClient(Js) {
-            install(JsonFeature)
+            install(ContentNegotiation) {
+                json(json = instance())
+            }
             install(HttpTimeout)
         }
     }

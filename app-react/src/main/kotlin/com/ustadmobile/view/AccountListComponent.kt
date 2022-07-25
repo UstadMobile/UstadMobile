@@ -7,7 +7,6 @@ import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultMarginTop
@@ -23,6 +22,10 @@ import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umProfileAvatar
 import kotlinx.css.*
+import mui.material.ButtonColor
+import mui.material.ButtonVariant
+import mui.material.Size
+import mui.material.styles.TypographyVariant
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
@@ -197,9 +200,9 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                         umGridContainer(GridSpacing.spacing2) {
                             umItem(GridSize.cells7, GridSize.cells4){
                                 umButton(getString(MessageID.my).format(getString(MessageID.profile)),
-                                    size = ButtonSize.large,
+                                    size = Size.large,
                                     variant = ButtonVariant.outlined,
-                                    color = UMColor.primary,
+                                    color = ButtonColor.primary,
                                     onClick = {
                                         it.stopPropagation()
                                         presenter.handleClickProfile(item.person.personUid)
@@ -209,9 +212,9 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
                             if(props.activeAccount){
                                 umItem(GridSize.cells5, GridSize.cells4){
                                     umButton(getString(MessageID.logout),
-                                        size = ButtonSize.large,
+                                        size = Size.large,
                                         variant = ButtonVariant.outlined,
-                                        color = UMColor.primary,
+                                        color = ButtonColor.primary,
                                         onClick = {
                                             presenter.handleClickLogout(item)
                                         })

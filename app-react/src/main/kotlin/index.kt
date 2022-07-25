@@ -27,7 +27,6 @@ import com.ustadmobile.util.ThemeManager.createAppTheme
 import com.ustadmobile.view.renderExtraActiveTabWarningComponent
 import com.ustadmobile.view.renderMainComponent
 import com.ustadmobile.view.renderSplashComponent
-import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
@@ -91,13 +90,13 @@ fun main() {
                 null
             }
 
-            val rootElement = document.getElementById("root")
+            val rootElement = document.getElementById("root")!!
             val rootDirectionAttrVal = if(displayedLocale in UstadMobileConstants.RTL_LANGUAGES) {
                 "rtl"
             }else {
                 "ltr"
             }
-            rootElement?.setAttribute("dir", rootDirectionAttrVal)
+            rootElement.setAttribute("dir", rootDirectionAttrVal)
 
             val di = ustadJsDi(dbBuilt, dbNodeIdAndAuth, appConfigs, apiUrl, defaultStringsXmlStr,
                 foreignStringXmlStr)

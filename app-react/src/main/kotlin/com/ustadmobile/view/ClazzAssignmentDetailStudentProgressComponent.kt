@@ -25,6 +25,10 @@ import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
 import kotlinx.css.height
 import kotlinx.css.px
+import mui.material.ButtonVariant
+import mui.material.FormControlVariant
+import mui.material.InputLabelVariant
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.dom.html.InputType
 import react.setState
@@ -224,7 +228,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                                 umInputLabel("${markLabel.text}",
                                     id = markLabel.id,
                                     error = markLabel.error,
-                                    variant = FormControlVariant.outlined,
+                                    variant = InputLabelVariant.outlined,
                                     htmlFor = markLabel.id)
                                 umOutlinedInput(
                                     id = markLabel.id,

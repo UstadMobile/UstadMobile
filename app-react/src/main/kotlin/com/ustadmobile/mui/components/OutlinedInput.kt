@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.createReUsableComponent
 import mui.material.OutlinedInput
 import mui.material.OutlinedInputProps
 import react.RBuilder
@@ -29,7 +29,7 @@ fun RBuilder.umOutlinedInput(
     onChange: ((String) -> Unit)? = null,
     className: String? = null,
     handler: StyledHandler<OutlinedInputProps>? = null
-) = createStyledComponent(OutlinedInput, className, handler) {
+) = createReUsableComponent(OutlinedInput, className, handler) {
     autoFocus?.let { attrs.autoFocus = it }
     defaultValue?.let { attrs.defaultValue = it }
     disabled?.let { attrs.disabled = it }

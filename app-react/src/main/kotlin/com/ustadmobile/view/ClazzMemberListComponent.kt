@@ -4,13 +4,10 @@ import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzMemberListView
-import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorDataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.mui.components.GridSize

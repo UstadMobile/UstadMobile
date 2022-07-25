@@ -8,6 +8,8 @@ import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmState
 import com.ustadmobile.view.ext.umGridContainer
 import kotlinx.css.*
+import mui.material.TypographyAlign
+import mui.material.styles.TypographyVariant
 import org.kodein.di.DI
 import org.kodein.di.instance
 import react.RBuilder

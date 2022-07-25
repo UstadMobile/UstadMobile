@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 32
     }
     namespace 'com.ustadmobile.lib.db.entities'
 

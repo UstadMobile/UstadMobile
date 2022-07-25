@@ -24,6 +24,7 @@ import com.ustadmobile.view.components.AttachmentImageComponent
 import com.ustadmobile.view.ext.*
 import io.github.aakira.napier.Napier
 import kotlinx.browser.document
+import mui.material.FormControlVariant
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 import react.RBuilder

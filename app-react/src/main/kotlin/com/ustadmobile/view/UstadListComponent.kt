@@ -15,7 +15,6 @@ import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.EmptyList
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignCenterItems
@@ -39,6 +38,11 @@ import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.window
 import kotlinx.css.*
+import mui.material.ChipColor
+import mui.material.IconButtonColor
+import mui.material.ListItemAlignItems
+import mui.material.TypographyAlign
+import mui.material.styles.TypographyVariant
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -515,7 +519,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                         }
 
                         umIconButton("close",
-                            color = UMColor.default){
+                            color = IconButtonColor.default){
                             css{
                                 marginTop = 4.px
                             }
@@ -558,7 +562,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                                marginLeft = 2.spacingUnits
                            }
                            umIconButton(SELECTION_ICONS_MAP[option]?:"delete",
-                               color = UMColor.default){
+                               color = IconButtonColor.default){
                                attrs.onClick = {
                                    stopEventPropagation(it)
                                    val selectedEntries = copyOnWriteListOf(selectedListItems)

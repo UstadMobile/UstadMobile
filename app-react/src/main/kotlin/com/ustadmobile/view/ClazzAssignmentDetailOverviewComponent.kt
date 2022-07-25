@@ -21,6 +21,8 @@ import kotlinx.css.FlexDirection
 import kotlinx.css.height
 import kotlinx.css.padding
 import kotlinx.css.px
+import mui.material.ButtonVariant
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css
