@@ -3,7 +3,6 @@ package com.ustadmobile.core.catalog.contenttype
 import android.content.Context
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
-import com.linkedin.android.litr.MediaTransformer
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
@@ -84,7 +83,6 @@ class PDFPluginAndroid(
                 localUri.getFileName(context))
             val params: Map<String, String> = safeParse(di, MapSerializer(String.serializer(), String.serializer()),
                 jobItem.contentJob?.params ?: "")
-            val mediaTransformer = MediaTransformer(context as Context)
             val pdfIsProcessed = contentJobItem.cjiContainerUid != 0L
 
             try {
@@ -155,7 +153,6 @@ class PDFPluginAndroid(
                 throw c
             }finally {
                 pdfTempDir.deleteRecursively()
-                mediaTransformer.release()
             }
         }
     }

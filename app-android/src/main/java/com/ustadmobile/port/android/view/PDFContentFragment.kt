@@ -48,6 +48,29 @@ class PDFContentFragment : UstadBaseFragment(), PDFContentView {
         }
         pdfView?.setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
 
+        pdfView?.setOnImageEventListener(object: SubsamplingScaleImageView.OnImageEventListener {
+            override fun onReady() {
+            }
+
+            override fun onImageLoaded() {
+            }
+
+            override fun onPreviewLoadError(e: java.lang.Exception?) {
+                showOpenError(e?.message?:"")
+            }
+
+            override fun onImageLoadError(e: java.lang.Exception?) {
+                showOpenError(e?.message?:"")
+            }
+
+            override fun onTileLoadError(e: java.lang.Exception?) {
+            }
+
+            override fun onPreviewReleased() {
+            }
+
+        })
+
         val accountManager: UstadAccountManager = di.direct.instance()
         db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
         containerUid = arguments?.getString(UstadView.ARG_CONTAINER_UID)?.toLong() ?: 0L
@@ -96,6 +119,10 @@ class PDFContentFragment : UstadBaseFragment(), PDFContentView {
                 requireContext()), {}, 0)
     }
 
+    fun showOpenError(message: String?) {
+        showSnackBar(systemImpl.getString(MessageID.error_opening_file,
+                requireContext()) + " " + message, {}, 0)
+    }
 
     companion object {
 
