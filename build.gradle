@@ -203,7 +203,6 @@ ext {
     version_npm_moment = "^2.29.4"
     version_npm_moment_timezone = "^0.5.34"
     version_npm_mement_io = "^2.14.0"
-    version_npm_picker_ui = "^3.3.10" //check this and remove if not used
     version_npm_mui_lab = "5.0.0-alpha.89"
 
     // These should be EXACTLY the same version as MUI kotlin wrapper.
@@ -211,14 +210,13 @@ ext {
     version_npm_mui_icons = "5.8.4"
     version_npm_mui_material = "5.8.7"
 
-    version_npm_timezones = "^1.6.1" //check below here for updates
+    version_npm_timezones = "^1.6.1"
     version_npm_buffer = "^6.0.3"
     version_npm_asmcrypto = "2.3.2"
     version_npm_emotion = "11.6.0"
     version_npm_google_charts = "^3.0.15"
     version_npm_html_to_image = "^1.9.0"
     version_npm_date_fns = "2.29.1"
-    version_npm_date_io_fns = "2.14.0"
     version_npm_mime_matcher = "^1.0.5"
     version_npm_mui_rte = "^2.0.1"
     version_npm_draft_js = "^0.11.7"

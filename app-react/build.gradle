@@ -62,7 +62,6 @@ dependencies {
     implementation npm("@mui/material","$version_npm_mui_material")
     implementation npm("@mui/icons-material","$version_npm_mui_icons")
     implementation npm("date-fns","$version_npm_date_fns")
-    implementation npm("@date-io/date-fns","$version_npm_date_io_fns")
     implementation npm("html-to-image","$version_npm_html_to_image")
     implementation "com.github.UstadMobile.door:room-annotations:$version_door"
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
