@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import kotlinx.css.Color
 import kotlinx.css.color
 import mui.material.Input
@@ -40,7 +40,7 @@ fun RBuilder.umInput(
     className: String? = null,
     endAdornment: ReactElement<*>? = null,
     handler: StyledHandler<InputProps>? = null
-) = createReUsableComponent(Input, className, handler) {
+) = convertFunctionalToClassElement(Input, className, handler) {
     autoFocus?.let{ attrs.autoFocus = it }
     defaultValue?.let { attrs.defaultValue = it }
     disabled?.let { attrs.disabled = it }

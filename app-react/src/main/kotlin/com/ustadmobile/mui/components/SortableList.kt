@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.UmState
 import react.ComponentType
 import react.RBuilder
@@ -39,7 +39,7 @@ fun RBuilder.umSortableList(
     useDragHandle: Boolean = true,
     className: String? = null,
     handler: StyledHandler<SortableListProps>? = null
-) = createReUsableComponent(
+) = convertFunctionalToClassElement(
     SortableListComponent.unsafeCast<ComponentType<SortableListProps>>(),
     className, handler){
     onSortEnd?.let {
@@ -53,7 +53,7 @@ fun RBuilder.umSortableItem(
     key: String,
     className: String? = null,
     handler: StyledHandler<SortableItemProps>? = null
-) = createReUsableComponent(
+) = convertFunctionalToClassElement(
     SortableItemComponent.unsafeCast<ComponentType<SortableItemProps>>(),
     className, handler){
     attrs.key = key
@@ -61,7 +61,7 @@ fun RBuilder.umSortableItem(
 
 fun RBuilder.umSortableKnob(
     className: String? = null,
-    handler: StyledHandler<SortableKnobProps>? = null) = createReUsableComponent(
+    handler: StyledHandler<SortableKnobProps>? = null) = convertFunctionalToClassElement(
     SortableHandleComponent.unsafeCast<ComponentType<SortableKnobProps>>(),
     className, handler)
 

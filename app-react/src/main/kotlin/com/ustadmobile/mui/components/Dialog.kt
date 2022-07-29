@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.components
 
 import Breakpoint
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.*
 import react.RBuilder
 import react.ReactNode
@@ -17,7 +17,7 @@ fun RBuilder.umDialog(
     maxWidth: Breakpoint = Breakpoint.sm,
     className: String? = null,
     handler: StyledHandler<DialogProps>? = null
-) = createReUsableComponent(Dialog, className, handler){
+) = convertFunctionalToClassElement(Dialog, className, handler){
     attrs.open = open
     attrs.fullWidth = fullWidth
     attrs.maxWidth = maxWidth
@@ -31,7 +31,7 @@ fun RBuilder.umDialogTitle(
     title: String,
     className: String? = null,
     handler: StyledHandler<UMDialogTitleProps>? = null
-) = createReUsableComponent(DialogTitle, className, handler){
+) = convertFunctionalToClassElement(DialogTitle, className, handler){
 
     attrs.children = ReactNode(title)
 }
@@ -40,10 +40,10 @@ fun RBuilder.umDialogTitle(
 fun RBuilder.umDialogActions(
     className: String? = null,
     handler: StyledHandler<DialogActionsProps>? = null
-) = createReUsableComponent(DialogActions, className, handler)
+) = convertFunctionalToClassElement(DialogActions, className, handler)
 
 
 fun RBuilder.umDialogContent(
     className: String? = null,
     handler: StyledHandler<DialogContentProps>? = null
-) = createReUsableComponent(DialogContent, className, handler)
+) = convertFunctionalToClassElement(DialogContent, className, handler)

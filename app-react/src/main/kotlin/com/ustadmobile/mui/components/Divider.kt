@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Divider
 import mui.material.DividerProps
 import mui.material.DividerVariant
@@ -20,7 +20,7 @@ fun RBuilder.umDivider(
     component: String = "hr",
     className: String? = null,
     handler: StyledHandler<UMDividerProps>? = null
-) = createReUsableComponent(Divider, className, handler) {
+) = convertFunctionalToClassElement(Divider, className, handler) {
     attrs.absolute = absolute
     attrs.asDynamic().component = component
     attrs.light = light

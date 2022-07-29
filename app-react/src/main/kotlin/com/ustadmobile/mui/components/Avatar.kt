@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Avatar
 import mui.material.AvatarProps
 import mui.material.AvatarVariant
@@ -18,7 +18,7 @@ fun RBuilder.umAvatar(
     sizes: String? = null,
     className: String? = null,
     handler: StyledHandler<AvatarProps>? = null
-) = createReUsableComponent(Avatar, className, handler) {
+) = convertFunctionalToClassElement(Avatar, className, handler) {
     imgProps?.let {attrs.imgProps = imgProps }
     alt?.let { attrs.alt = alt }
     sizes?.let { attrs.sizes = sizes }

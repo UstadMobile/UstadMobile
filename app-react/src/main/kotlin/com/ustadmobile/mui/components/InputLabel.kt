@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.InputLabel
 import mui.material.InputLabelMargin
 import mui.material.InputLabelProps
@@ -23,7 +23,7 @@ fun RBuilder.umInputLabel (
     margin: InputLabelMargin? = null,
     className: String? = null,
     handler: StyledHandler<InputLabelProps>? = null
-) = createReUsableComponent(InputLabel, className, handler) {
+) = convertFunctionalToClassElement(InputLabel, className, handler) {
     disabled?.let { attrs.disabled = it }
     attrs.disableAnimation = disableAnimation
     htmlFor?.let { attrs.htmlFor = it }

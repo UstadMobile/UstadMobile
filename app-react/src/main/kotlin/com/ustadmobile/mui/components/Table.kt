@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.*
 import react.RBuilder
 import styled.StyledHandler
@@ -11,7 +11,7 @@ fun RBuilder.umTable(
     padding: TablePadding = TablePadding.normal,
     className: String? = null,
     handler: StyledHandler<TableProps>? = null
-) = createReUsableComponent(Table, className, handler) {
+) = convertFunctionalToClassElement(Table, className, handler) {
     attrs.padding = padding
     attrs.size = size as BaseSize
     attrs.stickyHeader = stickyHeader
@@ -20,20 +20,20 @@ fun RBuilder.umTable(
 fun RBuilder.umTableBody(
     className: String? = null,
     handler: StyledHandler<TableBodyProps>? = null
-) = createReUsableComponent(TableBody, className, handler) {}
+) = convertFunctionalToClassElement(TableBody, className, handler) {}
 
 
 fun RBuilder.umTableHead(
     className: String? = null,
     handler: StyledHandler<TableHeadProps>? = null
-) = createReUsableComponent(TableHead, className, handler) {}
+) = convertFunctionalToClassElement(TableHead, className, handler) {}
 
 fun RBuilder.umTableRow(
     className: String? = null,
     hover: Boolean = false,
     selected: Boolean = false,
     handler: StyledHandler<TableRowProps>? = null
-) = createReUsableComponent(TableRow, className, handler) {
+) = convertFunctionalToClassElement(TableRow, className, handler) {
     attrs.hover = hover
     attrs.selected = selected
 }
@@ -46,7 +46,7 @@ fun RBuilder.umTableCell(
     size: Size = Size.medium,
     className: String? = null,
     handler: StyledHandler<TableCellProps>? = null
-) = createReUsableComponent(TableCell, className, handler) {
+) = convertFunctionalToClassElement(TableCell, className, handler) {
     attrs.padding = padding
     attrs.size = size as? BaseSize
     attrs.align = align
@@ -57,4 +57,4 @@ fun RBuilder.umTableCell(
 fun RBuilder.umTableContainer(
     className: String? = null,
     handler: StyledHandler<TableContainerProps>? = null
-) = createReUsableComponent(TableContainer, className, handler){}
+) = convertFunctionalToClassElement(TableContainer, className, handler){}

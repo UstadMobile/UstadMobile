@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.*
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -20,7 +20,7 @@ fun RBuilder.umChip(
     variant: ChipVariant = ChipVariant.filled,
     className: String? = null,
     handler: StyledHandler<ChipProps>? = null
-) = createReUsableComponent(Chip, className, handler) {
+) = convertFunctionalToClassElement(Chip, className, handler) {
     avatar?.let { attrs.avatar = it }
     attrs.color = color
     attrs.label = ReactNode(label)

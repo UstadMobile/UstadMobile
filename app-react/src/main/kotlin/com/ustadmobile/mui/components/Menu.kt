@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Menu
 import mui.material.MenuProps
 import mui.material.MenuVariant
@@ -16,7 +16,7 @@ fun RBuilder.umMenu(
     className: String? = null,
     variant: MenuVariant = MenuVariant.menu,
     handler: StyledHandler<MenuProps>? = null
-) = createReUsableComponent(Menu, className, handler){
+) = convertFunctionalToClassElement(Menu, className, handler){
     attrs.open = open
     attrs.onClose = {
         onClose?.invoke()

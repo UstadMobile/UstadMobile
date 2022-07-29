@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.Util
 import mui.material.*
@@ -23,7 +23,7 @@ fun RBuilder.umButton(
     id: String = this::class.js.name,
     className: String? = null,
     handler: StyledHandler<ButtonProps>? = null
-) = createReUsableComponent(Button, className, handler) {
+) = convertFunctionalToClassElement(Button, className, handler) {
     childList.add(ReactNode(label))
     attrs.color = color
     attrs.disabled = disabled

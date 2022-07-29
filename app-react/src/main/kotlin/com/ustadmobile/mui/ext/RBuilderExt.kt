@@ -9,21 +9,18 @@ import styled.StyledElementBuilder
 import styled.StyledHandler
 
 /**
- * createReUsableComponent, convert functional and un-styled components
- * to styled ReactElements which makes components re-usable and it provide
- * more flexibility and it's a robust way of dealing with React components.
+ * convertFunctionalToClassElement, convert functional and un-styled react elements
+ * to styled and class elements which makes those elements re-usable as it provides
+ * more flexibility when dealing with class components.
  *
- * There are react components (i.e TextFiled, Button, Chips,Avatar e.tc ) which requires complex
- * ReactNode as children, with functional components that can't be achieved since components are
- * being treated as functions instead of ReactNodes.
+ * Our current apps architecture requires class components over functional components
+ * that's why we do convert functional to class react elements.
  *
- * In React JS, this is handled easily, since props are functional by default
- * while in React Kotlin props are variables.
- * i.e in JS <Component prop = { ....put react-node or functional component }/>
+ * Read more: https://reactjs.org/docs/components-and-props.html
+ * More to read: https://www.twilio.com/blog/react-choose-functional-components
  *
- * Read more https://mui.com/system/styled/
  */
-fun <P : PropsWithClassName> RBuilder. createReUsableComponent(
+fun <P : PropsWithClassName> RBuilder. convertFunctionalToClassElement(
     componentType: ComponentType<P>,
     className: String? = null,
     handler: StyledHandler<P>? = null,

@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.*
 import react.RBuilder
 import styled.StyledHandler
@@ -14,7 +14,7 @@ fun RBuilder.umToggleButtonGroup(
     className: String? = null,
     onChange: ((Any)->Unit)? = null,
     handler: StyledHandler<ToggleButtonGroupProps>? = null
-) = createReUsableComponent(ToggleButtonGroup, className, handler) {
+) = convertFunctionalToClassElement(ToggleButtonGroup, className, handler) {
     attrs.orientation = orientation
     attrs.size = size
     attrs.disabled = disabled
@@ -34,7 +34,7 @@ fun RBuilder.umToggleButton(
     disabled: Boolean = false,
     className: String? = null,
     handler: StyledHandler<ToggleButtonProps>? = null
-) = createReUsableComponent(ToggleButton, className, handler) {
+) = convertFunctionalToClassElement(ToggleButton, className, handler) {
     attrs.selected = selected
     attrs.size = size
     attrs.disabled = disabled

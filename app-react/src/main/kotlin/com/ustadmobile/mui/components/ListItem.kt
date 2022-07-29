@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.Util
 import mui.material.ContainerProps
 import mui.material.ListItem
@@ -80,7 +80,7 @@ fun RBuilder.umListItem(
     onClick: ((Event) -> Unit)? = null,
     className: String? = null,
     handler: StyledHandler<ListItemProps>? = null
-) = createReUsableComponent(ListItem, className, handler) {
+) = convertFunctionalToClassElement(ListItem, className, handler) {
     attrs.alignItems = alignItems
     attrs.autoFocus = autoFocus
     attrs.asDynamic().button = button

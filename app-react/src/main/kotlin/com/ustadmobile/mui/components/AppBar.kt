@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.AppBar
 import mui.material.AppBarColor
 import mui.material.AppBarPosition
@@ -15,7 +15,7 @@ fun RBuilder.umAppBar(
     className: String? = null,
     enableColorOnDark: Boolean = false,
     handler: StyledHandler<AppBarProps>? = null
-) = createReUsableComponent(AppBar, className, handler) {
+) = convertFunctionalToClassElement(AppBar, className, handler) {
     attrs.color = color
     attrs.position = position
     attrs.enableColorOnDark = enableColorOnDark

@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.Util.stopEventPropagation
 import mui.material.*
 import org.w3c.dom.events.Event
@@ -13,12 +13,13 @@ fun RBuilder.umIconButton(
     disabled: Boolean = false,
     onClick: ((Event) -> Unit)? = null,
     size: Size = Size.medium,
+    iconSize: IconSize = IconSize.medium,
     iconColor: IconColor = IconColor.inherit,
     id: String? = null,
     edge: IconButtonEdge? = null,
     className: String? = null,
     handler: StyledHandler<IconButtonProps>? = null
-) = createReUsableComponent(IconButton, className, handler) {
+) = convertFunctionalToClassElement(IconButton, className, handler) {
     attrs.color = color
     attrs.disabled = disabled
     attrs.disableFocusRipple = disabled
@@ -32,7 +33,6 @@ fun RBuilder.umIconButton(
     id?.let { attrs.id = it }
 
     if (iconName != null) {
-
-        umIcon(iconName, color = iconColor, size = size as IconSize)
+        umIcon(iconName, color = iconColor, size = iconSize)
     }
 }

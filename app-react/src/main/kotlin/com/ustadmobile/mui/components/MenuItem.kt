@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.MenuItem
 import mui.material.MenuItemProps
 import org.w3c.dom.events.Event
@@ -56,7 +56,7 @@ fun RBuilder.umMenuItem(
     className: String? = null,
     handler: StyledHandler<MenuItemProps>? = null
 ) {
-    createReUsableComponent(MenuItem, className, handler) {
+    convertFunctionalToClassElement(MenuItem, className, handler) {
         attrs.asDynamic().button = button
         component?.let { attrs.asDynamic().component = it }
         attrs.asDynamic().containerComponent = containerComponent

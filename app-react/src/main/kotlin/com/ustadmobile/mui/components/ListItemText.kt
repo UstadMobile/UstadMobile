@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.ListItemText
 import mui.material.ListItemTextProps
 import react.RBuilder
@@ -14,7 +14,7 @@ fun RBuilder.umListItemText(
     disableTypography: Boolean = false,
     className: String? = null,
     handler: StyledHandler<ListItemTextProps>? = null
-) = createReUsableComponent(ListItemText, className, handler) {
+) = convertFunctionalToClassElement(ListItemText, className, handler) {
     attrs.disableTypography = disableTypography
     attrs.inset = inset
     primary?.let { _primary -> attrs.primary = ReactNode(_primary) }

@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.ext.DATE_FORMAT_DD_MM_YYYY
 import com.ustadmobile.util.ext.TIME_FORMAT_H_M
@@ -83,7 +83,7 @@ fun RBuilder.timePicker(
     views: Array<String>? = null,
     className: String? = null,
     handler: StyledHandler<UMTimePickerProps>? = null
-) = createReUsableComponent(MobileTimePicker, className, handler){
+) = convertFunctionalToClassElement(MobileTimePicker, className, handler){
     setProps(this,true,label, onChange, value, inputFormat, helperText,
         error, minTime, maxTime, onAccept, onClose, onError,cancelText, okText,
         inputVariant, openTo,toolbarTitle,views, ampm, ampmInClock)
@@ -109,7 +109,7 @@ fun RBuilder.datePicker(
     views: Array<String>? = null,
     className: String? = null,
     handler: StyledHandler<UMDatePickerProps>? = null
-) = createReUsableComponent(MobileDatePicker, className, handler){
+) = convertFunctionalToClassElement(MobileDatePicker, className, handler){
     setProps(this,false,label, onChange, value, inputFormat, helperText,
         error, minDate, maxDate, onAccept, onClose, onError,cancelText, okText,
         inputVariant, openTo,toolbarTitle,views)

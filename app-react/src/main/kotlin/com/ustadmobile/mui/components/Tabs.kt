@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.*
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.events.Event
@@ -28,7 +28,7 @@ fun RBuilder.umTabs(
     action: ((actions: Any) -> Unit)? = null,
     className: String? = null,
     handler: StyledHandler<UMTabsProps>? = null
-) = createReUsableComponent(Tabs, className, handler) {
+) = convertFunctionalToClassElement(Tabs, className, handler) {
     action?.let { attrs.asDynamic().action = it }
     attrs.centered = centered
     attrs.indicatorColor = indicatorColor
@@ -49,7 +49,7 @@ fun RBuilder.umTab(
     disabled: Boolean = false,
     className: String? = null,
     handler: StyledHandler<TabProps>? = null
-) = createReUsableComponent(Tab, className, handler) {
+) = convertFunctionalToClassElement(Tab, className, handler) {
     attrs.disabled = disabled
     icon?.let { attrs.icon = ReactNode(it) }
     attrs.label = ReactNode(label)

@@ -4,7 +4,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.mui.components.spacingUnits
 import com.ustadmobile.mui.components.umTypography
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmState
 import kotlinx.css.Color
@@ -51,7 +51,7 @@ fun RBuilder.linkifyReactMessage(
     systemImpl: UstadMobileSystemImpl,
     accountManager: UstadAccountManager,
     context: Any
-) = createReUsableComponent(linkifyReactComponent.unsafeCast<ComponentType<LinkifyReactProps>>(),
+) = convertFunctionalToClassElement(linkifyReactComponent.unsafeCast<ComponentType<LinkifyReactProps>>(),
     "Linkify"){
     attrs.id = "Linkify"
     attrs.options = options
@@ -92,7 +92,7 @@ fun RBuilder.linkifyReactTextView(
     systemImpl: UstadMobileSystemImpl,
     accountManager: UstadAccountManager,
     context: Any
-) = createReUsableComponent(linkifyReactComponent.unsafeCast<ComponentType<LinkifyReactProps>>(),
+) = convertFunctionalToClassElement(linkifyReactComponent.unsafeCast<ComponentType<LinkifyReactProps>>(),
     "Linkify"){
 
     val optionsTest = LinkifyOptions()

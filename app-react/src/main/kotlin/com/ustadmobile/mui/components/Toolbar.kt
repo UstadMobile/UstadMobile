@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Toolbar
 import mui.material.ToolbarProps
 import mui.material.ToolbarVariant
@@ -12,7 +12,7 @@ fun RBuilder.umToolbar(
     variant: ToolbarVariant = ToolbarVariant.regular,
     className: String? = null,
     handler: StyledHandler<ToolbarProps>? = null
-) = createReUsableComponent(Toolbar, className, handler) {
+) = convertFunctionalToClassElement(Toolbar, className, handler) {
     attrs.disableGutters = disableGutters
     attrs.variant = variant
 }

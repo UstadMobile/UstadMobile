@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.*
 import react.RBuilder
 import react.ReactNode
@@ -18,7 +18,7 @@ fun RBuilder.umSnackbar(
     resumeHideDuration: Int? = null,
     className: String? = null,
     handler: StyledHandler<SnackbarProps>? = null
-) = createReUsableComponent(Snackbar, className, handler) {
+) = convertFunctionalToClassElement(Snackbar, className, handler) {
     autoHideDuration?.let { attrs.autoHideDuration = it }
     attrs.key = "horizontal+${horizontalAnchor.name}"
     attrs.anchorOrigin?.horizontal = horizontalAnchor

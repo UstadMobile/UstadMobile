@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.*
 import react.RBuilder
 import styled.StyledHandler
@@ -13,7 +13,7 @@ fun RBuilder.umLinearProgress(
     color: LinearProgressColor = LinearProgressColor.primary,
     className: String? = null,
     handler: StyledHandler<LinearProgressProps>?
-) = createReUsableComponent(LinearProgress, className, handler){
+) = convertFunctionalToClassElement(LinearProgress, className, handler){
     attrs.color = color
     attrs.variant = variant
     attrs.value = value
@@ -28,7 +28,7 @@ fun RBuilder.umCircularProgress(
     thickness: Double = 3.6,
     className: String? = null,
     handler: StyledHandler<CircularProgressProps>?
-) = createReUsableComponent(CircularProgress, className, handler){
+) = convertFunctionalToClassElement(CircularProgress, className, handler){
     attrs.color = color
     attrs.variant = variant
     attrs.value = value

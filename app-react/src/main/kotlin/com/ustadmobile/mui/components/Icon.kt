@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Icon
 import mui.material.IconColor
 import mui.material.IconProps
@@ -15,7 +15,7 @@ fun RBuilder.umIcon(
     size: IconSize = IconSize.medium,
     className: String? = null,
     handler: StyledHandler<IconProps>? = null
-) = createReUsableComponent(Icon, className, handler) {
+) = convertFunctionalToClassElement(Icon, className, handler) {
     childList.add(ReactNode(iconName))
     attrs.color = color
     attrs.fontSize = size

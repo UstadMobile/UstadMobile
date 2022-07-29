@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import kotlinx.css.*
 import mui.material.Grid
 import mui.material.GridProps
@@ -107,7 +107,7 @@ fun RBuilder.gridContainer(
     rowSpacing: GridSpacing? = null,
     className: String? = null,
     handler: StyledHandler<GridProps>? = null
-) = createReUsableComponent(Grid, className, handler) {
+) = convertFunctionalToClassElement(Grid, className, handler) {
     attrs.asDynamic().alignContent = alignContent
     attrs.asDynamic().alignItems = alignItems
     attrs.container = true
@@ -134,7 +134,7 @@ fun RBuilder.gridItem(
     display: Display = Display.flex,
     flexDirection: FlexDirection = FlexDirection.column,
     handler: StyledHandler<GridProps>? = null
-) = createReUsableComponent(Grid, className, handler) {
+) = convertFunctionalToClassElement(Grid, className, handler) {
     attrs.item = true
     sm?.let { attrs.asDynamic().sm = it.sizeVal }
     md?.let { attrs.asDynamic().md = it.sizeVal }

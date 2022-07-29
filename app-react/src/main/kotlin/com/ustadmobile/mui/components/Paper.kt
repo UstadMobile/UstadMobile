@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Paper
 import mui.material.PaperProps
 import mui.material.PaperVariant
@@ -13,7 +13,7 @@ fun RBuilder.umPaper(
     variant: PaperVariant = PaperVariant.elevation,
     className: String? = null,
     handler: StyledHandler<PaperProps>? = null
-) = createReUsableComponent(Paper, className, handler) {
+) = convertFunctionalToClassElement(Paper, className, handler) {
     attrs.elevation = elevation
     attrs.square = square
     attrs.variant = variant

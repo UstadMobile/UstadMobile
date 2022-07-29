@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import csstype.TransitionDuration
 import mui.material.*
 import org.w3c.dom.events.Event
@@ -20,7 +20,7 @@ fun RBuilder.umDrawer(
 
     className: String? = null,
     handler: StyledHandler<DrawerProps>
-) = createReUsableComponent(Drawer, className, handler) {
+) = convertFunctionalToClassElement(Drawer, className, handler) {
     attrs.anchor = anchor
     attrs.elevation = elevation
     modalProps?.let { attrs.ModalProps = it }

@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.defaultFullWidth
 import mui.material.FormControlMargin
@@ -41,7 +41,7 @@ fun RBuilder.umTextField(
     allowCapitalLetters: Boolean = true,
     onClick: (() -> Unit)? = null,
     handler: StyledHandler<UMTextFieldProps>? = null
-) = createReUsableComponent(TextField, className, handler) {
+) = convertFunctionalToClassElement(TextField, className, handler) {
     css(defaultFullWidth)
     setProps(
         this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
@@ -71,7 +71,7 @@ fun RBuilder.umTextFieldMultiLine(
     blockedValues: String? = null,
     allowCapitalLetters: Boolean = true,
     handler: StyledHandler<UMTextFieldProps>? = null
-) = createReUsableComponent(TextField, className, handler) {
+) = convertFunctionalToClassElement(TextField, className, handler) {
     css(defaultFullWidth)
     setProps(this, null, autoFocus,
         disabled, error, fullWidth, helperText, id, label, margin, true, name, onChange,
@@ -99,7 +99,7 @@ fun RBuilder.umTextFieldSelect(
     name: String? = null,
     className: String? = null,
     handler: StyledHandler<UMTextFieldProps>? = null
-) = createReUsableComponent(TextField, className, handler) {
+) = convertFunctionalToClassElement(TextField, className, handler) {
     setProps(
         this, autoComplete, autoFocus, disabled, error, fullWidth, helperText,
         id, label, margin, false, name, onChange, placeholder, required, null,

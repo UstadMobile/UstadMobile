@@ -1,8 +1,7 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.StyleManager
-import kotlinx.css.hyphenize
 import mui.material.FormControl
 import mui.material.FormControlMargin
 import mui.material.FormControlProps
@@ -23,7 +22,7 @@ fun RBuilder.umFormControl(
     className: String? = null,
     handler: StyledHandler<FormControlProps>? = null
 ) {
-    createReUsableComponent(FormControl, className, handler) {
+    convertFunctionalToClassElement(FormControl, className, handler) {
         attrs.disabled = disabled
         attrs.error = error
         attrs.fullWidth = fullWidth

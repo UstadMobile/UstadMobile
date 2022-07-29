@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Size
 import mui.material.Switch
 import mui.material.SwitchColor
@@ -15,7 +15,7 @@ fun RBuilder.umSwitch(
     size: Size = Size.medium,
     className: String? = null,
     handler: StyledHandler<SwitchProps>? = null
-) = createReUsableComponent(Switch, className, handler) {
+) = convertFunctionalToClassElement(Switch, className, handler) {
     attrs.checked = checked
     attrs.disabled = disabled
     attrs.size = size.asDynamic()

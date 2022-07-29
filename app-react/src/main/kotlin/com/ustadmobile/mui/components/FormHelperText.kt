@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.FormHelperText
 import mui.material.FormHelperTextMargin
 import mui.material.FormHelperTextProps
@@ -22,7 +22,7 @@ fun RBuilder.umFormHelperText (
     className: String? = null,
     handler: StyledHandler<FormHelperTextProps>? = null
 ) {
-    createReUsableComponent(FormHelperText, className, handler) {
+    convertFunctionalToClassElement(FormHelperText, className, handler) {
         component?.let { attrs.asDynamic().component = it }
         attrs.disabled = disabled
         attrs.error = error

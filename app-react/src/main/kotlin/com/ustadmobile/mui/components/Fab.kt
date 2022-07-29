@@ -1,10 +1,10 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.*
+import mui.material.styles.TypographyVariant
 import org.w3c.dom.events.Event
 import react.RBuilder
-import react.ReactNode
 import styled.StyledHandler
 
 
@@ -19,7 +19,7 @@ fun RBuilder.umFab(
     id: String? = null,
     variant: FabVariant = FabVariant.extended,
     handler: StyledHandler<FabProps>? = null
-) = createReUsableComponent(Fab, className, handler) {
+) = convertFunctionalToClassElement(Fab, className, handler) {
     attrs.color = color
     attrs.disabled = disabled
     attrs.onClick = {
@@ -28,7 +28,6 @@ fun RBuilder.umFab(
     id?.let{ attrs.id = id }
     attrs.size = size
     attrs.variant = variant
-
     umIcon(iconName)
-    childList.add(ReactNode(caption))
+    umTypography(caption, variant = TypographyVariant.button)
 }

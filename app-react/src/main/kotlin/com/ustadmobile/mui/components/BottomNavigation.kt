@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.BottomNavigation
 import mui.material.BottomNavigationAction
 import mui.material.BottomNavigationActionProps
@@ -19,7 +19,7 @@ fun RBuilder.umBottomNavigation(
     onChange: ((event: Event, indexValue: Any) -> Unit)? = null,
     className: String? = null,
     handler: StyledHandler<BottomNavigationProps>? = null
-) = createReUsableComponent(BottomNavigation, className, handler) {
+) = convertFunctionalToClassElement(BottomNavigation, className, handler) {
     attrs.onChange = { event, value ->
         onChange?.invoke(event.nativeEvent, value)
     }
@@ -35,7 +35,7 @@ fun RBuilder.umBottomNavigationAction(
     value: Any? = null,
     className: String? = null,
     handler: StyledHandler<UMBottomNavigationActionProps>? = null
-) = createReUsableComponent(BottomNavigationAction, className, handler) {
+) = convertFunctionalToClassElement(BottomNavigationAction, className, handler) {
     icon?.let { attrs.icon = umIcon(it)}
     label?.let {it -> attrs.label = ReactNode(it) }
     showLabel?.let { attrs.showLabel = showLabel }

@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createReUsableComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import kotlinx.css.WhiteSpace
 import kotlinx.css.whiteSpace
 import mui.material.Typography
@@ -23,7 +23,7 @@ fun RBuilder.umTypography(
     paragraph: Boolean = false,
     className: String? = null,
     handler: StyledHandler<TypographyProps>? = null
-) = createReUsableComponent(Typography, className, handler) {
+) = convertFunctionalToClassElement(Typography, className, handler) {
     attrs.asDynamic().align = align.toString()
     attrs.gutterBottom = gutterBottom
     attrs.noWrap = noWrap
