@@ -147,10 +147,10 @@ class PersonEditPresenter(
             firstNamesFieldError != null ||
             lastNameFieldError != null ||
             genderFieldError != null ||
-                    firstNameError != null ||
-                    lastNameError != null ||
-                    emailError != null ||
-                    parentContactError != null
+            firstNameError != null ||
+            lastNameError != null ||
+            emailError != null ||
+            parentContactError != null
 
     override fun handleClickSave(entity: PersonWithAccount) {
         view.loading = true
@@ -190,6 +190,44 @@ class PersonEditPresenter(
 
             view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNameError = requiredFieldMessage
             view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameError = requiredFieldMessage
+
+            if(!entity.username.isNullOrEmpty() ||
+                !entity.newPassword.isNullOrEmpty() ||
+                !entity.confirmedPassword.isNullOrEmpty()) {
+                view.takeIf { entity.username.isNullOrEmpty() }?.usernameError =
+                    requiredFieldMessage
+                view.takeIf { entity.newPassword.isNullOrEmpty() }?.passwordError =
+                    requiredFieldMessage
+                view.takeIf { entity.confirmedPassword.isNullOrEmpty() }?.confirmError =
+                    requiredFieldMessage
+                view.takeIf { entity.confirmedPassword != entity.newPassword }?.noMatchPasswordError =
+                    impl.getString(MessageID.filed_password_no_match, context)
+            }
+
+            //New user
+            if(!entity.username.isNullOrEmpty() && entity.personUid == 0L){
+                try {
+                    accountManager.register(entity, serverUrl, AccountRegisterOptions(
+                        makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR),
+                        parentJoin = mPersonParentJoin
+                    ))
+
+                } catch (e: Exception) {
+                    if (e is IllegalStateException) {
+                        view.usernameError = impl.getString(MessageID.person_exists, context)
+                    } else {
+                        view.showSnackBar(impl.getString(MessageID.login_network_error, context))
+                    }
+
+                    return@launch
+                }finally {
+                    view.loading = false
+                    view.fieldsEnabled = true
+                }
+            }else{
+                //Do nothing?
+            }
+
 
             if(view.hasErrors()) {
                 view.loading = false
