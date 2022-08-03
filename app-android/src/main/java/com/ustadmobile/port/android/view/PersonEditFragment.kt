@@ -157,6 +157,13 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
         get() = mBinding?.firstNamesError
 
+    override var newPersonMode: Boolean?
+        get() = mBinding?.newPersonMode
+
+        set(value) {
+            mBinding?.newPersonMode = value
+        }
+
     private var imageViewLifecycleObserver: ImageViewLifecycleObserver2? = null
 
     override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {

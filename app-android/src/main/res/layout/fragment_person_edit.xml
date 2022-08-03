@@ -95,6 +95,9 @@
         <variable name="dateTimeMode"
             type="Integer"/>
 
+        <variable name="newPersonMode"
+            type="Boolean" />
+
 
     </data>
 
@@ -368,6 +371,7 @@
                 />
 
             <com.google.android.material.textfield.TextInputLayout
+                android:visibility="@{newPersonMode ? View.VISIBLE : View.GONE}"
                 android:id="@+id/username_textinputlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -396,6 +400,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:visibility="@{newPersonMode ? View.VISIBLE : View.GONE}"
                 android:id="@+id/password_textinputlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -424,6 +429,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:visibility="@{newPersonMode ? View.VISIBLE : View.GONE}"
                 android:id="@+id/confirm_password_textinputlayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"

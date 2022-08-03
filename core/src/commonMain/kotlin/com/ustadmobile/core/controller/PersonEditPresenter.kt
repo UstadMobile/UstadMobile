@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.AccountRegisterOptions
+import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -10,7 +11,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.on
 
 
 class PersonEditPresenter(
@@ -51,6 +52,8 @@ class PersonEditPresenter(
     private val impl: UstadMobileSystemImpl by instance()
 
     private lateinit var nextDestination: String
+
+    private val authManager: AuthManager by on(accountManager.activeEndpoint).instance()
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -102,6 +105,8 @@ class PersonEditPresenter(
         } ?: PersonWithAccount().also {
             it.dateOfBirth = arguments[PersonEditView.ARG_DATE_OF_BIRTH]?.toLong() ?: 0L
         }
+
+        view.newPersonMode = entityUid == 0L
 
         view.personPicture = db.onDbThenRepoWithTimeout(2000) { dbToUse, _ ->
             dbToUse.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
@@ -206,26 +211,11 @@ class PersonEditPresenter(
 
             //New user
             if(!entity.username.isNullOrEmpty() && entity.personUid == 0L){
-                try {
-                    accountManager.register(entity, serverUrl, AccountRegisterOptions(
-                        makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR),
-                        parentJoin = mPersonParentJoin
-                    ))
-
-                } catch (e: Exception) {
-                    if (e is IllegalStateException) {
-                        view.usernameError = impl.getString(MessageID.person_exists, context)
-                    } else {
-                        view.showSnackBar(impl.getString(MessageID.login_network_error, context))
-                    }
-
-                    return@launch
-                }finally {
-                    view.loading = false
-                    view.fieldsEnabled = true
+                //Check username exists
+                val username = entity.username
+                if(!username.isNullOrEmpty() && repo.personDao.findByUsernameCount(username) > 0){
+                    view.usernameError = impl.getString(MessageID.person_exists, context)
                 }
-            }else{
-                //Do nothing?
             }
 
 
@@ -340,6 +330,14 @@ class PersonEditPresenter(
                         repo.personPictureDao.updateAsync(personPictureVal)
                     }
                 }
+
+                val newPassword = entity.newPassword
+                    ?: throw IllegalStateException("Not possible! hasErrors checked false")
+
+                if(view.newPersonMode == true){
+                    authManager.setAuth(entity.personUid, newPassword)
+                }
+
 
                 //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
                 // PersonList, PersonEdit, EnrolmentEdit

@@ -41,6 +41,8 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var lastNameError: String?
 
+    var newPersonMode: Boolean?
+
     fun navigateToNextDestination(account: UmAccount?, nextDestination: String)
 
     companion object {
