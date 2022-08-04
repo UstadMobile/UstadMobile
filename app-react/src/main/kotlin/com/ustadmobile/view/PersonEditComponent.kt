@@ -202,6 +202,13 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
             field = value
         }
 
+    override var newPersonMode: Boolean? = false
+        set(value) {
+            setState{
+            }
+            field = value
+        }
+
     override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
         systemImpl.go(nextDestination, mapOf(), this)
     }
@@ -396,7 +403,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                         }
                     }
 
-                    if(registrationEnabled){
+                    if(registrationEnabled || newPersonMode == true){
                         umTextField(
                             autoFocus = false,
                             label = "${usernameLabel.text}",
@@ -414,7 +421,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
 
                     umGridContainer(GridSpacing.spacing4) {
 
-                        if(registrationEnabled){
+                        if(registrationEnabled || newPersonMode == true){
                             umItem(GridSize.cells12, GridSize.cells6 ) {
                                 css(defaultMarginTop)
                                 umFormControl(variant = FormControlVariant.outlined) {
