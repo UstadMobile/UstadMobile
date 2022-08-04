@@ -331,11 +331,13 @@ class PersonEditPresenter(
                     }
                 }
 
-                val newPassword = entity.newPassword
-                    ?: throw IllegalStateException("Not possible! hasErrors checked false")
+                if(!entity.username.isNullOrEmpty()) {
+                    val newPassword = entity.newPassword
+                        ?: throw IllegalStateException("Not possible! hasErrors checked false")
 
-                if(view.newPersonMode == true){
-                    authManager.setAuth(entity.personUid, newPassword)
+                    if (view.newPersonMode == true) {
+                        authManager.setAuth(entity.personUid, newPassword)
+                    }
                 }
 
 
