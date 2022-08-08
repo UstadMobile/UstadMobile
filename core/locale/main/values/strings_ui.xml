@@ -40,7 +40,7 @@
     <string name='username'>Username</string>
     <string name='password'>Password</string>
     <string name="confirm_password">Confirm password</string>
-    <string name="last_name">Last name</string>
+    <string name="last_name">Last name*</string>
     <string name="first_name">First name</string>
     <string name="register_now">Register Now</string>
     <string name="new_password">New password</string>
@@ -414,7 +414,7 @@
     <string name="father">Father</string>
     <string name="mother">Mother</string>
     <string name="birthday">Birthday</string>
-    <string name="first_names">First names</string>
+    <string name="first_names">First names*</string>
     <string name="basic_details">Basic details</string>
     <string name="address">Address</string>
     <string name="add_person_to_class">Add person to class</string>
@@ -551,7 +551,7 @@
     <string name="nomination">Nomination</string>
     <string name="active">Active</string>
     <string name="class_id">Class ID</string>
-    <string name="gender_literal">Gender</string>
+    <string name="gender_literal">Gender*</string>
     <string name="country">Country</string>
     <string name="connectivity">Connectivity</string>
     <string name="home_internet_access">Home Internet access</string>

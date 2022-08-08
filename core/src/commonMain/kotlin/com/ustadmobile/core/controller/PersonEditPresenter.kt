@@ -212,7 +212,7 @@ class PersonEditPresenter(
             //New user
             if(!entity.username.isNullOrEmpty() && entity.personUid == 0L){
                 //Check username exists
-                val username = entity.username
+                val username = entity.username?.lowercase()
                 if(!username.isNullOrEmpty() && repo.personDao.findByUsernameCount(username) > 0){
                     view.usernameError = impl.getString(MessageID.person_exists, context)
                 }
