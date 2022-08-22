@@ -215,6 +215,8 @@ class PersonEditPresenter(
                 val username = entity.username?.lowercase()
                 if(!username.isNullOrEmpty() && repo.personDao.findByUsernameCount(username) > 0){
                     view.usernameError = impl.getString(MessageID.person_exists, context)
+                }else{
+                    entity.username = entity.username?.lowercase()
                 }
             }
 

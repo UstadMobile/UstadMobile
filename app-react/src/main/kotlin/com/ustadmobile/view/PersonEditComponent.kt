@@ -159,7 +159,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
             }
         }
 
-    private var firstNameLabel = FieldLabel(text = getString(MessageID.first_name))
+    private var firstNameLabel = FieldLabel(text = getString(MessageID.first_names))
 
     override var firstNamesFieldError: String? = null
         set(value) {
