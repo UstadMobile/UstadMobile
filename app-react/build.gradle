@@ -1,5 +1,13 @@
 plugins {
     id 'org.jetbrains.kotlin.js'
+
+    /**
+     * This seems to work around a bug that prevents dead code elimination working as per
+     *  https://youtrack.jetbrains.com/issue/KT-51712
+     *
+     *
+     */
+    id "com.github.turansky.kfc.legacy-union" version "4.88.0"
 }
 
 apply plugin: 'kotlinx-serialization'
