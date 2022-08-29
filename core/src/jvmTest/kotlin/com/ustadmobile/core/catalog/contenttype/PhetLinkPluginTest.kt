@@ -67,7 +67,8 @@ class PhetLinkPluginTest {
             val result = phetPlugin.extractMetadata(phetUri, processContext)
 
             //Parima: TODO: Verify that the title and description are loaded. If possible, get the language.
-            Assert.assertEquals("Geometric Optics", result?.entry?.title)
+            //            Assert.assertEquals("Geometric Optics", result?.entry?.title)
+            Assert.assertEquals("Geometric Optics description", result?.entry?.description)
         }
     }
 

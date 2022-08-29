@@ -7,6 +7,7 @@ import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import org.jsoup.Jsoup
+import org.jsoup.select.Elements
 
 import org.kodein.di.DI
 import java.io.File
@@ -43,7 +44,16 @@ class PhetLinkPlugin(
 
         return MetadataResult(ContentEntryWithLanguage().apply {
             title = htmlTitle
-            this.description = "Parima - todo here"
+            val headTags: Elements = htmlContent.getElementsByTag("head")
+            val metaTags: Elements = headTags.get(0).getElementsByTag("meta")
+
+            for (metaTag in metaTags) {
+                val content: String = metaTag.attr("content")
+                val name: String = metaTag.attr("name")
+                if (name.equals("description")) {
+                    this.description = content
+                }
+            }
         }, pluginId)
     }
 
