@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -15,7 +15,7 @@ import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class ContainerDao : BaseDao<Container> {
 

@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.Role
 
 
 @Repository
-@Dao
+@DoorDao
 expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
     @Query("""

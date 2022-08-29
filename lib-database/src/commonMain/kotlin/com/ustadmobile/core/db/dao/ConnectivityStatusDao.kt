@@ -1,7 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.lifecycle.Observer
@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-@Dao
+@DoorDao
 expect abstract class ConnectivityStatusDao {
 
     @Query("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.core.db.JobStatus.NOT_QUEUED
 import com.ustadmobile.core.db.JobStatus.QUEUED
@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERE
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_UNMETERED
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 
-@Dao
+@DoorDao
 expect abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
 
     @Query("SELECT * FROM ContainerImportJob WHERE cijSessionId = :sessionId")

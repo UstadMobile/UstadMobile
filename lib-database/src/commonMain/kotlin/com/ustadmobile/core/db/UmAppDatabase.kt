@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db
 
-import com.ustadmobile.door.annotation.Database
+import com.ustadmobile.door.annotation.DoorDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.MinReplicationVersion
@@ -8,7 +8,7 @@ import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.room.RoomDatabase
 import com.ustadmobile.lib.db.entities.*
 
-@Database(entities = [NetworkNode::class,
+@DoorDatabase(entities = [NetworkNode::class,
     ClazzLog::class, ClazzLogAttendanceRecord::class,
     Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
     ScheduledCheck::class,

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ContextXObjectStatementJoin
@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.StatementEntity
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJoin> {
 

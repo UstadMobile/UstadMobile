@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
@@ -8,7 +8,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.*
 
-@Dao
+@DoorDao
 expect abstract class ContentJobItemDao {
 
     @Query("""

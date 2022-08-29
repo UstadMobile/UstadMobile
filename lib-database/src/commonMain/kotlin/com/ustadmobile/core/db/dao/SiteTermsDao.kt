@@ -1,7 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.door.paging.DataSourceFactory
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
 

@@ -1,10 +1,10 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.lib.db.entities.LocallyAvailableContainer
 
-@Dao
+@DoorDao
 expect abstract class LocallyAvailableContainerDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

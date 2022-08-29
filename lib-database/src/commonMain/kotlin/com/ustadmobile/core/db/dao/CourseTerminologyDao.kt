@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.paging.DataSourceFactory
@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
 
 @Repository
-@Dao
+@DoorDao
 expect abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
 
     @Query("""

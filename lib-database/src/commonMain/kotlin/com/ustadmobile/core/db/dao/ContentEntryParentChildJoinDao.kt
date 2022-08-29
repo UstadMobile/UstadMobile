@@ -10,7 +10,7 @@ import kotlin.js.JsName
 data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: Long = 0L)
 
 @Repository
-@Dao
+@DoorDao
 expect abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJoin> {
 
     @Query("""

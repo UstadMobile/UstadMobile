@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
-@Dao
+@DoorDao
 expect abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
 
     @Query("""

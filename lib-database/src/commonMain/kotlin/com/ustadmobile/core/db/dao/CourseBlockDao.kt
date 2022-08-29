@@ -1,14 +1,24 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.*
+
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.core.db.dao.CourseBlockDaoCommon.SUBMITTER_LIST_IN_CLAZZ_CTE
+import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.door.annotation.ReplicationCheckPendingNotificationsFor
+import com.ustadmobile.door.annotation.ReplicationRunOnNewNode
+import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.NewNodeIdParam
+import com.ustadmobile.door.annotation.ReplicationRunOnChange
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.paging.DataSourceFactory
-import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
 @Repository
-@Dao
+@DoorDao
 expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlock> {
 
     @Query("""

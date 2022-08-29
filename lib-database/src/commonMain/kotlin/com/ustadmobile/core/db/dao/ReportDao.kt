@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class ReportDao : BaseDao<Report> {
 

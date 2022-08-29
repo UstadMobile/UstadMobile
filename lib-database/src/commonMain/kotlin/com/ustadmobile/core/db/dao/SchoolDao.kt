@@ -1,7 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.door.paging.DataSourceFactory
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.SchoolDaoCommon.SORT_NAME_ASC
@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_SCHOOL_TO_USER
 import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 
 @Repository
-@Dao
+@DoorDao
 expect abstract class SchoolDao : BaseDao<School> {
 
     @Query("""

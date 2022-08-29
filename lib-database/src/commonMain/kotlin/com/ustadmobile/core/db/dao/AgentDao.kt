@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSON_TO_USER
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.Role
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class AgentDao :BaseDao<AgentEntity> {
 

@@ -1,13 +1,13 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDaoCommon.STATUS_PENDING
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeQueueItemWithScrapeRun
 
-@Dao
+@DoorDao
 expect abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
 
 

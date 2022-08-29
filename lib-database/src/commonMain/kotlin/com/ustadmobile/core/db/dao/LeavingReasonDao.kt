@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
 @Repository
-@Dao
+@DoorDao
 expect abstract class LeavingReasonDao : BaseDao<LeavingReason> {
 
     @Query("""

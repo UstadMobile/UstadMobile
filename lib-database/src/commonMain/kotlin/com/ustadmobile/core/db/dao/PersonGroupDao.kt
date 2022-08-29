@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.lifecycle.LiveData
@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.PersonGroupReplicate.Companion.SELECT_PER
 import com.ustadmobile.lib.db.entities.UserSession.Companion.USER_SESSION_NOT_LOCAL_DEVICE_SQL
 
 @Repository
-@Dao
+@DoorDao
 expect abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
     @Query("""

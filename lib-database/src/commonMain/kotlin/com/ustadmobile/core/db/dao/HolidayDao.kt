@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.SyncNode
@@ -8,7 +8,7 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class HolidayDao: BaseDao<Holiday>, OneToManyJoinDao<Holiday> {
 

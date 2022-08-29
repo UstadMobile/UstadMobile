@@ -2,13 +2,13 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.core.db.dao.NetworkNodeDaoCommon.findByBluetoothAddrSql
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.lib.db.entities.NetworkNode
 
 /**
  * Created by mike on 1/30/18.
  */
-@Dao
+@DoorDao
 expect abstract class NetworkNodeDao {
 
     @Query("SELECT * FROM NetworkNode")

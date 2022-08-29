@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
@@ -17,7 +17,7 @@ import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class StatementDao : BaseDao<StatementEntity> {
 

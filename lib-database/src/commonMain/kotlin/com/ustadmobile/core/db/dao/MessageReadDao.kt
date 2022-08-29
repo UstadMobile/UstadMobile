@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.paging.DataSourceFactory
@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.MessageRead
 import com.ustadmobile.lib.db.entities.MessageWithPerson
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class MessageReadDao: BaseDao<MessageRead>{
 

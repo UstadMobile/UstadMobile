@@ -3,14 +3,14 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
 import com.ustadmobile.core.db.dao.EntityRoleCommon.FILTER_BY_PERSON_UID2
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.PostgresQuery
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
 @Repository
-@Dao
+@DoorDao
 expect abstract class EntityRoleDao {
 
     @Query("""

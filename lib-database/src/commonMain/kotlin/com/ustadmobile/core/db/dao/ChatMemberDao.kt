@@ -7,7 +7,7 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ChatMember
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class ChatMemberDao: BaseDao<ChatMember>{
 

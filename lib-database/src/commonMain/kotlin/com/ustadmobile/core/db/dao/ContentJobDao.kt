@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.lifecycle.LiveData
@@ -8,7 +8,7 @@ import com.ustadmobile.door.annotation.PostgresQuery
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentJob
 
-@Dao
+@DoorDao
 expect abstract class ContentJobDao {
 
     @Insert

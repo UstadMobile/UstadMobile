@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 
 @Repository
-@Dao
+@DoorDao
 expect abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
 
     @Query("""

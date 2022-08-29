@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.AccessToken
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
 
-@Dao
+@DoorDao
 expect abstract class PersonAuthDao : BaseDao<PersonAuth> {
 
 

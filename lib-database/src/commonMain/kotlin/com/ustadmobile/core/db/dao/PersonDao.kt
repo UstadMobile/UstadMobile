@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEM
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
 
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class PersonDao : BaseDao<Person> {
 

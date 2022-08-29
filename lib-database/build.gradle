@@ -73,15 +73,7 @@ kotlin {
     }
 
     sourceSets {
-        //This adds a common DAO. It must be in the source so the annotation processor can see
-        // parameter names etc.
-        doorDao {
-
-        }
-
         commonMain {
-            dependsOn doorDao
-
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
@@ -98,6 +90,18 @@ kotlin {
         }
 
 
+        androidMain {
+            dependencies {
+                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "androidx.room:room-ktx:$version_android_room"
+                implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
+                implementation "androidx.paging:paging-runtime:$version_androidx_paging"
+
+                implementation "com.google.code.gson:gson:$version_gson"
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+            }
+        }
 
         jvmMain {
             dependencies {
@@ -122,21 +126,6 @@ ksp {
     arg("doordb_postgres_user", rootProject.ext.buildConfigProperties.getProperty("door.postgresUser", ""))
     arg("doordb_postgres_password", rootProject.ext.buildConfigProperties.getProperty("door.postgresPass", ""))
 }
-
-//kapt {
-//    arguments {
-//        arg("doordb_android_out", rootProject.file("lib-database-android/build/generated/source/door").absolutePath)
-//        arg("doordb_jvm_out", rootProject.file("lib-database-mpp/build/generated/source/door").absolutePath)
-//        arg("doordb_js_out", rootProject.file("lib-database-mpp/build/generated/source/door-js").absolutePath)
-//        arg("doordb_ktor_out", rootProject.file("app-ktor-server/build/generated/source/door").absolutePath)
-//        arg("doordb_source_path", project.file("src/commonMain/kotlin"))
-//        arg("doordb_template_fixupdatetrigger_sqlite", project.file("build/migrationtemplates"))
-//        arg("doordb_migrations_out", "$buildDir/generated/source/door-migrations")
-//
-//
-//    }
-//}
-
 
 dependencies {
     kspJvm "com.github.UstadMobile.door:door-compiler:$version_door"

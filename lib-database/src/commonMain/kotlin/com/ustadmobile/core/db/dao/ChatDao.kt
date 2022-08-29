@@ -7,7 +7,7 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class ChatDao: BaseDao<Chat>{
 

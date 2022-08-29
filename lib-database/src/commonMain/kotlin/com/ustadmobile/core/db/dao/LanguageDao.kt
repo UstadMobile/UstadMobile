@@ -13,7 +13,7 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class LanguageDao : BaseDao<Language> {
 

@@ -5,7 +5,7 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class SiteDao {
 

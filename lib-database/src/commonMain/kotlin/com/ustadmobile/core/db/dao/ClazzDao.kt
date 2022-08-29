@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
@@ -22,7 +22,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
 import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 
 @Repository
-@Dao
+@DoorDao
 expect abstract class ClazzDao : BaseDao<Clazz> {
 
     @Query("""

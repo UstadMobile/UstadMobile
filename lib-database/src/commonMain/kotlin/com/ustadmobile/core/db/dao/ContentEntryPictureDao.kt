@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.lifecycle.LiveData
@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryPicture
 import com.ustadmobile.lib.db.entities.UserSession
 
 
-@Dao
+@DoorDao
 @Repository
 expect abstract class ContentEntryPictureDao : BaseDao<ContentEntryPicture> {
 
