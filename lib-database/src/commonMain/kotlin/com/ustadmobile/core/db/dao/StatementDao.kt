@@ -1,11 +1,13 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.Serializable
 import kotlin.js.JsName
@@ -94,7 +96,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     abstract suspend fun insertListAsync(entityList: List<StatementEntity>)
 
     @Query("SELECT * From StatementEntity LIMIT 1")
-    abstract fun getOneStatement(): DoorLiveData<StatementEntity?>
+    abstract fun getOneStatement(): LiveData<StatementEntity?>
 
     @Query("SELECT * FROM StatementEntity WHERE statementId = :id LIMIT 1")
     abstract fun findByStatementId(id: String): StatementEntity?
@@ -111,7 +113,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
 
     @RawQuery(observedEntities = [StatementEntity::class, Person::class, XLangMapEntry::class])
     @QueryLiveTables(["StatementEntity", "Person", "XLangMapEntry"])
-    abstract fun getListResults(query: DoorQuery): DoorDataSourceFactory<Int, StatementEntityWithDisplayDetails>
+    abstract fun getListResults(query: DoorQuery): DataSourceFactory<Int, StatementEntityWithDisplayDetails>
 
 
     // This is required because of above raw query
@@ -199,7 +201,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     @SqliteOnly //This would need a considered group by to work on postgres
     abstract fun findPersonsWithContentEntryAttempts(contentEntryUid: Long, accountPersonUid: Long,
                                                      searchText: String, sortOrder: Int)
-            : DoorDataSourceFactory<Int, PersonWithAttemptsSummary>
+            : DataSourceFactory<Int, PersonWithAttemptsSummary>
 
 
     @Query("""
@@ -328,7 +330,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
          """)
     @SqliteOnly
     abstract fun findSessionsForPerson(contentEntryUid: Long, accountPersonUid: Long, personUid: Long)
-            : DoorDataSourceFactory<Int, PersonWithSessionsDisplay>
+            : DataSourceFactory<Int, PersonWithSessionsDisplay>
 
 
     @Query("""
@@ -355,7 +357,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
          """)
     abstract fun findSessionDetailForPerson(contentEntryUid: Long, accountPersonUid: Long,
                                             personUid: Long, contextRegistration: String)
-            : DoorDataSourceFactory<Int, StatementWithSessionDetailDisplay>
+            : DataSourceFactory<Int, StatementWithSessionDetailDisplay>
 
 
     @Query("""

@@ -1,0 +1,6 @@
+s/androidx.room.Dao/com.ustadmobile.door.annotation.Dao/g
+s/com.ustadmobile.door.DoorDataSourceFactory/com.ustadmobile.paging.DataSourceFactory/g
+s/DoorDataSourceFactory/DataSourceFactory/g
+s/com.ustadmobile.door.DoorLiveData/com.ustadmobile.door.lifecycle.LiveData/g
+s/DoorLiveData/LiveData/g
+

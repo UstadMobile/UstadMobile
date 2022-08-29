@@ -1,11 +1,11 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
@@ -93,7 +93,7 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
       ORDER BY DiscussionTopic.discussionTopicIndex
     """)
     abstract fun getListOfTopicsByDiscussion(discussionUid: Long)
-        : DoorDataSourceFactory<Int, DiscussionTopicListDetail>
+        : DataSourceFactory<Int, DiscussionTopicListDetail>
 
     @Query("""
         SELECT DiscussionTopic.*
@@ -116,7 +116,7 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
          WHERE DiscussionTopic.discussionTopicUid = :discussionTopicUid
          
          """)
-    abstract fun getDiscussionTopicByUid(discussionTopicUid: Long): DoorLiveData<DiscussionTopic?>
+    abstract fun getDiscussionTopicByUid(discussionTopicUid: Long): LiveData<DiscussionTopic?>
 
 
     @Query("""

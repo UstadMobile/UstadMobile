@@ -1,10 +1,10 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Clazz.Companion.JOIN_FROM_CLAZZ_TO_USERSESSION_VIA_SCOPEDGRANT_PT1
@@ -76,7 +76,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract fun findByUid(uid: Long): Clazz?
 
     @Query("SELECT * From Clazz WHERE clazzUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<Clazz?>
+    abstract fun findByUidLive(uid: Long): LiveData<Clazz?>
 
     @Query("SELECT * FROM Clazz WHERE clazzCode = :code")
     abstract suspend fun findByClazzCode(code: String): Clazz?
@@ -87,7 +87,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract suspend fun findByClazzCodeFromWeb(code: String): Clazz?
 
     @Query(SELECT_ACTIVE_CLAZZES)
-    abstract fun findAllLive(): DoorLiveData<List<Clazz>>
+    abstract fun findAllLive(): LiveData<List<Clazz>>
 
     @Query(SELECT_ACTIVE_CLAZZES)
     abstract fun findAll(): List<Clazz>
@@ -123,7 +123,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT * FROM Clazz WHERE clazzSchoolUid = :schoolUid " +
             "AND CAST(isClazzActive AS INTEGER) = 1 ")
     abstract fun findAllClazzesBySchoolLive(schoolUid: Long)
-            : DoorDataSourceFactory<Int,Clazz>
+            : DataSourceFactory<Int,Clazz>
 
 
     @Query("""
@@ -197,7 +197,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
         currentTime: Long,
         permission: Long,
         selectedSchool: Long
-    ) : DoorDataSourceFactory<Int, ClazzWithListDisplayDetails>
+    ) : DataSourceFactory<Int, ClazzWithListDisplayDetails>
 
 
     @Query("SELECT Clazz.clazzUid AS uid, Clazz.clazzName AS labelName From Clazz WHERE clazzUid IN (:ids)")
@@ -297,7 +297,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
               LEFT JOIN CourseTerminology
               ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
         WHERE Clazz.clazzUid = :clazzUid""")
-    abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): DoorLiveData<ClazzWithDisplayDetails?>
+    abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): LiveData<ClazzWithDisplayDetails?>
 
 
     /**

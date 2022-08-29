@@ -1,8 +1,9 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.Role
 

@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
@@ -57,7 +57,7 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
     abstract suspend fun replicateOnChange()
 
     @Query("""SELECT * FROM LeavingReason""")
-    abstract fun findAllReasons(): DoorDataSourceFactory<Int, LeavingReason>
+    abstract fun findAllReasons(): DataSourceFactory<Int, LeavingReason>
 
     @Query("SELECT * FROM LeavingReason")
     abstract fun findAllReasonsLive(): List<LeavingReason>
@@ -72,7 +72,7 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
 
     @JsName("findByUidLive")
     @Query("SELECT * FROM LeavingReason WHERE leavingReasonUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<LeavingReason?>
+    abstract fun findByUidLive(uid: Long): LiveData<LeavingReason?>
 
     @JsName("getReasonsFromUids")
     @Query("""SELECT LeavingReason.leavingReasonUid AS uid, 

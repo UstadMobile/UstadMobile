@@ -1,10 +1,10 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
@@ -104,7 +104,7 @@ abstract class ContainerDao : BaseDao<Container> {
                                         WHERE ContainerEntry.ceContainerUid = Container.containerUid)   
                       ORDER BY cntLastModified DESC LIMIT 1)
     """)
-    abstract fun hasContainerWithFilesToDownload(contentEntryUid: Long): DoorLiveData<Boolean>
+    abstract fun hasContainerWithFilesToDownload(contentEntryUid: Long): LiveData<Boolean>
 
     @Query("""
             SELECT Container.*

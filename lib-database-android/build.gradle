@@ -66,8 +66,6 @@ tasks.whenTaskAdded { task ->
 }
 
 dependencies {
-    implementation "com.github.UstadMobile.door:door-room-jdbc:$version_door"
-
     implementation project(":lib-database-entities")
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(':lib-util')

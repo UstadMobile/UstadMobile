@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.lib.db.entities.CustomFieldValueOption

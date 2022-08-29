@@ -1,10 +1,10 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CourseDiscussion
@@ -97,7 +97,7 @@ abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<
            AND CAST(CourseDiscussion.courseDiscussionActive AS INTEGER) = 1 
          
          """)
-    abstract fun getCourseDiscussionByUid(courseDiscussionUid: Long): DoorLiveData<CourseDiscussion?>
+    abstract fun getCourseDiscussionByUid(courseDiscussionUid: Long): LiveData<CourseDiscussion?>
 
 
 

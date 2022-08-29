@@ -1,9 +1,9 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
@@ -79,7 +79,7 @@ abstract class PersonPictureDao : BaseDao<PersonPicture> {
     abstract suspend fun findByPersonUidAsync(personUid: Long): PersonPicture?
 
     @Query("SELECT * FROM PersonPicture where personPicturePersonUid = :personUid ORDER BY " + " picTimestamp DESC LIMIT 1")
-    abstract fun findByPersonUidLive(personUid: Long): DoorLiveData<PersonPicture?>
+    abstract fun findByPersonUidLive(personUid: Long): LiveData<PersonPicture?>
 
 
     @Update

@@ -110,7 +110,6 @@ kotlin {
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
-                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
                 implementation project(":lib-util")
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"

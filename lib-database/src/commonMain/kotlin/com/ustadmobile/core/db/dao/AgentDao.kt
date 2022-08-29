@@ -1,6 +1,5 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.AgentEntity

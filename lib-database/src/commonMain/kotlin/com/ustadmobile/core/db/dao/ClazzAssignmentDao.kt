@@ -1,10 +1,10 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
@@ -130,7 +130,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
           AND caUid = :assignmentUid                  
     """)
     abstract fun getProgressSummaryForAssignment(
-        assignmentUid: Long, clazzUid: Long, group: String) : DoorLiveData<AssignmentProgressSummary?>
+        assignmentUid: Long, clazzUid: Long, group: String) : LiveData<AssignmentProgressSummary?>
 
 
     @Query("""
@@ -192,7 +192,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
         clazzUid: Long,
         group: String,
         searchText: String
-    ): DoorDataSourceFactory<Int, PersonGroupAssignmentSummary>
+    ): DataSourceFactory<Int, PersonGroupAssignmentSummary>
 
 
     @Query("""
@@ -247,7 +247,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
     @Query("""SELECT * 
                       FROM ClazzAssignment 
                      WHERE caUid = :uid""")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzAssignment?>
+    abstract fun findByUidLive(uid: Long): LiveData<ClazzAssignment?>
 
     companion object{
 

@@ -1,9 +1,9 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
@@ -107,7 +107,7 @@ abstract class UserSessionDao {
     abstract suspend fun findSessionsByPerson(personUid: Long): List<UserSession>
 
     @Query(FIND_LOCAL_SESSIONS_SQL)
-    abstract fun findAllLocalSessionsLive(): DoorLiveData<List<UserSessionAndPerson>>
+    abstract fun findAllLocalSessionsLive(): LiveData<List<UserSessionAndPerson>>
 
     @Query(FIND_LOCAL_SESSIONS_SQL)
     abstract suspend fun findAllLocalSessionsAsync(): List<UserSessionAndPerson>
@@ -152,7 +152,7 @@ abstract class UserSessionDao {
          WHERE UserSession.usUid = :sessionUid
          LIMIT 1
     """)
-    abstract fun findByUidLive(sessionUid: Long): DoorLiveData<UserSession?>
+    abstract fun findByUidLive(sessionUid: Long): LiveData<UserSession?>
 
 
     @Query("""

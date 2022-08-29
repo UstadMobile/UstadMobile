@@ -1,9 +1,9 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.UserSession
@@ -63,7 +63,7 @@ abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
          FROM CourseTerminology
      ORDER BY ctTitle   
     """)
-    abstract fun findAllCourseTerminology(): DoorDataSourceFactory<Int, CourseTerminology>
+    abstract fun findAllCourseTerminology(): DataSourceFactory<Int, CourseTerminology>
 
     @Query("""
         SELECT *

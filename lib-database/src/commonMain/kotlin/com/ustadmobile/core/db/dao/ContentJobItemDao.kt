@@ -1,11 +1,11 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.*
 
 @Dao
@@ -198,7 +198,7 @@ abstract class ContentJobItemDao {
           FROM ContentJobItem
          WHERE cjiUid = :uid   
     """)
-    abstract fun getJobItemByUidLive(uid: Long): DoorLiveData<ContentJobItem?>
+    abstract fun getJobItemByUidLive(uid: Long): LiveData<ContentJobItem?>
 
     @Query("""
         SELECT cjiContainerUid

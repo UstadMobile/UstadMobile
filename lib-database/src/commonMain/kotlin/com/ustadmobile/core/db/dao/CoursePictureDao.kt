@@ -1,9 +1,9 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CoursePicture
@@ -87,7 +87,7 @@ abstract class CoursePictureDao : BaseDao<CoursePicture> {
     abstract suspend fun findByClazzUidAsync(clazzUid: Long): CoursePicture?
 
     @Query("SELECT * FROM CoursePicture where coursePictureClazzUid = :clazzUid ORDER BY " + " coursePictureTimestamp DESC LIMIT 1")
-    abstract fun findByClazzUidLive(clazzUid: Long): DoorLiveData<CoursePicture?>
+    abstract fun findByClazzUidLive(clazzUid: Long): LiveData<CoursePicture?>
 
 
     @Update

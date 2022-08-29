@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Query
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
@@ -85,7 +85,7 @@ abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
       ORDER BY camLct DESC
          LIMIT 1
     """)
-    abstract fun getMarkOfAssignmentForSubmitterLiveData(assignmentUid: Long, submitterUid: Long): DoorLiveData<CourseAssignmentMark?>
+    abstract fun getMarkOfAssignmentForSubmitterLiveData(assignmentUid: Long, submitterUid: Long): LiveData<CourseAssignmentMark?>
 
     @Query("""
         SELECT * 

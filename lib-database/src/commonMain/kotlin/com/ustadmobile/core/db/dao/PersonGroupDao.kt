@@ -1,9 +1,9 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonGroupReplicate.Companion.PERSONGROUP_REPLICATE_NOT_ALREADY_UPDATE_SQL
@@ -261,7 +261,7 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
     abstract suspend fun findByUidAsync(uid: Long) : PersonGroup?
 
     @Query("SELECT * FROM PersonGroup WHERE groupUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<PersonGroup?>
+    abstract fun findByUidLive(uid: Long): LiveData<PersonGroup?>
 
 
     @Update

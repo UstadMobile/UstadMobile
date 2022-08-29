@@ -1,8 +1,9 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.PostgresQuery
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
@@ -46,7 +47,7 @@ abstract class EntityRoleDao {
 
     @Query(FILTER_BY_PERSON_UID2)
     abstract fun filterByPersonWithExtra(personGroupUid: Long)
-            : DoorDataSourceFactory<Int, EntityRoleWithNameAndRole>
+            : DataSourceFactory<Int, EntityRoleWithNameAndRole>
 
     @Query(FILTER_BY_PERSON_UID2)
     abstract suspend fun filterByPersonWithExtraAsList(personGroupUid: Long)
@@ -57,7 +58,7 @@ abstract class EntityRoleDao {
 
 
     @Query("SELECT * FROM EntityRole WHERE erUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<EntityRole?>
+    abstract fun findByUidLive(uid: Long): LiveData<EntityRole?>
 
     @Update
     abstract suspend fun updateAsync(entity: EntityRole) :Int

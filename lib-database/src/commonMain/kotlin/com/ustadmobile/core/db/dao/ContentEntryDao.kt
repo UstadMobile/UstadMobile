@@ -2,8 +2,8 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
@@ -87,7 +87,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer?
 
     @Query(ENTRY_WITH_CONTAINER_QUERY)
-    abstract fun findEntryWithContainerByEntryIdLive(entryUuid: Long): DoorLiveData<ContentEntryWithMostRecentContainer?>
+    abstract fun findEntryWithContainerByEntryIdLive(entryUuid: Long): LiveData<ContentEntryWithMostRecentContainer?>
 
     @Query("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl LIMIT 1")
     @JsName("findBySourceUrl")
@@ -100,7 +100,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
     @JsName("getChildrenByParentUid")
-    abstract fun getChildrenByParentUid(parentUid: Long): DoorDataSourceFactory<Int, ContentEntry>
+    abstract fun getChildrenByParentUid(parentUid: Long): DataSourceFactory<Int, ContentEntry>
 
     @Query("""
         SELECT ContentEntry.*
@@ -208,7 +208,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("SELECT * FROM ContentEntry WHERE title = :title")
     @JsName("findByTitle")
-    abstract fun findByTitle(title: String): DoorLiveData<ContentEntry?>
+    abstract fun findByTitle(title: String): LiveData<ContentEntry?>
 
     /**
      * For new jobs, if the user is currently on Mobile Data, we will assume that they know what
@@ -296,7 +296,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByName(parentUid: Long, langParam: Long,
                                                                      categoryParam0: Long, personUid: Long,
                                                                      showHidden: Boolean, onlyFolder: Boolean,
-                                                                     sortOrder: Int): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+                                                                     sortOrder: Int): DataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
 
@@ -346,7 +346,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     """)
     abstract fun getContentFromMyCourses(
         personUid: Long
-    ): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    ): DataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Query("""
@@ -389,7 +389,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     """)
     abstract fun getContentByOwner(
         personUid: Long
-    ): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    ): DataSourceFactory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Update
@@ -404,7 +404,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @JsName("findLiveContentEntry")
     @Query("SELECT * FROM ContentEntry where contentEntryUid = :parentUid LIMIT 1")
-    abstract fun findLiveContentEntry(parentUid: Long): DoorLiveData<ContentEntry?>
+    abstract fun findLiveContentEntry(parentUid: Long): LiveData<ContentEntry?>
 
     @Query("""SELECT COALESCE((SELECT contentEntryUid 
                                       FROM ContentEntry 
@@ -453,7 +453,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract suspend fun getRecursiveDownloadTotals(contentEntryUid: Long): DownloadJobSizeInfo?
 
     @Query(ALL_ENTRIES_RECURSIVE_SQL)
-    abstract fun getAllEntriesRecursively(contentEntryUid: Long): DoorDataSourceFactory<Int, ContentEntryWithParentChildJoinAndMostRecentContainer>
+    abstract fun getAllEntriesRecursively(contentEntryUid: Long): DataSourceFactory<Int, ContentEntryWithParentChildJoinAndMostRecentContainer>
 
     @Query(ALL_ENTRIES_RECURSIVE_SQL)
     abstract fun getAllEntriesRecursivelyAsList(contentEntryUid: Long): List<ContentEntryWithParentChildJoinAndMostRecentContainer>
@@ -493,7 +493,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun insertWithReplace(entry: ContentEntry)
 
     @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid")
-    abstract fun findAllLive(): DoorLiveData<List<ContentEntryWithLanguage>>
+    abstract fun findAllLive(): LiveData<List<ContentEntryWithLanguage>>
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
     @Query("SELECT EXISTS(SELECT 1 FROM ContentEntry WHERE " +

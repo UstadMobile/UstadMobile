@@ -1,11 +1,11 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -101,7 +101,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND ClazzEnrolment.clazzEnrolmentActive 
         AND clazzEnrolmentClazzUid = :clazzUid ORDER BY clazzEnrolmentDateLeft DESC""")
     abstract fun findAllEnrolmentsByPersonAndClazzUid(personUid: Long, clazzUid: Long):
-            DoorDataSourceFactory<Int, ClazzEnrolmentWithLeavingReason>
+            DataSourceFactory<Int, ClazzEnrolmentWithLeavingReason>
 
     @Query("""SELECT ClazzEnrolment.*, LeavingReason.*,
          COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
@@ -162,7 +162,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND ClazzEnrolment.clazzEnrolmentActive
         ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
     """)
-    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DoorDataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>
+    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>
 
     @Query("""SELECT COALESCE(MAX(clazzEnrolmentDateLeft),0) FROM ClazzEnrolment WHERE 
         ClazzEnrolment.clazzEnrolmentPersonUid = :selectedPerson 
@@ -199,7 +199,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     abstract suspend fun findByUid(uid: Long): ClazzEnrolment?
 
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzEnrolment?>
+    abstract fun findByUidLive(uid: Long): LiveData<ClazzEnrolment?>
 
     @Query("""
                 UPDATE ClazzEnrolment
@@ -287,7 +287,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonGroupMember", "ScopedGrant"])
     @SqliteOnly
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%",
-                                       filter: Int, accountPersonUid: Long, currentTime: Long): DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>
+                                       filter: Int, accountPersonUid: Long, currentTime: Long): DataSourceFactory<Int, PersonWithClazzEnrolmentDetails>
 
     @Query("""
         UPDATE ClazzEnrolment 

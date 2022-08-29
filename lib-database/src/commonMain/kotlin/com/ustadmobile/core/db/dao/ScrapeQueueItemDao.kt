@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Query
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeQueueItemWithScrapeRun
 
@@ -11,7 +11,7 @@ abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
 
 
     @Query("SELECT * FROM ScrapeQueueItem WHERE status = $STATUS_PENDING AND itemType = :itemType ORDER BY priority ASC LIMIT 10")
-    abstract fun findNextQueueItems(itemType: Int): DoorLiveData<List<ScrapeQueueItem>>
+    abstract fun findNextQueueItems(itemType: Int): LiveData<List<ScrapeQueueItem>>
 
     @Query("UPDATE ScrapeQueueItem SET status = :status, errorCode = :errorCode WHERE sqiUid = :uid")
     abstract fun updateSetStatusById(uid: Int, status: Int, errorCode: Int)

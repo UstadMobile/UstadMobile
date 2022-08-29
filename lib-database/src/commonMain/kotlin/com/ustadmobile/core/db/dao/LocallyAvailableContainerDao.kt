@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
+import com.ustadmobile.door.annotation.Dao
 import com.ustadmobile.lib.db.entities.LocallyAvailableContainer
 
 @Dao

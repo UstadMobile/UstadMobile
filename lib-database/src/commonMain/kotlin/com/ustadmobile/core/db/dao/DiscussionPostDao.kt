@@ -1,10 +1,10 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
@@ -113,7 +113,7 @@ abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
       ORDER BY DiscussionPost.discussionPostStartDate DESC
     """)
     abstract fun getPostsByDiscussionTopic(discussionTopicUid: Long)
-            : DoorDataSourceFactory<Int, DiscussionPostWithDetails>
+            : DataSourceFactory<Int, DiscussionPostWithDetails>
 
 
     @Query("""
@@ -159,7 +159,7 @@ abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
          WHERE DiscussionPost.discussionPostUid = :uid
            
     """)
-    abstract fun findWithDetailsByUidLive(uid: Long): DoorLiveData<DiscussionPostWithDetails?>
+    abstract fun findWithDetailsByUidLive(uid: Long): LiveData<DiscussionPostWithDetails?>
 
     @Update
     abstract suspend fun updateAsync(entity: DiscussionPost): Int

@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Report
@@ -80,7 +80,7 @@ abstract class ReportDao : BaseDao<Report> {
             """)
     abstract fun findAllActiveReport(searchBit: String, personUid: Long, sortOrder: Int,
                                      isTemplate: Boolean)
-            : DoorDataSourceFactory<Int, Report>
+            : DataSourceFactory<Int, Report>
 
     @Query("SELECT * FROM Report WHERE reportUid = :entityUid")
     abstract suspend fun findByUid(entityUid: Long): Report?
@@ -89,14 +89,14 @@ abstract class ReportDao : BaseDao<Report> {
     abstract suspend fun updateAsync(entity: Report)
 
     @Query("SELECT * From Report WHERE  reportUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<Report?>
+    abstract fun findByUidLive(uid: Long): LiveData<Report?>
 
     @Query("""SELECT * FROM REPORT WHERE NOT reportInactive 
         AND isTemplate = :isTemplate
         ORDER BY priority ASC
             """)
     abstract fun findAllActiveReportLive(isTemplate: Boolean)
-            : DoorLiveData<List<Report>>
+            : LiveData<List<Report>>
 
     @Query("""SELECT * FROM REPORT WHERE NOT reportInactive 
         AND isTemplate = :isTemplate

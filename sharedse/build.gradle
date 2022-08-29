@@ -125,7 +125,7 @@ kotlin {
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
-                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
+                compileOnly "com.github.UstadMobile.door:door-annotations:$version_door"
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
             }
         }

@@ -1,10 +1,10 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
@@ -91,7 +91,7 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
       ORDER BY casTimestamp DESC
     """)
     abstract fun getAllSubmissionsFromSubmitter(assignmentUid: Long, submitterUid: Long)
-            : DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>
+            : DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>
 
     @Query("""
         SELECT Count(casUid)
@@ -127,7 +127,7 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
                  LIMIT 1
            ),${CourseAssignmentSubmission.NOT_SUBMITTED}) AS Status
     """)
-    abstract fun getStatusOfAssignmentForSubmitter(assignmentUid: Long, submitterUid: Long): DoorLiveData<Int>
+    abstract fun getStatusOfAssignmentForSubmitter(assignmentUid: Long, submitterUid: Long): LiveData<Int>
 
     @Query("""
         SELECT * 
@@ -146,7 +146,7 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
                        WHERE CourseAssignmentSubmission.casAssignmentUid = :assignmentUid
                        LIMIT 1)
     """)
-    abstract fun checkNoSubmissionsMade(assignmentUid: Long): DoorLiveData<Boolean>
+    abstract fun checkNoSubmissionsMade(assignmentUid: Long): LiveData<Boolean>
 
     companion object {
 

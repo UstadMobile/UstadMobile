@@ -1,9 +1,10 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.annotation.Dao
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -11,16 +12,15 @@ import kotlinx.coroutines.launch
 @Dao
 abstract class ConnectivityStatusDao {
 
-    val conenctivityStatusObserver = object : DoorObserver<ConnectivityStatus> {
-        override fun onChanged(t: ConnectivityStatus) {
+    val conenctivityStatusObserver =
+        Observer<ConnectivityStatus> { t ->
             GlobalScope.launch {
                 insertAsync(t)
             }
         }
-    }
 
     @Query("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")
-    abstract fun statusLive(): DoorLiveData<ConnectivityStatus?>
+    abstract fun statusLive(): LiveData<ConnectivityStatus?>
 
     @Query("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")
     abstract fun status(): ConnectivityStatus?
@@ -49,7 +49,7 @@ abstract class ConnectivityStatusDao {
         insertAsync(connectivityStatus)
     }
 
-    fun commitLiveConnectivityStatus(connectivityStatusLive: DoorLiveData<ConnectivityStatus>) {
+    fun commitLiveConnectivityStatus(connectivityStatusLive: LiveData<ConnectivityStatus>) {
         GlobalScope.launch(doorMainDispatcher()) {
             connectivityStatusLive.observeForever(conenctivityStatusObserver)
         }

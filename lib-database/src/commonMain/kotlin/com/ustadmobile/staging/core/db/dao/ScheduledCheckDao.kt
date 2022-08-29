@@ -1,5 +1,5 @@
 package com.ustadmobile.core.db.dao
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import com.ustadmobile.lib.db.entities.ClazzLog

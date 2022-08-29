@@ -1,7 +1,7 @@
 package com.ustadmobile.core.db
 
-import com.ustadmobile.door.DoorDataSourceFactory
-import androidx.room.Dao
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
@@ -79,7 +79,7 @@ abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
         LEFT JOIN Language ON SiteTerms.sTermsLangUid = Language.langUid
         WHERE CAST(sTermsActive AS INTEGER) = 1
     """)
-    abstract fun findAllTermsAsFactory(): DoorDataSourceFactory<Int, SiteTermsWithLanguage>
+    abstract fun findAllTermsAsFactory(): DataSourceFactory<Int, SiteTermsWithLanguage>
 
     @Query("""SELECT SiteTerms.*, Language.*
         FROM SiteTerms

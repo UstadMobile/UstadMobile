@@ -46,7 +46,7 @@ kotlin {
                 implementation project(":lib-database")
                 implementation project(":lib-database-entities")
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
-                implementation "com.github.UstadMobile.door:room-annotations:$version_door"
+                implementation "com.github.UstadMobile.door:door-annotations:$version_door"
             }
         }
 

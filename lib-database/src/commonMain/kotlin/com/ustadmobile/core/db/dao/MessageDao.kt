@@ -1,9 +1,9 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
@@ -158,7 +158,7 @@ abstract class MessageDao: BaseDao<Message>{
     ORDER BY Message.messageTimestamp DESC
     """)
     abstract fun findAllMessagesByChatUid(entityUid: Long, tableId: Int, loggedInPersonUid: Long):
-            DoorDataSourceFactory<Int, MessageWithPerson>
+            DataSourceFactory<Int, MessageWithPerson>
 
 
 }

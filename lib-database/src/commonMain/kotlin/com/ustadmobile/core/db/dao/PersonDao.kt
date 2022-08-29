@@ -2,8 +2,8 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
@@ -186,7 +186,7 @@ abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount?
 
     @Query("SELECT * From Person WHERE personUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<Person?>
+    abstract fun findByUidLive(uid: Long): LiveData<Person?>
 
     @Query("SELECT * FROM Person WHERE personUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Person?
@@ -204,7 +204,7 @@ abstract class PersonDao : BaseDao<Person> {
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
                                                  excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DoorDataSourceFactory<Int, PersonWithDisplayDetails>
+                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSourceFactory<Int, PersonWithDisplayDetails>
 
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     abstract fun findPersonsWithPermissionAsList(timestamp: Long, excludeClazz: Long,
@@ -225,7 +225,7 @@ abstract class PersonDao : BaseDao<Person> {
          WHERE Person.personUid = :personUid
         """)
     @QueryLiveTables(["Person", "PersonParentJoin"])
-    abstract fun findByUidWithDisplayDetailsLive(personUid: Long, activeUserPersonUid: Long): DoorLiveData<PersonWithPersonParentJoin?>
+    abstract fun findByUidWithDisplayDetailsLive(personUid: Long, activeUserPersonUid: Long): LiveData<PersonWithPersonParentJoin?>
 
     private fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
         if(fromPersonUid != 0L) {

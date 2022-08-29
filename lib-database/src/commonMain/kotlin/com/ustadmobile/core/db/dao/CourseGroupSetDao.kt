@@ -1,9 +1,9 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CourseGroupSet
@@ -84,7 +84,7 @@ abstract class CourseGroupSetDao : BaseDao<CourseGroupSet> {
           AND cgsClazzUid = :clazzUid
      ORDER BY cgsName   
     """)
-    abstract fun findAllCourseGroupSetForClazz(clazzUid: Long): DoorDataSourceFactory<Int, CourseGroupSet>
+    abstract fun findAllCourseGroupSetForClazz(clazzUid: Long): DataSourceFactory<Int, CourseGroupSet>
 
 
     @Query("""

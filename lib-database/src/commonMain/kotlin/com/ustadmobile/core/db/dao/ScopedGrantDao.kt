@@ -1,11 +1,11 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
@@ -278,7 +278,7 @@ abstract class ScopedGrantDao {
     abstract fun findByTableIdAndEntityUidWithNameAsDataSource(
         tableId: Int,
         entityUid: Long
-    ): DoorDataSourceFactory<Int, ScopedGrantWithName>
+    ): DataSourceFactory<Int, ScopedGrantWithName>
 
 
     @Query("""
@@ -309,7 +309,7 @@ abstract class ScopedGrantDao {
                     ON Person.personGroupUid = PersonGroup.groupUid
          WHERE ScopedGrant.sgUid = :sgUid 
     """)
-    abstract fun findByUidLiveWithName(sgUid: Long): DoorLiveData<ScopedGrantWithName?>
+    abstract fun findByUidLiveWithName(sgUid: Long): LiveData<ScopedGrantWithName?>
 
     companion object {
 

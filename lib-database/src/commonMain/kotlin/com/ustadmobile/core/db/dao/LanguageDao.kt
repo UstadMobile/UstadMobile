@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
@@ -76,7 +76,7 @@ abstract class LanguageDao : BaseDao<Language> {
             ELSE ''
         END DESC
     """)
-    abstract fun findLanguagesAsSource(sortOrder: Int, searchText: String): DoorDataSourceFactory<Int, Language>
+    abstract fun findLanguagesAsSource(sortOrder: Int, searchText: String): DataSourceFactory<Int, Language>
 
     @Query("""SELECT * FROM Language""")
     abstract fun findLanguagesList(): List<Language>
@@ -109,7 +109,7 @@ abstract class LanguageDao : BaseDao<Language> {
     abstract suspend fun updateAsync(entity: Language): Int
 
     @Query("SELECT * FROM LANGUAGE")
-    abstract fun findAllLanguageLive(): DoorLiveData<List<Language>>
+    abstract fun findAllLanguageLive(): LiveData<List<Language>>
 
     @JsName("findByUidList")
     @Query("SELECT langUid FROM LANGUAGE WHERE langUid IN (:uidList)")

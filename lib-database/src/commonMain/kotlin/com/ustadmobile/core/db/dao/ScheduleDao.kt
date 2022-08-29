@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
@@ -102,14 +102,14 @@ abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
     abstract suspend fun findByUidAsync(uid: Long) : Schedule?
 
     @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND CAST(scheduleActive AS INTEGER) = 1 ")
-    abstract fun findAllSchedulesByClazzUid(clazzUid: Long): DoorDataSourceFactory<Int, Schedule>
+    abstract fun findAllSchedulesByClazzUid(clazzUid: Long): DataSourceFactory<Int, Schedule>
 
     @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND CAST(scheduleActive AS INTEGER) = 1")
     abstract fun findAllSchedulesByClazzUidAsList(clazzUid: Long): List<Schedule>
 
     //Used for testing ClazzEdit
     @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND CAST(scheduleActive AS INTEGER) = 1")
-    abstract fun findAllSchedulesByClazzUidAsLiveList(clazzUid: Long): DoorLiveData<List<Schedule>>
+    abstract fun findAllSchedulesByClazzUidAsLiveList(clazzUid: Long): LiveData<List<Schedule>>
 
     @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND CAST(scheduleActive AS INTEGER) = 1 ")
     abstract suspend fun findAllSchedulesByClazzUidAsync(clazzUid: Long): List<Schedule>

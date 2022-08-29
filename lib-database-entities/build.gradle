@@ -79,7 +79,7 @@ kotlin {
                 implementation kotlin('stdlib-common')
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
-                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
+                compileOnly "com.github.UstadMobile.door:door-annotations:$version_door"
 
             }
         }
