@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
 @Dao
-abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
+expect abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
 
     @Query("""
      REPLACE INTO HolidayCalendarReplicate(hcPk, hcDestination)

@@ -1,12 +1,10 @@
-package com.ustadmobile.core.db
+package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
-import com.ustadmobile.core.db.dao.OneToManyJoinDao
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
@@ -14,7 +12,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
+expect abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
 
     @Query("""
      REPLACE INTO SiteTermsReplicate(stPk, stDestination)
@@ -88,13 +86,6 @@ abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
     """)
     abstract suspend fun findAllWithLanguageAsList(): List<SiteTermsWithLanguage>
 
-
-    @Transaction
-    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-        uidList.forEach {
-            updateActiveByUid(it, false, changeTime)
-        }
-    }
 
     @Query("""
         UPDATE SiteTerms 

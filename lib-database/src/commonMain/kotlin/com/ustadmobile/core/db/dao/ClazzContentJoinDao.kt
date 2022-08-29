@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
 @Dao
-abstract class ClazzContentJoinDao: BaseDao<ClazzContentJoin> {
+expect abstract class ClazzContentJoinDao: BaseDao<ClazzContentJoin> {
 
 
     @Query("""

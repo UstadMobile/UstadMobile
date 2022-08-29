@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
-abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
+expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
 
     @Query("""
      REPLACE INTO DiscussionPostReplicate(discussionPostPk, discussionPostDestination)

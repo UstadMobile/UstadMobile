@@ -3,4 +3,6 @@ s/com.ustadmobile.door.DoorDataSourceFactory/com.ustadmobile.paging.DataSourceFa
 s/DoorDataSourceFactory/DataSourceFactory/g
 s/com.ustadmobile.door.DoorLiveData/com.ustadmobile.door.lifecycle.LiveData/g
 s/DoorLiveData/LiveData/g
+s/com.ustadmobile.door.DoorObserver/com.ustadmobile.door.lifecycle.Observer/g
+s/DoorObserver/Observer/g
 

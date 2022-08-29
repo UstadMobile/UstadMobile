@@ -13,7 +13,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class CoursePictureDao : BaseDao<CoursePicture> {
+expect abstract class CoursePictureDao : BaseDao<CoursePicture> {
 
     @Query("""
      REPLACE INTO CoursePictureReplicate(cpPk, cpDestination)
@@ -92,10 +92,6 @@ abstract class CoursePictureDao : BaseDao<CoursePicture> {
 
     @Update
     abstract suspend fun updateAsync(coursePicture: CoursePicture)
-
-    companion object {
-
-    }
 
 
 

@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class ContentEntryContentCategoryJoinDao : BaseDao<ContentEntryContentCategoryJoin> {
+expect abstract class ContentEntryContentCategoryJoinDao : BaseDao<ContentEntryContentCategoryJoin> {
 
     @Query("""
      REPLACE INTO ContentEntryContentCategoryJoinReplicate(ceccjPk, ceccjDestination)

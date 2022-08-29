@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class ErrorReportDao {
+expect abstract class ErrorReportDao {
 
     @Query("""
  REPLACE INTO ErrorReportReplicate(erPk, erDestination)

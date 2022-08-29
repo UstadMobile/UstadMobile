@@ -9,7 +9,7 @@ import kotlin.js.JsName
 
 @Dao
 @Repository
-abstract class XObjectDao : BaseDao<XObjectEntity> {
+expect abstract class XObjectDao : BaseDao<XObjectEntity> {
 
     @Query("""
      REPLACE INTO XObjectEntityReplicate(xoePk, xoeDestination)

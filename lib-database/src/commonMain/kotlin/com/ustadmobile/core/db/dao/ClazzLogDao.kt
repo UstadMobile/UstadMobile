@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.Role
 
 @Repository
 @Dao
-abstract class ClazzLogDao : BaseDao<ClazzLog> {
+expect abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
     @Query("""
      REPLACE INTO ClazzLogReplicate(clPk, clDestination)

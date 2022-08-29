@@ -9,7 +9,7 @@ import kotlin.js.JsName
 
 @Repository
 @Dao
-abstract class LeavingReasonDao : BaseDao<LeavingReason> {
+expect abstract class LeavingReasonDao : BaseDao<LeavingReason> {
 
     @Query("""
          REPLACE INTO LeavingReasonReplicate(lrPk, lrDestination)
@@ -86,15 +86,6 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
 
     @Update
     abstract suspend fun updateAsync(entity: LeavingReason): Int
-
-    suspend fun initPreloadedLeavingReasons() {
-        val uidsInserted = findByUidList(LeavingReason.FIXED_UIDS.values.toList())
-        val uidsToInsert = LeavingReason.FIXED_UIDS.filter { it.value !in uidsInserted }
-        val verbListToInsert = uidsToInsert.map { reason ->
-            LeavingReason(reason.value, reason.key)
-        }
-        replaceList(verbListToInsert)
-    }
 
 
 }

@@ -2,6 +2,12 @@ package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
+import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_LANGNAME_ASC
+import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_LANGNAME_DESC
+import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_THREE_LETTER_ASC
+import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_THREE_LETTER_DESC
+import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_TWO_LETTER_ASC
+import com.ustadmobile.core.db.dao.LanguageDaoCommon.SORT_TWO_LETTER_DESC
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
@@ -9,7 +15,7 @@ import kotlin.js.JsName
 
 @Dao
 @Repository
-abstract class LanguageDao : BaseDao<Language> {
+expect abstract class LanguageDao : BaseDao<Language> {
 
     @Query("""
      REPLACE INTO LanguageReplicate(languagePk, languageDestination)
@@ -131,25 +137,5 @@ abstract class LanguageDao : BaseDao<Language> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entityList: List<Language>)
 
-    fun initPreloadedLanguages() {
-        val uidsInserted = findByUidList(Language.FIXED_LANGUAGES.map { it.langUid })
-        val templateListToInsert = Language.FIXED_LANGUAGES.filter { it.langUid !in uidsInserted }
-        replaceList(templateListToInsert)
-    }
 
-    companion object  {
-
-        const val SORT_LANGNAME_ASC = 1
-
-        const val SORT_LANGNAME_DESC = 2
-
-        const val SORT_TWO_LETTER_ASC = 3
-
-        const val SORT_TWO_LETTER_DESC = 4
-
-        const val SORT_THREE_LETTER_ASC = 5
-
-        const val SORT_THREE_LETTER_DESC = 6
-
-    }
 }

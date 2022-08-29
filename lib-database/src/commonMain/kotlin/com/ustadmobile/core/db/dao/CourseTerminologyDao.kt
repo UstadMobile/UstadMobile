@@ -11,7 +11,7 @@ import kotlin.js.JsName
 
 @Repository
 @Dao
-abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
+expect abstract class CourseTerminologyDao : BaseDao<CourseTerminology> {
 
     @Query("""
      REPLACE INTO CourseTerminologyReplicate(ctPk, ctDestination)

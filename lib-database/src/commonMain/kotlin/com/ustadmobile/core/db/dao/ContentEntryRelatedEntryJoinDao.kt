@@ -14,7 +14,7 @@ import kotlin.js.JsName
 
 @Dao
 @Repository
-abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntryJoin> {
+expect abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntryJoin> {
 
     @Query("""
      REPLACE INTO ContentEntryRelatedEntryJoinReplicate(cerejPk, cerejDestination)

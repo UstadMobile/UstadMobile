@@ -7,7 +7,7 @@ import androidx.room.Query
 import com.ustadmobile.door.SyncNode
 
 @Dao
-abstract class SyncNodeDao {
+expect abstract class SyncNodeDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replace(syncNode: SyncNode)

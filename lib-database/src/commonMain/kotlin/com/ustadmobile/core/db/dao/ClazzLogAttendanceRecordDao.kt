@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
-abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
+expect abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
 
 
     @Query("""

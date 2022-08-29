@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJoin> {
+expect abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJoin> {
 
     @Query("""
     REPLACE INTO ContextXObjectStatementJoinReplicate(cxosjPk, cxosjDestination)
@@ -98,15 +98,5 @@ abstract class ContextXObjectStatementJoinDao : BaseDao<ContextXObjectStatementJ
     @Query("SELECT * FROM ContextXObjectStatementJoin where contextStatementUid = :statementUid and contextXObjectUid = :objectUid")
     abstract fun findByStatementAndObjectUid(statementUid: Long, objectUid: Long): ContextXObjectStatementJoin?
 
-    companion object {
-
-        const val CONTEXT_FLAG_PARENT = 0
-
-        const val CONTEXT_FLAG_CATEGORY = 1
-
-        const val CONTEXT_FLAG_GROUPING = 2
-
-        const val CONTEXT_FLAG_OTHER = 3
-    }
 
 }

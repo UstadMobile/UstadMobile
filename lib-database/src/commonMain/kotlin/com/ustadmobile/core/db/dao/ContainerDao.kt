@@ -4,6 +4,10 @@ import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.ustadmobile.core.db.dao.ContainerDaoCommon.CONTAINER_READY_WHERE_CLAUSE
+import com.ustadmobile.core.db.dao.ContainerDaoCommon.FROM_CONTAINER_WHERE_MOST_RECENT_AND_READY
+import com.ustadmobile.core.db.dao.ContainerDaoCommon.SELECT_MOST_RECENT_READY_CONTAINER
+import com.ustadmobile.core.db.dao.ContainerDaoCommon.UPDATE_SIZE_AND_NUM_ENTRIES_SQL
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Container
@@ -13,7 +17,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class ContainerDao : BaseDao<Container> {
+expect abstract class ContainerDao : BaseDao<Container> {
 
     @Query("""
          REPLACE INTO ContainerReplicate(containerPk, containerDestination)
@@ -200,41 +204,7 @@ abstract class ContainerDao : BaseDao<Container> {
     """)
     abstract suspend fun getContainerSizeByUid(containerUid: Long) : Long
 
-    companion object{
 
-        //Containers in process will not have their filesize set.
-        private const val CONTAINER_READY_WHERE_CLAUSE = """
-            Container.fileSize > 0
-        """
 
-        private const val FROM_CONTAINER_WHERE_MOST_RECENT_AND_READY = """
-            FROM Container
-             WHERE Container.containerContentEntryUid = :contentEntryUid
-               AND $CONTAINER_READY_WHERE_CLAUSE     
-          ORDER BY Container.cntLastModified DESC 
-          LIMIT 1
-        """
-
-        private const val SELECT_MOST_RECENT_READY_CONTAINER = """
-            SELECT Container.*
-            $FROM_CONTAINER_WHERE_MOST_RECENT_AND_READY
-        """
-
-        private const val UPDATE_SIZE_AND_NUM_ENTRIES_SQL = """
-            UPDATE Container 
-               SET cntNumEntries = COALESCE(
-                   (SELECT COUNT(*) 
-                      FROM ContainerEntry 
-                     WHERE ceContainerUid = Container.containerUid), 0),
-                   fileSize = COALESCE(
-                   (SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize 
-                      FROM ContainerEntry
-                      JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid
-                     WHERE ContainerEntry.ceContainerUid = Container.containerUid), 0),
-                   cntLct = :changeTime   
-                     
-             WHERE containerUid = :containerUid
-        """
-    }
 
 }

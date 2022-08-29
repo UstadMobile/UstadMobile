@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.Role
 
 @Dao
 @Repository
-abstract class AgentDao :BaseDao<AgentEntity> {
+expect abstract class AgentDao :BaseDao<AgentEntity> {
 
     @Query("""
      REPLACE INTO AgentEntityReplicate(aePk, aeDestination)

@@ -7,11 +7,10 @@ import org.junit.Test
 import com.ustadmobile.core.view.SiteTermsDetailView
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.SiteTermsDao
+import com.ustadmobile.core.db.dao.SiteTermsDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.util.*
-import com.ustadmobile.door.DoorLifecycleObserver
 
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert

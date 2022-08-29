@@ -226,7 +226,7 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             ContentScraperUtil.checkIfPathsToDriversExist()
             try {
                 //This needs replaced with DI
-                lateinit var runDao: ScrapeRunDao
+                //lateinit var runDao: ScrapeRunDao
                 //val runDao = UmAppDatabase.getInstance(Any(), replaceMeWithDi()).scrapeRunDao
 
 

@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 
 @Dao
 @Repository
-abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
+expect abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
 
     @Query(""" 
         REPLACE INTO ClazzAssignmentRollUp 

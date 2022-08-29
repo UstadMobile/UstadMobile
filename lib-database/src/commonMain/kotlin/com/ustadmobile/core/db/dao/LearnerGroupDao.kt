@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
 @Dao
-abstract class LearnerGroupDao : BaseDao<LearnerGroup> {
+expect abstract class LearnerGroupDao : BaseDao<LearnerGroup> {
 
     @Query("""
      REPLACE INTO LearnerGroupReplicate(lgPk, lgDestination)

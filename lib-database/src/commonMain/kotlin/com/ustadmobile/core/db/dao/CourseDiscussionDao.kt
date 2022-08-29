@@ -13,7 +13,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<CourseDiscussion>{
+expect abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<CourseDiscussion>{
 
     @Query("""
      REPLACE INTO CourseDiscussionReplicate(courseDiscussionPk, courseDiscussionDestination)
@@ -82,13 +82,6 @@ abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<
                courseDiscussionLct = :changeTime
          WHERE courseDiscussionUid = :cbUid""")
     abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
-
-    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-        uidList.forEach {
-            updateActiveByUid(it, false, changeTime)
-        }
-    }
-
 
     @Query("""
         SELECT CourseDiscussion.* 

@@ -124,12 +124,10 @@ import com.ustadmobile.lib.db.entities.*
     DiscussionPost::class,
     DiscussionPostReplicate::class
 
-    //TODO: DO NOT REMOVE THIS COMMENT!
-    //#DOORDB_TRACKER_ENTITIES
 
 ], version = 106)
 @MinReplicationVersion(60)
-abstract class UmAppDatabase : RoomDatabase() {
+expect abstract class UmAppDatabase : RoomDatabase {
 
     /*
         Changes from 38-39:
@@ -200,8 +198,6 @@ abstract class UmAppDatabase : RoomDatabase() {
 
     abstract val personPictureDao: PersonPictureDao
 
-    abstract val scrapeRunDao: ScrapeRunDao
-
     abstract val connectivityStatusDao: ConnectivityStatusDao
 
     abstract val containerDao: ContainerDao
@@ -238,13 +234,8 @@ abstract class UmAppDatabase : RoomDatabase() {
 
     abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
     abstract val clazzLogDao: ClazzLogDao
-    abstract val customFieldDao: CustomFieldDao
-    abstract val customFieldValueDao: CustomFieldValueDao
-    abstract val customFieldValueOptionDao: CustomFieldValueOptionDao
 
     abstract val scheduleDao: ScheduleDao
-
-    abstract val scheduledCheckDao: ScheduledCheckDao
 
     abstract val holidayCalendarDao: HolidayCalendarDao
     abstract val holidayDao: HolidayDao

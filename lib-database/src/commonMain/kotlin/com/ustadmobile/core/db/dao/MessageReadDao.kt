@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class MessageReadDao: BaseDao<MessageRead>{
+expect abstract class MessageReadDao: BaseDao<MessageRead>{
 
     @Query("""
      REPLACE INTO MessageReadReplicate(messageReadPk, messageReadDestination)

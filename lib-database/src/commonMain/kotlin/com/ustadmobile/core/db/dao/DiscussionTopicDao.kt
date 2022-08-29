@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
-abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<DiscussionTopic>{
+expect abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<DiscussionTopic>{
 
     @Query("""
      REPLACE INTO DiscussionTopicReplicate(discussionTopicPk, discussionTopicDestination)
@@ -125,13 +125,6 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
                discussionTopicLct = :changeTime
          WHERE discussionTopicUid = :uid""")
     abstract suspend fun updateActiveByUid(uid: Long, active: Boolean,  changeTime: Long)
-
-    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-        uidList.forEach {
-            updateActiveByUid(it, false, changeTime)
-        }
-    }
-
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun replaceListAsync(list: List<DiscussionTopic>)

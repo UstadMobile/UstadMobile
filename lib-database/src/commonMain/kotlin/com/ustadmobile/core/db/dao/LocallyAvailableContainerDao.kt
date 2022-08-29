@@ -5,7 +5,7 @@ import com.ustadmobile.door.annotation.Dao
 import com.ustadmobile.lib.db.entities.LocallyAvailableContainer
 
 @Dao
-abstract class LocallyAvailableContainerDao {
+expect abstract class LocallyAvailableContainerDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertList(locallyAvailableContainers: List<LocallyAvailableContainer>)

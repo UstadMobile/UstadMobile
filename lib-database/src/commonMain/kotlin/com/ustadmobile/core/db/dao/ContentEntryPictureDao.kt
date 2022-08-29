@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class ContentEntryPictureDao : BaseDao<ContentEntryPicture> {
+expect abstract class ContentEntryPictureDao : BaseDao<ContentEntryPicture> {
 
     @Query("""
      REPLACE INTO ContentEntryPictureReplicate(cepPk, cepDestination)

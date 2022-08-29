@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
 @Dao
-abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
+expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
 
     @Query("""
      REPLACE INTO CommentsReplicate(commentsPk, commentsDestination)
@@ -187,9 +187,9 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
         changeTime: Long
     )
 
-    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-        uidList.forEach {
-            updateInActiveByCommentUid(it, true, changeTime)
-        }
-    }
+//    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
+//        uidList.forEach {
+//            updateInActiveByCommentUid(it, true, changeTime)
+//        }
+//    }
 }

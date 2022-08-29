@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
+expect abstract class CourseAssignmentMarkDao : BaseDao<CourseAssignmentMark> {
 
 
     @Query("""

@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_UNMETE
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 
 @Dao
-abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
+expect abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
 
     @Query("SELECT * FROM ContainerImportJob WHERE cijSessionId = :sessionId")
     abstract fun findBySessionId(sessionId: String): ContainerImportJob?

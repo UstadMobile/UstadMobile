@@ -3,13 +3,14 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.ustadmobile.core.db.dao.UserSessionDaoCommon.FIND_LOCAL_SESSIONS_SQL
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
-abstract class UserSessionDao {
+expect abstract class UserSessionDao {
 
     /*
      * Here UserSessionSubject represents the UserSession for which we are checking access permissions
@@ -221,19 +222,5 @@ abstract class UserSessionDao {
            AND ScopedGrant.sgEntityUid IN (:schoolUids) 
     """)
     abstract suspend fun findAllActiveNodeIdsWithSchoolBasedPermission(schoolUids: List<Long>): List<Long>
-
-    companion object {
-        const val FIND_LOCAL_SESSIONS_SQL = """
-            SELECT UserSession.*, Person.*
-              FROM UserSession
-                   JOIN Person ON UserSession.usPersonUid = Person.personUid
-             WHERE UserSession.usClientNodeId = (
-                   SELECT COALESCE(
-                          (SELECT nodeClientId 
-                            FROM SyncNode
-                           LIMIT 1), 0))
-               AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}        
-            """
-    }
 
 }

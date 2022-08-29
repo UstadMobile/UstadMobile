@@ -2,6 +2,8 @@ package com.ustadmobile.core.db.dao
 
 import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
+import com.ustadmobile.core.db.dao.ReportDaoCommon.SORT_TITLE_ASC
+import com.ustadmobile.core.db.dao.ReportDaoCommon.SORT_TITLE_DESC
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.*
@@ -11,7 +13,7 @@ import kotlin.js.JsName
 
 @Dao
 @Repository
-abstract class ReportDao : BaseDao<Report> {
+expect abstract class ReportDao : BaseDao<Report> {
 
     @Query("""
      REPLACE INTO ReportReplicate(reportPk, reportDestination)
@@ -126,18 +128,5 @@ abstract class ReportDao : BaseDao<Report> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entityList: List<Report>)
 
-    fun initPreloadedTemplates() {
-        val uidsInserted = findByUidList(Report.FIXED_TEMPLATES.map { it.reportUid })
-        val templateListToInsert = Report.FIXED_TEMPLATES.filter { it.reportUid !in uidsInserted }
-        replaceList(templateListToInsert)
-    }
-
-    companion object{
-
-        const val SORT_TITLE_ASC = 1
-
-        const val SORT_TITLE_DESC = 2
-
-    }
 
 }

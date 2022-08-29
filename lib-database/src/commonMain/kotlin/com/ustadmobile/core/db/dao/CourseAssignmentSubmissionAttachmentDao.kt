@@ -12,7 +12,7 @@ import kotlin.js.JsName
 
 @Dao
 @Repository
-abstract class CourseAssignmentSubmissionAttachmentDao : BaseDao<CourseAssignmentSubmissionAttachment> {
+expect abstract class CourseAssignmentSubmissionAttachmentDao : BaseDao<CourseAssignmentSubmissionAttachment> {
 
     @Query("""
      REPLACE INTO CourseAssignmentSubmissionAttachmentReplicate(casaPk, casaDestination)

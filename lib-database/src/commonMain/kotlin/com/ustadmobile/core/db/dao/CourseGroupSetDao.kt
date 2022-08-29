@@ -13,7 +13,7 @@ import kotlin.js.JsName
 
 @Repository
 @Dao
-abstract class CourseGroupSetDao : BaseDao<CourseGroupSet> {
+expect abstract class CourseGroupSetDao : BaseDao<CourseGroupSet> {
 
     @Query("""
      REPLACE INTO CourseGroupSetReplicate(cgsPk, cgsDestination)

@@ -3,6 +3,12 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.annotation.Dao
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.SELECT_ACTIVE_CLAZZES
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_ATTENDANCE_ASC
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_ATTENDANCE_DESC
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_ASC
+import com.ustadmobile.core.db.dao.ClazzDaoCommon.SORT_CLAZZNAME_DESC
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
@@ -17,7 +23,7 @@ import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 
 @Repository
 @Dao
-abstract class ClazzDao : BaseDao<Clazz> {
+expect abstract class ClazzDao : BaseDao<Clazz> {
 
     @Query("""
      REPLACE INTO ClazzReplicate(clazzPk, clazzDestination)
@@ -331,25 +337,5 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
     @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
     abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
-
-    companion object {
-
-        const val SORT_CLAZZNAME_ASC = 1
-
-        const val SORT_CLAZZNAME_DESC = 2
-
-        const val SORT_ATTENDANCE_ASC = 3
-
-        const val SORT_ATTENDANCE_DESC = 4
-
-        const val FILTER_ACTIVE_ONLY = 1
-
-        const val FILTER_CURRENTLY_ENROLLED = 5
-
-        const val FILTER_PAST_ENROLLMENTS = 6
-
-        private const val SELECT_ACTIVE_CLAZZES = "SELECT * FROM Clazz WHERE CAST(isClazzActive AS INTEGER) = 1"
-    }
-
 
 }

@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
 @Dao
-abstract class ContentCategoryDao : BaseDao<ContentCategory> {
+expect abstract class ContentCategoryDao : BaseDao<ContentCategory> {
 
     @Query("""
      REPLACE INTO ContentCategoryReplicate(ccPk, ccDestination)

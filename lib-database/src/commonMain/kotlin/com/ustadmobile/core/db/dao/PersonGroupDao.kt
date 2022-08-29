@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.UserSession.Companion.USER_SESSION_NOT_LO
 
 @Repository
 @Dao
-abstract class PersonGroupDao : BaseDao<PersonGroup> {
+expect abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
     @Query("""
      REPLACE INTO PersonGroupReplicate(pgPk, pgDestination)

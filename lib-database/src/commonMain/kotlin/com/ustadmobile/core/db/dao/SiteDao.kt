@@ -7,7 +7,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class SiteDao {
+expect abstract class SiteDao {
 
     @Query("SELECT * FROM Site LIMIT 1")
     abstract fun getSite(): Site?

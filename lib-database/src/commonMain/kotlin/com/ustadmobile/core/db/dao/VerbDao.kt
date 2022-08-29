@@ -13,7 +13,7 @@ import kotlin.js.JsName
 
 @Dao
 @Repository
-abstract class VerbDao : BaseDao<VerbEntity> {
+expect abstract class VerbDao : BaseDao<VerbEntity> {
 
     @Query("""
      REPLACE INTO VerbEntityReplicate(vePk, veDestination)
@@ -69,15 +69,6 @@ abstract class VerbDao : BaseDao<VerbEntity> {
     @JsName("replaceList")
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun replaceList(entityList: List<VerbEntity>)
-
-    suspend fun initPreloadedVerbs() {
-        val uidsInserted = findByUidList(VerbEntity.FIXED_UIDS.values.toList())
-        val uidsToInsert = VerbEntity.FIXED_UIDS.filter { it.value !in uidsInserted }
-        val verbListToInsert = uidsToInsert.map { verbEntry ->
-            VerbEntity(verbEntry.value, verbEntry.key)
-        }
-        replaceList(verbListToInsert)
-    }
 
    @Query("""SELECT VerbEntity.verbUid, VerbEntity.urlId, XLangMapEntry.valueLangMap AS display
         FROM VerbEntity LEFT JOIN XLangMapEntry on XLangMapEntry.verbLangMapUid = VerbEntity.verbUid WHERE 

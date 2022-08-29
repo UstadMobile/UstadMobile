@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.*
 
 @Repository
 @Dao
-abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
+expect abstract class CourseGroupMemberDao: BaseDao<CourseGroupMember> {
 
 
     @Query("""

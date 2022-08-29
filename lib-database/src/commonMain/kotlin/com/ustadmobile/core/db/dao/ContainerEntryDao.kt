@@ -7,15 +7,8 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 
 @Dao
-abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
+expect abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
 
-
-    @Transaction
-    open fun insertAndSetIds(containerEntryList: List<ContainerEntry>) {
-        for (entry in containerEntryList) {
-            entry.ceUid = insert(entry)
-        }
-    }
 
     @Insert
     abstract suspend fun insertListAsync(containerEntryList: List<ContainerEntry>)

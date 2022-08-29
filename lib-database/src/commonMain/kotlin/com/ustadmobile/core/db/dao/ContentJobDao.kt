@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentJob
 
 @Dao
-abstract class ContentJobDao {
+expect abstract class ContentJobDao {
 
     @Insert
     abstract suspend fun insertAsync(contentJob: ContentJob): Long

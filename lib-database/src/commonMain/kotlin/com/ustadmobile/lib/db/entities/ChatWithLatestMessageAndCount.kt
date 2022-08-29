@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 class ChatWithLatestMessageAndCount() : Chat() {
@@ -19,21 +20,21 @@ class ChatWithLatestMessageAndCount() : Chat() {
 
 
     //Consider moving this logic away from the model
-    val chatName: String?
-        get() = if(chatGroup){
-            chatTitle
-        }else{
-            var f = ""
-            var l = ""
-            if(otherPersonFirstNames != null){
-                f = otherPersonFirstNames as String
-            }
-            if(otherPersonLastName != null){
-                l = otherPersonLastName as String
-            }
-
-            "$f $l"
-        }
+//    val chatName: String?
+//        get() = if(chatGroup){
+//            chatTitle
+//        }else{
+//            var f = ""
+//            var l = ""
+//            if(otherPersonFirstNames != null){
+//                f = otherPersonFirstNames as String
+//            }
+//            if(otherPersonLastName != null){
+//                l = otherPersonLastName as String
+//            }
+//
+//            "$f $l"
+//        }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -46,7 +47,6 @@ class ChatWithLatestMessageAndCount() : Chat() {
         if (otherPersonUid != other.otherPersonUid) return false
         if (otherPersonFirstNames != other.otherPersonFirstNames) return false
         if (otherPersonLastName != other.otherPersonLastName) return false
-        if (chatName != other.chatName) return false
 
         return true
     }
@@ -57,7 +57,6 @@ class ChatWithLatestMessageAndCount() : Chat() {
         result = 31 * result + otherPersonUid.hashCode()
         result = 31 * result + (otherPersonFirstNames?.hashCode() ?: 0)
         result = 31 * result + (otherPersonLastName?.hashCode() ?: 0)
-        result = 31 * result + (chatName?.hashCode() ?: 0)
         return result
     }
 

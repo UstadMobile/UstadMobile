@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class ChatMemberDao: BaseDao<ChatMember>{
+expect abstract class ChatMemberDao: BaseDao<ChatMember>{
 
     @Query("""
      REPLACE INTO chatMemberReplicate(chatMemberPk, chatMemberDestination)

@@ -3,7 +3,6 @@ package com.ustadmobile.core.db.dao
 import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
 import com.ustadmobile.door.lifecycle.LiveData
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
@@ -13,7 +12,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
 @Dao
-abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
+expect abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
 
     @Query("""
      REPLACE INTO ScheduleReplicate(schedulePk, scheduleDestination)
@@ -78,10 +77,6 @@ abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
     @Update
     abstract suspend fun updateAsync(entity: Schedule) : Int
 
-    @Transaction
-    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-        uidList.forEach { updateScheduleActivated(it, false, changeTime) }
-    }
 
     @Query("""
         UPDATE Schedule 

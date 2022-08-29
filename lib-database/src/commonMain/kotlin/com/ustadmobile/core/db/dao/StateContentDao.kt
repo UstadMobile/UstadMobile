@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class StateContentDao : BaseDao<StateContentEntity> {
+expect abstract class StateContentDao : BaseDao<StateContentEntity> {
 
     @Query("""
      REPLACE INTO StateContentEntityReplicate(scePk, sceDestination)

@@ -7,7 +7,7 @@ import com.ustadmobile.lib.db.entities.*
 
 @Repository
 @Dao
-abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
+expect abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     /**
      * PersonGroupMember must replicate to:

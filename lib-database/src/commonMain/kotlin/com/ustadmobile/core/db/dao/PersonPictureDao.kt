@@ -13,7 +13,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class PersonPictureDao : BaseDao<PersonPicture> {
+expect abstract class PersonPictureDao : BaseDao<PersonPicture> {
 
     @Query("""
      REPLACE INTO PersonPictureReplicate(ppPk, ppDestination)
@@ -84,22 +84,5 @@ abstract class PersonPictureDao : BaseDao<PersonPicture> {
 
     @Update
     abstract suspend fun updateAsync(personPicture: PersonPicture)
-
-    companion object {
-
-        val TABLE_LEVEL_PERMISSION = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) " +
-                "OR " +
-                "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
-                " JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
-                " JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
-                " WHERE " +
-                " PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
-                " AND EntityRole.erTableId = " + PersonPicture.TABLE_ID +
-                " AND Role.rolePermissions & "
-
-        protected val TABLE_LEVEL_PERMISSION_CONDITION2 = " > 0)"
-    }
-
-
 
 }

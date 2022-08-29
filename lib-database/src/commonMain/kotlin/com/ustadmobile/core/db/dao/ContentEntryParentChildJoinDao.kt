@@ -11,7 +11,7 @@ data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: L
 
 @Repository
 @Dao
-abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJoin> {
+expect abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJoin> {
 
     @Query("""
      REPLACE INTO ContentEntryParentChildJoinReplicate(cepcjPk, cepcjDestination)

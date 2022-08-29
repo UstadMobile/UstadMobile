@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Dao
 @Repository
-abstract class LanguageVariantDao : BaseDao<LanguageVariant> {
+expect abstract class LanguageVariantDao : BaseDao<LanguageVariant> {
 
     @Query("""
      REPLACE INTO LanguageVariantReplicate(lvPk, lvDestination)

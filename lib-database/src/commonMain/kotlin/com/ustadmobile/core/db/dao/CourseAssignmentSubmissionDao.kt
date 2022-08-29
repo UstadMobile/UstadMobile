@@ -11,7 +11,7 @@ import kotlin.js.JsName
 
 @Dao
 @Repository
-abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmission> {
+expect abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmission> {
 
     @Query("""
      REPLACE INTO CourseAssignmentSubmissionReplicate(casPk, casDestination)
@@ -147,19 +147,5 @@ abstract class CourseAssignmentSubmissionDao : BaseDao<CourseAssignmentSubmissio
                        LIMIT 1)
     """)
     abstract fun checkNoSubmissionsMade(assignmentUid: Long): LiveData<Boolean>
-
-    companion object {
-
-        const val GET_SUBMITTERID_FROM_STUDENT = """
-             (CASE WHEN ClazzAssignment.caGroupUid = 0
-                                       THEN :studentUid
-                                       ELSE COALESCE((SELECT cgmGroupNumber 
-                                                       FROM CourseGroupMember
-                                                      WHERE cgmSetUid = ClazzAssignment.caGroupUid
-                                                        AND cgmPersonUid = :studentUid
-                                                      LIMIT 1),0))
-        """
-
-    }
 
 }

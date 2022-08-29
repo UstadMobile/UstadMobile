@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @Repository
-abstract class ChatDao: BaseDao<Chat>{
+expect abstract class ChatDao: BaseDao<Chat>{
 
     @Query("""
      REPLACE INTO chatReplicate(chatPk, chatDestination)

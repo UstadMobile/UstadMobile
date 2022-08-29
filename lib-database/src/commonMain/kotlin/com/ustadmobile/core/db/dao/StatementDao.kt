@@ -4,17 +4,22 @@ import com.ustadmobile.door.annotation.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
+import com.ustadmobile.core.db.dao.StatementDaoCommon.SORT_FIRST_NAME_ASC
+import com.ustadmobile.core.db.dao.StatementDaoCommon.SORT_FIRST_NAME_DESC
+import com.ustadmobile.core.db.dao.StatementDaoCommon.SORT_LAST_ACTIVE_ASC
+import com.ustadmobile.core.db.dao.StatementDaoCommon.SORT_LAST_ACTIVE_DESC
+import com.ustadmobile.core.db.dao.StatementDaoCommon.SORT_LAST_NAME_ASC
+import com.ustadmobile.core.db.dao.StatementDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.serialization.Serializable
 import kotlin.js.JsName
 
 @Dao
 @Repository
-abstract class StatementDao : BaseDao<StatementEntity> {
+expect abstract class StatementDao : BaseDao<StatementEntity> {
 
     @Query("""
      REPLACE INTO StatementEntityReplicate(sePk, seDestination)
@@ -105,11 +110,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     abstract fun findByStatementIdList(id: List<String>): List<StatementEntity>
 
     @RawQuery
-    abstract suspend fun getResults(query: DoorQuery): List<ReportData>
-
-    open suspend fun getResults(sqlStr: String, paramsList: Array<Any>): List<ReportData> {
-        return getResults(SimpleDoorQuery(sqlStr, paramsList))
-    }
+    abstract suspend fun getResults(query: DoorQuery): List<StatementReportData>
 
     @RawQuery(observedEntities = [StatementEntity::class, Person::class, XLangMapEntry::class])
     @QueryLiveTables(["StatementEntity", "Person", "XLangMapEntry"])
@@ -424,25 +425,6 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     abstract suspend fun findLatestRegistrationStatement(accountPersonUid: Long, entryUid: Long): String?
 
 
-    @Serializable
-    data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")
-
-    companion object{
-
-        const val SORT_FIRST_NAME_ASC = 1
-
-        const val SORT_FIRST_NAME_DESC = 2
-
-        const val SORT_LAST_NAME_ASC = 3
-
-        const val SORT_LAST_NAME_DESC = 4
-
-        const val SORT_LAST_ACTIVE_ASC = 5
-
-        const val SORT_LAST_ACTIVE_DESC = 6
-
-
-    }
 
 
 }

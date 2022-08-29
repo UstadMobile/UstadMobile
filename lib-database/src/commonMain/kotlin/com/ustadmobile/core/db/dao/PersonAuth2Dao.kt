@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.Role
 
 @Dao
 @Repository
-abstract class PersonAuth2Dao {
+expect abstract class PersonAuth2Dao {
 
     @Query("""
      REPLACE INTO PersonAuth2Replicate(paPk, paDestination)

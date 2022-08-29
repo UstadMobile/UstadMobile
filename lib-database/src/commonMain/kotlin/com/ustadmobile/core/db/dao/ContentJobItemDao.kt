@@ -9,7 +9,7 @@ import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.*
 
 @Dao
-abstract class ContentJobItemDao {
+expect abstract class ContentJobItemDao {
 
     @Query("""
         WITH ConnectivityStateCte(state) AS 
@@ -107,14 +107,6 @@ abstract class ContentJobItemDao {
          WHERE cjiUid = :contentJobItemId   
     """)
     abstract suspend fun updateContainerProcessed(contentJobItemId: Long, cjiContainerProcessed: Boolean)
-
-    @Transaction
-    open suspend fun commitProgressUpdates(updates: List<ContentJobItemProgressUpdate>) {
-        updates.forEach {
-            updateItemProgress(it.cjiUid, it.cjiItemProgress, it.cjiItemTotal)
-        }
-    }
-
 
     @Query("""
         UPDATE ContentJobItem

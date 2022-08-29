@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
 @Dao
-abstract class GroupLearningSessionDao : BaseDao<GroupLearningSession> {
+expect abstract class GroupLearningSessionDao : BaseDao<GroupLearningSession> {
 
     @Query("""
      REPLACE INTO GroupLearningSessionReplicate(glsPk, glsDestination)
