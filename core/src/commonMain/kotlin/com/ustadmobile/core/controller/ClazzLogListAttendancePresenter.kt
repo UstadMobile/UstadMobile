@@ -15,6 +15,10 @@ import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.door.*
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzWithSchool
@@ -26,7 +30,8 @@ import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 
 class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, String>, view: ClazzLogListAttendanceView,
-                          di: DI, lifecycleOwner: DoorLifecycleOwner)
+                          di: DI, lifecycleOwner: LifecycleOwner
+)
     : UstadListPresenter<ClazzLogListAttendanceView, ClazzLog>(context, arguments, view, di, lifecycleOwner) {
 
     //List of points to plot.
@@ -40,9 +45,9 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
 
     private var clazzWithSchool: ClazzWithSchool? = null
 
-    private var graphDbData: DoorLiveData<List<ClazzLog>>? = null
+    private var graphDbData: LiveData<List<ClazzLog>>? = null
 
-    private var graphDisplayData = DoorMutableLiveData<AttendanceGraphData>()
+    private var graphDisplayData = MutableLiveData<AttendanceGraphData>()
 
     private var graphDateRange = Pair(0L, 0L)
 
@@ -50,15 +55,14 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
 
     //It is required to explicitly specify the type due to a compiler bug:
     // https://youtrack.jetbrains.com/issue/KT-20996
-    private val graphObserver : DoorObserver<List<ClazzLog>> = object: DoorObserver<List<ClazzLog>> {
-        override fun onChanged(t: List<ClazzLog>) {
-            graphDisplayData.sendValue(AttendanceGraphData(
+    private val graphObserver : Observer<List<ClazzLog>> =
+        Observer{ t ->
+            graphDisplayData.postValue(AttendanceGraphData(
                 t.map { it.logDate to it.attendancePercentage() },
                 t.map { it.logDate to it.latePercentage() },
                 graphDateRange
             ))
         }
-    }
 
     enum class SortOrder(val messageId: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc),

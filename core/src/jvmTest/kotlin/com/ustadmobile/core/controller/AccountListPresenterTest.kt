@@ -11,10 +11,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -54,13 +54,13 @@ class AccountListPresenterTest {
 
     private lateinit var impl: UstadMobileSystemImpl
 
-    private val mockActiveSessionsLive = DoorMutableLiveData<List<UserSessionWithPersonAndEndpoint>>()
+    private val mockActiveSessionsLive = MutableLiveData<List<UserSessionWithPersonAndEndpoint>>()
 
-    private val mockActiveSessionLive = DoorMutableLiveData<UserSessionWithPersonAndEndpoint?>()
+    private val mockActiveSessionLive = MutableLiveData<UserSessionWithPersonAndEndpoint?>()
 
-    private lateinit var mockedAccountListObserver:DoorObserver<List<UmAccount>>
+    private lateinit var mockedAccountListObserver:Observer<List<UmAccount>>
 
-    private lateinit var mockedAccountObserver:DoorObserver<UmAccount>
+    private lateinit var mockedAccountObserver:Observer<UmAccount>
 
     private val accountList = listOf(UmAccount(1,"dummy",null,""))
 
@@ -96,7 +96,7 @@ class AccountListPresenterTest {
         endpoint = Endpoint("https://orgname.ustadmobile.app/")
     ))
 
-    private lateinit var mockedLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockedLifecycleOwner: LifecycleOwner
 
     private lateinit var di: DI
 
@@ -151,12 +151,12 @@ class AccountListPresenterTest {
 
     @Test
     fun givenStoreAccounts_whenAppLaunched_thenShouldShowAllAccounts(){
-        mockActiveSessionsLive.setVal(defaultSessionList)
+        mockActiveSessionsLive.setValue(defaultSessionList)
 
         val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
         presenter.onCreate(null)
 
-        argumentCaptor<DoorLiveData<List<UserSessionWithPersonAndEndpoint>>>{
+        argumentCaptor<LiveData<List<UserSessionWithPersonAndEndpoint>>>{
             verify(mockView, timeout(5000)).accountListLive = capture()
             //This should be the mediator
             runBlocking {
@@ -175,9 +175,9 @@ class AccountListPresenterTest {
 
         presenter.onCreate(null)
 
-        mockActiveSessionLive.setVal(defaultSessionList[0])
+        mockActiveSessionLive.setValue(defaultSessionList[0])
 
-        nullableArgumentCaptor<DoorLiveData<UserSessionWithPersonAndEndpoint?>> {
+        nullableArgumentCaptor<LiveData<UserSessionWithPersonAndEndpoint?>> {
             verify(mockView, timeout(defaultTimeout)).activeAccountLive = capture()
             runBlocking {
                 lastValue!!.waitUntil<UserSessionWithPersonAndEndpoint?> { it != null }
@@ -223,7 +223,7 @@ class AccountListPresenterTest {
 
     @Test
     fun givenDeleteAccountButton_whenClicked_thenShouldRemoveAccountFromTheDevice(){
-        mockActiveSessionsLive.setVal(defaultSessionList)
+        mockActiveSessionsLive.setValue(defaultSessionList)
         val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
         presenter.onCreate(null)
 
@@ -236,8 +236,8 @@ class AccountListPresenterTest {
 
     @Test
     fun givenOneAccountOnDeviceAndServerSelectionAllowed_whenLogoutButtonClicked_thenEndSessionAndShouldRedirectToSiteEnterLinkView(){
-        mockActiveSessionLive.setVal(defaultSessionList[0])
-        mockActiveSessionsLive.setVal(defaultSessionList)
+        mockActiveSessionLive.setValue(defaultSessionList[0])
+        mockActiveSessionsLive.setValue(defaultSessionList)
 
         accountManager.stub {
             onBlocking {
@@ -267,8 +267,8 @@ class AccountListPresenterTest {
 
     @Test
     fun givenOneAccountOnDeviceAndServerSelectionNotAllowed_whenLogoutButtonClicked_thenEndSessionAndShouldRedirectToLoginView() {
-        mockActiveSessionLive.setVal(defaultSessionList[0])
-        mockActiveSessionsLive.setVal(defaultSessionList)
+        mockActiveSessionLive.setValue(defaultSessionList[0])
+        mockActiveSessionsLive.setValue(defaultSessionList)
 
         accountManager.stub {
             onBlocking {
@@ -300,8 +300,8 @@ class AccountListPresenterTest {
 
     @Test
     fun givenMultipleAccountsOnDevice_whenLogoutButtonClicked_thenShouldEndSessionAndRedirectToAccountListInPickerMode() {
-        mockActiveSessionsLive.setVal(defaultSessionList + secondAccountList)
-        mockActiveSessionLive.setVal(defaultSessionList[0])
+        mockActiveSessionsLive.setValue(defaultSessionList + secondAccountList)
+        mockActiveSessionLive.setValue(defaultSessionList[0])
 
         accountManager.stub {
             onBlocking {
@@ -332,8 +332,8 @@ class AccountListPresenterTest {
 
     @Test
     fun givenAccountList_whenAccountIsClicked_shouldBeActive(){
-        mockActiveSessionsLive.setVal(defaultSessionList + secondAccountList)
-        mockActiveSessionLive.setVal(defaultSessionList[0])
+        mockActiveSessionsLive.setValue(defaultSessionList + secondAccountList)
+        mockActiveSessionLive.setValue(defaultSessionList[0])
 
         val presenter = AccountListPresenter(context, mapOf(), mockView, di, mockedLifecycleOwner)
 
@@ -411,8 +411,8 @@ class AccountListPresenterTest {
             )
         )
 
-        mockActiveSessionLive.setVal(sessionList[0])
-        mockActiveSessionsLive.setVal(sessionList)
+        mockActiveSessionLive.setValue(sessionList[0])
+        mockActiveSessionsLive.setValue(sessionList)
 
         val presenter = AccountListPresenter(context,
             mapOf(AccountListView.ARG_FILTER_BY_ENDPOINT to activeEndpointArg), mockView, di,
@@ -425,7 +425,7 @@ class AccountListPresenterTest {
         presenter.handleClickAddAccount()
 
         //Verify that the account list was filtered as per the argument provided
-        argumentCaptor<DoorLiveData<List<UserSessionWithPersonAndEndpoint>>> {
+        argumentCaptor<LiveData<List<UserSessionWithPersonAndEndpoint>>> {
             verify(mockView, timeout(5000)).accountListLive = capture()
             runBlocking {
                 firstValue.waitUntil<List<UserSessionWithPersonAndEndpoint>> {

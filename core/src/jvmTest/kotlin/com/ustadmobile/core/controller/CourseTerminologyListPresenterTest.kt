@@ -6,7 +6,7 @@ import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.CourseTerminologyListView
 import org.mockito.kotlin.*
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.CourseTerminologyDao
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.CourseTerminology
@@ -37,7 +37,7 @@ class CourseTerminologyListPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoCourseTerminologyDaoSpy: CourseTerminologyDao
 

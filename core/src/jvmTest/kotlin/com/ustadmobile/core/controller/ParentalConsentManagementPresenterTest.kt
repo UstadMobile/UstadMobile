@@ -9,7 +9,7 @@ import org.junit.Test
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.PersonParentJoinDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -50,7 +50,7 @@ class ParentalConsentManagementPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoPersonParentJoinDaoSpy: PersonParentJoinDao
 

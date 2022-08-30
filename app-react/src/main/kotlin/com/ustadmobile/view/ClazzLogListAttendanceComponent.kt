@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.mui.components.*
@@ -50,7 +50,7 @@ class ClazzLogListAttendanceComponent (mProps: UmProps) : UstadListComponent<Cla
 
     }
 
-    override var graphData: DoorMutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>? =
+    override var graphData: MutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>? =
         null
         set(value) {
             field?.removeObserver(graphDataObserver)

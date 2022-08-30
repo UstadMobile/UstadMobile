@@ -8,7 +8,7 @@ import org.junit.Test
 import com.ustadmobile.core.view.@BaseFileName@View
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.@Entity@Dao
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.@Entity@
@@ -47,7 +47,7 @@ class @BaseFileName@PresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repo@Entity@DaoSpy: @Entity@Dao
 

@@ -12,7 +12,7 @@ import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.LanguageEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.LeavingReason
 import kotlinx.coroutines.runBlocking
@@ -36,7 +36,7 @@ class LanguageEditPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoLanguageDaoSpy: LanguageDao
 

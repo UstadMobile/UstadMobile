@@ -11,7 +11,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -33,7 +33,7 @@ ContentEntryOpenerTest {
 
     private lateinit var impl: UstadMobileSystemImpl
 
-    private val context = mock<DoorLifecycleOwner>() {
+    private val context = mock<LifecycleOwner>() {
         on { currentState }.thenReturn(DoorLifecycleObserver.STARTED)
     } as Any
 

@@ -9,7 +9,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.CourseTerminology
@@ -27,7 +27,7 @@ class CourseTerminologyEditPresenter(
     context: Any,
     arguments: Map<String, String>,
     view: CourseTerminologyEditView,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     di: DI)
     : UstadEditPresenter<CourseTerminologyEditView, CourseTerminology>(
     context,

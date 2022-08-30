@@ -9,7 +9,7 @@ import com.ustadmobile.core.view.HolidayCalendarEditView
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
@@ -22,7 +22,7 @@ import org.kodein.di.DI
 
 class HolidayCalendarEditPresenter(context: Any,
                           arguments: Map<String, String>, view: HolidayCalendarEditView,
-                          lifecycleOwner: DoorLifecycleOwner,
+                          lifecycleOwner: LifecycleOwner,
                           di: DI)
     : UstadEditPresenter<HolidayCalendarEditView, HolidayCalendar>(context, arguments, view, di, lifecycleOwner) {
 
@@ -56,7 +56,7 @@ class HolidayCalendarEditPresenter(context: Any,
         val holidayList = withTimeoutOrNull(2000) {
             db.holidayDao.findByHolidayCalendaUidAsync(entityUid)
         } ?: listOf()
-        holidayOneToManyJoinEditHelper.liveList.sendValue(holidayList)
+        holidayOneToManyJoinEditHelper.liveList.postValue(holidayList)
 
         return holidayCalendar
     }

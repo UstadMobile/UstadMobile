@@ -2,8 +2,8 @@ package com.ustadmobile.sharedse.network
 
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.util.copyOnWriteListOf
@@ -61,9 +61,9 @@ abstract class NetworkManagerBleCommon(
 
     private val knownPeerNodes = mutableMapOf<String, Long>()
 
-    protected val _connectivityStatus = DoorMutableLiveData<ConnectivityStatus>()
+    protected val _connectivityStatus = MutableLiveData<ConnectivityStatus>()
 
-    val connectivityStatus: DoorLiveData<ConnectivityStatus>
+    val connectivityStatus: LiveData<ConnectivityStatus>
         get() = _connectivityStatus
 
     private val nodeTimeoutChecker = GlobalScope.async {

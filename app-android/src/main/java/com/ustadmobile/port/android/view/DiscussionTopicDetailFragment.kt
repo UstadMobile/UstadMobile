@@ -20,7 +20,7 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.DiscussionTopicDetailView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.DiscussionTopic
@@ -61,7 +61,7 @@ class DiscussionTopicDetailFragment: UstadDetailFragment<DiscussionTopic>(),
     }
 
 
-    override var posts: DoorDataSourceFactory<Int, DiscussionPostWithDetails>? = null
+    override var posts: DataSourceFactory<Int, DiscussionPostWithDetails>? = null
         set(value) {
 
             postsLiveData?.removeObserver(postsObserver)

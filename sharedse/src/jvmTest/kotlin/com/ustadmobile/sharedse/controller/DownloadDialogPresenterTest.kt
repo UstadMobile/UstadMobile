@@ -14,7 +14,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CANCEL
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
@@ -39,7 +39,7 @@ class DownloadDialogPresenterTest {
 
     private val context = Any()
 
-    private val mockLifecycle = mock<DoorLifecycleOwner>() {
+    private val mockLifecycle = mock<LifecycleOwner>() {
         on { currentState }.thenReturn(DoorLifecycleObserver.STARTED)
     }
 

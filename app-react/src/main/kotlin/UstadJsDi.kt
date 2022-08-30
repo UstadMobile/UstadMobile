@@ -68,13 +68,13 @@ internal fun ustadJsDi(
         GlobalScope
     }
 
-    bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(EndpointScope.Default).singleton {
+    bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
         dbBuilt
     }
 
-    bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(EndpointScope.Default).singleton {
+    bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
         val nodeIdAndAuth: NodeIdAndAuth = instance()
-        val db = instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB)
+        val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
         val repositoryConfig =  RepositoryConfig.repositoryConfig(
             this,context.url+"UmAppDatabase/",  nodeIdAndAuth.auth,
             nodeIdAndAuth.nodeId, instance(), instance()

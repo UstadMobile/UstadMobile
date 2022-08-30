@@ -63,7 +63,7 @@ class ChatDetailFragment: UstadBaseFragment(), ChatDetailView, ChatDetailFragmen
     : View {
         val rootView: View
 
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
 
         mPresenter = ChatDetailPresenter(
             requireContext(), arguments.toStringMap(), this,

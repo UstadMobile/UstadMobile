@@ -16,7 +16,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzAssignmentRollUp
 import com.ustadmobile.util.test.ext.insertTestClazzAssignment
 import kotlinx.coroutines.runBlocking
@@ -45,7 +45,7 @@ class ClazzAssignmentDetailStudentProgressOverviewListPresenterTest {
 
     private lateinit var di: DI
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoClazzAssignmentDaoSpy: ClazzAssignmentDao
 

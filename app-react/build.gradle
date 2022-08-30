@@ -46,11 +46,9 @@ dependencies {
     implementation "org.jetbrains.kotlin-wrappers:kotlin-redux:$version_kotlin_redux"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux:$version_kotlin_react_redux"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-mui:$version_kotlin_mui"
-    implementation project(":lib-database-mpp")
     implementation project(":core")
     implementation project(":lib-util")
     implementation project(":lib-database")
-    implementation project(":lib-database-entities")
     implementation npm("@emotion/react", "$version_npm_emotion")
     implementation npm("@emotion/styled", "$version_npm_emotion")
     implementation npm("moment","$version_npm_moment")

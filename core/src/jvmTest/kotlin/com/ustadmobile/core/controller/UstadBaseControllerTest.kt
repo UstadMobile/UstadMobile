@@ -6,8 +6,8 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
@@ -57,7 +57,7 @@ class UstadBaseControllerTest {
 
     private var numActiveSessions: Int = 1
 
-    private lateinit var mockActiveSessionLive: DoorMutableLiveData<UserSessionWithPersonAndEndpoint?>
+    private lateinit var mockActiveSessionLive: MutableLiveData<UserSessionWithPersonAndEndpoint?>
 
     @JvmField
     @Rule
@@ -73,7 +73,7 @@ class UstadBaseControllerTest {
 
         mockView = mock  { }
 
-        mockActiveSessionLive = DoorMutableLiveData()
+        mockActiveSessionLive = MutableLiveData()
 
         accountManager = mock {
             onBlocking { activeSessionCount(any(), any()) }.thenAnswer {
@@ -95,7 +95,7 @@ class UstadBaseControllerTest {
                 accountManager
             }
 
-            bind<DoorLifecycleOwner>() with singleton {
+            bind<LifecycleOwner>() with singleton {
                 mock {
                     on { currentState }.thenReturn(UstadBaseController.RESUMED)
                 }
@@ -109,13 +109,13 @@ class UstadBaseControllerTest {
 
     @Test
     fun givenOneActiveSessionAndSessionIsRequired_whenSessionEnded_thenShouldNavigateToSelectSite() {
-        mockActiveSessionLive.setVal(userSession)
+        mockActiveSessionLive.setValue(userSession)
 
         val presenter = DummyViewPresenter(Any(), mapOf(), mockView, di, true)
         presenter.onCreate(null)
 
         numActiveSessions = 0
-        mockActiveSessionLive.setVal(null)
+        mockActiveSessionLive.setValue(null)
 
         verify(systemImpl, timeout(5000)).go(eq(SiteEnterLinkView.VIEW_NAME),
             any(), any(), argWhere {
@@ -125,13 +125,13 @@ class UstadBaseControllerTest {
 
     @Test
     fun givenTwoActiveSessionAndSessionIsRequired_whenSessionIsEnded_thenShouldNavigateToAccountList() {
-        mockActiveSessionLive.setVal(userSession)
+        mockActiveSessionLive.setValue(userSession)
 
         val presenter = DummyViewPresenter(Any(), mapOf(), mockView, di, true)
         presenter.onCreate(null)
 
         numActiveSessions = 1
-        mockActiveSessionLive.setVal(null)
+        mockActiveSessionLive.setValue(null)
 
         verify(systemImpl, timeout(5000)).go(eq(AccountListView.VIEW_NAME),
             any(), any(), argWhere {

@@ -14,7 +14,7 @@ import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.TextAssignmentEditView.Companion.EDIT_ENABLED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.doorMainDispatcher
@@ -37,7 +37,7 @@ class ClazzAssignmentDetailOverviewPresenter(
     context: Any,
     arguments: Map<String, String>,
     view: ClazzAssignmentDetailOverviewView,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     di: DI
 ) : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignmentWithCourseBlock>(
     context,

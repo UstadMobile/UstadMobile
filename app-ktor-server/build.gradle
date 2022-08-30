@@ -83,10 +83,8 @@ dependencies {
     implementation project(":core")
     implementation project(":sharedse")
     implementation project(":lib-database")
-    implementation project(":lib-database-mpp")
     implementation "com.github.UstadMobile.door:door-annotations:$version_door"
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
-    implementation project(":lib-database-entities")
     implementation project(":lib-util")
     implementation project(":lib-content-scrapers")
 

@@ -293,7 +293,7 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         localConnectionOpener = null
 
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
-        _connectivityStatus.sendValue(ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
+        _connectivityStatus.postValue(ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                 false, null))
     }
 
@@ -355,7 +355,7 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
 
         }
 
-        _connectivityStatus.sendValue(status)
+        _connectivityStatus.postValue(status)
     }
 
 

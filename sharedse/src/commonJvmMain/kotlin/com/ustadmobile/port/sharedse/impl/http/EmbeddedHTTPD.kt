@@ -110,8 +110,8 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
     @JvmOverloads
     override suspend fun mountContainer(endpointUrl: String, containerUid: Long, filterMode: Int): String {
         val endpoint = Endpoint(endpointUrl)
-        val endpointDb: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
-        val endpointRepo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+        val endpointDb: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+        val endpointRepo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
         val container = endpointRepo.containerDao.findByUidAsync(containerUid)
                 ?: throw IllegalArgumentException("Container $containerUid on $endpointUrl not found")

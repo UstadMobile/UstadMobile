@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.HolidayCalendarEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.HolidayCalendarEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
@@ -42,7 +42,7 @@ class HolidayCalendarEditComponent(mProps: UmProps): UstadEditComponent<HolidayC
         }
     }
 
-    override var holidayList: DoorLiveData<List<Holiday>>? = null
+    override var holidayList: LiveData<List<Holiday>>? = null
         get() = field
         set(value) {
             field = value

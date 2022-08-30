@@ -118,7 +118,7 @@ class SiteDetailFragment: UstadDetailFragment<Site>(), SiteDetailView, Workspace
         }
 
         val accountManager: UstadAccountManager by instance()
-        repo = di.direct.on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+        repo = di.direct.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
         siteRecyclerViewAdapter = SiteRecyclerViewAdapter()
         mSiteTermsRecyclerViewAdapter = SiteTermsRecyclerViewAdapter().also {

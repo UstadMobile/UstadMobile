@@ -10,7 +10,7 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.lib.util.copyOnWriteListOf
@@ -159,7 +159,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     }
 
 
-    override var list: DoorDataSourceFactory<Int, DT>? = null
+    override var list: DataSourceFactory<Int, DT>? = null
         get() = field
         set(value) {
             field = value
@@ -218,7 +218,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     override fun onCreateView() {
         super.onCreateView()
         fabManager?.icon = "add"
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
         window.setTimeout({
             searchManager?.searchListener = listPresenter
         }, UI_EVENT_LISTENER_TIMEOUT)

@@ -112,7 +112,7 @@ class TestXapiStatementResponder {
                 }
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
@@ -123,7 +123,7 @@ class TestXapiStatementResponder {
                     .also { runBlocking { it.preload() } })
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(),
                     context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance())))

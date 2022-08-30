@@ -17,9 +17,9 @@ import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
@@ -44,7 +44,7 @@ class ClazzLogListAttendancePresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var di: DI
 
@@ -132,10 +132,10 @@ class ClazzLogListAttendancePresenterTest {
                 mapOf(UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()), mockView, di,
                 mockLifecycleOwner)
         presenter.onCreate(null)
-        nullableArgumentCaptor<DoorMutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>>() {
+        nullableArgumentCaptor<MutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>>() {
             verify(mockView, timeout(5000)).graphData = capture()
             runBlocking {
-                waitForLiveData(firstValue as DoorLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>, 5000) {
+                waitForLiveData(firstValue as LiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>, 5000) {
                     it.percentageAttendedSeries.size == 5 && it.percentageLateSeries.size == 5
                 }
             }

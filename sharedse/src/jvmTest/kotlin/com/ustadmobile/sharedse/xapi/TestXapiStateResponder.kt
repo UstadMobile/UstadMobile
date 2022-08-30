@@ -124,7 +124,7 @@ class TestXapiStateResponder {
         }
 
         accountManager = di.direct.instance()
-        db = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
+        db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
 
         mockUriResource = mock<RouterNanoHTTPD.UriResource> {
             on { initParameter(0, DI::class.java) }.thenReturn(di)

@@ -2,7 +2,7 @@ package com.ustadmobile.core.util
 
 import com.ustadmobile.door.ChangeListenerRequest
 import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -31,7 +31,7 @@ class TestRateLimitedLiveData {
             "Hello World ${System.currentTimeMillis()}"
         }
 
-        val observer = mock<DoorObserver<String>> {  }
+        val observer = mock<Observer<String>> {  }
 
         rateLimitedLiveData.observeForever(observer)
 

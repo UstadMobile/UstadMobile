@@ -6,7 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.*
@@ -56,7 +56,7 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
         }
     }
 
-    override var pendingStudentList: DoorDataSourceFactory<Int, SchoolMemberWithPerson>? = null
+    override var pendingStudentList: DataSourceFactory<Int, SchoolMemberWithPerson>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)

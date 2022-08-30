@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
@@ -22,7 +22,7 @@ import org.kodein.di.DI
 
 class ReportDetailPresenter(context: Any,
                             arguments: Map<String, String>, view: ReportDetailView,
-                            di: DI, lifecycleOwner: DoorLifecycleOwner)
+                            di: DI, lifecycleOwner: LifecycleOwner)
     : UstadDetailPresenter<ReportDetailView, ReportWithSeriesWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
     private var loggedInPerson: Person? = null

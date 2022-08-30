@@ -7,7 +7,7 @@ import org.junit.Test
 import com.ustadmobile.core.view.SiteEditView
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.SiteDao
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -45,7 +45,7 @@ class SiteEditPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoWorkSpaceDaoSpy: SiteDao
 

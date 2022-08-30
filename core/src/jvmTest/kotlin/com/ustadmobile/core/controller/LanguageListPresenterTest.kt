@@ -15,7 +15,7 @@ import com.ustadmobile.core.view.LanguageEditView
 import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Language
 import kotlinx.serialization.builtins.ListSerializer
@@ -42,7 +42,7 @@ class LanguageListPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoLanguageDaoSpy: LanguageDao
 

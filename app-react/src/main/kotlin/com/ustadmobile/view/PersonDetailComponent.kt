@@ -7,9 +7,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.outcomeToString
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.PersonDetailView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.DoorMediatorLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonPicture
@@ -53,7 +53,7 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
         }
     }
 
-    override var clazzes: DoorDataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>? = null
+    override var clazzes: DataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>? = null
         get() = field
         set(value) {
             field = value
@@ -260,7 +260,7 @@ class PersonDetailComponent(mProps: UmProps): UstadDetailComponent<PersonWithPer
     companion object {
 
         val PERSON_PICTURE_LOOKUP_ADAPTER = AttachmentImageLookupAdapter { db, entityUid ->
-            object: DoorMediatorLiveData<String?>(), DoorObserver<PersonPicture?> {
+            object: DoorMediatorLiveData<String?>(), Observer<PersonPicture?> {
                 init {
                     addSource(db.personPictureDao.findByPersonUidLive(entityUid), this)
                 }

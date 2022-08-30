@@ -9,7 +9,7 @@ import com.ustadmobile.core.view.SiteEditView
 import com.ustadmobile.core.view.SiteTermsEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.Site
@@ -23,7 +23,7 @@ import org.kodein.di.DI
 
 class SiteEditPresenter(context: Any,
                         arguments: Map<String, String>, view: SiteEditView,
-                        lifecycleOwner: DoorLifecycleOwner,
+                        lifecycleOwner: LifecycleOwner,
                         di: DI)
     : UstadEditPresenter<SiteEditView, Site>(context, arguments, view, di, lifecycleOwner) {
 
@@ -62,7 +62,7 @@ class SiteEditPresenter(context: Any,
             it.siteTermsDao.findAllWithLanguageAsList()
         }
 
-        siteTermsOneToManyJoinEditHelper.liveList.sendValue(siteTerms)
+        siteTermsOneToManyJoinEditHelper.liveList.postValue(siteTerms)
 
         return site
     }

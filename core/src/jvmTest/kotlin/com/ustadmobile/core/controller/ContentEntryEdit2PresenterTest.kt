@@ -12,7 +12,7 @@ import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.door.ext.waitUntilWithTimeout
 import com.ustadmobile.door.getFirstValue
@@ -45,7 +45,7 @@ class ContentEntryEdit2PresenterTest {
 
     private lateinit var repo: UmAppDatabase
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var container: Container
 

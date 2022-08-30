@@ -34,8 +34,8 @@ class DownloadDialogPresenter(
     arguments: Map<String, String>,
     view: DownloadDialogView,
     di: DI,
-    private val lifecycleOwner: DoorLifecycleOwner
-) : UstadBaseController<DownloadDialogView>(context, arguments, view, di), DoorObserver<Int?> {
+    private val lifecycleOwner: LifecycleOwner
+) : UstadBaseController<DownloadDialogView>(context, arguments, view, di), Observer<Int?> {
 
     private var deleteFileOptions = false
 

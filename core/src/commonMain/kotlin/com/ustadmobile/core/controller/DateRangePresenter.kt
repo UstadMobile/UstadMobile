@@ -8,7 +8,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.DateRangeView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.DateRangeMoment
 import com.ustadmobile.lib.db.entities.Moment
@@ -21,7 +21,7 @@ import org.kodein.di.DI
 
 class DateRangePresenter(context: Any,
         arguments: Map<String, String>, view: DateRangeView,
-        lifecycleOwner: DoorLifecycleOwner,
+        lifecycleOwner: LifecycleOwner,
         di: DI)
     : UstadEditPresenter<DateRangeView, DateRangeMoment>(context, arguments, view, di, lifecycleOwner) {
 

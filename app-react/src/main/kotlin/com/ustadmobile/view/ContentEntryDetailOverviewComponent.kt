@@ -6,9 +6,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.calculateScoreWithPenalty
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.DoorMediatorLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
@@ -53,7 +53,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
         }
     }
 
-    override var availableTranslationsList: DoorDataSourceFactory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null
+    override var availableTranslationsList: DataSourceFactory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null
         get() = field
         set(value) {
             field = value
@@ -341,7 +341,7 @@ class ContentEntryDetailOverviewComponent(mProps: UmProps): UstadDetailComponent
     companion object {
 
         val ATTACHMENT_URI_LOOKUP_ADAPTER = AttachmentImageLookupAdapter { db, entityUid ->
-            object: DoorMediatorLiveData<String?>(), DoorObserver<ContentEntryPicture?> {
+            object: DoorMediatorLiveData<String?>(), Observer<ContentEntryPicture?> {
                 init {
                     addSource(db.contentEntryPictureDao.findByContentEntryUidLive(entityUid), this)
                 }

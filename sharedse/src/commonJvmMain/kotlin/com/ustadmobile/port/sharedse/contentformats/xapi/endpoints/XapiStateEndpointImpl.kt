@@ -22,9 +22,9 @@ import java.util.*
 
 class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiStateEndpoint {
 
-    private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+    private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val repo: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+    private val repo: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     private val gson: Gson by di.instance()
 

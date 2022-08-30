@@ -16,8 +16,8 @@ import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.commontest.ext.awaitResult
 import kotlinx.coroutines.runBlocking
@@ -50,7 +50,7 @@ class ScopedGrantEditPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoScopedGrantDaoSpy: ScopedGrantDao
 
@@ -115,8 +115,8 @@ class ScopedGrantEditPresenterTest {
         testNavController.navigate(ClazzEdit2View.VIEW_NAME, mapOf())
     }
 
-    fun ScopedGrantEditView.captureBitmaskLiveData(verifyTimes: Int = 1) : DoorLiveData<List<BitmaskFlag>>{
-        return nullableArgumentCaptor<DoorLiveData<List<BitmaskFlag>>>().run {
+    fun ScopedGrantEditView.captureBitmaskLiveData(verifyTimes: Int = 1) : LiveData<List<BitmaskFlag>>{
+        return nullableArgumentCaptor<LiveData<List<BitmaskFlag>>>().run {
             verify(this@captureBitmaskLiveData, timeout(5000).times(verifyTimes)).bitmaskList = capture()
             lastValue!!
         }

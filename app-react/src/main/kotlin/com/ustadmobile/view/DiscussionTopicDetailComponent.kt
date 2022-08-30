@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.DiscussionTopicDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.DiscussionTopicDetailView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.DiscussionTopic
@@ -44,7 +44,7 @@ class DiscussionTopicDetailComponent(mProps: UmProps): UstadDetailComponent<Disc
         }
     }
 
-    override var posts: DoorDataSourceFactory<Int, DiscussionPostWithDetails>? = null
+    override var posts: DataSourceFactory<Int, DiscussionPostWithDetails>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)

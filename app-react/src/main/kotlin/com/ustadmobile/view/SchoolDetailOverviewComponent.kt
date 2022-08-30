@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.SchoolDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SchoolDetailOverviewView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
@@ -42,7 +42,7 @@ class SchoolDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<Schoo
         }
     }
 
-    override var schoolClazzes: DoorDataSourceFactory<Int, ClazzWithListDisplayDetails>? = null
+    override var schoolClazzes: DataSourceFactory<Int, ClazzWithListDisplayDetails>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)

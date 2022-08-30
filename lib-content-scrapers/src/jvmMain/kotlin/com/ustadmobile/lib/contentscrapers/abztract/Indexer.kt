@@ -15,9 +15,9 @@ import org.kodein.di.on
 
 abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val sqiUid: Int, val contentEntryUid: Long, endpoint: Endpoint, di: DI) {
 
-    val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+    val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    val repo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+    val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     var parentContentEntry: ContentEntry? = null
     var contentEntry: ContentEntry? = null

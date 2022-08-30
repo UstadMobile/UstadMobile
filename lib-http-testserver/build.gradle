@@ -17,7 +17,6 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":app-ktor-server")
     implementation project(":lib-database")
-    implementation project(":lib-database-mpp")
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
     implementation project(":lib-test-common")
 

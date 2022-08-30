@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzDao
+import com.ustadmobile.core.db.dao.ClazzDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ListFilterIdOption
@@ -9,7 +10,7 @@ import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
@@ -18,7 +19,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
 class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: ClazzList2View,
-                         di: DI, lifecycleOwner: DoorLifecycleOwner,
+                         di: DI, lifecycleOwner: LifecycleOwner,
                          private val clazzList2ItemListener:
                          DefaultClazzListItemListener = DefaultClazzListItemListener(view, ListViewMode.BROWSER, context, arguments, di))
     : UstadListPresenter<ClazzList2View, Clazz>(context, arguments, view, di, lifecycleOwner), ClazzListItemListener by clazzList2ItemListener, OnSortOptionSelected, OnSearchSubmitted {
@@ -62,7 +63,7 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
                 searchText.toQueryLikeParam(),
                 loggedInPersonUid, filterAlreadySelectedList,
                 filterExcludeMembersOfSchool, selectedSortOption?.flag ?: 0,
-                view.checkedFilterOptionChip?.optionId ?: ClazzDao.FILTER_CURRENTLY_ENROLLED,
+                view.checkedFilterOptionChip?.optionId ?: ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED,
                 systemTimeInMillis(), filterByPermission, 0)
     }
 
@@ -119,15 +120,15 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
         const val CLAZZ_RESULT_KEY = "Clazz"
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.name, ClazzDao.SORT_CLAZZNAME_ASC, true),
-                SortOrderOption(MessageID.name, ClazzDao.SORT_CLAZZNAME_DESC, false),
-                SortOrderOption(MessageID.attendance, ClazzDao.SORT_ATTENDANCE_ASC, true),
-                SortOrderOption(MessageID.attendance, ClazzDao.SORT_ATTENDANCE_DESC, false)
+                SortOrderOption(MessageID.name, ClazzDaoCommon.SORT_CLAZZNAME_ASC, true),
+                SortOrderOption(MessageID.name, ClazzDaoCommon.SORT_CLAZZNAME_DESC, false),
+                SortOrderOption(MessageID.attendance, ClazzDaoCommon.SORT_ATTENDANCE_ASC, true),
+                SortOrderOption(MessageID.attendance, ClazzDaoCommon.SORT_ATTENDANCE_DESC, false)
         )
 
         val FILTER_OPTIONS = listOf(
-            MessageID.currently_enrolled to ClazzDao.FILTER_CURRENTLY_ENROLLED,
-            MessageID.past_enrollments to ClazzDao.FILTER_PAST_ENROLLMENTS,
+            MessageID.currently_enrolled to ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED,
+            MessageID.past_enrollments to ClazzDaoCommon.FILTER_PAST_ENROLLMENTS,
             MessageID.all to 0)
     }
 }

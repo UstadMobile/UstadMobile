@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.ChatDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ChatDetailView
 import com.ustadmobile.core.view.EditButtonMode
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Chat
 import com.ustadmobile.lib.db.entities.MessageRead
@@ -52,7 +52,7 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
             ustadComponentTitle = value
         }
 
-    override var messageList: DoorDataSourceFactory<Int, MessageWithPerson>? = null
+    override var messageList: DataSourceFactory<Int, MessageWithPerson>? = null
         get() = field
         set(value) {
             field = value

@@ -11,7 +11,7 @@ import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Schedule
 import kotlinx.serialization.builtins.ListSerializer
@@ -34,7 +34,7 @@ class ScheduleEditPresenterTest {
 
     private lateinit var mockView: ScheduleEditView
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     @Before
     fun setup() {

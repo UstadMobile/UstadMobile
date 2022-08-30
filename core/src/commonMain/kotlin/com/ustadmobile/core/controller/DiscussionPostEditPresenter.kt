@@ -8,7 +8,7 @@ import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.DiscussionPost
@@ -20,7 +20,7 @@ import org.kodein.di.DI
 
 class DiscussionPostEditPresenter(context: Any,
                                   arguments: Map<String, String>, view: DiscussionPostEditView, di: DI,
-                                  lifecycleOwner: DoorLifecycleOwner)
+                                  lifecycleOwner: LifecycleOwner)
     : UstadEditPresenter<DiscussionPostEditView, DiscussionPost>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode

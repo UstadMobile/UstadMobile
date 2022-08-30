@@ -82,7 +82,7 @@ class TestApacheIndexer {
         accountManager.activeEndpoint = Endpoint(mockWebServer.url("/").toString())
 
 
-        db = di.on(accountManager.activeEndpoint).direct.instance(tag = UmAppDatabase.TAG_DB)
+        db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
 
 
 

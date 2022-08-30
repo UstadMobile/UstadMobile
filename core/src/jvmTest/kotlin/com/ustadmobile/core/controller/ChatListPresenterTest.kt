@@ -7,7 +7,7 @@ import org.junit.Test
 import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.ChatDao
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -37,7 +37,7 @@ class ChatListPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoChatDaoSpy: ChatDao
 

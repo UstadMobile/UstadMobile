@@ -6,7 +6,7 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.EditButtonMode
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
@@ -85,7 +85,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                 ustadComponentTitle = value
             }
         }
-    override var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
+    override var clazzCourseAssignmentSubmissionAttachment: DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
@@ -93,7 +93,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
             liveData?.observe(this, submissionsObserver)
         }
 
-    override var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>? = null
+    override var clazzAssignmentPrivateComments: DataSourceFactory<Int, CommentsWithPerson>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)

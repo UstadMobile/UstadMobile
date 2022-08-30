@@ -132,7 +132,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
         private val accountManager: UstadAccountManager by di.instance()
 
-        private val appDatabase: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+        private val appDatabase: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
         class ModuleCourseBlockViewHolder(val binding: ItemCourseBlockBinding): RecyclerView.ViewHolder(binding.root)
 

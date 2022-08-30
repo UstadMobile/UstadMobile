@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.SiteEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SiteEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
@@ -38,7 +38,7 @@ class SiteEditComponent(props: UmProps): UstadEditComponent<Site>(props), SiteEd
         }
     }
 
-    override var siteTermsList: DoorLiveData<List<SiteTermsWithLanguage>>? = null
+    override var siteTermsList: LiveData<List<SiteTermsWithLanguage>>? = null
         set(value) {
             value?.removeObserver(siteTermsObserver)
             value?.observe(this, siteTermsObserver)

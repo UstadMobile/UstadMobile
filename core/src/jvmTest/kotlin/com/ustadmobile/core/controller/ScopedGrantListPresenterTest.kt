@@ -6,7 +6,7 @@ import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.ScopedGrantListView
 import org.mockito.kotlin.*
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.ScopedGrantDao
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.core.util.UstadTestRule
@@ -32,7 +32,7 @@ class ScopedGrantListPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoScopedGrantDaoSpy: ScopedGrantDao
 

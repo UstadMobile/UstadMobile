@@ -93,7 +93,7 @@ class TestStateEndpoint {
         }
 
         gson = di.direct.instance()
-        repo = di.on(endpointUrl).direct.instance(tag = UmAppDatabase.TAG_DB)
+        repo = di.on(endpointUrl).direct.instance(tag = DoorTag.TAG_DB)
         endpoint = di.on(endpointUrl).direct.instance()
 
     }

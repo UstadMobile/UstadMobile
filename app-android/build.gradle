@@ -257,8 +257,7 @@ dependencies {
     implementation project(':sharedse')
 
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
-    implementation project(':lib-database-android')
-    implementation project(":lib-database-entities")
+    implementation project(':lib-database')
     implementation project(':lib-util')
 
     implementation "io.github.aakira:napier:$version_napier"

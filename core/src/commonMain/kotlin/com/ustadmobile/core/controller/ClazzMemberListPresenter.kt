@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ListFilterIdOption
@@ -9,7 +10,7 @@ import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import io.github.aakira.napier.Napier
@@ -19,7 +20,7 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 
 class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, view: ClazzMemberListView,
-                               di: DI, lifecycleOwner: DoorLifecycleOwner)
+                               di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<ClazzMemberListView, PersonWithClazzEnrolmentDetails>(context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
 
     private var filterByClazzUid: Long = -1
@@ -66,16 +67,16 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     private fun updateListOnView() {
         view.list = repo.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
                 ClazzEnrolment.ROLE_TEACHER, selectedSortOption?.flag ?: 0,
-                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDao.FILTER_ACTIVE_ONLY,
+                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY,
                 mLoggedInPersonUid, systemTimeInMillis())
         view.studentList = repo.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
                 ClazzEnrolment.ROLE_STUDENT, selectedSortOption?.flag ?: 0,
-                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDao.FILTER_ACTIVE_ONLY,
+                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY,
                 mLoggedInPersonUid, systemTimeInMillis())
         if (view.addStudentVisible) {
             view.pendingStudentList = db.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
                     ClazzEnrolment.ROLE_STUDENT_PENDING, selectedSortOption?.flag ?: 0,
-                    searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDao.FILTER_ACTIVE_ONLY,
+                    searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY,
                     mLoggedInPersonUid, systemTimeInMillis())
         }
     }
@@ -158,19 +159,19 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     companion object {
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.first_name, ClazzEnrolmentDao.SORT_FIRST_NAME_ASC, true),
-                SortOrderOption(MessageID.first_name, ClazzEnrolmentDao.SORT_FIRST_NAME_DESC, false),
-                SortOrderOption(MessageID.last_name, ClazzEnrolmentDao.SORT_LAST_NAME_ASC, true),
-                SortOrderOption(MessageID.last_name, ClazzEnrolmentDao.SORT_LAST_NAME_DESC, false),
-                SortOrderOption(MessageID.attendance, ClazzEnrolmentDao.SORT_ATTENDANCE_ASC, true),
-                SortOrderOption(MessageID.attendance, ClazzEnrolmentDao.SORT_ATTENDANCE_DESC, false),
-                SortOrderOption(MessageID.date_enroll, ClazzEnrolmentDao.SORT_DATE_REGISTERED_ASC, true),
-                SortOrderOption(MessageID.date_enroll, ClazzEnrolmentDao.SORT_DATE_REGISTERED_DESC, false),
-                SortOrderOption(MessageID.date_left, ClazzEnrolmentDao.SORT_DATE_LEFT_ASC, true),
-                SortOrderOption(MessageID.date_left, ClazzEnrolmentDao.SORT_DATE_LEFT_DESC, false)
+                SortOrderOption(MessageID.first_name, ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC, true),
+                SortOrderOption(MessageID.first_name, ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC, false),
+                SortOrderOption(MessageID.last_name, ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC, true),
+                SortOrderOption(MessageID.last_name, ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC, false),
+                SortOrderOption(MessageID.attendance, ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_ASC, true),
+                SortOrderOption(MessageID.attendance, ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_DESC, false),
+                SortOrderOption(MessageID.date_enroll, ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC, true),
+                SortOrderOption(MessageID.date_enroll, ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_DESC, false),
+                SortOrderOption(MessageID.date_left, ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_ASC, true),
+                SortOrderOption(MessageID.date_left, ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_DESC, false)
         )
 
-        val FILTER_OPTIONS = listOf(MessageID.active to ClazzEnrolmentDao.FILTER_ACTIVE_ONLY,
+        val FILTER_OPTIONS = listOf(MessageID.active to ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY,
                 MessageID.all to 0)
 
         const val RESULT_PERSON_KEY = "person"

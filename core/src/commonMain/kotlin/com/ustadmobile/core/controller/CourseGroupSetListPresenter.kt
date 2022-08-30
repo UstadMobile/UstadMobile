@@ -5,7 +5,7 @@ import com.ustadmobile.core.util.ext.fallbackIndividualSet
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.CourseGroupSetListView.Companion.ARG_SHOW_INDIVIDUAL
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -17,7 +17,7 @@ class CourseGroupSetListPresenter(
     arguments: Map<String, String>,
     view: CourseGroupSetListView,
     di: DI,
-    lifecycleOwner: DoorLifecycleOwner
+    lifecycleOwner: LifecycleOwner
 ) : UstadListPresenter<CourseGroupSetListView, CourseGroupSet>(
     context,
     arguments,

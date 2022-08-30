@@ -9,7 +9,7 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.SiteTermsDao
 import com.ustadmobile.core.db.dao.SiteDao
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.util.*
 
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -32,7 +32,7 @@ class SiteDetailPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoSiteDaoSpy: SiteDao
 

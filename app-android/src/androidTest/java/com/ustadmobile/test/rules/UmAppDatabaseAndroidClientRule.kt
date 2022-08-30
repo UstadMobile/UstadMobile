@@ -64,9 +64,9 @@ class UmAppDatabaseAndroidClientRule(
         val endpoint = Endpoint(endpointUrl ?: account.endpointUrl)
         val accountManager: UstadAccountManager by di.instance()
 
-        dbInternal = di.direct.on(endpoint).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB)
+        dbInternal = di.direct.on(endpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
-        repoInternal = di.direct.on(endpoint).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
+        repoInternal = di.direct.on(endpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_REPO)
 
         repo.siteDao.insert(Site().apply {
             siteName = "Test Site"

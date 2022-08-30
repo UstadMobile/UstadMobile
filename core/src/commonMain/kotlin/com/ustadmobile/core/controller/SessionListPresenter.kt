@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.StatementListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -13,7 +13,7 @@ import org.kodein.di.DI
 
 class SessionListPresenter(context: Any, arguments: Map<String, String>,
                            view: SessionListView,
-                           di: DI, lifecycleOwner: DoorLifecycleOwner)
+                           di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<SessionListView, PersonWithSessionsDisplay>(
         context, arguments, view, di, lifecycleOwner) {
 

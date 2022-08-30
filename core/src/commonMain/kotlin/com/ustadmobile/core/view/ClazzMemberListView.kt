@@ -1,13 +1,13 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 
 interface ClazzMemberListView: UstadListView<PersonWithClazzEnrolmentDetails, PersonWithClazzEnrolmentDetails> {
 
-    var studentList: DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>?
+    var studentList: DataSourceFactory<Int, PersonWithClazzEnrolmentDetails>?
 
-    var pendingStudentList: DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>?
+    var pendingStudentList: DataSourceFactory<Int, PersonWithClazzEnrolmentDetails>?
 
     var addTeacherVisible: Boolean
 

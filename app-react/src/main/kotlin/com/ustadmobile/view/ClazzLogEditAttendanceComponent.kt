@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.ClazzLogEditAttendancePresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
@@ -55,7 +55,7 @@ class ClazzLogEditAttendanceComponent (mProps: UmProps): UstadEditComponent<Claz
         }
     }
 
-    override var clazzLogAttendanceRecordList: DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>? = null
+    override var clazzLogAttendanceRecordList: MutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>? = null
         set(value) {
             field?.removeObserver(clazzLogAttendanceRecordListObserver)
             field = value

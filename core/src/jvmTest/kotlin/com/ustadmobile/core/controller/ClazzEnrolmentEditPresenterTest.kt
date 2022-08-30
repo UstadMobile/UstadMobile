@@ -14,7 +14,7 @@ import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.LeavingReason
@@ -43,7 +43,7 @@ class ClazzEnrolmentEditPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoClazzEnrolmentDaoSpy: ClazzEnrolmentDao
 
