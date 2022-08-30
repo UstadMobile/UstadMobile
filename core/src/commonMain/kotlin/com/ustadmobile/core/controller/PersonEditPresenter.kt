@@ -216,7 +216,7 @@ class PersonEditPresenter(
                 if(!username.isNullOrEmpty() && repo.personDao.findByUsernameCount(username) > 0){
                     view.usernameError = impl.getString(MessageID.person_exists, context)
                 }else{
-                    entity.username = entity.username?.lowercase()
+                    entity.username = entity.username
                 }
             }
 
@@ -333,6 +333,7 @@ class PersonEditPresenter(
                     }
                 }
 
+                //Add password to created username on new user.
                 if(!entity.username.isNullOrEmpty()) {
                     val newPassword = entity.newPassword
                         ?: throw IllegalStateException("Not possible! hasErrors checked false")

@@ -309,7 +309,7 @@ class PersonEditPresenterTest  {
         val args = mapOf(UstadView.ARG_REGISTRATION_ALLOWED to false.toString())
 
         val person = createPerson().apply {
-            username = "dummyUsername"
+            username = "dummyUsername2"
             dateOfBirth = systemTimeInMillis() - (365 * 24 * 60 * 60 * 1000L)
         }
         val presenter = PersonEditPresenter(context, args,mockView, di,mockLifecycleOwner)
@@ -320,11 +320,11 @@ class PersonEditPresenterTest  {
 
         runBlocking {
             repo.waitUntil(5000, listOf("Person")) {
-                repo.personDao.findByUsername("dummyUsername") != null
+                repo.personDao.findByUsername("dummyUsername2") != null
             }
         }
 
-        val personInDb = repo.personDao.findByUsername("dummyUsername")
+        val personInDb = repo.personDao.findByUsername("dummyUsername2")
 
         runBlocking {
             Assert.assertTrue("Minor was marked as approved",
