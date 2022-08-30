@@ -293,7 +293,7 @@
     <string name="id_verbentity_urlid">ID: %s</string>
     <string name="edit_filters">Edit filters</string>
 
-    <string name="field_person_gender">Person gender</string>
+    <string name="field_person_gender">Person gender*</string>
     <string name="field_person_age">Person age</string>
     <string name="field_content_completion">Content completion status</string>
     <string name="field_content_entry">Content entry</string>
