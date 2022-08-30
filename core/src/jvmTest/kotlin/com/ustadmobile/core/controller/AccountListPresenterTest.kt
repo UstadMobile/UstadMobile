@@ -11,10 +11,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
-import com.ustadmobile.door.lifecycle.LifecycleOwner
-import com.ustadmobile.door.lifecycle.LiveData
-import com.ustadmobile.door.lifecycle.MutableLiveData
-import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -35,6 +31,8 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
 import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.core.util.mockLifecycleOwner
+import com.ustadmobile.door.lifecycle.*
 import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
 import com.ustadmobile.util.test.rules.bindPresenterCoroutineRule
 import io.ktor.client.plugins.contentnegotiation.*
@@ -130,9 +128,7 @@ class AccountListPresenterTest {
             on{ onChanged(any()) }.thenAnswer{ accountList[0] }
         }
 
-        mockedLifecycleOwner = mock {
-            on { currentState }.thenReturn(UstadBaseController.STARTED)
-        }
+        mockedLifecycleOwner = mockLifecycleOwner(DoorState.STARTED)
 
         di = DI {
             bind<UstadMobileSystemImpl>() with singleton { impl }

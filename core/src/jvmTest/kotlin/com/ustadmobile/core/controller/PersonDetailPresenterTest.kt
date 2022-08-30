@@ -12,9 +12,11 @@ import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
+import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -59,9 +61,7 @@ class PersonDetailPresenterTest {
     @Before
     fun setup() {
         context = Any()
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
 
         mockView = mock{}
         impl = mock()

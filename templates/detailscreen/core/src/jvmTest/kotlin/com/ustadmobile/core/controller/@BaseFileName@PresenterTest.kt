@@ -11,7 +11,7 @@ import com.ustadmobile.core.db.dao.@Entity@Dao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.util.*
-import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleObserver
 
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -49,7 +49,7 @@ class @BaseFileName@PresenterTest {
     fun setup() {
         mockView = mock { }
         mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
+            on { currentState }.thenReturn(LifecycleObserver.RESUMED)
         }
         context = Any()
 

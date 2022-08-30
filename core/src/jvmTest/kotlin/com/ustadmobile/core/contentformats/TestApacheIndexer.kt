@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking

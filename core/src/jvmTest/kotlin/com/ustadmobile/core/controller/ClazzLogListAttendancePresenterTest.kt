@@ -14,12 +14,10 @@ import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.asPerson
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.lifecycle.LifecycleOwner
-import com.ustadmobile.door.lifecycle.LiveData
-import com.ustadmobile.door.lifecycle.MutableLiveData
+import com.ustadmobile.door.lifecycle.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
@@ -51,9 +49,7 @@ class ClazzLogListAttendancePresenterTest {
     @Before
     fun setup(){
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         di = DI {

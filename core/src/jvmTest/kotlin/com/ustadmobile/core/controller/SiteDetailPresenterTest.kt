@@ -15,6 +15,7 @@ import com.ustadmobile.core.util.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.door.lifecycle.DoorState
 import org.kodein.di.DI
 
 /**
@@ -43,9 +44,7 @@ class SiteDetailPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         di = DI {

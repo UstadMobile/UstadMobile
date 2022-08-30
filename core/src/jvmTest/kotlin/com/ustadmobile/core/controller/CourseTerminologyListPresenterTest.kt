@@ -8,7 +8,7 @@ import com.ustadmobile.core.view.CourseTerminologyListView
 import org.mockito.kotlin.*
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.CourseTerminologyDao
-import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -18,6 +18,8 @@ import org.kodein.di.DI
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.mockLifecycleOwner
+import com.ustadmobile.door.lifecycle.DoorState
 import org.kodein.di.instance
 
 
@@ -46,9 +48,7 @@ class CourseTerminologyListPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         di = DI {

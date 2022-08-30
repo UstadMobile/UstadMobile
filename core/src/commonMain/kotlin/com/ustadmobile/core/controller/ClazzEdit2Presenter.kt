@@ -517,7 +517,9 @@ class ClazzEdit2Presenter(
                     txDb.clazzDao.updateAsync(entity)
                 }
 
-                scheduleOneToManyJoinEditHelper.commitToDatabase(txDb.scheduleDao) {
+                scheduleOneToManyJoinEditHelper.commitToDatabase(txDb.scheduleDao,
+                    { txDb.scheduleDao.deactivateByUids(it, systemTimeInMillis()) }
+                ) {
                     it.scheduleClazzUid = entity.clazzUid
                 }
 

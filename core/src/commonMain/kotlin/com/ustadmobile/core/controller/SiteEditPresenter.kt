@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -12,6 +13,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
@@ -90,9 +93,14 @@ class SiteEditPresenter(context: Any,
         GlobalScope.launch(doorMainDispatcher()) {
             repo.siteDao.updateAsync(entity)
 
-            siteTermsOneToManyJoinEditHelper.commitToDatabase(repo.siteTermsDao) {
-                //no need to set the foreign key
+            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+                siteTermsOneToManyJoinEditHelper.commitToDatabase(txRepo.siteTermsDao,
+                    { txRepo.siteTermsDao.deactivateByUids(it, systemTimeInMillis()) }
+                ) {
+                    //no need to set the foreign key
+                }
             }
+
             finishWithResult(safeStringify(di, ListSerializer(Site.serializer()), listOf(entity)))
         }
     }

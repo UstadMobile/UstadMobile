@@ -13,7 +13,8 @@ import com.ustadmobile.core.db.dao.MessageDao
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
@@ -45,9 +46,8 @@ class ChatDetailPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.STARTED)
+
         context = Any()
         di = DI {
             import(ustadTestRule.diModule)

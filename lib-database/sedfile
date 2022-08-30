@@ -13,5 +13,7 @@ s/\.sendValue(/.postValue(/g
 s/\.setVal(/.setValue(/g
 s/UmAppDatabase.TAG_DB/DoorTag.TAG_DB/g
 s/UmAppDatabase.TAG_REPO/DoorTag.TAG_REPO/g
+s/com.ustadmobile.door.DoorLifecycleObserver/com.ustadmobile.door.lifecycle.LifecycleObserver/g
+s/DoorLifecycleObserver/LifecycleObserver/g
 
 

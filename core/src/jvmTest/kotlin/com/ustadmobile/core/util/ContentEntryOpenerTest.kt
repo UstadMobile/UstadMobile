@@ -5,12 +5,12 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.VideoContentView
-import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
@@ -34,7 +34,9 @@ ContentEntryOpenerTest {
     private lateinit var impl: UstadMobileSystemImpl
 
     private val context = mock<LifecycleOwner>() {
-        on { currentState }.thenReturn(DoorLifecycleObserver.STARTED)
+        on { getLifecycle() }.thenReturn(mock {
+            on { realCurrentDoorState }.thenReturn(DoorState.STARTED)
+        })
     } as Any
 
     @JvmField
@@ -56,8 +58,8 @@ ContentEntryOpenerTest {
         endpoint = Endpoint(accountManager.activeAccount.endpointUrl)
         impl = di.direct.instance()
 
-        umAppDatabase = di.on(endpoint).direct.instance(tag = TAG_DB)
-        umAppRepository = di.on(endpoint).direct.instance(tag = TAG_REPO)
+        umAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+        umAppRepository = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
 
 
         contentEntry = ContentEntry()

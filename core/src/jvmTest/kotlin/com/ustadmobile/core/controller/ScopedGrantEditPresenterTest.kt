@@ -11,11 +11,13 @@ import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.*
@@ -69,9 +71,7 @@ class ScopedGrantEditPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         di = DI {

@@ -12,7 +12,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.util.*
-import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleObserver
 
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -20,6 +20,7 @@ import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.lifecycle.DoorState
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
@@ -50,9 +51,7 @@ class ScopedGrantDetailPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         di = DI {

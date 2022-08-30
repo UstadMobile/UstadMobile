@@ -10,7 +10,7 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.@Entity@Dao
-import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.lib.db.entities.@Entity@
 @EditEntity_Import@
 
@@ -55,7 +55,7 @@ class @BaseFileName@PresenterTest {
     fun setup() {
         mockView = mockEditView { }
         mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
+            on { currentState }.thenReturn(LifecycleObserver.RESUMED)
         }
         context = Any()
 

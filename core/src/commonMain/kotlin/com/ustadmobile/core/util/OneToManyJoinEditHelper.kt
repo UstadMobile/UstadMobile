@@ -94,9 +94,11 @@ open class OneToManyJoinEditHelper<T : Any, K>(val pkGetter: (T) -> K,
     }
 
     /**
-     * Commits the results of the editing to the database
+     * Commits the results of the editing to the database.
+     *
+     * Should not be used anymore directly. It cannot take care of deactivation.
      */
-    open suspend fun commitToDatabase(dao: OneToManyJoinDao<in T>, fkSetter: (T) -> Unit) {
+    protected open suspend fun commitToDatabase(dao: OneToManyJoinDao<in T>, fkSetter: (T) -> Unit) {
         dao.insertListAsync(entitiesToInsert.also { it.forEach {
             fkSetter(it)
             pkSetter(it, newPk)

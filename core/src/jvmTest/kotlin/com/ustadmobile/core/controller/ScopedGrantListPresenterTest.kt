@@ -8,11 +8,13 @@ import com.ustadmobile.core.view.ScopedGrantListView
 import org.mockito.kotlin.*
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.ScopedGrantDao
-import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.core.util.UstadTestRule
 import org.kodein.di.DI
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.mockLifecycleOwner
+import com.ustadmobile.door.lifecycle.DoorState
 import com.ustadmobile.lib.db.entities.Clazz
 
 
@@ -41,9 +43,7 @@ class ScopedGrantListPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         di = DI {
