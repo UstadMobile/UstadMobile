@@ -19,6 +19,7 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.util.*
+import com.ustadmobile.door.ext.DoorTag
 
 class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiStateEndpoint {
 

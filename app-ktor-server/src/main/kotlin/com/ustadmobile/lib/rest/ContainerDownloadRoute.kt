@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ContainerEntryFileCommon
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
 import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
 import com.ustadmobile.core.util.ext.encodeBase64
@@ -73,7 +74,7 @@ fun Route.ContainerDownload() {
         })
     }
 
-    post("${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/download") {
+    post("${ContainerEntryFileCommon.ENDPOINT_CONCATENATEDFILES2}/download") {
         serveConcatenatedResponse2()
     }
 

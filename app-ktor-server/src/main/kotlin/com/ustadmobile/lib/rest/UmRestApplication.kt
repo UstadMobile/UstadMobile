@@ -51,6 +51,8 @@ import javax.naming.InitialContext
 import com.ustadmobile.door.util.NodeIdAuthCache
 import com.ustadmobile.core.db.PermissionManagementIncomingReplicationListener
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
+import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.db.ext.preload
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.util.SysPathUtil
@@ -225,7 +227,7 @@ fun Application.umRestApplication(
                     attachmentsDir)
                 .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())
-                    .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+                    .addMigrations(*migrationList().toTypedArray())
                 .build()
             db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
 

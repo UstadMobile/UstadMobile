@@ -23,6 +23,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.text.SimpleDateFormat
 import java.util.*
+import com.ustadmobile.door.ext.DoorTag
 
 class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiStatementEndpoint {
 
@@ -351,22 +352,22 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
         if (contextActivities != null) {
             contextActivities.parent?.also {
                 createAllContextActivities(it, statementEntity.statementUid,
-                        ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT)
+                        ContextXObjectStatementJoinDaoCommon.CONTEXT_FLAG_PARENT)
             }
 
             contextActivities.category?.also {
                 createAllContextActivities(it,
-                        statementEntity.statementUid, ContextXObjectStatementJoinDao.CONTEXT_FLAG_CATEGORY)
+                        statementEntity.statementUid, ContextXObjectStatementJoinDaoCommon.CONTEXT_FLAG_CATEGORY)
             }
 
             contextActivities.grouping?.also {
                 createAllContextActivities(it,
-                        statementEntity.statementUid, ContextXObjectStatementJoinDao.CONTEXT_FLAG_GROUPING)
+                        statementEntity.statementUid, ContextXObjectStatementJoinDaoCommon.CONTEXT_FLAG_GROUPING)
             }
 
             contextActivities.other?.also {
                 createAllContextActivities(it,
-                        statementEntity.statementUid, ContextXObjectStatementJoinDao.CONTEXT_FLAG_OTHER)
+                        statementEntity.statementUid, ContextXObjectStatementJoinDaoCommon.CONTEXT_FLAG_OTHER)
             }
         }
         return statementEntity
