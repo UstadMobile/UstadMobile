@@ -12,6 +12,8 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -52,7 +54,7 @@ class H5PTypePluginTest {
 
     @Before
     fun setup(){
-
+        Napier.base(DebugAntilog())
         endpointScope = EndpointScope()
         di = DI {
             import(ustadTestRule.diModule)

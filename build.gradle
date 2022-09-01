@@ -83,7 +83,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 231
 
-    version_door = "0.0.61n"
+    version_door = "0.0.61o"
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.21'
 

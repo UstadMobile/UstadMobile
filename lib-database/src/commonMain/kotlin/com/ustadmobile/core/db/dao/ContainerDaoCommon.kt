@@ -20,20 +20,5 @@ object ContainerDaoCommon  {
             $FROM_CONTAINER_WHERE_MOST_RECENT_AND_READY
         """
 
-    internal const val UPDATE_SIZE_AND_NUM_ENTRIES_SQL = """
-            UPDATE Container 
-               SET cntNumEntries = COALESCE(
-                   (SELECT COUNT(*) 
-                      FROM ContainerEntry 
-                     WHERE ceContainerUid = Container.containerUid), 0),
-                   fileSize = COALESCE(
-                   (SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize 
-                      FROM ContainerEntry
-                      JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid
-                     WHERE ContainerEntry.ceContainerUid = Container.containerUid), 0),
-                   cntLct = :changeTime   
-                     
-             WHERE containerUid = :containerUid
-        """
 }
 

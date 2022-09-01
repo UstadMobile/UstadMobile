@@ -7,7 +7,6 @@ import androidx.room.Query
 import com.ustadmobile.core.db.dao.ContainerDaoCommon.CONTAINER_READY_WHERE_CLAUSE
 import com.ustadmobile.core.db.dao.ContainerDaoCommon.FROM_CONTAINER_WHERE_MOST_RECENT_AND_READY
 import com.ustadmobile.core.db.dao.ContainerDaoCommon.SELECT_MOST_RECENT_READY_CONTAINER
-import com.ustadmobile.core.db.dao.ContainerDaoCommon.UPDATE_SIZE_AND_NUM_ENTRIES_SQL
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Container
@@ -130,10 +129,22 @@ expect abstract class ContainerDao : BaseDao<Container> {
     @Query("SELECT * From Container WHERE Container.containerUid = :containerUid LIMIT 1")
     abstract suspend fun findByUidAsync(containerUid: Long): Container?
 
-    @Query(UPDATE_SIZE_AND_NUM_ENTRIES_SQL)
-    abstract fun updateContainerSizeAndNumEntries(containerUid: Long, changeTime: Long)
 
-    @Query(UPDATE_SIZE_AND_NUM_ENTRIES_SQL)
+    @Query("""
+            UPDATE Container 
+               SET cntNumEntries = COALESCE(
+                   (SELECT COUNT(*) 
+                      FROM ContainerEntry 
+                     WHERE ceContainerUid = Container.containerUid), 0),
+                   fileSize = COALESCE(
+                   (SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize 
+                      FROM ContainerEntry
+                      JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid
+                     WHERE ContainerEntry.ceContainerUid = Container.containerUid), 0),
+                   cntLct = :changeTime   
+                     
+             WHERE containerUid = :containerUid
+        """)
     abstract suspend fun updateContainerSizeAndNumEntriesAsync(containerUid: Long, changeTime: Long)
 
     @Query("SELECT Container.containerUid FROM Container " +
