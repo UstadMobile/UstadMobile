@@ -177,7 +177,7 @@ class ContentJobRunner(
                             item.contentJobItem?.cjiUid ?: 0, contentEntryUid)
 
                         if(item.contentJobItem?.cjiParentContentEntryUid != 0L){
-                            txDb.contentEntryParentChildJoinDao.insert(
+                            txDb.contentEntryParentChildJoinDao.insertAsync(
                                 ContentEntryParentChildJoin().apply {
                                     cepcjParentContentEntryUid =
                                         item.contentJobItem?.cjiParentContentEntryUid ?: 0L
@@ -199,9 +199,11 @@ class ContentJobRunner(
 
                 val jobResult = async {
                     try {
-                        plugin.processJob(item, processContext, this@ContentJobRunner)
+                        plugin.processJob(item, processContext, this@ContentJobRunner).also {
+                            Napier.i("ContentJobRunner: completed process")
+                        }
                     }catch(e: Exception) {
-                        Napier.e("jobResult: caught exception", e)
+                        Napier.e("ContentJobRunner: jobResult: caught exception", e)
                         processException = e
                         ProcessResult(JobStatus.FAILED)
                     }
@@ -356,7 +358,7 @@ class ContentJobRunner(
                             true, systemTimeInMillis())
 
                         //Delete all containers
-                        val jobDestDir = txDb.contentJobDao.findByUid(jobId)?.toUri
+                        val jobDestDir = txDb.contentJobDao.findByUidAsync(jobId)?.toUri
                             ?: containerStorageManager.storageList.first().dirUri
 
                         txDb.contentJobItemDao.findAllContainersByJobUid(jobId).forEach { containerUid ->

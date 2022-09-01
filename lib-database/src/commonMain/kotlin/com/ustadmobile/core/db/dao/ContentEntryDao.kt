@@ -521,7 +521,7 @@ expect abstract class ContentEntryDao : BaseDao<ContentEntry> {
                  WHERE cjiJobUid = :jobId
                    AND CAST(ContentJobItem.cjiContentDeletedOnCancellation AS INTEGER) = 1)
     """)
-    abstract fun updateContentEntryActiveByContentJobUid(
+    abstract suspend fun updateContentEntryActiveByContentJobUid(
         jobId: Long,
         inactive: Boolean,
         changedTime: Long

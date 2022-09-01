@@ -54,7 +54,7 @@ expect abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
                       JOIN ContentJob 
                            ON ContentJobItem.cjiJobUid = ContentJob.cjUid
                      WHERE ContentJob.cjUid = :jobId)""")
-    abstract fun deleteContainerEntriesCreatedByJobs(jobId: Long)
+    abstract suspend fun deleteContainerEntriesCreatedByJobs(jobId: Long)
 
     @Query("""
         DELETE FROM ContainerEntry

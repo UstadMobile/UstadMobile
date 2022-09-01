@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.Lifecycle
 import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
@@ -33,10 +34,12 @@ ContentEntryOpenerTest {
 
     private lateinit var impl: UstadMobileSystemImpl
 
+    private val mockLifecycle = mock<Lifecycle> {
+        on { realCurrentDoorState }.thenReturn(DoorState.STARTED)
+    }
+
     private val context = mock<LifecycleOwner>() {
-        on { getLifecycle() }.thenReturn(mock {
-            on { realCurrentDoorState }.thenReturn(DoorState.STARTED)
-        })
+        on { getLifecycle() }.thenReturn(mockLifecycle)
     } as Any
 
     @JvmField
@@ -145,26 +148,26 @@ ContentEntryOpenerTest {
     fun givenDownloadNotRequired_whenEntryDownloadedAndMimeTypeDoesNotMatch_openInDefaultViewer(){
         runBlocking {
 
-            var contentEntry = ContentEntry()
+            val contentEntry = ContentEntry()
             contentEntry.contentEntryUid = umAppRepository.contentEntryDao.insert(contentEntry)
 
-            var container = Container()
+            val container = Container()
             container.containerContentEntryUid = contentEntry.contentEntryUid
             container.fileSize = 10
             container.mimeType = "video/wav"
             container.cntLastModified = System.currentTimeMillis()
             container.containerUid = umAppRepository.containerDao.insert(container)
 
-            var containerEntryFile = ContainerEntryFile()
+            val containerEntryFile = ContainerEntryFile()
             containerEntryFile.cefPath = "hello"
             containerEntryFile.cefUid = umAppDatabase.containerEntryFileDao.insert(containerEntryFile)
 
-            var containerEntry = ContainerEntry()
+            val containerEntry = ContainerEntry()
             containerEntry.ceContainerUid = container.containerUid
             containerEntry.ceCefUid = containerEntryFile.cefUid
             containerEntry.ceUid = umAppDatabase.containerEntryDao.insert(containerEntry)
 
-            var dj = ContentJobItem()
+            val dj = ContentJobItem()
             dj.cjiContainerUid = container.containerUid
             dj.cjiContentEntryUid = contentEntry.contentEntryUid
             dj.cjiRecursiveStatus = JobStatus.COMPLETE

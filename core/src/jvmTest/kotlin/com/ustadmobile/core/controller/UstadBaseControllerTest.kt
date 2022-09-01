@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.Lifecycle
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.Person
@@ -97,10 +98,12 @@ class UstadBaseControllerTest {
             }
 
             bind<LifecycleOwner>() with singleton {
+                val mockLifecycle = mock<Lifecycle> {
+                    on { realCurrentDoorState }.thenReturn(DoorState.RESUMED)
+                }
+
                 mock {
-                    on { getLifecycle() }.thenReturn(mock {
-                        on { realCurrentDoorState }.thenReturn(DoorState.RESUMED)
-                    })
+                    on { getLifecycle() }.thenReturn(mockLifecycle)
                 }
             }
 
