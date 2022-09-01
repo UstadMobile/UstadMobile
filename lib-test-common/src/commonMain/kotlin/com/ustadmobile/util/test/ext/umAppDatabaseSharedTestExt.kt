@@ -420,7 +420,7 @@ suspend fun UmAppDatabase.insertStatementForSessions(){
 
 
 
-suspend fun UmAppDatabase.insertTestStatementsForReports() {
+fun UmAppDatabase.insertTestStatementsForReports() {
 
     val firstPerson = Person().apply {
         firstNames = "Bobb"

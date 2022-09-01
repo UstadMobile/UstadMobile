@@ -763,7 +763,9 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         presenter.onCreate(null)
 
-        whenever(mockView.entity).thenReturn(testEntity)
+        mockView.stub {
+            on { entity }.thenReturn(testEntity)
+        }
 
         mockView.captureLastEntityValue()
 

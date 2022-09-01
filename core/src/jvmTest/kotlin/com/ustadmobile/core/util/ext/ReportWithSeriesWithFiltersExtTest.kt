@@ -20,6 +20,8 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
 import com.ustadmobile.core.db.dao.getResults
+import com.ustadmobile.door.ext.withDoorTransaction
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 
 class ReportWithSeriesWithFiltersExtTest {
 
@@ -55,17 +57,22 @@ class ReportWithSeriesWithFiltersExtTest {
         repo = di.directActiveRepoInstance()
 
         runBlocking {
-            val person = repo.insertPersonAndGroup(Person().apply{
-                personUid = loggedPersonUid
-                admin = true
-                firstNames = "Bob"
-                lastName = "Jones"
-            })
+            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+                val person = txRepo.insertPersonAndGroup(Person().apply{
+                    personUid = loggedPersonUid
+                    admin = true
+                    firstNames = "Bob"
+                    lastName = "Jones"
+                })
 
-            repo.grantScopedPermission(person, Role.ALL_PERMISSIONS,
-                ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+                txRepo.grantScopedPermission(person, Role.ALL_PERMISSIONS,
+                    ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+            }
 
-            repo.insertTestStatementsForReports()
+            repo.withDoorTransaction(UmAppDatabase::class) { txRepo ->
+                txRepo.insertTestStatementsForReports()
+            }
+
         }
     }
 

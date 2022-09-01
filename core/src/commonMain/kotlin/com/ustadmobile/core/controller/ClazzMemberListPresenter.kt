@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
@@ -10,6 +11,7 @@ import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -91,13 +93,14 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     fun handleClickPendingRequest(enrolmentDetails: PersonWithClazzEnrolmentDetails, approved: Boolean) {
         presenterScope.launch {
             try {
-                if (approved) {
-                    repo.approvePendingClazzEnrolment(enrolmentDetails, filterByClazzUid)
+                repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+                    if (approved) {
+                        txRepo.approvePendingClazzEnrolment(enrolmentDetails, filterByClazzUid)
 
-                } else {
-                    repo.declinePendingClazzEnrolment(enrolmentDetails, filterByClazzUid)
+                    } else {
+                        txRepo.declinePendingClazzEnrolment(enrolmentDetails, filterByClazzUid)
+                    }
                 }
-
             } catch (e: IllegalStateException) {
                 //did not have all entities present yet (e.g. sync race condition)
                 view.showSnackBar(systemImpl.getString(MessageID.content_editor_save_error, context) + e.message)
