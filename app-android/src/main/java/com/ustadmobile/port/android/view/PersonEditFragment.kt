@@ -21,6 +21,7 @@ import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.port.android.view.PersonAccountEditFragment.Companion.NO_CAPS_FILTER
 import com.ustadmobile.port.android.view.PersonAccountEditFragment.Companion.USERNAME_FILTER
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
@@ -240,7 +241,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             mBinding?.emailError = null
         })
 
-        mBinding?.usernameText?.filters = arrayOf(USERNAME_FILTER)
+        mBinding?.usernameText?.filters = arrayOf(NO_CAPS_FILTER)
         mBinding?.parentcontactText?.addTextChangedListener(RunAfterTextChangedTextWatcher {
             parentContactError = null
         })

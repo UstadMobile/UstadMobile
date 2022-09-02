@@ -125,7 +125,7 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
             mBinding?.usernameError = null
         })
 
-        mBinding?.accountUsernameText?.filters = arrayOf(USERNAME_FILTER)
+        mBinding?.accountUsernameText?.filters = arrayOf(NO_CAPS_FILTER)
 
         return rootView
     }
@@ -152,6 +152,10 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
     }
 
     companion object{
+
+        val NO_CAPS_FILTER = InputFilter {source, start, end, _, _, _ ->
+            source.toString().lowercase().replace(" ", "");
+        }
 
         val USERNAME_FILTER = InputFilter { source, start, end, _, _, _ ->
 
