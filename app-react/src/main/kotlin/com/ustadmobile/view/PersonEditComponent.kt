@@ -5,6 +5,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.hasFlag
+import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
@@ -408,6 +409,8 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                             autoFocus = false,
                             label = "${usernameLabel.text}",
                             value = entity?.username,
+                            blockedCharacters = PersonAccountEditView.BLOCK_CHARACTER_SET,
+                            allowCapitalLetters = false,
                             error = usernameLabel.error,
                             disabled = !fieldsEnabled,
                             variant = FormControlVariant.outlined,
