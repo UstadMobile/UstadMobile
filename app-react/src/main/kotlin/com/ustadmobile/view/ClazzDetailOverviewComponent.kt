@@ -214,7 +214,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
                         )
                     }
                     CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
-                        renderCourseBlockAssignment(item, systemImpl)
+                        renderCourseBlockAssignment(item, systemImpl, null, true)
                     }
 
                     CourseBlock.BLOCK_CONTENT_TYPE -> {
