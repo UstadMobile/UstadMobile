@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid

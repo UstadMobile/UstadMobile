@@ -222,6 +222,7 @@ tools/unused_strings.txt
 app-ktor-server/server.conf
 app-ktor-server/devmode.conf
 app-ktor-server/application.conf
+app-ktor-server/ustad-server.conf
 
 #data directory for running the server
 app-ktor-server/data
