@@ -1,13 +1,13 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.model.BitmaskFlag
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ScopedGrant
 
 
 interface ScopedGrantEditView: UstadEditView<ScopedGrant> {
 
-    var bitmaskList: DoorLiveData<List<BitmaskFlag>>?
+    var bitmaskList: LiveData<List<BitmaskFlag>>?
 
     companion object {
 

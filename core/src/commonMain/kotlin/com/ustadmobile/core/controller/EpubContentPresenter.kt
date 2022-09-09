@@ -38,7 +38,6 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
@@ -47,6 +46,7 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.ContainerMounter.Companion.FILTER_MODE_EPUB
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
@@ -113,7 +113,7 @@ class EpubContentPresenter(context: Any,
     @Volatile
     private var mNavDocument: EpubNavDocument? = null
 
-    private val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+    private val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

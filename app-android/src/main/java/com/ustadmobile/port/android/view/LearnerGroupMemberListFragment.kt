@@ -16,6 +16,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.PersonListView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
@@ -61,7 +62,7 @@ class LearnerGroupMemberListFragment : UstadListViewFragment<LearnerGroupMember,
                               savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         val accountManager: UstadAccountManager by instance()
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
         mPresenter = LearnerGroupMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner).withViewLifecycle()
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter()

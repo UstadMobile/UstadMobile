@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.GroupLearningSession
@@ -11,8 +11,8 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
-@Dao
-abstract class GroupLearningSessionDao : BaseDao<GroupLearningSession> {
+@DoorDao
+expect abstract class GroupLearningSessionDao : BaseDao<GroupLearningSession> {
 
     @Query("""
      REPLACE INTO GroupLearningSessionReplicate(glsPk, glsDestination)

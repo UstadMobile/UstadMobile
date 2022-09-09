@@ -22,7 +22,7 @@ import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportFilterEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.UidAndLabel
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -120,7 +120,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
                     ?.isErrorEnabled = errorEnabled
         }
 
-    override var uidAndLabelList: DoorLiveData<List<UidAndLabel>>? = null
+    override var uidAndLabelList: LiveData<List<UidAndLabel>>? = null
         get() = field
         set(value) {
             field?.removeObserver(uidAndLabelFilterItemObserver)

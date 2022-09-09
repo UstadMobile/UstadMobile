@@ -4,14 +4,14 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>, view: HolidayCalendarListView,
-        di: DI, lifecycleOwner: DoorLifecycleOwner)
+        di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<HolidayCalendarListView, HolidayCalendar>(context, arguments, view, di, lifecycleOwner) {
 
 

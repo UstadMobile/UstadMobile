@@ -1,17 +1,17 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
-@Dao
+@DoorDao
 @Repository
-abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<DiscussionTopic>{
+expect abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<DiscussionTopic>{
 
     @Query("""
      REPLACE INTO DiscussionTopicReplicate(discussionTopicPk, discussionTopicDestination)
@@ -93,7 +93,7 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
       ORDER BY DiscussionTopic.discussionTopicIndex
     """)
     abstract fun getListOfTopicsByDiscussion(discussionUid: Long)
-        : DoorDataSourceFactory<Int, DiscussionTopicListDetail>
+        : DataSourceFactory<Int, DiscussionTopicListDetail>
 
     @Query("""
         SELECT DiscussionTopic.*
@@ -116,7 +116,7 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
          WHERE DiscussionTopic.discussionTopicUid = :discussionTopicUid
          
          """)
-    abstract fun getDiscussionTopicByUid(discussionTopicUid: Long): DoorLiveData<DiscussionTopic?>
+    abstract fun getDiscussionTopicByUid(discussionTopicUid: Long): LiveData<DiscussionTopic?>
 
 
     @Query("""
@@ -125,13 +125,6 @@ abstract class DiscussionTopicDao: BaseDao<DiscussionTopic>, OneToManyJoinDao<Di
                discussionTopicLct = :changeTime
          WHERE discussionTopicUid = :uid""")
     abstract suspend fun updateActiveByUid(uid: Long, active: Boolean,  changeTime: Long)
-
-    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-        uidList.forEach {
-            updateActiveByUid(it, false, changeTime)
-        }
-    }
-
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun replaceListAsync(list: List<DiscussionTopic>)

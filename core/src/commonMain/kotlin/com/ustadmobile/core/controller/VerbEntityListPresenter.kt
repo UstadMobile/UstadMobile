@@ -6,14 +6,14 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.VerbEntityListView
 import com.ustadmobile.core.view.VerbEntityListView.Companion.ARG_EXCLUDE_VERBUIDS_LIST
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.VerbDisplay
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class VerbEntityListPresenter(context: Any, arguments: Map<String, String>, view: VerbEntityListView,
-                              di: DI,lifecycleOwner: DoorLifecycleOwner)
+                              di: DI,lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<VerbEntityListView, VerbDisplay>(context, arguments, view, di, lifecycleOwner) {
 
 

@@ -10,7 +10,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScopedGrantEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ScopedGrant
 
 
@@ -30,7 +30,7 @@ class ScopedGrantEditFragment: UstadEditFragment<ScopedGrant>(), ScopedGrantEdit
 
     private var mRecyclerAdapter: BitmaskRecyclerViewAdapter? = null
 
-    override var bitmaskList: DoorLiveData<List<BitmaskFlag>>? = null
+    override var bitmaskList: LiveData<List<BitmaskFlag>>? = null
         set(value) {
             field?.removeObserver(this)
             field = value

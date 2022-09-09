@@ -29,6 +29,7 @@ import com.ustadmobile.test.rules.UmAppDatabaseServerRequiredTest
 import com.ustadmobile.util.test.ext.insertContentEntryWithTranslations
 import io.ktor.client.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -347,19 +348,19 @@ class ContentEntryDetailOverviewFragmentTest : TestCase() {
         }
 
         val uid = runBlocking {
-            httpClient.post<String>("${dbRule.endpointUrl}UmAppDatabase/ContentEntryDao/insert") {
+            httpClient.post("${dbRule.endpointUrl}UmAppDatabase/ContentEntryDao/insert") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
                 dbVersionHeader(dbRule.db)
-                body = testEntry
-            }
+                setBody(testEntry)
+            }.bodyAsText()
         }.toLong()
 
         val containerUid = runBlocking {
-            httpClient.get<String>("${dbRule.endpointUrl}UmContainer/addContainer") {
+            httpClient.get("${dbRule.endpointUrl}UmContainer/addContainer") {
                 parameter("entryUid", uid)
                 parameter("type", "epub")
                 parameter("resource", "test.epub")
-            }
+            }.bodyAsText()
         }.toLong()
 
         val context = ApplicationProvider.getApplicationContext<Context>()

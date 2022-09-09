@@ -20,7 +20,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
@@ -30,7 +30,7 @@ import org.kodein.di.DI
 
 class ClazzEnrolmentEditPresenter(context: Any,
                                   arguments: Map<String, String>, view: ClazzEnrolmentEditView,
-                                  lifecycleOwner: DoorLifecycleOwner,
+                                  lifecycleOwner: LifecycleOwner,
                                   di: DI)
     : UstadEditPresenter<ClazzEnrolmentEditView, ClazzEnrolmentWithLeavingReason>(context, arguments, view, di, lifecycleOwner) {
 

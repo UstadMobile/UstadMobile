@@ -2,7 +2,7 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.core.controller.ReportFilterEditPresenter
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.UidAndLabel
 
@@ -32,7 +32,7 @@ interface ReportFilterEditView: UstadEditView<ReportFilter>{
 
     var valuesErrorText: String?
 
-    var uidAndLabelList: DoorLiveData<List<UidAndLabel>>?
+    var uidAndLabelList: LiveData<List<UidAndLabel>>?
 
     var createNewFilter: String?
 

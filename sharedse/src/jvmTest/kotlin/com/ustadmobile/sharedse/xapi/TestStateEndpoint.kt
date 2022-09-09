@@ -15,6 +15,7 @@ import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementSerializer
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil
 import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
@@ -93,7 +94,7 @@ class TestStateEndpoint {
         }
 
         gson = di.direct.instance()
-        repo = di.on(endpointUrl).direct.instance(tag = UmAppDatabase.TAG_DB)
+        repo = di.on(endpointUrl).direct.instance(tag = DoorTag.TAG_DB)
         endpoint = di.on(endpointUrl).direct.instance()
 
     }

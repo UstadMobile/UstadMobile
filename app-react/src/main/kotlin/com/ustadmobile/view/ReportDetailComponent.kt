@@ -9,7 +9,7 @@ import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
 import com.ustadmobile.core.view.ReportTemplateListView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
@@ -62,7 +62,7 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
 
     private val statementSeriesList: MutableList<List<StatementEntityWithDisplayDetails>> = mutableListOf()
 
-    override var statementListDetails: List<DoorDataSourceFactory<Int, StatementEntityWithDisplayDetails>>? = null
+    override var statementListDetails: List<DataSourceFactory<Int, StatementEntityWithDisplayDetails>>? = null
         set(value) {
             field = value
             if(value?.isNotEmpty() == true){

@@ -9,8 +9,8 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.navigation.RouteManager
@@ -30,9 +30,9 @@ import react.RBuilder
 import react.RComponent
 
 abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<P, S>(props),
-    UstadView, DIAware, DoorLifecycleOwner {
+    UstadView, DIAware, LifecycleOwner {
 
-    private val lifecycleObservers: MutableList<DoorLifecycleObserver> = concurrentSafeListOf()
+    private val lifecycleObservers: MutableList<LifecycleObserver> = concurrentSafeListOf()
 
     protected val systemImpl : UstadMobileSystemImpl by instance()
 
@@ -106,7 +106,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         fabManager?.onClickListener = {
             onFabClicked()
         }
-        lifecycleStatus.value = DoorLifecycleObserver.STARTED
+        lifecycleStatus.value = LifecycleObserver.STARTED
         database = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
     }
 
@@ -176,11 +176,11 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         extend(getCurrentState().di.instance)
     }
 
-    override fun addObserver(observer: DoorLifecycleObserver) {
+    override fun addObserver(observer: LifecycleObserver) {
         lifecycleObservers.add(observer)
     }
 
-    override fun removeObserver(observer: DoorLifecycleObserver) {
+    override fun removeObserver(observer: LifecycleObserver) {
         lifecycleObservers.remove(observer)
     }
 
@@ -211,7 +211,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         for(observer in lifecycleObservers){
             observer.onStop(this)
         }
-        lifecycleStatus.value = DoorLifecycleObserver.STOPPED
+        lifecycleStatus.value = LifecycleObserver.STOPPED
         window.removeEventListener("hashchange",hashChangeListener)
         progressBarManager.onDestroy()
         searchManager?.onDestroy()

@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
@@ -71,9 +72,9 @@ class XapiPackageContentPresenter(
 
     private var isStarted: Boolean = false
 
-    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
-    private val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+    private val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
 

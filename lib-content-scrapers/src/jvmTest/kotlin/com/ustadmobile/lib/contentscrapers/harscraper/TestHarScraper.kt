@@ -72,7 +72,7 @@ class TestHarScraper {
                 NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
@@ -90,7 +90,7 @@ class TestHarScraper {
             }
         }
 
-        db = di.on(endpoint).direct.instance(tag = UmAppDatabase.TAG_DB)
+        db = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
 
         containerDao = db.containerDao
         containerEntryDao = db.containerEntryDao

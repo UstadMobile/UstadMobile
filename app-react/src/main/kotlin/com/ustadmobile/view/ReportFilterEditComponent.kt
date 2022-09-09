@@ -6,7 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ReportFilterEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.UidAndLabel
@@ -116,7 +116,7 @@ class ReportFilterEditComponent (mProps: UmProps): UstadEditComponent<ReportFilt
         }
     }
 
-    override var uidAndLabelList: DoorLiveData<List<UidAndLabel>>? = null
+    override var uidAndLabelList: LiveData<List<UidAndLabel>>? = null
         set(value) {
             field?.removeObserver(uidAndLabelFilterItemObserver)
             field = value

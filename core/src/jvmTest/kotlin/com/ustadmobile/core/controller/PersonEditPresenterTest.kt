@@ -17,7 +17,7 @@ import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonWithAccount
@@ -41,7 +41,7 @@ class PersonEditPresenterTest  {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private val timeoutInMill: Long = 5000
 

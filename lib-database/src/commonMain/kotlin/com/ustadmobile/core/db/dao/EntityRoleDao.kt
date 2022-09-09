@@ -1,15 +1,17 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.core.db.dao.EntityRoleCommon.FILTER_BY_PERSON_UID2
+import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.PostgresQuery
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
 @Repository
-@Dao
-abstract class EntityRoleDao {
+@DoorDao
+expect abstract class EntityRoleDao {
 
     @Query("""
         SELECT COALESCE((
@@ -46,7 +48,7 @@ abstract class EntityRoleDao {
 
     @Query(FILTER_BY_PERSON_UID2)
     abstract fun filterByPersonWithExtra(personGroupUid: Long)
-            : DoorDataSourceFactory<Int, EntityRoleWithNameAndRole>
+            : DataSourceFactory<Int, EntityRoleWithNameAndRole>
 
     @Query(FILTER_BY_PERSON_UID2)
     abstract suspend fun filterByPersonWithExtraAsList(personGroupUid: Long)
@@ -57,7 +59,7 @@ abstract class EntityRoleDao {
 
 
     @Query("SELECT * FROM EntityRole WHERE erUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<EntityRole?>
+    abstract fun findByUidLive(uid: Long): LiveData<EntityRole?>
 
     @Update
     abstract suspend fun updateAsync(entity: EntityRole) :Int
@@ -65,22 +67,4 @@ abstract class EntityRoleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertOrReplace(entity: EntityRole)
 
-    companion object {
-
-
-        const val FILTER_BY_PERSON_UID2 =
-                """
-                    SELECT  
-                    (CASE 
-                        WHEN EntityRole.erTableId = ${Clazz.TABLE_ID}	THEN (SELECT Clazz.clazzName FROM Clazz WHERE Clazz.clazzUid = EntityRole.erEntityUid)
-                        WHEN EntityRole.erTableId = ${Person.TABLE_ID}	THEN (SELECT Person.firstNames||' '||Person.lastName FROM Person WHERE Person.personUid = EntityRole.erEntityUid)
-                        WHEN EntityRole.erTableId = ${School.TABLE_ID}	THEN (SELECT School.schoolName FROM School WHERE School.schoolUid = EntityRole.erEntityUid)
-                        ELSE '' 
-                    END) as entityRoleScopeName,
-                    Role.*, EntityRole.* FROM EntityRole
-                    LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid 
-                    WHERE EntityRole.erGroupUid = :personGroupUid
-                    AND CAST(EntityRole.erActive AS INTEGER) = 1 
-                """
-    }
 }

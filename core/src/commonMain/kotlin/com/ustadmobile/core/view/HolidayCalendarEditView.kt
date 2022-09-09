@@ -1,12 +1,12 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 
 interface HolidayCalendarEditView: UstadEditView<HolidayCalendar> {
 
-    var holidayList: DoorLiveData<List<Holiday>>?
+    var holidayList: LiveData<List<Holiday>>?
 
     companion object {
 

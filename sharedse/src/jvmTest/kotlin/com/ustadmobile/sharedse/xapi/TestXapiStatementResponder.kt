@@ -13,7 +13,6 @@ import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMURLEncoder
@@ -30,6 +29,7 @@ import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder.Companion.URI_PARAM_ENDPOINT
@@ -112,7 +112,7 @@ class TestXapiStatementResponder {
                 }
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
@@ -123,9 +123,9 @@ class TestXapiStatementResponder {
                     .also { runBlocking { it.preload() } })
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(),
+                spy(instance<UmAppDatabase>(tag = DoorTag.TAG_DB).asRepository(repositoryConfig(Any(),
                     context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance())))
             }
 

@@ -6,7 +6,7 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
@@ -49,7 +49,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
         }
     }
 
-    override var studentList: DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>? = null
+    override var studentList: DataSourceFactory<Int, PersonWithClazzEnrolmentDetails>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
@@ -65,7 +65,7 @@ class ClazzMemberListComponent(mProps: UmProps):UstadListComponent<PersonWithCla
         }
     }
 
-    override var pendingStudentList: DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>? = null
+    override var pendingStudentList: DataSourceFactory<Int, PersonWithClazzEnrolmentDetails>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)

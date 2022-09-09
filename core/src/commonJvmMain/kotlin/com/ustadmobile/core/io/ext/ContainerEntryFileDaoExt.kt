@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.ContainerEntryFileDao
 import com.ustadmobile.core.util.ext.encodeBase64
 import java.io.OutputStream
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.findEntriesByMd5SumsSafe
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import com.ustadmobile.core.io.ConcatenatedOutputStream2
@@ -76,7 +77,7 @@ fun ContainerEntryFileDao.generateConcatenatedFilesResponse2(md5List: List<Strin
                                                              requestHeaders: Map<String, List<String>> = mapOf(),
                                                              db: UmAppDatabase) : ConcatenatedHttpResponse2 {
 
-    val containerEntryFiles = findEntriesByMd5SumsSafe(md5List, db)
+    val containerEntryFiles = findEntriesByMd5SumsSafe(md5List)
     val missingMd5s = mutableListOf<String>()
     val entriesToConcatenate = md5List.mapNotNull { md5Str: String ->
         val entry = containerEntryFiles.firstOrNull { it.cefMd5 == md5Str }

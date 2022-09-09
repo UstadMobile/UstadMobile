@@ -23,12 +23,13 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.text.SimpleDateFormat
 import java.util.*
+import com.ustadmobile.door.ext.DoorTag
 
 class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiStatementEndpoint {
 
-    private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+    private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val repo: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+    private val repo: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     private val gson: Gson by di.instance()
 
@@ -351,22 +352,22 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
         if (contextActivities != null) {
             contextActivities.parent?.also {
                 createAllContextActivities(it, statementEntity.statementUid,
-                        ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT)
+                        ContextXObjectStatementJoinDaoCommon.CONTEXT_FLAG_PARENT)
             }
 
             contextActivities.category?.also {
                 createAllContextActivities(it,
-                        statementEntity.statementUid, ContextXObjectStatementJoinDao.CONTEXT_FLAG_CATEGORY)
+                        statementEntity.statementUid, ContextXObjectStatementJoinDaoCommon.CONTEXT_FLAG_CATEGORY)
             }
 
             contextActivities.grouping?.also {
                 createAllContextActivities(it,
-                        statementEntity.statementUid, ContextXObjectStatementJoinDao.CONTEXT_FLAG_GROUPING)
+                        statementEntity.statementUid, ContextXObjectStatementJoinDaoCommon.CONTEXT_FLAG_GROUPING)
             }
 
             contextActivities.other?.also {
                 createAllContextActivities(it,
-                        statementEntity.statementUid, ContextXObjectStatementJoinDao.CONTEXT_FLAG_OTHER)
+                        statementEntity.statementUid, ContextXObjectStatementJoinDaoCommon.CONTEXT_FLAG_OTHER)
             }
         }
         return statementEntity

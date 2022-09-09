@@ -144,7 +144,7 @@ class UstadAccountManagerTest {
                 Pbkdf2Params(iterations = 10000, keyLength = 512)
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
@@ -153,8 +153,8 @@ class UstadAccountManagerTest {
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository(
+            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
+                spy(instance<UmAppDatabase>(tag = DoorTag.TAG_DB).asRepository(
                     RepositoryConfig.repositoryConfig(
                         Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
                         instance(), instance()

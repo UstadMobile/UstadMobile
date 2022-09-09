@@ -5,7 +5,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.navigation.UstadSavedStateHandleJs
 import com.ustadmobile.core.view.CourseDiscussionEditView
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.DiscussionTopic
@@ -84,7 +84,7 @@ class CourseDiscussionEditComponent (mProps: UmProps): UstadEditComponent<Course
                 field = value
             }
         }
-    override var topicList: DoorMutableLiveData<List<DiscussionTopic>>? = null
+    override var topicList: MutableLiveData<List<DiscussionTopic>>? = null
         set(value) {
             field?.removeObserver(topicListObserver)
             field = value

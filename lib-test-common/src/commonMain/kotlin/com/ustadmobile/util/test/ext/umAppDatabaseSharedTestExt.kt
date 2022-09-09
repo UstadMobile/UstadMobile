@@ -3,6 +3,7 @@ package com.ustadmobile.util.test.ext
 import com.soywiz.klock.Date
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.initPreloadedVerbs
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
@@ -419,7 +420,7 @@ suspend fun UmAppDatabase.insertStatementForSessions(){
 
 
 
-suspend fun UmAppDatabase.insertTestStatementsForReports() {
+fun UmAppDatabase.insertTestStatementsForReports() {
 
     val firstPerson = Person().apply {
         firstNames = "Bobb"

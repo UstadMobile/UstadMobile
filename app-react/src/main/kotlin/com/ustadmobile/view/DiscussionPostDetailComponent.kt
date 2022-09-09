@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.DiscussionPostDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.view.EditButtonMode
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.MessageWithPerson
@@ -57,7 +57,7 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
             ustadComponentTitle = value
         }
 
-    override var replies: DoorDataSourceFactory<Int, MessageWithPerson>? = null
+    override var replies: DataSourceFactory<Int, MessageWithPerson>? = null
         get() = field
         set(value) {
             field = value

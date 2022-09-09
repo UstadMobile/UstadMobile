@@ -21,7 +21,8 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
@@ -90,7 +91,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
         }
 
 
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
 
         mPresenter = ClazzAssignmentDetailStudentProgressPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
@@ -176,7 +177,7 @@ class ClazzAssignmentDetailStudentProgressFragment(): UstadDetailFragment<ClazzA
     }
 
 
-    override var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
+    override var clazzCourseAssignmentSubmissionAttachment: DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
         set(value) {
             val dbRepoVal = dbRepo?: return
             submissionAttachmentLiveDataCourse?.removeObserver(fileSubmissionObserver)

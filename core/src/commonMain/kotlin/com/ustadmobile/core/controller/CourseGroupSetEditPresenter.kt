@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.CourseGroupSetEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -24,7 +24,7 @@ import org.kodein.di.DI
 
 class CourseGroupSetEditPresenter(context: Any,
         arguments: Map<String, String>, view: CourseGroupSetEditView,
-        lifecycleOwner: DoorLifecycleOwner,
+        lifecycleOwner: LifecycleOwner,
         di: DI)
     : UstadEditPresenter<CourseGroupSetEditView, CourseGroupSet>(context, arguments, view, di, lifecycleOwner) {
 

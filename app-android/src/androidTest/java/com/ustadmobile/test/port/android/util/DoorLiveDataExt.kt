@@ -3,8 +3,8 @@ package com.ustadmobile.test.port.android.util
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.test.core.app.ActivityScenario
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.Observer
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
@@ -17,10 +17,10 @@ import kotlinx.coroutines.withTimeoutOrNull
  * an observer must take place on the main thread, and the test function is not a coroutine.
  *
  */
-fun <T, F: Fragment> DoorLiveData<T>.waitUntilWithFragmentScenario(fragmentScenario: FragmentScenario<F>,
+fun <T, F: Fragment> LiveData<T>.waitUntilWithFragmentScenario(fragmentScenario: FragmentScenario<F>,
                                                                    timeout: Long = 5000, checker: (T) -> Boolean): T? {
     val completableDeferred = CompletableDeferred<T>()
-    val observerFn = object : DoorObserver<T> {
+    val observerFn = object : Observer<T> {
         override fun onChanged(t: T) {
             if (checker.invoke(t))
                 completableDeferred.complete(t)
@@ -41,10 +41,10 @@ fun <T, F: Fragment> DoorLiveData<T>.waitUntilWithFragmentScenario(fragmentScena
     }
 }
 
-fun <T> DoorLiveData<T>.waitUntilWithActivityScenario(activityScenario: ActivityScenario<*>,
+fun <T> LiveData<T>.waitUntilWithActivityScenario(activityScenario: ActivityScenario<*>,
                                                       timeout: Long = 5000, checker: (T) -> Boolean): T? {
     val completableDeferred = CompletableDeferred<T>()
-    val observerFn = object : DoorObserver<T> {
+    val observerFn = object : Observer<T> {
         override fun onChanged(t: T) {
             if (checker.invoke(t))
                 completableDeferred.complete(t)

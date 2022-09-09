@@ -10,8 +10,8 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.BitmaskEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -21,7 +21,7 @@ import org.kodein.di.instance
 
 
 class BitmaskEditPresenter(context: Any, arguments: Map<String, String>, view: BitmaskEditView,
-                           di: DI, lifecycleOwner: DoorLifecycleOwner)
+                           di: DI, lifecycleOwner: LifecycleOwner)
     : UstadEditPresenter<BitmaskEditView, LongWrapper>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
@@ -55,7 +55,7 @@ class BitmaskEditPresenter(context: Any, arguments: Map<String, String>, view: B
             longWrapper = LongWrapper(0L)
         }
 
-        view.bitmaskList = DoorMutableLiveData(
+        view.bitmaskList = MutableLiveData(
                 FLAGS_AVAILABLE.map { BitmaskFlag(it.flagVal, it.messageId,
                 (longWrapper.longValue and it.flagVal) == it.flagVal) })
 

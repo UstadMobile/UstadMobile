@@ -8,7 +8,7 @@ import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
@@ -60,7 +60,7 @@ class ClazzEnrolmentListComponent (props: UmProps): UstadListComponent<ClazzEnro
         }
 
 
-    override var enrolmentList: DoorDataSourceFactory<Int, ClazzEnrolmentWithLeavingReason>? = null
+    override var enrolmentList: DataSourceFactory<Int, ClazzEnrolmentWithLeavingReason>? = null
         set(value) {
             field = value
             setState {

@@ -123,18 +123,13 @@ kotlin {
 
 
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
-                compileOnly project(':lib-database')
-                compileOnly project(':lib-database-entities')
-                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
+                implementation project(':lib-database')
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
             }
         }
 
         commonJvmMain {
             dependencies {
-                implementation project(":lib-database-entities")
-                compileOnly project(':lib-database')
-
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
@@ -160,13 +155,11 @@ kotlin {
             dependsOn commonJvmMain
 
             dependencies {
-                implementation project(":lib-database-android")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "androidx.lifecycle:lifecycle-livedata:$version_androidx_lifecycle"
                 implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
                 implementation "androidx.work:work-runtime:$version_android_workmanager"
-                implementation project(":lib-database-android")
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
 
@@ -222,9 +215,6 @@ kotlin {
 
         jvmTest {
             dependencies {
-                implementation project(":lib-database-mpp")
-                implementation project(":lib-database-entities")
-                implementation project(":lib-database")
                 implementation project(":lib-test-common")
 
                 implementation "io.github.aakira:napier:$version_napier"
@@ -246,7 +236,6 @@ kotlin {
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
                 api project(":sharedse")
-                api project(":lib-database-mpp")
                 api project(":app-ktor-server")
 
             }

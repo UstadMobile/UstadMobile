@@ -3,7 +3,6 @@ package com.ustadmobile.core.util
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
@@ -14,6 +13,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -42,7 +42,7 @@ val mimeTypeToPlayStoreIdMap = mapOf(
 
 class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware {
 
-    private val umAppDatabase: UmAppDatabase by di.on(endpoint).instance(tag = TAG_DB)
+    private val umAppDatabase: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
     private val systemImpl: UstadMobileSystemImpl by di.instance()
 

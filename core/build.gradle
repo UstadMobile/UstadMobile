@@ -108,9 +108,8 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
-                compileOnly project(':lib-database')
-                compileOnly project(':lib-database-entities')
-                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
+                implementation project(':lib-database')
+                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation project(":lib-util")
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
@@ -128,10 +127,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
-                compileOnly project(':lib-database')
-                compileOnly project(':lib-database-entities')
             }
         }
 
@@ -162,9 +158,6 @@ kotlin {
                 implementation "junit:junit:$version_junit"
 
                 implementation project(":sharedse")
-                implementation project(":lib-database-mpp")
-                implementation project(":lib-database-entities")
-                implementation project(":lib-database")
                 implementation project(":lib-test-common")
                 implementation project(":app-ktor-server")
 
@@ -205,7 +198,6 @@ kotlin {
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
                 implementation "androidx.work:work-runtime:$version_android_workmanager"
                 implementation "androidx.work:work-runtime-ktx:$version_android_workmanager"
-                implementation project(":lib-database-android")
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 //Image loading library
                 implementation "com.squareup.picasso:picasso:$version_android_picasso"

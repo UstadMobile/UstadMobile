@@ -4,8 +4,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
-import com.ustadmobile.core.db.dao.ScrapeQueueItemDao.Companion.STATUS_RUNNING
-import com.ustadmobile.core.db.dao.ScrapeRunDao
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDaoCommon
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDaoCommon.STATUS_RUNNING
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 
@@ -19,7 +19,6 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_PUBLI
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.core.util.LiveDataWorkQueue
-import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.apache.commons.io.FilenameUtils
@@ -72,7 +71,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
 
         }
 
-        queueDao!!.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
+        queueDao!!.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDaoCommon.STATUS_DONE else ScrapeQueueItemDaoCommon.STATUS_FAILED, 0)
         queueDao!!.setTimeFinished(scrapeQueueItemUid, System.currentTimeMillis())
     }
 
@@ -184,7 +183,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
 
             try {
                 //Replace this with DI
-                lateinit var runDao: ScrapeRunDao
+                //lateinit var runDao: ScrapeRunDao
                 //val runDao = UmAppDatabase.getInstance(Any(), replaceMeWithDi()).scrapeRunDao
 
                 scrapeFromRoot(File(args[0]), File(args[1]), 0)

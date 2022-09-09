@@ -27,7 +27,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -54,7 +54,7 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
             (mDataRecyclerViewAdapter as? ClazzLogListRecyclerAdapter)?.clazzTimeZone = value
         }
 
-    override var graphData: DoorMutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>? = null
+    override var graphData: MutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>? = null
         set(value) {
             val observer = graphRecyclerViewAdapter ?: return
             field?.removeObserver(observer)

@@ -12,6 +12,8 @@ import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.*
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonGroup.Companion.PERSONGROUP_FLAG_GUESTPERSON
@@ -49,7 +51,7 @@ class UstadAccountManager(
 
         private val endpointSessionsListMap = mutableMapOf<Endpoint, List<UserSessionWithPersonAndEndpoint>>()
 
-        private val endpointSessionsLiveDataMap = mutableMapOf<Endpoint, DoorLiveData<List<UserSessionAndPerson>>>()
+        private val endpointSessionsLiveDataMap = mutableMapOf<Endpoint, LiveData<List<UserSessionAndPerson>>>()
 
         fun addEndpoint(endpoint: Endpoint) {
             val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
@@ -58,7 +60,7 @@ class UstadAccountManager(
 
             addSource(liveData) { endpointSessionList ->
                 endpointSessionsListMap[endpoint] = endpointSessionList.map { it.withEndpoint(endpoint) }
-                setVal(endpointSessionsListMap.values.flatten())
+                setValue(endpointSessionsListMap.values.flatten())
             }
         }
 
@@ -70,19 +72,19 @@ class UstadAccountManager(
 
     private val userSessionLiveDataMediator = UserSessionMediator()
 
-    val activeUserSessionsLive: DoorLiveData<List<UserSessionWithPersonAndEndpoint>>
+    val activeUserSessionsLive: LiveData<List<UserSessionWithPersonAndEndpoint>>
         get() = userSessionLiveDataMediator
 
     private val _activeUserSession: AtomicRef<UserSessionWithPersonAndEndpoint?>
 
-    private val _activeUserSessionLive = DoorMutableLiveData<UserSessionWithPersonAndEndpoint?>()
+    private val _activeUserSessionLive = MutableLiveData<UserSessionWithPersonAndEndpoint?>()
 
-    val activeUserSessionLive: DoorLiveData<UserSessionWithPersonAndEndpoint?>
+    val activeUserSessionLive: LiveData<UserSessionWithPersonAndEndpoint?>
         get() = _activeUserSessionLive
 
     private val _activeEndpoint: AtomicRef<Endpoint>
 
-    private val _activeAccountLive = DoorMutableLiveData<UmAccount>()
+    private val _activeAccountLive = MutableLiveData<UmAccount>()
 
     private val httpClient: HttpClient by di.instance()
 
@@ -94,7 +96,7 @@ class UstadAccountManager(
         }
 
         _activeUserSession = atomic(activeUserSessionFromJson)
-        _activeUserSessionLive.sendValue(activeUserSessionFromJson)
+        _activeUserSessionLive.postValue(activeUserSessionFromJson)
 
         systemImpl.getAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, appContext)?.also { endpointJson ->
             val endpointStrs = safeParseList(di, ListSerializer(String.serializer()), String::class,
@@ -116,7 +118,7 @@ class UstadAccountManager(
 
         _activeEndpoint = atomic(Endpoint(activeEndpointStr))
 
-        _activeAccountLive.sendValue(_activeUserSession.value?.toUmAccount()
+        _activeAccountLive.postValue(_activeUserSession.value?.toUmAccount()
             ?: GUEST_PERSON.toUmAccount(activeEndpointStr))
     }
 
@@ -148,7 +150,7 @@ class UstadAccountManager(
         get() = _activeUserSession.value
         set(value) {
             _activeUserSession.value = value
-            _activeUserSessionLive.sendValue(value)
+            _activeUserSessionLive.postValue(value)
 
             val activeAccountJson = value?.let {
                 safeStringify(di, UserSessionWithPersonAndEndpoint.serializer(), value)
@@ -165,12 +167,12 @@ class UstadAccountManager(
             systemImpl.setAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, value.url, appContext)
         }
 
-    val activeAccountLive: DoorLiveData<UmAccount>
+    val activeAccountLive: LiveData<UmAccount>
         get() = _activeAccountLive
 
-    val storedAccountsLive: DoorLiveData<List<UmAccount>> = DoorMediatorLiveData<List<UmAccount>>().apply {
+    val storedAccountsLive: LiveData<List<UmAccount>> = DoorMediatorLiveData<List<UmAccount>>().apply {
         addSource(userSessionLiveDataMediator) { userSessionList ->
-            setVal(userSessionList.map { it.toUmAccount() })
+            setValue(userSessionList.map { it.toUmAccount() })
         }
     }
 
@@ -317,8 +319,8 @@ class UstadAccountManager(
 
     suspend fun login(username: String, password: String, endpointUrl: String,
         maxDateOfBirth: Long = 0L): UmAccount = withContext(Dispatchers.Default){
-        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
-        val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_DB)
+        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
+        val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_DB)
 
         val nodeId = (repo as? DoorDatabaseRepository)?.config?.nodeId
             ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
@@ -394,7 +396,7 @@ class UstadAccountManager(
     }
 
     suspend fun startGuestSession(endpointUrl: String) {
-        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
+        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
         val guestPerson = repo.insertPersonAndGroup(Person().apply {
             username = null
             firstNames = "Guest"

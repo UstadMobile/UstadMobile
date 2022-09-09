@@ -8,8 +8,6 @@ import com.ustadmobile.core.contentjob.ContentPluginIds.DELETE_CONTENT_ENTRY_PLU
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -19,6 +17,7 @@ import com.ustadmobile.core.util.ext.isStatusActiveOrQueued
 import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.*
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import io.github.aakira.napier.Napier
@@ -27,6 +26,8 @@ import kotlinx.coroutines.*
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.Observer
 
 
 class DownloadDialogPresenter(
@@ -34,8 +35,8 @@ class DownloadDialogPresenter(
     arguments: Map<String, String>,
     view: DownloadDialogView,
     di: DI,
-    private val lifecycleOwner: DoorLifecycleOwner
-) : UstadBaseController<DownloadDialogView>(context, arguments, view, di), DoorObserver<Int?> {
+    private val lifecycleOwner: LifecycleOwner
+) : UstadBaseController<DownloadDialogView>(context, arguments, view, di), Observer<Int?> {
 
     private var deleteFileOptions = false
 
@@ -67,9 +68,9 @@ class DownloadDialogPresenter(
 
     private val contentJobManager: ContentJobManager by di.instance()
 
-    private val appDatabase: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+    private val appDatabase: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
-    private val appDatabaseRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
+    private val appDatabaseRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

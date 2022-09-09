@@ -1,9 +1,11 @@
 package com.ustadmobile.core.util
 
 import com.ustadmobile.door.ChangeListenerRequest
-import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.room.RoomDatabase
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.door.room.InvalidationTracker
+import com.ustadmobile.door.room.InvalidationTrackerObserver
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -17,12 +19,16 @@ class TestRateLimitedLiveData {
 
     @Test
     fun givenActiveObserver_whenTableChanges_thenShouldRefreshOncePerInterval() {
-        val changeListeners = mutableListOf<ChangeListenerRequest>()
-        val mockDb = mock<DoorDatabase> {
-            on { addChangeListener(any()) }.thenAnswer {
-                changeListeners += (it.arguments.first() as ChangeListenerRequest)
+        val invalidationTrackerObservers = mutableListOf<InvalidationTrackerObserver>()
+        val mockInvalidationTracker = mock<InvalidationTracker> {
+            on { addObserver(any()) }.thenAnswer {
+                invalidationTrackerObservers += (it.arguments.first() as InvalidationTrackerObserver)
                 it.mock
             }
+        }
+
+        val mockDb = mock<RoomDatabase> {
+            on { getInvalidationTracker() }.thenReturn(mockInvalidationTracker)
         }
 
         val callTimes = concurrentSafeListOf<Long>()
@@ -31,7 +37,7 @@ class TestRateLimitedLiveData {
             "Hello World ${System.currentTimeMillis()}"
         }
 
-        val observer = mock<DoorObserver<String>> {  }
+        val observer = mock<Observer<String>> {  }
 
         rateLimitedLiveData.observeForever(observer)
 
@@ -39,8 +45,8 @@ class TestRateLimitedLiveData {
             GlobalScope.launch {
                 repeat(5) {
                     delay(100)
-                    changeListeners.forEach {
-                        it.onInvalidated.onTablesInvalidated(listOf("Test"))
+                    invalidationTrackerObservers.forEach {
+                        it.onInvalidated(setOf("Test"))
                     }
                 }
             }

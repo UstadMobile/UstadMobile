@@ -1,13 +1,13 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
 
 interface DiscussionTopicDetailView: UstadDetailView<DiscussionTopic> {
 
 
-    var posts: DoorDataSourceFactory<Int, DiscussionPostWithDetails>?
+    var posts: DataSourceFactory<Int, DiscussionPostWithDetails>?
 
     companion object {
 

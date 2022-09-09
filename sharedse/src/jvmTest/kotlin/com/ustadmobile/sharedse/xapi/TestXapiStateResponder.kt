@@ -22,6 +22,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementSerializer
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.XapiStateResponder
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder
@@ -124,7 +125,7 @@ class TestXapiStateResponder {
         }
 
         accountManager = di.direct.instance()
-        db = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
+        db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
 
         mockUriResource = mock<RouterNanoHTTPD.UriResource> {
             on { initParameter(0, DI::class.java) }.thenReturn(di)

@@ -38,8 +38,8 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
@@ -114,7 +114,7 @@ abstract class UstadBaseController<V : UstadView>(
      */
     protected val presenterScope: CoroutineScope by instance(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE)
 
-    private val activeSessionObserver = DoorObserver<UserSessionWithPersonAndEndpoint?> {
+    private val activeSessionObserver = Observer<UserSessionWithPersonAndEndpoint?> {
         if(it == null) {
             presenterScope.launch {
                 navigateToStartNewUserSession()
@@ -150,7 +150,7 @@ abstract class UstadBaseController<V : UstadView>(
 
         if(activeSessionRequired && !navChild) {
             val accountManager: UstadAccountManager = direct.instance()
-            val lifecycleOwner: DoorLifecycleOwner? = direct.instanceOrNull()
+            val lifecycleOwner: LifecycleOwner? = direct.instanceOrNull()
             if(lifecycleOwner != null) {
                 accountManager.activeUserSessionLive.observe(lifecycleOwner, activeSessionObserver)
             }

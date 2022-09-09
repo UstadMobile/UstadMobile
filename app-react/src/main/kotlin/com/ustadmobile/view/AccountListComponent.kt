@@ -4,7 +4,7 @@ import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.controller.AccountListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.AccountListView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
@@ -55,14 +55,14 @@ class AccountListComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmState
         }
     }
 
-    override var accountListLive: DoorLiveData<List<UserSessionWithPersonAndEndpoint>>? = null
+    override var accountListLive: LiveData<List<UserSessionWithPersonAndEndpoint>>? = null
         set(value) {
             field?.removeObserver(accountListObserver)
             field = value
             value?.observe(this, accountListObserver)
         }
 
-    override var activeAccountLive: DoorLiveData<UserSessionWithPersonAndEndpoint?>? = null
+    override var activeAccountLive: LiveData<UserSessionWithPersonAndEndpoint?>? = null
         set(value) {
             field?.removeObserver(activeAccountObserver)
             field = value
