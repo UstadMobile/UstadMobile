@@ -6,7 +6,7 @@ if [ ! -e app-ktor-server/build/libs/ustad-server-all.jar ]; then
 fi
 
 if [ ! -e app-ktor-server/application.conf ]; then
-  cp app-ktor-server/src/jvmMain/resources/application.conf app-ktor-server/
+  cp app-ktor-server/src/main/resources/application.conf app-ktor-server/
 fi
 
 echo "Running Ustad server: config file is app-ktor-server/application.conf"
