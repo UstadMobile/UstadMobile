@@ -17,8 +17,6 @@ import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.db.*
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
@@ -48,6 +46,7 @@ import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
@@ -63,6 +62,7 @@ import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.net.URI
 import java.util.concurrent.Executors
+import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
 
 open class UstadApp : Application(), DIAware {
 
@@ -83,7 +83,7 @@ open class UstadApp : Application(), DIAware {
             systemImpl.getOrGenerateNodeIdAndAuth(contextPrefix = contextIdentifier, applicationContext)
         }
 
-        bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
+        bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             val attachmentsDir = File(applicationContext.filesDir.siteDataSubDir(this@singleton.context),
@@ -93,7 +93,7 @@ open class UstadApp : Application(), DIAware {
                 attachmentsDir, attachmentFilters)
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
-                .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+                .addMigrations(*migrationList().toTypedArray())
                 .build()
                 .also {
                     val networkManager: NetworkManagerBle = di.direct.instance()
@@ -101,14 +101,13 @@ open class UstadApp : Application(), DIAware {
                 }
         }
 
-        bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
+        bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            val db = instance<UmAppDatabase>(tag = TAG_DB)
+            val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             db.asRepository(repositoryConfig(applicationContext,
                 "${context.url}UmAppDatabase/", nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
                     instance(), instance()
             ) {
-                
                 useReplicationSubscription = true
                 replicationSubscriptionInitListener = RepSubscriptionInitListener()
             }).also {

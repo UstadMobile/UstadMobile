@@ -7,12 +7,14 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.asPerson
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.port.android.impl.UstadApp
 import com.ustadmobile.test.port.android.util.getApplicationDi
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
 import org.junit.rules.TestWatcher
@@ -56,7 +58,7 @@ class UmAppDatabaseAndroidClientRule(
             val controlServerUrlVal = controlServerUrl ?: throw IllegalStateException(
                     "${description.methodName} annotated as requiring a server but controlServerUrl not specified")
             val controlServerUrlUrlObj = URL(controlServerUrl)
-            appDbServer = runBlocking { httpClient.get<Pair<Int, String>>("$controlServerUrlVal/servers/newServer") }
+            appDbServer = runBlocking { httpClient.get("$controlServerUrlVal/servers/newServer").body() }
             endpointUrl = "${controlServerUrlUrlObj.protocol}://${controlServerUrlUrlObj.host}:${appDbServer?.first}/"
             account.endpointUrl = endpointUrl!!
         }
@@ -68,10 +70,22 @@ class UmAppDatabaseAndroidClientRule(
 
         repoInternal = di.direct.on(endpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_REPO)
 
+        repo.contentEntryDao.insert(ContentEntry().apply {
+            title = "This is nonsense"
+        })
+
         repo.siteDao.insert(Site().apply {
             siteName = "Test Site"
             authSalt = randomString(12)
         })
+
+
+        runBlocking {
+            repo.contentEntryDao.insert(ContentEntry().apply {
+                title = "This is async nonsense"
+            })
+        }
+
 
         accountPerson = runBlocking {
             repo.insertPersonAndGroup(account.asPerson())
@@ -86,7 +100,7 @@ class UmAppDatabaseAndroidClientRule(
         val di = (getApplicationContext<UstadApp>() as DIAware).di
         val httpClient: HttpClient = di.direct.instance()
         appDbServer?.also { server ->
-            runBlocking { httpClient.get<Unit>("$controlServerUrl/servers/close/${server.first}") }
+            runBlocking { httpClient.get("$controlServerUrl/servers/close/${server.first}") }
             endpointUrl = null
             appDbServer = null
         }

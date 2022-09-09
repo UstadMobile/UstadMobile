@@ -89,8 +89,14 @@ kotlin {
             }
         }
 
+        commonJvmMain {
+            dependsOn commonMain
+        }
+
 
         androidMain {
+            dependsOn commonJvmMain
+
             dependencies {
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "androidx.room:room-ktx:$version_android_room"
@@ -104,6 +110,7 @@ kotlin {
         }
 
         jvmMain {
+            dependsOn commonJvmMain
             kotlin.srcDir("build/generated/ksp/jvm/jvmMain/kotlin")
             dependencies {
                 implementation "io.ktor:ktor-server-core:$version_ktor"

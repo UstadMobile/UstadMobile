@@ -24,11 +24,11 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.direct
@@ -147,7 +147,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
         set(value) {
             currentLiveData?.removeObserver(availableTranslationObserver)
             val accountManager: UstadAccountManager by instance()
-            val dbRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
+            val dbRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
             val displayTypeRepoVal = dbRepo.contentEntryRelatedEntryJoinDao
             currentLiveData = value?.asRepositoryLiveData(displayTypeRepoVal)
             currentLiveData?.observe(this, availableTranslationObserver)

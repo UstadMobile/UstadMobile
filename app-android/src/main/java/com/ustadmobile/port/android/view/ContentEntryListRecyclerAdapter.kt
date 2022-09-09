@@ -10,6 +10,7 @@ import com.ustadmobile.core.controller.ContentEntryListItemListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer

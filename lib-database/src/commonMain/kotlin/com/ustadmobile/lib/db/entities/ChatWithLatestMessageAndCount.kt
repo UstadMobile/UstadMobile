@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.Ignore
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -20,21 +21,22 @@ class ChatWithLatestMessageAndCount() : Chat() {
 
 
     //Consider moving this logic away from the model
-//    val chatName: String?
-//        get() = if(chatGroup){
-//            chatTitle
-//        }else{
-//            var f = ""
-//            var l = ""
-//            if(otherPersonFirstNames != null){
-//                f = otherPersonFirstNames as String
-//            }
-//            if(otherPersonLastName != null){
-//                l = otherPersonLastName as String
-//            }
-//
-//            "$f $l"
-//        }
+    val chatName: String?
+        @Ignore
+        get() = if(chatGroup){
+            chatTitle
+        }else{
+            var f = ""
+            var l = ""
+            if(otherPersonFirstNames != null){
+                f = otherPersonFirstNames as String
+            }
+            if(otherPersonLastName != null){
+                l = otherPersonLastName as String
+            }
+
+            "$f $l"
+        }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

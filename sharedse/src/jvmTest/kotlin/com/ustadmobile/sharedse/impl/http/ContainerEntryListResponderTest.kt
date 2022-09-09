@@ -5,7 +5,6 @@ import com.google.gson.reflect.TypeToken
 import org.mockito.kotlin.mock
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.port.sharedse.impl.http.ContainerEntryListResponder

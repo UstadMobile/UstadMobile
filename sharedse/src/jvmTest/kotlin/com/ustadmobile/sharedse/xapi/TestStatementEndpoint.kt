@@ -17,6 +17,8 @@ import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.core.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.db.dao.ContextXObjectStatementJoinDaoCommon
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
 import com.ustadmobile.util.test.checkJndiSetup
@@ -161,7 +163,7 @@ class TestStatementEndpoint {
         Assert.assertEquals("joined to verb", entity.statementVerbUid, verb!!.verbUid)
         Assert.assertEquals("joined to object", entity.xObjectUid, xobject!!.xObjectUid)
 
-        Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong(), contextJoin!!.contextActivityFlag.toLong())
+        Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDaoCommon.CONTEXT_FLAG_PARENT.toLong(), contextJoin!!.contextActivityFlag.toLong())
         Assert.assertEquals("context statement joined matches with objectuid", parent.xObjectUid, contextJoin.contextXObjectUid)
         Assert.assertEquals("context statement joined matches with statement", entity.statementUid, contextJoin.contextStatementUid)
     }
@@ -265,7 +267,8 @@ class TestStatementEndpoint {
 
         Assert.assertEquals("context statement joined matches with statement", contextJoin?.contextStatementUid, entity?.statementUid)
         Assert.assertEquals("context statement joined matches with objectuid", parent.xObjectUid, contextJoin?.contextXObjectUid)
-        Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong(), contextJoin?.contextActivityFlag?.toLong())
+        Assert.assertEquals("context statement joined with parent flag",
+            ContextXObjectStatementJoinDaoCommon.CONTEXT_FLAG_PARENT.toLong(), contextJoin?.contextActivityFlag?.toLong())
 
 
         Assert.assertEquals("result success matched", RESULT_SUCCESS, entity.resultSuccess)

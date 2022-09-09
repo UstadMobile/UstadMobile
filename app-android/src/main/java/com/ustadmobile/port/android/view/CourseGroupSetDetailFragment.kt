@@ -15,6 +15,7 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CourseGroupSetDetailView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.CourseGroupMemberPerson
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
