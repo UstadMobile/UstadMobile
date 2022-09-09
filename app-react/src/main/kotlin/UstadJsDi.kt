@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.redux.ReduxAppStateManager

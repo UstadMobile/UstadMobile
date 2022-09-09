@@ -3,6 +3,7 @@ import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -70,7 +71,7 @@ fun main() {
         val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
             .addCallback(ContentJobItemTriggersCallback())
             .addSyncCallback(dbNodeIdAndAuth)
-            .addMigrations(*UmAppDatabase.migrationList(dbNodeIdAndAuth.nodeId).toTypedArray())
+            .addMigrations(*migrationList().toTypedArray())
 
         val defaultAssetPath = "locales/en.xml"
 
