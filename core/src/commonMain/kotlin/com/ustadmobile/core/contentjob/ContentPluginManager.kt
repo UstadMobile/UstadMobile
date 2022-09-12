@@ -22,8 +22,12 @@ class ContentPluginManager(val pluginList: List<ContentPlugin>) {
     }
 
 
-    fun getPluginById(id: Int): ContentPlugin {
+    fun requirePluginById(id: Int) : ContentPlugin {
         return pluginList.find { it.pluginId == id } ?: throw FatalContentJobException("invalid pluginId")
+    }
+
+    fun getPluginById(id: Int): ContentPlugin? {
+        return pluginList.firstOrNull { it.pluginId == id }
     }
 
     suspend fun extractMetadata(uri: DoorUri, processContext: ContentJobProcessContext): MetadataResult {
