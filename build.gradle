@@ -12,7 +12,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        mavenLocal()
+
         maven {
             url 'https://plugins.gradle.org/m2/'
         }
@@ -83,7 +83,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 231
 
-    version_door = "0.0.62"
+    version_door = "0.0.62a"
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.20'
 
