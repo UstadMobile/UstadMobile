@@ -154,7 +154,29 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
     companion object{
 
         val NO_CAPS_FILTER = InputFilter {source, start, end, _, _, _ ->
-            source.toString().lowercase().replace(" ", "");
+            source.toString().lowercase().replace(" ", "")
+
+            val sb = StringBuilder()
+
+            var changed = false
+            for (i in start until end) {
+                val c = source[i]
+                if(!BLOCK_CHARACTER_SET.contains(c)) {
+                    sb.append(c.toString().lowercase())
+                }else {
+                    changed = true
+                }
+            }
+
+            if(!changed) {
+                null
+            } else if(source is Spanned) {
+                SpannableString(sb).also {
+                    TextUtils.copySpansFrom(source, start, end, null, it, 0)
+                }
+            }else {
+                sb
+            }
         }
 
         val USERNAME_FILTER = InputFilter { source, start, end, _, _, _ ->
