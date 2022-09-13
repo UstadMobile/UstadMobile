@@ -194,7 +194,7 @@ class ContentJobRunner(
                     item.contentJobItem?.cjiPluginId ?: 0
                 }
 
-                val plugin = contentPluginManager.getPluginById(pluginId)
+                val plugin = contentPluginManager.requirePluginById(pluginId)
 
                 val jobResult = async {
                     try {
