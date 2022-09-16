@@ -126,7 +126,7 @@ expect abstract class ScopedGrantDao {
                     ${Role.PERMISSION_CLAZZ_SELECT} 
                     ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
                JOIN ScopedGrant ScopedGrantEntity
-                    ON Clazz.clazzUid = ScopedGrant.sgEntityUid
+                    ON Clazz.clazzUid = ScopedGrantEntity.sgEntityUid
                        AND ScopedGrantEntity.sgTableId = ${Clazz.TABLE_ID}
        WHERE UserSession.usClientNodeId = :newNodeId
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
@@ -141,7 +141,7 @@ expect abstract class ScopedGrantDao {
     """)
     @ReplicationRunOnNewNode
     @ReplicationCheckPendingNotificationsFor([ScopedGrant::class])
-    abstract suspend fun replicateOnNewNodeClazzBased(newNodeId: Long)
+    abstract suspend fun replicateOnNewNodeClazzBased(@NewNodeIdParam newNodeId: Long)
 
     @Query("""
  REPLACE INTO ScopedGrantReplicate(sgPk, sgDestination)
