@@ -353,6 +353,13 @@ class ContentEntryEdit2Presenter(
         entityVal.contentFlags = metadataResult.entry.contentFlags
         entityVal.leaf = metadataResult.entry.leaf
 
+        val thumbnailUrl = metadataResult.thumbnailUrl
+        if(thumbnailUrl != null) {
+            view.contentEntryPicture = ContentEntryPicture().apply {
+                cepUri = thumbnailUrl
+            }
+        }
+
         return entityVal
     }
 

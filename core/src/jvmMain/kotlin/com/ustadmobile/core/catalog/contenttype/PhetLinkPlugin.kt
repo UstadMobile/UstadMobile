@@ -1,39 +1,31 @@
 package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
-import kotlinx.coroutines.CancellationException
-import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
-import com.ustadmobile.core.io.ext.addFileToContainer
-import com.ustadmobile.core.io.ext.guessMimeType
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.isRemote
-import com.ustadmobile.core.network.NetworkProgressListenerAdapter
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ShrinkUtils
-import com.ustadmobile.core.util.ext.fitWithin
-import com.ustadmobile.core.util.ext.requirePostfix
-import com.ustadmobile.core.util.ext.updateTotalFromContainerSize
 import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
 import com.ustadmobile.core.view.PhetLinkContentView
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toFile
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
-import io.github.aakira.napier.Napier
+import com.ustadmobile.lib.db.entities.*
+import io.ktor.client.*
+import io.ktor.util.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
-
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
+import java.util.*
 
 class PhetLinkPlugin(
     private var context: Any,
@@ -54,7 +46,13 @@ class PhetLinkPlugin(
     override val supportedFileExtensions: List<String>
         get() = TODO("not implemented yet")
 
-    private val ffprobeFile: File by di.instance(tag = DiTag.TAG_FILE_FFPROBE)
+    private val httpClient: HttpClient = di.direct.instance()
+
+    private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
+
+    private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+
+    private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     override suspend fun extractMetadata(
         uri: DoorUri,
@@ -67,23 +65,32 @@ class PhetLinkPlugin(
         val downloadedFile: File = localUri.toFile()
         val fileContent = downloadedFile.readText()
         val htmlContent = Jsoup.parse(fileContent)
-        val htmlTitle = htmlContent.title()
-        println(fileContent)
-        println(htmlTitle)
+
+        val headTags: Elements = htmlContent.getElementsByTag("head")
+        val img: String?  =
+            headTags.select("meta[property=og:image]").first()?.attr("content");
 
         return MetadataResult(ContentEntryWithLanguage().apply {
-            title = htmlTitle
-            val headTags: Elements = htmlContent.getElementsByTag("head")
-            val metaTags: Elements = headTags.get(0).getElementsByTag("meta")
+            author = "PhET"
+            publisher = "PhET"
 
-            for (metaTag in metaTags) {
-                val content: String = metaTag.attr("content")
-                val name: String = metaTag.attr("name")
-                if (name.equals("description")) {
-                    this.description = content
+            val title: String?  =
+                headTags.select("meta[property=og:title]").first()?.attr("content");
+            this.title = title
+
+            val footerTags: Elements = htmlContent.getElementsByTag("footer")
+            val languageCode: String?  =
+                footerTags.select("option[selected]").first()?.attr("value");
+            if (!languageCode.equals(null)) {
+                this.language = Language().apply {
+                    iso_639_1_standard = languageCode
                 }
             }
-        }, pluginId)
+
+            val description: String? = headTags.select("meta[name=description]").first()?.attr("content")
+            this.description = description
+
+        }, pluginId, img)
     }
 
     override suspend fun processJob(
