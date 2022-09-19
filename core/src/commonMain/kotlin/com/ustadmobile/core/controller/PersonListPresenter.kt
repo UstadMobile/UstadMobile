@@ -54,6 +54,9 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
+        //Not ideal, but if we are filtering to exclude members of a course, this means we are in add to course mode
+        view.inviteViaLinkVisibile  = (arguments[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L) != 0L
+
         return if(arguments[ARG_HIDE_PERSON_ADD] !== null){
             false
         }else {

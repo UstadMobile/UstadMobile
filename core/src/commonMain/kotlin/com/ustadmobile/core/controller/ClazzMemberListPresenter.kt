@@ -136,7 +136,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
         val args = mutableMapOf(
             PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
             ARG_FILTER_BY_ENROLMENT_ROLE to role.toString(),
-            ARG_CLAZZUID to (arguments?.get(ARG_CLAZZUID) ?: "-1"),
+            ARG_CLAZZUID to (arguments[ARG_CLAZZUID] ?: "-1"),
             UstadView.ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME,
             UstadView.ARG_POPUPTO_ON_FINISH to ClazzMemberListView.VIEW_NAME,
             ClazzMemberListView.ARG_HIDE_CLAZZES to true.toString(),

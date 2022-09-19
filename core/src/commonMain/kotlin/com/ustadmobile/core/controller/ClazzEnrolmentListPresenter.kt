@@ -15,9 +15,13 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
-class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, view: ClazzEnrolmentListView,
-                                   di: DI, lifecycleOwner: LifecycleOwner)
-    : UstadListPresenter<ClazzEnrolmentListView, ClazzEnrolment>(context, arguments, view, di, lifecycleOwner) {
+class ClazzEnrolmentListPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: ClazzEnrolmentListView,
+    di: DI,
+    lifecycleOwner: LifecycleOwner
+): UstadListPresenter<ClazzEnrolmentListView, ClazzEnrolment>(context, arguments, view, di, lifecycleOwner) {
 
     var selectedPerson = 0L
     var selectedClazz = 0L
