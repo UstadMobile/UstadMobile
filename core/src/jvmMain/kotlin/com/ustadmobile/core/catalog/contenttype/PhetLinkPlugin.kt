@@ -1,15 +1,18 @@
 package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
 import com.ustadmobile.core.view.PhetLinkContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
@@ -102,6 +105,8 @@ class PhetLinkPlugin(
         return withContext(Dispatchers.Default) {
 
             try {
+                val containerFolder = jobItem.contentJob?.toUri
+                    ?: defaultContainerDir.toURI().toString()
 
                 val doorUri = DoorUri.parse(uri)
                 val localUri = process.getLocalOrCachedUri()
@@ -110,49 +115,47 @@ class PhetLinkPlugin(
                     progress, context, di)
 
                 if(!contentJobItem.cjiContainerProcessed) {
+                    val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
+                        ?: Container().apply {
+                            containerContentEntryUid = contentJobItem.cjiContentEntryUid
+                            cntLastModified = System.currentTimeMillis()
+                            mimeType = supportedMimeTypes.first()
+                            containerUid = repo.containerDao.insertAsync(this)
+                        }
 
-//                    val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
-//                        ?: Container().apply {
-//                            containerContentEntryUid = contentJobItem.cjiContentEntryUid
-//                            cntLastModified = System.currentTimeMillis()
-//                            mimeType = supportedMimeTypes.first()
-//                            containerUid = repo.containerDao.insertAsync(this)
-//                        }
-//
-//                    val containerFolder = jobItem.contentJob?.toUri
-//                        ?: defaultContainerDir.toURI().toString()
-//                    val containerFolderUri = DoorUri.parse(containerFolder)
-//
-//                    contentJobItem.cjiContainerUid = container.containerUid
-//                    db.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
-//                        container.containerUid)
-//
-//                    repo.addEntriesToContainerFromZip(container.containerUid,
-//                        localUri,
-//                        ContainerAddOptions(storageDirUri = containerFolderUri), context)
-//
-//                    contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
-//                        progress)
-//
-//                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
-//
-//                    contentJobItem.cjiConnectivityNeeded = true
-//                    db.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
-//
-//                    val haveConnectivityToContinueJob = db.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
-//                        ?: 0)
-//                    if (!haveConnectivityToContinueJob) {
-//                        return@withContext ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
-//                    }
+                    repo.addFileToContainer(container.containerUid, localUri,
+                        "index.html", context, di,
+                        ContainerAddOptions(storageDirUri = DoorUri.parse(containerFolder),
+                            updateContainer = false)
+                    )
+
+                    val entry = db.contentEntryDao.findByUid(contentJobItem.cjiContentEntryUid)
+
+                    // generate tincan.xml
+                    val tinCan = """
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <tincan xmlns="http://projecttincan.com/tincan.xsd">
+                            <activities>
+                                <activity id="${entry?.entryId?.escapeHTML()}" type="http://adlnet.gov/expapi/activities/module">
+                                    <name>${entry?.title?.escapeHTML()}</name>
+                                    <description lang="en-US">${entry?.description?.escapeHTML()}</description>
+                                    <launch lang="en-us">index.html</launch>
+                                </activity>
+                            </activities>
+                        </tincan>
+                        """.trimIndent()
+
+                    val tmpTinCanFile = File.createTempFile("h5p-tincan", "xml")
+                    tmpTinCanFile.writeText(tinCan)
+                    repo.addFileToContainer(container.containerUid, tmpTinCanFile.toDoorUri(),
+                        "tincan.xml", context, di,
+                        ContainerAddOptions(storageDirUri = DoorUri.parse(containerFolder),
+                            updateContainer = true)
+                    )
+                    tmpTinCanFile.delete()
+                    db.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
                 }
 
-//                if(contentNeedUpload) {
-//                    val progressListenerAdapter = NetworkProgressListenerAdapter(progress,
-//                        contentJobItem)
-//                    return@withContext ProcessResult(uploader.upload(
-//                        contentJobItem, progressListenerAdapter, httpClient, endpoint, process
-//                    ))
-//                }
 
                 return@withContext ProcessResult(JobStatus.COMPLETE)
 

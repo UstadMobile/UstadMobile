@@ -10,6 +10,9 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.lib.db.entities.ContentJob
+import com.ustadmobile.lib.db.entities.ContentJobItem
+import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -38,6 +41,8 @@ class PhetLinkPluginTest {
     private lateinit var mockWebServer: MockWebServer
 
     private lateinit var db: UmAppDatabase
+
+    private lateinit var repo: UmAppDatabase
 
     private val endpointUrl = "http://localhost/"
 
@@ -84,5 +89,50 @@ class PhetLinkPluginTest {
             Assert.assertEquals(null, result)
         }
     }
+
+    @Test
+    fun givenValidPhetLink_whenProcessJobCalled_thenShouldDownloadAndCreateContainer() {
+        val containerTmpDir = tmpFolder.newFolder("containerTmpDir")
+        val tempFolder = tmpFolder.newFolder("newFolder")
+        val tempUri = DoorUri.parse(tempFolder.toURI().toString())
+        val accountManager: UstadAccountManager by di.instance()
+
+        repo = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        db = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
+
+
+        val doorUri = DoorUri.parse("https://phet.colorado.edu/en/simulations/geometric-optics")
+        val processContext = ContentJobProcessContext(doorUri, tempUri, params = mutableMapOf(),
+            DummyContentJobItemTransactionRunner(db), di)
+        val jobItem = ContentJobItem(sourceUri = doorUri.uri.toString(),
+            cjiParentContentEntryUid = 0, cjiContentEntryUid = 42)
+        val job = ContentJob(toUri = containerTmpDir.toURI().toString())
+        val jobAndItem = ContentJobItemAndContentJob().apply{
+            this.contentJob = job
+            this.contentJobItem = jobItem
+        }
+
+        val phetPlugin = PhetLinkPlugin(Any(), Endpoint(endpointUrl), di)
+
+        runBlocking {
+            phetPlugin.processJob(jobAndItem, processContext) {
+
+            }
+        }
+
+        val container = runBlocking {
+            repo.containerDao.findContainersForContentEntryUid(42).first()
+        }
+
+
+        Assert.assertNotNull(container)
+
+        // Assert Container
+
+        val tinCanEntry = db.containerEntryDao.findByPathInContainer(container.containerUid, "tincan.xml")
+        Assert.assertNotNull(tinCanEntry)
+
+    }
+
 
 }
