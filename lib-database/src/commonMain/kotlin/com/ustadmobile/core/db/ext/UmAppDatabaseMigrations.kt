@@ -1317,6 +1317,13 @@ val MIGRATION_105_106 = DoorMigrationStatementList(105, 106) { db ->
 
 }
 
+val MIGRATION_106_107 = DoorMigrationStatementList(106, 107) {db ->
+    mutableListOf<String>().apply {
+        add("DROP TABLE IF EXISTS SqliteChangeSeqNums")
+        add("DROP TABLE IF EXISTS UpdateNotification")
+    }
+}
+
 fun migrationList() = listOf<DoorMigration>(
     UmAppDatabaseReplicationMigration91_92, MIGRATION_92_93, MIGRATION_93_94, MIGRATION_94_95,
     MIGRATION_95_96, MIGRATION_96_97, MIGRATION_97_98, MIGRATION_98_99,

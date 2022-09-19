@@ -23,6 +23,11 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 32
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    sourceSets {
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 
     compileOptions {
@@ -109,6 +114,14 @@ kotlin {
             }
         }
 
+        androidTest {
+            dependencies {
+                implementation "androidx.room:room-testing:$version_android_room"
+                implementation "androidx.test:runner:$version_android_junit_runner"
+                implementation "junit:junit:$version_junit"
+            }
+        }
+
         jvmMain {
             dependsOn commonJvmMain
             kotlin.srcDir("build/generated/ksp/jvm/jvmMain/kotlin")
@@ -137,6 +150,7 @@ ksp {
     arg("doordb_postgres_url", rootProject.ext.buildConfigProperties.getProperty("door.postgresUrl", ""))
     arg("doordb_postgres_user", rootProject.ext.buildConfigProperties.getProperty("door.postgresUser", ""))
     arg("doordb_postgres_password", rootProject.ext.buildConfigProperties.getProperty("door.postgresPass", ""))
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
