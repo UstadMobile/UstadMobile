@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.view.SiteDetailView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.SiteEditView
 import com.ustadmobile.core.view.SiteTermsDetailView
@@ -17,7 +17,7 @@ import org.kodein.di.DI
 
 class SiteDetailPresenter(context: Any,
                           arguments: Map<String, String>, view: SiteDetailView,
-                          lifecycleOwner: DoorLifecycleOwner,
+                          lifecycleOwner: LifecycleOwner,
                           di: DI)
     : UstadDetailPresenter<SiteDetailView, Site>(context, arguments, view, di, lifecycleOwner) {
 

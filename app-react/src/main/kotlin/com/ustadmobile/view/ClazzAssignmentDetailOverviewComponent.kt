@@ -5,7 +5,7 @@ import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
@@ -21,6 +21,8 @@ import kotlinx.css.FlexDirection
 import kotlinx.css.height
 import kotlinx.css.padding
 import kotlinx.css.px
+import mui.material.ButtonVariant
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css
@@ -63,7 +65,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
         }
     }
 
-    override var submittedCourseAssignmentSubmission: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
+    override var submittedCourseAssignmentSubmission: DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
@@ -87,7 +89,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
             }
         }
 
-    override var clazzAssignmentClazzComments: DoorDataSourceFactory<Int, CommentsWithPerson>? = null
+    override var clazzAssignmentClazzComments: DataSourceFactory<Int, CommentsWithPerson>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
@@ -95,7 +97,7 @@ class ClazzAssignmentDetailOverviewComponent(mProps: UmProps): UstadDetailCompon
             liveData?.observe(this, classCommentsObserver)
         }
 
-    override var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>? = null
+    override var clazzAssignmentPrivateComments: DataSourceFactory<Int, CommentsWithPerson>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)

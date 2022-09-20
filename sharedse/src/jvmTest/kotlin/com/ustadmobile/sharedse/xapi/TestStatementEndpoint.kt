@@ -14,16 +14,19 @@ import com.ustadmobile.core.util.parse8601Duration
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
-import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.db.dao.ContextXObjectStatementJoinDaoCommon
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
 import com.ustadmobile.util.test.checkJndiSetup
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.json.*
 import io.ktor.utils.io.*
 import okhttp3.OkHttpClient
 import org.junit.Assert
@@ -32,7 +35,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -73,7 +75,7 @@ class TestStatementEndpoint {
 
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp){
-            install(JsonFeature)
+            install(ContentNegotiation)
             install(HttpTimeout)
             engine {
                 preconfigured = okHttpClient
@@ -104,7 +106,7 @@ class TestStatementEndpoint {
         }
 
         gson = di.direct.instance()
-        repo = di.on(endpointUrl).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        repo = di.on(endpointUrl).direct.instance(tag = DoorTag.TAG_REPO)
         endpoint = di.on(endpointUrl).direct.instance()
     }
 
@@ -161,7 +163,7 @@ class TestStatementEndpoint {
         Assert.assertEquals("joined to verb", entity.statementVerbUid, verb!!.verbUid)
         Assert.assertEquals("joined to object", entity.xObjectUid, xobject!!.xObjectUid)
 
-        Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong(), contextJoin!!.contextActivityFlag.toLong())
+        Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDaoCommon.CONTEXT_FLAG_PARENT.toLong(), contextJoin!!.contextActivityFlag.toLong())
         Assert.assertEquals("context statement joined matches with objectuid", parent.xObjectUid, contextJoin.contextXObjectUid)
         Assert.assertEquals("context statement joined matches with statement", entity.statementUid, contextJoin.contextStatementUid)
     }
@@ -265,7 +267,8 @@ class TestStatementEndpoint {
 
         Assert.assertEquals("context statement joined matches with statement", contextJoin?.contextStatementUid, entity?.statementUid)
         Assert.assertEquals("context statement joined matches with objectuid", parent.xObjectUid, contextJoin?.contextXObjectUid)
-        Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong(), contextJoin?.contextActivityFlag?.toLong())
+        Assert.assertEquals("context statement joined with parent flag",
+            ContextXObjectStatementJoinDaoCommon.CONTEXT_FLAG_PARENT.toLong(), contextJoin?.contextActivityFlag?.toLong())
 
 
         Assert.assertEquals("result success matched", RESULT_SUCCESS, entity.resultSuccess)

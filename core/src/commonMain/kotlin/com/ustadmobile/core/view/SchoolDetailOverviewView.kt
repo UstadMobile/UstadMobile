@@ -1,7 +1,7 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 
 interface SchoolDetailOverviewView: UstadDetailView<SchoolWithHolidayCalendar> {
 
-    var schoolClazzes : DoorDataSourceFactory<Int, ClazzWithListDisplayDetails>?
+    var schoolClazzes : DataSourceFactory<Int, ClazzWithListDisplayDetails>?
 
     var schoolCodeVisible: Boolean
 

@@ -8,12 +8,14 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.waitForListToBeSet
+import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ReportEditView
 import com.ustadmobile.core.view.ReportTemplateListView
 import com.ustadmobile.core.view.UstadEditView
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.LifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.Report
 import org.junit.Before
 import org.junit.Rule
@@ -37,7 +39,7 @@ class ReportTemplateListPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoReportDaoSpy: ReportDao
 
@@ -46,9 +48,7 @@ class ReportTemplateListPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         di = DI {

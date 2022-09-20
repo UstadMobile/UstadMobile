@@ -9,7 +9,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.CourseTerminology
@@ -27,7 +27,7 @@ class CourseTerminologyEditPresenter(
     context: Any,
     arguments: Map<String, String>,
     view: CourseTerminologyEditView,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     di: DI)
     : UstadEditPresenter<CourseTerminologyEditView, CourseTerminology>(
     context,
@@ -38,8 +38,6 @@ class CourseTerminologyEditPresenter(
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
-
-    private val json: Json by instance()
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): CourseTerminology? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
@@ -86,7 +84,7 @@ class CourseTerminologyEditPresenter(
         )*/
         entityVal?.ctTerminology = safeStringify(di, MapSerializer(String.serializer(), String.serializer()),
             view.terminologyTermList?.associate { it.id to it.term.toString() } ?: mapOf())
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, CourseTerminology.serializer(),
                 entityVal)
     }
 

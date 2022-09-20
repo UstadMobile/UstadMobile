@@ -1,16 +1,16 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
-@Dao
-abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
+@DoorDao
+expect abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
 
     @Query("""
      REPLACE INTO CommentsReplicate(commentsPk, commentsDestination)
@@ -74,7 +74,7 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
       ORDER BY Comments.commentsDateTimeAdded DESC 
     """)
     abstract fun findPublicByEntityTypeAndUidLive(entityType: Int, entityUid: Long):
-            DoorDataSourceFactory<Int, CommentsWithPerson>
+            DataSourceFactory<Int, CommentsWithPerson>
 
 
     @Query("""
@@ -91,7 +91,7 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
     """)
     abstract fun findPrivateByEntityTypeAndUidAndForPersonLive(entityType: Int, entityUid: Long,
                                                             personUid: Long):
-            DoorDataSourceFactory<Int, CommentsWithPerson>
+            DataSourceFactory<Int, CommentsWithPerson>
 
 
     @Query("""
@@ -113,7 +113,7 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
         entityUid: Long,
         submitterUid: Long
     ):
-            DoorDataSourceFactory<Int, CommentsWithPerson>
+            DataSourceFactory<Int, CommentsWithPerson>
 
     @Query("""
         SELECT Comments.*, Person.* FROM Comments
@@ -128,7 +128,7 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
     """)
     abstract fun findPrivateByEntityTypeAndUidAndPersonLive(entityType: Int, entityUid: Long,
                                                                 personUid: Long):
-            DoorDataSourceFactory<Int, CommentsWithPerson>
+            DataSourceFactory<Int, CommentsWithPerson>
 
 
     /*
@@ -157,7 +157,7 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
     """)
     abstract fun findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToLive(
             entityType: Int, entityUid: Long, personFrom: Long):
-            DoorDataSourceFactory<Int, CommentsWithPerson>
+            DataSourceFactory<Int, CommentsWithPerson>
 
     @Query("""
         SELECT Comments.*, Person.* FROM Comments
@@ -187,9 +187,9 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
         changeTime: Long
     )
 
-    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-        uidList.forEach {
-            updateInActiveByCommentUid(it, true, changeTime)
-        }
-    }
+//    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
+//        uidList.forEach {
+//            updateInActiveByCommentUid(it, true, changeTime)
+//        }
+//    }
 }

@@ -3,6 +3,7 @@ import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
+import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -27,7 +28,6 @@ import com.ustadmobile.util.ThemeManager.createAppTheme
 import com.ustadmobile.view.renderExtraActiveTabWarningComponent
 import com.ustadmobile.view.renderMainComponent
 import com.ustadmobile.view.renderSplashComponent
-import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
@@ -71,7 +71,7 @@ fun main() {
         val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
             .addCallback(ContentJobItemTriggersCallback())
             .addSyncCallback(dbNodeIdAndAuth)
-            .addMigrations(*UmAppDatabase.migrationList(dbNodeIdAndAuth.nodeId).toTypedArray())
+            .addMigrations(*migrationList().toTypedArray())
 
         val defaultAssetPath = "locales/en.xml"
 
@@ -91,13 +91,13 @@ fun main() {
                 null
             }
 
-            val rootElement = document.getElementById("root")
+            val rootElement = document.getElementById("root")!!
             val rootDirectionAttrVal = if(displayedLocale in UstadMobileConstants.RTL_LANGUAGES) {
                 "rtl"
             }else {
                 "ltr"
             }
-            rootElement?.setAttribute("dir", rootDirectionAttrVal)
+            rootElement.setAttribute("dir", rootDirectionAttrVal)
 
             val di = ustadJsDi(dbBuilt, dbNodeIdAndAuth, appConfigs, apiUrl, defaultStringsXmlStr,
                 foreignStringXmlStr)

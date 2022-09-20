@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.CourseGroupSetEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -24,7 +24,7 @@ import org.kodein.di.DI
 
 class CourseGroupSetEditPresenter(context: Any,
         arguments: Map<String, String>, view: CourseGroupSetEditView,
-        lifecycleOwner: DoorLifecycleOwner,
+        lifecycleOwner: LifecycleOwner,
         di: DI)
     : UstadEditPresenter<CourseGroupSetEditView, CourseGroupSet>(context, arguments, view, di, lifecycleOwner) {
 
@@ -95,11 +95,9 @@ class CourseGroupSetEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(SAVED_STATE_MEMBER_LIST,
-            ListSerializer(CourseGroupMemberPerson.serializer()),
-            view.memberList ?: listOf())
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(SAVED_STATE_MEMBER_LIST, json,
+            ListSerializer(CourseGroupMemberPerson.serializer()), view.memberList ?: listOf())
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, CourseGroupSet.serializer(), entityVal)
     }
 
     override fun handleClickSave(entity: CourseGroupSet) {

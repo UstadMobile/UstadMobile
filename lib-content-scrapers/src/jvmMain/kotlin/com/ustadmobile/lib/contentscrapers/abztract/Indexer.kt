@@ -3,6 +3,8 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDaoCommon
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -15,9 +17,9 @@ import org.kodein.di.on
 
 abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val sqiUid: Int, val contentEntryUid: Long, endpoint: Endpoint, di: DI) {
 
-    val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+    val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    val repo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+    val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     var parentContentEntry: ContentEntry? = null
     var contentEntry: ContentEntry? = null
@@ -39,7 +41,7 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val sqi
             item.scrapeUrl = queueUrl
             item.sqiContentEntryParentUid = parentContentEntryUid
             item.sqiContentEntryUid = contentEntry?.contentEntryUid ?: 0
-            item.status = ScrapeQueueItemDao.STATUS_PENDING
+            item.status = ScrapeQueueItemDaoCommon.STATUS_PENDING
             item.contentType = contentType
             item.runId = runUid
             item.overrideEntry = false
@@ -51,7 +53,7 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val sqi
     }
 
     fun setIndexerDone(successful: Boolean, errorCode: Int) {
-        db.scrapeQueueItemDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, errorCode)
+        db.scrapeQueueItemDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDaoCommon.STATUS_DONE else ScrapeQueueItemDaoCommon.STATUS_FAILED, errorCode)
     }
 
     fun hideContentEntry(contentEntryUid: Long) {

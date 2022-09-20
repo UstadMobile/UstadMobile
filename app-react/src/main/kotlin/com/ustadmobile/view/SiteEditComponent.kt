@@ -4,11 +4,10 @@ import com.ustadmobile.core.controller.SiteEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SiteEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
-import com.ustadmobile.mui.components.FormControlVariant
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.umTextField
 import com.ustadmobile.util.FieldLabel
@@ -17,6 +16,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.renderListSectionTitle
 import com.ustadmobile.view.ext.umItem
+import mui.material.FormControlVariant
 import react.RBuilder
 import react.setState
 import styled.css
@@ -38,7 +38,7 @@ class SiteEditComponent(props: UmProps): UstadEditComponent<Site>(props), SiteEd
         }
     }
 
-    override var siteTermsList: DoorLiveData<List<SiteTermsWithLanguage>>? = null
+    override var siteTermsList: LiveData<List<SiteTermsWithLanguage>>? = null
         set(value) {
             value?.removeObserver(siteTermsObserver)
             value?.observe(this, siteTermsObserver)

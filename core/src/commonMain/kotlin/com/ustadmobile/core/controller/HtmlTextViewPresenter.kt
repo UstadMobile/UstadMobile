@@ -1,14 +1,14 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.view.HtmlTextViewDetailView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
 
 class HtmlTextViewDetailPresenter(context: Any,
                                   arguments: Map<String, String>, view: HtmlTextViewDetailView,
-                                  lifecycleOwner: DoorLifecycleOwner,
+                                  lifecycleOwner: LifecycleOwner,
                                   di: DI)
     : UstadDetailPresenter<HtmlTextViewDetailView, String>(context, arguments, view, di, lifecycleOwner) {
 

@@ -1,10 +1,8 @@
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.util.ext.addInvalidationListener
-import com.ustadmobile.core.util.ext.removeInvalidationListener
-import com.ustadmobile.door.ChangeListenerRequest
-import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
+import com.ustadmobile.door.room.InvalidationTrackerObserver
+import com.ustadmobile.door.room.RoomDatabase
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
@@ -23,13 +21,17 @@ import kotlin.jvm.Volatile
  * observers.
  */
 class RateLimitedLiveData<T>(
-    private val db: DoorDatabase,
+    private val db: RoomDatabase,
     tableNames: List<String>,
     private val interval: Long = 1000,
     private val getter: suspend () -> T
-): DoorMutableLiveData<T>() {
+): MutableLiveData<T>() {
 
-    private val changeListenerRequest = ChangeListenerRequest(tableNames) { invalidate() }
+    private val invalidationObserver = object: InvalidationTrackerObserver(tableNames.toTypedArray()) {
+        override fun onInvalidated(tables: Set<String>) {
+            invalidate()
+        }
+    }
 
     @Volatile
     private var lastCheckTime: Long = 0
@@ -53,17 +55,17 @@ class RateLimitedLiveData<T>(
     private suspend fun refresh() {
         refreshCheckJob.value = null
         lastCheckTime = systemTimeInMillis()
-        sendValue(getter())
+        postValue(getter())
     }
 
-    override fun onActive2() {
-        super.onActive2()
-        db.addInvalidationListener(changeListenerRequest)
+    override fun onActive() {
+        super.onActive()
+        db.getInvalidationTracker().addObserver(invalidationObserver)
         invalidate()
     }
 
-    override fun onInactive2() {
-        super.onInactive2()
-        db.removeInvalidationListener(changeListenerRequest)
+    override fun onInactive() {
+        super.onInactive()
+        db.getInvalidationTracker().removeObserver(invalidationObserver)
     }
 }

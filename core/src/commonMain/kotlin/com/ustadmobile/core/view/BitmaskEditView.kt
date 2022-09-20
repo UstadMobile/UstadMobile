@@ -2,12 +2,12 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.LongWrapper
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 
 
 interface BitmaskEditView: UstadEditView<LongWrapper> {
 
-    var bitmaskList: DoorLiveData<List<BitmaskFlag>>?
+    var bitmaskList: LiveData<List<BitmaskFlag>>?
 
     companion object {
 

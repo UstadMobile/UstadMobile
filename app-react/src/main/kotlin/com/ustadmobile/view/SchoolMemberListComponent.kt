@@ -3,14 +3,14 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.SchoolMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.*
-import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.util.UmProps
 import com.ustadmobile.view.ext.renderListItemWithPersonAttendanceAndPendingRequests
 import com.ustadmobile.view.ext.renderListSectionTitle
 import org.w3c.dom.events.Event
@@ -56,7 +56,7 @@ class SchoolMemberListComponent(mProps: UmProps): UstadListComponent<SchoolMembe
         }
     }
 
-    override var pendingStudentList: DoorDataSourceFactory<Int, SchoolMemberWithPerson>? = null
+    override var pendingStudentList: DataSourceFactory<Int, SchoolMemberWithPerson>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)

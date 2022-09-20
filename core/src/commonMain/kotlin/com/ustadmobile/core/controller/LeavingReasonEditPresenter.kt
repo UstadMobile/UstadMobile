@@ -8,7 +8,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.LeavingReasonEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.LeavingReason
@@ -19,7 +19,7 @@ import org.kodein.di.DI
 
 class LeavingReasonEditPresenter(context: Any,
         arguments: Map<String, String>, view: LeavingReasonEditView,
-        lifecycleOwner: DoorLifecycleOwner,
+        lifecycleOwner: LifecycleOwner,
         di: DI)
     : UstadEditPresenter<LeavingReasonEditView, LeavingReason>(context, arguments, view, di, lifecycleOwner) {
 
@@ -48,9 +48,7 @@ class LeavingReasonEditPresenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, LeavingReason.serializer(),
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, LeavingReason.serializer(), entity)
     }
 
     override fun handleClickSave(entity: LeavingReason) {

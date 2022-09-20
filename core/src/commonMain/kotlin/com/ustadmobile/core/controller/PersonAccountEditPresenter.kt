@@ -11,7 +11,7 @@ import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.launch
@@ -24,7 +24,7 @@ import org.kodein.di.on
 
 class PersonAccountEditPresenter(context: Any,
                                  arguments: Map<String, String>, view: PersonAccountEditView, di: DI,
-                                 lifecycleOwner: DoorLifecycleOwner)
+                                 lifecycleOwner: LifecycleOwner)
     : UstadEditPresenter<PersonAccountEditView, PersonWithAccount>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
@@ -80,7 +80,7 @@ class PersonAccountEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, PersonWithAccount.serializer(), entityVal)
     }
 
     override fun handleClickSave(entity: PersonWithAccount) {

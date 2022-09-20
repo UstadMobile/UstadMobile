@@ -1,14 +1,14 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ContentCategory
 import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
-@Dao
-abstract class ContentCategoryDao : BaseDao<ContentCategory> {
+@DoorDao
+expect abstract class ContentCategoryDao : BaseDao<ContentCategory> {
 
     @Query("""
      REPLACE INTO ContentCategoryReplicate(ccPk, ccDestination)

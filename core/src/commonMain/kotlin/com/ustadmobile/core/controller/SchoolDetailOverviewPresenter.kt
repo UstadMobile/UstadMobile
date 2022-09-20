@@ -5,7 +5,7 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import io.github.aakira.napier.Napier
@@ -16,7 +16,7 @@ import org.kodein.di.DI
 
 
 class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>,
-                view: SchoolDetailOverviewView, di: DI, lifecycleOwner: DoorLifecycleOwner)
+                view: SchoolDetailOverviewView, di: DI, lifecycleOwner: LifecycleOwner)
     : UstadDetailPresenter<SchoolDetailOverviewView, SchoolWithHolidayCalendar>(context, arguments,
         view, di, lifecycleOwner) {
 

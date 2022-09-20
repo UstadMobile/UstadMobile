@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
@@ -9,8 +9,8 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
-@Dao
-abstract class ClazzContentJoinDao: BaseDao<ClazzContentJoin> {
+@DoorDao
+expect abstract class ClazzContentJoinDao: BaseDao<ClazzContentJoin> {
 
 
     @Query("""

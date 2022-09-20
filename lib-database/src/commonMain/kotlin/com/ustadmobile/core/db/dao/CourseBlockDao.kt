@@ -1,14 +1,25 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.*
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.annotation.*
+
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
+import com.ustadmobile.core.db.dao.CourseBlockDaoCommon.SUBMITTER_LIST_IN_CLAZZ_CTE
+import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.door.annotation.ReplicationCheckPendingNotificationsFor
+import com.ustadmobile.door.annotation.ReplicationRunOnNewNode
+import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.NewNodeIdParam
+import com.ustadmobile.door.annotation.ReplicationRunOnChange
+import com.ustadmobile.door.annotation.QueryLiveTables
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
 @Repository
-@Dao
-abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlock> {
+@DoorDao
+expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlock> {
 
     @Query("""
     REPLACE INTO CourseBlockReplicate(cbPk, cbDestination)
@@ -275,7 +286,7 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
                                                   personUid: Long,
                                                   collapseList: List<Long>,
                                                   currentTime: Long):
-            DoorDataSourceFactory<Int, CourseBlockWithCompleteEntity>
+            DataSourceFactory<Int, CourseBlockWithCompleteEntity>
 
 
     @Query("""
@@ -285,51 +296,5 @@ abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<CourseBlo
          WHERE cbUid = :cbUid""")
     abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
-    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-        uidList.forEach {
-            updateActiveByUid(it, false, changeTime)
-        }
-    }
-
-    companion object {
-
-        const val SUBMITTER_LIST_IN_CLAZZ_CTE = """
-            SubmitterList (submitterId, assignmentUid)
-            AS (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid AS submitterId,
-                       ClazzAssignment.caUid AS assignmentUid
-                  
-                  FROM ClazzEnrolment
-                  
-                       JOIN Person 
-                       ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                        
-                       JOIN ClazzAssignment
-                       ON ClazzAssignment.caClazzUid = :clazzUid
-
-                       JOIN CourseBlock
-                       ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
-                       AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-                       
-                 WHERE ClazzAssignment.caGroupUid = 0
-                   AND clazzEnrolmentClazzUid = :clazzUid
-                   AND clazzEnrolmentActive
-                   AND clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                   AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft
-                   AND ClazzEnrolment.clazzEnrolmentDateJoined <= CourseBlock.cbGracePeriodDate
-              GROUP BY submitterId, assignmentUid
-            UNION                 
-             SELECT DISTINCT CourseGroupMember.cgmGroupNumber AS submitterId,
-                    ClazzAssignment.caUid AS assignmentUid
-               FROM CourseGroupMember
-                    JOIN ClazzAssignment
-                    ON ClazzAssignment.caClazzUid = :clazzUid
-              WHERE CourseGroupMember.cgmSetUid = ClazzAssignment.caGroupUid
-                AND ClazzAssignment.caGroupUid != 0
-                AND CourseGroupMember.cgmGroupNumber != 0
-           GROUP BY submitterId, assignmentUid
-            )
-        """
-
-    }
 
 }

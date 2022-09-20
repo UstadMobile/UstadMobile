@@ -7,15 +7,15 @@ import org.junit.Test
 import com.ustadmobile.core.view.SiteDetailView
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.SiteTermsDao
+import com.ustadmobile.core.db.dao.SiteTermsDao
 import com.ustadmobile.core.db.dao.SiteDao
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.util.*
-import com.ustadmobile.door.DoorLifecycleObserver
 
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.door.lifecycle.DoorState
 import org.kodein.di.DI
 
 /**
@@ -33,7 +33,7 @@ class SiteDetailPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoSiteDaoSpy: SiteDao
 
@@ -44,9 +44,7 @@ class SiteDetailPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         di = DI {

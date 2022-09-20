@@ -3,6 +3,8 @@ package com.ustadmobile.lib.util.ext
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.DoorSqlDatabase
 import com.ustadmobile.door.ext.*
+import com.ustadmobile.door.jdbc.ext.useResults
+import com.ustadmobile.door.jdbc.ext.mapRows
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.util.escapeHTML
 import java.io.File
@@ -12,41 +14,41 @@ import java.util.*
 actual fun DoorSqlDatabase.fixTincan() {
 
     val listToFix = mutableListOf<ContainerFilesWithContentEntry>()
-    useConnection {
-        it.prepareStatement("""
-             SELECT containerUid, cefUid AS containerEntryFileUid, 
-                    cefPath AS containerEntryFilePath, 
-			 	    title AS contentEntryTitle, description AS contentEntryDesc, 
-                    entryId AS contentEntryId
-			   FROM ContainerEntryFile
-			 	    JOIN ContainerEntry
-			 	    ON ContainerEntry.cecefUid = ContainerEntryFile.cefUid
-			 	            
-			 	    JOIN Container
-			 	    ON Container.containerUid = ContainerEntry.ceContainerUid
-			 	            
-			 	    JOIN ContentEntry
-			 	    ON ContentEntry.contentEntryUid = Container.containerContentEntryUid
-			 	    AND cePath = 'tincan.xml'
-			 	            
-			  WHERE title SIMILAR TO '%(&|>|<)%' 
-				 OR description SIMILAR TO '%(&|>|<)%'  
-			     OR entryId SIMILAR TO '%(&|>|<)%'
-        """).use { stmt ->
-            stmt.executeQuery().useResults { result ->
-                result.mapRows { set ->
-                    listToFix.add(ContainerFilesWithContentEntry().apply {
-                        this.containerEntryFilePath = set.getString("containerEntryFilePath")
-                        this.containerEntryFileUid = set.getLong("containerEntryFileUid")
-                        this.containerUid = set.getLong("containerUid")
-                        this.contentEntryTitle = set.getString("contentEntryTitle")
-                        this.contentEntryDesc = set.getString("contentEntryDesc")
-                        this.contentEntryId = set.getString("contentEntryId")
-                    })
-                }
+
+    connection.prepareStatement("""
+         SELECT containerUid, cefUid AS containerEntryFileUid, 
+                cefPath AS containerEntryFilePath, 
+                title AS contentEntryTitle, description AS contentEntryDesc, 
+                entryId AS contentEntryId
+           FROM ContainerEntryFile
+                JOIN ContainerEntry
+                ON ContainerEntry.cecefUid = ContainerEntryFile.cefUid
+                        
+                JOIN Container
+                ON Container.containerUid = ContainerEntry.ceContainerUid
+                        
+                JOIN ContentEntry
+                ON ContentEntry.contentEntryUid = Container.containerContentEntryUid
+                AND cePath = 'tincan.xml'
+                        
+          WHERE title SIMILAR TO '%(&|>|<)%' 
+             OR description SIMILAR TO '%(&|>|<)%'  
+             OR entryId SIMILAR TO '%(&|>|<)%'
+    """).use { stmt ->
+        stmt.executeQuery().useResults { result ->
+            result.mapRows { set ->
+                listToFix.add(ContainerFilesWithContentEntry().apply {
+                    this.containerEntryFilePath = set.getString("containerEntryFilePath")
+                    this.containerEntryFileUid = set.getLong("containerEntryFileUid")
+                    this.containerUid = set.getLong("containerUid")
+                    this.contentEntryTitle = set.getString("contentEntryTitle")
+                    this.contentEntryDesc = set.getString("contentEntryDesc")
+                    this.contentEntryId = set.getString("contentEntryId")
+                })
             }
         }
     }
+
 
     listToFix.forEach {
 

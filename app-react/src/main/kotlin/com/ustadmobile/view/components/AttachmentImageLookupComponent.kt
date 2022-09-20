@@ -1,8 +1,8 @@
 package com.ustadmobile.view.components
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.util.UmProps
@@ -23,7 +23,7 @@ import react.setState
  */
 fun interface AttachmentImageLookupAdapter {
 
-    fun lookupAttachmentUri(db: UmAppDatabase, entityUid: Long): DoorLiveData<String?>
+    fun lookupAttachmentUri(db: UmAppDatabase, entityUid: Long): LiveData<String?>
 
 }
 
@@ -64,13 +64,13 @@ open class AttachmentImageLookupComponent(
 
     private var imageLookupJob: Job? = null
 
-    private var currentLiveData: DoorLiveData<String?>? = null
+    private var currentLiveData: LiveData<String?>? = null
 
     private lateinit var db: UmAppDatabase
 
-    private val uriObserver = DoorObserver<String?> { attachmentUri ->
+    private val uriObserver = Observer<String?> { attachmentUri ->
         if(attachmentUri == lastAttachmentUri)
-            return@DoorObserver
+            return@Observer
 
         imageLookupJob?.cancel()
         lastAttachmentUri = attachmentUri

@@ -1,13 +1,13 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 
 
 interface SiteDetailView: UstadDetailView<Site> {
 
-    var siteTermsList: DoorDataSourceFactory<Int, SiteTermsWithLanguage>?
+    var siteTermsList: DataSourceFactory<Int, SiteTermsWithLanguage>?
 
     companion object {
 

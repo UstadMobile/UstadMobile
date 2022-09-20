@@ -14,7 +14,7 @@ import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.ClazzLogEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzLog
 import kotlinx.coroutines.GlobalScope
@@ -25,7 +25,7 @@ import org.kodein.di.DI
 
 class ClazzLogEditPresenter(context: Any,
         arguments: Map<String, String>, view: ClazzLogEditView,
-        lifecycleOwner: DoorLifecycleOwner,
+        lifecycleOwner: LifecycleOwner,
         di: DI)
     : UstadEditPresenter<ClazzLogEditView, ClazzLog>(context, arguments, view, di, lifecycleOwner) {
 
@@ -71,8 +71,7 @@ class ClazzLogEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, ClazzLog.serializer(), entityVal)
     }
 
     override fun handleClickSave(entity: ClazzLog) {

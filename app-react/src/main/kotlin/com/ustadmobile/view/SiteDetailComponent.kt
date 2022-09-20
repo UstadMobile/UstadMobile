@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.SiteDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.SiteDetailView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
@@ -38,7 +38,7 @@ class SiteDetailComponent(props: UmProps): UstadDetailComponent<Site>(props), Si
         }
     }
 
-    override var siteTermsList: DoorDataSourceFactory<Int, SiteTermsWithLanguage>? = null
+    override var siteTermsList: DataSourceFactory<Int, SiteTermsWithLanguage>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)

@@ -17,6 +17,11 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import mui.material.FormControlVariant
+import mui.material.IconButtonEdge
+import mui.material.InputLabelVariant
+import mui.material.TypographyAlign
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.dom.html.InputType
 import react.setState
@@ -179,7 +184,7 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
                                         "${currentPasswordLabel.text}",
                                         id = currentPasswordLabel.id,
                                         error = currentPasswordLabel.error,
-                                        variant = FormControlVariant.outlined,
+                                        variant = InputLabelVariant.outlined,
                                         htmlFor = currentPasswordLabel.id)
                                     umOutlinedInput(
                                         id = currentPasswordLabel.id,
@@ -194,7 +199,8 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
                                                 currentPasswordError = null
                                             }
                                         }) {
-                                        attrs.endAdornment = umIconButton(if(showCurrentPassword) "visibility" else "visibility_off", edge = IconEdge.end, onClick = {
+                                        attrs.endAdornment = umIconButton(if(showCurrentPassword) "visibility" else "visibility_off",
+                                            edge = IconButtonEdge.end, onClick = {
                                             setState {
                                                 showCurrentPassword = !showCurrentPassword
                                             }
@@ -216,7 +222,7 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
                                 umInputLabel("${newPasswordLabel.text}",
                                     id = newPasswordLabel.id,
                                     error = newPasswordLabel.error,
-                                    variant = FormControlVariant.outlined,
+                                    variant = InputLabelVariant.outlined,
                                     htmlFor = newPasswordLabel.id)
                                 umOutlinedInput(
                                     id = newPasswordLabel.id,
@@ -231,7 +237,9 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
                                             newPasswordError = null
                                         }
                                     }) {
-                                    attrs.endAdornment = umIconButton(if(showNewPassword) "visibility" else "visibility_off", edge = IconEdge.end, onClick = {
+                                    attrs.endAdornment = umIconButton(if(showNewPassword) "visibility" else "visibility_off",
+                                        edge = IconButtonEdge.end,
+                                        onClick = {
                                         setState {
                                             showNewPassword = !showNewPassword
                                         }
@@ -251,7 +259,7 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
                                 umInputLabel("${confirmPasswordLabel.text}",
                                     error = confirmPasswordLabel.error,
                                     id = confirmPasswordLabel.id,
-                                    variant = FormControlVariant.outlined,
+                                    variant = InputLabelVariant.outlined,
                                     htmlFor = confirmPasswordLabel.id)
                                 umOutlinedInput(
                                     id = confirmPasswordLabel.id,
@@ -269,7 +277,7 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
                                     }) {
                                     attrs.endAdornment = umIconButton(
                                         if(showConfirmPassword) "visibility" else "visibility_off",
-                                        edge = IconEdge.end,
+                                        edge = IconButtonEdge.end,
                                         onClick = {
                                             setState {
                                                 showConfirmPassword = !showConfirmPassword

@@ -15,6 +15,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
@@ -72,7 +73,7 @@ class TestHarScraper {
                 NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
@@ -90,7 +91,7 @@ class TestHarScraper {
             }
         }
 
-        db = di.on(endpoint).direct.instance(tag = UmAppDatabase.TAG_DB)
+        db = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
 
         containerDao = db.containerDao
         containerEntryDao = db.containerEntryDao

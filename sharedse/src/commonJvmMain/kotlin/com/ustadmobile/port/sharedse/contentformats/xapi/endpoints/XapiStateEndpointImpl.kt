@@ -19,12 +19,13 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.util.*
+import com.ustadmobile.door.ext.DoorTag
 
 class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiStateEndpoint {
 
-    private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+    private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val repo: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+    private val repo: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     private val gson: Gson by di.instance()
 

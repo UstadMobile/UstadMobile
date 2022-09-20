@@ -6,7 +6,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.Role
@@ -16,7 +16,7 @@ import org.kodein.di.DI
 
 class ClazzAssignmentDetailPresenter(context: Any,
                                   arguments: Map<String, String>, view: ClazzAssignmentDetailView, di: DI,
-                                  lifecycleOwner: DoorLifecycleOwner)
+                                  lifecycleOwner: LifecycleOwner)
     : UstadDetailPresenter<ClazzAssignmentDetailView, ClazzAssignment>(context, arguments, view, di, lifecycleOwner) {
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {

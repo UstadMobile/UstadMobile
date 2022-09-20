@@ -5,6 +5,8 @@ import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 
 interface PersonListView: UstadListView<Person, PersonWithDisplayDetails> {
 
+    var inviteViaLinkVisibile: Boolean
+
     companion object {
         const val VIEW_NAME = "PersonListView"
 

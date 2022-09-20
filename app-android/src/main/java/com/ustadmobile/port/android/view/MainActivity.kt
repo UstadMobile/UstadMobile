@@ -33,8 +33,6 @@ import com.toughra.ustadmobile.databinding.ActivityMainBinding
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -42,6 +40,7 @@ import com.ustadmobile.core.impl.nav.NavControllerAdapter
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.port.android.view.binding.imageForeignKeyPlaceholder
@@ -55,6 +54,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.*
+import com.ustadmobile.core.db.UmAppDatabase
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
@@ -109,7 +109,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     //Observe the active account to show/hide the settings based on whether or not the user is admin
     private val mActiveUserObserver = Observer<UmAccount> {account ->
         GlobalScope.launch(Dispatchers.Main) {
-            val db: UmAppDatabase = di.on(Endpoint(account.endpointUrl)).direct.instance(tag = TAG_DB)
+            val db: UmAppDatabase = di.on(Endpoint(account.endpointUrl)).direct.instance(tag = DoorTag.TAG_DB)
             val isNewUserAdmin = db.personDao.personIsAdmin(account.personUid)
             if(isNewUserAdmin != mIsAdmin) {
                 mIsAdmin = isNewUserAdmin

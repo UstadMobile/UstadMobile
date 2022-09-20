@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.SyncNode
@@ -8,9 +8,9 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
-abstract class HolidayDao: BaseDao<Holiday>, OneToManyJoinDao<Holiday> {
+expect abstract class HolidayDao: BaseDao<Holiday>, OneToManyJoinDao<Holiday> {
 
     @Query("""
      REPLACE INTO HolidayReplicate(holidayPk, holidayDestination)
@@ -69,10 +69,6 @@ abstract class HolidayDao: BaseDao<Holiday>, OneToManyJoinDao<Holiday> {
                holLct = :changeTime
          WHERE holUid = :holidayUid""")
     abstract fun updateActiveByUid(holidayUid: Long, active: Boolean, changeTime: Long)
-
-    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-        uidList.forEach { updateActiveByUid(it, false, changeTime) }
-    }
 
     @Insert
     abstract suspend fun updateAsync(entity: Holiday)
