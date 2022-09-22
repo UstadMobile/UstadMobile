@@ -31,6 +31,7 @@ class LottiePlugin(
         get() = listOf("json")
 
     override suspend fun extractMetadata(
+
         uri: DoorUri, // could be file:/// or could be http://
         process: ContentJobProcessContext
     ): MetadataResult {
