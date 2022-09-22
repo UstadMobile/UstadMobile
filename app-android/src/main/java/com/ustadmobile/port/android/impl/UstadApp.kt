@@ -195,6 +195,10 @@ open class UstadApp : Application(), DIAware {
             FolderIndexerPlugin(applicationContext, context, di)
         }
 
+        bind<LottiePlugin>() with scoped(EndpointScope.Default).singleton{
+            LottiePlugin(applicationContext, context, di)
+        }
+
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
             ContentPluginManager(listOf(
                     di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
@@ -204,6 +208,7 @@ open class UstadApp : Application(), DIAware {
                     di.on(context).direct.instance<FolderIndexerPlugin>(),
                     di.on(context).direct.instance<ContainerDownloadPlugin>(),
                     di.on(context).direct.instance<DeleteContentEntryPlugin>(),
+                    di.on(context).direct.instance<LottiePlugin>(),
                     ContentEntryBranchDownloadPlugin(applicationContext, context, di)))
         }
 

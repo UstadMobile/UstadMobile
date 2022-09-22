@@ -1,10 +1,8 @@
-package com.ustadmobile.core.contentjob
+package com.ustadmobile.core.catalog.contenttype
 
+import com.google.gson.JsonElement
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.contentjob.ContentJobProcessContext
-import com.ustadmobile.core.contentjob.ContentJobProgressListener
-import com.ustadmobile.core.contentjob.ContentPlugin
-import com.ustadmobile.core.contentjob.ProcessResult
+import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
@@ -13,7 +11,9 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import com.ustadmobile.door.ext.toFile
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 class LottiePlugin(
     private var context: Any,
@@ -25,10 +25,10 @@ class LottiePlugin(
     override val pluginId: Int = PLUGIN_ID
 
     override val supportedMimeTypes: List<String>
-        get() = TODO("Not yet implemented")
+        get() = listOf("application/json")
 
     override val supportedFileExtensions: List<String>
-        get() = TODO("Not yet implemented")
+        get() = listOf("json")
 
     override suspend fun extractMetadata(
         uri: DoorUri, // could be file:/// or could be http://
@@ -40,10 +40,10 @@ class LottiePlugin(
         val jsonElement= json.parseToJsonElement(jsonString)
         val jsonObject = jsonElement.jsonObject
 
-        //now can use use jsonObject.get
+        val nm: JsonElement? = jsonObject.get("nm");
 
         return MetadataResult(ContentEntryWithLanguage().apply {
-            title = "TODO: The title from lottie file"
+            title = nm?.jsonPrimitive?.content
         }, PLUGIN_ID)
     }
 
@@ -56,7 +56,6 @@ class LottiePlugin(
     }
 
     companion object {
-
         const val PLUGIN_ID = 105
     }
 }

@@ -63,6 +63,7 @@ class LottiePluginTest {
 
     @Test
     fun givenValidLottieFile_whenExtractMetadataCalled_thenShouldGetTitle() {
+        print("%%%%%%%%%")
         val inputStream = this::class.java.getResourceAsStream(
             "/com/ustadmobile/core/contenttype/lottie.json")
         val tempFile = tmpFolder.newFile()
