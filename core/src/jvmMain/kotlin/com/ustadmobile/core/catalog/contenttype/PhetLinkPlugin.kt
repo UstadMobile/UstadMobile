@@ -74,6 +74,11 @@ class PhetLinkPlugin(
             headTags.select("meta[property=og:image]").first()?.attr("content");
 
         return MetadataResult(ContentEntryWithLanguage().apply {
+            leaf = true
+            sourceUrl =  uri.toString()
+            contentFlags = ContentEntry.FLAG_IMPORTED
+            contentTypeFlag = ContentEntry.PHET_LINK
+            licenseType = ContentEntry.LICENSE_TYPE_OTHER
             author = "PhET"
             publisher = "PhET"
 
@@ -93,7 +98,7 @@ class PhetLinkPlugin(
             val description: String? = headTags.select("meta[name=description]").first()?.attr("content")
             this.description = description
 
-        }, pluginId, img)
+        }, pluginId)
     }
 
     override suspend fun processJob(
@@ -119,7 +124,7 @@ class PhetLinkPlugin(
                         ?: Container().apply {
                             containerContentEntryUid = contentJobItem.cjiContentEntryUid
                             cntLastModified = System.currentTimeMillis()
-                            mimeType = supportedMimeTypes.first()
+                            mimeType = "application/tincan+zip"
                             containerUid = repo.containerDao.insertAsync(this)
                         }
 
@@ -145,7 +150,7 @@ class PhetLinkPlugin(
                         </tincan>
                         """.trimIndent()
 
-                    val tmpTinCanFile = File.createTempFile("h5p-tincan", "xml")
+                    val tmpTinCanFile = File.createTempFile("phet-tincan", "xml")
                     tmpTinCanFile.writeText(tinCan)
                     repo.addFileToContainer(container.containerUid, tmpTinCanFile.toDoorUri(),
                         "tincan.xml", context, di,
