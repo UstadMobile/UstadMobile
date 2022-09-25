@@ -153,6 +153,10 @@ class TestContentJobRunner {
                 mock{
                     on { getPluginById(any()) }.thenReturn(instance<DummyPlugin>())
 
+                    on { requirePluginById(any()) }.thenAnswer {
+                        DummyPlugin(di, context)
+                    }
+
                     onBlocking { extractMetadata(any(), any()) }.thenAnswer {
                         runBlocking { instance<DummyPlugin>().extractMetadata(
                             it.getArgument(0) as DoorUri, mock {})
@@ -260,6 +264,7 @@ class TestContentJobRunner {
         }
         pluginManager.stub {
             on { getPluginById(any()) }.thenReturn(mockPlugin)
+            on { requirePluginById(any()) }.thenReturn(mockPlugin)
         }
 
 
@@ -287,6 +292,7 @@ class TestContentJobRunner {
 
             pluginManager.stub {
                 on { getPluginById(any()) }.thenReturn(mockPlugin)
+                on { requirePluginById(any()) }.thenReturn(mockPlugin)
             }
 
             val runner = ContentJobRunner(2, endpoint, di, maxItemAttempts = maxAttempts)
@@ -367,7 +373,9 @@ class TestContentJobRunner {
         }
     }
 
-    @Test
+
+    //Test temporarily disabled 12/Sept/22- this is flaky, and will be replaced by the attachment system.
+    //@Test
     fun givenJobCreated_whenJobConnectivityChangesToUnAcceptable_thenJobCancelledAndQueued(){
         dummyPluginDelayTime = 10000
         runBlocking {
