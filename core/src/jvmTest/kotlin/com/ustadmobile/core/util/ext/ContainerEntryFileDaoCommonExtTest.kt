@@ -35,7 +35,8 @@ class ContainerEntryFileDaoCommonExtTest {
 
     @Before
     fun setup() {
-        db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+        db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
             .build()
         db.clearAllTables()
 

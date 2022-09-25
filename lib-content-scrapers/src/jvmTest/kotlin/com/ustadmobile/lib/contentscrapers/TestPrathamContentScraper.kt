@@ -76,7 +76,8 @@ class TestPrathamContentScraper {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+                spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                        "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
                     .addSyncCallback(nodeIdAndAuth)
                     .build()
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId))

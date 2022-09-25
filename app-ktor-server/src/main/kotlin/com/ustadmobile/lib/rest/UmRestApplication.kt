@@ -217,14 +217,15 @@ fun Application.umRestApplication(
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
             Napier.d("creating database for context: ${context.url}")
             val dbHostName = context.identifier(dbMode, singletonDbName)
-            val dbProperties = appConfig.databasePropertiesFromSection("ktor.database",
-                defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
-            InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             val attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
                 UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
-            val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbHostName,
-                    attachmentsDir)
+            val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                    dbUrl = appConfig.property("ktor.database.url").getString()
+                        .replace("(hostname)", dbHostName),
+                    dbUsername = appConfig.propertyOrNull("ktor.database.user")?.getString(),
+                    dbPassword = appConfig.propertyOrNull("ktor.database.password")?.getString(),
+                    attachmentDir = attachmentsDir)
                 .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())
                     .addMigrations(*migrationList().toTypedArray())

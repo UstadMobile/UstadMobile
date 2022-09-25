@@ -44,7 +44,7 @@ class UmAppDatabaseExtTest {
     @Before
     fun setup() {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
-        db = DatabaseBuilder.databaseBuilder(context, UmAppDatabase::class, "UmAppDatabase")
+        db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
             .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)

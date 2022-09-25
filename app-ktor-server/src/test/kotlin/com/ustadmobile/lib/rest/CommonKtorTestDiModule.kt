@@ -32,7 +32,7 @@ fun commonTestKtorDiModule(
 
     bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
         val nodeIdAndAuth : NodeIdAndAuth = instance()
-        DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+        DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
             .build().also { db ->
                 db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
                 runBlocking {

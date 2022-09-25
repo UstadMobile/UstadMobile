@@ -97,7 +97,8 @@ class ContainerFetcherOkHttpTest {
         }
 
         val serverNodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
-        serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+        serverDb = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
             .addSyncCallback(serverNodeIdAndAuth)
             .build()
             .clearAllTablesAndResetNodeId(serverNodeIdAndAuth.nodeId)

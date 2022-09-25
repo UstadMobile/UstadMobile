@@ -55,6 +55,7 @@ fun main() {
             ?: url.substringBefore(if(url.indexOf("umapp/") != -1) "umapp/" else "#/")
 
         val dbName = sanitizeDbNameFromUrl(window.location.origin)
+        val dbUrl = "sqlite:$dbName"
         val nodeId = localStorage.getOrPut("${dbName}_nodeId") {
             Random.nextLong(0, Long.MAX_VALUE).toString()
         }.toLong()
@@ -66,7 +67,7 @@ fun main() {
 
         val builderOptions = DatabaseBuilderOptions(
             UmAppDatabase::class,
-            UmAppDatabaseJsImplementations, dbName,"./worker.sql-wasm.js")
+            UmAppDatabaseJsImplementations, dbUrl = dbUrl, webWorkerPath = "./worker.sql-wasm.js")
 
         val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
             .addCallback(ContentJobItemTriggersCallback())

@@ -100,7 +100,8 @@ fun Application.testServerManager() {
             val nodeIdAndAuth = NodeIdAndAuth(nextLong(), randomUuid().toString())
             initialContext.bindNewSqliteDataSourceIfNotExisting(dbName)
 
-            val umDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+            val umDb = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                    "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
                 .addSyncCallback(nodeIdAndAuth)
                 .build()
                 .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)

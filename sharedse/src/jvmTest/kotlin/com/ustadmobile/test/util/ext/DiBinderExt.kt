@@ -30,7 +30,7 @@ fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMod
         val dbName = sanitizeDbNameFromUrl(context.url)
         val nodeIdAndAuth: NodeIdAndAuth = instance()
         InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-        spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+        spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/$dbName.sqlite")
             .addSyncCallback(nodeIdAndAuth)
             .build()
             .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)

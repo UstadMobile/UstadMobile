@@ -139,7 +139,8 @@ class UstadTestRule(
                 val attachmentsDir = File(tempFolder.siteDataSubDir(this@singleton.context),
                         UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName, attachmentsDir)
+                spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                        "jdbc:sqlite:build/tmp/$dbName.sqlite", attachmentDir = attachmentsDir)
                     .addMigrations(*migrationList().toTypedArray())
                     .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())

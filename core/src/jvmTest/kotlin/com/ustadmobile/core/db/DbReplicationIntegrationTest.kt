@@ -48,7 +48,6 @@ import org.kodein.di.ktor.di
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
-import javax.naming.InitialContext
 
 
 class DbReplicationIntegrationTest {
@@ -93,7 +92,7 @@ class DbReplicationIntegrationTest {
     //We can't use the normal UstadTestRule because we need multiple client databases for the same
     // endpoint.
     private fun DI.MainBuilder.bindDbAndRelated(
-        dbName: String,
+        dbUrl: String,
         //"Client" mode means use the replication subscription
         clientMode: Boolean
     ) {
@@ -117,12 +116,11 @@ class DbReplicationIntegrationTest {
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(remoteVirtualHostScope).singleton {
             if(dbCreated.get())
-                throw IllegalStateException("Attempted to create db again for $dbName !")
+                throw IllegalStateException("Attempted to create db again for $dbUrl !")
 
             dbCreated.set(true)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-            DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+            DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl)
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
                 .build().also { db ->
@@ -217,7 +215,7 @@ class DbReplicationIntegrationTest {
         remoteVirtualHostScope = EndpointScope()
 
         remoteDi = DI {
-            bindDbAndRelated("UmAppDatabase_${dbTime}", false)
+            bindDbAndRelated("jdbc:sqlite:build/tmp/UmAppDatabase_${dbTime}.sqlite", false)
 
             registerContextTranslator { _: String -> Endpoint("localhost") }
             registerContextTranslator { _: ApplicationCall -> Endpoint("localhost") }
@@ -233,13 +231,13 @@ class DbReplicationIntegrationTest {
 
 
         localDi1 = DI {
-            bindDbAndRelated("local1_${dbTime}", true)
+            bindDbAndRelated("jdbc:sqlite:build/tmp/local1_${dbTime}.sqlite", true)
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
 
         localDi2 = DI {
-            bindDbAndRelated("local2_${dbTime}", true)
+            bindDbAndRelated("jdbc:sqlite:build/tmp/local2_${dbTime}.sqlite", true)
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
