@@ -361,7 +361,7 @@ class ClazzAssignmentDetailOverviewPresenter(
                     return@launch
                 }
             }
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            repo.withDoorTransactionAsync { txDb ->
                 txDb.courseAssignmentSubmissionDao.insertListAsync(submissionList)
                 txDb.courseAssignmentSubmissionAttachmentDao.insertListAsync(submissionList.mapNotNull { it.attachment })
 

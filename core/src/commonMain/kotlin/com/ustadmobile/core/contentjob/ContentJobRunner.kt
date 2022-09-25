@@ -17,6 +17,7 @@ import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.*
+import com.ustadmobile.door.util.TransactionMode
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -308,7 +309,7 @@ class ContentJobRunner(
      */
     override suspend fun <R> withContentJobItemTransaction(block: suspend (UmAppDatabase) -> R): R {
         return contentJobItemUpdateMutex.withLock {
-            db.withDoorTransactionAsync(UmAppDatabase::class, block)
+            db.withDoorTransactionAsync(TransactionMode.READ_WRITE, block)
         }
     }
 
@@ -381,7 +382,7 @@ class ContentJobRunner(
 
         //Now remove any Zombies (e.g. where the same md5 was downloaded multiple times due when
         // downloads were running concurrently
-        db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+        db.withDoorTransactionAsync { txDb ->
             //TODO here: for all downloaded containers, set the containerentry to use the first
             // downloaded containerentryfile (in case multiple copies of the same md5 were downloaded)
 

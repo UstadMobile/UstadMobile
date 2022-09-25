@@ -93,7 +93,7 @@ class SiteEditPresenter(context: Any,
         GlobalScope.launch(doorMainDispatcher()) {
             repo.siteDao.updateAsync(entity)
 
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+            repo.withDoorTransactionAsync { txRepo ->
                 siteTermsOneToManyJoinEditHelper.commitToDatabase(txRepo.siteTermsDao,
                     { txRepo.siteTermsDao.deactivateByUids(it, systemTimeInMillis()) }
                 ) {

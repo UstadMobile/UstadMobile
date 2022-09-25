@@ -264,7 +264,7 @@ class PersonEditPresenter(
                 }
             } else {
                 //Create/Update person group
-                repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+                repo.withDoorTransactionAsync { txRepo ->
                     if(entity.personUid == 0L) {
                         val personWithGroup = txRepo.insertPersonAndGroup(entity)
                         entity.personGroupUid = personWithGroup.personGroupUid

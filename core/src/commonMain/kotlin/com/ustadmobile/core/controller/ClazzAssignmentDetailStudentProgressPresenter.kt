@@ -174,7 +174,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
         val assignment = view.entity ?: return false
         presenterScope.launch {
 
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            repo.withDoorTransactionAsync { txDb ->
                 val lastSubmission = txDb.courseAssignmentSubmissionDao.findLastSubmissionFromStudent(
                     selectedSubmitterUid, assignment.caUid) ?: return@withDoorTransactionAsync
 

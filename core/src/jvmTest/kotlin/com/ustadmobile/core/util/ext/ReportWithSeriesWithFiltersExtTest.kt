@@ -57,7 +57,7 @@ class ReportWithSeriesWithFiltersExtTest {
         repo = di.directActiveRepoInstance()
 
         runBlocking {
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+            repo.withDoorTransactionAsync { txRepo ->
                 val person = txRepo.insertPersonAndGroup(Person().apply{
                     personUid = loggedPersonUid
                     admin = true
@@ -69,7 +69,7 @@ class ReportWithSeriesWithFiltersExtTest {
                     ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
             }
 
-            repo.withDoorTransaction(UmAppDatabase::class) { txRepo ->
+            repo.withDoorTransaction { txRepo ->
                 txRepo.insertTestStatementsForReports()
             }
 

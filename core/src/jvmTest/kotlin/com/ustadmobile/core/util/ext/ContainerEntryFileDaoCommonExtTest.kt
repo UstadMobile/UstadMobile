@@ -71,7 +71,7 @@ class ContainerEntryFileDaoCommonExtTest {
         ))
 
         runBlocking {
-            db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            db.withDoorTransactionAsync { txDb ->
                 txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
             }
         }

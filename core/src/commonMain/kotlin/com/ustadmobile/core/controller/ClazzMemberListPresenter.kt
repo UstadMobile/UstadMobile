@@ -93,7 +93,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     fun handleClickPendingRequest(enrolmentDetails: PersonWithClazzEnrolmentDetails, approved: Boolean) {
         presenterScope.launch {
             try {
-                repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+                repo.withDoorTransactionAsync { txRepo ->
                     if (approved) {
                         txRepo.approvePendingClazzEnrolment(enrolmentDetails, filterByClazzUid)
 

@@ -74,7 +74,7 @@ class ChatDetailPresenter(
             val isGroup = arguments[ARG_CHAT_IS_GROUP] != null
             val loggedInPersonUid = accountManager.activeAccount.personUid
 
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+            repo.withDoorTransactionAsync { txRepo ->
                 if (chatUid == 0L) {
                     chatUid = txRepo.chatDao.insertAsync(Chat("", isGroup))
                     txRepo.chatMemberDao.insertAsync(
@@ -110,7 +110,7 @@ class ChatDetailPresenter(
 
     override fun updateMessageRead(messageRead: MessageRead){
         presenterScope.launch {
-            repo.withDoorTransactionAsync(UmAppDatabase::class){ txRepo ->
+            repo.withDoorTransactionAsync{ txRepo ->
                 txRepo.messageReadDao.insertAsync(messageRead)
             }
         }
@@ -118,7 +118,7 @@ class ChatDetailPresenter(
 
     fun updateMessageReadList(messageReadList: List<MessageRead>){
         presenterScope.launch {
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+            repo.withDoorTransactionAsync { txRepo ->
                 txRepo.messageReadDao.insertList(messageReadList)
             }
 

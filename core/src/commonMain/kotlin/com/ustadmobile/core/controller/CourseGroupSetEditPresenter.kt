@@ -105,7 +105,7 @@ class CourseGroupSetEditPresenter(context: Any,
 
             val members = view.memberList
 
-            repo.withDoorTransactionAsync(UmAppDatabase::class){ txDb ->
+            repo.withDoorTransactionAsync{ txDb ->
                 if(entity.cgsUid == 0L) {
                     entity.cgsUid = txDb.courseGroupSetDao.insertAsync(entity)
                 }else {

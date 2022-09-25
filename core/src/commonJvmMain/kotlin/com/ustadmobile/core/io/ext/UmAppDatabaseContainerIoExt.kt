@@ -306,7 +306,7 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(
         }
 
 
-        db.withDoorTransactionAsync(UmAppDatabase::class) { txDb: UmAppDatabase ->
+        db.withDoorTransactionAsync { txDb: UmAppDatabase ->
             txDb.containerEntryFileDao.insertListAsync(containerEntryFilesToInsert)
             zipFilesToAdd.forEach {
                 txDb.containerEntryDao.insertWithMd5SumsAsync(containerUid, it.pathInContainer,

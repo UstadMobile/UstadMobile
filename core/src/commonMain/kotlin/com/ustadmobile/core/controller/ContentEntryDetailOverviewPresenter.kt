@@ -179,7 +179,7 @@ class ContentEntryDetailOverviewPresenter(
 
     fun handleOnClickConfirmDelete() {
         presenterScope.launch {
-            val job = db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            val job = db.withDoorTransactionAsync { txDb ->
                 val job = ContentJob().apply {
                     cjNotificationTitle = systemImpl.getString(MessageID.deleting_content, context)
                         .replace("%1\$s",entity?.title ?: "")

@@ -158,7 +158,7 @@ class ContainerFetcherOkHttpTest {
                     .instance(tag = DoorTag.TAG_DB)
                 val downloadedContainerFiles = downloadDestDir.getContentEntryJsonFilesFromDir(
                     clientDi.direct.instance())
-                clientDb.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                clientDb.withDoorTransactionAsync { txDb ->
                     txDb.containerEntryFileDao.insertListAsync(downloadedContainerFiles)
                     txDb.linkExistingContainerEntries(container.containerUid,
                         containerEntriesToDownload)
@@ -219,7 +219,7 @@ class ContainerFetcherOkHttpTest {
             val fileEntriesDownloaded = downloadDestDir.getContentEntryJsonFilesFromDir(
                 clientDi.direct.instance())
 
-            clientDb.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            clientDb.withDoorTransactionAsync { txDb ->
                 txDb.containerEntryFileDao.insertListAsync(fileEntriesDownloaded)
                 txDb.linkExistingContainerEntries(container.containerUid,
                     allContainerEntryFilesToDownload)

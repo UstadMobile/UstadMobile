@@ -533,7 +533,7 @@ data class ContainerEntryPartition(
  */
 suspend fun UmAppDatabase.partitionContainerEntriesWithMd5(
     containerEntryFiles: List<ContainerEntryWithMd5>
-): ContainerEntryPartition = withDoorTransactionAsync(UmAppDatabase::class) {
+): ContainerEntryPartition = withDoorTransactionAsync {
     val existingFiles = containerEntryFileDao.findEntriesByMd5SumsSafeAsync(containerEntryFiles
         .mapNotNull { it.cefMd5 }, maxQueryParamListSize)
     val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
@@ -646,7 +646,7 @@ suspend fun UmAppDatabase.validateAndUpdateContainerSize(
 ) : Long{
     var containerSize: Long = 0
     for(i in 0 until attempts) {
-        containerSize = withDoorTransactionAsync(UmAppDatabase::class) {
+        containerSize = withDoorTransactionAsync {
             val currentSize = containerDao.getContainerSizeByUid(containerUid)
             if(currentSize != 0L)
                 return@withDoorTransactionAsync currentSize

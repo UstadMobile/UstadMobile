@@ -162,7 +162,7 @@ class ContainerDownloadPlugin(
                 val containerEntryFileEntities = containerDownloadDir
                     .getContentEntryJsonFilesFromDir(json)
 
-                db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                db.withDoorTransactionAsync { txDb ->
                     txDb.containerEntryFileDao.insertListAsync(containerEntryFileEntities)
 
                     //now everything is downloaded, link it

@@ -401,7 +401,7 @@ class ContentEntryEdit2Presenter(
                 val isNewEntry = entity.contentEntryUid == 0L
 
 
-                repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                repo.withDoorTransactionAsync { txDb ->
 
                     if (entity.contentEntryUid == 0L) {
                         entity.contentOwner = accountManager.activeAccount.personUid

@@ -91,7 +91,7 @@ class HolidayCalendarEditPresenter(context: Any,
                 repo.holidayCalendarDao.updateAsync(entity)
             }
 
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+            repo.withDoorTransactionAsync { txRepo ->
                 holidayOneToManyJoinEditHelper.commitToDatabase(txRepo.holidayDao,
                     { repo.holidayDao.deactivateByUids(it, systemTimeInMillis()) }
                 ) {

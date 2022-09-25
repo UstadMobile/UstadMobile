@@ -73,7 +73,7 @@ class DiscussionPostDetailPresenter(
             val updateListNeeded = postUid == 0L
             val loggedInPersonUid = accountManager.activeAccount.personUid
 
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+            repo.withDoorTransactionAsync { txRepo ->
 
                 txRepo.messageDao.insertAsync(
                     Message(
@@ -99,7 +99,7 @@ class DiscussionPostDetailPresenter(
 
     override fun updateMessageRead(messageRead: MessageRead){
         presenterScope.launch {
-            repo.withDoorTransactionAsync(UmAppDatabase::class){ txRepo ->
+            repo.withDoorTransactionAsync{ txRepo ->
                 txRepo.messageReadDao.insertAsync(messageRead)
             }
         }
@@ -107,7 +107,7 @@ class DiscussionPostDetailPresenter(
 
     fun updateMessageReadList(messageReadList: List<MessageRead>){
         presenterScope.launch {
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+            repo.withDoorTransactionAsync { txRepo ->
                 txRepo.messageReadDao.insertList(messageReadList)
             }
 
