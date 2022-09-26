@@ -80,7 +80,7 @@ val REQUIRED_EXTERNAL_COMMANDS = listOf("ffmpeg", "ffprobe")
  */
 val KTOR_SERVER_ROUTES = listOf("/UmAppDatabase", "/ConcatenatedContainerFiles2",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket")
+    "/ContainerUpload2", "/Site", "/import", "/contentupload", "/websocket", "/pdf")
 
 
 /**

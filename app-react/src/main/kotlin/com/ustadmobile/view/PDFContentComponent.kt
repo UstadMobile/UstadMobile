@@ -13,18 +13,16 @@ class PDFContentComponent(mProps: UmProps):UstadBaseComponent<UmProps, UmState>(
     PDFContentView {
 
     override var entry: ContentEntry? = null
-        get() = field
         set(value) {
             field = value
             ustadComponentTitle = value?.title
             mPresenter?.onResume()
         }
 
-    override var filePath: String? = null
+    override var pdfContainerUid: Long = 0L
         get() = field
         set(value) {
-            loading = value == null
-            setState{
+            setState {
                 field = value
             }
         }
@@ -43,9 +41,10 @@ class PDFContentComponent(mProps: UmProps):UstadBaseComponent<UmProps, UmState>(
     }
 
     override fun RBuilder.render() {
-        if(filePath?.isNotEmpty() == true) {
-            renderPDFIframe(listOf(filePath ?: ""), epubType = false)
+        if(pdfContainerUid != 0L){
+            renderPDFIframe(listOf("/pdf/" +pdfContainerUid), epubType = false)
         }
+
     }
 
     override fun onDestroyView() {

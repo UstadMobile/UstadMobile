@@ -6,6 +6,8 @@ import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.hexStringToByteArray
+import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.util.RANGE_CONTENT_ACCEPT_RANGE_HEADER
 import com.ustadmobile.lib.util.RANGE_CONTENT_RANGE_HEADER
 import io.ktor.application.ApplicationCall
@@ -13,9 +15,7 @@ import io.ktor.application.call
 import io.ktor.http.*
 import io.ktor.http.content.OutgoingContent
 import io.ktor.request.*
-import io.ktor.response.header
-import io.ktor.response.respond
-import io.ktor.response.respondFile
+import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.toMap
@@ -107,6 +107,24 @@ fun Route.ContainerDownload() {
             call.respondFile(File(filePath))
         }else {
             call.respond(HttpStatusCode.NotFound, "No such file: $entryFileUid")
+        }
+    }
+
+    get("pdf/{containerUid}"){
+        val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
+        val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
+        val entries = db.containerEntryDao.findByContainer(containerUid)
+        val containerEntryFile: ContainerEntryFile? = entries[0].containerEntryFile;
+        if(containerEntryFile?.cefPath != null){
+            call.response.header("X-Content-Length-Uncompressed", containerEntryFile?.ceTotalSize.toString())
+
+            //TODO: Find a solution to mimetype return
+            //call.response.header("Content-Type", "application/pdf") // NOT ALLOWED
+
+
+            call.respondFile(File(containerEntryFile.cefPath))
+        }else {
+            call.respond(HttpStatusCode.NotFound, "No such file for containerUid: $containerUid")
         }
     }
 
