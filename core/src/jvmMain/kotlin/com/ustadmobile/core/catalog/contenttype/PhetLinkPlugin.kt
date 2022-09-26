@@ -6,8 +6,10 @@ import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.core.io.ext.downloadUrlIfRemote
 import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
 import com.ustadmobile.core.view.PhetLinkContentView
 import com.ustadmobile.door.DoorUri
@@ -21,14 +23,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
-import java.util.*
 
 class PhetLinkPlugin(
     private var context: Any,
@@ -115,8 +115,20 @@ class PhetLinkPlugin(
 
                 val doorUri = DoorUri.parse(uri)
                 val localUri = process.getLocalOrCachedUri()
+                val downloadedAboutFile: File = localUri.toFile()
+                val aboutFileContent = downloadedAboutFile.readText()
+                val htmlContent = Jsoup.parse(aboutFileContent)
+
+                //TODO : For Parima - get the real link with the exercise to download by processing the HTML
+                // using JSoup - then replace this section below
+                val realUrl = "https://phet.colorado.edu/sims/html/build-a-nucleus/latest/build-a-nucleus_en.html"
+                val realUri = DoorUri.parse(realUrl)
+                val downloadedFileUri = UMFileUtil.joinPaths(process.tempDirUri.toString(),
+                    "phet.html")
+                realUri.downloadUrlIfRemote(downloadedFileUri, di)
+
                 val contentNeedUpload = !doorUri.isRemote()
-                contentJobItem.updateTotalFromLocalUriIfNeeded(localUri, contentNeedUpload,
+                contentJobItem.updateTotalFromLocalUriIfNeeded(downloadedFileUri, contentNeedUpload,
                     progress, context, di)
 
                 if(!contentJobItem.cjiContainerProcessed) {
@@ -128,7 +140,7 @@ class PhetLinkPlugin(
                             containerUid = repo.containerDao.insertAsync(this)
                         }
 
-                    repo.addFileToContainer(container.containerUid, localUri,
+                    repo.addFileToContainer(container.containerUid, downloadedFileUri,
                         "index.html", context, di,
                         ContainerAddOptions(storageDirUri = DoorUri.parse(containerFolder),
                             updateContainer = false)
