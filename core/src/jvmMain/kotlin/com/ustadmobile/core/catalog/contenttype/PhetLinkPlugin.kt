@@ -17,12 +17,14 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.util.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -114,17 +116,12 @@ class PhetLinkPlugin(
                     ?: defaultContainerDir.toURI().toString()
 
                 val doorUri = DoorUri.parse(uri)
-                val localUri = process.getLocalOrCachedUri()
-                val downloadedAboutFile: File = localUri.toFile()
-                val aboutFileContent = downloadedAboutFile.readText()
-                val htmlContent = Jsoup.parse(aboutFileContent)
-
-                //TODO : For Parima - get the real link with the exercise to download by processing the HTML
-                // using JSoup - then replace this section below
-                val realUrl = "https://phet.colorado.edu/sims/html/build-a-nucleus/latest/build-a-nucleus_en.html"
-                val realUri = DoorUri.parse(realUrl)
-                val downloadedFileUri = UMFileUtil.joinPaths(process.tempDirUri.toString(),
-                    "phet.html")
+                val language = uri.substringAfter("https://phet.colorado.edu/").substringBefore("/")
+                val id = uri.substringAfterLast("/")
+                val realUrl = "https://phet.colorado.edu/sims/html/$id/latest/$id"+"_"+"$language.html"
+                val realUri = realUrl.let { DoorUri.parse(it) }
+                val downloadedFileUri = DoorUri.parse(UMFileUtil.joinPaths(process.tempDirUri.toString(),
+                    "phet.html"))
                 realUri.downloadUrlIfRemote(downloadedFileUri, di)
 
                 val contentNeedUpload = !doorUri.isRemote()
