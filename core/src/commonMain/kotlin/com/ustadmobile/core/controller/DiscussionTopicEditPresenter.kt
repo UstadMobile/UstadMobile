@@ -6,7 +6,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.DiscussionTopicEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.DiscussionTopic
@@ -18,7 +18,7 @@ import org.kodein.di.DI
 class DiscussionTopicEditPresenter(context: Any,
                                    arguments: Map<String, String>,
                                    view: DiscussionTopicEditView,
-                                   lifecycleOwner: DoorLifecycleOwner,
+                                   lifecycleOwner: LifecycleOwner,
                                    di: DI)
     : UstadEditPresenter<DiscussionTopicEditView, DiscussionTopic>(  context,
                                                                             arguments,
@@ -53,7 +53,8 @@ class DiscussionTopicEditPresenter(context: Any,
         super.onSaveInstanceState(savedState)
         val entityVal = entity
 
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, DiscussionTopic.serializer(),
+            entityVal)
     }
 
 

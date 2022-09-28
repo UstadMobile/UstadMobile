@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -16,7 +16,7 @@ class ContentEntryDetailPresenter(
     arguments: Map<String, String>,
     view: ContentEntryDetailView,
     di: DI,
-    lifecycleOwner: DoorLifecycleOwner
+    lifecycleOwner: LifecycleOwner
 ) : UstadDetailPresenter<ContentEntryDetailView, ContentEntry>(
     context, arguments, view, di, lifecycleOwner
 ) {

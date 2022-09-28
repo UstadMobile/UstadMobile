@@ -19,7 +19,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.toStatusString
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentJob
@@ -67,7 +67,7 @@ class ContentJobRunnerWorker(
                  db.contentJobItemDao.findRootJobItemByJobId(jobId)
         }
 
-        val jobObserver = DoorObserver<ContentJobItem?> {
+        val jobObserver = Observer<ContentJobItem?> {
             when(it?.cjiRecursiveStatus){
                 JobStatus.COMPLETE, JobStatus.FAILED, JobStatus.PARTIAL_FAILED -> {
                     notification.setProgress(100, 100, false)

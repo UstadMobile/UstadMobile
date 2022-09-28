@@ -10,7 +10,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.withUtf8Charset
 import com.ustadmobile.door.util.NullOutputStream
 import io.ktor.client.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.json.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.client.statement.HttpStatement
@@ -22,6 +22,7 @@ import java.io.PipedOutputStream
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.io.ext.readFully
 import com.ustadmobile.core.network.NetworkProgressListener
+import io.ktor.client.call.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -54,11 +55,12 @@ actual class ContainerUploader2 actual constructor(
         try {
             val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-            uploadSessionParams = httpClient.post<UploadSessionParams>(
-                    "${endpoint.url}ContainerUpload2/${request.uploadUuid}/init") {
-                body = defaultSerializer().write(request.entriesToUpload,
-                        ContentType.Application.Json.withUtf8Charset())
-            }
+            uploadSessionParams = httpClient.post(
+                    "${endpoint.url}ContainerUpload2/${request.uploadUuid}/init"
+            ) {
+                contentType(ContentType.Application.Json)
+                setBody(request.entriesToUpload)
+            }.body()
 
             if(uploadSessionParams.md5sRequired.isNotEmpty()) {
                 val concatResponse = db.containerEntryFileDao.generateConcatenatedFilesResponse2(
@@ -106,12 +108,14 @@ actual class ContainerUploader2 actual constructor(
                 bytesToUpload = 0
             }
 
-            val statement = httpClient.post<HttpStatement>("${endpoint.url}ContainerUpload2/${request.uploadUuid}/close"){
-                body = defaultSerializer().write(request.entriesToUpload,
-                        ContentType.Application.Json.withUtf8Charset())
-            }.execute()
-            if(statement.status.value != 204){
-                throw IllegalStateException(statement.status.description)
+            val closeResponse = httpClient.post(
+                "${endpoint.url}ContainerUpload2/${request.uploadUuid}/close"
+            ){
+                contentType(ContentType.Application.Json)
+                setBody(request.entriesToUpload)
+            }
+            if(closeResponse.status.value != 204){
+                throw IllegalStateException(closeResponse.status.description)
             }
 
             progressListener?.onProgress(bytesUploaded, bytesToUpload)

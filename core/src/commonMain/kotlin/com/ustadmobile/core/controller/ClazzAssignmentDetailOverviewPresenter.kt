@@ -14,7 +14,7 @@ import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.TextAssignmentEditView.Companion.EDIT_ENABLED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.doorMainDispatcher
@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.jvm.JvmStatic
@@ -36,7 +37,7 @@ class ClazzAssignmentDetailOverviewPresenter(
     context: Any,
     arguments: Map<String, String>,
     view: ClazzAssignmentDetailOverviewView,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     di: DI
 ) : UstadDetailPresenter<ClazzAssignmentDetailOverviewView, ClazzAssignmentWithCourseBlock>(
     context,
@@ -180,8 +181,9 @@ class ClazzAssignmentDetailOverviewPresenter(
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        savedState.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, ClazzAssignment.serializer(), entity)
-        savedState.putEntityAsJson(SAVED_STATE_ADD_SUBMISSION_LIST,
+        savedState.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, json,
+            ClazzAssignment.serializer(), entity)
+        savedState.putEntityAsJson(SAVED_STATE_ADD_SUBMISSION_LIST, json,
                 ListSerializer(CourseAssignmentSubmissionWithAttachment.serializer()),
                 submissionList)
     }
@@ -281,7 +283,7 @@ class ClazzAssignmentDetailOverviewPresenter(
     fun handleEditSubmission(courseSubmission: CourseAssignmentSubmissionWithAttachment){
         if(courseSubmission.casType == CourseAssignmentSubmission.SUBMISSION_TYPE_TEXT){
             val args = mutableMapOf<String, String>()
-            args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON,
+            args.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, json,
                 CourseAssignmentSubmissionWithAttachment.serializer(), courseSubmission)
             args[EDIT_ENABLED] = true.toString()
 
@@ -359,7 +361,7 @@ class ClazzAssignmentDetailOverviewPresenter(
                     return@launch
                 }
             }
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            repo.withDoorTransactionAsync { txDb ->
                 txDb.courseAssignmentSubmissionDao.insertListAsync(submissionList)
                 txDb.courseAssignmentSubmissionAttachmentDao.insertListAsync(submissionList.mapNotNull { it.attachment })
 

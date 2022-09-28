@@ -3,12 +3,12 @@ package com.ustadmobile.view
 import Breakpoint
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
-import com.ustadmobile.mui.components.*
 import kotlinx.css.LinearDimension
 import kotlinx.css.width
+import mui.material.ButtonColor
 import react.RBuilder
 import react.RComponent
 import react.setState
@@ -77,7 +77,7 @@ class UmBottomSheetOptionsComponent(mProps: UmBottomSheetProps): RComponent<UmBo
             umDialogActions {
                 umButton(
                     props.systemImpl.getString(MessageID.cancel, this),
-                    color = UMColor.secondary,
+                    color = ButtonColor.secondary,
                     onClick = {
                        handleDialogClosed()
                     }

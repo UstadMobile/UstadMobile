@@ -9,7 +9,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.core.view.SiteTermsEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
@@ -20,7 +20,7 @@ import org.kodein.di.DI
 
 class SiteTermsEditPresenter(context: Any,
                              arguments: Map<String, String>, view: SiteTermsEditView,
-                             lifecycleOwner: DoorLifecycleOwner,
+                             lifecycleOwner: LifecycleOwner,
                              di: DI)
     : UstadEditPresenter<SiteTermsEditView, SiteTermsWithLanguage>(context, arguments, view, di, lifecycleOwner) {
 
@@ -97,7 +97,7 @@ class SiteTermsEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, SiteTermsWithLanguage.serializer(),
                 entityVal)
     }
 

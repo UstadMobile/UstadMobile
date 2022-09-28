@@ -24,11 +24,11 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzDetailOverviewView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.CourseBlock
@@ -132,7 +132,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
         private val accountManager: UstadAccountManager by di.instance()
 
-        private val appDatabase: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+        private val appDatabase: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
         class ModuleCourseBlockViewHolder(val binding: ItemCourseBlockBinding): RecyclerView.ViewHolder(binding.root)
 
@@ -295,7 +295,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         super.onViewCreated(view, savedInstanceState)
 
         val accountManager: UstadAccountManager by instance()
-        repo = di.direct.on(accountManager.activeAccount).instance(tag = TAG_REPO)
+        repo = di.direct.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
         mPresenter = ClazzDetailOverviewPresenter(requireContext(), arguments.toStringMap(), this,
             di, viewLifecycleOwner).withViewLifecycle()
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())

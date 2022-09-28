@@ -6,6 +6,7 @@ import com.ustadmobile.sharedse.network.NetworkManagerBle
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
+import io.ktor.client.call.*
 import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -78,7 +79,7 @@ class TestEmbeddedHTTPD {
         val client = HttpClient()
 
         runBlocking {
-            client.get<String>(httpd.localHttpUrl + "dir/filename.txt")
+            client.get(httpd.localHttpUrl + "dir/filename.txt").body<String>()
 
             argumentCaptor<NanoHTTPD.IHTTPSession> {
                 verify(responseListener).responseStarted(capture(), any())

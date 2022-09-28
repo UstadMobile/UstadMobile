@@ -24,7 +24,7 @@ class EndSessionPersonAuth2IncomingReplicationListener(
         if(incomingReplicationEvent.tableId != PersonAuth2.TABLE_ID)
             return
 
-        db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+        db.withDoorTransactionAsync { txDb ->
             incomingReplicationEvent.incomingReplicationData.forEach {
                 val jsonObj = it.jsonObject
                 val authUid = jsonObj["pauthUid"]?.jsonPrimitive?.long ?: return@forEach

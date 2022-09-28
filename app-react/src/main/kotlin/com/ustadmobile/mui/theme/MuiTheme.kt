@@ -2,17 +2,11 @@ package com.ustadmobile.mui.theme
 
 import Breakpoints
 import csstype.ZIndex
-import kotlinext.js.jsObject
+import kotlinx.js.jso
 import react.Props
 
 external interface ShapeOptions {
     var borderRadius: Int
-}
-
-
-@Suppress("EnumEntryName")
-enum class UMColor {
-    default, inherit, primary, secondary, error,info, success, standard
 }
 
 
@@ -48,6 +42,6 @@ external interface Theme {
 
 @Suppress("UnsafeCastFromDynamic")
 fun createMuiTheme(themeOptions: ThemeOptions? = null, args: dynamic = null): Theme {
-    val ourThemeOptions = themeOptions ?: jsObject {  }
+    val ourThemeOptions = themeOptions ?: jso {  }
     return styledModule.createTheme(ourThemeOptions, args)
 }

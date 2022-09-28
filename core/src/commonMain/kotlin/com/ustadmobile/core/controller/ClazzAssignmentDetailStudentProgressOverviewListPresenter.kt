@@ -7,14 +7,14 @@ import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonGroupAssignmentSummary
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
 class ClazzAssignmentDetailStudentProgressOverviewListPresenter(context: Any, arguments: Map<String, String>,
                                                                 view: ClazzAssignmentDetailStudentProgressOverviewListView,
-                                                                di: DI, lifecycleOwner: DoorLifecycleOwner)
+                                                                di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<ClazzAssignmentDetailStudentProgressOverviewListView,
         PersonGroupAssignmentSummary>(context, arguments, view, di, lifecycleOwner), SubmissionSummaryListener,
         OnSortOptionSelected, OnSearchSubmitted{

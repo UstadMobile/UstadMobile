@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.ListItemIcon
 import mui.material.ListItemIconProps
 import react.RBuilder
@@ -10,7 +10,7 @@ fun RBuilder.umListItemIcon(
     iconName: String? = null,
     className: String? = null,
     handler: StyledHandler<ListItemIconProps>? = null
-) = createStyledComponent(ListItemIcon, className, handler) {
+) = convertFunctionalToClassElement(ListItemIcon, className, handler) {
     iconName?.let {
         umIcon(iconName)
     }

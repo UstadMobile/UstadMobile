@@ -1,7 +1,7 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
-import androidx.room.Dao
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -11,9 +11,9 @@ import com.ustadmobile.lib.db.entities.VerbDisplay
 import com.ustadmobile.lib.db.entities.VerbEntity
 import kotlin.js.JsName
 
-@Dao
+@DoorDao
 @Repository
-abstract class VerbDao : BaseDao<VerbEntity> {
+expect abstract class VerbDao : BaseDao<VerbEntity> {
 
     @Query("""
      REPLACE INTO VerbEntityReplicate(vePk, veDestination)
@@ -70,15 +70,6 @@ abstract class VerbDao : BaseDao<VerbEntity> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun replaceList(entityList: List<VerbEntity>)
 
-    suspend fun initPreloadedVerbs() {
-        val uidsInserted = findByUidList(VerbEntity.FIXED_UIDS.values.toList())
-        val uidsToInsert = VerbEntity.FIXED_UIDS.filter { it.value !in uidsInserted }
-        val verbListToInsert = uidsToInsert.map { verbEntry ->
-            VerbEntity(verbEntry.value, verbEntry.key)
-        }
-        replaceList(verbListToInsert)
-    }
-
    @Query("""SELECT VerbEntity.verbUid, VerbEntity.urlId, XLangMapEntry.valueLangMap AS display
         FROM VerbEntity LEFT JOIN XLangMapEntry on XLangMapEntry.verbLangMapUid = VerbEntity.verbUid WHERE 
          XLangMapEntry.verbLangMapUid NOT IN (:uidList)""")
@@ -87,12 +78,12 @@ abstract class VerbDao : BaseDao<VerbEntity> {
     @Query("""SELECT VerbEntity.verbUid, VerbEntity.urlId, XLangMapEntry.valueLangMap AS display 
          FROM VerbEntity LEFT JOIN XLangMapEntry on XLangMapEntry.verbLangMapUid = VerbEntity.verbUid WHERE 
          VerbEntity.verbUid NOT IN (:uidList) ORDER BY display ASC""")
-    abstract fun findAllVerbsAsc(uidList: List<Long>): DoorDataSourceFactory<Int, VerbDisplay>
+    abstract fun findAllVerbsAsc(uidList: List<Long>): DataSourceFactory<Int, VerbDisplay>
 
     @Query("""SELECT VerbEntity.verbUid, VerbEntity.urlId, XLangMapEntry.valueLangMap AS display 
          FROM VerbEntity LEFT JOIN XLangMapEntry on XLangMapEntry.verbLangMapUid = VerbEntity.verbUid WHERE 
         VerbEntity.verbUid NOT IN (:uidList) ORDER BY display DESC""")
-    abstract fun findAllVerbsDesc(uidList: List<Long>): DoorDataSourceFactory<Int, VerbDisplay>
+    abstract fun findAllVerbsDesc(uidList: List<Long>): DataSourceFactory<Int, VerbDisplay>
 
 
 }

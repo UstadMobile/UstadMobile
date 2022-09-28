@@ -31,8 +31,10 @@ import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.json.*
+import io.ktor.serialization.gson.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -92,7 +94,9 @@ class ContainerDownloadPluginTest {
         Napier.baseDebugIfNotEnabled()
         serverOkHttpClient = OkHttpClient()
         serverHttpClient = HttpClient(OkHttp) {
-            install(JsonFeature)
+            install(ContentNegotiation) {
+                gson()
+            }
             install(HttpTimeout)
             engine {
                 preconfigured = serverOkHttpClient
@@ -100,7 +104,7 @@ class ContainerDownloadPluginTest {
         }
 
         val serverNodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
-        serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+        serverDb = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/ContainerDownloadPluginTest.sqlite")
                 .addSyncCallback(serverNodeIdAndAuth)
                 .build()
                 .clearAllTablesAndResetNodeId(serverNodeIdAndAuth.nodeId)

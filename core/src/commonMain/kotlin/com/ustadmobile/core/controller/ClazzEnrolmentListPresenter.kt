@@ -5,7 +5,7 @@ import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
@@ -15,9 +15,13 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
-class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, view: ClazzEnrolmentListView,
-                                   di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<ClazzEnrolmentListView, ClazzEnrolment>(context, arguments, view, di, lifecycleOwner) {
+class ClazzEnrolmentListPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: ClazzEnrolmentListView,
+    di: DI,
+    lifecycleOwner: LifecycleOwner
+): UstadListPresenter<ClazzEnrolmentListView, ClazzEnrolment>(context, arguments, view, di, lifecycleOwner) {
 
     var selectedPerson = 0L
     var selectedClazz = 0L

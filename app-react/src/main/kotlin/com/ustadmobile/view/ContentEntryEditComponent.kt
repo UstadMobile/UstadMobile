@@ -10,7 +10,6 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryPicture
 import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -26,6 +25,11 @@ import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.components.AttachmentImageComponent
 import com.ustadmobile.view.ext.*
 import kotlinx.css.*
+import mui.material.ButtonColor
+import mui.material.ButtonVariant
+import mui.material.FormControlVariant
+import mui.material.Size
+import mui.material.styles.TypographyVariant
 import org.w3c.dom.events.MouseEvent
 import react.RBuilder
 import react.setState
@@ -352,8 +356,8 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                         alignItems = GridAlignItems.center
                     ){
                         umButton(getString(MessageID.update_content),
-                            size = ButtonSize.large,
-                            color = UMColor.secondary,
+                            size = Size.large,
+                            color = ButtonColor.secondary,
                             variant = ButtonVariant.contained,
                             onClick = {
                                 setState{

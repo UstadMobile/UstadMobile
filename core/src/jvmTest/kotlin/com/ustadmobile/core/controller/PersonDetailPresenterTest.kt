@@ -12,11 +12,13 @@ import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
+import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.LifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
@@ -44,9 +46,9 @@ class PersonDetailPresenterTest {
 
     private lateinit var impl: UstadMobileSystemImpl
 
-    private val  activeAccountLive = DoorMutableLiveData<UmAccount>()
+    private val  activeAccountLive = MutableLiveData<UmAccount>()
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var di: DI
 
@@ -59,9 +61,7 @@ class PersonDetailPresenterTest {
     @Before
     fun setup() {
         context = Any()
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
 
         mockView = mock{}
         impl = mock()

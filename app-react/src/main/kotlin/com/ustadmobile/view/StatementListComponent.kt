@@ -6,7 +6,10 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.StatementListView
 import com.ustadmobile.lib.db.entities.StatementWithSessionDetailDisplay
 import com.ustadmobile.lib.db.entities.VerbEntity
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.spacingUnits
+import com.ustadmobile.mui.components.umIcon
+import com.ustadmobile.mui.components.umTypography
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.*
@@ -17,6 +20,9 @@ import com.ustadmobile.view.ext.umItemThumbnail
 import kotlinx.css.FlexDirection
 import kotlinx.css.LinearDimension
 import kotlinx.css.padding
+import mui.material.AvatarVariant
+import mui.material.IconSize
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import styled.css
 import styled.styledSpan
@@ -42,7 +48,7 @@ class StatementListComponent(props: UmProps): UstadListComponent<StatementWithSe
 
             umItem(GridSize.cells3 , GridSize.cells1){
                 umItemThumbnail(VERB_ICON_MAP[item.statementVerbUid.toInt()] ?: "",
-                    width = 50, avatarVariant = AvatarVariant.circle)
+                    width = 50, avatarVariant = AvatarVariant.circular)
             }
 
             umItem(GridSize.cells9, GridSize.cells11){
@@ -80,7 +86,7 @@ class StatementListComponent(props: UmProps): UstadListComponent<StatementWithSe
                                     css{
                                         padding(right = 1.spacingUnits)
                                     }
-                                    umIcon("calendar_today", fontSize = IconFontSize.small)
+                                    umIcon("calendar_today", size = IconSize.small)
                                 }
 
                                 umTypography("${item.timestamp.toDate()?.standardFormat()} " +
@@ -96,7 +102,7 @@ class StatementListComponent(props: UmProps): UstadListComponent<StatementWithSe
                                         css{
                                             padding(right = 1.spacingUnits)
                                         }
-                                        umIcon("timer", fontSize = IconFontSize.small)
+                                        umIcon("timer", size = IconSize.small)
                                     }
 
                                     umTypography(item.resultDuration.formatToStringHoursMinutesSeconds(systemImpl),
@@ -114,7 +120,7 @@ class StatementListComponent(props: UmProps): UstadListComponent<StatementWithSe
                             css{
                                 padding(right = 1.spacingUnits)
                             }
-                            umIcon("check", fontSize = IconFontSize.small)
+                            umIcon("check", size = IconSize.small)
                         }
 
                         styledSpan {

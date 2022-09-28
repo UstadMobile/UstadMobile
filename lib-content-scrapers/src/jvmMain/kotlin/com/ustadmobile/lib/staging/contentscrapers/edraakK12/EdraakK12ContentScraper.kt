@@ -3,6 +3,7 @@ package com.ustadmobile.lib.staging.contentscrapers.edraakK12
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDaoCommon
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -108,7 +109,7 @@ class EdraakK12ContentScraper : Runnable {
             ContentScraperUtil.deleteFile(lastModified)
         }
 
-        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
+        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDaoCommon.STATUS_DONE else ScrapeQueueItemDaoCommon.STATUS_FAILED, 0)
         queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
         val duration = System.currentTimeMillis() - startTime
         UMLogUtil.logInfo("Ended scrape for url $scrapUrl in duration: $duration")

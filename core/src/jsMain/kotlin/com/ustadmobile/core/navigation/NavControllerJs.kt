@@ -8,10 +8,10 @@ import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toUrlQueryString
 import io.github.aakira.napier.Napier
-import kotlinext.js.jsObject
 import kotlinx.browser.sessionStorage
 import kotlinx.browser.window
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
 import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.History
 import org.w3c.dom.events.Event
@@ -78,7 +78,7 @@ class NavControllerJs(
         }
 
         set(value) {
-            val newStateObj = state ?: jsObject {  }
+            val newStateObj = state ?: buildJsonObject {  }
             newStateObj.asDynamic().stateIndex = value
             window.history.replaceState(newStateObj, "")
         }

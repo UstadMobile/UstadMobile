@@ -167,7 +167,7 @@ class UploadSession(
 
             val containerEntryFiles = containerUidFolder.getContentEntryJsonFilesFromDir(
                 di.direct.instance())
-            db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            db.withDoorTransactionAsync { txDb ->
                 txDb.containerEntryFileDao.insertListAsync(containerEntryFiles)
                 txDb.linkExistingContainerEntries(containerEntryPaths.first().ceContainerUid,
                     entriesRequired)

@@ -3,7 +3,7 @@ package com.ustadmobile.lib.staging.contentscrapers.gdl
 import com.ustadmobile.core.contentformats.opds.OpdsFeed
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
-import com.ustadmobile.core.db.dao.ScrapeQueueItemDao.Companion.STATUS_RUNNING
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDaoCommon.STATUS_RUNNING
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -43,7 +43,7 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
         try {
             feed = getFeed(queueUrl)
         } catch (e: Exception) {
-            queueDao.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
+            queueDao.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDaoCommon.STATUS_DONE else ScrapeQueueItemDaoCommon.STATUS_FAILED, 0)
             queueDao.setTimeFinished(scrapeQueueItemUid, System.currentTimeMillis())
         }
         when (contentType) {
@@ -75,7 +75,7 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             }
         }
 
-        queueDao.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
+        queueDao.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDaoCommon.STATUS_DONE else ScrapeQueueItemDaoCommon.STATUS_FAILED, 0)
         queueDao.setTimeFinished(scrapeQueueItemUid, System.currentTimeMillis())
     }
 
@@ -226,7 +226,7 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             ContentScraperUtil.checkIfPathsToDriversExist()
             try {
                 //This needs replaced with DI
-                lateinit var runDao: ScrapeRunDao
+                //lateinit var runDao: ScrapeRunDao
                 //val runDao = UmAppDatabase.getInstance(Any(), replaceMeWithDi()).scrapeRunDao
 
 

@@ -11,7 +11,7 @@ import com.ustadmobile.core.util.ext.formatDate
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ParentalConsentManagementView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 
 import kotlinx.coroutines.*
@@ -31,7 +31,7 @@ import io.github.aakira.napier.Napier
 
 class ParentalConsentManagementPresenter(context: Any,
                                          arguments: Map<String, String>, view: ParentalConsentManagementView,
-                                         lifecycleOwner: DoorLifecycleOwner,
+                                         lifecycleOwner: LifecycleOwner,
                                          di: DI)
     : UstadEditPresenter<ParentalConsentManagementView, PersonParentJoinWithMinorPerson>(context, arguments, view, di, lifecycleOwner) {
 
@@ -132,9 +132,8 @@ class ParentalConsentManagementPresenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json,
+            PersonParentJoinWithMinorPerson.serializer(), entity)
     }
 
     override fun handleClickSave(entity: PersonParentJoinWithMinorPerson) {

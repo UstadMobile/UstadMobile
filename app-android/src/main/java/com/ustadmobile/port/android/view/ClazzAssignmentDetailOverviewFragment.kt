@@ -21,7 +21,8 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -98,7 +99,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
             rootView = it.root
         }
 
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
 
         detailMergerRecyclerView =
                 rootView.findViewById(R.id.fragment_clazz_assignment_detail_overview)
@@ -217,7 +218,7 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
     }
 
 
-    override var submittedCourseAssignmentSubmission: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
+    override var submittedCourseAssignmentSubmission: DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
         set(value) {
             val dvRepoVal = dbRepo?: return
             submissionAttachmentLiveDataCourse?.removeObserver(courseSubmissionWithAttachmentObserver)

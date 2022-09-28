@@ -5,13 +5,13 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.CourseGroupSetListView
 import com.ustadmobile.lib.db.entities.CourseGroupSet
-import com.ustadmobile.mui.components.TypographyVariant
 import com.ustadmobile.mui.components.umList
 import com.ustadmobile.mui.components.umListItem
 import com.ustadmobile.util.StyleManager.horizontalList
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util.stopEventPropagation
 import com.ustadmobile.view.ext.renderListItemWithLeftIconTitleAndDescription
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css

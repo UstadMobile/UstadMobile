@@ -38,8 +38,6 @@ kotlin {
             dependencies {
                 implementation project(":core")
                 implementation project(':lib-database')
-                implementation project(":lib-database-mpp")
-                implementation project(":lib-database-entities")
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation project(":sharedse")
                 implementation project(":lib-util")

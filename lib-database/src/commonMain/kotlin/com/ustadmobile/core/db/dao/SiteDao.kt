@@ -5,9 +5,9 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
-abstract class SiteDao {
+expect abstract class SiteDao {
 
     @Query("SELECT * FROM Site LIMIT 1")
     abstract fun getSite(): Site?

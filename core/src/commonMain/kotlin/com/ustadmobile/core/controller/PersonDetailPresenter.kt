@@ -8,8 +8,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
@@ -19,14 +19,14 @@ import org.kodein.di.DI
 
 class PersonDetailPresenter(context: Any,
                           arguments: Map<String, String>, view: PersonDetailView,
-                            di : DI, lifecycleOwner: DoorLifecycleOwner)
+                            di : DI, lifecycleOwner: LifecycleOwner)
     : UstadDetailPresenter<PersonDetailView, PersonWithPersonParentJoin>(context, arguments, view,
         di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.LIVEDATA
 
-    override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<PersonWithPersonParentJoin?>? {
+    override fun onLoadLiveData(repo: UmAppDatabase): LiveData<PersonWithPersonParentJoin?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         view.clazzes = repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazz(entityUid)
         val activePersonUid = accountManager.activeSession?.person?.personUid ?: -1
@@ -92,7 +92,7 @@ class PersonDetailPresenter(context: Any,
     }
 
     fun handleClickManageParentalConsent() {
-        val ppjUid = entityLiveData?.getValue()?.parentJoin?.ppjUid ?: 0
+        val ppjUid = entityLiveData?.getValue()?.parentJoin?.ppjUid ?: 0L
 
         if(ppjUid != 0L) {
             systemImpl.go(ParentalConsentManagementView.VIEW_NAME,

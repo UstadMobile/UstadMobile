@@ -3,8 +3,9 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.RegisterAgeRedirectPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.RegisterAgeRedirectView
-import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.umButton
+import com.ustadmobile.mui.components.umDatePicker
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.centerContainer
@@ -17,6 +18,10 @@ import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.LinearDimension
 import kotlinx.css.height
+import mui.material.ButtonColor
+import mui.material.ButtonVariant
+import mui.material.FormControlVariant
+import mui.material.Size
 import react.RBuilder
 import react.setState
 import styled.css
@@ -74,8 +79,8 @@ class RegisterAgeRedirectComponent(props: UmProps): UstadBaseComponent<UmProps, 
 
                     umItem(GridSize.cells12) {
                         umButton(getString(MessageID.next),
-                            size = ButtonSize.large,
-                            color = UMColor.secondary,
+                            size = Size.large,
+                            color = ButtonColor.secondary,
                             variant = ButtonVariant.contained,
                             onClick = {
                                 mPresenter?.handleClickNext()

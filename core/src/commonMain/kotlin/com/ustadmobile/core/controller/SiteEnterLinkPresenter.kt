@@ -13,7 +13,7 @@ import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
