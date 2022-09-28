@@ -221,9 +221,13 @@ fun Application.umRestApplication(
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             val attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
                 UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
+            val dbUrl = appConfig.property("ktor.database.url").getString()
+                .replace("(hostname)", dbHostName)
+            if(dbUrl.startsWith("jdbc:postgresql"))
+                Class.forName("org.postgresql.Driver")
+
             val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-                    dbUrl = appConfig.property("ktor.database.url").getString()
-                        .replace("(hostname)", dbHostName),
+                    dbUrl = dbUrl,
                     dbUsername = appConfig.propertyOrNull("ktor.database.user")?.getString(),
                     dbPassword = appConfig.propertyOrNull("ktor.database.password")?.getString(),
                     attachmentDir = attachmentsDir)
