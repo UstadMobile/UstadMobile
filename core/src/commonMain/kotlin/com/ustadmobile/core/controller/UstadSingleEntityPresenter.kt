@@ -2,15 +2,18 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadSingleEntityView
 import com.ustadmobile.door.*
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
+import com.ustadmobile.door.lifecycle.Observer
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.*
 import kotlinx.serialization.DeserializationStrategy
@@ -23,7 +26,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
     arguments: Map<String, String>,
     view: V,
     di: DI,
-    val lifecycleOwner: DoorLifecycleOwner,
+    val lifecycleOwner: LifecycleOwner,
     activeSessionRequired: Boolean = true
 ): UstadBaseController<V>(
     context, arguments, view, di, activeSessionRequired
@@ -48,17 +51,17 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
 
     abstract val persistenceMode: PersistenceMode
 
-    var entityLiveData: DoorLiveData<RT?>? = null
+    var entityLiveData: LiveData<RT?>? = null
 
-    var entityLiveDataObserver: DoorObserver<RT?>? = null
+    var entityLiveDataObserver: Observer<RT?>? = null
 
     val systemImpl: UstadMobileSystemImpl by instance()
 
     val accountManager: UstadAccountManager by instance()
 
-    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
-    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
     private val onLoadCompletedListeners: MutableList<OnLoadDataCompletedListener> = concurrentSafeListOf()
 
@@ -120,7 +123,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
             entityLiveData = onLoadLiveData(repo)
             view.loading = true
             if(entityLiveData != null) {
-                entityLiveDataObserver = object : DoorObserver<RT?> {
+                entityLiveDataObserver = object : Observer<RT?> {
                     override fun onChanged(t: RT?) {
                         entity = t
                         view.entity = entity
@@ -173,7 +176,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
         return null
     }
 
-    open fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<RT?>?{
+    open fun onLoadLiveData(repo: UmAppDatabase): LiveData<RT?>?{
         return null
     }
 
@@ -190,8 +193,8 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
     fun <T: Any> getSavedStateResultLiveData(keyName: String,
                                deserializationStrategy: DeserializationStrategy<List<T>>,
                                resultClass: KClass<T>
-    ): DoorLiveData<List<T>> {
-        val wrapper = DoorMutableLiveData<List<T>>()
+    ): LiveData<List<T>> {
+        val wrapper = MutableLiveData<List<T>>()
 
         val savedState = requireSavedStateHandle()
         val lifecycle = lifecycleOwner
@@ -199,14 +202,14 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
             addOnLoadDataCompletedListener {
                 savedState.getLiveData<String?>(keyName).observe(lifecycle) {
                     if(it == null) {
-                        wrapper.sendValue(listOf())
+                        wrapper.postValue(listOf())
                         return@observe
                     }
 
                     val deserialized = safeParseList(di, deserializationStrategy,
                         resultClass, it)
 
-                    wrapper.sendValue(deserialized)
+                    wrapper.postValue(deserialized)
                 }
             }
         }
@@ -223,7 +226,8 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
     fun <T: Any> observeSavedStateResult(keyName: String,
                                 deserializationStrategy: DeserializationStrategy<List<T>>,
                                 resultClass: KClass<T>,
-                                observer: DoorObserver<List<T>>) {
+                                observer: Observer<List<T>>
+    ) {
         getSavedStateResultLiveData(keyName, deserializationStrategy, resultClass)
             .observe(lifecycleOwner, observer)
     }

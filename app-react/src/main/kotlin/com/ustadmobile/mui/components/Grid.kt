@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import kotlinx.css.*
 import mui.material.Grid
 import mui.material.GridProps
@@ -107,7 +107,7 @@ fun RBuilder.gridContainer(
     rowSpacing: GridSpacing? = null,
     className: String? = null,
     handler: StyledHandler<GridProps>? = null
-) = createStyledComponent(Grid, className, handler) {
+) = convertFunctionalToClassElement(Grid, className, handler) {
     attrs.asDynamic().alignContent = alignContent
     attrs.asDynamic().alignItems = alignItems
     attrs.container = true
@@ -134,13 +134,13 @@ fun RBuilder.gridItem(
     display: Display = Display.flex,
     flexDirection: FlexDirection = FlexDirection.column,
     handler: StyledHandler<GridProps>? = null
-) = createStyledComponent(Grid, className, handler) {
+) = convertFunctionalToClassElement(Grid, className, handler) {
     attrs.item = true
-    sm?.let { attrs.sm = it.sizeVal }
-    md?.let { attrs.md = it.sizeVal }
-    xs?.let { attrs.xs = it.sizeVal }
-    xl?.let { attrs.xl = it.sizeVal }
-    lg?.let { attrs.lg = it.sizeVal }
+    sm?.let { attrs.asDynamic().sm = it.sizeVal }
+    md?.let { attrs.asDynamic().md = it.sizeVal }
+    xs?.let { attrs.asDynamic().xs = it.sizeVal }
+    xl?.let { attrs.asDynamic().xl = it.sizeVal }
+    lg?.let { attrs.asDynamic().lg = it.sizeVal }
     attrs.asDynamic().textAlign = alignItems.toString()
     zeroMinWidth?.let { attrs.zeroMinWidth = it }
     css{

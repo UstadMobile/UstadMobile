@@ -6,13 +6,13 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.view.UstadEditView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.Schedule
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: ScheduleEditView,
-                            di: DI, lifecycleOwner: DoorLifecycleOwner)
+                            di: DI, lifecycleOwner: LifecycleOwner)
     : UstadEditPresenter<ScheduleEditView, Schedule>(context, args, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode

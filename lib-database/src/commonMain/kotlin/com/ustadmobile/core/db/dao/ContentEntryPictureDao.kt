@@ -1,17 +1,17 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntryPicture
 import com.ustadmobile.lib.db.entities.UserSession
 
 
-@Dao
+@DoorDao
 @Repository
-abstract class ContentEntryPictureDao : BaseDao<ContentEntryPicture> {
+expect abstract class ContentEntryPictureDao : BaseDao<ContentEntryPicture> {
 
     @Query("""
      REPLACE INTO ContentEntryPictureReplicate(cepPk, cepDestination)
@@ -76,7 +76,7 @@ abstract class ContentEntryPictureDao : BaseDao<ContentEntryPicture> {
       ORDER BY cepTimestamp DESC 
          LIMIT 1
          """)
-    abstract fun findByContentEntryUidLive(entryUid: Long): DoorLiveData<ContentEntryPicture?>
+    abstract fun findByContentEntryUidLive(entryUid: Long): LiveData<ContentEntryPicture?>
 
     @Update
     abstract suspend fun updateAsync(ContentEntryPicture: ContentEntryPicture)

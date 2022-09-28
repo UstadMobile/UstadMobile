@@ -91,6 +91,8 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
     sql += groupBy(report.xAxis, queryType, dbType) + "AS xAxis "
     if (reportSeriesSubGroup != 0) {
         sql += " , " + groupBy(reportSeriesSubGroup, queryType, dbType) + "AS subgroup "
+    }else {
+        sql += ", '' AS subgroup "
     }
 
     sql += "FROM (SELECT "

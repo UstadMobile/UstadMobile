@@ -1,21 +1,11 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import csstype.TransitionDuration
 import mui.material.*
 import org.w3c.dom.events.Event
 import react.RBuilder
 import styled.StyledHandler
-
-@Suppress("EnumEntryName")
-enum class DrawerAnchor {
-    left, top, right, bottom
-}
-
-@Suppress("EnumEntryName")
-enum class DrawerVariant {
-    permanent, temporary, persistent
-}
 
 fun RBuilder.umDrawer(
     open: Boolean = false,
@@ -30,14 +20,14 @@ fun RBuilder.umDrawer(
 
     className: String? = null,
     handler: StyledHandler<DrawerProps>
-) = createStyledComponent(Drawer, className, handler) {
-    attrs.anchor = anchor.toString()
+) = convertFunctionalToClassElement(Drawer, className, handler) {
+    attrs.anchor = anchor
     attrs.elevation = elevation
     modalProps?.let { attrs.ModalProps = it }
-    onClose?.let { attrs.onClose = it }
+    attrs.onClose = { event, _ -> onClose?.invoke(event)}
     attrs.open = open
     paperProps?.let { attrs.PaperProps = it }
     slideProps?.let { attrs.SlideProps = it }
-    attrs.variant = variant.toString()
+    attrs.variant = variant
     transitionDuration?.let { attrs.transitionDuration = it }
 }

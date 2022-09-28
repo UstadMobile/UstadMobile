@@ -1,9 +1,9 @@
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
 
-expect fun <T: Any?> DoorLiveData<T>.observeWithLifecycleOwner(
-    lifecycleOwner: DoorLifecycleOwner,
+expect fun <T: Any?> LiveData<T>.observeWithLifecycleOwner(
+    lifecycleOwner: LifecycleOwner,
     observer: (T?) -> Unit
 )

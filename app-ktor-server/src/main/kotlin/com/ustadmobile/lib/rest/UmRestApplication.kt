@@ -33,18 +33,16 @@ import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
-import io.ktor.application.*
-import io.ktor.features.*
-import io.ktor.gson.*
+import io.ktor.server.application.*
+import io.ktor.serialization.gson.*
 import io.ktor.http.*
 import io.ktor.http.content.*
-import io.ktor.request.*
-import io.ktor.routing.*
+import io.ktor.server.request.*
+import io.ktor.server.routing.*
 import jakarta.mail.Authenticator
 import jakarta.mail.PasswordAuthentication
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
-import org.kodein.di.ktor.DIFeature
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import org.xmlpull.v1.XmlPullParserFactory
@@ -54,11 +52,21 @@ import javax.naming.InitialContext
 import com.ustadmobile.door.util.NodeIdAuthCache
 import com.ustadmobile.core.db.PermissionManagementIncomingReplicationListener
 import com.ustadmobile.core.contentjob.DummyContentPluginUploader
-import io.ktor.response.*
+import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.db.ext.preload
+import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.util.SysPathUtil
 import io.ktor.client.*
+import io.ktor.client.plugins.websocket.*
+import io.ktor.server.http.content.*
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.conditionalheaders.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.plugins.statuspages.*
 import io.ktor.websocket.*
+import org.kodein.di.ktor.di
 import java.util.*
 
 const val TAG_UPLOAD_DIR = 10
@@ -119,15 +127,15 @@ fun Application.umRestApplication(
 
     if (devMode) {
         install(CORS) {
-            method(HttpMethod.Get)
-            method(HttpMethod.Post)
-            method(HttpMethod.Put)
-            method(HttpMethod.Options)
-            header(HttpHeaders.ContentType)
-            header(HttpHeaders.AccessControlAllowOrigin)
-            header("X-nid")
-            header("door-dbversion")
-            header("door-node")
+            allowMethod(HttpMethod.Get)
+            allowMethod(HttpMethod.Post)
+            allowMethod(HttpMethod.Put)
+            allowMethod(HttpMethod.Options)
+            allowHeader(HttpHeaders.ContentType)
+            allowHeader(HttpHeaders.AccessControlAllowOrigin)
+            allowHeader("X-nid")
+            allowHeader("door-dbversion")
+            allowHeader("door-node")
             anyHost()
         }
     }
@@ -157,7 +165,7 @@ fun Application.umRestApplication(
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
-    install(DIFeature) {
+    di {
         import(commonJvmDiModule)
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
             File(tmpRootDir, context.identifier(dbMode)).also {
@@ -210,17 +218,18 @@ fun Application.umRestApplication(
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
             Napier.d("creating database for context: ${context.url}")
             val dbHostName = context.identifier(dbMode, singletonDbName)
-            val dbProperties = appConfig.databasePropertiesFromSection("ktor.database",
-                defaultUrl = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
-            InitialContext().bindDataSourceIfNotExisting(dbHostName, dbProperties)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             val attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
                 UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
-            val db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbHostName,
-                    attachmentsDir)
+            val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                    dbUrl = appConfig.property("ktor.database.url").getString()
+                        .replace("(hostname)", dbHostName),
+                    dbUsername = appConfig.propertyOrNull("ktor.database.user")?.getString(),
+                    dbPassword = appConfig.propertyOrNull("ktor.database.password")?.getString(),
+                    attachmentDir = attachmentsDir)
                 .addSyncCallback(nodeIdAndAuth)
                     .addCallback(ContentJobItemTriggersCallback())
-                    .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+                    .addMigrations(*migrationList().toTypedArray())
                 .build()
             db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
 
@@ -402,15 +411,14 @@ fun Application.umRestApplication(
     //Ensure that older clients that make http calls to pages that no longer exist will not make
     // an infinite number of calls and exhaust their data bundle etc.
     install(StatusPages) {
-        status(HttpStatusCode.NotFound) {
-            Napier.e("NOT FOUND! ${call.request.uri}!")
+        status(HttpStatusCode.NotFound) { _: HttpStatusCode ->
             call.respondText("Not found", ContentType.Text.Plain, HttpStatusCode.NotFound)
         }
     }
 
     val jsDevServer = appConfig.propertyOrNull("ktor.ustad.jsDevServer")?.getString()
     if(jsDevServer != null) {
-        install(WebSockets)
+        install(io.ktor.server.websocket.WebSockets)
 
         intercept(ApplicationCallPipeline.Setup) {
             val requestUri = call.request.uri.let {

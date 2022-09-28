@@ -7,8 +7,8 @@ import com.ustadmobile.core.util.ext.toDeepLink
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.launch
@@ -22,7 +22,7 @@ class ClazzDetailOverviewPresenter(
     arguments: Map<String, String>,
     view: ClazzDetailOverviewView,
     di: DI,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     val contentEntryListItemListener: DefaultContentEntryListItemListener =
         DefaultContentEntryListItemListener(
             view = view,
@@ -55,7 +55,7 @@ class ClazzDetailOverviewPresenter(
                 arguments[ARG_ENTITY_UID]?.toLong() ?: 0L, Role.PERMISSION_CLAZZ_UPDATE)
     }
 
-    override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<ClazzWithDisplayDetails?>? {
+    override fun onLoadLiveData(repo: UmAppDatabase): LiveData<ClazzWithDisplayDetails?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         view.scheduleList = repo.scheduleDao.findAllSchedulesByClazzUid(entityUid)
         presenterScope.launch {

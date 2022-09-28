@@ -1,14 +1,14 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.StateContentEntity
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
-abstract class StateContentDao : BaseDao<StateContentEntity> {
+expect abstract class StateContentDao : BaseDao<StateContentEntity> {
 
     @Query("""
      REPLACE INTO StateContentEntityReplicate(scePk, sceDestination)

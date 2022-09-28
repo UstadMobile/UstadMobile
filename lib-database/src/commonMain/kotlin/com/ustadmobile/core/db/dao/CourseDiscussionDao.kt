@@ -1,19 +1,19 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CourseDiscussion
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
-abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<CourseDiscussion>{
+expect abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<CourseDiscussion>{
 
     @Query("""
      REPLACE INTO CourseDiscussionReplicate(courseDiscussionPk, courseDiscussionDestination)
@@ -83,13 +83,6 @@ abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<
          WHERE courseDiscussionUid = :cbUid""")
     abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
-    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-        uidList.forEach {
-            updateActiveByUid(it, false, changeTime)
-        }
-    }
-
-
     @Query("""
         SELECT CourseDiscussion.* 
           FROM CourseDiscussion
@@ -97,7 +90,7 @@ abstract class CourseDiscussionDao: BaseDao<CourseDiscussion>, OneToManyJoinDao<
            AND CAST(CourseDiscussion.courseDiscussionActive AS INTEGER) = 1 
          
          """)
-    abstract fun getCourseDiscussionByUid(courseDiscussionUid: Long): DoorLiveData<CourseDiscussion?>
+    abstract fun getCourseDiscussionByUid(courseDiscussionUid: Long): LiveData<CourseDiscussion?>
 
 
 

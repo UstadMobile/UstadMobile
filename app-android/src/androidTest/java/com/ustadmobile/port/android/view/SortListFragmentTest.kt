@@ -8,6 +8,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.db.dao.PersonDaoCommon
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.PersonListScreen
 import com.ustadmobile.test.port.android.util.installNavController
@@ -66,7 +67,7 @@ class SortListFragmentTest : TestCase() {
         fragmentScenario.onFragment {
             val sortOption = it.mUstadListHeaderRecyclerViewAdapter!!.sortOptionSelected
             Assert.assertEquals("order set to default ascending",
-                    PersonDao.SORT_FIRST_NAME_ASC, sortOption!!.flag)
+                    PersonDaoCommon.SORT_FIRST_NAME_ASC, sortOption!!.flag)
         }
 
         init{
@@ -83,7 +84,7 @@ class SortListFragmentTest : TestCase() {
 
                 sortList{
                     childWith<PersonListScreen.Sort> {
-                        withTag(PersonDao.SORT_FIRST_NAME_ASC)
+                        withTag(PersonDaoCommon.SORT_FIRST_NAME_ASC)
                     }perform {
                         click()
                     }
@@ -91,7 +92,7 @@ class SortListFragmentTest : TestCase() {
 
                 fragmentScenario.onFragment {
                     val sortOption = it.mUstadListHeaderRecyclerViewAdapter!!.sortOptionSelected
-                    Assert.assertEquals("order changed to descending", PersonDao.SORT_FIRST_NAME_ASC, sortOption!!.flag)
+                    Assert.assertEquals("order changed to descending", PersonDaoCommon.SORT_FIRST_NAME_ASC, sortOption!!.flag)
                 }
             }
         }

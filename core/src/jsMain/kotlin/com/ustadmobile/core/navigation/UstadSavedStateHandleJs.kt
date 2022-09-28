@@ -1,7 +1,7 @@
 package com.ustadmobile.core.navigation
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 
 class UstadSavedStateHandleJs(
     initialValues: Map<String, String>? = null,
@@ -12,7 +12,7 @@ class UstadSavedStateHandleJs(
         fun onCommit()
     }
 
-    internal val mLiveData: MutableMap<String, DoorMutableLiveData<*>?> = mutableMapOf()
+    internal val mLiveData: MutableMap<String, MutableLiveData<*>?> = mutableMapOf()
 
     internal val currentValues: Map<String, String>
         get() {
@@ -23,12 +23,12 @@ class UstadSavedStateHandleJs(
 
     init {
         initialValues?.forEach {
-            mLiveData[it.key] = DoorMutableLiveData(it.value)
+            mLiveData[it.key] = MutableLiveData(it.value)
         }
     }
 
     override fun <T> set(key: String, value: T?) {
-        mLiveData[key] = DoorMutableLiveData(value)
+        mLiveData[key] = MutableLiveData(value)
         commitListener?.onCommit()
     }
 
@@ -37,10 +37,10 @@ class UstadSavedStateHandleJs(
         return mLiveData[key]?.getValue().unsafeCast<T>()
     }
 
-    override fun <T> getLiveData(key: String): DoorMutableLiveData<T> {
+    override fun <T> getLiveData(key: String): MutableLiveData<T> {
         return mLiveData.getOrPut(key) {
-            DoorMutableLiveData(null)
-        }.unsafeCast<DoorMutableLiveData<T>>()
+            MutableLiveData(null)
+        }.unsafeCast<MutableLiveData<T>>()
     }
 
     fun dumpToString(): String {

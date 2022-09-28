@@ -4,10 +4,10 @@ if not exist app-ktor-server\build\libs\ustad-server-all.jar (
     exit /B 1
 )
 
-if not exist app-ktor-server\application.conf (
-    copy app-ktor-server\src\jvmMain\resources\application.conf app-ktor-server
+if not exist app-ktor-server\ustad-server.conf (
+    copy app-ktor-server\src\main\resources\application.conf app-ktor-server\ustad-server.conf
 )
 
 cd app-ktor-server
-java -jar build\libs\ustad-server-all.jar -config=application.conf
+java -jar build\libs\ustad-server-all.jar -config=ustad-server.conf
 cd..

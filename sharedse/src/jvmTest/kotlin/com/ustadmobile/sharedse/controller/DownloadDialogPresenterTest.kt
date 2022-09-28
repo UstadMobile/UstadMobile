@@ -6,15 +6,16 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.Lifecycle
+import com.ustadmobile.door.lifecycle.LifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CANCEL
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
@@ -39,8 +40,12 @@ class DownloadDialogPresenterTest {
 
     private val context = Any()
 
-    private val mockLifecycle = mock<DoorLifecycleOwner>() {
-        on { currentState }.thenReturn(DoorLifecycleObserver.STARTED)
+    private val mockLifecycle = mock<Lifecycle> {
+        on { realCurrentDoorState }.thenReturn(DoorState.STARTED)
+    }
+
+    private val mockLifecycleOwner = mock<LifecycleOwner>() {
+        on { getLifecycle() }.thenReturn(mockLifecycle)
     }
 
     private lateinit var contentEntrySet: RecursiveContentEntrySet
@@ -91,8 +96,8 @@ class DownloadDialogPresenterTest {
         }
 
         val accountManager: UstadAccountManager by di.instance()
-        db =  di.on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
-        repo = di.on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
+        db =  di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
+        repo = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
         contentEntrySet = insertTestContentEntries(repo, System.currentTimeMillis())
     }
 
@@ -111,7 +116,7 @@ class DownloadDialogPresenterTest {
         runBlocking {
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()),
-                    mockedDialogView, di, mockLifecycle)
+                    mockedDialogView, di, mockLifecycleOwner)
 
             presenter.onCreate(mapOf())
             presenter.onStart()
@@ -148,7 +153,7 @@ class DownloadDialogPresenterTest {
 
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()),
-                    mockedDialogView, di, mockLifecycle)
+                    mockedDialogView, di, mockLifecycleOwner)
 
             presenter.onCreate(mapOf())
             presenter.onStart()
@@ -190,7 +195,7 @@ class DownloadDialogPresenterTest {
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to
                             mockExistingDownloadJob.contentEntryUid.toString()),
-                    mockedDialogView, di, mockLifecycle)
+                    mockedDialogView, di, mockLifecycleOwner)
 
             presenter.onCreate(mapOf())
             presenter.onStart()
@@ -209,7 +214,7 @@ class DownloadDialogPresenterTest {
             val preparerFn =  {downloadJobUid: Int, context: Any  -> Unit}
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to "1"),
-                    mockedDialogView, di, mockLifecycle)
+                    mockedDialogView, di, mockLifecycleOwner)
 
             presenter.onCreate(mapOf())
             presenter.onStart()
@@ -236,7 +241,7 @@ class DownloadDialogPresenterTest {
                 ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()
         )
 
-        presenter = DownloadDialogPresenter(context, args, mockedDialogView, di, mockLifecycle)
+        presenter = DownloadDialogPresenter(context, args, mockedDialogView, di, mockLifecycleOwner)
         presenter.onCreate(mapOf())
         presenter.onStart()
         viewReadyLatch.await(5, TimeUnit.SECONDS)
@@ -277,7 +282,7 @@ class DownloadDialogPresenterTest {
         runBlocking{
             setupMockDownloadJob(JobStatus.RUNNING)
             val args = mapOf(ARG_CONTENT_ENTRY_UID to "1")
-            presenter = DownloadDialogPresenter(context, args, mockedDialogView, di, mockLifecycle)
+            presenter = DownloadDialogPresenter(context, args, mockedDialogView, di, mockLifecycleOwner)
             presenter.onCreate(mapOf())
             presenter.onStart()
 
@@ -296,7 +301,7 @@ class DownloadDialogPresenterTest {
             setupMockDownloadJob(JobStatus.RUNNING)
 
             presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"),
-                mockedDialogView, di, mockLifecycle)
+                mockedDialogView, di, mockLifecycleOwner)
             presenter.onCreate(mapOf())
             presenter.onStart()
 

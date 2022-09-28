@@ -1,13 +1,13 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 
 interface AccountListView : UstadView {
 
-    var accountListLive: DoorLiveData<List<UserSessionWithPersonAndEndpoint>>?
+    var accountListLive: LiveData<List<UserSessionWithPersonAndEndpoint>>?
 
-    var activeAccountLive: DoorLiveData<UserSessionWithPersonAndEndpoint?>?
+    var activeAccountLive: LiveData<UserSessionWithPersonAndEndpoint?>?
 
     var title: String?
 

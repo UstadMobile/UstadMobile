@@ -6,14 +6,14 @@ import com.ustadmobile.core.view.CourseGroupSetDetailView
 import com.ustadmobile.core.view.CourseGroupSetEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 
 
 class CourseGroupSetDetailPresenter(context: Any,
                                     arguments: Map<String, String>, view: CourseGroupSetDetailView,
-                                    lifecycleOwner: DoorLifecycleOwner,
+                                    lifecycleOwner: LifecycleOwner,
                                     di: DI)
     : UstadDetailPresenter<CourseGroupSetDetailView, CourseGroupSet>(context, arguments, view, di, lifecycleOwner) {
 

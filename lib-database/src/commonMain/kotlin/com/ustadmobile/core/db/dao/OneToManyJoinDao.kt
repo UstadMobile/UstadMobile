@@ -11,7 +11,7 @@ interface OneToManyJoinDao<T> {
     @Update
     suspend fun updateListAsync(entityList: List<T>)
 
-    suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long)
+    //suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long)
 
 
 }

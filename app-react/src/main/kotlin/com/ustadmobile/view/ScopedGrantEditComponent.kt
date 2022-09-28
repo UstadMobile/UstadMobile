@@ -5,7 +5,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.view.ScopedGrantEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.mui.components.GridSpacing
@@ -38,7 +38,7 @@ class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant
         }
     }
 
-    override var bitmaskList: DoorLiveData<List<BitmaskFlag>>? = null
+    override var bitmaskList: LiveData<List<BitmaskFlag>>? = null
         set(value) {
             field?.removeObserver(scopedGrantListObserver)
             field = value

@@ -4,10 +4,11 @@ import com.ustadmobile.port.sharedse.impl.http.parseRequestBody
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
+import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.request.post
-import io.ktor.client.request.put
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.serialization.gson.*
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert
@@ -50,7 +51,9 @@ class IHTTPSessionExtTest  {
         embeddedHttpd = RouterNanoHTTPD(0)
         embeddedHttpd.start()
         httpClient = HttpClient(OkHttp) {
-            install(JsonFeature)
+            install(ContentNegotiation) {
+                gson()
+            }
         }
     }
 
@@ -64,9 +67,9 @@ class IHTTPSessionExtTest  {
     fun givenPutRequestWithBody_whenParseRequestBodyCalled_thenShouldReturnContent() {
         embeddedHttpd.addRoute("/body", BodyEchoResponder::class.java)
         runBlocking {
-            val response = httpClient.put<String>("http://localhost:${embeddedHttpd.listeningPort}/body") {
-                body = "Hello World"
-            }
+            val response: String = httpClient.put("http://localhost:${embeddedHttpd.listeningPort}/body") {
+                setBody("Hello World")
+            }.body()
 
             Assert.assertEquals("Got body back in response", "Hello World",
                 response)
@@ -77,9 +80,9 @@ class IHTTPSessionExtTest  {
     fun givenSmallPostRequestWithBody_whenParseRequestCalled_thenShouldReturnContent() {
         embeddedHttpd.addRoute("/body", BodyEchoResponder::class.java)
         runBlocking {
-            val response = httpClient.post<String>("http://localhost:${embeddedHttpd.listeningPort}/body") {
-                body = "Hello World"
-            }
+            val response: String = httpClient.post("http://localhost:${embeddedHttpd.listeningPort}/body") {
+                setBody("Hello World")
+            }.body()
 
             Assert.assertEquals("Got body back in response", "Hello World",
                     response)
@@ -89,13 +92,13 @@ class IHTTPSessionExtTest  {
     @Test
     fun givenLargerPostRequestWithBody_whenParseRequestCalled_thenShouldReturnContent() {
         embeddedHttpd.addRoute("/body", BodyEchoResponder::class.java)
-        val textContent = BufferedReader(InputStreamReader(this::class.java.getResourceAsStream("/com/ustadmobile/port/sharedse/xapi/statementWithProgress.json"))).use {
+        val textContent = BufferedReader(InputStreamReader(this::class.java.getResourceAsStream("/com/ustadmobile/port/sharedse/xapi/statementWithProgress.json")!!)).use {
             it.readText()
         }
         runBlocking {
-            val response = httpClient.post<String>("http://localhost:${embeddedHttpd.listeningPort}/body") {
-                body = textContent
-            }
+            val response: String = httpClient.post("http://localhost:${embeddedHttpd.listeningPort}/body") {
+                setBody(textContent)
+            }.body()
 
             Assert.assertEquals("Got body back in response", textContent,
                     response)

@@ -23,6 +23,7 @@ import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.ext.maxQueryParamListSize
 import kotlinx.coroutines.NonCancellable
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.core.db.dao.findExistingMd5SumsByMd5SumsSafe
 import java.util.*
 
 actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
@@ -305,7 +306,7 @@ suspend fun UmAppDatabase.addEntriesToContainerFromZip(
         }
 
 
-        db.withDoorTransactionAsync(UmAppDatabase::class) { txDb: UmAppDatabase ->
+        db.withDoorTransactionAsync { txDb: UmAppDatabase ->
             txDb.containerEntryFileDao.insertListAsync(containerEntryFilesToInsert)
             zipFilesToAdd.forEach {
                 txDb.containerEntryDao.insertWithMd5SumsAsync(containerUid, it.pathInContainer,

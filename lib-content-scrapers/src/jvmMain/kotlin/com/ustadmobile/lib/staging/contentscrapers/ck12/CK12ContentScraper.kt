@@ -3,6 +3,7 @@ package com.ustadmobile.lib.contentscrapers.ck12
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDaoCommon
 import com.ustadmobile.lib.contentscrapers.*
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.getDefaultSeleniumProxy
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CHECK_NAME
@@ -210,7 +211,7 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
                 }
                 else -> {
                     UMLogUtil.logError("unsupported kind = $contentType at url = $scrapeUrl")
-                    queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
+                    queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDaoCommon.STATUS_DONE else ScrapeQueueItemDaoCommon.STATUS_FAILED, 0)
                     queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
                     val modifiedFile = File(destLocation, destLocation.name + LAST_MODIFIED_TXT)
                     FileUtils.deleteQuietly(modifiedFile)
@@ -231,7 +232,7 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
             ContentScraperUtil.deleteETagOrModified(destLocation, destLocation.name)
         }
 
-        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
+        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDaoCommon.STATUS_DONE else ScrapeQueueItemDaoCommon.STATUS_FAILED, 0)
         queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
         val duration = System.currentTimeMillis() - startTime
         UMLogUtil.logInfo("Ended scrape for url $scrapeUrl in duration: $duration squUid  $sqiUid")

@@ -93,10 +93,6 @@ android {
         }
     }
 
-    dexOptions {
-        jumboMode = true
-    }
-
     buildTypes {
         debug {
             testCoverageEnabled = true

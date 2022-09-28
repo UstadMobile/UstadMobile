@@ -1,19 +1,29 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_ATTENDANCE_DESC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_LEFT_DESC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_DATE_REGISTERED_DESC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_DESC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_ASC
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.SORT_LAST_NAME_DESC
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 
 @Repository
-@Dao
-abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
+@DoorDao
+expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
     @Query("""
      REPLACE INTO ClazzEnrolmentReplicate(cePk, ceDestination)
@@ -79,13 +89,6 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Insert
     abstract fun insertListAsync(entityList: List<ClazzEnrolment>)
 
-    open suspend fun updateDateLeft(clazzEnrolmentUidList: List<Long>, endDate: Long) {
-        val updateTime = systemTimeInMillis()
-        clazzEnrolmentUidList.forEach {
-            updateDateLeftByUid(it, endDate, updateTime)
-        }
-    }
-
     @Query("""SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = :personUid 
         AND clazzEnrolmentClazzUid = :clazzUid 
         AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS} LIMIT 1""")
@@ -101,7 +104,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND ClazzEnrolment.clazzEnrolmentActive 
         AND clazzEnrolmentClazzUid = :clazzUid ORDER BY clazzEnrolmentDateLeft DESC""")
     abstract fun findAllEnrolmentsByPersonAndClazzUid(personUid: Long, clazzUid: Long):
-            DoorDataSourceFactory<Int, ClazzEnrolmentWithLeavingReason>
+            DataSourceFactory<Int, ClazzEnrolmentWithLeavingReason>
 
     @Query("""SELECT ClazzEnrolment.*, LeavingReason.*,
          COALESCE(Clazz.clazzTimeZone, COALESCE(School.schoolTimeZone, 'UTC')) as timeZone
@@ -162,7 +165,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND ClazzEnrolment.clazzEnrolmentActive
         ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
     """)
-    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DoorDataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>
+    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>
 
     @Query("""SELECT COALESCE(MAX(clazzEnrolmentDateLeft),0) FROM ClazzEnrolment WHERE 
         ClazzEnrolment.clazzEnrolmentPersonUid = :selectedPerson 
@@ -199,7 +202,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     abstract suspend fun findByUid(uid: Long): ClazzEnrolment?
 
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzEnrolment?>
+    abstract fun findByUidLive(uid: Long): LiveData<ClazzEnrolment?>
 
     @Query("""
                 UPDATE ClazzEnrolment
@@ -287,7 +290,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @QueryLiveTables(value = ["Clazz", "Person", "ClazzEnrolment", "PersonGroupMember", "ScopedGrant"])
     @SqliteOnly
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%",
-                                       filter: Int, accountPersonUid: Long, currentTime: Long): DoorDataSourceFactory<Int, PersonWithClazzEnrolmentDetails>
+                                       filter: Int, accountPersonUid: Long, currentTime: Long): DataSourceFactory<Int, PersonWithClazzEnrolmentDetails>
 
     @Query("""
         UPDATE ClazzEnrolment 
@@ -321,29 +324,4 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         updateTime: Long
     ): Int
 
-    companion object {
-
-        const val SORT_FIRST_NAME_ASC = 1
-
-        const val SORT_FIRST_NAME_DESC = 2
-
-        const val SORT_LAST_NAME_ASC = 3
-
-        const val SORT_LAST_NAME_DESC = 4
-
-        const val SORT_ATTENDANCE_ASC = 5
-
-        const val SORT_ATTENDANCE_DESC = 6
-
-        const val SORT_DATE_REGISTERED_ASC = 7
-
-        const val SORT_DATE_REGISTERED_DESC = 8
-
-        const val SORT_DATE_LEFT_ASC = 9
-
-        const val SORT_DATE_LEFT_DESC = 10
-
-        const val FILTER_ACTIVE_ONLY = 1
-
-    }
 }

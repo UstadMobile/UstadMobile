@@ -2,6 +2,7 @@ package com.ustadmobile.core.schedule
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -19,7 +20,7 @@ class ClazzLogScheduleJob : Job {
         val endpointUrl = jobDataMap.getString(ClazzLogCreatorManager.INPUT_ENDPOINTURL)
         val clazzUid = jobDataMap.getLong(ClazzLogCreatorManager.INPUT_CLAZZUID)
 
-        val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_DB)
+        val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_DB)
         db.createClazzLogs(fromTime, toTime, clazzUid)
     }
 }

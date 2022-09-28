@@ -3,6 +3,7 @@ package com.ustadmobile.core.contentjob
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.commitProgressUpdates
 import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.io.ext.deleteRecursively
 import com.ustadmobile.core.io.ext.emptyRecursively
@@ -12,10 +13,11 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.createTemporaryDir
 import com.ustadmobile.core.util.ext.decodeStringMapFromString
 import com.ustadmobile.core.util.ext.deleteZombieContainerEntryFiles
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.*
+import com.ustadmobile.door.util.TransactionMode
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -43,7 +45,7 @@ class ContentJobRunner(
     override val di: DI,
     val numProcessors: Int = DEFAULT_NUM_PROCESSORS,
     val maxItemAttempts: Int = DEFAULT_NUM_RETRIES
-) : DIAware, ContentJobProgressListener, DoorObserver<Pair<Int, Boolean>?>,
+) : DIAware, ContentJobProgressListener, Observer<Pair<Int, Boolean>?>,
     ContentJobItemTransactionRunner {
 
     data class ContentJobResult(val status: Int)
@@ -152,7 +154,7 @@ class ContentJobRunner(
 
             var processResult: ProcessResult? = null
             var processException: Throwable? = null
-            var mediatorObserver: DoorObserver<Pair<Int, Boolean>>?= null
+            var mediatorObserver: Observer<Pair<Int, Boolean>>?= null
 
             try {
                 val cjiUid = item.contentJobItem?.cjiUid
@@ -176,7 +178,7 @@ class ContentJobRunner(
                             item.contentJobItem?.cjiUid ?: 0, contentEntryUid)
 
                         if(item.contentJobItem?.cjiParentContentEntryUid != 0L){
-                            txDb.contentEntryParentChildJoinDao.insert(
+                            txDb.contentEntryParentChildJoinDao.insertAsync(
                                 ContentEntryParentChildJoin().apply {
                                     cepcjParentContentEntryUid =
                                         item.contentJobItem?.cjiParentContentEntryUid ?: 0L
@@ -194,19 +196,21 @@ class ContentJobRunner(
                     item.contentJobItem?.cjiPluginId ?: 0
                 }
 
-                val plugin = contentPluginManager.getPluginById(pluginId)
+                val plugin = contentPluginManager.requirePluginById(pluginId)
 
                 val jobResult = async {
                     try {
-                        plugin.processJob(item, processContext, this@ContentJobRunner)
+                        plugin.processJob(item, processContext, this@ContentJobRunner).also {
+                            Napier.i("ContentJobRunner: completed process")
+                        }
                     }catch(e: Exception) {
-                        Napier.e("jobResult: caught exception", e)
+                        Napier.e("ContentJobRunner: jobResult: caught exception", e)
                         processException = e
                         ProcessResult(JobStatus.FAILED)
                     }
                 }
 
-                mediatorObserver = DoorObserver {
+                mediatorObserver = Observer {
                     val state = it.first
                     val isMeteredAllowed = it.second
 
@@ -305,7 +309,7 @@ class ContentJobRunner(
      */
     override suspend fun <R> withContentJobItemTransaction(block: suspend (UmAppDatabase) -> R): R {
         return contentJobItemUpdateMutex.withLock {
-            db.withDoorTransactionAsync(UmAppDatabase::class, block)
+            db.withDoorTransactionAsync(TransactionMode.READ_WRITE, block)
         }
     }
 
@@ -355,7 +359,7 @@ class ContentJobRunner(
                             true, systemTimeInMillis())
 
                         //Delete all containers
-                        val jobDestDir = txDb.contentJobDao.findByUid(jobId)?.toUri
+                        val jobDestDir = txDb.contentJobDao.findByUidAsync(jobId)?.toUri
                             ?: containerStorageManager.storageList.first().dirUri
 
                         txDb.contentJobItemDao.findAllContainersByJobUid(jobId).forEach { containerUid ->
@@ -378,7 +382,7 @@ class ContentJobRunner(
 
         //Now remove any Zombies (e.g. where the same md5 was downloaded multiple times due when
         // downloads were running concurrently
-        db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+        db.withDoorTransactionAsync { txDb ->
             //TODO here: for all downloaded containers, set the containerentry to use the first
             // downloaded containerentryfile (in case multiple copies of the same md5 were downloaded)
 

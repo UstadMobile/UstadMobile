@@ -2,6 +2,7 @@ package com.ustadmobile.lib.staging.contentscrapers.gdl
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDaoCommon
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_EPUB
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_PDF
@@ -68,7 +69,7 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
             ContentScraperUtil.deleteETagOrModified(destLocation, destLocation.name)
         }
 
-        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
+        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDaoCommon.STATUS_DONE else ScrapeQueueItemDaoCommon.STATUS_FAILED, 0)
         queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
         val duration = System.currentTimeMillis() - startTime
         UMLogUtil.logInfo("Ended scrape for url $scrapeUrl in duration: $duration squUid  $sqiUid")

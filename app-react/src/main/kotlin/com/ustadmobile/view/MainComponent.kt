@@ -7,7 +7,6 @@ import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.navigation.RouteManager.defaultDestination
 import com.ustadmobile.navigation.RouteManager.destinationList
 import com.ustadmobile.navigation.RouteManager.lookupDestinationName
@@ -33,17 +32,16 @@ import com.ustadmobile.util.StyleManager.showOnMobile
 import com.ustadmobile.util.ThemeManager.isDarkModeActive
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
-import com.ustadmobile.util.getViewNameFromUrl
 import com.ustadmobile.view.ext.appBarSpacer
 import com.ustadmobile.view.ext.renderRoutes
 import com.ustadmobile.view.ext.umTopBar
-import kotlinext.js.jsObject
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.css.Display
 import kotlinx.css.display
 import kotlinx.css.padding
-import mui.material.PaperProps
+import kotlinx.js.jso
+import mui.material.*
 import react.RBuilder
 import react.setState
 import styled.css
@@ -114,8 +112,8 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                 css (mainComponentWrapperContainer)
 
                 //Loading indicator
-                umLinearProgress(color = if(isDarkModeActive()) UMColor.secondary
-                else UMColor.primary) {
+                umLinearProgress(color = if(isDarkModeActive()) LinearProgressColor.secondary
+                else LinearProgressColor.primary) {
                     css(mainComponentProgressIndicator)
                     attrs.asDynamic().id = "um-progress"
                 }
@@ -150,9 +148,11 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
                         renderBottomNavigation()
                     }
 
+
                     umFab("","",
                         id = "um-fab",
-                        color = UMColor.secondary) {
+                        variant = FabVariant.extended,
+                        color = FabColor.secondary) {
                         css{
                             display = Display.none
                             +mainComponentFab
@@ -192,7 +192,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
     }
 
     private fun RBuilder.renderSideNavigation(){
-        val p: PaperProps = jsObject { }
+        val p: PaperProps = jso()
         p.asDynamic().style = kotlinext.js.js {
             position = "relative"; display = "block"; height =
             "100%"; minHeight = "100vh"
@@ -245,7 +245,7 @@ class MainComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(props)
             if(!appState.appSnackBar.actionLabel.isNullOrBlank()){
                 attrs.action = umButton("${appState.appSnackBar.actionLabel}",
                     variant = ButtonVariant.text,
-                    size = ButtonSize.medium,
+                    size = Size.medium,
                     onClick = {
                         appState.appSnackBar.onClick
                         dispatch(ReduxSnackBarState())
