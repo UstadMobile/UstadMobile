@@ -3,6 +3,7 @@ package com.ustadmobile.core.util
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
@@ -14,6 +15,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import io.github.aakira.napier.Napier
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -61,6 +63,8 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
         clazzUid: Long = 0
     ) {
 
+        Napier.d("OPENING ENTRY " + contentEntryUid.toString())
+
         val containerToOpen = umAppDatabase.containerDao
             .getMostRecentAvailableContainerUidAndMimeType(contentEntryUid,
                 downloadRequired)
@@ -84,7 +88,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
                     systemImpl.go(viewName, args, context, goToOptions)
                 }else {
                     val container = umAppDatabase.containerEntryDao.findByContainerAsync(containerToOpen.containerUid)
-                    require(container.isNotEmpty()) { "No file found" }
+                    require(container.isNotEmpty()) { "No file found in the container." }
                     val containerEntryFilePath = container[0].containerEntryFile?.cefPath
                     if (containerEntryFilePath != null) {
                         systemImpl.openFileInDefaultViewer(context, DoorUri.parse(containerEntryFilePath),
@@ -103,7 +107,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
             }
 
             else -> {
-                throw IllegalArgumentException("No file found")
+                throw IllegalArgumentException("No file found. Container null")
             }
         }
 

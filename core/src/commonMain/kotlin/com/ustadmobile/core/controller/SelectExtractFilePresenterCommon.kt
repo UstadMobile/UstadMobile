@@ -107,7 +107,7 @@ abstract class SelectExtractFilePresenterCommon(
                 view.loading = false
                 view.unSupportedFileError = systemImpl.getString(
                     MessageID.import_link_content_not_supported, context)
-                Napier.e("Error extracting metadata", e)
+                Napier.e("Error extracting metadata: "+ e.message, e)
                 repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e,
                     this@SelectExtractFilePresenterCommon)
             }
