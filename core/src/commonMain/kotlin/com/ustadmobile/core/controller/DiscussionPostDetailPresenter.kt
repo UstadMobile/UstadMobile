@@ -7,7 +7,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.DiscussionPost
@@ -30,9 +31,9 @@ class DiscussionPostDetailPresenter(
 
     val accountManager: UstadAccountManager by instance()
 
-    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
-    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
     var postUid: Long = 0
 
@@ -72,7 +73,7 @@ class DiscussionPostDetailPresenter(
             val updateListNeeded = postUid == 0L
             val loggedInPersonUid = accountManager.activeAccount.personUid
 
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+            repo.withDoorTransactionAsync { txRepo ->
 
                 txRepo.messageDao.insertAsync(
                     Message(
@@ -98,7 +99,7 @@ class DiscussionPostDetailPresenter(
 
     override fun updateMessageRead(messageRead: MessageRead){
         presenterScope.launch {
-            repo.withDoorTransactionAsync(UmAppDatabase::class){ txRepo ->
+            repo.withDoorTransactionAsync{ txRepo ->
                 txRepo.messageReadDao.insertAsync(messageRead)
             }
         }
@@ -106,7 +107,7 @@ class DiscussionPostDetailPresenter(
 
     fun updateMessageReadList(messageReadList: List<MessageRead>){
         presenterScope.launch {
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+            repo.withDoorTransactionAsync { txRepo ->
                 txRepo.messageReadDao.insertList(messageReadList)
             }
 

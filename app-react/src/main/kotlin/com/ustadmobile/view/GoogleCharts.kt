@@ -1,6 +1,6 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.UmState
 import react.ComponentType
 import react.RBuilder
@@ -50,7 +50,7 @@ fun RBuilder.umChart(
     options: ChartOptions? = null,
     className: String? = null,
     handler: StyledHandler<GoogleChartsProps>? = null
-) = createStyledComponent(googleChartsComponent.unsafeCast<ComponentType<GoogleChartsProps>>(), className, handler) {
+) = convertFunctionalToClassElement(googleChartsComponent.unsafeCast<ComponentType<GoogleChartsProps>>(), className, handler) {
     attrs.width = width.toString()
     attrs.height = height.toString()
     attrs.chartType = chartType.toString()

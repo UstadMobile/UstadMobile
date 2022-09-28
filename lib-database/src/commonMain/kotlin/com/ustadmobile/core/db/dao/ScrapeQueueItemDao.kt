@@ -1,17 +1,18 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDaoCommon.STATUS_PENDING
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeQueueItemWithScrapeRun
 
-@Dao
-abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
+@DoorDao
+expect abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
 
 
     @Query("SELECT * FROM ScrapeQueueItem WHERE status = $STATUS_PENDING AND itemType = :itemType ORDER BY priority ASC LIMIT 10")
-    abstract fun findNextQueueItems(itemType: Int): DoorLiveData<List<ScrapeQueueItem>>
+    abstract fun findNextQueueItems(itemType: Int): LiveData<List<ScrapeQueueItem>>
 
     @Query("UPDATE ScrapeQueueItem SET status = :status, errorCode = :errorCode WHERE sqiUid = :uid")
     abstract fun updateSetStatusById(uid: Int, status: Int, errorCode: Int)
@@ -33,16 +34,5 @@ abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
                     WHERE ScrapeQueueItem.sqiUid = :sqiUid""")
     abstract fun findByUid(sqiUid: Int): ScrapeQueueItemWithScrapeRun?
 
-    companion object {
-
-        const val STATUS_PENDING = 1
-
-        const val STATUS_RUNNING = 2
-
-        const val STATUS_DONE = 3
-
-        const val STATUS_FAILED = 4
-
-    }
 
 }

@@ -13,7 +13,6 @@ import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMURLEncoder
@@ -27,9 +26,10 @@ import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.db.ext.preload
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder.Companion.URI_PARAM_ENDPOINT
@@ -38,8 +38,8 @@ import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.json.*
 import okhttp3.OkHttpClient
 import org.junit.Assert
 import org.junit.Before
@@ -54,6 +54,7 @@ import java.nio.charset.StandardCharsets
 import javax.naming.InitialContext
 import kotlin.random.Random
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import io.ktor.client.plugins.contentnegotiation.*
 import kotlinx.coroutines.runBlocking
 
 class TestXapiStatementResponder {
@@ -103,7 +104,7 @@ class TestXapiStatementResponder {
 
             bind<HttpClient>() with singleton {
                 HttpClient(OkHttp) {
-                    install(JsonFeature)
+                    install(ContentNegotiation)
                     install(HttpTimeout)
                     engine {
                         preconfigured = instance()
@@ -111,20 +112,19 @@ class TestXapiStatementResponder {
                 }
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/$dbName.sqlite")
                     .addSyncCallback(nodeIdAndAuth)
                     .build()
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
                     .also { runBlocking { it.preload() } })
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(),
+                spy(instance<UmAppDatabase>(tag = DoorTag.TAG_DB).asRepository(repositoryConfig(Any(),
                     context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance())))
             }
 

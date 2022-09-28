@@ -7,7 +7,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.PersonGroupEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.PersonGroup
 import kotlinx.coroutines.GlobalScope
@@ -18,7 +18,7 @@ import org.kodein.di.DI
 
 class PersonGroupEditPresenter(context: Any,
                           arguments: Map<String, String>, view: PersonGroupEditView,
-                          lifecycleOwner: DoorLifecycleOwner,
+                          lifecycleOwner: LifecycleOwner,
                           di: DI)
     : UstadEditPresenter<PersonGroupEditView, PersonGroup>(context, arguments, view, di, lifecycleOwner) {
 
@@ -64,9 +64,7 @@ class PersonGroupEditPresenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, PersonGroup.serializer(), entity)
     }
 
     override fun handleClickSave(entity: PersonGroup) {

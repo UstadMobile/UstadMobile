@@ -5,19 +5,20 @@ import com.soywiz.klock.DateTime
 import com.soywiz.klock.weeks
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.util.ext.processEnrolmentIntoClass
+import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.LifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT_PENDING
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
@@ -43,7 +44,7 @@ class ClazzMemberListPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoClazzEnrolmentDaoSpy: ClazzEnrolmentDao
 
@@ -58,9 +59,7 @@ class ClazzMemberListPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         di = DI {
@@ -69,8 +68,8 @@ class ClazzMemberListPresenterTest {
 
         accountManager = di.direct.instance()
 
-        db = di.on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
-        repo = di.on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
+        db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
+        repo = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
 
         repoClazzEnrolmentDaoSpy = spy(repo.clazzEnrolmentDao)
         whenever(repo.clazzEnrolmentDao).thenReturn(repoClazzEnrolmentDaoSpy)

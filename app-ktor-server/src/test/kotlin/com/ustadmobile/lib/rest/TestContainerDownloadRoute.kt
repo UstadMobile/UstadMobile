@@ -15,24 +15,24 @@ import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
-import io.ktor.application.*
+import io.ktor.server.application.*
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
-import io.ktor.features.*
-import io.ktor.gson.*
+import io.ktor.serialization.gson.*
 import io.ktor.http.*
-import io.ktor.routing.*
+import io.ktor.server.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.bind
-import org.kodein.di.ktor.DIFeature
+import org.kodein.di.ktor.di
 import org.kodein.di.registerContextTranslator
 import org.kodein.di.scoped
 import org.kodein.di.singleton
@@ -75,7 +75,7 @@ class TestContainerDownloadRoute {
 
         nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
 
-        db = DatabaseBuilder.databaseBuilder(Any() ,UmAppDatabase::class, "UmAppDatabase")
+        db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
             .build()
         db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
         val attachmentsDir = temporaryFolder.newFolder()
@@ -83,7 +83,9 @@ class TestContainerDownloadRoute {
         okHttpClient = OkHttpClient()
 
         httpClient = HttpClient(OkHttp) {
-            install(JsonFeature)
+            install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+                gson()
+            }
             install(HttpTimeout)
             engine {
                 preconfigured = okHttpClient
@@ -104,7 +106,7 @@ class TestContainerDownloadRoute {
                 }
             }
 
-            install(DIFeature) {
+            di {
                 bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
                     db
                 }
@@ -144,12 +146,15 @@ class TestContainerDownloadRoute {
     fun givenContainer_WhenEntryListRequestIsMade_shouldGiveListWIthMd5s() {
         runBlocking {
             val httpClient = HttpClient {
-                install(JsonFeature)
+                install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation){
+                    gson()
+                }
             }
 
             httpClient.use {
-                val containerEntryList = httpClient.get<List<ContainerEntryWithMd5>>(
-                        "http://localhost:8097/ContainerEntryList/findByContainerWithMd5?containerUid=${container.containerUid}")
+                val containerEntryList: List<ContainerEntryWithMd5> = httpClient.get(
+                        "http://localhost:8097/ContainerEntryList/findByContainerWithMd5?containerUid=${container.containerUid}"
+                ).body()
                 val containerEntries = db.containerEntryDao.findByContainerWithMd5(container.containerUid)
                 containerEntries.forEach { dbEntry ->
                     Assert.assertTrue("Entry was in response", containerEntryList.any {

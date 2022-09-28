@@ -13,7 +13,6 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
-import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONCATENATEDFILES
 import com.ustadmobile.core.view.ContainerMounter
 import kotlin.jvm.JvmOverloads
 import org.kodein.di.*
@@ -23,6 +22,7 @@ import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.impl.http.vhToPxFactor
+import com.ustadmobile.door.ext.DoorTag
 
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
@@ -110,8 +110,8 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
     @JvmOverloads
     override suspend fun mountContainer(endpointUrl: String, containerUid: Long, filterMode: Int): String {
         val endpoint = Endpoint(endpointUrl)
-        val endpointDb: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
-        val endpointRepo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+        val endpointDb: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
+        val endpointRepo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
         val container = endpointRepo.containerDao.findByUidAsync(containerUid)
                 ?: throw IllegalArgumentException("Container $containerUid on $endpointUrl not found")

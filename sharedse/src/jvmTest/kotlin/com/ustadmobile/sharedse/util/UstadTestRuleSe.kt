@@ -10,8 +10,6 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
@@ -26,14 +24,16 @@ import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.db.ext.preload
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.json.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import okhttp3.OkHttpClient
@@ -46,6 +46,8 @@ import java.nio.file.Files
 import javax.naming.InitialContext
 import kotlin.random.Random
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.gson.*
 import kotlinx.coroutines.runBlocking
 
 fun DI.onActiveAccount(): DI {
@@ -55,13 +57,13 @@ fun DI.onActiveAccount(): DI {
 
 fun DI.onActiveAccountDirect() = direct.on(direct.instance<UstadAccountManager>().activeAccount)
 
-fun DI.activeDbInstance() = onActiveAccount().instance<UmAppDatabase>(tag = TAG_DB)
+fun DI.activeDbInstance() = onActiveAccount().instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
-fun DI.activeRepoInstance() = onActiveAccount().instance<UmAppDatabase>(tag = TAG_REPO)
+fun DI.activeRepoInstance() = onActiveAccount().instance<UmAppDatabase>(tag = DoorTag.TAG_REPO)
 
-fun DI.directActiveDbInstance() = onActiveAccountDirect().instance<UmAppDatabase>(tag = TAG_DB)
+fun DI.directActiveDbInstance() = onActiveAccountDirect().instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
-fun DI.directActiveRepoInstance() = onActiveAccountDirect().instance<UmAppDatabase>(tag = TAG_REPO)
+fun DI.directActiveRepoInstance() = onActiveAccountDirect().instance<UmAppDatabase>(tag = DoorTag.TAG_REPO)
 
 /**
  * UstadTestRule makes a fresh almost-ready-to-go DI module for each test run. The DB and SystemImpl
@@ -90,7 +92,9 @@ class UstadTestRule: TestWatcher() {
         systemImplSpy = spy(UstadMobileSystemImpl(XmlPullParserFactory.newInstance(), tmpFolder))
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {
-            install(JsonFeature)
+            install(ContentNegotiation) {
+                gson()
+            }
             install(HttpTimeout)
             engine {
                 preconfigured = okHttpClient
@@ -106,11 +110,11 @@ class UstadTestRule: TestWatcher() {
                 NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
             }
 
-            bind<UmAppDatabase>(tag = TAG_DB) with scoped(endpointScope!!).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope!!).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                spy(DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/$dbName.sqlite")
                     .addSyncCallback(nodeIdAndAuth)
                     .build()
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
@@ -125,9 +129,9 @@ class UstadTestRule: TestWatcher() {
                 okHttpClient
             }
 
-            bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope!!).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope!!).singleton {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
-                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(),
+                spy(instance<UmAppDatabase>(tag = DoorTag.TAG_DB).asRepository(repositoryConfig(Any(),
                     context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance()))
                 ).also {
                     it.siteDao.insert(Site().apply {

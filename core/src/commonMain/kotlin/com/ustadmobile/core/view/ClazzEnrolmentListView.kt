@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
@@ -13,7 +13,7 @@ interface ClazzEnrolmentListView: UstadListView<ClazzEnrolment, ClazzEnrolmentWi
 
     var clazz: Clazz?
 
-    var enrolmentList: DoorDataSourceFactory<Int, ClazzEnrolmentWithLeavingReason>?
+    var enrolmentList: DataSourceFactory<Int, ClazzEnrolmentWithLeavingReason>?
 
     var isStudentEnrolmentEditVisible: Boolean
 

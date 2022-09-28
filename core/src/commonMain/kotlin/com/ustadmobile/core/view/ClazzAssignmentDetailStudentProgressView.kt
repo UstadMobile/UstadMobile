@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
@@ -13,9 +13,9 @@ interface ClazzAssignmentDetailStudentProgressView: UstadDetailView<ClazzAssignm
 
     var submitterName: String?
 
-    var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
+    var clazzCourseAssignmentSubmissionAttachment: DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>?
 
-    var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>?
+    var clazzAssignmentPrivateComments: DataSourceFactory<Int, CommentsWithPerson>?
 
     var submissionScore: CourseAssignmentMark?
 

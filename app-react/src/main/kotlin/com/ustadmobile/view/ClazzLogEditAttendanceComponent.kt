@@ -4,13 +4,12 @@ import com.ustadmobile.core.controller.ClazzLogEditAttendancePresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.alignEndItems
@@ -28,6 +27,9 @@ import com.ustadmobile.util.ext.formatDate
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
 import kotlinx.css.margin
+import mui.material.Size
+import mui.material.ToggleButtonColor
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css
@@ -55,7 +57,7 @@ class ClazzLogEditAttendanceComponent (mProps: UmProps): UstadEditComponent<Claz
         }
     }
 
-    override var clazzLogAttendanceRecordList: DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>? = null
+    override var clazzLogAttendanceRecordList: MutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>? = null
         set(value) {
             field?.removeObserver(clazzLogAttendanceRecordListObserver)
             field = value
@@ -132,10 +134,10 @@ class ClazzLogEditAttendanceComponent (mProps: UmProps): UstadEditComponent<Claz
                umGridContainer {
                    umItem(GridSize.cells1) {
                        css(alignStartItems)
-                       umToggleButton(0, ToggleButtonSize.medium,
+                       umToggleButton(0, Size.medium,
                            disabled = disablePrevBtn){
-                           attrs.onClick = {
-                               stopEventPropagation(it)
+                           attrs.onClick = { evt, _ ->
+                               stopEventPropagation(evt)
                                handleOnDateChange(false)
                            }
                            umIcon("arrow_back_ios")
@@ -157,10 +159,10 @@ class ClazzLogEditAttendanceComponent (mProps: UmProps): UstadEditComponent<Claz
                    umItem(GridSize.cells1) {
                        css(alignEndItems)
 
-                       umToggleButton(0, ToggleButtonSize.medium,
+                       umToggleButton(0, Size.medium,
                            disabled = disableNextBtn){
-                           attrs.onClick = {
-                               stopEventPropagation(it)
+                           attrs.onClick = { evt, _ ->
+                               stopEventPropagation(evt)
                                handleOnDateChange(true)
                            }
                            umIcon("arrow_forward_ios")
@@ -205,8 +207,8 @@ class ClazzLogEditAttendanceComponent (mProps: UmProps): UstadEditComponent<Claz
                                        }
 
                                        umItem(GridSize.cells3) {
-                                          umToggleButtonGroup(size = if(Util.isMobile())ToggleButtonSize.small
-                                              else ToggleButtonSize.medium,
+                                          umToggleButtonGroup(size = if(Util.isMobile())Size.small
+                                              else Size.medium,
                                               onChange = {
                                                   val selected = it.unsafeCast<Array<Int>>().first()
                                                   setState {
@@ -245,8 +247,8 @@ class ClazzLogEditAttendanceComponent (mProps: UmProps): UstadEditComponent<Claz
 
     }
 
-    private fun setSelectedColor(selected: Boolean): UMColor{
-        return if(selected) UMColor.primary else UMColor.standard
+    private fun setSelectedColor(selected: Boolean): ToggleButtonColor {
+        return if(selected) ToggleButtonColor.primary else ToggleButtonColor.standard
     }
 
     override fun onDestroyView() {

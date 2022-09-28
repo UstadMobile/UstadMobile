@@ -2,7 +2,6 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.controller.DefaultNewCommentItemListener
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.defaultMarginBottom
 import com.ustadmobile.util.StyleManager.defaultMarginTop
@@ -14,6 +13,10 @@ import kotlinx.css.FlexDirection
 import kotlinx.css.LinearDimension
 import kotlinx.css.marginTop
 import kotlinx.css.padding
+import mui.material.FabColor
+import mui.material.FabVariant
+import mui.material.FormControlVariant
+import mui.material.Size
 import react.RBuilder
 import react.RComponent
 import react.setState
@@ -75,9 +78,9 @@ class NewCommentsComponent(mProps: CommentProps): RComponent<CommentProps, UmSta
             if(commentText.isNotEmpty()){
                 umItem(GridSize.cells2, GridSize.cells1, flexDirection = FlexDirection.rowReverse) {
                     umFab("send","",
-                        variant = FabVariant.round,
-                        size = ButtonSize.large,
-                        color = UMColor.secondary,
+                        variant = FabVariant.circular,
+                        size = Size.large,
+                        color = FabColor.secondary,
                         onClick = {
                             stopEventPropagation(it)
                             handleSendComment()

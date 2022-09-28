@@ -11,12 +11,12 @@ import com.toughra.ustadmobile.databinding.ItemPersongroupListItemBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.PersonGroupListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonGroupListView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.PersonGroup
 import com.ustadmobile.lib.db.entities.PersonGroupWithMemberCount
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -58,7 +58,7 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         val accountManager: UstadAccountManager by instance()
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
         mPresenter = PersonGroupListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this,  di, viewLifecycleOwner).withViewLifecycle()
         mDataBinding?.presenter = mPresenter

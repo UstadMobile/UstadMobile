@@ -48,7 +48,7 @@ class DeleteContentEntryPlugin(
         contentJobItem.cjiItemProgress = 25
         progress.onProgress(contentJobItem)
 
-        val zombiesNotDeleted = db.withDoorTransactionAsync(UmAppDatabase::class) { txDb: UmAppDatabase ->
+        val zombiesNotDeleted = db.withDoorTransactionAsync { txDb: UmAppDatabase ->
             txDb.containerEntryDao.deleteByContentEntryUid(contentJobItem.cjiContentEntryUid)
             txDb.containerEntryFileDao.deleteZombieContainerEntryFiles(db.dbType())
         }

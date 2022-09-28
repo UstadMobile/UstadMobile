@@ -1,15 +1,14 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.JoinWithCodePresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.navigation.NavControllerJs
 import com.ustadmobile.core.view.JoinWithCodeView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
-import com.ustadmobile.core.navigation.NavControllerJs
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
@@ -19,6 +18,11 @@ import com.ustadmobile.view.ext.umItem
 import kotlinx.css.LinearDimension
 import kotlinx.css.marginTop
 import kotlinx.css.padding
+import mui.material.ButtonColor
+import mui.material.ButtonVariant
+import mui.material.FormControlVariant
+import mui.material.Size
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css
@@ -138,11 +142,11 @@ class JoinWithCodeComponent (mProps: UmProps): UstadBaseComponent<UmProps, UmSta
 
                         umItem(GridSize.cells12, GridSize.cells4) {
                             umButton(
-                                caption = buttonLabel ?: "",
+                                label = buttonLabel ?: "",
                                 disabled = code.isNullOrEmpty(),
                                 variant = ButtonVariant.contained,
-                                color = UMColor.secondary,
-                                size = ButtonSize.large,
+                                color = ButtonColor.secondary,
+                                size = Size.large,
                                 onClick = {
                                     code?.let { code ->
                                         mPresenter?.handleClickDone(code)

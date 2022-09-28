@@ -8,7 +8,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.LearnerGroupMember
 import com.ustadmobile.lib.db.entities.Person
@@ -20,7 +20,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 class LearnerGroupMemberListPresenter(context: Any, arguments: Map<String, String>, view: LearnerGroupMemberListView,
-                                      di: DI, lifecycleOwner: DoorLifecycleOwner) :
+                                      di: DI, lifecycleOwner: LifecycleOwner) :
         UstadListPresenter<LearnerGroupMemberListView, LearnerGroupMember>(context, arguments, view, di, lifecycleOwner) {
 
     var learnerGroupUid: Long = 0

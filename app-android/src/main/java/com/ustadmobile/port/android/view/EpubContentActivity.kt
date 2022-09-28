@@ -27,7 +27,7 @@ import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.port.android.view.ext.adjustHeightToDisplayHeight
 import com.ustadmobile.port.android.view.ext.adjustHeightToWrapContent
 import com.ustadmobile.core.util.ext.dpAsPx
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.port.android.view.ext.scrollToAnchor
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.CompletableDeferred
@@ -72,7 +72,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
             lifecycle.coroutineScope
         }
 
-        bind<DoorLifecycleOwner>() with provider {
+        bind<LifecycleOwner>() with provider {
             this@EpubContentActivity
         }
     }

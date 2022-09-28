@@ -1,19 +1,13 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.AppBar
+import mui.material.AppBarColor
+import mui.material.AppBarPosition
 import mui.material.AppBarProps
 import react.RBuilder
 import styled.StyledHandler
 
-@Suppress("EnumEntryName")
-enum class AppBarPosition {
-    fixed, absolute, sticky, static, relative
-}
-
-enum class AppBarColor {
-    primary, secondary, transparent, default, inherit
-}
 
 fun RBuilder.umAppBar(
     color: AppBarColor = AppBarColor.primary,
@@ -21,8 +15,8 @@ fun RBuilder.umAppBar(
     className: String? = null,
     enableColorOnDark: Boolean = false,
     handler: StyledHandler<AppBarProps>? = null
-) = createStyledComponent(AppBar, className, handler) {
-    attrs.color = color.toString()
-    attrs.position = position.toString()
+) = convertFunctionalToClassElement(AppBar, className, handler) {
+    attrs.color = color
+    attrs.position = position
     attrs.enableColorOnDark = enableColorOnDark
 }

@@ -4,7 +4,8 @@ import com.ustadmobile.core.controller.SiteEnterLinkPresenter
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.*
-import io.ktor.client.features.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 
 /**
@@ -12,9 +13,9 @@ import io.ktor.client.request.*
  */
 suspend fun HttpClient.verifySite(endpointUrl: String, timeout: Long = SiteEnterLinkPresenter.LINK_REQUEST_TIMEOUT): Site {
     val siteVerifyUrl = UMFileUtil.joinPaths(endpointUrl, "Site","verify")
-    return get<Site>(siteVerifyUrl) {
+    return get(siteVerifyUrl) {
         timeout {
             requestTimeoutMillis = timeout
         }
-    }
+    }.body()
 }

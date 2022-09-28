@@ -23,12 +23,9 @@ include ':app-android',
         ':core',
         ':sharedse',
         ':app-android-launcher',
-        ':lib-database-entities',
         ':lib-util',
-        ':lib-database-mpp',
         ':lib-http-testserver',
         ':lib-database',
-        ':lib-database-android',
         ':lib-content-scrapers',
         ':app-react-e2e-test'
 

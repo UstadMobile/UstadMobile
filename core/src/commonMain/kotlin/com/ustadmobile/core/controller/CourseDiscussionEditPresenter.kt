@@ -18,7 +18,7 @@ import com.ustadmobile.core.view.ItemTouchHelperListener
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -32,7 +32,7 @@ import org.kodein.di.DI
 class CourseDiscussionEditPresenter(context: Any,
                                     arguments: Map<String, String>,
                                     view: CourseDiscussionEditView,
-                                    lifecycleOwner: DoorLifecycleOwner,
+                                    lifecycleOwner: LifecycleOwner,
                                     di: DI)
     : UstadEditPresenter<CourseDiscussionEditView, CourseBlockWithEntity>(  context,
                                                                             arguments,
@@ -119,7 +119,7 @@ class CourseDiscussionEditPresenter(context: Any,
 
         topicsOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
 
-        topicsOneToManyJoinEditHelper.liveList.sendValue(editEntity.topics ?: listOf())
+        topicsOneToManyJoinEditHelper.liveList.postValue(editEntity.topics ?: listOf())
         presenterScope.launch {
 
 
@@ -144,7 +144,7 @@ class CourseDiscussionEditPresenter(context: Any,
             saveDateTimeIntoEntity(entityVal)
             entityVal.topics = topicsOneToManyJoinEditHelper.liveList.getValue()
         }
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, CourseBlockWithEntity.serializer(),
                 entityVal)
     }
 
@@ -256,7 +256,7 @@ class CourseDiscussionEditPresenter(context: Any,
             item.discussionTopicIndex = index
         }
 
-        topicsOneToManyJoinEditHelper.liveList.sendValue(currentList.toList())
+        topicsOneToManyJoinEditHelper.liveList.postValue(currentList.toList())
 
         return true
     }

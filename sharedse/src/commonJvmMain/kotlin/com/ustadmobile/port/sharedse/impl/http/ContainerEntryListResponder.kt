@@ -1,7 +1,6 @@
 package com.ustadmobile.port.sharedse.impl.http
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UMLog
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
@@ -10,6 +9,7 @@ import com.ustadmobile.core.account.Endpoint
 import org.kodein.di.instance
 import org.kodein.di.on
 import com.google.gson.Gson
+import com.ustadmobile.door.ext.DoorTag
 
 /**
  * NanoHTTPD router that will provide a list of all ContainEntry objects (and their MD5 sum) so that
@@ -24,7 +24,7 @@ class ContainerEntryListResponder : RouterNanoHTTPD.UriResponder {
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
         val di = uriResource.initParameter(PARAM_DI_INDEX, DI::class.java)
         val endpoint = urlParams[PATH_VAR_ENDPOINT] ?: return newBadRequestResponse("No endpoint in urlParams")
-        val appDatabase: UmAppDatabase by di.on(Endpoint(endpoint)).instance(tag = TAG_DB)
+        val appDatabase: UmAppDatabase by di.on(Endpoint(endpoint)).instance(tag = DoorTag.TAG_DB)
         val containerUid = session.parameters.get(PARAM_CONTAINER_UID)?.firstOrNull()?.toLong()
                 ?: return newBadRequestResponse("No containerUid param")
         val entryList = appDatabase.containerEntryDao.findByContainerWithMd5(containerUid)

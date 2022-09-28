@@ -12,7 +12,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.TextCourseBlockEditView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.ClazzWithSchool
@@ -22,7 +22,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class TextCourseBlockEditPresenter(context: Any, args: Map<String, String>, view: TextCourseBlockEditView,
-                                     di: DI, lifecycleOwner: DoorLifecycleOwner)
+                                     di: DI, lifecycleOwner: LifecycleOwner)
     : UstadEditPresenter<TextCourseBlockEditView, CourseBlock>(context, args, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode

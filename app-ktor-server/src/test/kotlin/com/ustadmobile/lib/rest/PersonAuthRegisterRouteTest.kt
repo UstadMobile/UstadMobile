@@ -3,39 +3,42 @@ package com.ustadmobile.lib.rest
 import com.google.gson.Gson
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
-import io.ktor.application.*
+import io.ktor.server.application.*
 import io.ktor.http.*
-import io.ktor.routing.*
+import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import org.junit.Test
-import org.kodein.di.ktor.DIFeature
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.commonJvmDiModule
-import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ParentalConsentManagementView
-import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.RepositoryConfig
-import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.serialization.json.Json
 import org.mockito.kotlin.*
-import org.xmlpull.v1.XmlPullParserFactory
-import com.ustadmobile.door.entities.NodeIdAndAuth
-import com.ustadmobile.door.ext.toHexString
-import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.rest.ext.insertDefaultSite
-import io.ktor.features.*
-import io.ktor.gson.*
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.content.*
+import io.ktor.serialization.gson.*
+import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.ktor.closestDI
-import kotlin.random.Random
+import org.kodein.di.ktor.di
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.config.*
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.response.*
+import org.slf4j.event.Level
+
 
 class PersonAuthRegisterRouteTest {
 
@@ -45,45 +48,76 @@ class PersonAuthRegisterRouteTest {
     @Rule
     val temporaryFolder = TemporaryFolder()
 
-    private fun <R> withTestRegister(testFn: TestApplicationEngine.() -> R) {
-        val endpointScope = EndpointScope()
+    private lateinit var serverDi: DI
+
+    private lateinit var endpointScope: EndpointScope
+
+    @Before
+    fun setup() {
+        endpointScope = EndpointScope()
         mockNotificationSender = mock { }
-        withTestApplication({
-            install(ContentNegotiation) {
-                gson {
-                    register(ContentType.Application.Json, GsonConverter())
-                    register(ContentType.Any, GsonConverter())
+        Napier.takeLogarithm()
+        Napier.base(DebugAntilog())
+
+        serverDi = DI {
+            import(commonJvmDiModule)
+
+            import(commonTestKtorDiModule(endpointScope, temporaryFolder))
+
+            bind<NotificationSender>() with singleton {
+                mockNotificationSender
+            }
+
+            onReady {
+                val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_REPO)
+                repo.insertDefaultSite()
+            }
+
+            registerContextTranslator { _: ApplicationCall ->
+                Endpoint("localhost")
+            }
+        }
+    }
+
+    private fun testPersonAuthRegisterApplication(
+        block: ApplicationTestBuilder.(httpClient: HttpClient) -> Unit
+    ) {
+        testApplication {
+            environment {
+                config = MapApplicationConfig("ktor.environment" to "test")
+            }
+
+            val client = createClient {
+                install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+                    gson()
                 }
             }
 
-            install(DIFeature) {
-                import(commonJvmDiModule)
-                import(commonTestKtorDiModule(endpointScope, temporaryFolder))
-
-                bind<NotificationSender>() with singleton {
-                    mockNotificationSender
+            application {
+                install(ContentNegotiation) {
+                    gson()
+                }
+                install(CallLogging) {
+                    level = Level.DEBUG
                 }
 
+                di {
+                    extend(serverDi)
+                }
 
-                registerContextTranslator { _: ApplicationCall ->
-                    Endpoint("localhost")
+                routing {
+                    personAuthRegisterRoute()
                 }
             }
 
-            routing {
-                personAuthRegisterRoute()
-            }
-        }) {
-            val di: DI by closestDI { this.application }
-            val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_REPO)
-            repo.insertDefaultSite()
-
-            testFn()
+            block(client)
         }
     }
 
     @Test
-    fun givenRegisterRequestFromMinor_whenRegisterCalled_thenShouldSendEmailAndReply() = withTestRegister {
+    fun givenRegisterRequestFromMinor_whenRegisterCalled_thenShouldSendEmailAndReply(
+
+    ) = testPersonAuthRegisterApplication { client ->
         val registerPerson = PersonWithAccount().apply {
             this.newPassword = "test"
             firstNames = "Bob"
@@ -95,24 +129,28 @@ class PersonAuthRegisterRouteTest {
             this.ppjEmail = "parent@email.com"
         }
 
-        handleRequest(HttpMethod.Post, "/auth/register") {
-            setBody(Json.encodeToString(RegisterRequest.serializer(), RegisterRequest(
-                person = registerPerson,
-                parent = registerParent,
-                endpointUrl = "https://org.ustadmobile.app/"
-            )))
-            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-        }.apply {
-            verifyBlocking(mockNotificationSender) {
-                sendEmail(eq("parent@email.com"), any(), argWhere {
-                    it.contains("https://org.ustadmobile.app/umapp/#/${ParentalConsentManagementView.VIEW_NAME}")
-                })
+        runBlocking {
+            client.post("/auth/register") {
+                contentType(ContentType.Application.Json)
+                setBody(RegisterRequest(
+                    person = registerPerson,
+                    parent = registerParent,
+                    endpointUrl = "https://org.ustadmobile.app/"
+                ))
             }
+        }
+
+        verifyBlocking(mockNotificationSender) {
+            sendEmail(eq("parent@email.com"), any(), argWhere {
+                it.contains("https://org.ustadmobile.app/umapp/#/${ParentalConsentManagementView.VIEW_NAME}")
+            })
         }
     }
 
     @Test
-    fun givenRegisterPersonWithAuth_whenRegisterCalled_thenShouldGenerateAuth() = withTestRegister {
+    fun givenRegisterPersonWithAuth_whenRegisterCalled_thenShouldGenerateAuth(
+
+    ) = testPersonAuthRegisterApplication { client ->
         val registerPerson = PersonWithAccount().apply {
             this.newPassword = "test"
             firstNames = "Bob"
@@ -123,36 +161,38 @@ class PersonAuthRegisterRouteTest {
             confirmedPassword = "secret23"
         }
 
-        handleRequest(HttpMethod.Post, "/auth/register") {
-            setBody(Json.encodeToString(RegisterRequest.serializer(), RegisterRequest(
-                person = registerPerson,
-                parent = null,
-                endpointUrl = "https://org.ustadmobile.app/"
-            )))
-
-        }.apply {
-            val response = response.content!!
-            val createdAccount : Person = Json.decodeFromString(PersonWithAccount.serializer(), response)
-            val di: DI by closestDI()
-
-            val pbkdf2Params: Pbkdf2Params = di.direct.instance()
-
-            runBlocking {
-                val db: UmAppDatabase = di.direct.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_DB)
-                val personAuth2 = db.personAuth2Dao.findByPersonUid(createdAccount.personUid)
-                val salt = db.siteDao.getSite()?.authSalt ?: throw IllegalStateException("No auth salt!")
-                Assert.assertEquals("PersonAuth2 created with valid hashed password",
-                    "secret23".doublePbkdf2Hash(salt, pbkdf2Params).encodeBase64(),
-                    personAuth2?.pauthAuth)
+        val httpResponse = runBlocking {
+            client.post("/auth/register") {
+                contentType(ContentType.Application.Json)
+                setBody(RegisterRequest(
+                    person = registerPerson,
+                    parent = null,
+                    endpointUrl = "https://org.ustadmobile.app/"
+                ))
             }
         }
+
+        val createdAccount: PersonWithAccount = runBlocking { httpResponse.body() }
+
+
+        val pbkdf2Params: Pbkdf2Params = serverDi.direct.instance()
+
+        runBlocking {
+            val db: UmAppDatabase = serverDi.direct.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_DB)
+            val personAuth2 = db.personAuth2Dao.findByPersonUid(createdAccount.personUid)
+            val salt = db.siteDao.getSite()?.authSalt ?: throw IllegalStateException("No auth salt!")
+            Assert.assertEquals("PersonAuth2 created with valid hashed password",
+                "secret23".doublePbkdf2Hash(salt, pbkdf2Params).encodeBase64(),
+                personAuth2?.pauthAuth)
+        }
     }
 
     @Test
-    fun givenValidCredentials_whenLoginCalled_thenShouldReturnAccount()  = withTestRegister {
-        val di: DI by closestDI { application }
-        val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
-        val pbkdf2Params: Pbkdf2Params by di.instance()
+    fun givenValidCredentials_whenLoginCalled_thenShouldReturnAccount(
+
+    )  = testPersonAuthRegisterApplication { client ->
+        val repo: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val pbkdf2Params: Pbkdf2Params by serverDi.instance()
 
         val person = runBlocking {
             repo.insertPersonAndGroup(Person().apply {
@@ -165,22 +205,27 @@ class PersonAuthRegisterRouteTest {
             repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params)
         }
 
-        handleRequest(HttpMethod.Post, "/auth/login?username=mary&password=secret23") {
-            addHeader("X-nid", "123")
-        }.apply {
-            Assert.assertEquals("Response is 200 OK", HttpStatusCode.OK, response.status())
-            val bodyStr = this.response.content!!
-            val umAccount = Gson().fromJson(bodyStr, UmAccount::class.java)
-            Assert.assertEquals("Received expected account object",
-                "mary", umAccount.username)
+        val httpResponse = runBlocking {
+            client.post("/auth/login?username=mary&password=secret23") {
+                header("X-nid", "123")
+            }
         }
+
+        Assert.assertEquals("Response is 200 OK", HttpStatusCode.OK, httpResponse.status)
+        val umAccount: UmAccount = runBlocking { httpResponse.body() }
+
+        Assert.assertEquals("Received expected account object",
+            "mary", umAccount.username)
     }
 
+
+
     @Test
-    fun givenInvalidCredentials_whenLoginCalled_thenShouldRespondForbidden()  = withTestRegister {
-        val di: DI by closestDI { application }
-        val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
-        val pbkdf2Params: Pbkdf2Params by di.instance()
+    fun givenInvalidCredentials_whenLoginCalled_thenShouldRespondForbidden(
+
+    )  = testPersonAuthRegisterApplication { client ->
+        val repo: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val pbkdf2Params: Pbkdf2Params by serverDi.instance()
 
         val person = runBlocking {
             repo.insertPersonAndGroup(Person().apply {
@@ -193,18 +238,21 @@ class PersonAuthRegisterRouteTest {
             repo.insertPersonAuthCredentials2(person.personUid, "secret23", pbkdf2Params)
         }
 
-        handleRequest(HttpMethod.Post, "/auth/login?username=mary&password=wrong") {
-            addHeader("X-nid", "123")
-        }.apply {
-            Assert.assertEquals("Response is Forbidden", HttpStatusCode.Forbidden, response.status())
+        val httpResponse = runBlocking {
+            client.post("/auth/login?username=mary&password=wrong") {
+                header("X-nid", "123")
+            }
         }
+        Assert.assertEquals("Resposne is Forbidden", HttpStatusCode.Forbidden,
+            httpResponse.status)
     }
 
     @Test
-    fun givenParentalConsentIsRequiredButNotGranted_whenLoginCalled_thenShouldRespondFailedDepdency() = withTestRegister {
-        val di: DI by closestDI { application }
-        val repo: UmAppDatabase by di.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
-        val pbkdf2Params: Pbkdf2Params by di.instance()
+    fun givenParentalConsentIsRequiredButNotGranted_whenLoginCalled_thenShouldRespondFailedDepdency(
+
+    ) = testPersonAuthRegisterApplication {
+        val repo: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_REPO)
+        val pbkdf2Params: Pbkdf2Params by serverDi.instance()
 
         val person = runBlocking {
             repo.insertPersonAndGroup(Person().apply {
@@ -221,12 +269,14 @@ class PersonAuthRegisterRouteTest {
             })
         }
 
-        handleRequest(HttpMethod.Post, "/auth/login?username=mary&password=secret23") {
-            addHeader("X-nid", "123")
-        }.apply {
-            Assert.assertEquals("Response is Precondition Failed",
-                HttpStatusCode.FailedDependency, response.status())
+        val response = runBlocking {
+            client.post("/auth/login?username=mary&password=secret23") {
+                header("X-nid", "123")
+            }
         }
+
+        Assert.assertEquals("Response is Precondition Failed",
+            HttpStatusCode.FailedDependency, response.status)
     }
 
 }

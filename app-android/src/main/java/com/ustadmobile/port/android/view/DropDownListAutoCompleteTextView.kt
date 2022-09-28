@@ -62,8 +62,11 @@ open class DropDownListAutoCompleteTextView<T: Any>: androidx.appcompat.widget.A
             }
 
             override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
-                mCurrentList = (results?.values as List<T>)
-                if(results?.count > 0) {
+                if(results == null)
+                    return
+
+                mCurrentList = (results.values as List<T>)
+                if(results.count > 0) {
                     notifyDataSetChanged()
                 }else {
                     notifyDataSetInvalidated()

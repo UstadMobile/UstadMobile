@@ -5,8 +5,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
@@ -16,7 +16,7 @@ class @BaseFileName@Presenter(
     arguments: Map<String, String>,
     view: @BaseFileName@View,
     di: DI,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     private val @Entity_VariableName@ItemListener: Default@BaseFileName@ItemListener = Default@BaseFileName@ItemListener(view, ListViewMode.BROWSER, context, di)
 ) : UstadListPresenter<@BaseFileName@View, @Entity@>(context, arguments, view, di, lifecycleOwner),
     @BaseFileName@ItemListener by @Entity_VariableName@ItemListener

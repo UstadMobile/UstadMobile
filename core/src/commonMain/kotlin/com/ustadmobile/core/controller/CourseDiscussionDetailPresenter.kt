@@ -5,8 +5,8 @@ import com.ustadmobile.core.view.CourseDiscussionDetailView
 import com.ustadmobile.core.view.DiscussionTopicDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.CourseDiscussion
 import com.ustadmobile.lib.db.entities.DiscussionTopicListDetail
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -17,7 +17,7 @@ class CourseDiscussionDetailPresenter(
         context: Any, arguments: Map<String, String>,
         view: CourseDiscussionDetailView,
         di: DI,
-        lifecycleOwner: DoorLifecycleOwner
+        lifecycleOwner: LifecycleOwner
     ) : UstadDetailPresenter<CourseDiscussionDetailView, CourseDiscussion>(
                 context,
                 arguments,
@@ -34,7 +34,7 @@ class CourseDiscussionDetailPresenter(
         return false
     }
 
-    override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<CourseDiscussion?>? {
+    override fun onLoadLiveData(repo: UmAppDatabase): LiveData<CourseDiscussion?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         view.topics = repo.discussionTopicDao.getListOfTopicsByDiscussion(entityUid)

@@ -1,13 +1,13 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 
 
 interface ClazzLogEditAttendanceView: UstadEditView<ClazzLog> {
 
-    var clazzLogAttendanceRecordList: DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>?
+    var clazzLogAttendanceRecordList: MutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>?
 
     /**
      * The timezone MUST always be set first

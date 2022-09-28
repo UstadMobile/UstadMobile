@@ -7,7 +7,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.TextAssignmentEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
@@ -18,7 +18,7 @@ import org.kodein.di.DI
 
 class TextAssignmentEditPresenter(context: Any,
                              arguments: Map<String, String>, view: TextAssignmentEditView,
-                             lifecycleOwner: DoorLifecycleOwner,
+                             lifecycleOwner: LifecycleOwner,
                              di: DI)
     : UstadEditPresenter<TextAssignmentEditView, CourseAssignmentSubmission>(context, arguments, view, di, lifecycleOwner) {
 
@@ -54,9 +54,8 @@ class TextAssignmentEditPresenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json,CourseAssignmentSubmission.serializer(),
+                entity)
     }
 
     override fun handleClickSave(entity: CourseAssignmentSubmission) {

@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -8,8 +7,12 @@ import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ObjectMessageIdOption
 import com.ustadmobile.core.util.ext.toDisplayString
 import com.ustadmobile.core.view.ReportEditView
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.DateRangeMoment
+import com.ustadmobile.lib.db.entities.ReportFilter
+import com.ustadmobile.lib.db.entities.ReportSeries
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.defaultPaddingTop
 import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
 import com.ustadmobile.util.StyleManager.horizontalList
@@ -18,6 +21,7 @@ import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.*
 import kotlinx.css.*
+import mui.material.FormControlVariant
 import react.RBuilder
 import react.setState
 import styled.css

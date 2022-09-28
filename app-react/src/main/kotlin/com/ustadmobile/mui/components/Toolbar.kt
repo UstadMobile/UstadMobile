@@ -1,22 +1,18 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Toolbar
 import mui.material.ToolbarProps
+import mui.material.ToolbarVariant
 import react.RBuilder
 import styled.StyledHandler
-
-@Suppress("EnumEntryName")
-enum class ToolbarVariant {
-    regular, dense
-}
 
 fun RBuilder.umToolbar(
     disableGutters: Boolean = false,
     variant: ToolbarVariant = ToolbarVariant.regular,
     className: String? = null,
     handler: StyledHandler<ToolbarProps>? = null
-) = createStyledComponent(Toolbar, className, handler) {
+) = convertFunctionalToClassElement(Toolbar, className, handler) {
     attrs.disableGutters = disableGutters
-    attrs.variant = variant.toString()
+    attrs.variant = variant
 }

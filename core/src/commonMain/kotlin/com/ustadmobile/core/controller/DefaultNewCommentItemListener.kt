@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
@@ -24,7 +25,7 @@ class DefaultNewCommentItemListener(
 
         val accountManager: UstadAccountManager by instance()
 
-        val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+        val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
         val commentObj = Comments(tableId, entityUid, accountManager.activeAccount.personUid,
                 getSystemTimeInMillis(), text, isPublic)

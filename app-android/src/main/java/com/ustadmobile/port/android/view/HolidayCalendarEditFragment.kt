@@ -18,7 +18,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.HolidayCalendarEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -48,7 +48,7 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
         }
     }
 
-    override var holidayList: DoorLiveData<List<Holiday>>? = null
+    override var holidayList: LiveData<List<Holiday>>? = null
         get() = field
         set(value) {
             field?.removeObserver(holidayObserver)

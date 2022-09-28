@@ -1,14 +1,11 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Paper
 import mui.material.PaperProps
+import mui.material.PaperVariant
 import react.RBuilder
 import styled.StyledHandler
-
-enum class PaperVariant {
-    elevation, outlined
-}
 
 fun RBuilder.umPaper(
     elevation: Int = 2,
@@ -16,8 +13,8 @@ fun RBuilder.umPaper(
     variant: PaperVariant = PaperVariant.elevation,
     className: String? = null,
     handler: StyledHandler<PaperProps>? = null
-) = createStyledComponent(Paper, className, handler) {
+) = convertFunctionalToClassElement(Paper, className, handler) {
     attrs.elevation = elevation
     attrs.square = square
-    attrs.variant = variant.toString()
+    attrs.variant = variant
 }

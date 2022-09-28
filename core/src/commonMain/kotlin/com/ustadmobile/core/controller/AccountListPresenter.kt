@@ -20,14 +20,14 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_MAX_DATE_OF_BIRTH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_TITLE
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.DoorMediatorLiveData
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 
 class AccountListPresenter(context: Any, arguments: Map<String, String>, view: AccountListView,
-                           di: DI, val doorLifecycleOwner: DoorLifecycleOwner)
+                           di: DI, val doorLifecycleOwner: LifecycleOwner)
     : UstadBaseController<AccountListView>(context, arguments, view, di, activeSessionRequired = false) {
 
     private val accountManager: UstadAccountManager by instance()
@@ -69,7 +69,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
                 newList.removeAll { it.person.dateOfBirth > maxDateOfBirth }
             }
 
-            accountListMediator.sendValue(newList)
+            accountListMediator.postValue(newList)
         }
 
         nextDest = arguments[ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest(context)

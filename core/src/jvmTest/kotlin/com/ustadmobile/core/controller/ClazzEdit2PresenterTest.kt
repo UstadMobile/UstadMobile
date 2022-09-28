@@ -11,8 +11,9 @@ import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.LifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.runBlocking
@@ -38,7 +39,7 @@ class ClazzEdit2PresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoClazzDaoSpy: ClazzDao
 
@@ -49,9 +50,7 @@ class ClazzEdit2PresenterTest {
     @Before
     fun setup() {
         mockView = mockEditView { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         val mockClazzLogCreator = mock<ClazzLogCreatorManager>()
@@ -141,7 +140,7 @@ class ClazzEdit2PresenterTest {
 
         val entitySaved = runBlocking {
             db.clazzDao.findByUidLive(testEntity.clazzUid)
-                    .waitUntil(5000 * 1000) { it?.clazzName == "New Spelling Clazz" }.getValue()
+                    .waitUntil(5000) { it?.clazzName == "New Spelling Clazz" }.getValue()
         }
 
         Assert.assertEquals("Name was saved and updated",
