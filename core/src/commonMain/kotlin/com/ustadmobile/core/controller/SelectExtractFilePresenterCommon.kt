@@ -51,6 +51,7 @@ abstract class SelectExtractFilePresenterCommon(
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.acceptedMimeTypes =  arguments[SelectFileView.ARG_MIMETYPE_SELECTED].toString().split(";")
+        Napier.d{"HELLO HELLO HELLO"}
     }
 
     abstract suspend fun extractMetadata(uri: String, filename: String): MetadataResult

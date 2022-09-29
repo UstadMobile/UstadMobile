@@ -1,12 +1,12 @@
 package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.contentjob.ContentPlugin
-import com.ustadmobile.core.view.VideoContentView
+import com.ustadmobile.core.view.PDFContentView
 
 abstract class PDFTypePlugin : ContentPlugin {
 
     val viewName: String
-        get() = VideoContentView.VIEW_NAME
+        get() = PDFContentView.VIEW_NAME
 
     override val supportedMimeTypes: List<String>
         get() = PDF_MIME_MAP.keys.toList()
