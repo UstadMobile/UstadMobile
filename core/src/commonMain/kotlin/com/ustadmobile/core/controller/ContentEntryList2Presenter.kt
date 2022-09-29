@@ -388,8 +388,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override fun onClickImportFile() {
-        val supportedMimeTypes = pluginManager?.supportedMimeTypeList?.joinToString(";")
-        val supportedMimeTypes2 = pluginManager?.supportedMimeTypeList
         val args = mutableMapOf(
                 SelectFileView.ARG_MIMETYPE_SELECTED to
                         (pluginManager?.supportedMimeTypeList?.joinToString(";") ?: "*/*"),
@@ -398,10 +396,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         args.putFromOtherMapIfPresent(arguments, KEY_SELECTED_ITEMS)
         args.putFromOtherMapIfPresent(arguments, ContentEntryEdit2View.BLOCK_REQUIRED)
         args.putFromOtherMapIfPresent(arguments, ARG_CLAZZUID)
-        UmPlatformUtil.debug()
 
-        Napier.d{"HELLO from ContentEntryList2Presenter "}
-        
         navigateForResult(NavigateForResultOptions(
             this, null,
             SelectExtractFileView.VIEW_NAME,

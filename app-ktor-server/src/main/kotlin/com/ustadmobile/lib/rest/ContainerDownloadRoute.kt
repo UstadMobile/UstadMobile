@@ -16,9 +16,7 @@ import io.ktor.server.application.call
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.request.*
-import io.ktor.server.response.header
-import io.ktor.server.response.respond
-import io.ktor.server.response.respondFile
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.toMap
@@ -120,25 +118,25 @@ fun Route.ContainerDownload() {
         val containerEntryFile: ContainerEntryFile? = entries[0].containerEntryFile;
         if(containerEntryFile?.cefPath != null){
 
-            val file: File = File(containerEntryFile.cefPath)
+            val file = containerEntryFile.cefPath?.let { it1 -> File(it1) }
 
-            call.response.header(
-                HttpHeaders.ContentDisposition,
-                ContentDisposition.Attachment.withParameter(ContentDisposition.Parameters.FileName,
-                    "$containerUid.pdf"
+            if(file != null) {
+                call.response.header("Content-Type", "application/pdf")
+                call.response.header(
+                    HttpHeaders.ContentDisposition,
+
+                    ContentDisposition.Inline.withParameter(
+                        ContentDisposition.Parameters.FileName,
+                        "$containerUid.pdf"
+                    )
+                        .toString()
                 )
-                    .toString()
-            )
-            call.respondFile(file)
+                call.respondBytes(file.readBytes(), ContentType.Application.Pdf)
 
-//            call.response.header("X-Content-Length-Uncompressed", containerEntryFile?.ceTotalSize.toString())
-//
-//            //TODO: Find a solution to mimetype return
-//            //call.response.header("Content-Type", "application/pdf") // NOT ALLOWED
-//
-//
-//            call.respondFile()
-
+            }else{
+                call.respond(HttpStatusCode.NotFound,
+                    "No such file path for containerUid : $containerUid")
+            }
 
         }else {
             call.respond(HttpStatusCode.NotFound, "No such file for containerUid: $containerUid")
