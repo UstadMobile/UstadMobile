@@ -26,7 +26,6 @@ import react.RBuilder
 import react.setState
 import styled.css
 import styled.styledDiv
-import kotlin.js.Date
 
 
 class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry,

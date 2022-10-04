@@ -1,9 +1,11 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
-import androidx.room.Dao
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.core.db.dao.SchoolDaoCommon.SORT_NAME_ASC
+import com.ustadmobile.core.db.dao.SchoolDaoCommon.SORT_NAME_DESC
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_SCHOOL_VIA_SCOPEDGRANT_PT1
@@ -12,8 +14,8 @@ import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_SCHOOL_TO_USER
 import com.ustadmobile.lib.db.entities.School.Companion.JOIN_FROM_SCHOOL_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 
 @Repository
-@Dao
-abstract class SchoolDao : BaseDao<School> {
+@DoorDao
+expect abstract class SchoolDao : BaseDao<School> {
 
     @Query("""
      REPLACE INTO SchoolReplicate(schoolPk, schoolDestination)
@@ -138,37 +140,11 @@ abstract class SchoolDao : BaseDao<School> {
               END DESC""")
     abstract fun findAllActiveSchoolWithMemberCountAndLocationName(searchBit: String,
                     personUid: Long, permission: Long, sortOrder: Int)
-            : DoorDataSourceFactory<Int, SchoolWithMemberCountAndLocation>
+            : DataSourceFactory<Int, SchoolWithMemberCountAndLocation>
 
 
     @Update
     abstract suspend fun updateAsync(entity: School): Int
 
-    companion object {
-
-        const val SORT_NAME_ASC = 1
-
-        const val SORT_NAME_DESC = 2
-
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
-            SELECT DISTINCT Person.PersonUid FROM Person
-            LEFT JOIN PersonGroupMember ON Person.personUid = PersonGroupMember.groupMemberPersonUid
-            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
-            WHERE 
-            CAST(Person.admin AS INTEGER) = 1
-            OR 
-            (EntityRole.ertableId = ${School.TABLE_ID} AND 
-            EntityRole.erEntityUid = School.schoolUid AND
-            (Role.rolePermissions &  
-        """
-
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 = ") > 0)"
-
-        const val ENTITY_PERSONS_WITH_PERMISSION = "${ENTITY_PERSONS_WITH_PERMISSION_PT1} " +
-                ":permission ${ENTITY_PERSONS_WITH_PERMISSION_PT2}"
-
-
-    }
 
 }

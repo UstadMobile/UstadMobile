@@ -21,7 +21,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.launch
@@ -29,9 +29,12 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
-class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String>, view: ContentEntryImportLinkView,
-                                      di: DI) :
-        UstadBaseController<ContentEntryImportLinkView>(context, arguments, view, di) {
+class ContentEntryImportLinkPresenter(
+    context: Any,
+    arguments: Map<String, String>,
+    view: ContentEntryImportLinkView,
+    di: DI
+): UstadBaseController<ContentEntryImportLinkView>(context, arguments, view, di) {
 
     val accountManager: UstadAccountManager by instance()
 
@@ -44,50 +47,45 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
             view.inProgress = true
             try {
-                currentHttpClient.post<HttpStatement>() {
+                val response = currentHttpClient.post {
                     url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
                             "/import/validateLink"))
                     parameter("url", link)
                     expectSuccess = false
-                }.execute() {
-
-                    val status = it.status
-                    if (status.value != 200) {
-                        view.validLink = false
-                        view.inProgress = false
-                        return@execute
-                    }
-
-                    val data = it.receive<MetadataResult>()
-                    view.inProgress = false
-
-                    if (arguments[ARG_RESULT_DEST_VIEWNAME] == ContentEntryEdit2View.VIEW_NAME) {
-                        finishWithResult(safeStringify(di, ListSerializer(MetadataResult.serializer()),
-                            listOf(data)))
-                    } else {
-                        val args = mutableMapOf<String, String>()
-                        args.putEntityAsJson(ContentEntryEdit2View.ARG_IMPORTED_METADATA,
-                                MetadataResult.serializer(), data)
-                        args.putFromOtherMapIfPresent(arguments, ARG_LEAF)
-                        args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
-                        args.putFromOtherMapIfPresent(arguments, BLOCK_REQUIRED)
-                        args.putFromOtherMapIfPresent(arguments, UstadView.ARG_CLAZZUID)
-
-                        navigateForResult(
-                            NavigateForResultOptions(
-                                this@ContentEntryImportLinkPresenter,
-                                null,
-                                ContentEntryEdit2View.VIEW_NAME,
-                                ContentEntry::class,
-                                ContentEntry.serializer(),
-                                arguments = args)
-                        )
-
-                    }
-
-
                 }
 
+                val status = response.status
+                if (status.value != 200) {
+                    view.validLink = false
+                    view.inProgress = false
+                    return@launch
+                }
+
+                val data = response.body<MetadataResult>()
+                view.inProgress = false
+
+                if (arguments[ARG_RESULT_DEST_VIEWNAME] == ContentEntryEdit2View.VIEW_NAME) {
+                    finishWithResult(safeStringify(di, ListSerializer(MetadataResult.serializer()),
+                        listOf(data)))
+                } else {
+                    val args = mutableMapOf<String, String>()
+                    args.putEntityAsJson(ContentEntryEdit2View.ARG_IMPORTED_METADATA, json,
+                            MetadataResult.serializer(), data)
+                    args.putFromOtherMapIfPresent(arguments, ARG_LEAF)
+                    args.putFromOtherMapIfPresent(arguments, ARG_PARENT_ENTRY_UID)
+                    args.putFromOtherMapIfPresent(arguments, BLOCK_REQUIRED)
+                    args.putFromOtherMapIfPresent(arguments, UstadView.ARG_CLAZZUID)
+
+                    navigateForResult(
+                        NavigateForResultOptions(
+                            this@ContentEntryImportLinkPresenter,
+                            null,
+                            ContentEntryEdit2View.VIEW_NAME,
+                            ContentEntry::class,
+                            ContentEntry.serializer(),
+                            arguments = args)
+                    )
+                }
             } catch (e: Exception) {
                 view.inProgress = false
                 view.showSnackBar(systemImpl.getString(MessageID.import_link_error, context))

@@ -18,7 +18,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.AccountListView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 import org.kodein.di.instance
@@ -126,7 +126,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         otherAccountsAdapter?.submitList(it)
     }
 
-    override var activeAccountLive: DoorLiveData<UserSessionWithPersonAndEndpoint?>? = null
+    override var activeAccountLive: LiveData<UserSessionWithPersonAndEndpoint?>? = null
         set(value) {
             field?.removeObserver(activeAccountObserver)
             field = value
@@ -134,7 +134,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         }
 
 
-    override var accountListLive: DoorLiveData<List<UserSessionWithPersonAndEndpoint>>? = null
+    override var accountListLive: LiveData<List<UserSessionWithPersonAndEndpoint>>? = null
         set(value) {
             field?.removeObserver(accountListObserver)
             field = value

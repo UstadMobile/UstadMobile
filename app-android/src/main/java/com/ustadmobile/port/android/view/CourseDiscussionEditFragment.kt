@@ -11,7 +11,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CourseDiscussionEditView
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -119,7 +119,7 @@ class CourseDiscussionEditFragment: UstadEditFragment<CourseBlockWithEntity>(),
     }
 
 
-    override var topicList: DoorMutableLiveData<List<DiscussionTopic>>? = null
+    override var topicList: MutableLiveData<List<DiscussionTopic>>? = null
         set(value) {
             field?.removeObserver(topicListObserver)
             field = value

@@ -1,51 +1,40 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
-import com.ustadmobile.mui.theme.UMColor
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.Util
-import mui.material.Button
-import mui.material.ButtonProps
+import mui.material.*
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.ReactNode
 import styled.StyledHandler
 import styled.css
 
-@Suppress("EnumEntryName")
-enum class ButtonSize {
-    small, medium, large
-}
-
-@Suppress("EnumEntryName")
-enum class ButtonVariant {
-    text, outlined, contained
-}
 
 fun RBuilder.umButton(
-    caption: String,
-    color: UMColor = UMColor.secondary,
+    label: String,
+    color: ButtonColor = ButtonColor.secondary,
     variant: ButtonVariant? = null,
     disabled: Boolean = false,
     onClick: ((Event) -> Unit)? = null,
-    size: ButtonSize = ButtonSize.medium,
+    size: Size = Size.medium,
     startIcon: String? = null,
     endIcon: String? = null,
-    id: String? = this::class.js.name,
+    id: String = this::class.js.name,
     className: String? = null,
     handler: StyledHandler<ButtonProps>? = null
-) = createStyledComponent(Button, className, handler) {
-    attrs.color = color.toString()
+) = convertFunctionalToClassElement(Button, className, handler) {
+    childList.add(ReactNode(label))
+    attrs.color = color
     attrs.disabled = disabled
-    attrs.size = size.toString()
-    startIcon?.let {
+    attrs.size = size
+    attrs.variant = variant
+    attrs.id = id
+    attrs.startIcon = startIcon?.let {
         umIcon(it){
             css(StyleManager.startIcon)
         }
     }
-
-    attrs.variant = variant.toString()
-    childList.add(ReactNode(caption))
     endIcon?.let {
         umIcon(it){
             css(StyleManager.endIcon)
@@ -55,5 +44,4 @@ fun RBuilder.umButton(
         Util.stopEventPropagation(it)
         onClick?.invoke(it.nativeEvent)
     }
-    id?.let{ attrs.id = it }
 }

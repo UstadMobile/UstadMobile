@@ -6,7 +6,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.navigation.UstadSavedStateHandleJs
 import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.lib.db.entities.DiscussionPost
-import com.ustadmobile.mui.components.FormControlVariant
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.umTextField
 import com.ustadmobile.util.FieldLabel
@@ -15,6 +14,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.umItem
 import io.github.aakira.napier.Napier
+import mui.material.FormControlVariant
 import react.RBuilder
 import react.setState
 import styled.css

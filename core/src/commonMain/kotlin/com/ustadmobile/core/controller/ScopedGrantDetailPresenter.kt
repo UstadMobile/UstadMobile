@@ -3,8 +3,8 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ScopedGrantDetailView
 import com.ustadmobile.core.view.ScopedGrantEditView
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
@@ -15,7 +15,7 @@ class ScopedGrantDetailPresenter(
     context: Any,
     arguments: Map<String, String>,
     view: ScopedGrantDetailView,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     di: DI
 ): UstadDetailPresenter<ScopedGrantDetailView, ScopedGrantWithName>(
     context, arguments, view, di, lifecycleOwner
@@ -38,7 +38,7 @@ class ScopedGrantDetailPresenter(
         return true
     }
 
-    override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<ScopedGrantWithName?> {
+    override fun onLoadLiveData(repo: UmAppDatabase): LiveData<ScopedGrantWithName?> {
         return repo.scopedGrantDao.findByUidLiveWithName(arguments[ARG_ENTITY_UID]?.toLong() ?: 0)
     }
 

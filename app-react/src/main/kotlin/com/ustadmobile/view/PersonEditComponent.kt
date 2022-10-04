@@ -27,6 +27,9 @@ import com.ustadmobile.view.ext.umItem
 import kotlinx.css.LinearDimension
 import kotlinx.css.margin
 import kotlinx.css.marginTop
+import mui.material.FormControlVariant
+import mui.material.IconButtonEdge
+import mui.material.InputLabelVariant
 import react.RBuilder
 import react.dom.html.InputType
 import react.setState
@@ -421,7 +424,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                                     umInputLabel("${passwordLabel.text}",
                                         id = passwordLabel.id,
                                         error = passwordLabel.error,
-                                        variant = FormControlVariant.outlined,
+                                        variant = InputLabelVariant.outlined,
                                         htmlFor = passwordLabel.id)
                                     umOutlinedInput(
                                         id = passwordLabel.id,
@@ -438,7 +441,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                                         }) {
                                         attrs.endAdornment = umIconButton(
                                             if(!showPassword) "visibility" else "visibility_off",
-                                            edge = IconEdge.end,
+                                            edge = IconButtonEdge.end,
                                             onClick = {
                                             setState {
                                                 showPassword = !showPassword
@@ -461,7 +464,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                                     umInputLabel("${confirmPasswordLabel.text}",
                                         id = confirmPasswordLabel.id,
                                         error = confirmPasswordLabel.error,
-                                        variant = FormControlVariant.outlined,
+                                        variant = InputLabelVariant.outlined,
                                         htmlFor = confirmPasswordLabel.id)
                                     umOutlinedInput(
                                         id = confirmPasswordLabel.id,
@@ -478,7 +481,7 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                                         }) {
                                         attrs.endAdornment = umIconButton(
                                             if(!showConfirmPassword) "visibility" else "visibility_off",
-                                            edge = IconEdge.end,
+                                            edge = IconButtonEdge.end,
                                             onClick = {
                                                 setState {
                                                     showConfirmPassword = !showConfirmPassword

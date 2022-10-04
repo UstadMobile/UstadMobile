@@ -10,8 +10,9 @@ import com.ustadmobile.core.controller.ContentEntryListItemListener
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.lib.db.entities.ContentJobItemProgressAndStatus
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -37,13 +38,13 @@ class ContentEntryListRecyclerAdapter(
 
     private val accountManager: UstadAccountManager by di.instance()
 
-    private val appDatabase: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+    private val appDatabase: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
     class ContentEntryListViewHolder(
         val itemBinding: ItemContentEntryListBinding,
         val lifecycleOwner: LifecycleOwner?
-    ): RecyclerView.ViewHolder(itemBinding.root), DoorObserver<ContentJobItemProgressAndStatus?>{
-        var downloadJobItemLiveData: DoorLiveData<ContentJobItemProgressAndStatus?>? = null
+    ): RecyclerView.ViewHolder(itemBinding.root), Observer<ContentJobItemProgressAndStatus?>{
+        var downloadJobItemLiveData: LiveData<ContentJobItemProgressAndStatus?>? = null
             set(value) {
                 field?.removeObserver(this)
                 field = value

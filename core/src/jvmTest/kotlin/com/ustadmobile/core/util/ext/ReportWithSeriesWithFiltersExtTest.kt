@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveDbInstance
 import com.ustadmobile.core.util.directActiveRepoInstance
+import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.ext.insertTestStatementsForReports
 import kotlinx.coroutines.runBlocking
@@ -18,6 +19,9 @@ import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
+import com.ustadmobile.core.db.dao.getResults
+import com.ustadmobile.door.ext.withDoorTransaction
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 
 class ReportWithSeriesWithFiltersExtTest {
 
@@ -53,17 +57,22 @@ class ReportWithSeriesWithFiltersExtTest {
         repo = di.directActiveRepoInstance()
 
         runBlocking {
-            val person = repo.insertPersonAndGroup(Person().apply{
-                personUid = loggedPersonUid
-                admin = true
-                firstNames = "Bob"
-                lastName = "Jones"
-            })
+            repo.withDoorTransactionAsync { txRepo ->
+                val person = txRepo.insertPersonAndGroup(Person().apply{
+                    personUid = loggedPersonUid
+                    admin = true
+                    firstNames = "Bob"
+                    lastName = "Jones"
+                })
 
-            repo.grantScopedPermission(person, Role.ALL_PERMISSIONS,
-                ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+                txRepo.grantScopedPermission(person, Role.ALL_PERMISSIONS,
+                    ScopedGrant.ALL_TABLES, ScopedGrant.ALL_ENTITIES)
+            }
 
-            repo.insertTestStatementsForReports()
+            repo.withDoorTransaction { txRepo ->
+                txRepo.insertTestStatementsForReports()
+            }
+
         }
     }
 
@@ -80,7 +89,7 @@ class ReportWithSeriesWithFiltersExtTest {
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid, db.jdbcDbType)
+        val queryList = report.generateSql(loggedPersonUid, db.dbType())
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
@@ -104,7 +113,7 @@ class ReportWithSeriesWithFiltersExtTest {
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid, db.jdbcDbType)
+        val queryList = report.generateSql(loggedPersonUid, db.dbType())
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
@@ -148,7 +157,7 @@ class ReportWithSeriesWithFiltersExtTest {
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid, db.jdbcDbType)
+        val queryList = report.generateSql(loggedPersonUid, db.dbType())
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
@@ -172,7 +181,7 @@ class ReportWithSeriesWithFiltersExtTest {
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid, db.jdbcDbType)
+        val queryList = report.generateSql(loggedPersonUid, db.dbType())
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
@@ -200,7 +209,7 @@ class ReportWithSeriesWithFiltersExtTest {
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid, db.jdbcDbType)
+        val queryList = report.generateSql(loggedPersonUid, db.dbType())
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)

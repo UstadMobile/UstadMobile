@@ -9,7 +9,7 @@ import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_SHOW_ACCEPT_BUTTON
 import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_USE_DISPLAY_LOCALE
 import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -24,7 +24,7 @@ class SiteTermsDetailPresenter(
     context: Any,
     arguments: Map<String, String>,
     view: SiteTermsDetailView,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     di: DI
 ) : UstadDetailPresenter<SiteTermsDetailView, SiteTerms>(
     context, arguments, view, di, lifecycleOwner, activeSessionRequired = false

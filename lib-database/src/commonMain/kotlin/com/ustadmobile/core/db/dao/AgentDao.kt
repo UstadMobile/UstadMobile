@@ -1,6 +1,5 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.AgentEntity
@@ -9,9 +8,9 @@ import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSON_TO_USER
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSON_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 import com.ustadmobile.lib.db.entities.Role
 
-@Dao
+@DoorDao
 @Repository
-abstract class AgentDao :BaseDao<AgentEntity> {
+expect abstract class AgentDao :BaseDao<AgentEntity> {
 
     @Query("""
      REPLACE INTO AgentEntityReplicate(aePk, aeDestination)

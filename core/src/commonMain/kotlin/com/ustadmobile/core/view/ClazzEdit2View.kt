@@ -1,15 +1,15 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
 
 interface ClazzEdit2View: UstadEditView<ClazzWithHolidayCalendarAndSchoolAndTerminology> {
 
-    var clazzSchedules: DoorMutableLiveData<List<Schedule>>?
+    var clazzSchedules: MutableLiveData<List<Schedule>>?
 
-    var courseBlocks: DoorMutableLiveData<List<CourseBlockWithEntity>>?
+    var courseBlocks: MutableLiveData<List<CourseBlockWithEntity>>?
 
     var clazzEndDateError: String?
 

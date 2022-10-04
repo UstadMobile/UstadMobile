@@ -6,7 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.view.BitmaskEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -36,7 +36,7 @@ class BitmaskEditComponent (mProps: UmProps): UstadEditComponent<LongWrapper>(mP
         }
     }
 
-    override var bitmaskList: DoorLiveData<List<BitmaskFlag>>? = null
+    override var bitmaskList: LiveData<List<BitmaskFlag>>? = null
         set(value) {
             field?.removeObserver(scopedGrantListObserver)
             field = value

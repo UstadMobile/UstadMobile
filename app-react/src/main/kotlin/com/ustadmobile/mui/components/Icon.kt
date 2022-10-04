@@ -1,35 +1,24 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Icon
+import mui.material.IconColor
 import mui.material.IconProps
+import mui.material.IconSize
 import react.RBuilder
 import react.ReactNode
 import styled.StyledHandler
 
-
-@Suppress("EnumEntryName")
-enum class IconColor {
-    action, error, disabled, inherit, primary, secondary
-}
-
-@Suppress("EnumEntryName")
-enum class IconFontSize {
-    default, small, large, inherit
-}
-
 fun RBuilder.umIcon(
     iconName: String,
-    color: IconColor? = IconColor.inherit,
-    fontSize: IconFontSize = IconFontSize.default,
+    color: IconColor = IconColor.inherit,
+    size: IconSize = IconSize.medium,
     className: String? = null,
     handler: StyledHandler<IconProps>? = null
-) = createStyledComponent(Icon, className, handler) {
-    color?.let {
-        attrs.color = it.toString()
-    }
-    attrs.fontSize = fontSize.toString()
+) = convertFunctionalToClassElement(Icon, className, handler) {
     childList.add(ReactNode(iconName))
+    attrs.color = color
+    attrs.fontSize = size
 }
 
 

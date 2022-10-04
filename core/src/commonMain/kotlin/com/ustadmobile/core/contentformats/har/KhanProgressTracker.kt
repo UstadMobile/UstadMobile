@@ -5,14 +5,11 @@ import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
 import io.ktor.client.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
-import io.ktor.client.request.put
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.json.*
+import io.ktor.client.request.*
 import io.ktor.client.statement.HttpStatement
-import io.ktor.http.URLBuilder
-import io.ktor.http.URLProtocol
-import io.ktor.http.Url
-import io.ktor.http.takeFrom
+import io.ktor.http.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -64,7 +61,8 @@ class KhanProgressTracker(val httpClient: HttpClient) : HarInterceptor() {
         val requestUrl = Url(request.url ?: "")
         val sourceUrl = harContainer.entry.sourceUrl ?: ""
         val exerciseId = sourceUrl.substringAfter("khan-id://").substringBefore(".")
-        val urlToFindTotalQuestions = URLBuilder(protocol = URLProtocol.HTTPS, host = requestUrl.host, encodedPath = "$exercisePath$exerciseId").buildString()
+        val urlToFindTotalQuestions = URLBuilder(protocol = URLProtocol.HTTPS, host = requestUrl.host,
+            pathSegments = listOf(exercisePath, exerciseId)).buildString()
 
         val totalQuestions = harContainer.requestMap.filterKeys { it.second.startsWith(urlToFindTotalQuestions) }.size
 
@@ -166,7 +164,9 @@ class KhanProgressTracker(val httpClient: HttpClient) : HarInterceptor() {
         val bodyInput = body.variables?.input ?: return response
 
         // build url to get question content
-        val finalUrl = URLBuilder(protocol = URLProtocol.HTTPS, host = requestUrl.host, encodedPath = "$exercisePath$exerciseId$itemPath${bodyInput.assessmentItemId}$langPath$lang").buildString()
+        val finalUrl = URLBuilder(protocol = URLProtocol.HTTPS, host = requestUrl.host,
+            pathSegments = listOf("$exercisePath$exerciseId$itemPath${bodyInput.assessmentItemId}$langPath$lang")
+        ).buildString()
 
         val harList = harContainer.requestMap[(Pair("GET", finalUrl))]
 
@@ -245,13 +245,13 @@ class KhanProgressTracker(val httpClient: HttpClient) : HarInterceptor() {
     private fun sendStatement(statement: String, harContainer: HarContainer) {
 
         GlobalScope.launch {
-            httpClient.put<HttpStatement> {
+            httpClient.put {
                 url {
                     takeFrom(harContainer.localHttp)
                     encodedPath = "${encodedPath}xapi/${harContainer.entry.contentEntryUid}/statements"
                 }
-                this.body = statement
-            }.execute()
+                setBody(statement)
+            }
 
         }
 

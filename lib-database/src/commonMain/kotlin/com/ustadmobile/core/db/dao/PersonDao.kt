@@ -1,24 +1,19 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
-import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.core.db.dao.PersonDaoCommon.SQL_SELECT_LIST_WITH_PERMISSION
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
-import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
-import com.ustadmobile.lib.util.encryptPassword
-import com.ustadmobile.lib.util.getSystemTimeInMillis
-import kotlinx.serialization.Serializable
-import kotlin.js.JsName
 
 
-@Dao
+@DoorDao
 @Repository
-abstract class PersonDao : BaseDao<Person> {
+expect abstract class PersonDao : BaseDao<Person> {
 
     @Query("""
      REPLACE INTO PersonReplicate(personPk, personDestination)
@@ -74,33 +69,17 @@ abstract class PersonDao : BaseDao<Person> {
     @ReplicationCheckPendingNotificationsFor([Person::class])
     abstract suspend fun replicateOnChange()
 
-    @JsName("insertListAsync")
     @Insert
     abstract suspend fun insertListAsync(entityList: List<Person>)
 
-    class PersonUidAndPasswordHash {
-        var passwordHash: String? = null
 
-        var personUid: Long = 0
 
-        var firstNames: String? = null
-
-        var lastName: String? = null
-
-        var admin: Boolean = false
-    }
-
-    @JsName("insertOrReplace")
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertOrReplace(person: Person)
 
     @Query("SELECT COUNT(*) FROM Person where Person.username = :username")
     abstract suspend fun findByUsernameCount(username: String): Int
 
-
-    fun authenticate(token: String, personUid: Long): Boolean {
-        return isValidToken(token, personUid)
-    }
 
     @Query("SELECT EXISTS(SELECT token FROM AccessToken WHERE token = :token " +
             " and accessTokenPersonUid = :personUid)")
@@ -176,17 +155,15 @@ abstract class PersonDao : BaseDao<Person> {
     """)
     abstract suspend fun findSystemAccount(nodeId: Long): Person?
 
-    @JsName("findByUid")
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
     abstract fun findByUid(uid: Long): Person?
 
-    @JsName("findPersonAccountByUid")
     @Query("SELECT Person.*, null as newPassword, null as currentPassword,null as confirmedPassword" +
             " FROM PERSON WHERE Person.personUid = :uid")
     abstract suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount?
 
     @Query("SELECT * From Person WHERE personUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<Person?>
+    abstract fun findByUidLive(uid: Long): LiveData<Person?>
 
     @Query("SELECT * FROM Person WHERE personUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Person?
@@ -204,7 +181,7 @@ abstract class PersonDao : BaseDao<Person> {
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
                                                  excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DoorDataSourceFactory<Int, PersonWithDisplayDetails>
+                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSourceFactory<Int, PersonWithDisplayDetails>
 
     @Query(SQL_SELECT_LIST_WITH_PERMISSION)
     abstract fun findPersonsWithPermissionAsList(timestamp: Long, excludeClazz: Long,
@@ -225,111 +202,12 @@ abstract class PersonDao : BaseDao<Person> {
          WHERE Person.personUid = :personUid
         """)
     @QueryLiveTables(["Person", "PersonParentJoin"])
-    abstract fun findByUidWithDisplayDetailsLive(personUid: Long, activeUserPersonUid: Long): DoorLiveData<PersonWithPersonParentJoin?>
-
-    private fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
-        if(fromPersonUid != 0L) {
-            val auditLog = AuditLog(fromPersonUid, Person.TABLE_ID, toPersonUid)
-            insertAuditLog(auditLog)
-        }
-    }
+    abstract fun findByUidWithDisplayDetailsLive(personUid: Long, activeUserPersonUid: Long): LiveData<PersonWithPersonParentJoin?>
 
     @Insert
     abstract fun insertAuditLog(entity: AuditLog): Long
 
-    @JsName("getAllPerson")
     @Query("SELECT * FROM Person")
     abstract fun getAllPerson(): List<Person>
 
-
-    companion object {
-
-        const val SORT_FIRST_NAME_ASC = 1
-
-        const val SORT_FIRST_NAME_DESC = 2
-
-        const val SORT_LAST_NAME_ASC = 3
-
-        const val SORT_LAST_NAME_DESC = 4
-
-        const val SQL_SELECT_LIST_WITH_PERMISSION = """
-         SELECT Person.* 
-           FROM PersonGroupMember 
-                ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1}
-                    ${Role.PERMISSION_PERSON_SELECT}
-                    ${Person.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2}
-         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-           AND PersonGroupMember.groupMemberActive 
-           AND (:excludeClazz = 0 OR :excludeClazz NOT IN
-                    (SELECT clazzEnrolmentClazzUid 
-                       FROM ClazzEnrolment 
-                      WHERE clazzEnrolmentPersonUid = Person.personUid 
-                            AND :timestamp BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined 
-                                AND ClazzEnrolment.clazzEnrolmentDateLeft
-           AND ClazzEnrolment.clazzEnrolmentActive))
-           AND (:excludeSchool = 0 OR :excludeSchool NOT IN
-                    (SELECT schoolMemberSchoolUid
-                      FROM SchoolMember 
-                     WHERE schoolMemberPersonUid = Person.personUid 
-                       AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate
-                            AND SchoolMember.schoolMemberLeftDate ))
-           AND Person.personType = ${Person.TYPE_NORMAL_PERSON}                  
-           AND (Person.personUid NOT IN (:excludeSelected))
-           AND (:searchText = '%' 
-               OR Person.firstNames || ' ' || Person.lastName LIKE :searchText)
-      GROUP BY Person.personUid
-      ORDER BY CASE(:sortOrder)
-               WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
-               WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
-               ELSE ''
-               END ASC,
-               CASE(:sortOrder)
-               WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
-               WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
-               ELSE ''
-               END DESC
-    """
-
-
-        private const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
-            SELECT DISTINCT Person_Perm.personUid FROM Person Person_Perm
-            LEFT JOIN PersonGroupMember ON Person_Perm.personUid = PersonGroupMember.groupMemberPersonUid
-            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
-            WHERE
-            CAST(Person_Perm.admin AS INTEGER) = 1 OR ( (
-            """
-        private const val ENTITY_PERSONS_WITH_PERMISSION_PT2 =  """
-            = 0) AND (Person_Perm.personUid = Person.personUid))
-            OR
-            (
-            ((EntityRole.erTableId = ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid) OR 
-            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid)) OR
-            (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.PersonUid)) OR
-            (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
-                SELECT DISTINCT Clazz.clazzSchoolUid 
-                FROM Clazz
-                JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
-            ))
-            ) 
-            AND (Role.rolePermissions & 
-        """
-
-        private const val ENTITY_PERSONS_WITH_PERMISSION_PT4 = ") > 0)"
-
-        const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
-
-        @Deprecated("Replaced with ScopedGrant")
-        const val ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
-
-
-    }
-
-    @Serializable
-    data class PersonNameAndUid(var personUid: Long = 0L, var name: String = ""){
-
-        override fun toString(): String {
-            return name
-        }
-    }
 }

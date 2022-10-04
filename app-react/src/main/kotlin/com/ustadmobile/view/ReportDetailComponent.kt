@@ -9,7 +9,7 @@ import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
 import com.ustadmobile.core.view.ReportTemplateListView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
@@ -25,14 +25,15 @@ import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.standardFormat
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.util.getViewNameFromUrl
-import com.ustadmobile.view.ext.renderTopMainAction
 import com.ustadmobile.view.ext.renderChart
+import com.ustadmobile.view.ext.renderTopMainAction
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.Overflow
 import kotlinx.css.borderBottom
 import kotlinx.css.borderTop
 import kotlinx.css.overflow
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css
@@ -61,7 +62,7 @@ class ReportDetailComponent(mProps: UmProps): UstadDetailComponent<ReportWithSer
 
     private val statementSeriesList: MutableList<List<StatementEntityWithDisplayDetails>> = mutableListOf()
 
-    override var statementListDetails: List<DoorDataSourceFactory<Int, StatementEntityWithDisplayDetails>>? = null
+    override var statementListDetails: List<DataSourceFactory<Int, StatementEntityWithDisplayDetails>>? = null
         set(value) {
             field = value
             if(value?.isNotEmpty() == true){

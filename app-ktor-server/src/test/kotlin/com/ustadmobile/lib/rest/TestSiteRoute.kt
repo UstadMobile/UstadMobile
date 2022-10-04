@@ -1,64 +1,97 @@
 package com.ustadmobile.lib.rest
 
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.core.impl.di.commonJvmDiModule
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Site
-import io.ktor.application.install
 import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.call.*
 import io.ktor.client.request.get
-import io.ktor.client.statement.HttpStatement
-import io.ktor.features.ContentNegotiation
-import io.ktor.gson.GsonConverter
-import io.ktor.gson.gson
+import io.ktor.serialization.gson.GsonConverter
+import io.ktor.serialization.gson.gson
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.takeFrom
-import io.ktor.routing.Routing
-import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
+import io.ktor.server.application.*
+import io.ktor.server.config.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.routing.*
+import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.ktor.di
+import org.kodein.di.on
+import org.kodein.di.registerContextTranslator
 
 class TestSiteRoute {
-    lateinit var server: ApplicationEngine
 
-    lateinit var db: UmAppDatabase
+    private lateinit var serverDi: DI
 
-    lateinit var httpClient: HttpClient
+    private lateinit var endpointScope: EndpointScope
 
-    //@Before
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
+
+    @Before
     fun setup() {
-        db = DatabaseBuilder.databaseBuilder(Any() ,UmAppDatabase::class, "UmAppDatabase").build()
-        db.clearAllTables()
-        server = embeddedServer(Netty, port = 8097) {
-            install(ContentNegotiation) {
-                gson {
-                    register(ContentType.Application.Json, GsonConverter())
-                    register(ContentType.Any, GsonConverter())
-                }
-            }
+        endpointScope = EndpointScope()
+        serverDi = DI {
+            import(commonJvmDiModule)
 
-            install(Routing) {
-                SiteRoute()
-            }
-        }.start(wait = false)
+            import(commonTestKtorDiModule(endpointScope, temporaryFolder))
 
-        httpClient = HttpClient(){
-            install(JsonFeature)
+            registerContextTranslator { _: ApplicationCall ->
+                Endpoint("localhost")
+            }
         }
     }
 
-    //@After
-    fun tearDown() {
-        server.stop(0, 5000)
-        httpClient.close()
+    private fun testSiteApplication(block: ApplicationTestBuilder.(httpClient: HttpClient) -> Unit) {
+        testApplication {
+            environment {
+                config = MapApplicationConfig("ktor.environment" to "test")
+            }
+
+            val client = createClient {
+                install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+                    gson()
+                }
+            }
+
+            application {
+                install(ContentNegotiation) {
+                    gson {
+                        register(ContentType.Application.Json, GsonConverter())
+                        register(ContentType.Any, GsonConverter())
+                    }
+                }
+
+                di {
+                    extend(serverDi)
+                }
+
+                routing {
+                    SiteRoute()
+                }
+            }
+
+            block(client)
+        }
     }
 
-    //@Test
-    fun givenAvailableWorkSpace_whenRequested_thenShouldReturnWorkSpaceObject() {
+
+    @Test
+    fun givenAvailableWorkSpace_whenRequested_thenShouldReturnWorkSpaceObject(
+
+    ) = testSiteApplication{ client ->
+        val db: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_DB)
         val site = Site().apply {
             siteName = "UmTestWorkspace"
             guestLogin = true
@@ -66,20 +99,11 @@ class TestSiteRoute {
         }
         site.siteUid = db.siteDao.insert(site)
 
-        runBlocking {
-            val response = httpClient.get<HttpStatement> {
-                url{
-                    takeFrom("http://localhost:8097")
-                    path("Workspace", "verify")
-                }
-            }.execute()
-
-            val mWorkSpace = response.receive<Site>()
-
-            Assert.assertEquals("Workspace was retrieved, response code is 200",
-                    HttpStatusCode.OK, response.status.value)
-            Assert.assertEquals("Valid workspace was retrieved",
-                    mWorkSpace.siteUid, site.siteUid)
+        val siteReceived: Site = runBlocking {
+            client.get("/Site/verify").body()
         }
+
+        Assert.assertEquals("Valid workspace was retrieved",
+            siteReceived.siteUid, site.siteUid)
     }
 }

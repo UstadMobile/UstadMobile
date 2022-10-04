@@ -17,7 +17,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SchoolEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
@@ -32,7 +32,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
     override val mEditPresenter: UstadEditPresenter<*, SchoolWithHolidayCalendar>?
         get() = mPresenter
 
-    override var scopedGrants: DoorLiveData<List<ScopedGrantAndName>>? = null
+    override var scopedGrants: LiveData<List<ScopedGrantAndName>>? = null
         set(value) {
             field?.removeObserver(scopedGrantListObserver)
             field = value

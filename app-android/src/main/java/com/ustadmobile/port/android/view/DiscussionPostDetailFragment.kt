@@ -20,7 +20,8 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.view.EditButtonMode
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.MessageWithPerson
@@ -61,7 +62,7 @@ class DiscussionPostDetailFragment: UstadBaseFragment(), DiscussionPostDetailVie
     : View? {
         val rootView: View
 
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
 
         //1.
         descriptionRecyclerAdapter = DiscussionPostDescriptionRecyclerAdapter(di, requireContext())
@@ -141,7 +142,7 @@ class DiscussionPostDetailFragment: UstadBaseFragment(), DiscussionPostDetailVie
 
         }
 
-    override var replies: DoorDataSourceFactory<Int, MessageWithPerson>? = null
+    override var replies: DataSourceFactory<Int, MessageWithPerson>? = null
         set(value) {
             messageListLiveData?.removeObserver(messageListObserver)
             field = value

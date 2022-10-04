@@ -4,7 +4,7 @@ import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerEntryFileDao
+import com.ustadmobile.core.db.dao.ContainerEntryFileCommon
 import com.ustadmobile.core.io.ConcatenatedEntry
 import com.ustadmobile.core.io.ConcatenatedInputStream2
 import com.ustadmobile.door.ext.DoorTag
@@ -75,7 +75,7 @@ class ContainerFetcherOkHttp(
 
         try {
             //check and see if the first file is already here
-            val inputUrl = "${request.mirrorUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/download"
+            val inputUrl = "${request.mirrorUrl}/${ContainerEntryFileCommon.ENDPOINT_CONCATENATEDFILES2}/download"
             Napier.d("$logPrefix Download ${md5sToDownload.size} container files $inputUrl -> ${request.destDirUri}")
 
             val requestBuilder = Request.Builder()

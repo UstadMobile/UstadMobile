@@ -5,12 +5,14 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.DoorMediatorLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.lifecycle.Observer
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.mui.components.umTypography
 import com.ustadmobile.util.DraftJsUtil.clean
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -23,6 +25,7 @@ import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.formatDateRange
 import com.ustadmobile.view.components.AttachmentImageLookupAdapter
 import com.ustadmobile.view.ext.*
+import mui.material.styles.TypographyVariant
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
@@ -55,7 +58,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
         }
     }
 
-    override var scheduleList: DoorDataSourceFactory<Int, Schedule>? = null
+    override var scheduleList: DataSourceFactory<Int, Schedule>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
@@ -63,7 +66,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
             liveData?.observe(this, scheduleObserver)
         }
 
-    override var courseBlockList: DoorDataSourceFactory<Int, CourseBlockWithCompleteEntity>? = null
+    override var courseBlockList: DataSourceFactory<Int, CourseBlockWithCompleteEntity>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
@@ -263,7 +266,7 @@ class ClazzDetailOverviewComponent(mProps: UmProps): UstadDetailComponent<ClazzW
     companion object {
 
         val CLAZZ_PICTURE_LOOKUP_ADAPTER = AttachmentImageLookupAdapter { db, entityUid ->
-            object: DoorMediatorLiveData<String?>(), DoorObserver<CoursePicture?> {
+            object: DoorMediatorLiveData<String?>(), Observer<CoursePicture?> {
                 init {
                     addSource(db.coursePictureDao.findByClazzUidLive(entityUid), this)
                 }

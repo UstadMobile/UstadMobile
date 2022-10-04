@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -9,9 +10,11 @@ import com.ustadmobile.core.view.SiteEditView
 import com.ustadmobile.core.view.SiteTermsEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
@@ -23,7 +26,7 @@ import org.kodein.di.DI
 
 class SiteEditPresenter(context: Any,
                         arguments: Map<String, String>, view: SiteEditView,
-                        lifecycleOwner: DoorLifecycleOwner,
+                        lifecycleOwner: LifecycleOwner,
                         di: DI)
     : UstadEditPresenter<SiteEditView, Site>(context, arguments, view, di, lifecycleOwner) {
 
@@ -62,7 +65,7 @@ class SiteEditPresenter(context: Any,
             it.siteTermsDao.findAllWithLanguageAsList()
         }
 
-        siteTermsOneToManyJoinEditHelper.liveList.sendValue(siteTerms)
+        siteTermsOneToManyJoinEditHelper.liveList.postValue(siteTerms)
 
         return site
     }
@@ -83,18 +86,21 @@ class SiteEditPresenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, Site.serializer(), entity)
     }
 
     override fun handleClickSave(entity: Site) {
         GlobalScope.launch(doorMainDispatcher()) {
             repo.siteDao.updateAsync(entity)
 
-            siteTermsOneToManyJoinEditHelper.commitToDatabase(repo.siteTermsDao) {
-                //no need to set the foreign key
+            repo.withDoorTransactionAsync { txRepo ->
+                siteTermsOneToManyJoinEditHelper.commitToDatabase(txRepo.siteTermsDao,
+                    { txRepo.siteTermsDao.deactivateByUids(it, systemTimeInMillis()) }
+                ) {
+                    //no need to set the foreign key
+                }
             }
+
             finishWithResult(safeStringify(di, ListSerializer(Site.serializer()), listOf(entity)))
         }
     }

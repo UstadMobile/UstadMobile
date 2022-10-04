@@ -4,8 +4,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.navigateToErrorScreen
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
@@ -21,6 +19,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.XapiPackageContentView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
@@ -83,7 +82,7 @@ class XapiPackageContentPresenterTest {
         val accountManager: UstadAccountManager = di.direct.instance()
 
         endpoint = accountManager.activeEndpoint
-        val repo: UmAppDatabase by di.on(endpoint).instance(tag = TAG_REPO)
+        val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
         userPerson = runBlocking {
             repo.insertPersonAndGroup(Person().apply{
@@ -192,7 +191,7 @@ class XapiPackageContentPresenterTest {
     @Test
     fun givenInvalidXapi_whenLoaded_shouldGoToErrorScreen(){
 
-        val db: UmAppDatabase by di.on(endpoint).instance(tag = TAG_DB)
+        val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
         db.containerEntryDao.deleteByContainerUid(xapiContainer.containerUid)
 
         val args = Hashtable<String, String>()
