@@ -8,16 +8,7 @@ import com.neovisionaries.i18n.LanguageAlpha3Code
 import com.neovisionaries.i18n.LanguageCode
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.ContentCategoryDao
-import com.ustadmobile.core.db.dao.ContentCategorySchemaDao
-import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
-import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao
-import com.ustadmobile.core.db.dao.LanguageDao
-import com.ustadmobile.core.db.dao.LanguageVariantDao
-import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.contentscrapers.khanacademy.ItemData
 import com.ustadmobile.lib.contentscrapers.util.SrtFormat
@@ -1082,7 +1073,7 @@ object ContentScraperUtil {
             item.destDir = destination.path
             item.scrapeUrl = subjectUrl.toString()
             item.sqiContentEntryParentUid = subjectEntry.contentEntryUid
-            item.status = ScrapeQueueItemDao.STATUS_PENDING
+            item.status = ScrapeQueueItemDaoCommon.STATUS_PENDING
             item.contentType = type
             item.runId = runId
             item.itemType = itemType

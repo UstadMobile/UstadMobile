@@ -234,7 +234,7 @@ class H5PTypePluginCommonJvm(
                     tmpIndexHtmlFile.delete()
 
                     process.withContentJobItemTransactionMutex { txDb ->
-                        txDb.containerDao.updateContainerSizeAndNumEntries(
+                        txDb.containerDao.updateContainerSizeAndNumEntriesAsync(
                             container.containerUid, systemTimeInMillis())
                         contentJobItem.updateTotalFromContainerSize(contentNeedUpload, txDb,
                             progress)

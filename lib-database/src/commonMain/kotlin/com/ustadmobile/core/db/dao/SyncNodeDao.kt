@@ -1,13 +1,13 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.SyncNode
 
-@Dao
-abstract class SyncNodeDao {
+@DoorDao
+expect abstract class SyncNodeDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replace(syncNode: SyncNode)

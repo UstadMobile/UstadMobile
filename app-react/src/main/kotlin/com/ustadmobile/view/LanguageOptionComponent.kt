@@ -2,7 +2,6 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.mui.components.FormControlVariant
 import com.ustadmobile.mui.components.spacingUnits
 import com.ustadmobile.mui.components.umFormControl
 import com.ustadmobile.mui.components.umTextFieldSelect
@@ -11,6 +10,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import kotlinx.browser.window
 import kotlinx.css.LinearDimension
+import mui.material.FormControlVariant
 import react.RBuilder
 import react.RComponent
 import react.setState

@@ -7,7 +7,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.Holiday
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
@@ -15,7 +15,7 @@ import org.kodein.di.DI
 
 class HolidayEditPresenter(context: Any,
                           arguments: Map<String, String>, view: HolidayEditView,
-                           di: DI, lifecycleOwner: DoorLifecycleOwner)
+                           di: DI, lifecycleOwner: LifecycleOwner)
     : UstadEditPresenter<HolidayEditView, Holiday>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
@@ -46,9 +46,7 @@ class HolidayEditPresenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, Holiday.serializer(), entity)
     }
 
     override fun handleClickSave(entity: Holiday) {

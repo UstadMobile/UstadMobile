@@ -13,7 +13,7 @@ import com.ustadmobile.core.view.ReportFilterEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.XapiPackageContentView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
@@ -32,7 +32,7 @@ import kotlin.math.max
 class ReportEditPresenter(context: Any,
                           arguments: Map<String, String>, view: ReportEditView,
                           di: DI,
-                          lifecycleOwner: DoorLifecycleOwner)
+                          lifecycleOwner: LifecycleOwner)
     : UstadEditPresenter<ReportEditView, ReportWithSeriesWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
     private val seriesCounter = atomic(1)
@@ -345,7 +345,8 @@ class ReportEditPresenter(context: Any,
         val entityVal = entity ?: return
         entityVal.reportSeries = safeStringify(di, ListSerializer(ReportSeries.serializer()),
             entityVal.reportSeriesWithFiltersList ?: listOf())
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, ReportWithSeriesWithFilters.serializer(),
+            entityVal)
     }
 
     fun handleAddCustomRange(dateRangeMoment: DateRangeMoment) {

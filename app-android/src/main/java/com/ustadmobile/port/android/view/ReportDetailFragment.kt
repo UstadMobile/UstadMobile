@@ -24,11 +24,11 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ReportDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportDetailView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
@@ -218,7 +218,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         }
 
         val accountManager: UstadAccountManager by instance()
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
         reportRecyclerView = rootView.findViewById(R.id.fragment_detail_report_list)
         chartAdapter = RecyclerViewChartAdapter(this, null)
 

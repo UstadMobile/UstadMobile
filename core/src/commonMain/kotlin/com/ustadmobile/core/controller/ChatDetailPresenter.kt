@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ChatDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Chat
 import com.ustadmobile.lib.db.entities.ChatMember
@@ -27,9 +28,9 @@ class ChatDetailPresenter(
 
     val accountManager: UstadAccountManager by instance()
 
-    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
-    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
     var chatUid: Long = 0
 
@@ -73,7 +74,7 @@ class ChatDetailPresenter(
             val isGroup = arguments[ARG_CHAT_IS_GROUP] != null
             val loggedInPersonUid = accountManager.activeAccount.personUid
 
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+            repo.withDoorTransactionAsync { txRepo ->
                 if (chatUid == 0L) {
                     chatUid = txRepo.chatDao.insertAsync(Chat("", isGroup))
                     txRepo.chatMemberDao.insertAsync(
@@ -109,7 +110,7 @@ class ChatDetailPresenter(
 
     override fun updateMessageRead(messageRead: MessageRead){
         presenterScope.launch {
-            repo.withDoorTransactionAsync(UmAppDatabase::class){ txRepo ->
+            repo.withDoorTransactionAsync{ txRepo ->
                 txRepo.messageReadDao.insertAsync(messageRead)
             }
         }
@@ -117,7 +118,7 @@ class ChatDetailPresenter(
 
     fun updateMessageReadList(messageReadList: List<MessageRead>){
         presenterScope.launch {
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+            repo.withDoorTransactionAsync { txRepo ->
                 txRepo.messageReadDao.insertList(messageReadList)
             }
 

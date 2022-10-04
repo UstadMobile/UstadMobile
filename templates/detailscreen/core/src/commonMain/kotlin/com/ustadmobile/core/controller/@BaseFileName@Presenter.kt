@@ -2,8 +2,8 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.@Entity@DetailView
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.@Entity@
 @DisplayEntity_Import@
@@ -14,7 +14,7 @@ import org.kodein.di.DI
 
 class @Entity@DetailPresenter(context: Any,
         arguments: Map<String, String>, view: @BaseFileName@View,
-        lifecycleOwner: DoorLifecycleOwner,
+        lifecycleOwner: LifecycleOwner,
         di: DI)
     : UstadDetailPresenter<@Entity@DetailView, @DisplayEntity@>(context, arguments, view, di, lifecycleOwner) {
 

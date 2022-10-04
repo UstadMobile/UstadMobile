@@ -1,15 +1,15 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.PostgresQuery
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentJob
 
-@Dao
-abstract class ContentJobDao {
+@DoorDao
+expect abstract class ContentJobDao {
 
     @Insert
     abstract suspend fun insertAsync(contentJob: ContentJob): Long
@@ -33,7 +33,7 @@ abstract class ContentJobDao {
           FROM ContentJob
          WHERE cjUid = :cjUid
     """)
-    abstract fun findLiveDataByUid(cjUid: Long): DoorLiveData<ContentJob?>
+    abstract fun findLiveDataByUid(cjUid: Long): LiveData<ContentJob?>
 
     @Query("""
         UPDATE ContentJob
@@ -55,7 +55,7 @@ abstract class ContentJobDao {
          WHERE cjUid = :contentJobId
          LIMIT 1), FALSE)
     """)
-    abstract fun findMeteredAllowedLiveData(contentJobId: Long): DoorLiveData<Boolean>
+    abstract fun findMeteredAllowedLiveData(contentJobId: Long): LiveData<Boolean>
 
     @Query("""
         UPDATE ContentJob 

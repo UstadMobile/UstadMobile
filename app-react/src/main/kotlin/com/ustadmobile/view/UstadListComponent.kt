@@ -10,12 +10,12 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.EmptyList
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignCenterItems
@@ -39,6 +39,11 @@ import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.browser.window
 import kotlinx.css.*
+import mui.material.ChipColor
+import mui.material.IconButtonColor
+import mui.material.ListItemAlignItems
+import mui.material.TypographyAlign
+import mui.material.styles.TypographyVariant
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -159,7 +164,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     }
 
 
-    override var list: DoorDataSourceFactory<Int, DT>? = null
+    override var list: DataSourceFactory<Int, DT>? = null
         get() = field
         set(value) {
             field = value
@@ -218,7 +223,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
     override fun onCreateView() {
         super.onCreateView()
         fabManager?.icon = "add"
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
         window.setTimeout({
             searchManager?.searchListener = listPresenter
         }, UI_EVENT_LISTENER_TIMEOUT)
@@ -515,7 +520,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                         }
 
                         umIconButton("close",
-                            color = UMColor.default){
+                            color = IconButtonColor.default){
                             css{
                                 marginTop = 4.px
                             }
@@ -558,7 +563,7 @@ abstract class UstadListComponent<RT, DT>(props: UmProps) : UstadBaseComponent<U
                                marginLeft = 2.spacingUnits
                            }
                            umIconButton(SELECTION_ICONS_MAP[option]?:"delete",
-                               color = UMColor.default){
+                               color = IconButtonColor.default){
                                attrs.onClick = {
                                    stopEventPropagation(it)
                                    val selectedEntries = copyOnWriteListOf(selectedListItems)

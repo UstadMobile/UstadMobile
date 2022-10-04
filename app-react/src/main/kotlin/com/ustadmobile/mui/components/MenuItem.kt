@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.MenuItem
 import mui.material.MenuItemProps
 import org.w3c.dom.events.Event
@@ -21,8 +21,14 @@ fun RBuilder.umMenuItem(
     className: String? = null,
     handler: StyledHandler<MenuItemProps>? = null
 ) {
-    umMenuItem(selected, button = true, key = key, value = value, divider = divider, disabled = disabled,
-        onClick = onClick, className = className) {
+    umMenuItem(selected,
+        button = true,
+        key = key,
+        value = value,
+        divider = divider,
+        disabled = disabled,
+        onClick = onClick,
+        className = className) {
 
         if (secondaryText == null) {
             // Just a simple text child element is all that is required...
@@ -50,7 +56,7 @@ fun RBuilder.umMenuItem(
     className: String? = null,
     handler: StyledHandler<MenuItemProps>? = null
 ) {
-    createStyledComponent(MenuItem, className, handler) {
+    convertFunctionalToClassElement(MenuItem, className, handler) {
         attrs.asDynamic().button = button
         component?.let { attrs.asDynamic().component = it }
         attrs.asDynamic().containerComponent = containerComponent

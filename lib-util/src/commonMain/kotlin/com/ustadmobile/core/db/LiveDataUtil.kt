@@ -1,18 +1,16 @@
 package com.ustadmobile.core.db
 
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.Observer
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.withTimeoutOrNull
 
-suspend fun <T> waitForLiveData(liveData: DoorLiveData<T>, timeout: Long, checker: (T) -> Boolean) {
+suspend fun <T> waitForLiveData(liveData: LiveData<T>, timeout: Long, checker: (T) -> Boolean) {
     val channel = Channel<T>(1)
-    val observerFn = object : DoorObserver<T> {
-        override fun onChanged(t: T) {
-            if(checker.invoke(t))
-                channel.offer(t)
-        }
+    val observerFn = Observer<T> { t ->
+        if(checker.invoke(t))
+            channel.trySend(t)
     }
     liveData.observeForever(observerFn)
 
@@ -22,13 +20,11 @@ suspend fun <T> waitForLiveData(liveData: DoorLiveData<T>, timeout: Long, checke
     channel.close()
 }
 
-suspend fun <T> DoorLiveData<T>.waitUntil(timeout: Long = 5000, checker: (T) -> Boolean): DoorLiveData<T> {
+suspend fun <T> LiveData<T>.waitUntil(timeout: Long = 5000, checker: (T) -> Boolean): LiveData<T> {
     val completableDeferred = CompletableDeferred<T>()
-    val observerFn = object : DoorObserver<T> {
-        override fun onChanged(t: T) {
-            if(checker.invoke(t))
-                completableDeferred.complete(t)
-        }
+    val observerFn = Observer<T> { t ->
+        if(checker.invoke(t))
+            completableDeferred.complete(t)
     }
 
     observeForever(observerFn)

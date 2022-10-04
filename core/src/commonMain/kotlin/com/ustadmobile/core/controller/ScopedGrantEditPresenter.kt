@@ -14,8 +14,8 @@ import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.view.ScopedGrantEditView.Companion.ARG_PERMISSION_LIST
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
@@ -29,7 +29,7 @@ class ScopedGrantEditPresenter(
     context: Any,
     arguments: Map<String, String>,
     view: ScopedGrantEditView,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     di: DI
 ) : UstadEditPresenter<ScopedGrantEditView, ScopedGrant>(
     context, arguments, view, di, lifecycleOwner
@@ -70,7 +70,7 @@ class ScopedGrantEditPresenter(
             else -> 0L
         }
 
-        view.bitmaskList = DoorMutableLiveData(PERMISSION_MESSAGE_ID_LIST.filter {
+        view.bitmaskList = MutableLiveData(PERMISSION_MESSAGE_ID_LIST.filter {
             availablePermissions.hasFlag(it.flagVal)
         }.map {
             it.toBitmaskFlag(scopedGrant.sgPermissions)
@@ -96,7 +96,7 @@ class ScopedGrantEditPresenter(
         val permissionList = PERMISSION_LIST_MAP[permissionListKey]
             ?: throw IllegalArgumentException("Invalid permission list key")
 
-        view.bitmaskList = DoorMutableLiveData(permissionList.map {
+        view.bitmaskList = MutableLiveData(permissionList.map {
             it.toBitmaskFlag(editEntity.sgPermissions)
         })
 
@@ -105,9 +105,7 @@ class ScopedGrantEditPresenter(
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, ScopedGrant.serializer(), entity)
     }
 
     override fun handleClickSave(entity: ScopedGrant) {

@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.core.view.WebChunkView
+import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -57,9 +58,9 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
     val accountManager: UstadAccountManager by instance()
 
-    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
-    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
     private val systemImpl: UstadMobileSystemImpl by di.instance()
 

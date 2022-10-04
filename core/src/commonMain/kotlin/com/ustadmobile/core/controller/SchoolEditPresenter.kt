@@ -14,7 +14,7 @@ import com.ustadmobile.core.view.TimeZoneListView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
@@ -30,7 +30,7 @@ import org.kodein.di.DI
 
 class SchoolEditPresenter(context: Any,
                           arguments: Map<String, String>, view: SchoolEditView, di: DI,
-                          lifecycleOwner: DoorLifecycleOwner)
+                          lifecycleOwner: LifecycleOwner)
     : UstadEditPresenter<SchoolEditView, SchoolWithHolidayCalendar>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
@@ -82,7 +82,7 @@ class SchoolEditPresenter(context: Any,
                 it.scopedGrantDao.findByTableIdAndEntityUid(School.TABLE_ID, entityUid)
             }
 
-            scopedGrantOneToManyHelper.liveList.setVal(scopedGrants)
+            scopedGrantOneToManyHelper.liveList.setValue(scopedGrants)
         } else if(db is DoorDatabaseRepository){
             //Add default roles
             scopedGrantOneToManyHelper.onEditResult(ScopedGrantAndName().apply {
@@ -119,7 +119,7 @@ class SchoolEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, SchoolWithHolidayCalendar.serializer(),
                 entityVal)
     }
 

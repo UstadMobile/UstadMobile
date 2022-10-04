@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.SqliteOnly
@@ -8,9 +8,9 @@ import com.ustadmobile.lib.db.entities.ClazzAssignmentRollUp
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CourseBlock
 
-@Dao
+@DoorDao
 @Repository
-abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
+expect abstract class ClazzAssignmentRollUpDao: BaseDao<ClazzAssignmentRollUp> {
 
     @Query(""" 
         REPLACE INTO ClazzAssignmentRollUp 

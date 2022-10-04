@@ -4,7 +4,7 @@ import android.view.View
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 
 /**
  * This PagedListAdapter helps manage selections.
@@ -14,7 +14,7 @@ abstract class SelectablePagedListAdapter<T, VH: RecyclerView.ViewHolder>(diffca
 
     protected val selectedItems = mutableListOf<T>()
 
-    val selectedItemsLiveData: DoorMutableLiveData<List<T>> = DoorMutableLiveData(listOf())
+    val selectedItemsLiveData: MutableLiveData<List<T>> = MutableLiveData(listOf())
 
     override fun onItemSelectedChanged(view: View, item: T) {
         if(view.isSelected) {
@@ -23,12 +23,12 @@ abstract class SelectablePagedListAdapter<T, VH: RecyclerView.ViewHolder>(diffca
             selectedItems -= item
         }
 
-        selectedItemsLiveData.sendValue(selectedItems.toList())
+        selectedItemsLiveData.postValue(selectedItems.toList())
     }
 
     fun clearSelection() {
         selectedItems.clear()
-        selectedItemsLiveData.sendValue(selectedItems.toList())
+        selectedItemsLiveData.postValue(selectedItems.toList())
     }
 
     override val isInSelectionMode: Boolean

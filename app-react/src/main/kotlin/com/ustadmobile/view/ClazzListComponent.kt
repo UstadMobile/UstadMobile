@@ -22,6 +22,9 @@ import com.ustadmobile.util.ext.format
 import com.ustadmobile.util.ext.wordBreakLimit
 import com.ustadmobile.view.ext.*
 import kotlinx.css.*
+import mui.material.ChipColor
+import mui.material.IconColor
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css

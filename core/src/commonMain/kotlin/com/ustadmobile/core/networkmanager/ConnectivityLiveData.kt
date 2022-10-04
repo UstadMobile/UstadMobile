@@ -1,6 +1,6 @@
 package com.ustadmobile.core.networkmanager
 
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 
 /**
@@ -10,5 +10,5 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus
  * This is kept in the DI to avoid multiple classes creating their own copy.
  */
 class ConnectivityLiveData(
-        val liveData: DoorLiveData<ConnectivityStatus?>
+        val liveData: LiveData<ConnectivityStatus?>
 )

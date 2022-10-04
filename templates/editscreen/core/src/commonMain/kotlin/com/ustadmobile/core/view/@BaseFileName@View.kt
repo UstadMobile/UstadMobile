@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.@Entity@
 @EditEntity_Import@
 

@@ -11,9 +11,9 @@ import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
@@ -33,7 +33,7 @@ class ClazzLogEditAttendancePresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var di: DI
 
@@ -79,7 +79,7 @@ class ClazzLogEditAttendancePresenterTest {
 
         presenter.handleClickSave(entityVal!!)
 
-        nullableArgumentCaptor<DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().apply {
+        nullableArgumentCaptor<MutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().apply {
             verify(mockView, timeout(5000).atLeastOnce()).clazzLogAttendanceRecordList = capture()
             assertEquals("Got expected number of class members", 5,
                     testClazzAndMembers.studentList.size)
@@ -101,7 +101,7 @@ class ClazzLogEditAttendancePresenterTest {
                 di, mockLifecycleOwner)
         presenter.onCreate(null)
 
-        nullableArgumentCaptor<DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().apply {
+        nullableArgumentCaptor<MutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().apply {
             verify(mockView, timeout(5000)).clazzLogAttendanceRecordList = capture()
             assertEquals("Got expected number of class members", 5,
                     testClazzAndMembers.studentList.size)
@@ -137,14 +137,14 @@ class ClazzLogEditAttendancePresenterTest {
         //wait for loading to finish
         verify(mockView, timeout(5000)).loading = false
 
-        val clazzLogAttendanceRecordLiveData = nullableArgumentCaptor<DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().run {
+        val clazzLogAttendanceRecordLiveData = nullableArgumentCaptor<MutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().run {
             verify(mockView, timeout(5000)).clazzLogAttendanceRecordList = capture()
             firstValue
         }
 
         val initialViewOnEntity = mockView.captureLastEntityValue()
 
-        clazzLogAttendanceRecordLiveData!!.setVal(clazzLogAttendanceRecordLiveData!!.getValue()!!.map {
+        clazzLogAttendanceRecordLiveData!!.setValue(clazzLogAttendanceRecordLiveData!!.getValue()!!.map {
             it.apply {
                 attendanceStatus = STATUS_ATTENDED
             }
@@ -204,16 +204,16 @@ class ClazzLogEditAttendancePresenterTest {
 
         verify(mockView, timeout(5000)).clazzLogAttendanceRecordList = any()
 
-        nullableArgumentCaptor<DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().apply {
+        nullableArgumentCaptor<MutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().apply {
             verify(mockView, timeout(5000)).clazzLogAttendanceRecordList = capture()
             runBlocking {
-                waitForLiveData(firstValue as DoorLiveData<List<ClazzLogAttendanceRecordWithPerson>>, 5000) {
+                waitForLiveData(firstValue as LiveData<List<ClazzLogAttendanceRecordWithPerson>>, 5000) {
                     it.size == testClazzAndMembers.studentList.size
                 }
 
                 presenter.handleClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
 
-                waitForLiveData(firstValue as DoorLiveData<List<ClazzLogAttendanceRecordWithPerson>>, 5000) {
+                waitForLiveData(firstValue as LiveData<List<ClazzLogAttendanceRecordWithPerson>>, 5000) {
                     it.size == testClazzAndMembers.studentList.size &&
                             it.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED }
                 }

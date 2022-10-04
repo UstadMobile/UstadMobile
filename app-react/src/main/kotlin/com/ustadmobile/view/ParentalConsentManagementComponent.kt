@@ -9,7 +9,6 @@ import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -25,6 +24,10 @@ import kotlinx.css.em
 import kotlinx.css.fontSize
 import kotlinx.css.height
 import kotlinx.css.px
+import mui.material.ButtonColor
+import mui.material.ButtonVariant
+import mui.material.Size
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css
@@ -156,8 +159,8 @@ class ParentalConsentManagementComponent (mProps: UmProps): UstadEditComponent<P
                         if(entity?.ppjParentPersonUid == 0L){
                             umItem {
                                 umButton(getString(MessageID.i_consent),
-                                    size = ButtonSize.large,
-                                    color = UMColor.secondary,
+                                    size = Size.large,
+                                    color = ButtonColor.secondary,
                                     variant = ButtonVariant.contained,
                                     onClick = {
                                         entity?.also {
@@ -178,8 +181,8 @@ class ParentalConsentManagementComponent (mProps: UmProps): UstadEditComponent<P
                         if(entity?.ppjParentPersonUid == 0L){
                             umItem {
                                 umButton(getString(MessageID.i_do_not_consent),
-                                    size = ButtonSize.large,
-                                    color = UMColor.secondary,
+                                    size = Size.large,
+                                    color = ButtonColor.secondary,
                                     variant = ButtonVariant.outlined,
                                     onClick = {
                                         entity?.also {
@@ -199,8 +202,8 @@ class ParentalConsentManagementComponent (mProps: UmProps): UstadEditComponent<P
                         if(entity?.ppjParentPersonUid != 0L){
                             umItem {
                                 umButton(getString(MessageID.revoke_consent),
-                                    size = ButtonSize.large,
-                                    color = UMColor.secondary,
+                                    size = Size.large,
+                                    color = ButtonColor.secondary,
                                     variant = ButtonVariant.contained,
                                     onClick = {
                                         entity?.also {

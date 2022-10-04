@@ -1,16 +1,13 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.InputLabel
+import mui.material.InputLabelMargin
 import mui.material.InputLabelProps
+import mui.material.InputLabelVariant
 import react.RBuilder
 import react.ReactNode
 import styled.StyledHandler
-
-enum class LabelMargin {
-    dense
-}
-
 
 fun RBuilder.umInputLabel (
     caption: String,
@@ -20,28 +17,27 @@ fun RBuilder.umInputLabel (
     disabled: Boolean? = null,
     error: Boolean? = null,
     focused: Boolean? = null,
-    variant: FormControlVariant = FormControlVariant.standard,
+    variant: InputLabelVariant = InputLabelVariant.standard,
     shrink: Boolean? = null,
     disableAnimation: Boolean = false,
-    margin: LabelMargin? = null,
-    component: String? = null,
+    margin: InputLabelMargin? = null,
     className: String? = null,
     handler: StyledHandler<InputLabelProps>? = null
-) = createStyledComponent(InputLabel, className, handler) {
+) = convertFunctionalToClassElement(InputLabel, className, handler) {
     disabled?.let { attrs.disabled = it }
     attrs.disableAnimation = disableAnimation
     htmlFor?.let { attrs.htmlFor = it }
     error?.let { attrs.error = it }
     attrs.id = id
     focused?.let { attrs.focused = it }
-    margin?.let { attrs.margin = it.toString() }
+    margin?.let { attrs.margin = it }
     required?.let { attrs.required = it }
     shrink?.let {
         if (it) {
             attrs.shrink = it
         }
     }
-    attrs.variant = variant.toString()
+    attrs.variant = variant
 
     childList.add(ReactNode(caption))
 }

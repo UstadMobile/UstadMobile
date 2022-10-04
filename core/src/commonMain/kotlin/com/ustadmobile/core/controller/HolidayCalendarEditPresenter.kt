@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.deactivateByUids
 import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -9,8 +10,10 @@ import com.ustadmobile.core.view.HolidayCalendarEditView
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import kotlinx.coroutines.GlobalScope
@@ -22,7 +25,7 @@ import org.kodein.di.DI
 
 class HolidayCalendarEditPresenter(context: Any,
                           arguments: Map<String, String>, view: HolidayCalendarEditView,
-                          lifecycleOwner: DoorLifecycleOwner,
+                          lifecycleOwner: LifecycleOwner,
                           di: DI)
     : UstadEditPresenter<HolidayCalendarEditView, HolidayCalendar>(context, arguments, view, di, lifecycleOwner) {
 
@@ -56,7 +59,7 @@ class HolidayCalendarEditPresenter(context: Any,
         val holidayList = withTimeoutOrNull(2000) {
             db.holidayDao.findByHolidayCalendaUidAsync(entityUid)
         } ?: listOf()
-        holidayOneToManyJoinEditHelper.liveList.sendValue(holidayList)
+        holidayOneToManyJoinEditHelper.liveList.postValue(holidayList)
 
         return holidayCalendar
     }
@@ -77,9 +80,7 @@ class HolidayCalendarEditPresenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, HolidayCalendar.serializer(), entity)
     }
 
     override fun handleClickSave(entity: HolidayCalendar) {
@@ -90,8 +91,12 @@ class HolidayCalendarEditPresenter(context: Any,
                 repo.holidayCalendarDao.updateAsync(entity)
             }
 
-            holidayOneToManyJoinEditHelper.commitToDatabase(repo.holidayDao) {
-                it.holHolidayCalendarUid = entity.umCalendarUid
+            repo.withDoorTransactionAsync { txRepo ->
+                holidayOneToManyJoinEditHelper.commitToDatabase(txRepo.holidayDao,
+                    { repo.holidayDao.deactivateByUids(it, systemTimeInMillis()) }
+                ) {
+                    it.holHolidayCalendarUid = entity.umCalendarUid
+                }
             }
 
             finishWithResult(safeStringify(di, ListSerializer(HolidayCalendar.serializer()),

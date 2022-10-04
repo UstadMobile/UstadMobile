@@ -1,6 +1,6 @@
 package com.ustadmobile.mui.components
 
-import kotlinext.js.jsObject
+import kotlinx.js.jso
 import mui.system.Theme
 import org.w3c.dom.MediaQueryList
 
@@ -38,7 +38,7 @@ private fun convertOptions(
     matchMedia: MatchMedia?,
     noSsr: Boolean?,
     ssrMatchMedia: MatchMedia?
-): dynamic = jsObject {
+): dynamic = jso {
     defaultMatches?.let {
         this.defaultMatches = defaultMatches
     }

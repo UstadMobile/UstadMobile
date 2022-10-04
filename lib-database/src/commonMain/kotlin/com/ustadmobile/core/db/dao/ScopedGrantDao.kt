@@ -1,17 +1,18 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.core.db.dao.ScopedGrantDaoCommon.SQL_FIND_BY_TABLE_AND_ENTITY
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
-@Dao
+@DoorDao
 @Repository
-abstract class ScopedGrantDao {
+expect abstract class ScopedGrantDao {
 
     /**
      * ScopedGrant must replicate to:
@@ -125,7 +126,7 @@ abstract class ScopedGrantDao {
                     ${Role.PERMISSION_CLAZZ_SELECT} 
                     ${Clazz.JOIN_FROM_PERSONGROUPMEMBER_TO_CLAZZ_VIA_SCOPEDGRANT_PT2}
                JOIN ScopedGrant ScopedGrantEntity
-                    ON Clazz.clazzUid = ScopedGrant.sgEntityUid
+                    ON Clazz.clazzUid = ScopedGrantEntity.sgEntityUid
                        AND ScopedGrantEntity.sgTableId = ${Clazz.TABLE_ID}
        WHERE UserSession.usClientNodeId = :newNodeId
          AND UserSession.usStatus = ${UserSession.STATUS_ACTIVE}
@@ -140,7 +141,7 @@ abstract class ScopedGrantDao {
     """)
     @ReplicationRunOnNewNode
     @ReplicationCheckPendingNotificationsFor([ScopedGrant::class])
-    abstract suspend fun replicateOnNewNodeClazzBased(newNodeId: Long)
+    abstract suspend fun replicateOnNewNodeClazzBased(@NewNodeIdParam newNodeId: Long)
 
     @Query("""
  REPLACE INTO ScopedGrantReplicate(sgPk, sgDestination)
@@ -278,7 +279,7 @@ abstract class ScopedGrantDao {
     abstract fun findByTableIdAndEntityUidWithNameAsDataSource(
         tableId: Int,
         entityUid: Long
-    ): DoorDataSourceFactory<Int, ScopedGrantWithName>
+    ): DataSourceFactory<Int, ScopedGrantWithName>
 
 
     @Query("""
@@ -309,25 +310,7 @@ abstract class ScopedGrantDao {
                     ON Person.personGroupUid = PersonGroup.groupUid
          WHERE ScopedGrant.sgUid = :sgUid 
     """)
-    abstract fun findByUidLiveWithName(sgUid: Long): DoorLiveData<ScopedGrantWithName?>
+    abstract fun findByUidLiveWithName(sgUid: Long): LiveData<ScopedGrantWithName?>
 
-    companion object {
-
-        const val SQL_FIND_BY_TABLE_AND_ENTITY = """
-        SELECT ScopedGrant.*,
-               CASE
-               WHEN Person.firstNames IS NOT NULL THEN Person.firstNames
-               ELSE PersonGroup.groupName 
-               END AS name
-          FROM ScopedGrant
-               JOIN PersonGroup 
-                    ON ScopedGrant.sgGroupUid = PersonGroup.groupUid
-               LEFT JOIN Person
-                         ON Person.personGroupUid = PersonGroup.groupUid
-         WHERE ScopedGrant.sgTableId = :tableId
-               AND ScopedGrant.sgEntityUid = :entityUid  
-    """
-
-    }
 
 }

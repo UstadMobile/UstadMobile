@@ -38,9 +38,14 @@ open class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
     override val fakePkGenerator: () -> Long
         get() = { atomicLong.decrementAndGet() }
 
-    override suspend fun commitToDatabase(dao: OneToManyJoinDao<in T>, fkSetter: (T) -> Unit) {
+    @Suppress("DEPRECATION")
+    suspend fun commitToDatabase(
+        dao: OneToManyJoinDao<in T>,
+        deactivateFn: suspend (keysToDeactivate: List<Long>) -> Unit,
+        fkSetter: (T) -> Unit
+    ) {
         super.commitToDatabase(dao, fkSetter)
-        dao.deactivateByUids(primaryKeysToDeactivate, systemTimeInMillis())
+        deactivateFn(primaryKeysToDeactivate)
     }
 
     override fun doesNewEntityRequireFakePk(pk: Long) = (pk == 0L)

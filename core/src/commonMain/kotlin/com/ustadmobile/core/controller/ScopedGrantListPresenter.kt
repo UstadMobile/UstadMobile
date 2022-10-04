@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.view.*
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 
@@ -11,7 +11,7 @@ class ScopedGrantListPresenter(
     arguments: Map<String, String>,
     view: ScopedGrantListView,
     di: DI,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     private val scopedGrantItemListener: DefaultScopedGrantListItemListener = DefaultScopedGrantListItemListener(view, ListViewMode.BROWSER, context, di)
 ): UstadListPresenter<ScopedGrantListView, ScopedGrant>(context, arguments, view, di, lifecycleOwner),
     ScopedGrantListItemListener by scopedGrantItemListener

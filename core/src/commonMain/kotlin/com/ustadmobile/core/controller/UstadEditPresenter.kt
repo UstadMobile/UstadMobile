@@ -7,7 +7,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_ID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -18,7 +18,7 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(
     arguments: Map<String, String>,
     view: V,
     di: DI,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     override val activeSessionRequired: Boolean = true
 ) : UstadSingleEntityPresenter<V, RT>(context, arguments, view, di, lifecycleOwner) {
 

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
@@ -10,9 +10,9 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
 
-@Dao
+@DoorDao
 @Repository
-abstract class CourseAssignmentSubmissionAttachmentDao : BaseDao<CourseAssignmentSubmissionAttachment> {
+expect abstract class CourseAssignmentSubmissionAttachmentDao : BaseDao<CourseAssignmentSubmissionAttachment> {
 
     @Query("""
      REPLACE INTO CourseAssignmentSubmissionAttachmentReplicate(casaPk, casaDestination)

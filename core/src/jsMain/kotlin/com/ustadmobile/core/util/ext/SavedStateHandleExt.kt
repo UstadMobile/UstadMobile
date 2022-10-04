@@ -1,7 +1,7 @@
 package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.navigation.UstadSavedStateHandleJs
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -15,7 +15,7 @@ fun UstadSavedStateHandle.setAllFromMap(stringMap: Map<String, String>) {
 }
 
 
-fun <T> UstadSavedStateHandle.observeResult(lifecycleOwner: DoorLifecycleOwner,
+fun <T> UstadSavedStateHandle.observeResult(lifecycleOwner: LifecycleOwner,
                                             serializer: KSerializer<T>,
                                             resultKey: String,
                                             block: (List<T>) -> Unit) {
