@@ -117,6 +117,8 @@ kotlin {
         }
 
         commonJvmMain {
+            dependsOn commonMain
+
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
