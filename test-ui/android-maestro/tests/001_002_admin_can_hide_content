@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "Test admin can hide content"
+
