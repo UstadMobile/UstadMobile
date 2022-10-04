@@ -1,6 +1,5 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import com.google.gson.JsonElement
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
 import com.ustadmobile.door.DoorUri

@@ -5,7 +5,7 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
-import com.ustadmobile.core.contentjob.LottiePlugin
+import com.ustadmobile.core.catalog.contenttype.LottiePlugin
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
