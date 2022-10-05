@@ -204,6 +204,7 @@ open class ContentEntry() {
         const val COMPLETION_CRITERIA_AUTOMATIC = 0
         const val COMPLETION_CRITERIA_MIN_SCORE = 1
         const val COMPLETION_CRITERIA_MARKED_BY_STUDENT = 2
+        const val PHET_LINK = 102
     }
 
     override fun equals(other: Any?): Boolean {

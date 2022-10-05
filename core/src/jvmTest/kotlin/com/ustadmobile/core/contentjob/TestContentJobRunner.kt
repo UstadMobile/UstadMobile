@@ -157,6 +157,10 @@ class TestContentJobRunner {
                         DummyPlugin(di, context)
                     }
 
+                    on { requirePluginById(any()) }.thenAnswer {
+                        DummyPlugin(di, context)
+                    }
+
                     onBlocking { extractMetadata(any(), any()) }.thenAnswer {
                         runBlocking { instance<DummyPlugin>().extractMetadata(
                             it.getArgument(0) as DoorUri, mock {})

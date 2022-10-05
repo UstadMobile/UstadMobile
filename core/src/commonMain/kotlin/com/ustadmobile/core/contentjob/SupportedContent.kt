@@ -8,6 +8,8 @@ object SupportedContent {
 
     val H5P_MIME_TYPES = listOf("application/h5p-tincan+zip","application/tincan+zip", "application/zip", "application/octet-stream")
 
+    val PHET_LINK = listOf("application/html")
+
     val SCORM_MIME_TYPES = listOf("application/scorm+zip")
 
     val H5P_EXTENSIONS = listOf("h5p")

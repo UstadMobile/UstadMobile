@@ -2,10 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.ustadmobile.core.account.*
-import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
-import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
-import com.ustadmobile.core.catalog.contenttype.VideoTypePluginJvm
-import com.ustadmobile.core.catalog.contenttype.XapiTypePluginCommonJvm
+import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerJvm
 import com.ustadmobile.core.contentjob.ContentPluginManager
@@ -21,7 +18,6 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.*
-import com.ustadmobile.core.catalog.contenttype.ApacheIndexerPlugin
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.io.UploadSessionManager
@@ -266,13 +262,18 @@ fun Application.umRestApplication(
             ApacheIndexerPlugin(Any(), context, di)
         }
 
+        bind<PhetLinkPlugin>() with scoped(EndpointScope.Default).singleton{
+            PhetLinkPlugin(Any(), context, di)
+        }
+
         bind<ContentPluginManager>() with scoped(EndpointScope.Default).singleton {
             ContentPluginManager(listOf(
                     di.on(context).direct.instance<EpubTypePluginCommonJvm>(),
                     di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
                     di.on(context).direct.instance<VideoTypePluginJvm>(),
-                    di.on(context).direct.instance<ApacheIndexerPlugin>()))
+                    di.on(context).direct.instance<ApacheIndexerPlugin>(),
+                    di.on(context).direct.instance<PhetLinkPlugin>()))
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
@@ -364,7 +365,6 @@ fun Application.umRestApplication(
                     it.mkdirs()
             }
         }
-
         try {
             appConfig.config("mail")
 

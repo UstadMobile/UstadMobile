@@ -10,7 +10,9 @@ data class MetadataResult(
     /**
      * The pluginId that provided this metadata
      */
-    val pluginId: Int
+    val pluginId: Int,
+
+    val thumbnailUrl: String? = null,
 ) {
 
     companion object {
