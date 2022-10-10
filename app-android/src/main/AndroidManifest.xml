@@ -2,38 +2,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <!-- Required for BLE peer-to-peer GATT server -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Required for BLE peer-to-peer GATT server -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- Used for content editing when a user wants to add pictures/video from camera -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- Used for content editing when a user wants to add pictures/video from camera -->
     <!--
     Temporarily disabled until we introduce syncable attachments
     <uses-permission android:name="android.permission.CAMERA" />
     -->
-
     <!-- Required for peer-to-peer connecting using WiFi direct -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-
-    <!-- This is required on android 12 to handle shake detection -->
-    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"/>
-
-
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <!-- To obtain wifi lock to avoid wifi powering down during download -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <!-- Required to show download progress indicator -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-    <!-- Remove permission requested by wordpress utils -->
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" /> <!-- This is required on android 12 to handle shake detection -->
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- To obtain wifi lock to avoid wifi powering down during download -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- Required to show download progress indicator -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- Remove permission requested by wordpress utils -->
     <uses-permission
         android:name="android.permission.GET_ACCOUNTS"
         tools:node="remove" />
@@ -46,36 +30,57 @@
         android:supportsRtl="true"
         android:theme="@style/UmTheme.App"
         android:usesCleartextTraffic="true">
-        <activity android:name="com.ustadmobile.port.android.view.MainActivity"
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:label="@string/title_activity_main"
+            android:theme="@style/UmTheme.App">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".TextView"
+            android:exported="false"
+            android:label="@string/title_activity_text_view"
+            android:theme="@style/UmTheme.App">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name="com.ustadmobile.port.android.view.MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:exported="true"
             android:launchMode="singleTask">
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="*" android:pathPattern="/umapp/.*"
-                    android:scheme="http" />
-                <data android:host="*" android:pathPattern="/.*/umapp/.*"
-                    android:scheme="http" />
 
-                <data android:host="*" android:pathPattern="/umapp/.*"
+                <data
+                    android:host="*"
+                    android:pathPattern="/umapp/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="*"
+                    android:pathPattern="/.*/umapp/.*"
+                    android:scheme="http" />
+                <data
+                    android:host="*"
+                    android:pathPattern="/umapp/.*"
                     android:scheme="https" />
-                <data android:host="*" android:pathPattern="/.*/umapp/.*"
+                <data
+                    android:host="*"
+                    android:pathPattern="/.*/umapp/.*"
                     android:scheme="https" />
-
             </intent-filter>
-
-
-        </activity>
-
-        <!-- previously used: android:theme="@style/UmTheme.App.OnBoarding"  -->
+        </activity> <!-- previously used: android:theme="@style/UmTheme.App.OnBoarding" -->
         <activity
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
-            android:noHistory="true"
             android:exported="true"
-            />
+            android:noHistory="true" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -88,28 +93,29 @@
         </provider>
 
         <activity
-            android:exported="false"
             android:name="com.ustadmobile.port.android.view.EpubContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:exported="false"
             android:label="" />
-
         <activity
-            android:exported="true"
             android:name="com.ustadmobile.port.android.view.AboutActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:exported="true" />
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:exported="true" />
+        <activity
+            android:name="com.ustadmobile.port.android.ui.screen.SplashScreen"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="@string/app_name"
             android:exported="true"
+            android:label="@string/app_name"
             android:noHistory="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
     </application>
 

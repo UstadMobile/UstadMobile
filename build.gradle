@@ -2,6 +2,9 @@
 import org.apache.tools.ant.filters.*
 
 buildscript {
+    ext {
+        compose_ui_version = '1.2.0-alpha08'
+    }
     ext.version_kotlin = '1.7.10'
     ext.version_shadow = "7.1.0"
     ext.version_gradle_versions_plugin = "0.28.0"
