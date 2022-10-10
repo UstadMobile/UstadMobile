@@ -1,15 +1,14 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.ext.DATE_FORMAT_DD_MM_YYYY
 import com.ustadmobile.util.ext.TIME_FORMAT_H_M
 import com.ustadmobile.util.ext.formatDate
-import kotlinx.css.Color
 import kotlinx.css.RuleSet
-import kotlinx.css.color
-import mui.lab.*
 import mui.material.BaseTextFieldProps
+import mui.material.FormControlVariant
+import muix.pickers.*
 import react.RBuilder
 import react.ReactElement
 import styled.StyledElementBuilder
@@ -18,14 +17,19 @@ import styled.StyledProps
 import styled.css
 import kotlin.js.Date
 
-@JsModule("@mui/lab/AdapterDateFns")
-@JsNonModule
-private external val AdapterDateFns: dynamic
-
-external interface UMDateTimePickerProps: MobileDatePickerProps, MobileTimePickerProps, StyledProps{
+external interface SharedPickerProps: StyledProps{
     var renderInput: (BaseTextFieldProps)-> Any?
     var onChange:(dynamic)-> Unit
 }
+
+external interface UMDatePickerProps: MobileDatePickerProps, SharedPickerProps{
+    override var components: MobileDatePickerSlotsComponentsProps
+}
+
+external interface UMTimePickerProps: MobileTimePickerProps, SharedPickerProps{
+    override var components: MobileTimePickerSlotsComponentsProps
+}
+
 
 enum class  DateTimePickerOpenTo {
     day, month, year,hours, minutes, seconds
@@ -39,11 +43,12 @@ private fun RBuilder.renderTextField(
     error: Boolean = false,
     helperText: String? = null,
     ruleSet: RuleSet ? = StyleManager.defaultFullWidth
-): ReactElement {
+): ReactElement<*> {
     return umTextField(
         label = label,
         helperText = helperText,
-        error = error){
+        error = error
+    ) {
         attrs.onClick = {
             props.inputProps?.onClick?.invoke(it.asDynamic())
         }
@@ -77,8 +82,8 @@ fun RBuilder.timePicker(
     toolbarTitle: String? = null,
     views: Array<String>? = null,
     className: String? = null,
-    handler: StyledHandler<UMDateTimePickerProps>? = null
-) = createStyledComponent(MobileTimePicker, className, handler){
+    handler: StyledHandler<UMTimePickerProps>? = null
+) = convertFunctionalToClassElement(MobileTimePicker, className, handler){
     setProps(this,true,label, onChange, value, inputFormat, helperText,
         error, minTime, maxTime, onAccept, onClose, onError,cancelText, okText,
         inputVariant, openTo,toolbarTitle,views, ampm, ampmInClock)
@@ -103,15 +108,15 @@ fun RBuilder.datePicker(
     toolbarTitle: String? = null,
     views: Array<String>? = null,
     className: String? = null,
-    handler: StyledHandler<UMDateTimePickerProps>? = null
-) = createStyledComponent(MobileDatePicker, className, handler){
+    handler: StyledHandler<UMDatePickerProps>? = null
+) = convertFunctionalToClassElement(MobileDatePicker, className, handler){
     setProps(this,false,label, onChange, value, inputFormat, helperText,
         error, minDate, maxDate, onAccept, onClose, onError,cancelText, okText,
         inputVariant, openTo,toolbarTitle,views)
 }
 
 private fun RBuilder.setProps(
-    field: StyledElementBuilder<UMDateTimePickerProps>,
+    builder: StyledElementBuilder<*>,
     isTime: Boolean,
     label: String,
     onChange:(Date)-> Unit,
@@ -133,34 +138,32 @@ private fun RBuilder.setProps(
     ampm: Boolean = true,
     ampmInClock: Boolean = false
 ){
-    field.attrs.asDynamic().value = value ?: Date()
-    field.attrs.onChange = {
+    val component = builder as  StyledElementBuilder<SharedPickerProps>
+    component.attrs.asDynamic().value = value ?: Date()
+    component.attrs.onChange = {
         onChange.invoke(it)
     }
-    field.attrs.asDynamic().views  = views
-    field.attrs.asDynamic().openTo = openTo.toString()
-    field.attrs.renderInput = { it ->
-        it.variant = inputVariant.toString()
+    component.attrs.asDynamic().views  = views
+    component.attrs.asDynamic().openTo = openTo.toString()
+    component.attrs.renderInput = {
+        it.variant = inputVariant
         renderTextField(it,label,value, inputFormat, error = error,helperText = helperText)
     }
-    onError?.let { field.attrs.asDynamic().onError = it}
-    onAccept?.let { field.attrs.asDynamic().onAccept = it}
-    onClose?.let { field.attrs.asDynamic().onClose = it}
-    field.attrs.asDynamic().inputFormat = inputFormat?.lowercase()
-    toolbarTitle?.let { field.attrs.asDynamic().toolbarTitle = it}
-    field.css {
-        color = Color.white
-    }
+    onError?.let { component.attrs.asDynamic().onError = it}
+    onAccept?.let { component.attrs.asDynamic().onAccept = it}
+    onClose?.let { component.attrs.asDynamic().onClose = it}
+    component.attrs.asDynamic().inputFormat = inputFormat?.lowercase()
+    toolbarTitle?.let { component.attrs.asDynamic().toolbarTitle = it}
 
     if(isTime){
-        min?.let { field.attrs.asDynamic().minTime = it}
-        max?.let { field.attrs.asDynamic().maxTime = it}
-        field.attrs.asDynamic().ampm = ampm
-        field.attrs.asDynamic().ampmInClock = ampmInClock
+        min?.let { component.attrs.asDynamic().minTime = it}
+        max?.let { component.attrs.asDynamic().maxTime = it}
+        component.attrs.asDynamic().ampm = ampm
+        component.attrs.asDynamic().ampmInClock = ampmInClock
 
     }else {
-        min?.let { field.attrs.asDynamic().minDate = it}
-        max?.let { field.attrs.asDynamic().maxDate = it}
+        min?.let { component.attrs.asDynamic().minDate = it}
+        max?.let { component.attrs.asDynamic().maxDate = it}
     }
 }
 
@@ -183,9 +186,9 @@ fun RBuilder.umDatePicker(
     toolbarTitle: String? = null,
     views: Array<String>? = arrayOf("day" ,"year" , "month"),
     className: String? = null,
-    handler: StyledHandler<UMDateTimePickerProps>? = null
+    handler: StyledHandler<UMDatePickerProps>? = null
 ) = LocalizationProvider{
-    attrs.dateAdapter = AdapterDateFns.default
+    attrs.dateAdapter = AdapterDateFns
     datePicker(label, onChange,value, inputFormat, helperText,
         error, minDate, maxDate, onAccept, onClose, onError,cancelText, okText,
         inputVariant, openTo,toolbarTitle,views,className, handler)
@@ -213,9 +216,9 @@ fun RBuilder.umTimePicker(
     className: String? = null,
     ampm: Boolean = false,
     ampmInClock: Boolean = false,
-    handler: StyledHandler<UMDateTimePickerProps>? = null
-) = LocalizationProvider{
-    attrs.dateAdapter = AdapterDateFns.default
+    handler: StyledHandler<UMTimePickerProps>? = null
+) = LocalizationProvider {
+    attrs.dateAdapter = AdapterDateFns
     timePicker(label, onChange, value, ampm, ampmInClock,inputFormat, helperText,
         error, minDate, maxDate, onAccept, onClose, onError,cancelText, okText,
         inputVariant, openTo,toolbarTitle,views,className, handler)

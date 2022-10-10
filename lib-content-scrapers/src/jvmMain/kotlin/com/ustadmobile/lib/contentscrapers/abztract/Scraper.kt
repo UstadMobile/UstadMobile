@@ -4,7 +4,9 @@ import io.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDaoCommon
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETPYE_MPEG
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_EPUB
@@ -31,9 +33,9 @@ import java.net.URL
 
 abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentContentEntryUid: Long, endpoint: Endpoint, di: DI) {
 
-    val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+    val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    val repo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+    val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     val containerFolder: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
@@ -88,7 +90,7 @@ abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentCon
     }
 
     fun setScrapeDone(successful: Boolean, errorCode: Int) {
-        db.scrapeQueueItemDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, errorCode)
+        db.scrapeQueueItemDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDaoCommon.STATUS_DONE else ScrapeQueueItemDaoCommon.STATUS_FAILED, errorCode)
     }
 
     data class HeadRequestValues(val isUpdated: Boolean, val etag: String, val mimeType: String, val lastModified: Long)

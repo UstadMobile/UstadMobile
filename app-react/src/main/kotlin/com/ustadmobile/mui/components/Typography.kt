@@ -1,29 +1,16 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import kotlinx.css.WhiteSpace
 import kotlinx.css.whiteSpace
 import mui.material.Typography
+import mui.material.TypographyAlign
 import mui.material.TypographyProps
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.ReactNode
 import styled.StyledHandler
 import styled.css
-
-@Suppress("EnumEntryName")
-enum class TypographyAlign {
-    inherit, left, center, right, justify
-}
-
-@Suppress("EnumEntryName")
-enum class TypographyColor {
-    initial, inherit, primary, secondary, textPrimary, textSecondary, error
-}
-
-@Suppress("EnumEntryName")
-enum class TypographyVariant {
-    h1, h2, h3, h4, h5, h6, body1, body2, subtitle1, subtitle2, caption, button, overline, srOnly, inherit
-}
 
 
 fun RBuilder.umTypography(
@@ -36,7 +23,7 @@ fun RBuilder.umTypography(
     paragraph: Boolean = false,
     className: String? = null,
     handler: StyledHandler<TypographyProps>? = null
-) = createStyledComponent(Typography, className, handler) {
+) = convertFunctionalToClassElement(Typography, className, handler) {
     attrs.asDynamic().align = align.toString()
     attrs.gutterBottom = gutterBottom
     attrs.noWrap = noWrap
@@ -44,7 +31,7 @@ fun RBuilder.umTypography(
         attrs.asDynamic().component = it
     }
     attrs.paragraph = paragraph
-    attrs.asDynamic().variant = variant.toString()
+    attrs.variant = variant
     text?.let {
         childList.add(ReactNode(it))
     }

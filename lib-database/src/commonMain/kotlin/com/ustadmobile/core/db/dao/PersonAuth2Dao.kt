@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -9,9 +9,9 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.db.entities.Role
 
-@Dao
+@DoorDao
 @Repository
-abstract class PersonAuth2Dao {
+expect abstract class PersonAuth2Dao {
 
     @Query("""
      REPLACE INTO PersonAuth2Replicate(paPk, paDestination)

@@ -1,37 +1,31 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.CourseDiscussionEditPresenter
-import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.view.CourseDiscussionEditView
-import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
-import com.ustadmobile.mui.components.*
 import com.ustadmobile.core.navigation.UstadSavedStateHandleJs
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.core.view.CourseDiscussionEditView
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
-import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.DiscussionTopic
-import com.ustadmobile.util.DraftJsUtil
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.Util
 import com.ustadmobile.util.ext.clean
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.util.ext.formattedInHoursAndMinutes
 import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
 import io.github.aakira.napier.Napier
-import kotlinx.browser.document
+import mui.material.FormControlVariant
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.setState
 import styled.css
 import styled.styledDiv
-import kotlin.js.Date
 
 class CourseDiscussionEditComponent (mProps: UmProps): UstadEditComponent<CourseBlockWithEntity>(mProps),
     CourseDiscussionEditView {
@@ -90,7 +84,7 @@ class CourseDiscussionEditComponent (mProps: UmProps): UstadEditComponent<Course
                 field = value
             }
         }
-    override var topicList: DoorMutableLiveData<List<DiscussionTopic>>? = null
+    override var topicList: MutableLiveData<List<DiscussionTopic>>? = null
         set(value) {
             field?.removeObserver(topicListObserver)
             field = value

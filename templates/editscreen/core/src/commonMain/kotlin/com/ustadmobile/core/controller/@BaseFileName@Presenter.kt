@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.@BaseFileName@View
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.@Entity@
 @EditEntity_Import@
@@ -17,7 +17,7 @@ import com.ustadmobile.core.util.safeParse
 
 class @BaseFileName@Presenter(context: Any,
         arguments: Map<String, String>, view: @BaseFileName@View,
-        lifecycleOwner: DoorLifecycleOwner,
+        lifecycleOwner: LifecycleOwner,
         di: DI)
     : UstadEditPresenter<@BaseFileName@View, @EditEntity@>(context, arguments, view, di, lifecycleOwner) {
 

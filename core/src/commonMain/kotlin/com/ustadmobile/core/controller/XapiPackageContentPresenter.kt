@@ -15,12 +15,14 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Runnable
@@ -70,9 +72,9 @@ class XapiPackageContentPresenter(
 
     private var isStarted: Boolean = false
 
-    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
-    private val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+    private val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
     val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
 
@@ -94,7 +96,7 @@ class XapiPackageContentPresenter(
                 val client: HttpClient = di.direct.instance()
                 val tinCanPath = UMFileUtil.joinPaths(mountedPath, "tincan.xml")
                 Napier.d { "XapiPackageContentPresenter: Loading $tinCanPath " }
-                val tincanContent = client.get<String>(tinCanPath)
+                val tincanContent: String = client.get(tinCanPath).body()
 
                 val xppFactory: XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSAWARE)
                 val xpp = xppFactory.newPullParser()

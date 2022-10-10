@@ -6,7 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.nav.viewUri
 import com.ustadmobile.core.util.ext.isAttendanceEnabledAndRecorded
 import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
@@ -24,6 +24,7 @@ import com.ustadmobile.view.components.AttachmentImageComponent
 import com.ustadmobile.view.ext.*
 import io.github.aakira.napier.Napier
 import kotlinx.browser.document
+import mui.material.FormControlVariant
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 import react.RBuilder
@@ -76,14 +77,14 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
         }
     }
 
-    override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
+    override var clazzSchedules: MutableLiveData<List<Schedule>>? = null
         set(value) {
             field?.removeObserver(scheduleObserver)
             field = value
             value?.observe(this, scheduleObserver)
         }
 
-    override var courseBlocks: DoorMutableLiveData<List<CourseBlockWithEntity>>? = null
+    override var courseBlocks: MutableLiveData<List<CourseBlockWithEntity>>? = null
         set(value) {
             field?.removeObserver(courseBlockObserver)
             field = value

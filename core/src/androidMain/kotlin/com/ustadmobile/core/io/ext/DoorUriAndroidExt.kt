@@ -7,7 +7,7 @@ import android.webkit.MimeTypeMap
 import com.ustadmobile.door.DoorUri
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -55,8 +55,9 @@ actual suspend fun DoorUri.getSize(context: Any, di: DI): Long {
     return if(isRemote()){
         withContext(Dispatchers.IO){
             try {
-                val okHttpClient: HttpClient = di.direct.instance()
-                val response: HttpResponse = okHttpClient.head<HttpResponse>(uri.toString()).receive()
+                val httpClient: HttpClient = di.direct.instance()
+                val response: HttpResponse = httpClient.head(uri.toString())
+                response.discardRemaining()
                 return@withContext response.contentLength() ?: -1L
             }catch (io: IOException){
                 throw io

@@ -8,13 +8,15 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import org.mockito.kotlin.*
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.SiteTermsEditView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.LifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
@@ -42,7 +44,7 @@ class SiteTermsEditPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var testNavController: UstadNavController
 
@@ -53,9 +55,7 @@ class SiteTermsEditPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
 
         savedStateHandle = mock{}
         ustadBackStackEntry = mock{

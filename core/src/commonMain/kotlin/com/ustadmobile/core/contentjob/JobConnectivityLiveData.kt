@@ -1,7 +1,7 @@
 package com.ustadmobile.core.contentjob
 
 import com.ustadmobile.core.networkmanager.ConnectivityLiveData
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.DoorMediatorLiveData
 
 
@@ -13,7 +13,7 @@ import com.ustadmobile.door.DoorMediatorLiveData
  */
 class JobConnectivityLiveData(
         val connectivityLiveData: ConnectivityLiveData,
-        val meteredAllowedLiveData: DoorLiveData<Boolean>
+        val meteredAllowedLiveData: LiveData<Boolean>
 ) : DoorMediatorLiveData<Pair<Int, Boolean>>() {
 
     var connectivityState: Int? = null
@@ -28,7 +28,7 @@ class JobConnectivityLiveData(
             connectivityState = it.connectivityState
             val meteredAllowed = meteredConnectionAllowed ?: return@addSource
 
-            setVal(Pair(it.connectivityState, meteredAllowed))
+           setValue(Pair(it.connectivityState, meteredAllowed))
         }
 
         addSource(meteredAllowedLiveData){
@@ -37,7 +37,7 @@ class JobConnectivityLiveData(
             }
             meteredConnectionAllowed = it
             val connectivityState = connectivityState ?: return@addSource
-            setVal(Pair(connectivityState, it))
+           setValue(Pair(connectivityState, it))
         }
 
     }

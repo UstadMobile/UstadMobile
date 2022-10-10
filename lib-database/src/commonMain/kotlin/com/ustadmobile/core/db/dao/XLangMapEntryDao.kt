@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.UserSession
@@ -8,9 +8,9 @@ import com.ustadmobile.lib.db.entities.XLangMapEntry
 import kotlinx.serialization.Serializable
 import kotlin.js.JsName
 
-@Dao
+@DoorDao
 @Repository
-abstract class XLangMapEntryDao : BaseDao<XLangMapEntry> {
+expect abstract class XLangMapEntryDao : BaseDao<XLangMapEntry> {
 
     @Query("""
          REPLACE INTO XLangMapEntryReplicate(xlmePk, xlmeDestination)
@@ -75,19 +75,5 @@ abstract class XLangMapEntryDao : BaseDao<XLangMapEntry> {
             objectLangMapUid = :objectUid AND languageLangMapUid = :langMapUid LIMIT 1""")
     abstract fun getXLangMapFromObject(objectUid: Long, langMapUid: Long): XLangMapEntry?
 
-    @Serializable
-    data class Verb(var verbLangMapUid: Long = 0, var valueLangMap: String = "") {
 
-        override fun toString(): String {
-            return valueLangMap
-        }
-    }
-
-    @Serializable
-    data class XObject(var objectLangMapUid: Long = 0, var valueLangMap: String = "") {
-
-        override fun toString(): String {
-            return valueLangMap
-        }
-    }
 }

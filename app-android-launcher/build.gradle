@@ -93,10 +93,6 @@ android {
         }
     }
 
-    dexOptions {
-        jumboMode = true
-    }
-
     buildTypes {
         debug {
             testCoverageEnabled = true
@@ -136,6 +132,10 @@ tasks.whenTaskAdded { task ->
     if (task.name.startsWith("lint")) {
         task.enabled = false
     }
+
+    if(task.name == "bundleRelease") {
+        build.dependsOn(task)
+    }
 }
 
 dependencies {
@@ -164,4 +164,3 @@ dependencies {
 
     testImplementation "junit:junit:$version_junit"
 }
-

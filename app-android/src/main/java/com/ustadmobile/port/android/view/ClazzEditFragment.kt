@@ -18,8 +18,8 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
@@ -59,7 +59,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
         t -> courseBlockRecyclerAdapter?.dataSet = t
     }
 
-    override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
+    override var clazzSchedules: MutableLiveData<List<Schedule>>? = null
         set(value) {
             field?.removeObserver(scheduleObserver)
             field = value
@@ -67,7 +67,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
         }
 
 
-    override var courseBlocks: DoorMutableLiveData<List<CourseBlockWithEntity>>? = null
+    override var courseBlocks: MutableLiveData<List<CourseBlockWithEntity>>? = null
         set(value) {
             field?.removeObserver(courseBlockObserver)
             field = value

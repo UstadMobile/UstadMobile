@@ -1,36 +1,29 @@
 package com.ustadmobile.mui.components
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import mui.material.Divider
 import mui.material.DividerProps
+import mui.material.DividerVariant
+import mui.material.Orientation
 import react.RBuilder
 import styled.StyledHandler
 import styled.StyledProps
 
-@Suppress("EnumEntryName")
-enum class MDividerOrientation {
-    horizontal, vertical
-}
-
-@Suppress("EnumEntryName")
-enum class MDividerVariant {
-    fullWidth, inset, middle
-}
 
 external interface UMDividerProps : DividerProps, StyledProps
 
 fun RBuilder.umDivider(
-    variant: MDividerVariant = MDividerVariant.fullWidth,
+    variant: DividerVariant = DividerVariant.fullWidth,
     light: Boolean = false,
     absolute: Boolean = false,
-    orientation: MDividerOrientation = MDividerOrientation.horizontal,
+    orientation: Orientation = Orientation.horizontal,
     component: String = "hr",
     className: String? = null,
     handler: StyledHandler<UMDividerProps>? = null
-) = createStyledComponent(Divider, className, handler) {
+) = convertFunctionalToClassElement(Divider, className, handler) {
     attrs.absolute = absolute
     attrs.asDynamic().component = component
     attrs.light = light
-    attrs.orientation = orientation.toString()
-    attrs.variant = variant.toString()
+    attrs.orientation = orientation
+    attrs.variant = variant
 }

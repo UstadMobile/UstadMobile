@@ -25,7 +25,7 @@ class RepSubscriptionInitListener : ReplicationSubscriptionManager.SubscriptionI
         repo: DoorDatabaseRepository,
         remoteNodeId: Long
     ) {
-        (repo as UmAppDatabase).withDoorTransactionAsync(UmAppDatabase::class) { transactDb ->
+        (repo as UmAppDatabase).withDoorTransactionAsync { transactDb ->
             //create a virtual person and persongroup
             if(transactDb.personDao.findSystemAccount(remoteNodeId) == null) {
                 val systemPerson = transactDb.insertPersonAndGroup(Person().apply {

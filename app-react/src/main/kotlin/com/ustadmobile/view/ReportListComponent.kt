@@ -11,11 +11,9 @@ import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
-import com.ustadmobile.mui.components.TypographyVariant
 import com.ustadmobile.mui.components.spacingUnits
 import com.ustadmobile.mui.components.umCircularProgress
 import com.ustadmobile.mui.components.umTypography
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.alignTextToStart
 import com.ustadmobile.util.StyleManager.maxLines
@@ -27,6 +25,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.css.*
 import kotlinx.serialization.builtins.ListSerializer
+import mui.material.CircularProgressColor
+import mui.material.styles.TypographyVariant
 import org.kodein.di.direct
 import org.kodein.di.instance
 import react.RBuilder
@@ -93,7 +93,7 @@ class ReportListComponent(mProps: UmProps):  UstadListComponent<Report, Report>(
                     thickness = 5.0,
                     size = 80,
                     color = if(ThemeManager.isDarkModeActive())
-                        UMColor.secondary else  UMColor.primary){}
+                        CircularProgressColor.secondary else  CircularProgressColor.primary){}
             }
         }else {
             styledDiv {

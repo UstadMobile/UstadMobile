@@ -2,22 +2,27 @@ package com.ustadmobile.core.util.test
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ChangeListenerRequest
+import com.ustadmobile.door.room.InvalidationTrackerObserver
 import kotlinx.coroutines.*
 
 suspend fun UmAppDatabase.waitUntil(timeout: Long, tableNames: List<String>, checker: () -> Boolean) {
     val completableDeferred = CompletableDeferred<Boolean>()
-    val changeListener = ChangeListenerRequest(tableNames) {
-        if(checker())
-            completableDeferred.complete(true)
-    }
 
-    addChangeListener(changeListener)
+    val invalidationObserver = object: InvalidationTrackerObserver(tableNames.toTypedArray()) {
+        override fun onInvalidated(tables: Set<String>) {
+            completableDeferred.complete(true)
+        }
+    }
+    getInvalidationTracker().addObserver(invalidationObserver)
     if(checker())
         completableDeferred.complete(true)
 
-    withTimeout(timeout) { completableDeferred.await() }
+    try {
+        withTimeout(timeout) { completableDeferred.await() }
+    }finally {
+        getInvalidationTracker().removeObserver(invalidationObserver)
+    }
 
-    removeChangeListener(changeListener)
 }
 
 private suspend fun UmAppDatabase.waitUntilWithWaitFn(
@@ -27,14 +32,13 @@ private suspend fun UmAppDatabase.waitUntilWithWaitFn(
     waitFn: suspend (time: Long, suspend() -> Unit) -> Unit
 ) {
     val completableDeferred = CompletableDeferred<Boolean>()
-    val changeListener = ChangeListenerRequest(tableNames) {
-        GlobalScope.launch {
-            if(checker())
-                completableDeferred.complete(true)
+    val invalidationObserver = object: InvalidationTrackerObserver(tableNames.toTypedArray()) {
+        override fun onInvalidated(tables: Set<String>) {
+            completableDeferred.complete(true)
         }
     }
+    getInvalidationTracker().addObserver(invalidationObserver)
 
-    addChangeListener(changeListener)
     if(checker())
         completableDeferred.complete(true)
 
@@ -43,7 +47,7 @@ private suspend fun UmAppDatabase.waitUntilWithWaitFn(
             completableDeferred.await()
         }
     }finally {
-        removeChangeListener(changeListener)
+        getInvalidationTracker().removeObserver(invalidationObserver)
     }
 }
 suspend fun UmAppDatabase.waitUntilAsyncOrTimeout(

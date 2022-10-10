@@ -6,7 +6,7 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressView
 import com.ustadmobile.core.view.EditButtonMode
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.*
@@ -25,6 +25,10 @@ import com.ustadmobile.util.ext.toDate
 import com.ustadmobile.view.ext.*
 import kotlinx.css.height
 import kotlinx.css.px
+import mui.material.ButtonVariant
+import mui.material.FormControlVariant
+import mui.material.InputLabelVariant
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.dom.html.InputType
 import react.setState
@@ -85,7 +89,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                 ustadComponentTitle = value
             }
         }
-    override var clazzCourseAssignmentSubmissionAttachment: DoorDataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
+    override var clazzCourseAssignmentSubmissionAttachment: DataSourceFactory<Int, CourseAssignmentSubmissionWithAttachment>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
@@ -93,7 +97,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
             liveData?.observe(this, submissionsObserver)
         }
 
-    override var clazzAssignmentPrivateComments: DoorDataSourceFactory<Int, CommentsWithPerson>? = null
+    override var clazzAssignmentPrivateComments: DataSourceFactory<Int, CommentsWithPerson>? = null
         set(value) {
             field = value
             val liveData = value?.getData(0,Int.MAX_VALUE)
@@ -224,7 +228,7 @@ class ClazzAssignmentDetailStudentProgressComponent(mProps: UmProps): UstadDetai
                                 umInputLabel("${markLabel.text}",
                                     id = markLabel.id,
                                     error = markLabel.error,
-                                    variant = FormControlVariant.outlined,
+                                    variant = InputLabelVariant.outlined,
                                     htmlFor = markLabel.id)
                                 umOutlinedInput(
                                     id = markLabel.id,

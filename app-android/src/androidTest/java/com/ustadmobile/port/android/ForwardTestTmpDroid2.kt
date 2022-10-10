@@ -3,6 +3,7 @@ package com.ustadmobile.port.android
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.statement.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.io.*
@@ -91,7 +92,7 @@ class ForwardTestTmpDroid2{
 
         runBlocking {
             try {
-                val serverResponse = httpClient.get<String>("http://localhost:8095")
+                val serverResponse = httpClient.get("http://localhost:8095").bodyAsText()
                 println(serverResponse)
             }catch(e: Exception) {
                 e.printStackTrace()

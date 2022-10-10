@@ -4,7 +4,7 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.SessionListView.Companion.ARG_CONTEXT_REGISTRATION
 import com.ustadmobile.core.view.StatementListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.StatementWithSessionDetailDisplay
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -14,7 +14,7 @@ import org.kodein.di.DI
 
 class StatementListPresenter(context: Any, arguments: Map<String, String>,
                              view: StatementListView,
-                             di: DI, lifecycleOwner: DoorLifecycleOwner)
+                             di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<StatementListView, StatementWithSessionDetailDisplay>(
         context, arguments, view, di, lifecycleOwner) {
 

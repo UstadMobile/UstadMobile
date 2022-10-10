@@ -6,25 +6,18 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.rest.umRestApplication
-import io.ktor.application.Application
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.features.CORS
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.gson.GsonConverter
-import io.ktor.gson.gson
+import io.ktor.serialization.gson.GsonConverter
+import io.ktor.serialization.gson.gson
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.response.respond
-import io.ktor.routing.Routing
-import io.ktor.routing.get
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Routing
+import io.ktor.server.routing.get
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockWebServer
 import java.io.IOException
 import java.net.ServerSocket
@@ -34,10 +27,13 @@ import com.ustadmobile.util.test.ReverseProxyDispatcher
 import io.ktor.server.engine.ApplicationEngineEnvironment
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.net.InetAddress
-import kotlin.random.Random.Default.nextInt
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.core.db.ext.addSyncCallback
+import io.ktor.server.application.*
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.contentnegotiation.*
 import kotlin.random.Random.Default.nextLong
+import io.ktor.server.plugins.cors.routing.CORS
 
 val umRestServerInstances = mutableMapOf<Int, TestApplicationHolder>()
 
@@ -66,19 +62,21 @@ data class TestApplicationHolder(var proxyPort: Int, var appPort: Int, var token
                                  var mockWebServer: MockWebServer,
                                  var reverseProxy: ReverseProxyDispatcher)
 
+@Suppress("BlockingMethodInNonBlockingContext")
 fun Application.testServerManager() {
+
     var proxyHost = "localhost"
-    val env = this.environment
+    val env = environment
     if(env is ApplicationEngineEnvironment) {
         proxyHost = env.connectors[0].host
     }
 
     install(CORS) {
-        method(HttpMethod.Get)
-        method(HttpMethod.Post)
-        method(HttpMethod.Put)
-        method(HttpMethod.Options)
-        header(HttpHeaders.ContentType)
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Options)
+        allowHeader(HttpHeaders.ContentType)
         anyHost()
     }
 
@@ -102,7 +100,8 @@ fun Application.testServerManager() {
             val nodeIdAndAuth = NodeIdAndAuth(nextLong(), randomUuid().toString())
             initialContext.bindNewSqliteDataSourceIfNotExisting(dbName)
 
-            val umDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase")
+            val umDb = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
+                    "jdbc:sqlite:build/tmp/UmAppDatabase.sqlite")
                 .addSyncCallback(nodeIdAndAuth)
                 .build()
                 .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)

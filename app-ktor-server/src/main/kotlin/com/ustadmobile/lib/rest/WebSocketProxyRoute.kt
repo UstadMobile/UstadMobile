@@ -2,10 +2,11 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.lib.rest.ext.resolveProxyToUrl
 import io.ktor.client.*
-import io.ktor.client.features.websocket.*
+import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
-import io.ktor.request.*
-import io.ktor.routing.*
+import io.ktor.server.request.*
+import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch

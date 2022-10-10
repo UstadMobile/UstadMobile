@@ -7,7 +7,10 @@ import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.components.GridSize
+import com.ustadmobile.mui.components.GridSpacing
+import com.ustadmobile.mui.components.umTextField
+import com.ustadmobile.mui.components.umTextFieldSelect
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.defaultMarginTop
 import com.ustadmobile.util.StyleManager.fieldsOnlyFormScreen
@@ -19,6 +22,7 @@ import com.ustadmobile.view.ext.renderCourseBlockCommonFields
 import com.ustadmobile.view.ext.renderListItemWithTitleAndSwitch
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
+import mui.material.FormControlVariant
 import react.RBuilder
 import react.setState
 import styled.css

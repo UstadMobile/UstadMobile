@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ListFilterIdOption
@@ -13,8 +12,9 @@ import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -28,7 +28,7 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(
     arguments: Map<String, String>,
     view: V,
     di: DI,
-    val lifecycleOwner: DoorLifecycleOwner
+    val lifecycleOwner: LifecycleOwner
 ) : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected,
     OnSearchSubmitted, OnListFilterOptionSelectedListener
 {
@@ -45,9 +45,9 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(
 
     val systemImpl: UstadMobileSystemImpl by instance()
 
-    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
-    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
     open val sortOptions: List<SortOrderOption>
         get() = listOf()

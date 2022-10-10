@@ -1,14 +1,14 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
 @Repository
-@Dao
-abstract class LearnerGroupMemberDao : BaseDao<LearnerGroupMember> {
+@DoorDao
+expect abstract class LearnerGroupMemberDao : BaseDao<LearnerGroupMember> {
 
     @Query("""
      REPLACE INTO LearnerGroupMemberReplicate(lgmPk, lgmDestination)
@@ -75,7 +75,7 @@ abstract class LearnerGroupMemberDao : BaseDao<LearnerGroupMember> {
     AND GroupLearningSession.groupLearningSessionContentUid = :contentEntryUid 
     ORDER BY learnerGroupMemberRole ASC
     """)
-    abstract fun findLearnerGroupMembersByGroupIdAndEntry(learnerGroupUid: Long, contentEntryUid: Long): DoorDataSourceFactory<Int, LearnerGroupMemberWithPerson>
+    abstract fun findLearnerGroupMembersByGroupIdAndEntry(learnerGroupUid: Long, contentEntryUid: Long): DataSourceFactory<Int, LearnerGroupMemberWithPerson>
 
     @Query("""SELECT LearnerGroupMember.*, Person.* FROM LearnerGroupMember 
         LEFT JOIN Person ON LearnerGroupMember.learnerGroupMemberPersonUid = Person.personUid 

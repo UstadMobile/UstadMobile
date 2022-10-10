@@ -8,14 +8,14 @@ import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.PersonGroupEditView
 import com.ustadmobile.core.view.PersonGroupListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonGroup
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, view: PersonGroupListView,
-        di: DI, lifecycleOwner: DoorLifecycleOwner)
+        di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<PersonGroupListView, PersonGroup>(context, arguments, view, di, lifecycleOwner) {
 
 

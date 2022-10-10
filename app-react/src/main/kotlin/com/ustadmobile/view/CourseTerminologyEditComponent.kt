@@ -6,7 +6,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.TerminologyEntry
-import com.ustadmobile.mui.components.FormControlVariant
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.GridSpacing
 import com.ustadmobile.mui.components.umTextField
@@ -18,6 +17,7 @@ import com.ustadmobile.view.ext.renderListSectionTitle
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umSpacer
+import mui.material.FormControlVariant
 import react.RBuilder
 import react.setState
 import styled.css

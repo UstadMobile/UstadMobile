@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailStudentProgressOverv
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
 import com.ustadmobile.lib.db.entities.PersonGroupAssignmentSummary
@@ -41,7 +41,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewComponent (props: UmProps)
         }
     }
 
-    override var progressSummary: DoorLiveData<AssignmentProgressSummary?>? = null
+    override var progressSummary: LiveData<AssignmentProgressSummary?>? = null
         set(value) {
             field = value
             value?.removeObserver(progressObserver)

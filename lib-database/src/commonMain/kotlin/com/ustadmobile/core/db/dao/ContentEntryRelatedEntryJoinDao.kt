@@ -1,7 +1,7 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
-import androidx.room.Dao
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.annotation.*
@@ -12,9 +12,9 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.UserSession
 import kotlin.js.JsName
 
-@Dao
+@DoorDao
 @Repository
-abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntryJoin> {
+expect abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntryJoin> {
 
     @Query("""
      REPLACE INTO ContentEntryRelatedEntryJoinReplicate(cerejPk, cerejDestination)
@@ -96,7 +96,7 @@ abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntr
         AND ContentEntryRelatedEntryJoin.relType = $REL_TYPE_TRANSLATED_VERSION
         ORDER BY Language.name""")
     @JsName("findAllTranslationsWithContentEntryUid")
-    abstract fun findAllTranslationsWithContentEntryUid(contentEntryUid: Long): DoorDataSourceFactory<Int, ContentEntryRelatedEntryJoinWithLanguage>
+    abstract fun findAllTranslationsWithContentEntryUid(contentEntryUid: Long): DataSourceFactory<Int, ContentEntryRelatedEntryJoinWithLanguage>
 
     @Update
     abstract override fun update(entity: ContentEntryRelatedEntryJoin)

@@ -8,6 +8,7 @@ import com.ustadmobile.core.contentjob.SupportedContent.H5P_MIME_TYPES
 import com.ustadmobile.core.contentjob.SupportedContent.XAPI_MIME_TYPES
 import com.ustadmobile.core.contentjob.SupportedContent.ZIP_EXTENSIONS
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.db.dao.ContentEntryDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadNavController
@@ -25,7 +26,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -39,7 +40,7 @@ import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, view: ContentEntryList2View,
-                                 di: DI, lifecycleOwner: DoorLifecycleOwner,
+                                 di: DI, lifecycleOwner: LifecycleOwner,
                                  val contentEntryListItemListener: DefaultContentEntryListItemListener
                                  = DefaultContentEntryListItemListener(view = view, context = context,
                                          di = di, clazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L))
@@ -128,12 +129,12 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
             selectedChipOption == CHIP_ID_LIBRARY -> {
                 repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
                     parentEntryUid, 0, 0, loggedPersonUid, false, onlyFolderFilter,
-                    selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
+                    selectedSortOption?.flag ?: ContentEntryDaoCommon.SORT_TITLE_ASC)
             }
             contentFilter == ARG_DISPLAY_CONTENT_BY_PARENT -> {
                 repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
                         parentEntryUid, 0, 0, loggedPersonUid, showHiddenEntries, onlyFolderFilter,
-                        selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
+                        selectedSortOption?.flag ?: ContentEntryDaoCommon.SORT_TITLE_ASC)
             }
             else -> null
         }
@@ -276,7 +277,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     private fun showContentEntryListByParentUid() {
         view.list = repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByName(
                 parentEntryUid, 0, 0, loggedPersonUid, showHidden = false, onlyFolder = false,
-                sortOrder = selectedSortOption?.flag ?: ContentEntryDao.SORT_TITLE_ASC)
+                sortOrder = selectedSortOption?.flag ?: ContentEntryDaoCommon.SORT_TITLE_ASC)
     }
 
     fun handleOnBackPressed(): Boolean {
@@ -480,8 +481,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         const val CHIP_ID_LIBRARY = 3
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.title, ContentEntryDao.SORT_TITLE_ASC, true),
-                SortOrderOption(MessageID.title, ContentEntryDao.SORT_TITLE_DESC, false)
+                SortOrderOption(MessageID.title, ContentEntryDaoCommon.SORT_TITLE_ASC, true),
+                SortOrderOption(MessageID.title, ContentEntryDaoCommon.SORT_TITLE_DESC, false)
         )
 
         val PICKER_CHIP_OPTIONS = listOf(

@@ -1,15 +1,15 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.*
 
-@Dao
-abstract class ContentJobItemDao {
+@DoorDao
+expect abstract class ContentJobItemDao {
 
     @Query("""
         WITH ConnectivityStateCte(state) AS 
@@ -108,14 +108,6 @@ abstract class ContentJobItemDao {
     """)
     abstract suspend fun updateContainerProcessed(contentJobItemId: Long, cjiContainerProcessed: Boolean)
 
-    @Transaction
-    open suspend fun commitProgressUpdates(updates: List<ContentJobItemProgressUpdate>) {
-        updates.forEach {
-            updateItemProgress(it.cjiUid, it.cjiItemProgress, it.cjiItemTotal)
-        }
-    }
-
-
     @Query("""
         UPDATE ContentJobItem
            SET cjiStatus = :status,
@@ -198,7 +190,7 @@ abstract class ContentJobItemDao {
           FROM ContentJobItem
          WHERE cjiUid = :uid   
     """)
-    abstract fun getJobItemByUidLive(uid: Long): DoorLiveData<ContentJobItem?>
+    abstract fun getJobItemByUidLive(uid: Long): LiveData<ContentJobItem?>
 
     @Query("""
         SELECT cjiContainerUid

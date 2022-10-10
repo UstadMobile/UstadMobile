@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -8,9 +8,9 @@ import com.ustadmobile.door.annotation.*
 import com.ustadmobile.door.annotation.Repository.Companion.METHOD_DELEGATE_TO_WEB
 import com.ustadmobile.lib.db.entities.*
 
-@Dao
+@DoorDao
 @Repository
-abstract class PersonParentJoinDao {
+expect abstract class PersonParentJoinDao {
 
     @Query("""
      REPLACE INTO PersonParentJoinReplicate(ppjPk, ppjDestination)
@@ -96,10 +96,6 @@ abstract class PersonParentJoinDao {
     """)
     abstract suspend fun findByMinorPersonUid(minorPersonUid: Long): List<PersonParentJoin>
 
-    /**
-     * Represents a parent enrolment that needs to be done
-     */
-    data class ParentEnrolmentRequired(var parentPersonUid: Long = 0L, var clazzUid: Long = 0L)
 
     /**
      * Find classes for which a minor (child) is enroled where there is no parent enrolment for

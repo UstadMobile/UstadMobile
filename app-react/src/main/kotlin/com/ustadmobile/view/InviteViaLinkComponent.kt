@@ -4,7 +4,6 @@ import com.ustadmobile.core.controller.InviteViaLinkPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.InviteViaLinkView
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignCenterItems
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -17,6 +16,10 @@ import com.ustadmobile.view.ext.renderListItemWithIconAndTitle
 import com.ustadmobile.view.ext.umGridContainer
 import com.ustadmobile.view.ext.umItem
 import kotlinx.css.marginTop
+import mui.material.ButtonColor
+import mui.material.ButtonVariant
+import mui.material.Size
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css
@@ -85,8 +88,8 @@ class InviteViaLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                         css(alignCenterItems)
                         umButton(getString(MessageID.copy_link),
                             variant = ButtonVariant.contained,
-                            color = UMColor.secondary,
-                            size = ButtonSize.large,
+                            color = ButtonColor.secondary,
+                            size = Size.large,
                             startIcon = "content_copy", onClick = {
                                 copyToClipboard(inviteLink ?: ""){
                                     showSnackBar(getString(MessageID.copied_to_clipboard))
@@ -98,8 +101,8 @@ class InviteViaLinkComponent(mProps: UmProps): UstadBaseComponent<UmProps, UmSta
                         css(alignCenterItems)
                         umButton(getString(MessageID.copy_code),
                             variant = ButtonVariant.contained,
-                            color = UMColor.secondary,
-                            size = ButtonSize.large,
+                            color = ButtonColor.secondary,
+                            size = Size.large,
                             startIcon = "content_copy",
                             onClick = {
                                 copyToClipboard(inviteCode ?: ""){

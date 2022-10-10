@@ -14,12 +14,14 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
+import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.SelectFileView.Companion.ARG_MIMETYPE_SELECTED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.LifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import org.junit.Before
 import org.junit.Rule
@@ -48,7 +50,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoClazzAssignmentDaoSpy: ClazzAssignmentDao
 
@@ -67,9 +69,7 @@ class ClazzAssignmentDetailOverviewPresenterTest {
                 Thread(it.getArgument<Any>(0) as Runnable).start()
             }
         }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         xapiStatementEndpointImpl = mock{}
@@ -763,7 +763,9 @@ class ClazzAssignmentDetailOverviewPresenterTest {
 
         presenter.onCreate(null)
 
-        whenever(mockView.entity).thenReturn(testEntity)
+        mockView.stub {
+            on { entity }.thenReturn(testEntity)
+        }
 
         mockView.captureLastEntityValue()
 

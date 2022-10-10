@@ -24,6 +24,15 @@ class PersonListComponent(mProps: UmProps): UstadListComponent<Person, PersonWit
     override val listPresenter: UstadListPresenter<*, in PersonWithDisplayDetails>?
         get() = mPresenter
 
+    override var inviteViaLinkVisibile: Boolean
+        get() = inviteNewText.isNotEmpty()
+        set(value) {
+            inviteNewText = if(value) {
+                getString(MessageID.invite_with_link)
+            }else {
+                ""
+            }
+        }
 
     override fun onCreateView() {
         super.onCreateView()
