@@ -97,7 +97,7 @@ abstract class UstadMobileSystemCommon {
      */
     fun getAppConfigDefaultFirstDest(context: Any): String {
         return getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context)
-            ?: ContentEntryList2View.VIEW_NAME_HOME
+            ?: ClazzList2View.VIEW_NAME_HOME
     }
 
     fun goToDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
