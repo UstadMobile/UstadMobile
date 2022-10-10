@@ -119,26 +119,19 @@
     <string name="entry_details_license">جواز:</string>
     <string name="file_not_found">دوتنه و نه موندل شو</string>
     <string name="multiple_choice">ګڼ ځوابه</string>
-    <string name="content_format_paragraph">پاراګراف</string>
     <string name="content_font_10">اندازه ۱۰</string>
-    <string name="content_font_24">اندازه ۲۴</string>
     <string name="content_choose_file">دوتنه غوره کړئ</string>
     <string name="video">ویډیو</string>
-    <string name="content_blank_doc_start_label">د سمون د پیل لپاره.</string>
     <string name="content_add_page">د مخ زیاتول</string>
     <string name="location_permission_details">دا اپلیکیشن د نورو نږدې کاروونکو د پیدا کولو لپاره له بلوټوت او وایفای څخه کار اخلی. دا اپلیکیشن بیا کولای شی له نږدی کاروونکو سره وصل شی او محتویات پرته له انټرنټ څخه په لوړ سرعت سره کښته کړی. د دې لپاره چې د دې سکن پایلی څخه ستاسو د موقعیت د مالومولو لپاره ګټه اخیستل کیدای شی، ځکه نو تاسو باید د ځای د موقعیت اجازه ورکړئ ترڅو دا بڼه فعاله شی. دا اپلیکیشن د دې سکن/پلټنې پایله له ځانه سره خوندی نه ساتی او په هیڅ وجه ستاسو د ځای موقعیت نه ثبتوی. دا اپلیکیشن له خلاص زیرمه کوډ (Open source code) څخه جوړه شوې ده چې په دې پته یې لیدلی شئ: github.com/UstadMobile/UstadMobile</string>
-    <string name="content_editor_menu_redo">بیاکړ</string>
     <string name="content_editor_menu_unorderd_list">نامنظم لسټ</string>
     <string name="download_state_download">
         <b>کښته کول</b> ټول %1$s توکي، چې ستاسو په وزله کې ټولټال %2$s ځای نیسی.</string>
-    <string name="content_editor_menu_superscript">سترلیک</string>
     <string name="content_editor_link_error">پیوند متن او یا url باید تش نه وی، مهربانی وکړئ بیا هڅه وکړئ</string>
     <string name="download_state_downloading">
         <b>کښته کول</b> ټولټال %1$s توکي، چې ستاسو په وزله کې به %2$s ځای ونیسی.</string>
     <string name="download_cancel_label">د کښته کولو ړنګول</string>
-    <string name="permission_camera_message">دا اپلیکیشن د کامرې او دوتنې دواړو اجازې ته اړتیا لری چې عکسونه واخلي او ویډیو ثبت کړی</string>
     <string name="content_editor_create_new_category">نوی پوښه</string>
-    <string name="download_storage_permission_message">دا اپلیکیشن د حافظې کارډ اجازې ته اړتیا لری ترڅو محتویات پکښې کښته او ثبت کړی</string>
     <string name="licence">منښتلیک</string>
     <string name="publicly_accessible">محتویات علنی کول</string>
     <string name="download_cloud_availability">په کلاوډ کې موجود دی</string>
@@ -196,11 +189,8 @@
     <string name="repo_loading_status_failed_noconnection">کومه اړیکه یا جوړه نشته</string>
     <string name="repo_loading_status_failed_connection_error">پیوستون تیروتنه</string>
     <string name="xapi_options_when">څه وخت</string>
-    <string name="content_editor_page_delete_failure_message">بخښنه غواړو، تاسو نشئ کولای دا مخ ړنګ کړئ</string>
     <string name="content_editor_menu_underline">لاندی کرښه</string>
-    <string name="xapi_today">نن</string>
     <string name="done">ترسره شو</string>
-    <string name="content_editor_menu_align_center">منځول</string>
     <string name="content_from_file">له دوتنې څخه</string>
     <string name="content_from_link">له پیوند څخه</string>
     <string name="content_creation_folder_update_message">پوښۍ په بریا سره اوسمهاله شوه</string>
@@ -222,7 +212,6 @@
     <string name="locations">د ځایونو موقعیتونه</string>
     <string name="locations_setting_desc">د ځایونو د موقعیتونو مدیریت</string>
     <string name="add_group">د ډلې زیاتول</string>
-    <string name="enroll_group_member">د شخص ثبتول</string>
     <string name="custom_fields">دودیز ډګري</string>
     <string name="custom_field">دودیز ډګر</string>
     <string name="field_type">د ډګر ډول</string>

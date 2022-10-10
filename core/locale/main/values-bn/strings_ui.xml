@@ -76,7 +76,6 @@
     <string name="file_not_found">ফাইল পাওয়া যায় নি</string>
     <string name="multiple_choice">বহু নির্বাচনী</string>
     <string name="preview">পূর্বরূপ</string>
-    <string name="content_format_paragraph">অনুচ্ছেদ</string>
     <string name="content_font_14">১৪pt</string>
     <string name="app_name">উস্তাদ মোবাইল</string>
     <string name="login">প্রবেশ করুন</string>
@@ -120,18 +119,13 @@
     <string name="phone_number">ফোন নম্বর</string>
     <string name="name">নাম</string>
     <string name="video">ভিডিও</string>
-    <string name="content_blank_doc_start_label">সম্পাদনা শুরু করতে।</string>
     <string name="content_add_page">পাতা যোগ কর</string>
-    <string name="content_editor_directionality">দিকনির্দেশনা</string>
     <string name="content_editor_menu_outdent">আউটডেন্ট</string>
     <string name="location_permission_details">এই অ্যাপটি নিকটস্থ অন্যান্য ব্যবহারকারীদের খুঁজতে ব্লুটুথ এবং ওয়াইফাই স্ক্যানিং ব্যবহার করে। অ্যাপ্লিকেশনটি ইন্টারনেট অ্যাক্সেসের প্রয়োজন ছাড়াই দ্রুতগতিতে সামগ্রী ডাউনলোড করতে কাছের ব্যবহারকারীদের সাথে সংযোগ করতে পারে। এই স্ক্যানের ফলাফলগুলি আপনার অবস্থান নির্ধারণের জন্য ব্যবহার করা যেতে পারে, আপনাকে এই বৈশিষ্ট্যটি সক্ষম করার জন্য অবস্থানের অনুমতিটি দিতে হবে। এই অ্যাপ্লিকেশনটি এই স্ক্যানগুলির ফলাফল সংরক্ষণ করে না এবং কোনওভাবেই আপনার অবস্থান রেকর্ড করে না। এই অ্যাপ্লিকেশনটি ওপেন সোর্স কোড থেকে তৈরি যা github.com/UstadMobile/UstadMobile এ চেক করা যায়</string>
     <string name="download_continue_stacked_label">ডাউনলোড চালিয়ে যান</string>
-    <string name="content_editor_menu_italic">ইটালিক</string>
     <string name="download_continue_btn_label">চালিয়ে যান</string>
-    <string name="content_editor_menu_subscript">নিম্ন লিখিত</string>
     <string name="download_wifi_only">শুধুমাত্র ওয়াইফাই</string>
     <string name="download_calculating">গণনা করা হচ্ছে …</string>
-    <string name="permission_camera_title">ক্যামেরা এবং ফাইল অনুমতি প্রয়োজন</string>
     <string name="content_editor_create_new_category">নতুন ফোল্ডার</string>
     <string name="content_creation_storage_option_title">স্টোরেজ বিকল্প</string>
     <string name="file_required_prompt">আমদানি করা ফাইলটি নির্বাচিত নয়, আবার চেষ্টা করুন</string>
@@ -178,7 +172,6 @@
     <string name="enter_url">ইউআরএল দিন</string>
     <string name="download_summary_title">%1$s সক্রিয় ডাউনলোডসমূহ</string>
     <string name="download_cloud_availability">মেঘে উপলব্ধ</string>
-    <string name="content_editor_menu_pages">পৃষ্ঠা</string>
     <string name="enter_register_code">রেজিস্ট্রেশন কোড লিখুন</string>
     <string name="xapi_week" value="301">সপ্তাহ</string>
     <string name="activity_import_link">লিঙ্ক আমদানি করুন</string>
@@ -485,7 +478,6 @@
     <string name="return_only">ফিরে এবং শেষ</string>
     <string name="workspace">কর্মক্ষেত্র</string>
     <string name="organisation">সংস্থা %1$s</string>
-    <string name="existing_organisation">আপনার সংস্থা ইতিমধ্যে ওস্তাদ মোবাইল ব্যবহার করছে</string>
     <string name="locations_setting_desc">অবস্থানগুলি পরিচালনা করুন</string>
     <string name="connect_as_guest">অতিথি হিসাবে সংযুক্ত হন</string>
     <string name="create_account">হিসাব তৈরি কর</string>

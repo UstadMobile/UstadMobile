@@ -88,15 +88,11 @@
     <string name="download_locally_availability">नजिकै उपलब्ध छ</string>
     <string name="multiple_choice">बहु विकल्प</string>
     <string name="preview">पूर्व अवलोकन</string>
-    <string name="content_font_12">१२प्वाइन्ट</string>
     <string name="content_insert_options">इन्सर्ट गरौं</string>
     <string name="video">भिडियो</string>
-    <string name="content_untitled_page">शीर्षकविनाको पेज</string>
     <string name="download_continue_stacked_label">डाउनलोडलाई निरन्तरता दिऔं</string>
     <string name="download_continue_btn_label">निरन्तरता दिऔं</string>
-    <string name="content_editor_menu_text_formatting">टेक्स्ट फर्मेटिङ</string>
     <string name="content_editor_menu_fontsize">फन्ट साइज</string>
-    <string name="content_editor_menu_align_right">दायाँ</string>
     <string name="content_editor_link_insert">लिंक इन्सर्ट गरौं</string>
     <string name="content_editor_create_new_category">नयाँ फोल्डर</string>
     <string name="download_state_downloading">जम्मा %1$s आइटमहरू &lt;b&gt;डाउनलोड हुँदैछ&lt;/b&gt;, जसले तपाईंको डिभाइस स्टोरेजको जम्मा %2$s प्रयोग गर्दैछन्।</string>

@@ -124,11 +124,8 @@
 \n  Овози Амрико 
 \n  
 \n Мундариҷа аз ҷониби провайдерҳои мундариҷаи беруна тибқи иҷозатнома пешниҳод карда мешавад. Устод Мобайл, агар ба таври возеҳ дарҷ нагардида бошад, аз ҷониби ягон провайдери мундариҷа тасдиқ карда намешавад.</string>
-    <string name="content_media_title">Навъи медиа</string>
     <string name="content_action_page_remove">Саҳифаро нест кунед</string>
-    <string name="content_editor_menu_indent">Фосила</string>
     <string name="content_editor_menu_align_center">Марказ</string>
-    <string name="content_editor_link_remove">Пайвандро тоза намоед</string>
     <string name="content_editor_create_new_category">Папкаи нав</string>
     <string name="content_from_file">Аз файл</string>
     <string name="content_from_link">Аз пайванд</string>
@@ -217,7 +214,6 @@
     <string name="wednesday">Чоршанбе</string>
     <string name="thursday">Панҷшанбе</string>
     <string name="friday">Ҷумъа</string>
-    <string name="aug">Август</string>
     <string name="day">Рӯз</string>
     <string name="toC">Ба</string>
     <string name="last_month">Моҳи гузашта</string>
@@ -248,7 +244,6 @@
     <string name="time_period">Мӯҳлат</string>
     <string name="location">Макон</string>
     <string name="last_three_months">Се ҳафтаи охир</string>
-    <string name="at_risk_students">Хонандагони таҳти хавф қарордошта</string>
     <string name="export">Содирот</string>
     <string name="date">Сана</string>
     <string name="average">Миёна</string>
@@ -276,7 +271,6 @@
     <string name="over">бар зиёд</string>
     <string name="sync">Ҳамоҳангсозӣ</string>
     <string name="not_recorded">Сабт нашудаст</string>
-    <string name="dropout_reason_other">Дигар</string>
     <string name="groups">Гурӯҳҳо</string>
     <string name="roles">Нақшҳо</string>
     <string name="role">Нақш</string>
@@ -330,7 +324,6 @@
     <string name="change_password">Ивази парол</string>
     <string name="current_password">Пароли мазкур</string>
     <string name="password_unchanged">Парол (бетағйир)</string>
-    <string name="bottomnav_classes_title">Синфхонаҳо</string>
     <string name="users_settings_desc">Илова, тоза, тағйир додани корбарон ё барқарор кардани пароли онҳо</string>
     <string name="add">Илова намоед</string>
     <string name="refresh">Навсозӣ</string>
@@ -369,7 +362,6 @@
     <string name="download_storage_option_device">Истифодаи %1$s - %2$s озод</string>
     <string name="insufficient_space">Ҷойи кофии нигоҳдории мундариҷа мавҷуд нест</string>
     <string name="no_app_found">Ягон барнома барои кушодани файл ёфт нашуд</string>
-    <string name="content_update_document_title">Ҳуҷҷатро навсозӣ кунед</string>
     <string name="content_entry_label_title">Унвон</string>
     <string name="error_message_update_document">Ҳуҷҷатро навсозӣ карда натавонист</string>
     <string name="content_editor_save_error">Ҳангоми захирасозӣ ба хатогӣ роҳ дода шуд, бори дигар кӯшиш кунед</string>
@@ -392,7 +384,6 @@
     <string name="add_activity">Фаъолияти навро илова намоед...</string>
     <string name="add_activity_literal">Фаъолиятро илова намоед</string>
     <string name="select_one">Якеро интихоб намоед</string>
-    <string name="question_set">Савол гузошта шудааст</string>
     <string name="date_left">Санаӣ тарк</string>
     <string name="class_id">Шиносномаи синф</string>
     <string name="attendance_percentage">Фоизи давомот:</string>
