@@ -2,6 +2,7 @@ package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
@@ -9,10 +10,10 @@ import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
-import com.ustadmobile.door.ext.toFile
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import com.ustadmobile.door.ext.openInputStream
 
 class LottiePlugin(
     private var context: Any,
@@ -30,17 +31,17 @@ class LottiePlugin(
         get() = listOf("json")
 
     override suspend fun extractMetadata(
-
         uri: DoorUri, // could be file:/// or could be http://
         process: ContentJobProcessContext
     ): MetadataResult {
         val json: Json = di.direct.instance()
         val localFileUri = process.getLocalOrCachedUri()
-        val jsonString = localFileUri.toFile().readText()
+        val jsonString = localFileUri.openInputStream(context)?.readString()
+            ?: throw IllegalArgumentException("cannot open inputstream!")
         val jsonElement= json.parseToJsonElement(jsonString)
         val jsonObject = jsonElement.jsonObject
 
-        val nm: JsonElement? = jsonObject.get("nm");
+        val nm: JsonElement? = jsonObject.get("nm")
 
         return MetadataResult(ContentEntryWithLanguage().apply {
             title = nm?.jsonPrimitive?.content
