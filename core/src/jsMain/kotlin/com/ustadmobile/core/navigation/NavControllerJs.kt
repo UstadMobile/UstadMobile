@@ -90,6 +90,8 @@ class NavControllerJs(
 
 
 
+    var wentForwardForSavePrompt: Boolean = false
+
     /**
      * Use the current location href to find the correct back stack entry. popstate and hashchange
      * might happen after the page already changed.

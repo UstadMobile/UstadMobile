@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_ID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -24,6 +25,13 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(
 
     private val jsonLoadListeners: MutableList<JsonLoadListener> = copyOnWriteListOf()
 
+    /*
+     * The initial state after loading completed. This is used if/when there is a back or up
+     * navigation to check if there were any changes (so that the user can receive a prompt to save
+     * changes)
+     */
+    private var initialState: Map<String, String>? = null
+
     interface JsonLoadListener {
 
         fun onLoadFromJsonSavedState(savedState: Map<String, String>?)
@@ -32,13 +40,21 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(
 
     }
 
+
+    override fun onLoadDataComplete() {
+        super.onLoadDataComplete()
+
+        initialState = mutableMapOf<String, String>().also { onSaveInstanceState(it) }
+    }
+
     abstract fun handleClickSave(entity: RT)
 
     fun addJsonLoadListener(loadListener: JsonLoadListener) = jsonLoadListeners.add(loadListener)
 
     fun removeJsonLoadListener(loadListener: JsonLoadListener) = jsonLoadListeners.remove(loadListener)
 
-    fun requireBackStackEntry() = requireNavController().currentBackStackEntry ?: throw IllegalStateException("requirebackstackentry: no currentbackstackentry!")
+    fun requireBackStackEntry() = requireNavController().currentBackStackEntry
+        ?: throw IllegalStateException("requirebackstackentry: no currentbackstackentry!")
 
     override fun onLoadFromJson(bundle: Map<String, String>): RT? {
         jsonLoadListeners.forEach { it.onLoadFromJsonSavedState(bundle) }
@@ -56,6 +72,7 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(
                 arguments[ARG_RESULT_DEST_VIEWNAME] != null
 
     fun onFinish(detailViewName: String, entityUid: Long, entity: RT, serializer: KSerializer<RT>) {
+        stampLastSavedOrDiscardTime()
         if(!isExistingEntityOrPickerMode) {
             systemImpl.go(detailViewName,
                 mapOf(ARG_ENTITY_UID to entityUid.toString()), context,
@@ -64,4 +81,39 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(
             finishWithResult(safeStringify(di, ListSerializer(serializer), listOf(entity)))
         }
     }
+
+
+    override fun finishWithResult(result: String) {
+        super.finishWithResult(result)
+        stampLastSavedOrDiscardTime()
+    }
+
+    fun stampLastSavedOrDiscardTime() {
+        requireSavedStateHandle().set(KEY_LAST_SAVE_OR_DISCARD_TIME, systemTimeInMillis().toString())
+    }
+
+    open fun hasUnsavedChanges(): Boolean {
+        val stateNow = mutableMapOf<String, String>().also { onSaveInstanceState(it) }
+
+        // needs to prompt user to check changes
+        if(stateNow != initialState) {
+            view.showSaveOrDiscardChangesDialog()
+            return true
+        }
+
+        return false
+    }
+
+    /**
+     *
+     * @return true if the press should be intercepted, false otherwise
+     */
+    fun handleBackPressed(): Boolean = hasUnsavedChanges()
+
+    companion object {
+
+        const val KEY_LAST_SAVE_OR_DISCARD_TIME = "lastSaveOrDiscardTime"
+
+    }
+
 }

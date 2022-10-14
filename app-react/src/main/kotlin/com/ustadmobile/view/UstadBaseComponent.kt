@@ -97,8 +97,8 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         }
     }
 
-    val  savedStateHandle: UstadSavedStateHandle?
-        get() = navController.currentBackStackEntry?.savedStateHandle
+    var savedStateHandle: UstadSavedStateHandle? = null
+        private set
 
     var ustadComponentTitle: String? = null
         set(value) {
@@ -124,6 +124,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
             onFabClicked()
         }
         database = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
+        savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     }
 
     open fun onDestroyView(){}

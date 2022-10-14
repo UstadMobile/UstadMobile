@@ -66,4 +66,7 @@ class SelectExtractFileFragment(private val registry: ActivityResultRegistry? = 
     override var fieldsEnabled: Boolean = false
     override var entity: Any? = null
 
+    override fun showSaveOrDiscardChangesDialog() {
+
+    }
 }

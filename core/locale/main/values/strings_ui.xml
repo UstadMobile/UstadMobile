@@ -1940,5 +1940,16 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="app_language">App language</string>
 
+    <!--
+    This message will be displayed to users when they have made changes and then try to go back
+    before saving.
+    -->
+    <string name="your_changes_have_not_been_saved">Your changes have not been saved</string>
+
+    <!--
+    Option for user to discard changes to an item without saving
+    -->
+    <string name="discard">Discard</string>
+
 
 </resources>

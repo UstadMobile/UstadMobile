@@ -167,6 +167,7 @@ class ClazzEditComponent (mProps: UmProps): UstadEditComponent<ClazzWithHolidayC
                 +defaultPaddingTop
             }
 
+            renderSaveOrDiscardChangesDialog()
             renderAddContentOptionsDialog()
 
             umGridContainer(GridSpacing.spacing4) {

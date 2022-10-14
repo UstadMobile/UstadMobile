@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -87,6 +88,9 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private lateinit var ustadNavController: UstadNavController
 
+    private val currentPrimaryNavigationFragment: Fragment?
+        get() = supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.get(0)
+
     private val userProfileDrawable: Drawable? by lazy(LazyThreadSafetyMode.NONE) {
         ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_24dp)?.also {
             it.setTint(ContextCompat.getColor(this, R.color.onPrimaryColor))
@@ -148,6 +152,15 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         setupActionBarWithNavController(navController,
             AppBarConfiguration(mBinding.bottomNavView.menu))
+
+        //Check if the fragment itself wants to handle the back navigation e.g. edit screens that
+        // need to prompt the user to save
+        mBinding.mainCollapsingToolbar.toolbar.setNavigationOnClickListener {
+            val fragment = currentPrimaryNavigationFragment
+            if((fragment as? FragmentBackHandler)?.onHostBackPressed() != true) {
+                navController.navigateUp()
+            }
+        }
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
     }
@@ -279,7 +292,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     override fun onBackPressed() {
-        val fragment = supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.get(0)
+        val fragment = currentPrimaryNavigationFragment
         when {
             searchView?.isIconified == false -> {
                 searchView?.setQuery("",true)

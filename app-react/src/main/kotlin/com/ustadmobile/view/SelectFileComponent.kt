@@ -156,4 +156,8 @@ class SelectFileComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
         fileDropZoneManager = null
         entity = null
     }
+
+    override fun showSaveOrDiscardChangesDialog() {
+        //do nothing here - this is not used for file selection
+    }
 }

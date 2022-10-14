@@ -273,7 +273,7 @@ abstract class UstadBaseController<V : UstadView>(
      * the backstack to lookup, and what key name should be used in the saved state handle once
      * it has been looked up.
      */
-    fun finishWithResult(result: String) {
+    open fun finishWithResult(result: String) {
         val saveToViewName = arguments[ARG_RESULT_DEST_VIEWNAME]
         val saveToKey = arguments[ARG_RESULT_DEST_KEY]
 

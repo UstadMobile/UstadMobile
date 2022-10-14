@@ -6,6 +6,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.controller.UstadSingleEntityPresenter
@@ -14,9 +15,9 @@ import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.port.android.util.ext.saveStateToCurrentBackStackStateHandle
 
-abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> {
+abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T>, FragmentBackHandler {
 
-    abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
+    protected abstract val mEditPresenter : UstadEditPresenter<*, T>?
 
     override var fieldsEnabled: Boolean = true
         set(value) {
@@ -79,5 +80,21 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
     @Deprecated("This should not be used. Saving to the state handle should be done in " +
         "multiplatform code by the presenter.")
     protected open fun onSaveStateToBackStackStateHandle() = mEditPresenter?.saveStateToCurrentBackStackStateHandle(findNavController())
+
+    override fun onHostBackPressed(): Boolean {
+        return mEditPresenter?.handleBackPressed() ?: false
+    }
+
+    override fun showSaveOrDiscardChangesDialog() {
+        MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.your_changes_have_not_been_saved)
+            .setPositiveButton(R.string.save) { dialog, which ->
+                val entityVal = entity ?: return@setPositiveButton
+                mEditPresenter?.handleClickSave(entityVal)
+            }
+            .setNegativeButton(R.string.discard) { dialog, which ->
+                findNavController().popBackStack()
+            }
+            .show()
+    }
 
 }

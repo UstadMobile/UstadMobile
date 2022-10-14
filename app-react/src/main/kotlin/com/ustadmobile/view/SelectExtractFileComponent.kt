@@ -135,6 +135,10 @@ class SelectExtractFileComponent(
         }
     }
 
+    override fun showSaveOrDiscardChangesDialog() {
+        //Do nothing here - this is not used for file selection
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         entity = null
