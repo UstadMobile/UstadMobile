@@ -2,12 +2,13 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.RedirectView.Companion.TAG_REDIRECTED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_DEEPLINK
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -40,9 +41,13 @@ class RedirectPresenter(
             }
 
             accountManager.activeSession != null -> {
-                Napier.d { "Redirect: go to ${ContentEntryList2View.VIEW_NAME_HOME}" }
+                Napier.d { "Redirect: go to ${ClazzList2View.VIEW_NAME_HOME}" }
                 systemImpl.setAppPref(TAG_REDIRECTED, "true", context)
-                systemImpl.goToViewLink(ContentEntryList2View.VIEW_NAME_HOME, context)
+                presenterScope.launch {
+                    //Unfortunately this is required to allow the current app-react implementation to stabilize
+                    delay(200)
+                    systemImpl.goToViewLink(ClazzList2View.VIEW_NAME_HOME, context)
+                }
             }
 
             else -> {
