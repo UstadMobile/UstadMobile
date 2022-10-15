@@ -78,6 +78,8 @@ class SiteEditComponent(props: UmProps): UstadEditComponent<Site>(props), SiteEd
                 +StyleManager.defaultPaddingTop
             }
 
+            renderSaveOrDiscardChangesDialog()
+
 
             umItem(GridSize.cells12){
                 umTextField(label = "${nameLabel.text}",

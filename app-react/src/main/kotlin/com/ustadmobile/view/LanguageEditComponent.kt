@@ -73,6 +73,8 @@ class LanguageEditComponent (mProps: UmProps): UstadEditComponent<Language>(mPro
                 +StyleManager.fieldsOnlyFormScreen
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umItem(GridSize.cells12){
                 umTextField(label = "${nameLabel.text}",
                     helperText = nameLabel.errorText,

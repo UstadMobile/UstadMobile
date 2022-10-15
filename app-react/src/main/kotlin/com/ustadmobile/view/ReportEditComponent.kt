@@ -155,6 +155,8 @@ class ReportEditComponent (mProps: UmProps): UstadEditComponent<ReportWithSeries
                 +defaultPaddingTop
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umItem(GridSize.cells12){
 
                 umTextField(label = "${reportTitleLabel.text}",

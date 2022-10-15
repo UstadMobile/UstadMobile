@@ -120,6 +120,8 @@ class ClazzEnrolmentEditComponent (mProps: UmProps): UstadEditComponent<ClazzEnr
                 +StyleManager.fieldsOnlyFormScreen
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umGridContainer(GridSpacing.spacing4) {
 
                 umItem(GridSize.cells12){

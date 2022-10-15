@@ -76,6 +76,8 @@ class BitmaskEditComponent (mProps: UmProps): UstadEditComponent<LongWrapper>(mP
                 +defaultPaddingTop
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umGridContainer(GridSpacing.spacing4) {
 
                 scopeList?.let { scopes ->

@@ -96,6 +96,9 @@ class SchoolEditComponent (mProps: UmProps): UstadEditComponent<SchoolWithHolida
                 +contentContainer
                 +defaultPaddingTop
             }
+
+            renderSaveOrDiscardChangesDialog()
+
             umGridContainer(GridSpacing.spacing4) {
                 umItem(GridSize.cells12, GridSize.cells4){
                     umEntityAvatar(fallbackSrc = ASSET_ENTRY, listItem = true)

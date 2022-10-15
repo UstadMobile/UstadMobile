@@ -99,6 +99,8 @@ class CourseGroupSetEditComponent (mProps: UmProps): UstadEditComponent<CourseGr
                 +defaultPaddingTop
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umGridContainer(GridSpacing.spacing4) {
                 umItem(GridSize.cells12, GridSize.cells6) {
                     umTextField(label = "${titleLabel.text}",

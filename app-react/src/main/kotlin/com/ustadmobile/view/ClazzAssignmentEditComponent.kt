@@ -287,6 +287,8 @@ class ClazzAssignmentEditComponent(mProps: UmProps): UstadEditComponent<CourseBl
                 +fieldsOnlyFormScreen
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umGridContainer{
 
                 umItem(GridSize.cells12){

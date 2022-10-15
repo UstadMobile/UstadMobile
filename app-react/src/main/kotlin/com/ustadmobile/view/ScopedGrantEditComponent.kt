@@ -78,6 +78,8 @@ class ScopedGrantEditComponent (mProps: UmProps): UstadEditComponent<ScopedGrant
                 +defaultPaddingTop
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umGridContainer(GridSpacing.spacing4) {
 
                 scopeList?.let { scopes ->

@@ -65,6 +65,8 @@ class HolidayEditComponent(mProps: UmProps): UstadEditComponent<Holiday>(mProps)
                 +defaultPaddingTop
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umGridContainer {
                 css{
                     padding(2.spacingUnits, 2.spacingUnits,0.spacingUnits)

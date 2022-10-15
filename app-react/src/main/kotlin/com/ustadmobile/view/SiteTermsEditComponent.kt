@@ -69,6 +69,8 @@ class SiteTermsEditComponent(props: UmProps): UstadEditComponent<SiteTermsWithLa
                 +StyleManager.defaultPaddingTop
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umItem {
                 umTextField(label = "${languageLabel.text}",
                     helperText = languageLabel.errorText,

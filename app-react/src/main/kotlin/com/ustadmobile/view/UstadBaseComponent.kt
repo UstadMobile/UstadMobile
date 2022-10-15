@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadBackStackEntry
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.UstadUrlComponents
@@ -97,7 +98,10 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
         }
     }
 
-    var savedStateHandle: UstadSavedStateHandle? = null
+    protected var backStackEntry: UstadBackStackEntry? = null
+        private set
+
+    protected var savedStateHandle: UstadSavedStateHandle? = null
         private set
 
     var ustadComponentTitle: String? = null
@@ -124,7 +128,9 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
             onFabClicked()
         }
         database = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
-        savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+
+        backStackEntry = navController.currentBackStackEntry
+        savedStateHandle = backStackEntry?.savedStateHandle
     }
 
     open fun onDestroyView(){}

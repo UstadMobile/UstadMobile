@@ -223,6 +223,10 @@ class NavControllerJs(
         return navStack.lastOrNull { it.viewName == viewName }
     }
 
+    fun getPreviousBackStackEntry(viewName: String): UstadBackStackEntry? {
+        return navStack.subList(0, currentStackIndex).lastOrNull { it.viewName == viewName }
+    }
+
     private fun calcNumStepsToGoBack(viewName: String, inclusive: Boolean) : Int{
         val resolvedPopViewname = when(viewName) {
             UstadView.ROOT_DEST -> navStack.firstOrNull()?.viewName ?: RedirectView.VIEW_NAME

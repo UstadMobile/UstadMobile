@@ -239,6 +239,8 @@ class PersonEditComponent(mProps: UmProps) : UstadEditComponent<PersonWithAccoun
                 +defaultPaddingTop
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umGridContainer(GridSpacing.spacing4) {
                 umItem(GridSize.cells12, GridSize.cells4){
                     css{

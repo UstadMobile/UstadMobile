@@ -130,6 +130,8 @@ class ClazzLogEditAttendanceComponent (mProps: UmProps): UstadEditComponent<Claz
                 +defaultPaddingTop
             }
 
+            renderSaveOrDiscardChangesDialog()
+
            umGridContainer {
                umGridContainer {
                    umItem(GridSize.cells1) {

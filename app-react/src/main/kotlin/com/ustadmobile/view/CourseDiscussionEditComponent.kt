@@ -124,6 +124,8 @@ class CourseDiscussionEditComponent (mProps: UmProps): UstadEditComponent<Course
                 +fieldsOnlyFormScreen
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umItem(GridSize.cells12){
                 umTextField(label = "${titleLabel.text}",
                     helperText = titleLabel.errorText,

@@ -99,6 +99,8 @@ class TextCourseBlockEditComponent (mProps: UmProps): UstadEditComponent<CourseB
                 +fieldsOnlyFormScreen
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umItem(GridSize.cells12){
                 umTextField(label = "${titleLabel.text}",
                     helperText = titleLabel.errorText,

@@ -74,6 +74,8 @@ class DiscussionPostEditComponent (mProps: UmProps): UstadEditComponent<Discussi
                 +fieldsOnlyFormScreen
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umItem(GridSize.cells12){
                 umTextField(label = "${titleLabel.text}",
                     helperText = titleLabel.errorText,

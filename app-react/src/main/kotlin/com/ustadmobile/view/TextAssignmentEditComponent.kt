@@ -111,6 +111,8 @@ class TextAssignmentEditComponent (mProps: UmProps): UstadEditComponent<CourseAs
                 +StyleManager.fieldsOnlyFormScreen
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umItem{
                 umMuiHtmlEditor(editorContent,
                     readOnly = !editEnabled,

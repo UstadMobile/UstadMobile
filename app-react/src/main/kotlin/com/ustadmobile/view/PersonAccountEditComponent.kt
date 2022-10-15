@@ -146,6 +146,8 @@ class PersonAccountEditComponent(mProps: UmProps) : UstadEditComponent<PersonWit
                 +defaultDoubleMarginTop
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umGridContainer {
 
                 umItem(GridSize.cells3){

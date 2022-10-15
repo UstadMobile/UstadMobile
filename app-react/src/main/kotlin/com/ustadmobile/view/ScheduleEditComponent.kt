@@ -92,6 +92,8 @@ class ScheduleEditComponent (mProps: UmProps): UstadEditComponent<Schedule>(mPro
                 +StyleManager.fieldsOnlyFormScreen
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umGridContainer(GridSpacing.spacing4) {
                 umItem(GridSize.cells12){
 

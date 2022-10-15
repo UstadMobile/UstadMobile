@@ -74,6 +74,8 @@ class DiscussionTopicEditComponent (mProps: UmProps): UstadEditComponent<Discuss
                 +fieldsOnlyFormScreen
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umItem(GridSize.cells12){
                 umTextField(label = "${titleLabel.text}",
                     helperText = titleLabel.errorText,

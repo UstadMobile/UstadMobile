@@ -317,6 +317,8 @@ class ContentEntryEditComponent (mProps: UmProps): UstadEditComponent<ContentEnt
                 +defaultPaddingTop
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             if(updateItemOptionsDialogVisible) {
                 renderAddContentEntryOptionsDialog(
                     systemImpl,

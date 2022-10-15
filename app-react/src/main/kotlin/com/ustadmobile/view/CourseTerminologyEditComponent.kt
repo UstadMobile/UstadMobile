@@ -82,6 +82,8 @@ class CourseTerminologyEditComponent (mProps: UmProps): UstadEditComponent<Cours
                 +StyleManager.fieldsOnlyFormScreen
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umItem(GridSize.cells12){
                 umTextField(label = "${titleLabel.text}",
                     helperText = titleLabel.errorText,

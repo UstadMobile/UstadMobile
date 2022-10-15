@@ -67,6 +67,8 @@ class LeavingReasonEditComponent (mProps: UmProps): UstadEditComponent<LeavingRe
                 +fieldsOnlyFormScreen
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umItem(GridSize.cells12){
                 umTextField(label = "${reasonTitle.text}",
                     helperText = reasonTitle.errorText,

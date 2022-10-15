@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.navigation.NavControllerJs
+import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -12,6 +13,7 @@ import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
+import com.ustadmobile.util.getViewNameFromUrl
 import io.github.aakira.napier.Napier
 import kotlinx.browser.window
 import kotlinx.css.LinearDimension
@@ -35,8 +37,14 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
     private val lastSaveOrDiscardedTime: Long
         get() = savedStateHandle?.get<String>(UstadEditPresenter.KEY_LAST_SAVE_OR_DISCARD_TIME)?.toLong() ?: 0
 
+    private var viewName: String = ""
+
     override fun onCreateView() {
+        viewName = UstadUrlComponents.parse(window.location.href).viewName
+        Napier.d("lastSavedTime = $lastSaveOrDiscardedTime " +
+            "wentForward = ${(navController as NavControllerJs).wentForwardForSavePrompt}")
         if(lastSaveOrDiscardedTime == 0L && (navController as NavControllerJs).wentForwardForSavePrompt) {
+            Napier.d("SavePrompts: Setting wentForwardForSavePrompt=false, showing dialog")
             saveOrDiscardDialogVisible = true
             (navController as NavControllerJs).wentForwardForSavePrompt = false
         }
@@ -81,14 +89,21 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
          * taken care of. On the browser, the user can go forward themselves.
          */
         val presenterVal = mEditPresenter
+        val navControllerJs = navController as NavControllerJs
         if(presenterVal != null
                 && presenterVal.persistenceMode == UstadSingleEntityPresenter.PersistenceMode.DB
                 && (systemTimeInMillis() -  presenterVal.lastStateSaveTime) > LAST_SAVE_CHECK_WINDOW) {
             presenterVal.saveStateToNavController()
         }
 
-        if(lastSaveOrDiscardedTime == 0L && mEditPresenter?.hasUnsavedChanges() == true) {
-            (navController as NavControllerJs).wentForwardForSavePrompt = true
+        Napier.d("SavePrompts: lastSaveOrDiscardedTime=$lastSaveOrDiscardedTime " +
+            "hasUnsavedchanges = ${mEditPresenter?.hasUnsavedChanges()}  " +
+            "foundstackentry = ${navControllerJs.getPreviousBackStackEntry(viewName) != backStackEntry}")
+        if(lastSaveOrDiscardedTime == 0L && mEditPresenter?.hasUnsavedChanges() == true
+            && navControllerJs.getPreviousBackStackEntry(viewName) != backStackEntry
+        ) {
+            Napier.d("SavePrompts: Setting wentForwardForSavePrompt=true")
+            navControllerJs.wentForwardForSavePrompt = true
             loading = false
             window.history.forward()
         }
@@ -110,7 +125,13 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
             }
 
 
-            umDialog(true, onClose = { saveOrDiscardDialogVisible = false }) {
+            umDialog(true,
+                onClose = {
+                    setState {
+                        saveOrDiscardDialogVisible = false
+                    }
+                }
+            ) {
                 umDialogContent {
                     css {
                         width = LinearDimension("100%")
@@ -126,6 +147,9 @@ abstract class UstadEditComponent<T: Any>(mProps: UmProps): UstadBaseComponent<U
                         systemImpl.getString(MessageID.save, this),
                         color = ButtonColor.secondary,
                         onClick = {
+                            setState {
+                                saveOrDiscardDialogVisible = false
+                            }
                             entity?.also { mEditPresenter?.handleClickSave(it) }
                         }
                     )

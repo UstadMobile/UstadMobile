@@ -114,6 +114,8 @@ class ClazzLogEditComponent (mProps: UmProps): UstadEditComponent<ClazzLog>(mPro
                 +defaultPaddingTop
             }
 
+            renderSaveOrDiscardChangesDialog()
+
             umGridContainer(columnSpacing = GridSpacing.spacing4) {
                 umItem(GridSize.cells12, GridSize.cells6) {
                     umDatePicker(
