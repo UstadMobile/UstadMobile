@@ -187,6 +187,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
+                implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$version_androidx_lifecycle"
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "com.google.code.gson:gson:$version_gson"
 

@@ -162,3 +162,6 @@ new class, new assignment, etc. %1$s will be replaced with the name of the item.
 <string name="new_entity">New %1$s</string>
 ```
 
+# MVVM
+
+

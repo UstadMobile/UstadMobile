@@ -146,13 +146,18 @@ ext {
 
     version_android_material = "1.6.1"
     version_androidx_appcompat = "1.4.2"
+    version_compose_material = "1.2.1"
+
+    //As per https://github.com/material-components/material-components-android-compose-theme-adapter/releases
+    version_compose_theme_adapter = "1.1.20"
+
     version_androidx_legacy_support = "1.0.0"
     version_androidx_activity = "1.4.0"
     version_androidx_fragment = "1.4.1"
     version_androidx_core = '1.8.0'
     version_androidx_cardview = "1.0.0"
     version_androidx_coordinatorlayout = "1.2.0"
-    version_androidx_lifecycle = "2.4.1"
+    version_androidx_lifecycle = "2.5.1"
     version_androidx_legacy = "1.0.0"
     version_android_room = "2.4.3"
     version_androidx_arch = "2.1.0"
