@@ -1204,7 +1204,7 @@ object ContentScraperUtil {
      * @return Chrome Driver with Log enabled
      */
     fun setupLogIndexChromeDriver(): ChromeDriver {
-        val d = DesiredCapabilities()
+        val d = ChromeOptions()
         d.setCapability("opera.arguments", "-screenwidth 411 -screenheight 731")
 
         val logPrefs = LoggingPreferences()
@@ -1215,7 +1215,7 @@ object ContentScraperUtil {
     }
 
     fun setupChromeDriverWithSeleniumProxy(seleniumProxy: Proxy): ChromeDriver {
-        val d = DesiredCapabilities()
+        val d = ChromeOptions()
         d.setCapability("opera.arguments", "-screenwidth 411 -screenheight 731")
         d.setCapability(CapabilityType.PROXY, seleniumProxy)
 

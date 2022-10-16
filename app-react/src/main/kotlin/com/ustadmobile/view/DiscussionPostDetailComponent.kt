@@ -167,6 +167,7 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
                             fontSize = (1.3).em
                         }
                         attrs.asDynamic().inputProps = object: Props {
+                            override var key: String?= "${StyleManager.name}-chatInputMessageClass"
                             val className = "${StyleManager.name}-chatInputMessageClass"
                         }
                     }

@@ -64,7 +64,7 @@ import mui.material.*
 import mui.material.styles.TypographyVariant
 import org.kodein.di.DI
 import org.kodein.di.instance
-import org.w3c.dom.HTMLImageElement
+import dom.html.HTMLImageElement
 import org.w3c.dom.events.Event
 import react.*
 import react.dom.attrs
@@ -1536,6 +1536,7 @@ fun RBuilder.umTopBar(
                     textColor = Color.white,
                     disableUnderline = true) {
                     attrs.asDynamic().inputProps = object: Props {
+                        override var key: Key?= "${StyleManager.name}-mainComponentInputSearchClass"
                         val className = "${StyleManager.name}-mainComponentInputSearchClass"
                         val id = "um-search"
                     }

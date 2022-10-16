@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util
 
+import com.ustadmobile.core.controller.UstadEditPresenterJsonLoader
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.db.dao.OneToManyJoinDao
 import com.ustadmobile.door.lifecycle.MutableLiveData
@@ -18,14 +19,15 @@ import kotlin.reflect.KClass
  * false).
  */
 open class OneToManyJoinEditHelper<T : Any, K>(val pkGetter: (T) -> K,
-                                         val serializationKey: String,
-                                         val serializationStrategy: SerializationStrategy<List<T>>? = null,
-                                         val deserializationStrategy: DeserializationStrategy<List<T>>? = null,
-                                         val newPk: K,
-                                         editPresenter: UstadEditPresenter<*, *>,
-                                         val entityClass: KClass<T>,
-                                         val pkSetter: T.(K) -> Unit,
-                                         open protected val fakePkGenerator: () -> K): UstadEditPresenter.JsonLoadListener  {
+                                               val serializationKey: String,
+                                               val serializationStrategy: SerializationStrategy<List<T>>? = null,
+                                               val deserializationStrategy: DeserializationStrategy<List<T>>? = null,
+                                               val newPk: K,
+                                               editPresenter: UstadEditPresenterJsonLoader,
+                                               val di: DI,
+                                               val entityClass: KClass<T>,
+                                               val pkSetter: T.(K) -> Unit,
+                                               open protected val fakePkGenerator: () -> K): UstadEditPresenter.JsonLoadListener  {
 
     val liveList: MutableLiveData<List<T>> = MutableLiveData(listOf())
 
@@ -33,10 +35,7 @@ open class OneToManyJoinEditHelper<T : Any, K>(val pkGetter: (T) -> K,
 
     protected val pksToDeactivate = mutableListOf<K>()
 
-    private val di: DI
-
     init {
-        di = editPresenter.di
         editPresenter.addJsonLoadListener(this)
     }
 

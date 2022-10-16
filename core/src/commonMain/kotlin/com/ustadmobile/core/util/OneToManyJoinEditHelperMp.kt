@@ -30,6 +30,7 @@ open class OneToManyJoinEditHelperMp<T : Any>(pkGetter: (T) -> Long,
         serializationStrategy,
         deserializationStrategy,
         editPresenter,
+        editPresenter.di,
         entityClass,
         pkSetter) {
 

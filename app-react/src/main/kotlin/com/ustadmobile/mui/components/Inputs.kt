@@ -5,7 +5,7 @@ import kotlinx.css.Color
 import kotlinx.css.color
 import mui.material.Input
 import mui.material.InputProps
-import org.w3c.dom.HTMLDivElement
+import dom.html.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
 import react.RBuilder

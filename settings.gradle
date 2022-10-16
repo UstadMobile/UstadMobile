@@ -8,6 +8,8 @@ pluginManagement {
         }
 
         mavenCentral()
+        gradlePluginPortal()
+        google()
         maven {
             url 'https://plugins.gradle.org/m2/'
         }
