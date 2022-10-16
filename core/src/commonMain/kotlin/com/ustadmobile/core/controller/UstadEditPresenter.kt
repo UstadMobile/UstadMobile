@@ -20,7 +20,7 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(
     di: DI,
     lifecycleOwner: LifecycleOwner,
     override val activeSessionRequired: Boolean = true
-) : UstadSingleEntityPresenter<V, RT>(context, arguments, view, di, lifecycleOwner) {
+) : UstadSingleEntityPresenter<V, RT>(context, arguments, view, di, lifecycleOwner), UstadEditPresenterJsonLoader {
 
     private val jsonLoadListeners: MutableList<JsonLoadListener> = copyOnWriteListOf()
 
@@ -34,9 +34,9 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(
 
     abstract fun handleClickSave(entity: RT)
 
-    fun addJsonLoadListener(loadListener: JsonLoadListener) = jsonLoadListeners.add(loadListener)
+    override fun addJsonLoadListener(loadListener: JsonLoadListener) = jsonLoadListeners.add(loadListener)
 
-    fun removeJsonLoadListener(loadListener: JsonLoadListener) = jsonLoadListeners.remove(loadListener)
+    override fun removeJsonLoadListener(loadListener: JsonLoadListener) = jsonLoadListeners.remove(loadListener)
 
     fun requireBackStackEntry() = requireNavController().currentBackStackEntry ?: throw IllegalStateException("requirebackstackentry: no currentbackstackentry!")
 

@@ -311,7 +311,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     private fun setUserProfile(menuItem: MenuItem) {
         val accountManager: UstadAccountManager by instance()
 
-        val profileImgView: ImageView = menuItem.actionView.findViewById(R.id.person_name_profilepic)
+        val profileImgView: ImageView = menuItem.actionView?.findViewById(R.id.person_name_profilepic) ?: return
         userProfileDrawable?.also { profileImgView.imageForeignKeyPlaceholder(it) }
         profileImgView.setImageForeignKeyAdapter(PersonDetailFragment.FOREIGNKEYADAPTER_PERSON)
         profileImgView.setImageForeignKey(accountManager.activeAccount.personUid)
