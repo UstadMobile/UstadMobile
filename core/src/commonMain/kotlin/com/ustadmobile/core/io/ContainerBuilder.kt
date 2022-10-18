@@ -17,4 +17,12 @@ class ContainerBuilder internal constructor(){
     internal val containerSources = mutableListOf<ContainerSource>()
 
 
+    companion object {
+
+        val DEFAULT_DONT_COMPRESS_EXTENSIONS = arrayOf(
+            "mp3", "ogg", "wav", "wma",
+            "mp4", "mov", "wmv", "avi", "flv", "mkv", "webm",
+            "pdf", "")
+
+    }
 }

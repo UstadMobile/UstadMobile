@@ -187,12 +187,12 @@ class UmAppDatabaseContainerIoExtTest {
         val containerStorageDir = temporaryFolder.newFolder()
 
         val containerUid = runBlocking {
-            repo.addContainer {
+            repo.addContainer(contentEntryUid = 0, mimeType = "application/zip") {
                 containerStorageUri = containerStorageDir.toDoorUri()
 
                 addFile("cat-pic0.jpg", tmpFile1, ContainerBuilder.Compression.GZIP)
             }
-        }
+        }.containerUid
 
         val file1ContainerEntry = db.containerEntryDao.findByPathInContainer(containerUid,
             "cat-pic0.jpg")
@@ -213,11 +213,11 @@ class UmAppDatabaseContainerIoExtTest {
             .writeToFile(epubTmp)
 
         val containerUid = runBlocking {
-            repo.addContainer {
+            repo.addContainer(contentEntryUid = 0, mimeType = "application/zip") {
                 containerStorageUri = containerStorageDir.toDoorUri()
                 addZip("", epubTmp) { ContainerBuilder.Compression.GZIP }
             }
-        }
+        }.containerUid
 
         assertZipAndContainerContentsAreEqual(epubTmp, db, containerUid)
     }
