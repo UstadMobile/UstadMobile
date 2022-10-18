@@ -4,6 +4,7 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ContainerBuilder
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.lib.db.entities.Container
 import org.kodein.di.DI
 
 expect suspend fun UmAppDatabase.addEntriesToContainerFromZip(
@@ -32,6 +33,8 @@ expect suspend fun UmAppDatabase.addFileToContainer(
 )
 
 expect suspend fun UmAppDatabase.addContainer(
+    contentEntryUid: Long,
+    mimeType: String,
     block: ContainerBuilder.() -> Unit
-): Long
+): Container
 

@@ -24,9 +24,7 @@ import com.ustadmobile.core.util.ext.maxQueryParamListSize
 import kotlinx.coroutines.NonCancellable
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.core.db.dao.findExistingMd5SumsByMd5SumsSafe
-import com.ustadmobile.core.io.ContainerBuilder
-import com.ustadmobile.core.io.ContainerFileSource
-import com.ustadmobile.core.io.ContainerZipSource
+import com.ustadmobile.core.io.*
 import com.ustadmobile.lib.db.entities.Container
 import java.io.FileInputStream
 import java.util.*
@@ -409,7 +407,7 @@ fun ContainerBuilder.addFile(
 fun ContainerBuilder.addZip(
     pathInContainerPrefix: String,
     zipInput: () -> ZipInputStream,
-    compression: (ZipEntry) -> ContainerBuilder.Compression,
+    compression: PathCompressionFilter = DefaultPathCompressionFilter(),
 ) {
     containerSources += ContainerZipSource(zipInput, pathInContainerPrefix, compression)
 }
@@ -417,18 +415,39 @@ fun ContainerBuilder.addZip(
 fun ContainerBuilder.addZip(
     pathInContainerPrefix: String,
     zipFile: File,
-    compression: (ZipEntry) -> ContainerBuilder.Compression,
+    compression: PathCompressionFilter = DefaultPathCompressionFilter(),
 ) {
     containerSources += ContainerZipSource({ ZipInputStream(FileInputStream(zipFile)) },
         pathInContainerPrefix, compression)
 }
 
+fun ContainerBuilder.addZip(
+    pathInContainerPrefix: String,
+    zipUri: DoorUri,
+    context: Any,
+    compression: PathCompressionFilter = DefaultPathCompressionFilter(),
+) {
+    containerSources += ContainerZipSource({ ZipInputStream(zipUri.openInputStream(context)
+        ?: throw IllegalArgumentException("Cannot get input stream for uri: $zipUri")) },
+        pathInContainerPrefix, compression)
+}
+
 actual suspend fun UmAppDatabase.addContainer(
+    contentEntryUid: Long,
+    mimeType: String,
     block: ContainerBuilder.() -> Unit
-): Long {
+): Container {
     val containerBuilder = ContainerBuilder()
     block(containerBuilder)
-    val containerUid = containerDao.insertAsync(Container())
+    val container = Container().apply {
+        this.containerContentEntryUid = contentEntryUid
+        this.mimeType = mimeType
+        this.cntLastModified = getSystemTimeInMillis()
+        this.containerUid = containerDao.insertAsync(this)
+    }
+
+    val containerUid = container.containerUid
+
     val containerStorageUri = containerBuilder.containerStorageUri
         ?: throw java.lang.IllegalStateException("No ContainerStorage provided!")
 
@@ -445,7 +464,7 @@ actual suspend fun UmAppDatabase.addContainer(
 
     containerDao.updateContainerSizeAndNumEntriesAsync(containerUid, getSystemTimeInMillis())
 
-    return containerUid
+    return container
 }
 
 private suspend fun UmAppDatabase.addContainerAddFile(
@@ -545,7 +564,7 @@ private suspend fun UmAppDatabase.addContainerAddZip(
                 val nameInZip = "${zipSource.pathInContainerPrefix}${zipEntry.name}"
 
                 val entryTmpFile = File(containerDir, "${fileCounter++}.tmp")
-                val useGzip = zipSource.compression(zipEntry) == ContainerBuilder.Compression.GZIP
+                val useGzip = zipSource.compression.getCompressionForPath(zipEntry.name) == ContainerBuilder.Compression.GZIP
                 val entryMd5 = zipIn.writeToFileAndGetMd5(entryTmpFile, useGzip)
                 zipFilesToAdd += FileToAdd(entryTmpFile, entryMd5, nameInZip, useGzip, zipEntry.size)
             }

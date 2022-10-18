@@ -128,28 +128,22 @@ class EpubTypePluginCommonJvm(
 
                     if(!contentJobItem.cjiContainerProcessed) {
 
-                        val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
-                                ?: Container().apply {
-                                    containerContentEntryUid = contentJobItem.cjiContentEntryUid
-                                    cntLastModified = System.currentTimeMillis()
-                                    mimeType = supportedMimeTypes.first()
-                                    containerUid = repo.containerDao.insertAsync(this)
-
-                                }
-
                         val containerFolder = jobItem.contentJob?.toUri
-                                ?: defaultContainerDir.toURI().toString()
-                        val containerFolderUri = DoorUri.parse(containerFolder)
+                            ?: defaultContainerDir.toURI().toString()
+
+                        val container = repo.addContainer(
+                            contentEntryUid = contentJobItem.cjiContentEntryUid,
+                            mimeType = supportedMimeTypes.first()
+                        ) {
+                            containerStorageUri = DoorUri.parse(containerFolder)
+                            addZip("", localUri, context)
+                        }
 
                         contentJobItem.cjiContainerUid = container.containerUid
                         process.withContentJobItemTransactionMutex { txDb ->
                             txDb.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
                                 container.containerUid)
                         }
-
-                        repo.addEntriesToContainerFromZip(container.containerUid,
-                                localUri,
-                                ContainerAddOptions(storageDirUri = containerFolderUri), context)
 
                         contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
                             progress)
