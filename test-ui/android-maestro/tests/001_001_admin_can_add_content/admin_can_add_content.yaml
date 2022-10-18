@@ -1,0 +1,68 @@
+appId: com.toughra.ustadmobile
+---
+- clearState: com.toughra.ustadmobile
+- launchApp
+- tapOn: "GET STARTED"
+- inputText: "http://localhost:8087/"
+- hideKeyboard
+- tapOn: "NEXT"
+- tapOn: "Username"
+- inputText: ${USERNAME}
+- tapOn: "Password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: "LOGIN"
+- tapOn: "Library"
+- tapOn: "CONTENT"
+- tapOn: "Add file"
+- runFlow:
+      when:
+          visible: "Recent"
+      file: recent_page.yaml
+#- tapOn:
+ #   text: "Show roots"
+#- tapOn: "Downloads"
+- scroll
+- tapOn: ${TESTFILENAME}
+- tapOn:
+      id: "com.toughra.ustadmobile:id/entry_title_text"
+- longPressOn:
+    id: "com.toughra.ustadmobile:id/entry_title_text"
+- tapOn: "Select all"
+- eraseText: 50
+- inputText: ${TESTCONTENTNAME}
+- tapOn: "SAVE"
+- tapOn: ${TESTCONTENTNAME}
+- extendedWaitUntil:
+    visible: "Delete"
+    timeout: 60000
+- clearState: com.toughra.ustadmobile
+- launchApp
+- tapOn: "GET STARTED"
+- inputText: "http://localhost:8087/"
+- hideKeyboard
+- tapOn: "NEXT"
+- tapOn: "Username"
+- inputText: ${USERNAME}
+- tapOn: "Password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: "LOGIN"
+- tapOn: "Library"
+- extendedWaitUntil:
+    visible: ${TESTCONTENTNAME}
+    timeout: 60000
+- tapOn: ${TESTCONTENTNAME}
+- tapOn: "Download"
+- tapOn: "Download"
+- extendedWaitUntil:
+    visible: "OPEN"    # Same input as in assertVisible or tapOn
+    timeout: 10000      # Timeout in milliseconds
+- tapOn: "OPEN"
+- scroll
+- takeScreenshot: ${TESTCONTENTNAME}
+- back
+- tapOn: "ATTEMPTS"
+- takeScreenshot: ${TESTCONTENTNAME}AttemptsScreen
+
+

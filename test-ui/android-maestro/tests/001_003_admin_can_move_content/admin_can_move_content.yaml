@@ -1,0 +1,67 @@
+appId: com.toughra.ustadmobile
+---
+- clearState: com.toughra.ustadmobile
+- launchApp
+- tapOn: "GET STARTED"
+- inputText: "http://localhost:8087/"
+- hideKeyboard
+- tapOn: "NEXT"
+- tapOn: "Username"
+- inputText: ${USERNAME}
+- tapOn: "Password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: "LOGIN"
+- extendedWaitUntil:
+    visible: "Courses"
+    timeout: 10000
+- tapOn: "Library"
+- tapOn: "CONTENT"
+- tapOn: "Add file"
+- tapOn:
+    text: "Show roots"
+- tapOn: "Downloads"
+- tapOn:
+       text: "Show roots"
+- tapOn: "Downloads"
+- scroll
+- tapOn: ${TESTFILENAME}
+- tapOn:
+      id: "com.toughra.ustadmobile:id/entry_title_text"
+- longPressOn:
+      id: "com.toughra.ustadmobile:id/entry_title_text"
+- tapOn: "Select all"
+- eraseText: 50
+- inputText: ${TESTCONTENTNAME}
+- tapOn: "SAVE"
+- tapOn: ${TESTCONTENTNAME}
+- extendedWaitUntil:
+    visible: "Delete"
+    timeout: 60000
+- back
+- takeScreenshot: ${TESTCONTENTNAME}_beforeMoving
+- longPressOn:
+      id: "com.toughra.ustadmobile:id/content_entry_item_title"
+- tapOn:
+    text: "Move"
+- tapOn: "Add new content"
+- tapOn: "New folder"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/entry_title_text"
+- inputText: "Test Folder"${TESTCONTENTNAME}
+- tapOn: "SAVE"
+- takeScreenshot: ${TESTCONTENTNAME}_AfterMoving
+- clearState: com.toughra.ustadmobile
+- launchApp
+- tapOn: "GET STARTED"
+- inputText: "http://localhost:8087/"
+- hideKeyboard
+- tapOn: "NEXT"
+- tapOn: "Username"
+- inputText: ${USERNAME}
+- tapOn: "Password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: "LOGIN"
+- tapOn: "Library"
+- takeScreenshot: ${TESTCONTENTNAME}_AfterMovingContent
