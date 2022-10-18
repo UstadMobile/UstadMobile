@@ -164,4 +164,63 @@ new class, new assignment, etc. %1$s will be replaced with the name of the item.
 
 # MVVM
 
+Passing items:
 
+```
+//On Android - use ActivityViewModel
+class MessageBusViewModel {
+     
+     val pendingFlows: Map<String, MutableList<Flow<Any?>>
+     
+     send(key, value) {
+         pendingFlows.getOrPut(key) += flowOf {  value }
+     }
+     
+     receive<T>(key): Flow<T> {
+        return pendingFlows[key].merge()
+     }
+}
+```
+
+Editing back/forth:
+```
+class ClazzEditViewModel {
+
+    val entity = MutableStateFlow<Clazz>()
+
+    val schedules = MutableStateFlow<List<Schedule>>()
+
+    init {
+        viewModelScope.launch {
+            awaitAll(async {
+                entityVar.emit(savedState.getJson(KEY) ?: 
+                    repo.onDbThenRepo { it.someDao.findByUid(savedState[PRIMARYKEY] })
+            },
+            async {
+                schedules.emit(savedState.getJson(KEY_SCHEDULES) ?: 
+                    repo.onDbThenRepo { it.someDao.findScheduleByClazzUid(savedState[PRIMARYKEY] } 
+            })
+        
+            messageBus.receive<Schedule>("ScheduleResult").collectLatest { schedule ->
+                 val newScheduleList = schedules.collectLatest.replace { }
+                 schedules.emit(newScheduleList)
+                 savedState.saveJson(KEY_SCHEDULES, newScheduleList)
+            }
+        }
+    }
+    
+    fun onEntityUpdated(newValue: Clazz) {
+        entity.emit(newValue)
+        commit(interval) {
+           savedState.saveJson(KEY_ENTITYVAL, newValue)
+        }
+    }
+    
+    fun onClickSchedule(schedule: Schedule) {
+        messageBus.send("Schedule", schedule)
+        navController.navigate(ScheduleEdit?loadKey=Schedule&returnTo=ClazzEdit&returnSteps=1&returnKey=ScheduleResult)
+    }
+    
+}
+
+```
