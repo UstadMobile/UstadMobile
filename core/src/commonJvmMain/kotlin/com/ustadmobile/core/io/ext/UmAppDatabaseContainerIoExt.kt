@@ -24,6 +24,11 @@ import com.ustadmobile.core.util.ext.maxQueryParamListSize
 import kotlinx.coroutines.NonCancellable
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.core.db.dao.findExistingMd5SumsByMd5SumsSafe
+import com.ustadmobile.core.io.ContainerBuilder
+import com.ustadmobile.core.io.ContainerFileSource
+import com.ustadmobile.core.io.ContainerZipSource
+import com.ustadmobile.lib.db.entities.Container
+import java.io.FileInputStream
 import java.util.*
 
 actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
@@ -392,3 +397,206 @@ suspend fun UmAppDatabase.addHarEntryToContainer(containerUid: Long, harEntry: H
             ?.updateContainerSizeAndNumEntriesAsync(containerUid, getSystemTimeInMillis())
 
 }
+
+fun ContainerBuilder.addFile(
+    pathInContainer: String,
+    file: File,
+    compression: ContainerBuilder.Compression = ContainerBuilder.Compression.GZIP
+) {
+    containerSources += ContainerFileSource(pathInContainer, file, compression)
+}
+
+fun ContainerBuilder.addZip(
+    pathInContainerPrefix: String,
+    zipInput: () -> ZipInputStream,
+    compression: (ZipEntry) -> ContainerBuilder.Compression,
+) {
+    containerSources += ContainerZipSource(zipInput, pathInContainerPrefix, compression)
+}
+
+fun ContainerBuilder.addZip(
+    pathInContainerPrefix: String,
+    zipFile: File,
+    compression: (ZipEntry) -> ContainerBuilder.Compression,
+) {
+    containerSources += ContainerZipSource({ ZipInputStream(FileInputStream(zipFile)) },
+        pathInContainerPrefix, compression)
+}
+
+actual suspend fun UmAppDatabase.addContainer(
+    block: ContainerBuilder.() -> Unit
+): Long {
+    val containerBuilder = ContainerBuilder()
+    block(containerBuilder)
+    val containerUid = containerDao.insertAsync(Container())
+    val containerStorageUri = containerBuilder.containerStorageUri
+        ?: throw java.lang.IllegalStateException("No ContainerStorage provided!")
+
+    val containerUidDir = File(containerStorageUri.toFile(), containerUid.toString()).also {
+        it.mkdirs()
+    }
+
+    containerBuilder.containerSources.forEach { source: ContainerBuilder.ContainerSource ->
+        when(source) {
+            is ContainerFileSource -> addContainerAddFile(source, containerUid, containerUidDir)
+            is ContainerZipSource -> addContainerAddZip(source, containerUid, containerUidDir)
+        }
+    }
+
+    containerDao.updateContainerSizeAndNumEntriesAsync(containerUid, getSystemTimeInMillis())
+
+    return containerUid
+}
+
+private suspend fun UmAppDatabase.addContainerAddFile(
+    fileSource: ContainerFileSource,
+    containerUid: Long,
+    containerUidFolder: File,
+) {
+    //add the file
+    val tmpFile = File(containerUidFolder,
+        "${systemTimeInMillis()}.tmp")
+
+    val md5Sum = withContext(Dispatchers.IO) {
+        if(fileSource.compression == ContainerBuilder.Compression.GZIP) {
+            fileSource.file.gzipAndGetMd5(tmpFile)
+        }else if(fileSource.moveOriginalFile) {
+            fileSource.file.md5Sum
+        }else {
+            fileSource.file.copyAndGetMd5(tmpFile)
+        }
+    }
+
+    val md5Hex = md5Sum.toHexString()
+
+    val db = if(this is DoorDatabaseRepository) {
+        this.db as UmAppDatabase
+    }else {
+        this
+    }
+
+    //check if we already have this file in the database
+    var containerFile = db.containerEntryFileDao.findEntryByMd5Sum(md5Sum.encodeBase64())
+
+    val totalSize = fileSource.file.length()
+    if(containerFile == null) {
+        val finalDestFile = File(containerUidFolder, md5Hex)
+        if(fileSource.compression != ContainerBuilder.Compression.GZIP && fileSource.moveOriginalFile) {
+            if(!fileSource.file.renameTo(finalDestFile))
+                throw IOException("Could not rename ${fileSource.file} to $finalDestFile")
+        }else {
+            if(!tmpFile.renameTo(finalDestFile))
+                throw IOException("Could not rename $tmpFile to $finalDestFile")
+        }
+
+        containerFile = finalDestFile.toContainerEntryFile(totalSize = totalSize,
+            md5Sum =  md5Sum, gzipped = fileSource.compression == ContainerBuilder.Compression.GZIP
+        ).apply {
+            this.cefUid = db.containerEntryFileDao.insertAsync(this)
+        }
+    }
+
+    //link the existing entry
+    db.containerEntryDao.insertAsync(ContainerEntry().apply {
+        this.cePath = fileSource.pathInContainer
+        this.ceContainerUid = containerUid
+        this.ceCefUid = containerFile.cefUid
+    })
+
+    tmpFile.takeIf { it.exists() }?.delete()
+}
+
+private suspend fun UmAppDatabase.addContainerAddZip(
+    zipSource: ContainerZipSource,
+    containerUid: Long,
+    containerUidFolder: File,
+) {
+    val db = if(this is DoorDatabaseRepository) {
+        this.db as UmAppDatabase
+    }else {
+        this
+    }
+
+    class FileToAdd(
+        val tmpFile: File,
+        val md5Sum: ByteArray,
+        val pathInContainer: String,
+        val isCompressed: Boolean,
+        val uncompressedSize: Long
+    ) {
+        val md5Base64: String by lazy(LazyThreadSafetyMode.NONE) {
+            md5Sum.encodeBase64()
+        }
+    }
+
+    withContext(Dispatchers.IO) {
+        val containerDir = containerUidFolder
+
+        val zipFilesToAdd = mutableListOf<FileToAdd>()
+        zipSource.zipInput().use { zipIn ->
+            lateinit var zipEntry: ZipEntry
+
+            var fileCounter = 0
+            while(zipIn.nextEntry?.also { zipEntry = it } != null) {
+                //Do not include zip directories
+                if(zipEntry.isDirectory)
+                    continue
+
+                val nameInZip = "${zipSource.pathInContainerPrefix}${zipEntry.name}"
+
+                val entryTmpFile = File(containerDir, "${fileCounter++}.tmp")
+                val useGzip = zipSource.compression(zipEntry) == ContainerBuilder.Compression.GZIP
+                val entryMd5 = zipIn.writeToFileAndGetMd5(entryTmpFile, useGzip)
+                zipFilesToAdd += FileToAdd(entryTmpFile, entryMd5, nameInZip, useGzip, zipEntry.size)
+            }
+        }
+
+        val existingMd5s = db.containerEntryFileDao.findExistingMd5SumsByMd5SumsSafe(
+            zipFilesToAdd.map { it.md5Base64 }, maxQueryParamListSize).filterNotNull().toSet()
+        val filesToStore = mutableMapOf<String, FileToAdd>()
+        val filesToDelete = mutableListOf<FileToAdd>()
+
+        //Need to handle the edge case where we have a zip that contains two or more entries with
+        // the same md5
+        zipFilesToAdd.forEach {
+            if(it.md5Base64 !in existingMd5s && !filesToStore.containsKey(it.md5Base64))
+                filesToStore[it.md5Base64] = it
+            else
+                filesToDelete += it
+        }
+
+        val containerEntryFilesToInsert = filesToStore.map { fileToAddEntry ->
+            val fileToAdd = fileToAddEntry.value
+            val destFile = File(containerDir, fileToAdd.md5Sum.toHexString())
+            if(!fileToAdd.tmpFile.renameTo(destFile))
+                throw IOException("Could not rename ${fileToAdd.tmpFile.absolutePath} to " +
+                    "${destFile.absolutePath} container uid $containerUid path = ${fileToAdd.pathInContainer}")
+
+            ContainerEntryFile().apply {
+                cefMd5 = fileToAdd.md5Base64
+                compression = if(fileToAdd.isCompressed) {
+                    ContainerEntryFile.COMPRESSION_GZIP
+                }else {
+                    ContainerEntryFile.COMPRESSION_NONE
+                }
+                ceCompressedSize = destFile.length()
+                ceTotalSize = fileToAdd.uncompressedSize
+                cefPath = destFile.absolutePath
+            }
+        }
+
+        filesToDelete.forEach {
+            it.tmpFile.delete()
+        }
+
+
+        db.withDoorTransactionAsync { txDb: UmAppDatabase ->
+            txDb.containerEntryFileDao.insertListAsync(containerEntryFilesToInsert)
+            zipFilesToAdd.forEach {
+                txDb.containerEntryDao.insertWithMd5SumsAsync(containerUid, it.pathInContainer,
+                    it.md5Base64)
+            }
+        }
+    }
+}
+

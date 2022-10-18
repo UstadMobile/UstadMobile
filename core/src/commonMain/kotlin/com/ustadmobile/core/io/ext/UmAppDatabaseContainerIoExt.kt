@@ -2,6 +2,7 @@ package com.ustadmobile.core.io.ext
 
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ContainerBuilder
 import com.ustadmobile.door.DoorUri
 import org.kodein.di.DI
 
@@ -29,3 +30,8 @@ expect suspend fun UmAppDatabase.addFileToContainer(
     di: DI,
     addOptions: ContainerAddOptions
 )
+
+expect suspend fun UmAppDatabase.addContainer(
+    block: ContainerBuilder.() -> Unit
+): Long
+
