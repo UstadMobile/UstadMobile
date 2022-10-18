@@ -77,7 +77,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@={block.courseDiscussion.courseDiscussionTitle}"
-                    android:hint="@string/title" />
+                    android:hint="@string/subject" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout

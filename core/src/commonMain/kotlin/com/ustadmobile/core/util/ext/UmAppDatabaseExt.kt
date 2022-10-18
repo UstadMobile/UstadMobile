@@ -125,18 +125,8 @@ suspend fun UmAppDatabase.processEnrolmentIntoClass(
 
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(
         enrolment.clazzEnrolmentClazzUid)
-        ?: throw IllegalArgumentException("processEnrolmentIntoClass: Class does not exist")
+    ?: throw IllegalArgumentException("processEnrolmentIntoClass: Class does not exist")
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
-
-    enrolment.clazzEnrolmentDateJoined = DateTime(enrolment.clazzEnrolmentDateJoined)
-        .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
-    if(enrolment.clazzEnrolmentDateLeft != Long.MAX_VALUE){
-        enrolment.clazzEnrolmentDateLeft = DateTime(enrolment.clazzEnrolmentDateLeft)
-            .toOffsetByTimezone(clazzTimeZone).localEndOfDay.utc.unixMillisLong
-    }
-
-    enrolment.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(enrolment)
-
 
     val personGroupUid = when(enrolment.clazzEnrolmentRole) {
         ClazzEnrolment.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
@@ -146,33 +136,72 @@ suspend fun UmAppDatabase.processEnrolmentIntoClass(
         else -> -1
     }
 
-    if(personGroupUid != -1L) {
-        val existingGroupMemberships = personGroupMemberDao.checkPersonBelongsToGroup(
-            personGroupUid, enrolment.clazzEnrolmentPersonUid)
-        personGroupMemberDao.takeIf { existingGroupMemberships.isEmpty() }?.insertAsync(
-            PersonGroupMember().also {
-                it.groupMemberPersonUid = enrolment.clazzEnrolmentPersonUid
-                it.groupMemberGroupUid = personGroupUid
-            })
-    }
+    if(enrolment.clazzEnrolmentUid == 0L) {
 
-    val parentsToEnrol = if(enrolment.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT) {
-        onRepoWithFallbackToDb(2500) {
-            it.personParentJoinDao.findByMinorPersonUidWhereParentNotEnrolledInClazz(
-                enrolment.clazzEnrolmentPersonUid, enrolment.clazzEnrolmentClazzUid)
-        }
-    }else {
-        listOf()
-    }
-
-    parentsToEnrol.forEach { parentJoin ->
-        onRepoWithFallbackToDb(2500) {
-            it.personDao.findByUidAsync(parentJoin.parentPersonUid)
-        }?.also { parentPerson ->
-            enrolPersonIntoClazzAtLocalTimezone(parentPerson, enrolment.clazzEnrolmentClazzUid,
-                ClazzEnrolment.ROLE_PARENT, clazzWithSchoolVal)
+        enrolment.clazzEnrolmentDateJoined = DateTime(enrolment.clazzEnrolmentDateJoined)
+            .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+        if(enrolment.clazzEnrolmentDateLeft != Long.MAX_VALUE){
+            enrolment.clazzEnrolmentDateLeft = DateTime(enrolment.clazzEnrolmentDateLeft)
+                .toOffsetByTimezone(clazzTimeZone).localEndOfDay.utc.unixMillisLong
         }
 
+        enrolment.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(enrolment)
+
+        if(personGroupUid != -1L) {
+            val existingGroupMemberships = personGroupMemberDao.checkPersonBelongsToGroup(
+                personGroupUid, enrolment.clazzEnrolmentPersonUid)
+            personGroupMemberDao.takeIf { existingGroupMemberships.isEmpty() }?.insertAsync(
+                PersonGroupMember().also {
+                    it.groupMemberPersonUid = enrolment.clazzEnrolmentPersonUid
+                    it.groupMemberGroupUid = personGroupUid
+                })
+        }
+
+        val parentsToEnrol = if(enrolment.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT) {
+            onRepoWithFallbackToDb(2500) {
+                it.personParentJoinDao.findByMinorPersonUidWhereParentNotEnrolledInClazz(
+                    enrolment.clazzEnrolmentPersonUid, enrolment.clazzEnrolmentClazzUid)
+            }
+        }else {
+            listOf()
+        }
+
+        parentsToEnrol.forEach { parentJoin ->
+            onRepoWithFallbackToDb(2500) {
+                it.personDao.findByUidAsync(parentJoin.parentPersonUid)
+            }?.also { parentPerson ->
+                enrolPersonIntoClazzAtLocalTimezone(parentPerson, enrolment.clazzEnrolmentClazzUid,
+                    ClazzEnrolment.ROLE_PARENT, clazzWithSchoolVal)
+            }
+
+        }
+
+    }else{
+
+
+        if(personGroupUid != -1L) {
+            val existingGroupMemberships = personGroupMemberDao.checkPersonBelongsToGroup(
+                personGroupUid, enrolment.clazzEnrolmentPersonUid)
+
+            //Remove group membership?
+            for(everyGroupMembership in existingGroupMemberships){
+                personGroupMemberDao.updateGroupMemberActive(false,
+                    enrolment.clazzEnrolmentPersonUid,
+                    clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid, systemTimeInMillis()
+                )
+            }
+
+            val existingGroupMembershipsAfterDisabling = personGroupMemberDao.checkPersonBelongsToGroup(
+                personGroupUid, enrolment.clazzEnrolmentPersonUid)
+
+            personGroupMemberDao.takeIf { existingGroupMembershipsAfterDisabling.isEmpty() }?.insertAsync(
+                PersonGroupMember().also {
+                    it.groupMemberPersonUid = enrolment.clazzEnrolmentPersonUid
+                    it.groupMemberGroupUid = personGroupUid
+                })
+        }
+
+        clazzEnrolmentDao.updateAsync(enrolment)
     }
 
     return enrolment

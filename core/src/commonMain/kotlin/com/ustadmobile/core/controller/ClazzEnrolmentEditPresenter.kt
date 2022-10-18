@@ -23,6 +23,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
+import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
@@ -193,11 +195,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
             view.startDateErrorWithDate = null
             view.endDateError = null
 
-            if(entity.clazzEnrolmentUid == 0L) {
-                repo.processEnrolmentIntoClass(entity)
-            }else {
-                repo.clazzEnrolmentDao.updateAsync(entity)
-            }
+            repo.processEnrolmentIntoClass(entity)
 
             finishWithResult(
                 safeStringify(di, ListSerializer(ClazzEnrolmentWithLeavingReason.serializer()) ,
