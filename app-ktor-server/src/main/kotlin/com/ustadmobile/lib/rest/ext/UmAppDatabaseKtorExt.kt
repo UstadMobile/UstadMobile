@@ -81,7 +81,9 @@ fun UmAppDatabase.insertCourseTerminology(di: DI){
  */
 suspend fun UmAppDatabase.initAdminUser(
     endpoint: Endpoint,
-    di: DI
+    authManager: AuthManager,
+    di: DI,
+    defaultPassword: String? = null,
 ) {
     if(this !is DoorDatabaseRepository)
         throw IllegalStateException("initAdminUser must be called on repo!")
@@ -96,9 +98,9 @@ suspend fun UmAppDatabase.initAdminUser(
         adminPerson.personUid = insertPersonAndGroup(adminPerson).personUid
 
         //Remove lower case l, upper case I, and the number 1
-        val adminPass = randomString(10, "abcdefghijkmnpqrstuvxwyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")
+        val adminPass = defaultPassword
+            ?: randomString(10, "abcdefghijkmnpqrstuvxwyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")
 
-        val authManager: AuthManager = di.on(endpoint).direct.instance()
         authManager.setAuth(adminPerson.personUid, adminPass)
 
         val adminPassFile = File(passwordFilePath, "admin.txt")
