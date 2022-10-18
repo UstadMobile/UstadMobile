@@ -2,6 +2,7 @@ package com.ustadmobile.core.io.ext
 
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ContainerBuilder
 import com.ustadmobile.door.DoorUri
 import org.kodein.di.DI
 
@@ -27,4 +28,10 @@ actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(
     zipUri: DoorUri,
     addOptions: ContainerAddOptions,
     context: Any) {
+}
+
+actual suspend fun UmAppDatabase.addContainer(
+    block: ContainerBuilder.() -> Unit
+): Long {
+    throw IllegalStateException("Not supported on Javascript")
 }
