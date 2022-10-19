@@ -3,7 +3,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:r::' --long 'serial1:,username:,password::' -n 'run-all-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e::' --long 'serial1:,username:,password::' -n 'run-all-maestro-tests.sh' -- "$@")
 
 eval set -- "$TEMP"
 unset TEMP
@@ -26,8 +26,8 @@ while true; do
                         shift 2
                        continue
                 ;;
-              '-r'|'--result')
-                    RESULT=$2
+              '-e'|'--endpoint')
+                    ENDPOINT=$2
                       shift 2
                      continue
                ;;
@@ -42,10 +42,17 @@ done
 
 BASEDIR=$(pwd)
 TESTS=$(ls ./tests/*/runtest.sh)
-RESULT = $(ls ./tests/*.png)
+
 echo "Serial1=$SERIAL"
 echo "Username=$USERNAME"
 
+ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){​3}​[0-9]*).*/\2/p' | head -n 1
+IPADDR=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){​3}​[0-9]*).*/\2/p' | head -n 1)
+if [ "$ENDPOINT" == "" ]; then
+     IPADDR=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n 1)
+    ENDPOINT="http://$IPADDR:8087/"
+fi
+echo "ENDPOINT=$ENDPOINT"
 for TESTFILE in $TESTS; do
   cd $(dirname $TESTFILE)
     source $TESTFILE
