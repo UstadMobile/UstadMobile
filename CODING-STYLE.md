@@ -184,6 +184,17 @@ class MessageBusViewModel {
 
 Editing back/forth:
 ```
+@Composable
+fun ClazzEdit(viewModel) {
+  ..
+  
+  var clazzState: Clazz by viewModel.entityState()
+  
+  Text(onChanged = { newText ->
+     viewModel.onEntityUpdate(clazzState.copy(clazzName = newText))
+  })
+}
+
 EditPresenter?loadKey=Schedule&resultDest=<RESULTVIEWNAME>&resultSteps=1&resultKey
 
 {
@@ -204,6 +215,8 @@ EditPresenter?loadKey=Schedule&resultDest=<RESULTVIEWNAME>&resultSteps=1&resultK
            scheduleState.emit(newList)   
        }
    }
+   
+   
    
    fun onEntityUpdate(entity: T) {
        entityState.emit(entity)
