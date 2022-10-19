@@ -6,6 +6,8 @@ class ContainerBuilder internal constructor(){
 
     internal var containerStorageUri: DoorUri? = null
 
+    var mimeType: String? = null
+
     enum class Compression {
         NONE, GZIP
     }

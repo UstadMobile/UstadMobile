@@ -32,7 +32,8 @@ actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(
 }
 
 actual suspend fun UmAppDatabase.addContainer(
-    block: ContainerBuilder.() -> Unit
+    contentEntryUid: Long,
+    block: suspend ContainerBuilder.() -> Unit
 ): Container {
     throw IllegalStateException("Not supported on Javascript")
 }

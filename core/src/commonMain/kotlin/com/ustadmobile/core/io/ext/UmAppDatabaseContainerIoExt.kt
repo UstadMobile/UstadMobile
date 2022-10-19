@@ -34,7 +34,6 @@ expect suspend fun UmAppDatabase.addFileToContainer(
 
 expect suspend fun UmAppDatabase.addContainer(
     contentEntryUid: Long,
-    mimeType: String,
-    block: ContainerBuilder.() -> Unit
+    block: suspend ContainerBuilder.() -> Unit
 ): Container
 
