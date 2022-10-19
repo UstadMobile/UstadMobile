@@ -434,14 +434,13 @@ fun ContainerBuilder.addZip(
 
 actual suspend fun UmAppDatabase.addContainer(
     contentEntryUid: Long,
-    mimeType: String,
-    block: ContainerBuilder.() -> Unit
+    block: suspend ContainerBuilder.() -> Unit
 ): Container {
     val containerBuilder = ContainerBuilder()
     block(containerBuilder)
     val container = Container().apply {
         this.containerContentEntryUid = contentEntryUid
-        this.mimeType = mimeType
+        this.mimeType = containerBuilder.mimeType
         this.cntLastModified = getSystemTimeInMillis()
         this.containerUid = containerDao.insertAsync(this)
     }
@@ -459,6 +458,7 @@ actual suspend fun UmAppDatabase.addContainer(
         when(source) {
             is ContainerFileSource -> addContainerAddFile(source, containerUid, containerUidDir)
             is ContainerZipSource -> addContainerAddZip(source, containerUid, containerUidDir)
+            else -> throw IllegalArgumentException("unsupported source: $source")
         }
     }
 
