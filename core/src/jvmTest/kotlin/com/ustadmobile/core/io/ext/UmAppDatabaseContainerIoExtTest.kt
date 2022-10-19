@@ -217,7 +217,7 @@ class UmAppDatabaseContainerIoExtTest {
             repo.addContainer(contentEntryUid = 0) {
                 mimeType = "application/zip"
                 containerStorageUri = containerStorageDir.toDoorUri()
-                addZip("", epubTmp) { ContainerBuilder.Compression.GZIP }
+                addZip(epubTmp)
             }
         }.containerUid
 

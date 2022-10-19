@@ -405,16 +405,16 @@ fun ContainerBuilder.addFile(
 }
 
 fun ContainerBuilder.addZip(
-    pathInContainerPrefix: String,
     zipInput: () -> ZipInputStream,
+    pathInContainerPrefix: String = "",
     compression: PathCompressionFilter = DefaultPathCompressionFilter(),
 ) {
     containerSources += ContainerZipSource(zipInput, pathInContainerPrefix, compression)
 }
 
 fun ContainerBuilder.addZip(
-    pathInContainerPrefix: String,
     zipFile: File,
+    pathInContainerPrefix: String = "",
     compression: PathCompressionFilter = DefaultPathCompressionFilter(),
 ) {
     containerSources += ContainerZipSource({ ZipInputStream(FileInputStream(zipFile)) },
@@ -422,9 +422,9 @@ fun ContainerBuilder.addZip(
 }
 
 fun ContainerBuilder.addZip(
-    pathInContainerPrefix: String,
     zipUri: DoorUri,
     context: Any,
+    pathInContainerPrefix: String = "",
     compression: PathCompressionFilter = DefaultPathCompressionFilter(),
 ) {
     containerSources += ContainerZipSource({ ZipInputStream(zipUri.openInputStream(context)
