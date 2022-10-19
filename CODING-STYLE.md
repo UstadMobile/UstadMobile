@@ -184,43 +184,44 @@ class MessageBusViewModel {
 
 Editing back/forth:
 ```
-class ClazzEditViewModel {
+EditPresenter?loadKey=Schedule&resultDest=<RESULTVIEWNAME>&resultSteps=1&resultKey
 
-    val entity = MutableStateFlow<Clazz>()
+{
 
-    val schedules = MutableStateFlow<List<Schedule>>()
+   val scheduleState = MutableState<List<Schedule>>(listOf())
 
-    init {
-        viewModelScope.launch {
-            awaitAll(async {
-                entityVar.emit(savedState.getJson(KEY) ?: 
-                    repo.onDbThenRepo { it.someDao.findByUid(savedState[PRIMARYKEY] })
-            },
-            async {
-                schedules.emit(savedState.getJson(KEY_SCHEDULES) ?: 
-                    repo.onDbThenRepo { it.someDao.findScheduleByClazzUid(savedState[PRIMARYKEY] } 
-            })
-        
-            messageBus.receive<Schedule>("ScheduleResult").collectLatest { schedule ->
-                 val newScheduleList = schedules.collectLatest.replace { }
-                 schedules.emit(newScheduleList)
-                 savedState.saveJson(KEY_SCHEDULES, newScheduleList)
-            }
-        }
-    }
-    
-    fun onEntityUpdated(newValue: Clazz) {
-        entity.emit(newValue)
-        commit(interval) {
-           savedState.saveJson(KEY_ENTITYVAL, newValue)
-        }
-    }
-    
-    fun onClickSchedule(schedule: Schedule) {
-        messageBus.send("Schedule", schedule)
-        navController.navigate(ScheduleEdit?loadKey=Schedule&returnTo=ClazzEdit&returnSteps=1&returnKey=ScheduleResult)
-    }
-    
-}
+   init {
+       entityState.emit(savedStateHandle.getOrLoadJson<Schedule>(KEY_ENTITY) {
+           messageBus.receive(loadKey) ?: repo.onDbThenRepo { dbToUse ->
+               dbToUse.dao.findByUid(savedStateHandle.require(ENTITY_PK))
+           }
+       })
+       
+       observeReturnedResult<Type>(KEY) { schedule ->
+           val newList = scheduleState.collectLatest()
+              .replaceOrAppend { it.scheduleUid == schedule.scheduleUid }
+           saveState.saveJson(STATE_SCHEDULES, newList)
+           scheduleState.emit(newList)   
+       }
+   }
+   
+   fun onEntityUpdate(entity: T) {
+       entityState.emit(entity)
+       savedState.postCommit(KEY, entity) 
+   }
+   
+   fun navigateForResult() {
+       
+   }
+   	
+   fun finishWithResult() {
+       //1. put the result onto backstack saved state handle as before...
+       
+       //2. also put this on the message bus
+       
+       //3. run the navigation back
+   }
+      
+}   
 
 ```
