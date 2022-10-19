@@ -80,6 +80,7 @@ class XapiTypePluginCommonJvm(
         process: ContentJobProcessContext,
         progressListener: ContentJobProgressListener
     ) {
+        mimeType = supportedMimeTypes.first()
         addZip(process.getLocalOrCachedUri(), context)
     }
 
