@@ -432,6 +432,19 @@ fun ContainerBuilder.addZip(
         pathInContainerPrefix, compression)
 }
 
+/**
+ * Directly add the given DoorUri to the container being built
+ */
+fun ContainerBuilder.addUri(
+    pathInContainer: String,
+    uri: DoorUri,
+    context: Any,
+    compression: ContainerBuilder.Compression = ContainerBuilder.Compression.GZIP,
+    moveOriginalFile: Boolean = false
+) {
+    containerSources += ContainerUriSource(pathInContainer, uri, context, compression, moveOriginalFile)
+}
+
 actual suspend fun UmAppDatabase.addContainer(
     contentEntryUid: Long,
     block: suspend ContainerBuilder.() -> Unit
