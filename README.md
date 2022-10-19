@@ -61,7 +61,7 @@ e.g. http://192.168.1.123:8087/ where 192.168.1.123 is the IP address of your de
 Contributions are welcome! If you're unsure about anything, please create an issue and label it as
 a question.
 
-* __Localization__ - Localization is done using on our [Weblate project](https://weblate.ustadmobile.com/projects/ustad-mobile/).
+* __Localization__ - Localization is done using on our [Weblate project](https://hosted.weblate.org/projects/ustad-mobile/).
  Please register on Weblate and then [create an issue](https://github.com/UstadMobile/UstadMobile/issues/new) 
  with the subject "Localization - language name" and let us know what language you would like to 
  translate into. We can then give you permission to start translating!

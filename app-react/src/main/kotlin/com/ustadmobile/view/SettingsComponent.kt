@@ -23,6 +23,9 @@ class SettingsComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(pr
 
     var mPresenter: SettingsPresenter? = null
 
+    //This is not really used on the web version - language control is in the toolbar
+    override var displayLanguage: String? = null
+
     override var workspaceSettingsVisible: Boolean = false
         get() = field
         set(value) {

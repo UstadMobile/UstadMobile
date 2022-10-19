@@ -40,7 +40,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
     private val attendanceRecordOneToManyJoinHelper = DefaultOneToManyJoinEditHelper(ClazzLogAttendanceRecord::clazzLogAttendanceRecordUid,
             "state_ClazzLogAttendanceRecord_list",
             ListSerializer(ClazzLogAttendanceRecordWithPerson.serializer()),
-            ListSerializer(ClazzLogAttendanceRecordWithPerson.serializer()), this,
+            ListSerializer(ClazzLogAttendanceRecordWithPerson.serializer()), this, di,
             ClazzLogAttendanceRecordWithPerson::class) { clazzLogAttendanceRecordUid = it }
 
     @Volatile

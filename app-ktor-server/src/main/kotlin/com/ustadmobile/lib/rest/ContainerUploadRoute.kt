@@ -13,7 +13,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.apache.http.HttpStatus
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
@@ -35,7 +34,7 @@ fun Route.ContainerUploadRoute2() {
                         containerEntryList)
                 call.respond(uploadSession.uploadSessionParams)
             }catch(se: IllegalStateException) {
-                call.respond(HttpStatus.SC_BAD_REQUEST)
+                call.respond(HttpStatusCode.BadRequest, "")
             }
         }
 

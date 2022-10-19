@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import org.mockito.kotlin.*
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
@@ -28,8 +29,11 @@ class OnBoardingPresenterTest {
         view = mock()
         impl = mock()
 
-        whenever(impl.getAllUiLanguagesList(any())).thenReturn(listOf("" to "sys default", "en" to "English",
-                "ar" to "Arabic"))
+        whenever(impl.getAllUiLanguagesList(any())).thenReturn(
+            listOf(
+                UstadMobileSystemCommon.UiLanguage("", "sys default"),
+                UstadMobileSystemCommon.UiLanguage("en", "English"),
+                UstadMobileSystemCommon.UiLanguage("ar", "Arabic")))
 
         whenever(impl.getLocale(any())).thenReturn("")
 
