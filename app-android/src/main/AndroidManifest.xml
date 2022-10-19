@@ -31,18 +31,17 @@
         android:theme="@style/UmTheme.App"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".MainActivity"
+            android:name="com.ustadmobile.port.android.ui.screen.MainScreen"
             android:exported="false"
-            android:label="@string/title_activity_main"
+            android:label="@string/title_activity_main_screen"
             android:theme="@style/UmTheme.App">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
-            android:name=".TextView"
+            android:name="com.ustadmobile.port.android.ui.screen.OnBoarding.OnBoarding"
             android:exported="false"
-            android:label="@string/title_activity_text_view"
             android:theme="@style/UmTheme.App">
             <meta-data
                 android:name="android.app.lib_name"
@@ -77,10 +76,6 @@
                     android:scheme="https" />
             </intent-filter>
         </activity> <!-- previously used: android:theme="@style/UmTheme.App.OnBoarding" -->
-        <activity
-            android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
-            android:exported="true"
-            android:noHistory="true" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -99,10 +94,6 @@
             android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:exported="true" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:exported="true" />
         <activity

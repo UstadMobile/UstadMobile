@@ -7,4 +7,5 @@
     <string name="title_activity_splash_screen">SplashScreen</string>
     <string name="title_activity_text_view">TextView</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main_screen">MainScreen</string>
 </resources>

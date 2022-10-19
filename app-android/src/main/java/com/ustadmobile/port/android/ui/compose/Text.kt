@@ -11,6 +11,16 @@ fun TextHeader1(text: String, color: Color) {
 }
 
 @Composable
+fun TextHeader3(text: String, color: Color) {
+    Text(text = text, style = Typography.h3, color = color)
+}
+
+@Composable
 fun TextBody1(text: String, color: Color) {
     Text(text = text, style = Typography.body1, color = color)
+}
+
+@Composable
+fun TextBody2(text: String, color: Color) {
+    Text(text = text, style = Typography.body2, color = color)
 }

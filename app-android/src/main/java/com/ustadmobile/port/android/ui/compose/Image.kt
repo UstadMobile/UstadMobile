@@ -31,6 +31,15 @@ fun ImageCompose(image: Int, size: Int) {
 }
 
 @Composable
+fun ImageCompose(image: Int, modifier: Modifier) {
+    Image(
+        painter = painterResource(id = image),
+        contentDescription = null,
+        modifier = modifier)
+}
+
+
+@Composable
 fun CircleImageView() {
     Image(
         painter = painterResource(R.drawable.expo2020_logo),
