@@ -101,7 +101,7 @@ class EpubTypePluginCommonJvm(
         progressListener: ContentJobProgressListener,
     ) {
         mimeType = supportedMimeTypes.first()
-        addZip("", process.getLocalOrCachedUri(), context)
+        addZip(process.getLocalOrCachedUri(), context)
     }
 
     companion object {
