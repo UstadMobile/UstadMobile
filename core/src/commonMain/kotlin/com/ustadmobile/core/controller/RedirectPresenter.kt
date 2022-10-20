@@ -41,7 +41,7 @@ class RedirectPresenter(
 
             accountManager.activeSession != null -> {
                 Napier.d { "Redirect: go to ${ContentEntryList2View.VIEW_NAME_HOME}" }
-                systemImpl.setAppPref(TAG_REDIRECTED, "true", context)
+                systemImpl.setAppPref(TAG_REDIRECTED, "true")
                 systemImpl.goToViewLink(ContentEntryList2View.VIEW_NAME_HOME, context)
             }
 

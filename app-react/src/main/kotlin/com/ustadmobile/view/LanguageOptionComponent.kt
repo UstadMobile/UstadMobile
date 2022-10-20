@@ -34,7 +34,8 @@ class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,
     override fun UmState.init(props: LanguageProps) {
         languageOptions = props.systemImpl.getAllUiLanguagesList(this)
         val selectedLocaleIndex = languageOptions.indexOfFirst {
-            it.langCode == props.systemImpl.getDisplayedLocale(this) }
+            it.langCode == props.systemImpl.getDisplayedLocale()
+        }
         selectedLanguage = languageOptions[selectedLocaleIndex].langCode
     }
 
@@ -43,7 +44,7 @@ class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,
             css(languageComponentLanguageSelectorFormControl)
             val text = props.label ?: props.systemImpl.getString(MessageID.language, this)
             umTextFieldSelect(text,
-                props.systemImpl.getDisplayedLocale(this),
+                props.systemImpl.getDisplayedLocale(),
                 props.caption?:"",
                 values = languageOptions.map { it.langCode to it.langDisplay },
                 variant = FormControlVariant.outlined,
@@ -55,7 +56,7 @@ class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,
     }
 
     private fun handleOnLanguageChange(value: String){
-        props.systemImpl.setLocale(value,this)
+        props.systemImpl.setLocale(value)
         setState { selectedLanguage = value }
         window.location.reload()
     }

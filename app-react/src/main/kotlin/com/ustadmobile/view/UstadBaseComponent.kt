@@ -151,8 +151,8 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
     override fun componentDidUpdate(prevProps: P, prevState: S, snapshot: Any) {
         val propsDidChange = props.asDynamic().arguments != js("undefined")
                 && !props.asDynamic().arguments.values.equals(prevProps.asDynamic().arguments.values)
-        val activeSession = systemImpl.getAppPref(UstadAccountManager.ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
-        val redirected = systemImpl.getAppPref(RedirectView.TAG_REDIRECTED, "false",this).toBoolean()
+        val activeSession = systemImpl.getAppPref(UstadAccountManager.ACCOUNTS_ACTIVE_SESSION_PREFKEY)
+        val redirected = systemImpl.getAppPref(RedirectView.TAG_REDIRECTED, "false").toBoolean()
         val refreshPage = activeSession != null && redirected
 
         /**
@@ -168,7 +168,7 @@ abstract class UstadBaseComponent <P: UmProps,S: UmState>(props: P): RComponent<
                 arguments = props.asDynamic().arguments as Map<String, String>
             }
             if(refreshPage){
-                systemImpl.setAppPref(RedirectView.TAG_REDIRECTED, "false", this)
+                systemImpl.setAppPref(RedirectView.TAG_REDIRECTED, "false")
             }
             onCreateView()
         }

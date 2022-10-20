@@ -68,7 +68,7 @@ actual open class UstadMobileSystemImpl(
      *
      * @return System locale
      */
-    actual override fun getSystemLocale(context: Any): String {
+    actual override fun getSystemLocale(): String {
         return systemLocale
     }
 
@@ -79,7 +79,7 @@ actual open class UstadMobileSystemImpl(
      * @return value of that preference
      */
 
-    actual override fun getAppPref(key: String, context: Any): String? {
+    actual override fun getAppPref(key: String): String? {
         return localStorage.getItem(key)
     }
 
@@ -98,7 +98,7 @@ actual open class UstadMobileSystemImpl(
      * @param key preference that is being set
      * @param value value to be set
      */
-    actual override fun setAppPref(key: String, value: String?, context: Any) {
+    actual override fun setAppPref(key: String, value: String?) {
         if(value == null){
             localStorage.removeItem(key)
         }else{
@@ -135,7 +135,7 @@ actual open class UstadMobileSystemImpl(
      *
      * @return The value of the key if found, if not, the default value provided
      */
-    actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String? {
+    actual override fun getAppConfigString(key: String, defaultVal: String?): String? {
         val value =  localStorage.getItem(key)
         return  value ?: defaultVal
     }

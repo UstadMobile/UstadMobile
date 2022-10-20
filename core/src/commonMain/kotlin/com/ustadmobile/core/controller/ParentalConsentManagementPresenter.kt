@@ -94,7 +94,7 @@ class ParentalConsentManagementPresenter(context: Any,
             throw IllegalStateException("1022: Could not find minor for ppj $entityUid")
         }
 
-        view.siteTerms = db.siteTermsDao.findSiteTerms(systemImpl.getDisplayedLocale(context))
+        view.siteTerms = db.siteTermsDao.findSiteTerms(systemImpl.getDisplayedLocale())
 
         if(personParentJoin.ppjParentPersonUid == 0L) {
             view.infoText = systemImpl.getString(MessageID.parent_consent_explanation, context)

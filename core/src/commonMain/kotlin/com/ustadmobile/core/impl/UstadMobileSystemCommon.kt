@@ -90,19 +90,18 @@ abstract class UstadMobileSystemCommon {
      *
      * @param key The config key to lookup
      * @param defaultVal The default value to return if the key is not found
-     * @param context Systme context object
      *
      * @return The value of the key if found, if not, the default value provided
      */
     @JsName("getAppConfigString")
-    abstract fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
+    abstract fun getAppConfigString(key: String, defaultVal: String?): String?
 
     /**
      * Get the default first destination that the user should be taken to after logging in or
      * selecting to continue as a guest.
      */
     fun getAppConfigDefaultFirstDest(context: Any): String {
-        return getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context)
+        return getAppConfigString(AppConfig.KEY_FIRST_DEST, null)
             ?: ClazzList2View.VIEW_NAME_HOME
     }
 
@@ -192,10 +191,10 @@ abstract class UstadMobileSystemCommon {
      * @return The currently active locale code, or a blank "" string meaning the locale is the system default.
      */
     @JsName("getLocale")
-    open fun getLocale(context: Any) = getAppPref(PREFKEY_LOCALE, LOCALE_USE_SYSTEM, context)
+    open fun getLocale() = getAppPref(PREFKEY_LOCALE)
 
     @JsName("setLocale")
-    fun setLocale(locale: String, context: Any) = setAppPref(PREFKEY_LOCALE, locale, context)
+    fun setLocale(locale: String) = setAppPref(PREFKEY_LOCALE, locale)
 
 
     /**
@@ -205,7 +204,7 @@ abstract class UstadMobileSystemCommon {
      * @return value of that preference
      */
     @JsName("getAppPref")
-    abstract fun getAppPref(key: String, context: Any): String?
+    abstract fun getAppPref(key: String): String?
 
     /**
      * Set a preference for the app
@@ -213,7 +212,7 @@ abstract class UstadMobileSystemCommon {
      * @param key preference that is being set
      * @param value value to be set
      */
-    abstract fun setAppPref(key: String, value: String?, context: Any)
+    abstract fun setAppPref(key: String, value: String?)
 
     /**
      * Get a preference for the app.  If not set, return the provided defaultVal
@@ -222,14 +221,14 @@ abstract class UstadMobileSystemCommon {
      * @param defaultVal default value to return if not set
      * @return value of the preference if set, defaultVal otherwise
      */
-    open fun getAppPref(key: String, defaultVal: String, context: Any): String {
-        val valFound = getAppPref(key, context)
+    open fun getAppPref(key: String, defaultVal: String): String {
+        val valFound = getAppPref(key)
         return valFound ?: defaultVal
     }
 
-    open fun getOrPutAppPref(key: String, context: Any, block: () -> String): String {
-        return getAppPref(key, context) ?: block().also { newValue ->
-            setAppPref(key, newValue, context)
+    open fun getOrPutAppPref(key: String, block: () -> String): String {
+        return getAppPref(key) ?: block().also { newValue ->
+            setAppPref(key, newValue)
         }
     }
 
@@ -239,23 +238,21 @@ abstract class UstadMobileSystemCommon {
      * @return System locale
      */
     @JsName("getSystemLocale")
-    abstract fun getSystemLocale(context: Any): String
+    abstract fun getSystemLocale(): String
 
     /**
      * Provides the language code of the currently active locale. This is different to getLocale. If
      * the locale is currently set to LOCALE_USE_SYSTEM then that language will be resolved and the
      * code returned.
      *
-     * @param context
-     *
      * @return The locale as the user sees it.
      */
-    open fun getDisplayedLocale(context: Any): String {
-        var locale = getLocale(context)
+    open fun getDisplayedLocale(): String {
+        var locale = getLocale()
         if (locale == LOCALE_USE_SYSTEM)
-            locale = getSystemLocale(context)
+            locale = getSystemLocale()
 
-        return locale.substring(0, 2)
+        return locale?.substring(0, 2) ?: "en"
     }
 
     /**
@@ -265,20 +262,26 @@ abstract class UstadMobileSystemCommon {
     abstract fun getString(messageCode: Int, context: Any): String
 
     /**
+     * Get a string for use in the UI (without requiring context)
+     */
+    abstract fun getString(messageCode: Int): String
+
+    /**
      * Get a list of all languages available for the UI. This is a list of pairs in the form of
      * langcode, language display name. The first entry will always be empty constant which
      * tells the app to use the system default language.
      *
-     * @param context
      */
     @JsName("getAllUiLanguagesList")
-    open fun getAllUiLanguagesList(context: Any): List<UiLanguage> {
-        val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
-                "", context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
+    open fun getAllUiLanguagesList(): List<UiLanguage> {
+        val languagesConfigVal = getAppConfigString(
+            AppConfig.KEY_SUPPORTED_LANGUAGES,
+            ""
+        ) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
         val availableLangs = languagesConfigVal.split(",").sorted()
 
 
-        return listOf(UiLanguage(LOCALE_USE_SYSTEM, getString(MessageID.use_device_language, context))) +
+        return listOf(UiLanguage(LOCALE_USE_SYSTEM, getString(MessageID.use_device_language))) +
                 availableLangs.map { UiLanguage(it ,(LANGUAGE_NAMES[it] ?: it)) }
     }
 
@@ -319,7 +322,7 @@ abstract class UstadMobileSystemCommon {
      * @return The boolean value of the given preference key if found, otherwise the default value
      */
     private fun getAppConfigBoolean(key: String, defaultVal: Boolean, context: Any): Boolean {
-        val strVal = getAppConfigString(key, null, context)
+        val strVal = getAppConfigString(key, null)
         return strVal?.toBoolean() ?: defaultVal
     }
 
@@ -345,7 +348,7 @@ abstract class UstadMobileSystemCommon {
      * @return The integer value of the value if found, otherwise the default value
      */
     open fun getAppConfigInt(key: String, defaultVal: Int, context: Any): Int {
-        return getAppConfigString(key, "" + defaultVal, context)!!.toInt()
+        return getAppConfigString(key, "" + defaultVal)!!.toInt()
     }
 
     /**
@@ -356,13 +359,13 @@ abstract class UstadMobileSystemCommon {
      * @return
      */
     open fun hasDisplayedLocaleChanged(oldLocale: String?, context: Any): Boolean {
-        val currentlyDisplayedLocale = getDisplayedLocale(context)
+        val currentlyDisplayedLocale = getDisplayedLocale()
         return !(currentlyDisplayedLocale != null && oldLocale != null
                 && oldLocale.substring(0, 2) == currentlyDisplayedLocale.substring(0, 2))
     }
 
     protected fun getContentDirName(context: Any): String? {
-        return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context)
+        return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME)
     }
 
 

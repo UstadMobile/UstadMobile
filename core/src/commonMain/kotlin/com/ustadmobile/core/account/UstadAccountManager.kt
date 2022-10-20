@@ -22,9 +22,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.http.content.*
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Dispatchers
@@ -91,14 +89,14 @@ class UstadAccountManager(
     private val endpointsWithActiveSessions = concurrentSafeListOf<Endpoint>()
 
     init {
-        val activeUserSessionFromJson = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, appContext)?.let {
+        val activeUserSessionFromJson = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY)?.let {
             safeParse(di, UserSessionWithPersonAndEndpoint.serializer(), it)
         }
 
         _activeUserSession = atomic(activeUserSessionFromJson)
         _activeUserSessionLive.postValue(activeUserSessionFromJson)
 
-        systemImpl.getAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, appContext)?.also { endpointJson ->
+        systemImpl.getAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION)?.also { endpointJson ->
             val endpointStrs = safeParseList(di, ListSerializer(String.serializer()), String::class,
                 endpointJson)
             val allEndpoints = endpointStrs.map { Endpoint(it) }
@@ -112,8 +110,8 @@ class UstadAccountManager(
         }
 
 
-        val activeEndpointStr = systemImpl.getAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, appContext)
-            ?: systemImpl.getAppConfigString(AppConfig.KEY_API_URL, MANIFEST_URL_FALLBACK, appContext)
+        val activeEndpointStr = systemImpl.getAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY)
+            ?: systemImpl.getAppConfigString(AppConfig.KEY_API_URL, MANIFEST_URL_FALLBACK)
             ?: MANIFEST_URL_FALLBACK
 
         _activeEndpoint = atomic(Endpoint(activeEndpointStr))
@@ -156,7 +154,7 @@ class UstadAccountManager(
                 safeStringify(di, UserSessionWithPersonAndEndpoint.serializer(), value)
             }
 
-            systemImpl.setAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, activeAccountJson, appContext)
+            systemImpl.setAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, activeAccountJson)
 
         }
 
@@ -164,7 +162,7 @@ class UstadAccountManager(
         get() = _activeEndpoint.value
         set(value){
             _activeEndpoint.value = value
-            systemImpl.setAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, value.url, appContext)
+            systemImpl.setAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, value.url)
         }
 
     val activeAccountLive: LiveData<UmAccount>
@@ -271,7 +269,7 @@ class UstadAccountManager(
     private fun commitActiveEndpointsToPref() {
         val json = Json.encodeToString(ListSerializer(String.serializer()),
             endpointsWithActiveSessions.toSet().map { it.url }.toList())
-        systemImpl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, json, appContext)
+        systemImpl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION, json)
     }
 
     //When sync data comes in, check to see if a change has been actioned that has ended our active

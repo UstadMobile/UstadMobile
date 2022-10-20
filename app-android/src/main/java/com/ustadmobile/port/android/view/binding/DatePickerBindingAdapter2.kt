@@ -73,7 +73,7 @@ fun TextView.setChatDateTime(timeInMillis: Long){
 
     val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
             ).di.direct.instance()
-    val localeString = impl.getDisplayedLocale(context)
+    val localeString = impl.getDisplayedLocale()
 
     val dateFormat = android.text.format.DateFormat.getDateFormat(context)
 
@@ -119,7 +119,7 @@ fun TextView.setDateTime2(timeInMillis: Long, timeZoneId: String?, dateTimeInMil
 
     val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
             ).di.direct.instance()
-    val localeString = impl.getDisplayedLocale(context)
+    val localeString = impl.getDisplayedLocale()
     text = when {
         !adapterCalendar.timeInMillis.isSet2 -> ""
         (localeString.startsWith("fa") || localeString.startsWith("ps")) -> {
@@ -147,7 +147,7 @@ fun TextView.setDateTimeInMillisChanged(inverseBindingListener: InverseBindingLi
 
         val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
                                             ).di.direct.instance()
-        val localeString = impl.getDisplayedLocale(context)
+        val localeString = impl.getDisplayedLocale()
 
         if(localeString.startsWith("ps") || localeString.startsWith("fa")){
 
@@ -236,7 +236,7 @@ fun TextView.setDateUseSpinners(dateUseSpinners: Boolean) {
 fun TextView.setTextFromToDateTimeMillis(textFromDateLong: Long, textToDateLong: Long) {
     val impl : UstadMobileSystemImpl = (context.applicationContext as DIAware
             ).di.direct.instance()
-    val localeString = impl.getDisplayedLocale(context)
+    val localeString = impl.getDisplayedLocale()
 
     val dateFormat = android.text.format.DateFormat.getDateFormat(context)
 

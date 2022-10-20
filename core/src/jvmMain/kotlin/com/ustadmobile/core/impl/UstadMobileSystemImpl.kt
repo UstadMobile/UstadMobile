@@ -109,10 +109,14 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
     actual override fun getString(messageCode: Int, context: Any): String{
         //This is really only used in tests, so we just want to be sure that it is returning
         //something that is distinct
-        return getString(getDisplayedLocale(context), messageCode, context)
+        return getString(getDisplayedLocale(), messageCode, context)
     }
 
-    fun getString(localeCode: String, messageId: Int, context: Any): String {
+    actual override fun getString(messageCode: Int): String {
+        return getString(getDisplayedLocale(), messageCode)
+    }
+
+    fun getString(localeCode: String, messageId: Int, context: Any? = null): String {
         val localeCodeLower = localeCode.toLowerCase(Locale.ROOT)
 
         val stringsXml = if(localeCodeLower.startsWith("en")) {
@@ -142,7 +146,7 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
      *
      * @return System locale
      */
-    actual override fun getSystemLocale(context: Any): String{
+    actual override fun getSystemLocale(): String{
         return Locale.getDefault().toString()
     }
 
@@ -156,7 +160,7 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
      * @param key preference key as a string
      * @return value of that preference
      */
-    actual override fun getAppPref(key: String, context: Any): String?{
+    actual override fun getAppPref(key: String): String?{
         return appPrefs.getProperty(key)
     }
 
@@ -166,7 +170,7 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
      * @param key preference that is being set
      * @param value value to be set
      */
-    actual override fun setAppPref(key: String, value: String?, context: Any){
+    actual override fun setAppPref(key: String, value: String?){
         if(value != null) {
             appPrefs[key] = value
         }else {
@@ -226,7 +230,7 @@ actual open class UstadMobileSystemImpl(val xppFactory: XmlPullParserFactory,
      *
      * @return The value of the key if found, if not, the default value provided
      */
-    actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?{
+    actual override fun getAppConfigString(key: String, defaultVal: String?): String?{
         return appConfig.getProperty(key, defaultVal)
     }
 

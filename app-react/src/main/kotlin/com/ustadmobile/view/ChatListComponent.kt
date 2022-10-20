@@ -64,7 +64,7 @@ class ChatListComponent(mProps: UmProps): UstadListComponent<Chat, ChatWithLates
     override fun RBuilder.renderListItem(item: ChatWithLatestMessageAndCount) {
         renderChatListItemWithCounter(
             item.chatName, item.latestMessage,
-            item.latestMessageTimestamp.toDate()?.fromNow(systemImpl.getDisplayedLocale(this)),
+            item.latestMessageTimestamp.toDate()?.fromNow(systemImpl.getDisplayedLocale()),
             item.unreadMessageCount)
     }
 

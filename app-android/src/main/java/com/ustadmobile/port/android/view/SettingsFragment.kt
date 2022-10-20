@@ -79,7 +79,7 @@ class SettingsFragment : UstadBaseFragment(), SettingsView, SettingsFragmentEven
             .setTitle(R.string.app_language)
             .setItems(langList.map { it.langDisplay }.toTypedArray()) { _, which ->
                 val lang = langList[which].langCode
-                systemImpl.setLocale(lang, requireContext())
+                systemImpl.setLocale(lang)
                 activity?.recreate()
             }
             .show()

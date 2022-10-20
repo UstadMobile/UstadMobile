@@ -95,7 +95,7 @@ class SiteTermsDetailPresenterTest {
         val systemImpl: UstadMobileSystemImpl = di.direct.instance()
 
         systemImpl.stub {
-            on { getDisplayedLocale(any()) }.thenReturn("fa")
+            on { getDisplayedLocale() }.thenReturn("fa")
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
