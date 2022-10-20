@@ -163,17 +163,20 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(
  * is no ContainerEntryFile for that MD5 Sum, add a new one. Returns the result
  *
  * @param src InputStream from which to read data
- * @param originalLength the length of the data
+ * @param originalLength the length of the data (uncompressed)
  * @param pathInContainer the path that this entry will receive (used to pass to the
  * addoptions.compressionFilter)
  * @param addOptions ContainerAddOptions
  *
  * @return ContainerEntryFile with the data as per the MD5Sum of the given InputStream
  */
-private suspend fun UmAppDatabase.insertOrLookupContainerEntryFile(containerUid: Long, src: InputStream,
-                                                                   originalLength: Long,
-                                                                   pathInContainer: String,
-                                                                   addOptions: ContainerAddOptions) : ContainerEntryFile {
+private suspend fun UmAppDatabase.insertOrLookupContainerEntryFile(
+    containerUid: Long,
+    src: InputStream,
+    originalLength: Long,
+    pathInContainer: String,
+    addOptions: ContainerAddOptions
+) : ContainerEntryFile {
 
     val storageDirFile = addOptions.storageDirUri.toFile()
     val containerFolder = File(storageDirFile, "$containerUid")
@@ -440,9 +443,16 @@ fun ContainerBuilder.addUri(
     uri: DoorUri,
     context: Any,
     compression: ContainerBuilder.Compression = ContainerBuilder.Compression.GZIP,
-    moveOriginalFile: Boolean = false
 ) {
-    containerSources += ContainerUriSource(pathInContainer, uri, context, compression, moveOriginalFile)
+    containerSources += ContainerUriSource(pathInContainer, uri, context, compression)
+}
+
+fun ContainerBuilder.addText(
+    pathInContainer: String,
+    text: String,
+    compression: ContainerBuilder.Compression = ContainerBuilder.Compression.GZIP,
+) {
+    containerSources += ContainerTextSource(pathInContainer, text, compression)
 }
 
 actual suspend fun UmAppDatabase.addContainer(
@@ -471,6 +481,8 @@ actual suspend fun UmAppDatabase.addContainer(
         when(source) {
             is ContainerFileSource -> addContainerAddFile(source, containerUid, containerUidDir)
             is ContainerZipSource -> addContainerAddZip(source, containerUid, containerUidDir)
+            is ContainerUriSource -> addContainerAddUri(source, containerUid, containerUidDir)
+            is ContainerTextSource -> addContainerAddText(source, containerUid, containerUidDir)
             else -> throw IllegalArgumentException("unsupported source: $source")
         }
     }
@@ -632,3 +644,81 @@ private suspend fun UmAppDatabase.addContainerAddZip(
     }
 }
 
+private suspend fun UmAppDatabase.addContainerAddUri(
+    uriSource: ContainerUriSource,
+    containerUid: Long,
+    containerUidFolder: File
+) {
+    val uri = uriSource.uri
+    val inputStream = uri.openInputStream(uriSource.context)
+        ?: throw IOException("resource not found: ${uri.getFileName(uriSource.context)}")
+    val countingInputStream = CountInputStream(inputStream)
+    val db = if(this is DoorDatabaseRepository) {
+        this.db as UmAppDatabase
+    }else {
+        this
+    }
+
+    val tmpFile = File(containerUidFolder, "${systemTimeInMillis()}.tmp")
+    val useGzip = uriSource.compression == ContainerBuilder.Compression.GZIP
+    val md5Sum = countingInputStream.writeToFileAndGetMd5(tmpFile, useGzip)
+    val originalLength = countingInputStream.byteReadCount
+
+    var containerFile = db.containerEntryFileDao.findEntryByMd5Sum(md5Sum.encodeBase64())
+    if(containerFile == null) {
+        val finalDestFile = File(containerUidFolder, md5Sum.toHexString())
+        if(!tmpFile.renameTo(finalDestFile))
+            throw IOException("Could not rename $tmpFile to $finalDestFile")
+
+        containerFile = finalDestFile.toContainerEntryFile(originalLength, md5Sum, useGzip).apply {
+            this.cefUid = db.containerEntryFileDao.insert(this)
+        }
+    }else {
+        tmpFile.delete()
+    }
+
+    //link it
+    db.containerEntryDao.insertAsync(ContainerEntry().apply {
+        this.cePath = uriSource.pathInContainer
+        this.ceContainerUid = containerUid
+        this.ceCefUid = containerFile.cefUid
+    })
+}
+
+private suspend fun UmAppDatabase.addContainerAddText(
+    textSource: ContainerTextSource,
+    containerUid: Long,
+    containerUidFolder: File
+) {
+    val tmpFile = File(containerUidFolder, "${systemTimeInMillis()}.tmp")
+    val useGzip = textSource.compression == ContainerBuilder.Compression.GZIP
+    val countingInputStream = CountInputStream(ByteArrayInputStream(textSource.text.toByteArray()))
+    val md5Sum = countingInputStream.writeToFileAndGetMd5(tmpFile, useGzip)
+    val originalLength = countingInputStream.byteReadCount
+
+    val db = if(this is DoorDatabaseRepository) {
+        this.db as UmAppDatabase
+    }else {
+        this
+    }
+
+    var containerFile = db.containerEntryFileDao.findEntryByMd5Sum(md5Sum.encodeBase64())
+    if(containerFile == null) {
+        val finalDestFile = File(containerUidFolder, md5Sum.toHexString())
+        if(!tmpFile.renameTo(finalDestFile))
+            throw IOException("Could not rename $tmpFile to $finalDestFile")
+
+        containerFile = finalDestFile.toContainerEntryFile(originalLength, md5Sum, useGzip).apply {
+            this.cefUid = db.containerEntryFileDao.insert(this)
+        }
+    }else {
+        tmpFile.delete()
+    }
+
+    //link it
+    db.containerEntryDao.insertAsync(ContainerEntry().apply {
+        this.cePath = textSource.pathInContainer
+        this.ceContainerUid = containerUid
+        this.ceCefUid = containerFile.cefUid
+    })
+}
