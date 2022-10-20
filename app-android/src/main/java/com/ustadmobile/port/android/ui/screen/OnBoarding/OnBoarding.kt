@@ -97,8 +97,7 @@ class OnBoarding : ComponentActivity() {
         ) {
 
 
-            Box(modifier = Modifier
-                .weight(1f)){
+            Box(modifier = Modifier.weight(1f)){
             }
 
             Box(modifier = Modifier
