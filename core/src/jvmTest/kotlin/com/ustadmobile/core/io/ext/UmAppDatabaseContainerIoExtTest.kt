@@ -224,4 +224,49 @@ class UmAppDatabaseContainerIoExtTest {
         assertZipAndContainerContentsAreEqual(epubTmp, db, containerUid)
     }
 
+
+    @Test
+    fun givenAddContainer_whenAddDoorUriCalled_thenShouldAddFile() {
+        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        val containerStorageDir = temporaryFolder.newFolder()
+        val container = runBlocking {
+            repo.addContainer(0) {
+                mimeType = "application/zip"
+                containerStorageUri = containerStorageDir.toDoorUri()
+                addUri("catpic0.jpg", tmpFile1.toDoorUri(), Any())
+            }
+        }
+
+        val file1ContainerEntry = db.containerEntryDao.findByPathInContainer(container.containerUid,
+            "catpic0.jpg")
+        val file1InContainer = File(file1ContainerEntry!!.containerEntryFile!!.cefPath)
+        Assert.assertArrayEquals("File 1 inflated md5 is the same as original file contents",
+            tmpFile1.md5Sum, file1InContainer.inflatedMd5Sum)
+
+    }
+
+    @Test
+    fun givenAddContainer_whenAddTextCalled_thenShouldAddText() {
+        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        val containerStorageDir = temporaryFolder.newFolder()
+        val container = runBlocking {
+            repo.addContainer(0) {
+                mimeType = "application/zip"
+                containerStorageUri = containerStorageDir.toDoorUri()
+                addText("hello.txt", "Hello World")
+            }
+        }
+
+        val file1ContainerEntry = db.containerEntryDao.findByPathInContainer(container.containerUid,
+            "hello.txt")
+        val file1InContainer = File(file1ContainerEntry!!.containerEntryFile!!.cefPath)
+
+        val inflatedText = GZIPInputStream(FileInputStream(file1InContainer)).readString()
+        Assert.assertEquals("Hello World", inflatedText)
+    }
+
 }
