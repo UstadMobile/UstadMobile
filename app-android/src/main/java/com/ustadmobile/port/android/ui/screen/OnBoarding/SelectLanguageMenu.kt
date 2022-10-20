@@ -11,75 +11,82 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.port.android.ui.theme.ui.theme.primary
 import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun SelectLanguageMenu(onItemSelected: () -> Unit) {
+fun SelectLanguageMenu(
+    langList: List<UstadMobileSystemCommon.UiLanguage>,
+    currentLanguage: UstadMobileSystemCommon.UiLanguage,
+    onItemSelected: (UstadMobileSystemCommon.UiLanguage) -> Unit
+) {
 
-    val context = LocalContext.current
-    val impl =  UstadMobileSystemImpl()
-    var languageOptions = impl.getAllUiLanguagesList(context)
     var expanded by remember { mutableStateOf(false) }
-    var label by remember { mutableStateOf(context.getString(R.string.language)) }
-    var selectedLanguageFirst by remember { mutableStateOf(impl.getLocale(context)) }
-    var selectedLanguageSecond = languageOptions.find { it.first == selectedLanguageFirst }?.second
 
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = {
-            expanded = !expanded
-        }
-    ) {
-        selectedLanguageSecond?.let {
-            OutlinedTextField(
-                readOnly = true,
-                value = it,
-                onValueChange = { },
-                label = { Text(label) },
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(
-                        expanded = expanded
-                    )
-                },
-                colors = ExposedDropdownMenuDefaults.textFieldColors(
-                    backgroundColor = Color.White,
-                    focusedIndicatorColor = primary,
-                    unfocusedIndicatorColor = primary,
-                    disabledIndicatorColor = primary,
-                )
-            )
-        }
-        ExposedDropdownMenu(
-            modifier = Modifier.fillMaxWidth(),
-            expanded = expanded,
-            onDismissRequest = {
-                expanded = false
-
-            }
-        ) {
-            languageOptions.forEachIndexed { index: Int, selectionOption: Pair<String, String> ->
-                DropdownMenuItem(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        onItemSelected()
-                        selectedLanguageSecond = languageOptions[index].second
-                        impl.setLocale(languageOptions[index].first, context)
-                        expanded = false
-                        SetLanguage(context, languageOptions[index].first)
-                        label = context.getString(R.string.language)
-                    }
-                ) {
-                    Text(text = selectionOption.second)
-                }
-            }
-
-        }
-
-    }
+//    val context = LocalContext.current
+//    val impl =  UstadMobileSystemImpl()
+//    var languageOptions = impl.getAllUiLanguagesList(context)
+//
+//    var label by remember { mutableStateOf(context.getString(R.string.language)) }
+//    var selectedLanguageFirst by remember { mutableStateOf(impl.getLocale(context)) }
+//    var selectedLanguageSecond = languageOptions.find { it.first == selectedLanguageFirst }?.second
+//
+//
+//    ExposedDropdownMenuBox(
+//        expanded = expanded,
+//        onExpandedChange = {
+//            expanded = !expanded
+//        }
+//    ) {
+//        selectedLanguageSecond?.let {
+//            OutlinedTextField(
+//                readOnly = true,
+//                value = it,
+//                onValueChange = { },
+//                label = { Text(label) },
+//                trailingIcon = {
+//                    ExposedDropdownMenuDefaults.TrailingIcon(
+//                        expanded = expanded
+//                    )
+//                },
+//                colors = ExposedDropdownMenuDefaults.textFieldColors(
+//                    backgroundColor = Color.White,
+//                    focusedIndicatorColor = primary,
+//                    unfocusedIndicatorColor = primary,
+//                    disabledIndicatorColor = primary,
+//                )
+//            )
+//        }
+//        ExposedDropdownMenu(
+//            modifier = Modifier.fillMaxWidth(),
+//            expanded = expanded,
+//            onDismissRequest = {
+//                expanded = false
+//
+//            }
+//        ) {
+//            languageOptions.forEachIndexed { index: Int, selectionOption: Pair<String, String> ->
+//                DropdownMenuItem(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    onClick = {
+//                        onItemSelected()
+//                        selectedLanguageSecond = languageOptions[index].second
+//                        impl.setLocale(languageOptions[index].first, context)
+//                        expanded = false
+//                        SetLanguage(context, languageOptions[index].first)
+//                        label = context.getString(R.string.language)
+//                    }
+//                ) {
+//                    Text(text = selectionOption.second)
+//                }
+//            }
+//
+//        }
+//
+//    }
 
 }
 

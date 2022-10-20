@@ -33,29 +33,29 @@ import com.ustadmobile.port.android.ui.compose.TextBody1
 import com.ustadmobile.port.android.ui.compose.TextHeader3
 import com.ustadmobile.port.android.ui.theme.ui.theme.gray
 
-@Composable
-fun OnBoardingView() {
-
-    val viewModel by lazy { OnBoardingViewModel() }
-
-    viewModel.items = arrayOf(
-        arrayOf(
-            R.string.onboarding_no_internet_headline,
-            R.string.onboarding_no_internet_subheadline, R.drawable.illustration_offline_usage),
-        arrayOf(R.string.onboarding_offline_sharing,
-            R.string.onboarding_offline_sharing_subheading, R.drawable.illustration_offline_sharing),
-        arrayOf(R.string.onboarding_stay_organized_headline,
-            R.string.onboarding_stay_organized_subheading, R.drawable.ic_logout))
-
-    LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        state = LazyListState(),
-    ) {
-        itemsIndexed(viewModel.items) { index, item ->
-            View(index, item)
-        }
-    }
-}
+//@Composable
+//fun OnBoardingView() {
+//
+//    val viewModel by lazy { OnBoardingViewModel() }
+//
+//    viewModel.items = arrayOf(
+//        arrayOf(
+//            R.string.onboarding_no_internet_headline,
+//            R.string.onboarding_no_internet_subheadline, R.drawable.illustration_offline_usage),
+//        arrayOf(R.string.onboarding_offline_sharing,
+//            R.string.onboarding_offline_sharing_subheading, R.drawable.illustration_offline_sharing),
+//        arrayOf(R.string.onboarding_stay_organized_headline,
+//            R.string.onboarding_stay_organized_subheading, R.drawable.ic_logout))
+//
+//    LazyRow(
+//        modifier = Modifier.fillMaxWidth(),
+//        state = LazyListState(),
+//    ) {
+//        itemsIndexed(viewModel.items) { index, item ->
+//            View(index, item)
+//        }
+//    }
+//}
 
 
 @Composable
