@@ -129,10 +129,11 @@ class AccountListFragmentTest : TestCase() {
 
         }.toMutableList()
 
-        impl.setAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, endpoint.url,
-            ApplicationProvider.getApplicationContext())
-        impl.setAppPref(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION,
-            gson.toJson(listOf(endpoint.url)), ApplicationProvider.getApplicationContext())
+        impl.setAppPref(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY, endpoint.url)
+        impl.setAppPref(
+            ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION,
+            gson.toJson(listOf(endpoint.url))
+        )
 
         if(guestActive) {
             val guestPerson = runBlocking {
@@ -153,13 +154,15 @@ class AccountListFragmentTest : TestCase() {
 
             sessions += UserSessionWithPersonAndEndpoint(guestSession, guestPerson, endpoint)
 
-            impl.setAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY,
-                safeStringify(di, UserSessionWithPersonAndEndpoint.serializer(), sessions.last()),
-                ApplicationProvider.getApplicationContext())
+            impl.setAppPref(
+                ACCOUNTS_ACTIVE_SESSION_PREFKEY,
+                safeStringify(di, UserSessionWithPersonAndEndpoint.serializer(), sessions.last())
+            )
         }else {
-            impl.setAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY,
-                safeStringify(di, UserSessionWithPersonAndEndpoint.serializer(), sessions.first()),
-                ApplicationProvider.getApplicationContext())
+            impl.setAppPref(
+                ACCOUNTS_ACTIVE_SESSION_PREFKEY,
+                safeStringify(di, UserSessionWithPersonAndEndpoint.serializer(), sessions.first())
+            )
         }
     }
 

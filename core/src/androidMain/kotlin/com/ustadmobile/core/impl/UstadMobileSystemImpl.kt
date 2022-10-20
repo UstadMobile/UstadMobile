@@ -69,7 +69,9 @@ import java.util.zip.ZipOutputStream
  *
  * @author mike, kileha3
  */
-actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
+actual open class UstadMobileSystemImpl(
+    private val applicationContext: Context
+) : UstadMobileSystemCommon() {
 
     private var appConfig: Properties? = null
 
@@ -109,7 +111,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             val di: DI by closestDI(context)
             val impl : UstadMobileSystemImpl = di.direct.instance()
 
-            val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context) + "-" +
+            val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "") + "-" +
                     impl.getVersion(context)
 
 
@@ -283,12 +285,16 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         }
     }
 
+    actual override fun getString(messageCode: Int): String {
+        return messageIdMap[messageCode]?.let { applicationContext.getString(it) } ?: ""
+    }
+
     /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)
      *
      * @return System locale
      */
-    actual override fun getSystemLocale(context: Any): String {
+    actual override fun getSystemLocale(): String {
         return Locale.getDefault().toString()
     }
 
@@ -298,8 +304,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param key preference key as a string
      * @return value of that preference
      */
-    actual override fun getAppPref(key: String, context: Any): String? {
-        return getAppSharedPreferences(context as Context).getString(key, null)
+    actual override fun getAppPref(key: String): String? {
+        return getAppSharedPreferences(applicationContext).getString(key, null)
     }
 
 
@@ -308,8 +314,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param key preference that is being set
      * @param value value to be set
      */
-    override actual fun setAppPref(key: String, value: String?, context: Any) {
-        val prefs = getAppSharedPreferences(context as Context)
+    override actual fun setAppPref(key: String, value: String?) {
+        val prefs = getAppSharedPreferences(applicationContext)
         val editor = prefs.edit()
         if (value != null) {
             editor.putString(key, value)
@@ -406,15 +412,15 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @return The value of the key if found, if not, the default value provided
      */
-    actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String? {
+    actual override fun getAppConfigString(key: String, defaultVal: String?): String? {
         if (appConfig == null) {
             val appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
-                    context) ?: "com/ustadmobile/core/appconfig.properties"
+                    applicationContext) ?: "com/ustadmobile/core/appconfig.properties"
             appConfig = Properties()
             var prefIn: InputStream? = null
 
             try {
-                prefIn =  (context as Context).assets.open(appPrefResource)
+                prefIn =  applicationContext.assets.open(appPrefResource)
                 appConfig!!.load(prefIn)
             } catch (e: IOException) {
                 UMLog.l(UMLog.ERROR, 685, appPrefResource, e)

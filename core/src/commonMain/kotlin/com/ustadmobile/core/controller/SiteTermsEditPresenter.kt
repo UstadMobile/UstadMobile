@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeStringify
@@ -67,7 +66,7 @@ class SiteTermsEditPresenter(context: Any,
 
             presenterScope.launch {
                 //set the language to be the default for a new policy
-                val displayLocale = systemImpl.getDisplayedLocale(context)
+                val displayLocale = systemImpl.getDisplayedLocale()
                 repo.onDbThenRepoWithTimeout(5000) { db, lastResult ->
                     val uiLanguage = db.languageDao.takeIf { lastResult == null }?.findByTwoCodeAsync(displayLocale)
                     if(uiLanguage != null) {

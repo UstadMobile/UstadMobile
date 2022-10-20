@@ -106,7 +106,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         getStartedBtn?.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-            systemImpl.setAppPref(OnBoardingView.PREF_TAG, true.toString(), this)
+            systemImpl.setAppPref(OnBoardingView.PREF_TAG, true.toString())
 
             startActivity(intent)
         }

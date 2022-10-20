@@ -52,7 +52,7 @@ internal fun ustadJsDi(
                     AppConfig.KEY_API_URL -> apiUrl
                     else -> it.value
                 }
-                impl.setAppPref(it.key, value, this)
+                impl.setAppPref(it.key, value)
             }
         }
     }

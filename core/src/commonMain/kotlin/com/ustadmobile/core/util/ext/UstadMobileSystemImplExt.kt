@@ -13,11 +13,11 @@ import kotlin.random.Random
  * @param contextPrefix a prefix used for appPref keys e.g. the sanitized hostname
  */
 fun UstadMobileSystemImpl.getOrGenerateNodeIdAndAuth(contextPrefix: String, context: Any): NodeIdAndAuth {
-    val nodeId: String = getOrPutAppPref("${contextPrefix}_nodeId", context) {
+    val nodeId: String = getOrPutAppPref("${contextPrefix}_nodeId") {
         Random.nextLong(0, Long.MAX_VALUE).toString()
     }
 
-    val nodeAuth: String = getOrPutAppPref("${contextPrefix}_nodeAuth", context) {
+    val nodeAuth: String = getOrPutAppPref("${contextPrefix}_nodeAuth") {
         randomUuid().toString()
     }
 

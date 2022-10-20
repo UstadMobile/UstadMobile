@@ -83,8 +83,7 @@ class SplashScreenActivity : AppCompatActivity(), SplashScreenView, DIAware  {
 
         GlobalScope.launch {
             delay(DEFAULT_DELAY)
-            val activityClass = if(systemImpl.getAppPref(OnBoardingView.PREF_TAG, "false",
-                            this@SplashScreenActivity).toBoolean()) {
+            val activityClass = if(systemImpl.getAppPref(OnBoardingView.PREF_TAG, "false").toBoolean()) {
                 MainActivity::class.java
             }else {
                 OnBoardingActivity::class.java

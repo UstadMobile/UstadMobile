@@ -19,7 +19,6 @@ import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
@@ -46,7 +45,6 @@ import org.junit.Before
 import org.junit.Test
 import org.kodein.di.*
 import java.io.ByteArrayOutputStream
-import javax.naming.InitialContext
 import kotlin.random.Random
 
 
@@ -117,7 +115,7 @@ class UstadAccountManagerTest {
     @Before
     fun setup() {
         mockSystemImpl = mock {
-            on { getAppConfigString(eq(AppConfig.KEY_API_URL), any(), any()) }
+            on { getAppConfigString(eq(AppConfig.KEY_API_URL), any()) }
                     .thenReturn("http://app.ustadmobile.com/")
         }
 
@@ -259,7 +257,7 @@ class UstadAccountManagerTest {
         Assert.assertEquals("There is one stored account", 1,
                 storedAccounts?.getValue()?.size)
         argumentCaptor<String> {
-            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture(), any())
+            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture())
             val accountSaved = json.decodeFromString(UserSessionWithPersonAndEndpoint.serializer(),
                 firstValue)
             Assert.assertEquals("Saved account as active", loggedInAccount.personUid,
@@ -299,10 +297,10 @@ class UstadAccountManagerTest {
 
         mockSystemImpl.stub {
             on {
-                getAppPref(eq(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY), any())
+                getAppPref(eq(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY))
             }.thenReturn(mockServerUrl)
             on {
-                getAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), any())
+                getAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY))
             }.thenReturn(json.encodeToString(UserSessionWithPersonAndEndpoint.serializer(),
                 savedSessionWithPersonAndEndpoint))
         }
@@ -327,7 +325,7 @@ class UstadAccountManagerTest {
                 loggedInAccount.userAtServer, accountManager.activeAccount.userAtServer)
 
         argumentCaptor<String> {
-            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture(), any())
+            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture())
             val accountSaved = json.decodeFromString(UserSessionWithPersonAndEndpoint.serializer(),
                 firstValue)
             Assert.assertEquals("Saved account as active", loggedInAccount.personUid,
@@ -427,15 +425,15 @@ class UstadAccountManagerTest {
 
         mockSystemImpl.stub {
             on {
-                getAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), any())
+                getAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY))
             }.thenReturn(
                 json.encodeToString(UserSessionWithPersonAndEndpoint.serializer(),
                     activeUserSession))
             on {
-                getAppPref(eq(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY), any())
+                getAppPref(eq(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY))
             }.thenReturn(mockServerUrl)
             on {
-                getAppPref(eq(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION), any())
+                getAppPref(eq(ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION))
             }.thenReturn(
                 json.encodeToString(ListSerializer(String.serializer()), listOf(mockServerUrl)))
         }
@@ -455,7 +453,7 @@ class UstadAccountManagerTest {
         Assert.assertEquals("AccountManager still has both accounts stored", 2,
             accountManager.storedAccountsLive.getValue()?.size)
         argumentCaptor<String> {
-            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture(), any())
+            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture())
             val accountSaved = json.decodeFromString(UserSessionWithPersonAndEndpoint.serializer(),
                 firstValue)
             Assert.assertEquals("Saved account as active matches username",

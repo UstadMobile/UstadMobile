@@ -59,7 +59,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
             arguments.getValue(ARG_SERVER_URL)
         } else {
             impl.getAppConfigString(
-                    AppConfig.KEY_API_URL, "http://localhost", context)?:""
+                AppConfig.KEY_API_URL, "http://localhost"
+            )?:""
         }
 
         view.versionInfo = impl.getVersion(context)

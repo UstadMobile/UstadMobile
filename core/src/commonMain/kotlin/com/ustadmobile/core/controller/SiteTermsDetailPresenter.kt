@@ -62,7 +62,7 @@ class SiteTermsDetailPresenter(
 
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        val displayedLocale = systemImpl.getDisplayedLocale(context)
+        val displayedLocale = systemImpl.getDisplayedLocale()
 
         return dbToUse.onRepoWithFallbackToDb(5000) {
             if(arguments[ARG_USE_DISPLAY_LOCALE]?.toBoolean() == true) {

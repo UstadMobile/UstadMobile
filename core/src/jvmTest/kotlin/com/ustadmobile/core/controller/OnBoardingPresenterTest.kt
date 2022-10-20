@@ -35,7 +35,7 @@ class OnBoardingPresenterTest {
                 UstadMobileSystemCommon.UiLanguage("en", "English"),
                 UstadMobileSystemCommon.UiLanguage("ar", "Arabic")))
 
-        whenever(impl.getLocale(any())).thenReturn("")
+        whenever(impl.getLocale()).thenReturn("")
 
         di  = DI {
             bind<UstadMobileSystemImpl>() with singleton { impl }
@@ -55,24 +55,24 @@ class OnBoardingPresenterTest {
     fun givenListOfUiSupportedLanguages_whenDifferentDisplayLanguageIsSelected_shouldSetDefaultLocale() {
         presenter.onCreate(mapOf())
         presenter.handleLanguageSelected(2)
-        verify(impl).setLocale("ar", context)
+        verify(impl).setLocale("ar")
     }
 
     @Test
     fun givenListOfUiSupportedLangauges_whenUserSelectsDifferentLanguage_thenShouldRestart() {
-        whenever(impl.getDisplayedLocale(any())).thenReturn("en")
+        whenever(impl.getDisplayedLocale()).thenReturn("en")
 
         presenter.onCreate(mapOf())
         presenter.handleLanguageSelected(2)
 
-        verify(impl).setLocale("ar", context)
+        verify(impl).setLocale("ar")
         verify(view).restartUI()
     }
 
 
     @Test
     fun givenListOfUiSupportedLangauges_whenUserSelectsSameLangAsDisplayed_thenShouldNotRestart() {
-        whenever(impl.getDisplayedLocale(any())).thenReturn("ar")
+        whenever(impl.getDisplayedLocale()).thenReturn("ar")
 
         presenter.onCreate(mapOf())
         presenter.handleLanguageSelected(2)

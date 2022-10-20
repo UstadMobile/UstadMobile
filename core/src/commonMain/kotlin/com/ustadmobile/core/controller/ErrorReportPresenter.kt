@@ -50,8 +50,8 @@ class ErrorReportPresenter(
                     errorCode = arguments[ErrorReportView.ARG_ERR_CODE]?.toInt() ?: -1
                     message = arguments[ErrorReportView.ARG_MESSAGE]
                     stackTrace = arguments[ErrorReportView.ARG_STACKTRACE_PREFKEY]?.let{ stackTraceKey ->
-                        systemImpl.getAppPref(stackTraceKey, context)?.also {
-                            systemImpl.setAppPref(stackTraceKey, null, context)
+                        systemImpl.getAppPref(stackTraceKey)?.also {
+                            systemImpl.setAppPref(stackTraceKey, null)
                         }
                     }
                     presenterUri = arguments[ErrorReportView.ARG_PRESENTER_URI]
