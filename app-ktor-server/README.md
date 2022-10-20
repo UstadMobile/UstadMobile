@@ -6,21 +6,14 @@ in both production and development environment. It is built as KTOR server.
 
 # Development running:
 
-1. Build the fat jar:
-```
-$ gradlew app-ktor-server:shadowJar
-```
-
-This builds the server jar which can be found in app-ktor-server/build/libs/ustad-server-all.jar .
-
-2. Copy the default configuration file and adjust it for your database and/or https certificate (optional)
+1. Copy the default configuration file and adjust it for your database and/or https certificate (optional)
 
 ```
 cd app-ktor-server
-cp src/jvmMain/resources/application.conf ./
+cp src/main/resources/application.conf ./ustad-server.conf
 ```
 
-3. Run using the runserver.sh script:
+2. Build and run using the runserver.sh script:
 
 ```
 # Linux
@@ -29,6 +22,8 @@ $ ./runserver.sh
 #Windows
 $ runserver.bat
 ```
+
+Run ./runserver.sh --help to see options
 
 Or use the Java command
 ```

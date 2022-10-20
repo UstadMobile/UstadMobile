@@ -1,11 +1,10 @@
 
 plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.github.johnrengelman.shadow' version "$version_shadow"
 }
 
-apply plugin: "kotlin-multiplatform"
-apply plugin: 'kotlinx-serialization'
-apply plugin: "jacoco"
 
 
 kotlin {

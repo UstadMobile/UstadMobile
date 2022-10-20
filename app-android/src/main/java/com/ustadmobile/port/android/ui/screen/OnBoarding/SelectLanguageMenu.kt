@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.ui.screen.OnBoarding
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -23,7 +24,9 @@ fun SelectLanguageMenu(onItemSelected: () -> Unit) {
     var languageOptions = impl.getAllUiLanguagesList(context)
     var expanded by remember { mutableStateOf(false) }
     var label by remember { mutableStateOf(context.getString(R.string.language)) }
-    var selectedLanguage by remember { mutableStateOf(impl.getLocale(context)) }
+    var selectedLanguageFirst by remember { mutableStateOf(impl.getLocale(context)) }
+    var selectedLanguageSecond = languageOptions.find { it.first == selectedLanguageFirst }?.second
+
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -31,23 +34,25 @@ fun SelectLanguageMenu(onItemSelected: () -> Unit) {
             expanded = !expanded
         }
     ) {
-        OutlinedTextField(
-            readOnly = true,
-            value = selectedLanguage,
-            onValueChange = { },
-            label = { Text(label) },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded
+        selectedLanguageSecond?.let {
+            OutlinedTextField(
+                readOnly = true,
+                value = it,
+                onValueChange = { },
+                label = { Text(label) },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = expanded
+                    )
+                },
+                colors = ExposedDropdownMenuDefaults.textFieldColors(
+                    backgroundColor = Color.White,
+                    focusedIndicatorColor = primary,
+                    unfocusedIndicatorColor = primary,
+                    disabledIndicatorColor = primary,
                 )
-            },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(
-                backgroundColor = Color.White,
-                focusedIndicatorColor = primary,
-                unfocusedIndicatorColor = primary,
-                disabledIndicatorColor = primary,
             )
-        )
+        }
         ExposedDropdownMenu(
             modifier = Modifier.fillMaxWidth(),
             expanded = expanded,
@@ -61,13 +66,13 @@ fun SelectLanguageMenu(onItemSelected: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         onItemSelected()
-                        selectedLanguage = languageOptions[index].second
+                        selectedLanguageSecond = languageOptions[index].second
                         impl.setLocale(languageOptions[index].first, context)
                         expanded = false
+                        SetLanguage(context, languageOptions[index].first)
+                        label = context.getString(R.string.language)
                     }
                 ) {
-                    label = context.getString(R.string.language)
-//                    SetLanguage(languageOptions[index].first)
                     Text(text = selectionOption.second)
                 }
             }
@@ -78,11 +83,11 @@ fun SelectLanguageMenu(onItemSelected: () -> Unit) {
 
 }
 
-@Composable
-private fun SetLanguage(language: String) {
+private fun SetLanguage(context: Context, language: String) {
     val locale = Locale(language)
-    val configuration = LocalConfiguration.current
+    val configuration = context.resources.configuration
     configuration.setLocale(locale)
-    val resources = LocalContext.current.resources
+    val resources = context.resources
     resources.updateConfiguration(configuration, resources.displayMetrics)
+    val str = resources.getString(R.string.organization_id)
 }

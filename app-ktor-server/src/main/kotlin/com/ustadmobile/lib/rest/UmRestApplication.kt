@@ -234,6 +234,12 @@ fun Application.umRestApplication(
                     .addCallback(ContentJobItemTriggersCallback())
                     .addMigrations(*migrationList().toTypedArray())
                 .build()
+
+            if(appConfig.propertyOrNull("ktor.database.cleardb")?.getString()?.toBoolean() == true) {
+                Napier.i("Clearing database ${db} as ktor.database.cleardb is set")
+                db.clearAllTables()
+            }
+
             db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
 
             //Add listener that will end sessions when authentication has been updated
@@ -278,17 +284,13 @@ fun Application.umRestApplication(
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             val doorNode = instance<NodeIdAndAuth>()
-            val repo: UmAppDatabase = db.asRepository(repositoryConfig(Any(), "http://localhost/",
+            db.asRepository(repositoryConfig(Any(), "http://localhost/",
                 doorNode.nodeId, doorNode.auth, instance(), instance()) {
                 useReplicationSubscription = false
-            })
-
-            runBlocking { repo.preload() }
-            repo.ktorInitRepo(di)
-            runBlocking {
-                repo.initAdminUser(context, di)
+            }).also { repo ->
+                runBlocking { repo.preload() }
+                repo.ktorInitRepo(di)
             }
-            repo
         }
 
         bind<Scheduler>() with singleton {
@@ -331,7 +333,14 @@ fun Application.umRestApplication(
         }
 
         bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
-            AuthManager(context, di)
+            AuthManager(context, di).also { authManager ->
+                val repo: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_REPO)
+                runBlocking {
+                    repo.initAdminUser(context, authManager, di,
+                        appConfig.propertyOrNull("ktor.ustad.adminpass")?.getString())
+                }
+            }
+
         }
 
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
@@ -398,6 +407,8 @@ fun Application.umRestApplication(
             if(dbMode == CONF_DBMODE_SINGLETON) {
                 //Get the container dir so that any old directories (build/storage etc) are moved if required
                 di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+                //Generate the admin username/password etc.
+                di.on(Endpoint("localhost")).direct.instance<AuthManager>()
             }
 
             instance<Scheduler>().start()

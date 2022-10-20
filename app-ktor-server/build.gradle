@@ -53,7 +53,7 @@ dependencies {
     implementation "io.ktor:ktor-server-html-builder:$version_ktor"
     implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
     implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
-    implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
+    implementation "io.github.bonigarcia:webdrivermanager:$version_web_driver"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
 
     implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"

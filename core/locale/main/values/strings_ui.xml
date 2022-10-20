@@ -1932,4 +1932,13 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="reviewer">Reviewer #%1$s</string>
 
+    <!--
+    This is the option that allows the user to select what language they want for the app user
+    interface e.g. buttons, menu options, etc. They can select to use the default system language,
+    or select one of the supported languages (which might be different to the language used for the
+    rest of the system).
+    -->
+    <string name="app_language">App language</string>
+
+
 </resources>
