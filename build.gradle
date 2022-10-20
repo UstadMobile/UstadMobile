@@ -4,9 +4,7 @@ import org.apache.tools.ant.filters.*
 buildscript {
     ext.version_kotlin = '1.7.20'
     ext.version_shadow = "7.1.2"
-    ext.version_gradle_versions_plugin = "0.28.0"
     ext.atomicfu_version = '0.18.4'
-    ext.version_execfork = "0.2.0"
     ext.version_android_adbscreenrecorder = "0.1-alpha12"
 
     repositories {
@@ -29,7 +27,7 @@ plugins {
     id 'org.jetbrains.kotlin.android' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.serialization' version "$version_kotlin" apply false
     id 'org.jetbrains.kotlin.plugin.atomicfu' version "$version_kotlin" apply false
-    id "com.github.ben-manes.versions" version "0.42.0"
+    id "com.github.ben-manes.versions" version "0.43.0"
 }
 
 

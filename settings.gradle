@@ -1,19 +1,12 @@
 pluginManagement {
     repositories {
         maven {
-            url "https://devserver3.ustadmobile.com/maven"
-        }
-        maven {
             url "https://jitpack.io/"
         }
 
         mavenCentral()
         gradlePluginPortal()
         google()
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-
     }
 }
 
