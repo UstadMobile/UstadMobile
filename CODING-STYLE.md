@@ -162,3 +162,79 @@ new class, new assignment, etc. %1$s will be replaced with the name of the item.
 <string name="new_entity">New %1$s</string>
 ```
 
+# MVVM
+
+Passing items:
+
+```
+//On Android - use ActivityViewModel
+class MessageBusViewModel {
+     
+     val pendingFlows: Map<String, MutableList<Flow<Any?>>
+     
+     send(key, value) {
+         pendingFlows.getOrPut(key) += flowOf {  value }
+     }
+     
+     receive<T>(key): Flow<T> {
+        return pendingFlows[key].merge()
+     }
+}
+```
+
+Editing back/forth:
+```
+@Composable
+fun ClazzEdit(viewModel) {
+  ..
+  
+  var clazzState: Clazz by viewModel.entityState()
+  
+  Text(onChanged = { newText ->
+     viewModel.onEntityUpdate(clazzState.copy(clazzName = newText))
+  })
+}
+
+EditPresenter?loadKey=Schedule&resultDest=<RESULTVIEWNAME>&resultSteps=1&resultKey
+
+{
+
+   val scheduleState = MutableState<List<Schedule>>(listOf())
+
+   init {
+       entityState.emit(savedStateHandle.getOrLoadJson<Schedule>(KEY_ENTITY) {
+           messageBus.receive(loadKey) ?: repo.onDbThenRepo { dbToUse ->
+               dbToUse.dao.findByUid(savedStateHandle.require(ENTITY_PK))
+           }
+       })
+       
+       observeReturnedResult<Type>(KEY) { schedule ->
+           val newList = scheduleState.collectLatest()
+              .replaceOrAppend { it.scheduleUid == schedule.scheduleUid }
+           saveState.saveJson(STATE_SCHEDULES, newList)
+           scheduleState.emit(newList)   
+       }
+   }
+   
+   
+   
+   fun onEntityUpdate(entity: T) {
+       entityState.emit(entity)
+       savedState.postCommit(KEY, entity) 
+   }
+   
+   fun navigateForResult() {
+       
+   }
+   	
+   fun finishWithResult() {
+       //1. put the result onto backstack saved state handle as before...
+       
+       //2. also put this on the message bus
+       
+       //3. run the navigation back
+   }
+      
+}   
+
+```

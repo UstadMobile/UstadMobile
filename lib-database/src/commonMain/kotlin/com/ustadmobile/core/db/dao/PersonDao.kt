@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
+import kotlinx.coroutines.flow.Flow
 
 
 @DoorDao
@@ -167,6 +168,9 @@ expect abstract class PersonDao : BaseDao<Person> {
 
     @Query("SELECT * FROM Person WHERE personUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Person?
+
+    @Query("SELECT * FROM Person WHERE personUid = :uid")
+    abstract fun findByUidAsFlow(uid: Long): Flow<Person?>
 
 
     @Update
