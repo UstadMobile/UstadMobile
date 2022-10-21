@@ -132,43 +132,48 @@ class H5PTypePluginCommonJvm(
         }
     }
 
-    override suspend fun ContainerBuilder.makeContainer(
+    override suspend fun makeContainer(
         jobItem: ContentJobItemAndContentJob,
         process: ContentJobProcessContext,
-        progressListener: ContentJobProgressListener
-    ) {
-        mimeType = supportedMimeTypes.first()
-        addZip(process.getLocalOrCachedUri(), context, "workspace/")
-        addZip({
-            ZipInputStream(getAssetFromResource("/com/ustadmobile/core/h5p/dist.zip", context, this::class)
-                ?: throw IllegalStateException("could not find h5p dist file!"))
-        })
+        progressListener: ContentJobProgressListener,
+        containerStorageUri: DoorUri,
+    ): Container {
+        val repo: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
         val entry = db.contentEntryDao.findByUid(jobItem.contentJobItem?.cjiContentEntryUid ?: 0)
-        addText("tincan.xml",
-            """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <tincan xmlns="http://projecttincan.com/tincan.xsd">
-                <activities>
-                    <activity id="${entry?.entryId?.escapeHTML()}" type="http://adlnet.gov/expapi/activities/module">
-                        <name>${entry?.title?.escapeHTML()}</name>
-                        <description lang="en-US">${entry?.description?.escapeHTML()}</description>
-                        <launch lang="en-us">index.html</launch>
-                    </activity>
-                </activities>
-            </tincan>
+
+        return repo.containerBuilder(jobItem.contentJobItem?.cjiContentEntryUid ?: 0,
+                supportedMimeTypes.first(), containerStorageUri)
+            .addZip(process.getLocalOrCachedUri(), context, "workspace/")
+            .addZip({
+                ZipInputStream(getAssetFromResource("/com/ustadmobile/core/h5p/dist.zip", context, this::class)
+                    ?: throw IllegalStateException("could not find h5p dist file!"))
+            })
+            .addText("tincan.xml",
+                """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <tincan xmlns="http://projecttincan.com/tincan.xsd">
+                    <activities>
+                        <activity id="${entry?.entryId?.escapeHTML()}" type="http://adlnet.gov/expapi/activities/module">
+                            <name>${entry?.title?.escapeHTML()}</name>
+                            <description lang="en-US">${entry?.description?.escapeHTML()}</description>
+                            <launch lang="en-us">index.html</launch>
+                        </activity>
+                    </activities>
+                </tincan>
+                """.trimIndent())
+            .addText("index.html",
+                """
+                <html>
+                <head>
+                    <meta charset="utf-8" />
+                    <script type="text/javascript" src="dist/main.bundle.js"></script>
+                </head>
+                <body>
+                <div id="h5p-container" data-workspace="workspace"></div>
+                </body>
+                </html>
             """.trimIndent())
-        addText("index.html",
-            """
-            <html>
-            <head>
-                <meta charset="utf-8" />
-                <script type="text/javascript" src="dist/main.bundle.js"></script>
-            </head>
-            <body>
-            <div id="h5p-container" data-workspace="workspace"></div>
-            </body>
-            </html>
-        """.trimIndent())
+            .build()
     }
 
     companion object {
