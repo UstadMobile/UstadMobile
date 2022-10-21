@@ -67,6 +67,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -231,13 +232,13 @@ fun Application.umRestApplication(
                     dbPassword = appConfig.propertyOrNull("ktor.database.password")?.getString(),
                     attachmentDir = attachmentsDir)
                 .addSyncCallback(nodeIdAndAuth)
-                    .addCallback(ContentJobItemTriggersCallback())
-                    .addMigrations(*migrationList().toTypedArray())
+                .addCallback(ContentJobItemTriggersCallback())
+                .addMigrations(*migrationList().toTypedArray())
                 .build()
 
             if(appConfig.propertyOrNull("ktor.database.cleardb")?.getString()?.toBoolean() == true) {
                 Napier.i("Clearing database ${db} as ktor.database.cleardb is set")
-                db.clearAllTables()
+                    db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
             }
 
             db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))

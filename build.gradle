@@ -5,18 +5,11 @@ buildscript {
     ext.version_kotlin = '1.7.20'
     ext.version_shadow = "7.1.2"
     ext.atomicfu_version = '0.18.4'
-    ext.version_android_adbscreenrecorder = "0.1-alpha12"
 
     repositories {
         google()
         mavenCentral()
-
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-        maven {
-            url 'https://jitpack.io/'
-        }
+        gradlePluginPortal()
     }
 
 }
@@ -36,6 +29,11 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+
+        //Temp jitpack substitute
+        maven {
+            url "https://devserver3.ustadmobile.com/maven2"
+        }
 
         maven {
             url "https://devserver3.ustadmobile.com/maven"
@@ -73,7 +71,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 232
 
-    version_door = "0.0.62s"
+    version_door = "0.0.63c"
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.20'
 
