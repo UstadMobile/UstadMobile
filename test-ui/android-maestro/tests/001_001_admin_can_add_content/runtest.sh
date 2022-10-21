@@ -5,14 +5,14 @@ echo "ENDPOINT=$ENDPOINT"
 echo "Username=$USERNAME"
 echo "PASSWORD=$PASSWORD"
 INDEX=0
- ../../../../runserver.sh --password testpass  --clear --background --nobuild
+
  for FILENAME in $(ls ../Content/*); do
   FILEBASENAME=$(basename $FILENAME)
   adb push $FILENAME /sdcard/Download/$FILEBASENAME
-  CONTENTNAME="TESTCONTENT"$INDEX
-
-  maestro --platform android test -e ENDPOINT=$ENDPOINT -e USERNAME=$USERNAME -e PASSWORD=$PASSWORD -e TESTFILENAME=$FILEBASENAME -e TESTCONTENTNAME=$CONTENTNAME admin_can_add_content.yaml
-
+  CONTENTNAME="ContentUploadDownloadTest"$INDEX
+ ../../../../runserver.sh --password testpass  --clear --background --nobuild
+  maestro --platform android test -e ENDPOINT=$ENDPOINT -e USERNAME=admin -e PASSWORD=testpass -e TESTFILENAME=$FILEBASENAME -e TESTCONTENTNAME=$CONTENTNAME admin_can_add_content.yaml
+ ../../../../runserver.sh --stop
   TESTRESULT=$?
   if [ "$TESTRESULT" != "0" ]; then
      echo "fail" > results/result
@@ -22,4 +22,4 @@ INDEX=0
 
   INDEX=$((INDEX+1))
  done
-  ../../../../runserver.sh --stop
+

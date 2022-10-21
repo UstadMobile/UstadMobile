@@ -21,13 +21,13 @@ appId: com.toughra.ustadmobile
 - tapOn: "Download"
 - tapOn: "Download"
 - extendedWaitUntil:
-    visible: "OPEN"    # Same input as in assertVisible or tapOn
-    timeout: 10000      # Timeout in milliseconds
+    visible: "OPEN"
+    timeout: 10000
 - tapOn: "OPEN"
 - scroll
-- takeScreenshot: ${TESTCONTENTNAME}
+- takeScreenshot: "result/${TESTCONTENTNAME}"
 - back
 - tapOn: "ATTEMPTS"
-- takeScreenshot: ${TESTCONTENTNAME}AttemptsScreen
+- takeScreenshot: "result/${TESTCONTENTNAME}AttemptsScreen"
 
 

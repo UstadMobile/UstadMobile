@@ -3,7 +3,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e::' --long 'serial1:,username:,password::' -n 'run-all-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e::' --long 'serial1:,username:,password:,endpoint::' -n 'run-all-maestro-tests.sh' -- "$@")
 
 eval set -- "$TEMP"
 unset TEMP
@@ -52,6 +52,7 @@ if [ "$ENDPOINT" == "" ]; then
      IPADDR=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n 1)
     ENDPOINT="http://$IPADDR:8087/"
 fi
+
 echo "ENDPOINT=$ENDPOINT"
 for TESTFILE in $TESTS; do
   cd $(dirname $TESTFILE)

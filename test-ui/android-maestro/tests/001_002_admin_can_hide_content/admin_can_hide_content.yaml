@@ -1,54 +1,17 @@
 appId: com.toughra.ustadmobile
 ---
-- clearState: com.toughra.ustadmobile
-- launchApp
-- tapOn: "GET STARTED"
-- inputText: "http://localhost:8087/"
-- hideKeyboard
-- tapOn: "NEXT"
-- tapOn: "Username"
-- inputText: ${USERNAME}
-- tapOn: "Password"
-- inputText: ${PASSWORD}
-- hideKeyboard
-- tapOn: "LOGIN"
-- extendedWaitUntil:
-    visible: "Courses"
-    timeout: 10000
-- tapOn: "Library"
-- tapOn: "CONTENT"
-- tapOn: "Add file"
-- tapOn:
-    text: "Show roots"
-- tapOn: "Downloads"
-- tapOn:
-       text: "Show roots"
-- tapOn: "Downloads"
-- scroll
-- tapOn: ${TESTFILENAME}
-- tapOn:
-      id: "com.toughra.ustadmobile:id/entry_title_text"
-- longPressOn:
-      id: "com.toughra.ustadmobile:id/entry_title_text"
-- tapOn: "Select all"
-- eraseText: 50
-- inputText: ${TESTCONTENTNAME}
-- tapOn: "SAVE"
-- tapOn: ${TESTCONTENTNAME}
-- extendedWaitUntil:
-    visible: "Delete"
-    timeout: 60000
+- runFlow: "../common/add_content.yaml"
 - back
-- takeScreenshot: ${TESTCONTENTNAME}screen_beforeHiding
+- takeScreenshot: "results/{TESTCONTENTNAME}screen_beforeHiding"
 - longPressOn:
       id: "com.toughra.ustadmobile:id/content_entry_item_title"
 - tapOn:
     text: "Hide"
-- takeScreenshot: ${TESTCONTENTNAME}screen_AfterHiding
+- takeScreenshot: "results/${TESTCONTENTNAME}screen_AfterHiding"
 - clearState: com.toughra.ustadmobile
 - launchApp
 - tapOn: "GET STARTED"
-- inputText: "http://localhost:8087/"
+- inputText: ${ENDPOINT}
 - hideKeyboard
 - tapOn: "NEXT"
 - tapOn: "Username"
@@ -58,4 +21,4 @@ appId: com.toughra.ustadmobile
 - hideKeyboard
 - tapOn: "LOGIN"
 - tapOn: "Library"
-- takeScreenshot: ${TESTCONTENTNAME}Screen_OnNewDevice
+- takeScreenshot: "results/${TESTCONTENTNAME}Screen_OnNewDevice"

@@ -17,7 +17,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "Add file"
 - runFlow:
     when:
-      visible: "Recent"
+      notVisible: "Downloads"
     file: redirect_to_downloads.yaml
 - scroll
 - tapOn: ${TESTFILENAME}
@@ -25,8 +25,12 @@ appId: com.toughra.ustadmobile
     id: "com.toughra.ustadmobile:id/entry_title_text"
 - longPressOn:
     id: "com.toughra.ustadmobile:id/entry_title_text"
+- runFlow:
+      when:
+          notVisible: "Select all"
+      file: redirect_to_select.yaml
 - tapOn: "Select all"
-- eraseText: 50
+- eraseText
 - inputText: ${TESTCONTENTNAME}
 - tapOn: "SAVE"
 - tapOn: ${TESTCONTENTNAME}
