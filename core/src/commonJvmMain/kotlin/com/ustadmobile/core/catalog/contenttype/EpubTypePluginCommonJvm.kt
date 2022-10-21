@@ -4,11 +4,13 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ContainerBuilder
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
@@ -18,6 +20,9 @@ import java.util.*
 import io.ktor.client.*
 import java.util.zip.ZipInputStream
 import kotlinx.coroutines.*
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 class EpubTypePluginCommonJvm(
     context: Any,
@@ -95,13 +100,18 @@ class EpubTypePluginCommonJvm(
     }
 
 
-    override suspend fun ContainerBuilder.makeContainer(
+    override suspend fun makeContainer(
         jobItem: ContentJobItemAndContentJob,
         process: ContentJobProcessContext,
         progressListener: ContentJobProgressListener,
-    ) {
-        mimeType = supportedMimeTypes.first()
-        addZip(process.getLocalOrCachedUri(), context)
+        containerStorageUri: DoorUri,
+    ): Container {
+        val repo: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+
+        return repo.containerBuilder(jobItem.contentJobItem?.cjiContentEntryUid ?: 0,
+                supportedMimeTypes.first(), containerStorageUri)
+            .addZip(process.getLocalOrCachedUri(), context)
+            .build()
     }
 
     companion object {

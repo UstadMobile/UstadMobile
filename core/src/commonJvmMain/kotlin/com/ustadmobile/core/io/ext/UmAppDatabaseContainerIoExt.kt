@@ -403,25 +403,28 @@ fun ContainerBuilder.addFile(
     pathInContainer: String,
     file: File,
     compression: ContainerBuilder.Compression = ContainerBuilder.Compression.GZIP
-) {
+) : ContainerBuilder {
     containerSources += ContainerFileSource(pathInContainer, file, compression)
+    return this
 }
 
 fun ContainerBuilder.addZip(
     zipInput: () -> ZipInputStream,
     pathInContainerPrefix: String = "",
     compression: PathCompressionFilter = DefaultPathCompressionFilter(),
-) {
+) : ContainerBuilder {
     containerSources += ContainerZipSource(zipInput, pathInContainerPrefix, compression)
+    return this
 }
 
 fun ContainerBuilder.addZip(
     zipFile: File,
     pathInContainerPrefix: String = "",
     compression: PathCompressionFilter = DefaultPathCompressionFilter(),
-) {
+): ContainerBuilder {
     containerSources += ContainerZipSource({ ZipInputStream(FileInputStream(zipFile)) },
         pathInContainerPrefix, compression)
+    return this
 }
 
 fun ContainerBuilder.addZip(
@@ -429,10 +432,11 @@ fun ContainerBuilder.addZip(
     context: Any,
     pathInContainerPrefix: String = "",
     compression: PathCompressionFilter = DefaultPathCompressionFilter(),
-) {
+) : ContainerBuilder {
     containerSources += ContainerZipSource({ ZipInputStream(zipUri.openInputStream(context)
         ?: throw IllegalArgumentException("Cannot get input stream for uri: $zipUri")) },
         pathInContainerPrefix, compression)
+    return this
 }
 
 /**
@@ -443,51 +447,45 @@ fun ContainerBuilder.addUri(
     uri: DoorUri,
     context: Any,
     compression: ContainerBuilder.Compression = ContainerBuilder.Compression.GZIP,
-) {
+): ContainerBuilder {
     containerSources += ContainerUriSource(pathInContainer, uri, context, compression)
+    return this
 }
 
 fun ContainerBuilder.addText(
     pathInContainer: String,
     text: String,
     compression: ContainerBuilder.Compression = ContainerBuilder.Compression.GZIP,
-) {
+) : ContainerBuilder {
     containerSources += ContainerTextSource(pathInContainer, text, compression)
+    return this
 }
 
-actual suspend fun UmAppDatabase.addContainer(
-    contentEntryUid: Long,
-    block: suspend ContainerBuilder.() -> Unit
-): Container {
-    val containerBuilder = ContainerBuilder()
-    block(containerBuilder)
+actual suspend fun ContainerBuilder.build(): Container {
     val container = Container().apply {
         this.containerContentEntryUid = contentEntryUid
-        this.mimeType = containerBuilder.mimeType
+        this.mimeType = this@build.mimeType
         this.cntLastModified = getSystemTimeInMillis()
-        this.containerUid = containerDao.insertAsync(this)
+        this.containerUid = db.containerDao.insertAsync(this)
     }
 
     val containerUid = container.containerUid
-
-    val containerStorageUri = containerBuilder.containerStorageUri
-        ?: throw java.lang.IllegalStateException("No ContainerStorage provided!")
 
     val containerUidDir = File(containerStorageUri.toFile(), containerUid.toString()).also {
         it.mkdirs()
     }
 
-    containerBuilder.containerSources.forEach { source: ContainerBuilder.ContainerSource ->
+    containerSources.forEach { source: ContainerBuilder.ContainerSource ->
         when(source) {
-            is ContainerFileSource -> addContainerAddFile(source, containerUid, containerUidDir)
-            is ContainerZipSource -> addContainerAddZip(source, containerUid, containerUidDir)
-            is ContainerUriSource -> addContainerAddUri(source, containerUid, containerUidDir)
-            is ContainerTextSource -> addContainerAddText(source, containerUid, containerUidDir)
+            is ContainerFileSource -> db.addContainerAddFile(source, containerUid, containerUidDir)
+            is ContainerZipSource -> db.addContainerAddZip(source, containerUid, containerUidDir)
+            is ContainerUriSource -> db.addContainerAddUri(source, containerUid, containerUidDir)
+            is ContainerTextSource -> db.addContainerAddText(source, containerUid, containerUidDir)
             else -> throw IllegalArgumentException("unsupported source: $source")
         }
     }
 
-    containerDao.updateContainerSizeAndNumEntriesAsync(containerUid, getSystemTimeInMillis())
+    db.containerDao.updateContainerSizeAndNumEntriesAsync(containerUid, getSystemTimeInMillis())
 
     return container
 }

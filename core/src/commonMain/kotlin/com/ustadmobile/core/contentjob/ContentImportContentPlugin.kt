@@ -4,14 +4,13 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
-import com.ustadmobile.core.io.ContainerBuilder
-import com.ustadmobile.core.io.ext.addContainer
 import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.core.network.NetworkProgressListenerAdapter
 import com.ustadmobile.core.util.ext.updateTotalFromContainerSize
 import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -35,11 +34,12 @@ abstract class ContentImportContentPlugin(
      * @param process ContentJobProcessContext
      * @param progressListener
      */
-    abstract suspend fun ContainerBuilder.makeContainer(
+    abstract suspend fun makeContainer(
         jobItem: ContentJobItemAndContentJob,
         process: ContentJobProcessContext,
         progressListener: ContentJobProgressListener,
-    )
+        containerStorageUri: DoorUri,
+    ): Container
 
     /**
      * Can be used to override whether or not content is uploaded to the upstream endpoint server.
@@ -71,13 +71,10 @@ abstract class ContentImportContentPlugin(
         val shouldUpload = shouldUpload() ?: (sourceUri?.isRemote() == false)
 
         if(!contentJobItem.cjiContainerProcessed) {
-            val containerStorageUriStr = jobItem.contentJob?.toUri
-                ?: containerStorageManager.storageList.first().dirUri
+            val containerStorageUri = DoorUri.parse(jobItem.contentJob?.toUri
+                ?: containerStorageManager.storageList.first().dirUri)
 
-            val container = repo.addContainer(contentJobItem.cjiContentEntryUid) {
-                containerStorageUri = DoorUri.parse(containerStorageUriStr)
-                makeContainer(jobItem, process, progress)
-            }
+            val container = makeContainer(jobItem, process, progress, containerStorageUri)
 
             contentJobItem.cjiContainerUid = container.containerUid
 

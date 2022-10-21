@@ -4,16 +4,21 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.tincan.TinCanXML
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ContainerBuilder
 import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.DI
 import io.ktor.client.*
 import org.xmlpull.v1.XmlPullParserFactory
 import kotlinx.coroutines.*
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 class XapiTypePluginCommonJvm(
     context: Any,
@@ -75,13 +80,18 @@ class XapiTypePluginCommonJvm(
         }
     }
 
-    override suspend fun ContainerBuilder.makeContainer(
+    override suspend fun makeContainer(
         jobItem: ContentJobItemAndContentJob,
         process: ContentJobProcessContext,
-        progressListener: ContentJobProgressListener
-    ) {
-        mimeType = supportedMimeTypes.first()
-        addZip(process.getLocalOrCachedUri(), context)
+        progressListener: ContentJobProgressListener,
+        containerStorageUri: DoorUri,
+    ) : Container {
+        val repo: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+
+        return repo.containerBuilder(jobItem.contentJobItem?.cjiContentEntryUid ?: 0,
+                supportedMimeTypes.first(), containerStorageUri)
+            .addZip(process.getLocalOrCachedUri(), context)
+            .build()
     }
 
     companion object {
