@@ -43,20 +43,24 @@ done
 BASEDIR=$(pwd)
 TESTS=$(ls ./tests/*/runtest.sh)
 
+if [ "$SERIAL" == "" ]; then
+  echo "ERROR: ADB device serial required: please specify with --serial1 "
+  exit 1
+fi
+
 echo "Serial1=$SERIAL"
 echo "Username=$USERNAME"
 
-ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){​3}​[0-9]*).*/\2/p' | head -n 1
-IPADDR=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){​3}​[0-9]*).*/\2/p' | head -n 1)
+IPADDR=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n 1)
 if [ "$ENDPOINT" == "" ]; then
-     IPADDR=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n 1)
     ENDPOINT="http://$IPADDR:8087/"
 fi
 
 echo "ENDPOINT=$ENDPOINT"
 for TESTFILE in $TESTS; do
+  TESTABSPATH=$(realpath $TESTFILE)
   cd $(dirname $TESTFILE)
-    source $TESTFILE
+  source $TESTABSPATH
   cd $BASEDIR
 done
 
