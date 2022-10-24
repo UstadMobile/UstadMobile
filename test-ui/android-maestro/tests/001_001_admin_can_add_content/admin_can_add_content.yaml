@@ -25,9 +25,9 @@ appId: com.toughra.ustadmobile
     timeout: 10000
 - tapOn: "OPEN"
 - scroll
-- takeScreenshot: "result/${TESTCONTENTNAME}"
+- takeScreenshot: "results/${TESTCONTENTNAME}"
 - back
 - tapOn: "ATTEMPTS"
-- takeScreenshot: "result/${TESTCONTENTNAME}AttemptsScreen"
+- takeScreenshot: "results/${TESTCONTENTNAME}AttemptsScreen"
 
 

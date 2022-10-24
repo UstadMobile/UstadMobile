@@ -239,7 +239,7 @@ app-react/src/main/resources/locales
 
 #location for tests screenshots
 test-ui/android-maestro/results
-test-ui/android-maestro/*/results
+test-ui/android-maestro/tests/*/results
 
 
 

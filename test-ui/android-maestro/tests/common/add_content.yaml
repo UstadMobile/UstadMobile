@@ -2,6 +2,7 @@ appId: com.toughra.ustadmobile
 ---
 - clearState: com.toughra.ustadmobile
 - launchApp
+- hideKeyboard
 - tapOn: "GET STARTED"
 - inputText: ${ENDPOINT}
 - hideKeyboard
@@ -36,4 +37,4 @@ appId: com.toughra.ustadmobile
 - tapOn: ${TESTCONTENTNAME}
 - extendedWaitUntil:
     visible: "Delete"
-    timeout: 60000
+    timeout: 600000
