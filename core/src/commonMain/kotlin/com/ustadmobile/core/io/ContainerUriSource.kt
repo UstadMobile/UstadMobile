@@ -7,6 +7,5 @@ class ContainerUriSource(
     val uri: DoorUri,
     val context: Any,
     val compression: ContainerBuilder.Compression = ContainerBuilder.Compression.GZIP,
-    val moveOriginalFile: Boolean = false,
 ): ContainerBuilder.ContainerSource() {
 }
