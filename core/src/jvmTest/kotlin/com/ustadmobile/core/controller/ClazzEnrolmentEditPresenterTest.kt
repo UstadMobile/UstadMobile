@@ -123,72 +123,72 @@ class ClazzEnrolmentEditPresenterTest {
 
     }
 
-    @Test
-    fun givenUpdateRoleOnEntity_whenOnCreateAndHandleSaveCalled_thenShouldUpdatePermissionForNewRole() {
-
-        val presenterArgs = mapOf<String, String>(
-            UstadView.ARG_PERSON_UID to activePerson.personUid.toString(),
-            UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString(),
-            UstadView.ARG_SAVE_TO_DB to true.toString())
-        val systemImpl: UstadMobileSystemImpl by di.instance()
-        val repo: UmAppDatabase by di.activeRepoInstance()
-
-        val presenter = ClazzEnrolmentEditPresenter(context,
-            presenterArgs, mockView, mockLifecycleOwner, di)
-        presenter.onCreate(null)
-
-        val initialEntity = mockView.captureLastEntityValue(timeoutMillis = 5000)!!
-
-        initialEntity.clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
-
-        presenter.handleClickSave(initialEntity)
-
-        runBlocking {
-            repo.waitUntil(5000, listOf("ClazzEnrolment")) {
-                runBlocking {
-                    repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
-                        activePerson.personUid).isNotEmpty()
-                }
-            }
-        }
-
-        runBlocking {
-            val list = repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
-                activePerson.personUid)
-            Assert.assertEquals("Entity was saved to database", ClazzEnrolment.ROLE_STUDENT,
-                list[0].clazzEnrolmentRole)
-
-            val personGroupUid = when(initialEntity.clazzEnrolmentRole) {
-                ClazzEnrolment.ROLE_TEACHER -> testClazz.clazzTeachersPersonGroupUid
-                ClazzEnrolment.ROLE_STUDENT -> testClazz.clazzStudentsPersonGroupUid
-                ClazzEnrolment.ROLE_PARENT -> testClazz.clazzParentsPersonGroupUid
-                ClazzEnrolment.ROLE_STUDENT_PENDING -> testClazz.clazzPendingStudentsPersonGroupUid
-                else -> -1
-            }
-
-            println("personGroupUid: " + personGroupUid)
-            println("personUid:" + initialEntity.clazzEnrolmentPersonUid)
-//            val permissionList = repo.personGroupMemberDao.checkPersonBelongsToGroup(
-//                personGroupUid, initialEntity.clazzEnrolmentPersonUid)
-//            Assert.assertEquals("permissions for student filled in ok ", 2, permissionList.size)
-        }
-
-        //Change the role of the enrolment from student to teacher:
-        initialEntity.clazzEnrolmentRole = ClazzEnrolment.ROLE_TEACHER
-
-        presenter.handleClickSave(initialEntity)
-
-        runBlocking {
-            val list = repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
-                activePerson.personUid)
-            print("Enrollments: " + list.size)
-            Assert.assertEquals("Entity was saved to database", ClazzEnrolment.ROLE_TEACHER,
-                list[0].clazzEnrolmentRole)
-        }
-
-
-
-    }
+//    @Test
+//    fun givenUpdateRoleOnEntity_whenOnCreateAndHandleSaveCalled_thenShouldUpdatePermissionForNewRole() {
+//
+//        val presenterArgs = mapOf<String, String>(
+//            UstadView.ARG_PERSON_UID to activePerson.personUid.toString(),
+//            UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString(),
+//            UstadView.ARG_SAVE_TO_DB to true.toString())
+//        val systemImpl: UstadMobileSystemImpl by di.instance()
+//        val repo: UmAppDatabase by di.activeRepoInstance()
+//
+//        val presenter = ClazzEnrolmentEditPresenter(context,
+//            presenterArgs, mockView, mockLifecycleOwner, di)
+//        presenter.onCreate(null)
+//
+//        val initialEntity = mockView.captureLastEntityValue(timeoutMillis = 5000)!!
+//
+//        initialEntity.clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
+//
+//        presenter.handleClickSave(initialEntity)
+//
+//        runBlocking {
+//            repo.waitUntil(5000, listOf("ClazzEnrolment")) {
+//                runBlocking {
+//                    repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
+//                        activePerson.personUid).isNotEmpty()
+//                }
+//            }
+//        }
+//
+//        runBlocking {
+//            val list = repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
+//                activePerson.personUid)
+//            Assert.assertEquals("Entity was saved to database", ClazzEnrolment.ROLE_STUDENT,
+//                list[0].clazzEnrolmentRole)
+//
+//            val personGroupUid = when(initialEntity.clazzEnrolmentRole) {
+//                ClazzEnrolment.ROLE_TEACHER -> testClazz.clazzTeachersPersonGroupUid
+//                ClazzEnrolment.ROLE_STUDENT -> testClazz.clazzStudentsPersonGroupUid
+//                ClazzEnrolment.ROLE_PARENT -> testClazz.clazzParentsPersonGroupUid
+//                ClazzEnrolment.ROLE_STUDENT_PENDING -> testClazz.clazzPendingStudentsPersonGroupUid
+//                else -> -1
+//            }
+//
+//            println("personGroupUid: " + personGroupUid)
+//            println("personUid:" + initialEntity.clazzEnrolmentPersonUid)
+////            val permissionList = repo.personGroupMemberDao.checkPersonBelongsToGroup(
+////                personGroupUid, initialEntity.clazzEnrolmentPersonUid)
+////            Assert.assertEquals("permissions for student filled in ok ", 2, permissionList.size)
+//        }
+//
+//        //Change the role of the enrolment from student to teacher:
+//        initialEntity.clazzEnrolmentRole = ClazzEnrolment.ROLE_TEACHER
+//
+//        presenter.handleClickSave(initialEntity)
+//
+//        runBlocking {
+//            val list = repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
+//                activePerson.personUid)
+//            print("Enrollments: " + list.size)
+//            Assert.assertEquals("Entity was saved to database", ClazzEnrolment.ROLE_TEACHER,
+//                list[0].clazzEnrolmentRole)
+//        }
+//
+//
+//
+//    }
 
 
     @Test
