@@ -3,6 +3,7 @@ appId: com.toughra.ustadmobile
 - runFlow: "../common/add_content.yaml"
 - clearState: com.toughra.ustadmobile
 - launchApp
+- hideKeyboard
 - tapOn: "GET STARTED"
 - inputText: ${ENDPOINT}
 - hideKeyboard

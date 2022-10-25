@@ -10,6 +10,7 @@ appId: com.toughra.ustadmobile
 - takeScreenshot: "results/${TESTCONTENTNAME}screen_AfterHiding"
 - clearState: com.toughra.ustadmobile
 - launchApp
+- hideKeyboard
 - tapOn: "GET STARTED"
 - inputText: ${ENDPOINT}
 - hideKeyboard
