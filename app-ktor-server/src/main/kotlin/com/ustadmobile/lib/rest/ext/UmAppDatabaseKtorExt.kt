@@ -51,7 +51,7 @@ fun UmAppDatabase.insertCourseTerminology(di: DI){
         val impl: UstadMobileSystemImpl by di.instance()
         val json: Json by di.instance()
 
-        val languageOptions = impl.getAllUiLanguagesList(Any())
+        val languageOptions = impl.getAllUiLanguagesList()
         val terminologyList = mutableListOf<CourseTerminology>()
 
         languageOptions.forEach { pair ->

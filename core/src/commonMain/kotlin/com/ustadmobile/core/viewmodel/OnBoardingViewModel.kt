@@ -3,11 +3,15 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.DiTag
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.kodein.di.DI
+import org.kodein.di.bind
 import org.kodein.di.instance
+import org.kodein.di.provider
 
 class OnBoardingViewModel(
     di: DI,
@@ -42,5 +46,4 @@ class OnBoardingViewModel(
     fun onLanguageSelected(uiLanguage: UstadMobileSystemCommon.UiLanguage) {
         //TODO: Set the language
     }
-
 }

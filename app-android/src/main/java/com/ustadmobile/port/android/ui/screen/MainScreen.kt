@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -33,7 +35,7 @@ class MainScreen : ComponentActivity(){
                         .padding(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally) {
 
-                    ImageCompose(R.drawable.illustration_connect, 180)
+                    ImageCompose(R.drawable.illustration_connect, 200)
 
                     TextBody1(getString(R.string.please_enter_the_linK), black)
 
@@ -43,7 +45,7 @@ class MainScreen : ComponentActivity(){
 
                     ButtonWithIcon(
                         getString(R.string.create_a_new_learning_env),
-                        R.drawable.ic_add_black_24dp)
+                        Icons.Default.Add)
                 }
             }
         }

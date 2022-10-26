@@ -191,7 +191,7 @@ abstract class UstadMobileSystemCommon {
      * @return The currently active locale code, or a blank "" string meaning the locale is the system default.
      */
     @JsName("getLocale")
-    open fun getLocale() = getAppPref(PREFKEY_LOCALE)
+    open fun getLocale(): String = getAppPref(PREFKEY_LOCALE, LOCALE_USE_SYSTEM)
 
     @JsName("setLocale")
     fun setLocale(locale: String) = setAppPref(PREFKEY_LOCALE, locale)

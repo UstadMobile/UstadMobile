@@ -1,73 +1,88 @@
 package com.ustadmobile.port.android.ui.screen.OnBoarding
 
-import android.content.res.Resources
-import androidx.compose.foundation.Image
+import android.annotation.SuppressLint
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.DraggableState
-import androidx.compose.foundation.gestures.TransformableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.state.ToggleableState
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
-import androidx.compose.ui.unit.sp
 import com.example.ustadmobile.ui.ImageCompose
-import com.ustadmobile.core.viewmodel.OnBoardingViewModel
-import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.android.ui.compose.TextBody1
 import com.ustadmobile.port.android.ui.compose.TextHeader3
 import com.ustadmobile.port.android.ui.theme.ui.theme.gray
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-//@Composable
-//fun OnBoardingView() {
-//
-//    val viewModel by lazy { OnBoardingViewModel() }
-//
-//    viewModel.items = arrayOf(
-//        arrayOf(
-//            R.string.onboarding_no_internet_headline,
-//            R.string.onboarding_no_internet_subheadline, R.drawable.illustration_offline_usage),
-//        arrayOf(R.string.onboarding_offline_sharing,
-//            R.string.onboarding_offline_sharing_subheading, R.drawable.illustration_offline_sharing),
-//        arrayOf(R.string.onboarding_stay_organized_headline,
-//            R.string.onboarding_stay_organized_subheading, R.drawable.ic_logout))
-//
-//    LazyRow(
-//        modifier = Modifier.fillMaxWidth(),
-//        state = LazyListState(),
-//    ) {
-//        itemsIndexed(viewModel.items) { index, item ->
-//            View(index, item)
-//        }
-//    }
-//}
-
-
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-private fun View(index: Int, item: Array<Any>) {
+fun PagerView() {
+
+    val pagesList = arrayOf(
+        arrayOf(
+            R.string.onboarding_no_internet_headline,
+            R.string.onboarding_no_internet_subheadline, R.drawable.illustration_offline_usage),
+        arrayOf(R.string.onboarding_offline_sharing,
+            R.string.onboarding_offline_sharing_subheading, R.drawable.illustration_offline_sharing),
+        arrayOf(R.string.onboarding_stay_organized_headline,
+            R.string.onboarding_stay_organized_subheading, R.drawable.illustration_organized))
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
+    var currentIndex by remember { mutableStateOf(0) }
+
+    Column(
+        modifier = Modifier
+            .width(screenWidth),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        val listState = rememberLazyListState()
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            state = listState,
+        ) {
+            itemsIndexed(pagesList) { index, item ->
+                ItemView(index, item)
+            }
+        }
+
+        currentIndex = listState.firstVisibleItemIndex
+
+        threeDots(currentIndex)
+    }
+}
+
+@Composable
+private fun ItemView(index: Int, item: Array<Int>) {
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = (configuration.screenWidthDp-20).dp
 
     Column(
         modifier = Modifier
             .width(screenWidth)
-            .height(IntrinsicSize.Max),
+            .height(IntrinsicSize.Max)
+            .padding(20.dp, 0.dp, 0.dp,0.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -87,7 +102,7 @@ private fun View(index: Int, item: Array<Any>) {
 }
 
 @Composable
-private fun bottomRow(index: Int, item: Array<Any>){
+private fun bottomRow(index: Int, item: Array<Int>){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -99,10 +114,6 @@ private fun bottomRow(index: Int, item: Array<Any>){
             text = stringResource(item[1] as Int),
             color = Color.DarkGray,
         )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        threeDots(index)
     }
 }
 

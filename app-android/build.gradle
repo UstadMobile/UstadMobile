@@ -363,6 +363,8 @@ dependencies {
     implementation "androidx.navigation:navigation-ui:$version_android_navigation"
     implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
 
+    implementation "androidx.navigation:navigation-compose:$version_jetpack_navigation"
+
     //dependency injection
     implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 

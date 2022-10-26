@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultShadowColor
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -44,23 +45,29 @@ import com.ustadmobile.core.generated.locale.MessageID.content
 import com.ustadmobile.port.android.ui.theme.ui.theme.primary
 
 @Composable
-fun ButtonWithIcon(text: String, icon: Int) {
+fun ButtonWithIcon(text: String, icon: ImageVector) {
+
     Button(
         onClick = {},
         modifier = Modifier.padding(12.dp),
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
+        elevation = null,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.Transparent,
+            contentColor = Color.Transparent,
+            disabledBackgroundColor = Color.Transparent,),
     ) {
-        Box {
+        Row() {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = primary,
+                modifier = Modifier.padding(start = 4.dp)
+            )
             Text(
                 text = text,
                 color = primary,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
-            )
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = null,
-                modifier = Modifier.padding(start = 4.dp)
             )
         }
     }
@@ -80,7 +87,8 @@ fun ButtonWithRoundCorners(text: String, onClick: () -> Unit) {
             disabledBackgroundColor = Color.Transparent,
             disabledContentColor = primary.copy(alpha = ContentAlpha.disabled),
         ),
-        modifier = Modifier.height(45.dp)
+        modifier = Modifier.height(40.dp)
+            .width(120.dp)
             .shadow(AppBarDefaults.BottomAppBarElevation)
             .zIndex(1f)
     ) {

@@ -76,7 +76,6 @@
                     android:scheme="https" />
             </intent-filter>
         </activity> <!-- previously used: android:theme="@style/UmTheme.App.OnBoarding" -->
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

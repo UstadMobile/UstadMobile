@@ -231,6 +231,7 @@ ext {
     version_linkify_js = "^3.0.5"
     version_linkify_react = "^3.0.4"
 
+    version_jetpack_navigation = "2.5.0"
 }
 
 /*
