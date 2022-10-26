@@ -61,7 +61,7 @@ BASEDIR=$(pwd)
 cd $SCRIPTDIR
 
 if [ "$TESTS" == "" ]; then
-  TESTS=$(ls ./tests/*/runtest.sh)
+  TESTS=$(ls $SCRIPTDIR/tests/*/runtest.sh)
 fi
 
 if [ "$TESTSERIAL" == "" ]; then

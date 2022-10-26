@@ -16,7 +16,7 @@ NOBUILD="false"
 cd $BASEDIR
 
 
-SERVERARGS=""
+SERVERARGS=" -DLOG_DIR=$BASEDIR/build "
 while true; do
   case "$1" in
     '-h'|'--help')
@@ -112,11 +112,12 @@ elif [ "$BACKGROUND" == "true" ]; then
   fi
 
   echo "SERVERARGS =$SERVERARGS"
-  java $DEBUGARGS -jar build/libs/ustad-server-all.jar -config=ustad-server.conf $SERVERARGS 2>&1 > build/server.stdout &
+  java $DEBUGARGS -jar build/libs/ustad-server-all.jar -config=ustad-server.conf $SERVERARGS &
   PID=$!
   echo $PID > build/server.pid
-  echo "Server started as PID $PID"
+  echo "Server started as PID $PID Logging to app-ktor-server/log/ustad-server.log"
 else
+  echo "Server starting: logging to app-ktor-server/log/ustad-server.log"
   java $DEBUGARGS -jar build/libs/ustad-server-all.jar -config=ustad-server.conf $SERVERARGS
 fi
 
