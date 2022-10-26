@@ -1,0 +1,4 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: ${COURSENAME}
+- tapOn: "Course code"

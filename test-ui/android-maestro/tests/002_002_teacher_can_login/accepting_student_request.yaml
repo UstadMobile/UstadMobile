@@ -1,0 +1,7 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: ${COURSENAME}
+- tapOn: "MEMBERS"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/accept_icon"
+- takeScreenshot: "results/StudentGotAdded"

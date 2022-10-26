@@ -12,8 +12,8 @@ INDEX=0
   CONTENTNAME="ContentUploadDownloadTest"$INDEX
  ../../../../runserver.sh --password testpass  --clear --background --nobuild
  ../../start-screenrecord.sh $SERIAL $CONTENTNAME.mp4
-  maestro --platform android test /
-   -e SERIAL=$SERIAL -e ENDPOINT=$ENDPOINT -e USERNAME=$USERNAME -e PASSWORD=$PASSWORD /
+  maestro --platform android test \
+   -e SERIAL=$SERIAL -e ENDPOINT=$ENDPOINT -e USERNAME=$USERNAME -e PASSWORD=$PASSWORD \
   -e TESTFILENAME=$FILEBASENAME -e TESTCONTENTNAME=$CONTENTNAME admin_can_add_content.yaml
  ../../stop-screenrecord.sh $SERIAL $CONTENTNAME.mp4 results/$CONTENTNAME.mp4
  ../../../../runserver.sh --stop

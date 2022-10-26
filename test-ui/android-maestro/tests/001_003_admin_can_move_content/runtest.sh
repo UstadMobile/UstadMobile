@@ -9,8 +9,8 @@ for FILENAME in $(ls ../Content/Epub_Content.epub); do
   adb push $FILENAME /sdcard/Download/$FILEBASENAME
    ../../../../runserver.sh --password testpass  --clear --background --nobuild
     ../../start-screenrecord.sh $SERIAL $CONTENTNAME.mp4
-  maestro --platform android test /
- -e SERIAL=$SERIAL -e ENDPOINT=$ENDPOINT -e USERNAME=$USERNAME -e PASSWORD=$PASSWORD /
+  maestro --platform android test \
+ -e SERIAL=$SERIAL -e ENDPOINT=$ENDPOINT -e USERNAME=$USERNAME -e PASSWORD=$PASSWORD \
   -e TESTFILENAME=Epub_Content.epub -e TESTCONTENTNAME=$CONTENTNAME admin_can_move_content.yaml
   ../../stop-screenrecord.sh $SERIAL $CONTENTNAME.mp4 results/$CONTENTNAME.mp4
  ../../../../runserver.sh --stop

@@ -6,7 +6,7 @@ echo "Run admin can create course test"
  ../../start-screenrecord.sh $SERIAL $COURSENAME.mp4
   maestro --platform android test \
  -e SERIAL=$SERIAL -e ENDPOINT=$ENDPOINT -e USERNAME=$USERNAME -e PASSWORD=$PASSWORD \
-  -e COURSENAME=$COURSENAME admin_can_create_course.yaml
+  -e COURSENAME=$COURSENAME admin_can_add_new_student.yaml
  ../../stop-screenrecord.sh $SERIAL $COURSENAME.mp4 results/$COURSENAME.mp4
  ../../../../runserver.sh --stop
   TESTRESULT=$?
