@@ -22,3 +22,4 @@ appId: com.toughra.ustadmobile
 - takeScreenshot: "results/${COURSENAME}-overviewscreen"
 - back
 - takeScreenshot: "results/${COURSENAME}-coursepage"
+- runFlow: admin_can_add_new_teacher.yaml
