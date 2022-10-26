@@ -74,7 +74,7 @@ class SettingsFragment : UstadBaseFragment(), SettingsView, SettingsFragmentEven
 
     override fun onClickAppLanguage() {
         val systemImpl: UstadMobileSystemImpl by instance()
-        val langList = systemImpl.getAllUiLanguagesList(requireContext())
+        val langList = systemImpl.getAllUiLanguagesList()
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.app_language)
             .setItems(langList.map { it.langDisplay }.toTypedArray()) { _, which ->

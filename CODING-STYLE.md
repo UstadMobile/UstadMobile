@@ -238,3 +238,86 @@ EditPresenter?loadKey=Schedule&resultDest=<RESULTVIEWNAME>&resultSteps=1&resultK
 }   
 
 ```
+
+
+Handling App Ui State (e.g. fab, snackbar, etc.)
+
+1. ViewModel emits the AppUiState
+```
+
+class AppUiState {
+    val fabText: String,
+    val onClickFab: () -> Unit,
+}
+
+UstadViewModel( ... ) {
+    protected val _appUiState = MutableStateFlow(AppUiState())
+
+    val appUiState: Flow<AppUiState>
+        get = _appUiState.asStateFlow()
+    
+}
+```
+
+2. State is collected 
+ a. By Fragment: collected and then sent to the activity as needed
+ b. In Jetpack compose:
+ ```
+ App.kt
+ fun App() {
+     
+     var appUiState: AppUiState by rememberSaveable { mutableStateOf(AppUiState) }
+     
+     SomeScreen(
+         viewModel,
+         onAppStateChange = { appUiState = it }
+     )
+     
+     Fab {
+         Text()
+     }            
+ }
+ 
+ 
+ SomeScreen.kt:
+ fun SomeScreen(
+     entity: SomeEntity,
+ ) {
+     Text(...)
+ }
+ 
+ fun SomeScreen(
+      viewModel: ViewModel,
+      onAppStateChange: (AppUiState) -> Unit,
+ ) {
+     LaunchedEffect(Lifecycle) {
+         viewModel.appUiState.collectWithLifecycle {
+            appUiState = it
+         }
+     }
+     
+     val someUiState: SomeUiState by viewModel.uiState.collectAsState()
+     
+     val entity: SomeEntity by someUiState.entity.collectAsState()
+     
+     SomeScreen(entity)
+ }
+```
+
+c. By React Functional component
+
+```
+val SomeScreen = FC<AppProps>() {
+    val viewModel: SomeViewModel by useViewModel()
+    
+    //Or: could use Redux to dispatch this if that's the way for JS
+    // See: https://github.com/Kotlin/react-redux-js-ir-todo-list-sample/tree/master/src/main/kotlin/reactredux
+    
+    useEffect(dependencies = "viewModel") {
+        viewModel.appUiState.collectLatest {
+            appProps.onAppStateChange(it)
+        }
+    }
+}
+
+```
