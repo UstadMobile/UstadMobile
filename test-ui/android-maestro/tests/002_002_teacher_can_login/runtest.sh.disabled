@@ -3,11 +3,11 @@
 echo "Run admin can create course test"
 
  ../../../../runserver.sh --password testpass  --clear --background --nobuild
- ../../start-screenrecord.sh $SERIAL $COURSENAME.mp4
+ ../../start-screenrecord.sh $TESTSERIAL $COURSENAME.mp4
   maestro --platform android test \
- -e SERIAL=$SERIAL -e ENDPOINT=$ENDPOINT -e USERNAME=$USERNAME -e PASSWORD=$PASSWORD \
+ -e SERIAL=$TESTSERIAL -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER -e PASSWORD=$TESTPASS \
   -e COURSENAME=$COURSENAME admin_can_add_new_student.yaml
- ../../stop-screenrecord.sh $SERIAL $COURSENAME.mp4 results/$COURSENAME.mp4
+ ../../stop-screenrecord.sh $TESTSERIAL $COURSENAME.mp4 results/$COURSENAME.mp4
  ../../../../runserver.sh --stop
   TESTRESULT=$?
   if [ "$TESTRESULT" != "0" ]; then
