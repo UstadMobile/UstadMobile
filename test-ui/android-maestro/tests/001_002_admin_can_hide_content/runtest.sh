@@ -9,9 +9,8 @@ adb push $FILENAME /sdcard/Download/$FILEBASENAME
 
 ../../../../runserver.sh --password $TESTPASS  --clear --background --nobuild
 ../../start-screenrecord.sh $TESTSERIAL $CONTENTNAME.mp4
-maestro --platform android test \
--e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER -e PASSWORD=$TESTPASS \
--e TESTFILENAME=Epub_Content.epub -e TESTCONTENTNAME=$CONTENTNAME admin_can_hide_content.yaml
+maestro --$MAESTRO_BASE_OPTS \
+  -e TESTFILENAME=Epub_Content.epub -e TESTCONTENTNAME=$CONTENTNAME admin_can_hide_content.yaml
 TESTRESULT=$?
 if [ "$TESTRESULT" != "0" ]; then
    echo "fail" > results/result

@@ -58,7 +58,6 @@ while true; do
 done
 
 BASEDIR=$(pwd)
-cd $SCRIPTDIR
 
 if [ "$TESTS" == "" ]; then
   TESTS=$(ls $SCRIPTDIR/tests/*/runtest.sh)
@@ -85,7 +84,7 @@ if [ "$ENDPOINT" == "" ]; then
 fi
 
 echo "ENDPOINT=$ENDPOINT"
-MAESTRO_BASE_OPTS="--platform android test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER -e PASSWORD=$TESTPASS "
+MAESTRO_BASE_OPTS="--device=$TESTSERIAL test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER -e PASSWORD=$TESTPASS "
 
 export ANDROID_SERIAL=$TESTSERIAL
 if [ "$(adb shell pm list packages com.toughra.ustadmobile)" != "" ]; then
@@ -93,12 +92,36 @@ if [ "$(adb shell pm list packages com.toughra.ustadmobile)" != "" ]; then
 fi
 adb -s $TESTSERIAL install $TESTAPK
 
+if [ ! -d $SCRIPTDIR/results ]; then
+  mkdir $SCRIPTDIR/results
+fi
+
+if [ -e $SCRIPTDIR/results/results-summary.txt ]; then
+  rm $SCRIPTDIR/results/results-summary.txt
+fi
+
+
 for TESTFILE in $TESTS; do
   TESTABSPATH=$(realpath $TESTFILE)
   export ANDROID_SERIAL=$TESTSERIAL
   adb shell rm /sdcard/Download/*
-  cd $(dirname $TESTFILE)
+
+  if [ -e $TESTABSPATH/results ]; then
+    rm -rf $TESTABSPATH/results
+  fi
+
+  TESTDIR=$(dirname $TESTABSPATH)
+  cd $TESTDIR
   source $TESTABSPATH
+
+  if [ "$(cat $TESTDIR/results/result)" == "pass" ]; then
+    echo "$(basename $TESTDIR) : PASS" > $SCRIPTDIR/results/results-summary.txt
+  fi
+
+  if [ "$(cat $TESTDIR/results/result)" == "fail" ]; then
+    echo "$(basename $TESTDIR) : FAIL" > $SCRIPTDIR/results/results-summary.txt
+  fi
+
   cd $BASEDIR
 done
 
