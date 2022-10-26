@@ -58,6 +58,7 @@ while true; do
 done
 
 BASEDIR=$(pwd)
+cd $SCRIPTDIR
 
 if [ "$TESTS" == "" ]; then
   TESTS=$(ls ./tests/*/runtest.sh)
@@ -100,4 +101,6 @@ for TESTFILE in $TESTS; do
   source $TESTABSPATH
   cd $BASEDIR
 done
+
+cd $WORKDIR
 
