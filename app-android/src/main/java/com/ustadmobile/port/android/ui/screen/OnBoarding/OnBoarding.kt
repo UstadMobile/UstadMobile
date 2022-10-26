@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.ui.screen.OnBoarding
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,12 +22,14 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
+import com.ustadmobile.core.viewmodel.OnboardingUiState
 import com.ustadmobile.port.android.ui.compose.TextBody2
 import com.ustadmobile.port.android.ui.theme.ui.theme.UstadMobileTheme
 import com.ustadmobile.port.android.ui.theme.ui.theme.gray
-import com.ustadmobile.port.android.util.ext.getActivityContext
+import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
+import java.util.*
 
 class OnBoarding : ComponentActivity() {
 
@@ -35,15 +38,30 @@ class OnBoarding : ComponentActivity() {
         provideFactory(di, this, null)
     }
 
+    override fun attachBaseContext(newBase: Context) {
+        val res = newBase.resources
+        val config = res.configuration
+        val languageSetting = newBase.getUstadLocaleSetting()
+
+        val locale = if (languageSetting == UstadMobileSystemCommon.LOCALE_USE_SYSTEM)
+            Locale.getDefault()
+        else
+            Locale(languageSetting)
+        config.setLocale(locale)
+        super.attachBaseContext(newBase.createConfigurationContext(config))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             UstadMobileTheme {
-                OnboardingViaViewModel(viewModel = viewModel)
+                OnboardingScreen(viewModel = viewModel)
             }
         }
     }
+
+
 
     companion object {
         fun provideFactory(
@@ -63,12 +81,13 @@ class OnBoarding : ComponentActivity() {
 }
 
 @Composable
-private fun OnboardingViaViewModel(viewModel: OnBoardingViewModel) {
-    val langList = viewModel.languageList.collectAsState(initial = listOf())
-    val currentLang = viewModel.currentLanguage.collectAsState(
-        initial = UstadMobileSystemCommon.UiLanguage("", ""))
+private fun OnboardingScreen(viewModel: OnBoardingViewModel) {
+    val uiState: OnboardingUiState by viewModel.uiState.collectAsState(initial = OnboardingUiState())
 
-    OnboardingScreen(langList.value, currentLang.value, { viewModel.onLanguageSelected(it) })
+
+    OnboardingScreen(uiState.languageList, uiState.currentLanguage,
+        onSetLanguage = { viewModel.onLanguageSelected(it) }
+    )
 }
 
 @Composable
@@ -80,12 +99,15 @@ fun OnboardingScreen(
     onSetLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit = { },
 ) {
     Column(
-        modifier = Modifier.fillMaxHeight()
+        modifier = Modifier
+            .fillMaxHeight()
             .padding(16.dp)
     ) {
 
         Box(modifier = Modifier.weight(0.13F)){
-            topRow(langList, currentLanguage)
+            topRow(langList, currentLanguage, onSetLanguage = {
+                onSetLanguage(it)
+            })
         }
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -106,9 +128,9 @@ fun OnboardingScreen(
 private fun topRow(
     langList: List<UstadMobileSystemCommon.UiLanguage> = listOf(),
     currentLanguage: UstadMobileSystemCommon.UiLanguage
-    = UstadMobileSystemCommon.UiLanguage("en", "English")
+        = UstadMobileSystemCommon.UiLanguage("en", "English"),
+    onSetLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit = { },
 ){
-    val context = LocalContext.current
     Row(
         modifier = Modifier
             .wrapContentHeight()
@@ -116,9 +138,11 @@ private fun topRow(
     ) {
         Box(modifier = Modifier
             .weight(1f)){
-                SetLanguageMenu(langList = langList, currentLanguage){
-                    context.getActivityContext()?.recreate()
-                }
+                SetLanguageMenu(
+                    langList = langList,
+                    currentLanguage,
+                    onItemSelected = onSetLanguage,
+                )
         }
 
         Box(modifier = Modifier

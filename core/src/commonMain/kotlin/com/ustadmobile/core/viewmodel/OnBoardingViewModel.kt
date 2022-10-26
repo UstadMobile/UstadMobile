@@ -3,40 +3,38 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.DiTag
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
-import org.kodein.di.bind
 import org.kodein.di.instance
-import org.kodein.di.provider
+
+data class OnboardingUiState(
+    val currentLanguage: UstadMobileSystemCommon.UiLanguage = UstadMobileSystemCommon.UiLanguage("en", "English"),
+    val languageList: List<UstadMobileSystemCommon.UiLanguage> = listOf(currentLanguage),
+)
 
 class OnBoardingViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
 ): UstadViewModel(di, savedStateHandle) {
 
-    private val _languageList: MutableStateFlow<List<UstadMobileSystemCommon.UiLanguage>>
+    private val _uiState = MutableStateFlow(OnboardingUiState())
 
-    val languageList: Flow<List<UstadMobileSystemCommon.UiLanguage>>
-
-    private val _currentLanguage: MutableStateFlow<UstadMobileSystemCommon.UiLanguage>
-
-    val currentLanguage: Flow<UstadMobileSystemCommon.UiLanguage>
+    val uiState: Flow<OnboardingUiState>
+        get() = _uiState.asStateFlow()
 
     private val systemImpl: UstadMobileSystemImpl by instance()
 
     init {
         val allLanguages = systemImpl.getAllUiLanguagesList()
         val currentLocaleCode = systemImpl.getLocale()
+        val currentLanguage = allLanguages.first { it.langCode == currentLocaleCode}
 
-        _languageList = MutableStateFlow(allLanguages)
-        languageList = _languageList.asStateFlow()
-
-        _currentLanguage = MutableStateFlow(allLanguages.first { it.langCode == currentLocaleCode} )
-        currentLanguage = _currentLanguage.asStateFlow()
+        _uiState.update {
+            OnboardingUiState(currentLanguage, allLanguages)
+        }
     }
 
     fun onClickNext(){
@@ -44,6 +42,9 @@ class OnBoardingViewModel(
     }
 
     fun onLanguageSelected(uiLanguage: UstadMobileSystemCommon.UiLanguage) {
-        //TODO: Set the language
+        systemImpl.setLocale(uiLanguage.langCode)
+        _uiState.update { previous ->
+            previous.copy(currentLanguage =  uiLanguage)
+        }
     }
 }
