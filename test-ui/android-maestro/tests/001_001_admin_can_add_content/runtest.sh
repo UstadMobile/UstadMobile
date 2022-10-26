@@ -16,14 +16,15 @@ for FILENAME in $(ls ../Content/*); do
  ../../start-screenrecord.sh $TESTSERIAL $CONTENTNAME.mp4
   maestro $MAESTRO_BASE_OPTS \
   -e TESTFILENAME=$FILEBASENAME -e TESTCONTENTNAME=$CONTENTNAME admin_can_add_content.yaml
+   TESTRESULT=$?
+    if [ "$TESTRESULT" != "0" ]; then
+       echo "fail" > results/result
+    elif [ ! -f results/result ]; then
+       echo "pass" > results/result
+    fi
  ../../stop-screenrecord.sh $TESTSERIAL $CONTENTNAME.mp4 results/$CONTENTNAME.mp4
  ../../../../runserver.sh --stop
-  TESTRESULT=$?
-  if [ "$TESTRESULT" != "0" ]; then
-     echo "fail" > results/result
-  elif [ ! -f results/result ]; then
-     echo "pass" > results/result
-  fi
+
 
   INDEX=$((INDEX+1))
  done

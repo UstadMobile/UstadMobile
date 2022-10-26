@@ -21,7 +21,8 @@ appId: com.toughra.ustadmobile
 - tapOn: "SAVE"
 - takeScreenshot: "results/NewStudentAccountCreated"
 - runFlow: "admin_can_copy_course_code.yaml"
-- runFlow: "Student_join_using_course_code.yaml"
+- runFlow: "student_join_using_course_code.yaml"
+- runFlow: "../common/admin_can_add_new_teacher.yaml"
 - runFlow: "teacher_can_login.yaml"
 
 

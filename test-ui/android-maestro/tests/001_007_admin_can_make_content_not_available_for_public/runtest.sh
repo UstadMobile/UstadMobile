@@ -15,15 +15,15 @@ for FILENAME in $(ls ../Content/Epub_Content.epub); do
   -e SERIAL=$TESTSERIAL -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER -e PASSWORD=$TESTPASS \
   -e TESTFILENAME=Epub_Content.epub -e TESTCONTENTNAME=$CONTENTNAME \
   admin_can_make_content_not_available_for_public.yaml
-
-  ../../stop-screenrecord.sh $TESTSERIAL $CONTENTNAME.mp4 results/$CONTENTNAME.mp4
- ../../../../runserver.sh --stop
-
-  TESTRESULT=$?
+ TESTRESULT=$?
   if [ "$TESTRESULT" != "0" ]; then
      echo "fail" > results/result
   elif [ ! -f results/result ]; then
      echo "pass" > results/result
   fi
+  ../../stop-screenrecord.sh $TESTSERIAL $CONTENTNAME.mp4 results/$CONTENTNAME.mp4
+ ../../../../runserver.sh --stop
+
+
 INDEX=$((INDEX+1))
 done
