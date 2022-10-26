@@ -2,13 +2,16 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:' --long 'serial1:,username:,password:,endpoint:,tests:' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e:t:a:' --long 'serial1:,username:,password:,endpoint:,tests:,apk:' -n 'run-maestro-tests.sh' -- "$@")
 
 eval set -- "$TEMP"
 unset TEMP
 
 TESTUSER="admin"
 TESTPASS="testpass"
+WORKDIR=$(pwd)
+SCRIPTDIR=$(realpath $(dirname $0))
+TESTAPK=$SCRIPTDIR/../../app-android-launcher/build/outputs/apk/release/app-android-launcher-release.apk
 
 # Alias for maestro with common variables
 
@@ -40,6 +43,12 @@ while true; do
                      shift 2
                      continue
                ;;
+               '-a'|'--apk')
+                     echo "Set APK to $2"
+                     TESTAPK=$2
+                     shift 2
+                     continue
+               ;;
                '--')
                         shift
                         break
@@ -59,6 +68,13 @@ if [ "$TESTSERIAL" == "" ]; then
   exit 1
 fi
 
+if [ ! -f $TESTAPK ]; then
+  echo "ERROR: APK File $TESTAPK does not exist! Maybe you need to build it? e.g. ./gradlew app-android-launcher:assembleRelease"
+  exit 1
+fi
+
+TESTAPK=$(realpath $TESTAPK)
+
 echo "Serial1=$TESTSERIAL"
 echo "Username=$TESTUSER"
 
@@ -69,6 +85,12 @@ fi
 
 echo "ENDPOINT=$ENDPOINT"
 MAESTRO_BASE_OPTS="--platform android test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER -e PASSWORD=$TESTPASS "
+
+export ANDROID_SERIAL=$TESTSERIAL
+if [ "$(adb shell pm list packages com.toughra.ustadmobile)" != "" ]; then
+  adb shell pm uninstall com.toughra.ustadmobile
+fi
+adb -s $TESTSERIAL install $TESTAPK
 
 for TESTFILE in $TESTS; do
   TESTABSPATH=$(realpath $TESTFILE)
