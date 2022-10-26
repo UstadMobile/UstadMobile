@@ -72,7 +72,8 @@ MAESTRO_BASE_OPTS="--platform android test -e ENDPOINT=$ENDPOINT -e USERNAME=$TE
 
 for TESTFILE in $TESTS; do
   TESTABSPATH=$(realpath $TESTFILE)
-  adb -s $TESTSERIAL rm /sdcard/Download/*
+  export ANDROID_SERIAL=$TESTSERIAL
+  adb shell rm /sdcard/Download/*
   cd $(dirname $TESTFILE)
   source $TESTABSPATH
   cd $BASEDIR

@@ -7,7 +7,6 @@ echo "PASSWORD=$TESTPASS"
 echo "SERIAL=$TESTSERIAL"
 INDEX=0
 
-export ANDROID_SERIAL=$TESTSERIAL
 for FILENAME in $(ls ../Content/*); do
   FILEBASENAME="$(basename $FILENAME)"
 

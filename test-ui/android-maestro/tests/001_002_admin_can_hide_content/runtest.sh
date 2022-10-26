@@ -2,9 +2,6 @@
 
 echo "Run admin can add content test"
 
-
-export ANDROID_SERIAL=$TESTSERIAL
-
 FILENAME=$(ls ../Content/Epub_Content.epub)
 FILEBASENAME=$(basename $FILENAME)
 CONTENTNAME="ContentHideTest"
