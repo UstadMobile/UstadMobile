@@ -19,3 +19,5 @@ appId: com.toughra.ustadmobile
 - tapOn: "Connect as Guest"
 - tapOn: "Library"
 - takeScreenshot: "results/${TESTCONTENTNAME}_finalresult"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/accept_icon"
