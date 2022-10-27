@@ -6,7 +6,7 @@ echo "Username=$TESTUSER"
 echo "PASSWORD=$TESTPASS"
 echo "SERIAL=$TESTSERIAL"
 INDEX=0
-
+FAILCOUNT=0
 for FILENAME in $(ls ../Content/*); do
   FILEBASENAME="$(basename $FILENAME)"
 
@@ -18,19 +18,19 @@ for FILENAME in $(ls ../Content/*); do
     -e TESTFILENAME=$FILEBASENAME -e TESTCONTENTNAME=$CONTENTNAME admin_can_add_content.yaml
 
   TESTRESULT=$?
-  if [ "$TESTRESULT" != "0" ]; then
-    echo "fail" > results/result-$CONTENTNAME
-    echo "fail" > results/result
-  else
+  if [ "$TESTRESULT" == "0" ]; then
     echo "pass" > results/result-$CONTENTNAME
-    if [ ! -e results/result ]; then
-      echo "pass" > results/result
-    fi
+  else
+    echo "fail" > results/result-$CONTENTNAME
   fi
+
  ../../stop-screenrecord.sh $TESTSERIAL $CONTENTNAME.mp4 results/$CONTENTNAME.mp4
  ../../../../runserver.sh --stop
-
-
   INDEX=$((INDEX+1))
  done
+if [ "$FAILCOUNT" == "0" ] ; then
+  echo "pass" > results/result
+else
+  echo "fail" > results/result
+fi
 

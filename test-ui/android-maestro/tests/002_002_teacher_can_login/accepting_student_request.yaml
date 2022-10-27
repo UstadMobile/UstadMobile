@@ -1,6 +1,9 @@
 appId: com.toughra.ustadmobile
 ---
-- tapOn: ${COURSENAME}
+- launchApp
+-  tapOn: "Courses"
+- tapOn:
+      id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
 - tapOn: "MEMBERS"
 - tapOn:
     id: "com.toughra.ustadmobile:id/accept_icon"
