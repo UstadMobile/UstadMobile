@@ -3,11 +3,14 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.tincan.Activity
+import com.ustadmobile.core.view.OnBoardingView
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 
 data class OnboardingUiState(
@@ -38,7 +41,8 @@ class OnBoardingViewModel(
     }
 
     fun onClickNext(){
-
+        val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+        systemImpl.setAppPref(OnBoardingView.PREF_TAG, true.toString())
     }
 
     fun onLanguageSelected(uiLanguage: UstadMobileSystemCommon.UiLanguage) {

@@ -23,7 +23,7 @@
             android:value="com/ustadmobile/core/appconfig.properties"/>
 
         <activity
-            android:name="com.ustadmobile.port.android.ui.screen.SplashScreen"
+            android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/app_name"
             android:noHistory="true">

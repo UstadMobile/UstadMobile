@@ -30,17 +30,9 @@
         android:supportsRtl="true"
         android:theme="@style/UmTheme.App"
         android:usesCleartextTraffic="true">
+
         <activity
-            android:name="com.ustadmobile.port.android.ui.screen.MainScreen"
-            android:exported="false"
-            android:label="@string/title_activity_main_screen"
-            android:theme="@style/UmTheme.App">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name="com.ustadmobile.port.android.ui.screen.OnBoarding.OnBoarding"
+            android:name="com.ustadmobile.port.android.view.OnboardingActivity"
             android:exported="false"
             android:theme="@style/UmTheme.App">
             <meta-data
@@ -96,7 +88,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:exported="true" />
         <activity
-            android:name="com.ustadmobile.port.android.ui.screen.SplashScreen"
+            android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:exported="true"
             android:label="@string/app_name"

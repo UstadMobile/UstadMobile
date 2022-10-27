@@ -13,4 +13,5 @@
     <string name="title_activity_messages">Messages</string>
     <string name="title_activity_people">People</string>
     <string name="title_activity_reports">Reports</string>
+    <string name="title_activity_text_field">TextField</string>
 </resources>
