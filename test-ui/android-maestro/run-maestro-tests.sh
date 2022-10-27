@@ -115,11 +115,11 @@ for TESTFILE in $TESTS; do
   source $TESTABSPATH
 
   if [ "$(cat $TESTDIR/results/result)" == "pass" ]; then
-    echo "$(basename $TESTDIR) : PASS" > $SCRIPTDIR/results/results-summary.txt
+    echo "$(basename $TESTDIR) : PASS" >> $SCRIPTDIR/results/results-summary.txt
   fi
 
   if [ "$(cat $TESTDIR/results/result)" == "fail" ]; then
-    echo "$(basename $TESTDIR) : FAIL" > $SCRIPTDIR/results/results-summary.txt
+    echo "$(basename $TESTDIR) : FAIL" >> $SCRIPTDIR/results/results-summary.txt
   fi
 
   cd $BASEDIR
