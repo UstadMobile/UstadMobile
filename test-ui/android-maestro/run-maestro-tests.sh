@@ -69,7 +69,8 @@ if [ "$TESTSERIAL" == "" ]; then
 fi
 
 if [ ! -f $TESTAPK ]; then
-  echo "ERROR: APK File $TESTAPK does not exist! Maybe you need to build it? e.g. ./gradlew app-android-launcher:assembleRelease"
+  echo "ERROR: APK File $TESTAPK does not exist! By default this will be the release APK file."
+  echo "Alternatively, you can specify a different APK by using --apk path/to/file.apk "
   exit 1
 fi
 

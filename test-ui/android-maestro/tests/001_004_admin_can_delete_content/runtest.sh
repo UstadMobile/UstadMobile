@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Run admin can add content test"
-echo "admin username=$USERNAME"
+echo "admin username=$TESTUSER"
 FILENAME="../Content/Epub_Content.epub"
 FILEBASENAME=$(basename $FILENAME)
 CONTENTNAME="ContentDeleteTest"

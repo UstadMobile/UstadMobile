@@ -13,6 +13,7 @@ BACKGROUND="false"
 STOP="false"
 NOBUILD="false"
 
+#The root path of the project (e.g. the directory into which it was checked out from git)
 cd $BASEDIR
 
 
@@ -36,9 +37,9 @@ while true; do
       continue
       ;;
     '-c'|'--clear')
-      echo "Clearing ALL DATA as requested"
+      echo "Clearing ALL DATA as requested: Delete $BASEDIR/app-ktor-server/data"
       SERVERARGS="$SERVERARGS -P:ktor.database.cleardb=true"
-      rm -rf app-ktor-server/data
+      rm -rf $BASEDIR/app-ktor-server/data
       shift 1
       continue
       ;;
@@ -84,16 +85,16 @@ if [ "$NOBUILD" != "true" ] && [ "$STOP" != "true" ]; then
   fi
 fi
 
-if [ ! -e app-ktor-server/build/libs/ustad-server-all.jar ]; then
+if [ ! -e $BASEDIR/app-ktor-server/build/libs/ustad-server-all.jar ]; then
   echo "Please build the server jar: ./gradlew app-ktor-server:shadowJar"
   exit 1
 fi
 
-if [ ! -e app-ktor-server/ustad-server.conf ]; then
-  cp app-ktor-server/src/main/resources/application.conf app-ktor-server/ustad-server.conf
+if [ ! -e $BASEDIR/app-ktor-server/ustad-server.conf ]; then
+  cp $BASEDIR/app-ktor-server/src/main/resources/application.conf $BASEDIR/app-ktor-server/ustad-server.conf
 fi
 
-cd app-ktor-server
+cd $BASEDIR/app-ktor-server
 
 if [ "$STOP" == "true" ];then
   if [ -e build/server.pid ]; then
