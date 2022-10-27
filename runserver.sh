@@ -36,9 +36,9 @@ while true; do
       continue
       ;;
     '-c'|'--clear')
-      echo "Clearing ALL DATA as requested"
+      echo "Clearing ALL DATA as requested: Delete $BASEDIR/app-ktor-server/data"
       SERVERARGS="$SERVERARGS -P:ktor.database.cleardb=true"
-      rm -rf app-ktor-server/data
+      rm -rf $BASEDIR/app-ktor-server/data
       shift 1
       continue
       ;;
