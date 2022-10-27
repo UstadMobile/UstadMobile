@@ -1,9 +1,12 @@
 package com.ustadmobile.port.android.view
 
+import android.accounts.Account
+import android.accounts.AccountManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
@@ -18,7 +21,13 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.instance
 
 
-class Login2Fragment : UstadBaseFragment(), Login2View {
+interface DroidAccountTest{
+
+    fun addToAccountManager(username: String)
+
+}
+
+class Login2Fragment : UstadBaseFragment(), Login2View, DroidAccountTest {
 
     private var mBinding: FragmentLogin2Binding? = null
 
@@ -98,6 +107,7 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         val rootView: View
         mBinding = FragmentLogin2Binding.inflate(inflater, container, false).also {
             rootView = it.root
+            it.droidAccountTester = this
             it.buttonEnabled = true
             it.fieldsEnabled = true
         }
@@ -114,10 +124,28 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         mPresenter?.onCreate(savedInstanceState.toStringMap())
     }
 
+
+
+    override fun addToAccountManager(username: String) {
+        val accountManager = AccountManager.get(requireContext())
+        if(accountManager.addAccountExplicitly(Account(username, ACCOUNT_TYPE), "password",
+            null)) {
+            Toast.makeText(requireContext(), "Added account", Toast.LENGTH_LONG)
+        }else {
+            Toast.makeText(requireContext(), "Account add FAIL", Toast.LENGTH_LONG)
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter = null
         mBinding = null
+    }
+
+    companion object {
+
+        val ACCOUNT_TYPE = "com.ustadmobile"
+
     }
 
 }

@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Bundle
 import com.ustadmobile.port.android.view.MainActivity
 
+// As per https://developer.android.com/training/id-auth/custom_auth
 //see https://developer.android.com/reference/kotlin/android/accounts/AbstractAccountAuthenticator
 class AccountAuthenticator(
     private val context: Context
@@ -19,7 +20,7 @@ class AccountAuthenticator(
     }
 
     override fun addAccount(
-        response: AccountAuthenticatorResponse?,
+        response: AccountAuthenticatorResponse,
         accountType: String?,
         authTokenType: String?,
         requiredFeatures: Array<out String>?,
@@ -41,8 +42,8 @@ class AccountAuthenticator(
         p0: AccountAuthenticatorResponse?,
         p1: Account?,
         p2: Bundle?
-    ): Bundle {
-        TODO("Not yet implemented")
+    ): Bundle? {
+        return null
     }
 
     override fun getAuthToken(
