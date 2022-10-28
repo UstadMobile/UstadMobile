@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.accounts.AccountManager
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -16,6 +17,7 @@ import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
@@ -38,8 +40,6 @@ import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.NavControllerAdapter
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.view.AccountListView
-import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
@@ -55,6 +55,8 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.UmPlatformUtil
+import com.ustadmobile.core.view.*
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
@@ -111,6 +113,25 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         if(uri != null){
             impl.goToDeepLink(uri, accountManager, this)
+        }
+    }
+
+
+    private fun onGrantAppPermissionIntentReceived(intent: Intent) {
+        lifecycleScope.launch {
+            val destViewUri = "${GrantAppPermissionView.VIEW_NAME}?"
+            val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION,
+                this)
+            if(accountManager.activeSessionCount(Long.MAX_VALUE) > 0) {
+                //there are existing accounts that might be used... go to accountmanager
+                ustadNavController.navigate(AccountListView.VIEW_NAME, mapOf(
+                    UstadView.ARG_NEXT to destViewUri,
+                    UstadView.ARG_TITLE to getString(R.string.select_account),
+                    UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
+                ))
+            }else if(canSelectServer){
+                ustadNavController.navigate(SiteEnterLinkView.VIEW_NAME)
+            }
         }
     }
 

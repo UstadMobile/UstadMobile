@@ -122,10 +122,10 @@ import com.ustadmobile.lib.db.entities.*
     DiscussionTopic::class,
     DiscussionTopicReplicate::class,
     DiscussionPost::class,
-    DiscussionPostReplicate::class
+    DiscussionPostReplicate::class,
+    AuthToken::class,
 
-
-], version = 107)
+], version = 108)
 @MinReplicationVersion(60)
 expect abstract class UmAppDatabase : RoomDatabase {
 
@@ -299,18 +299,6 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract val discussionPostDao: DiscussionPostDao
 
-
-//    companion object {
-//
-//        const val TAG_DB = DoorTag.TAG_DB
-//
-//        const val TAG_REPO = DoorTag.TAG_REPO
-//
-//
-//
-//
-//
-//    }
-
+    abstract val authTokenDao: AuthTokenDao
 
 }

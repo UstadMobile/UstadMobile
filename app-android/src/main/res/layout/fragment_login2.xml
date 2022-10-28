@@ -209,21 +209,6 @@
                 />
 
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/add_android_account"
-                style="@style/UmTheme.Widget.OutlinedButton"
-                android:onClick="@{() -> droidAccountTester.addToAccountManager(username)}"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/dimen_16dp"
-                android:enabled="@{buttonEnabled}"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginTop="@dimen/dimen_16dp"
-                android:text="Add Droid Account"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/version_info_text" />
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 

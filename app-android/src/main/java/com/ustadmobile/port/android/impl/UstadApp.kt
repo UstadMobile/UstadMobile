@@ -74,7 +74,7 @@ open class UstadApp : Application(), DIAware {
         }
 
         bind<UstadAccountManager>() with singleton {
-            UstadAccountManager(instance(), applicationContext, di)
+            UstadAccountManagerAndroid(instance(), applicationContext, di)
         }
 
         bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {

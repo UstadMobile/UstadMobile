@@ -7,13 +7,28 @@ import android.accounts.AccountManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.core.os.bundleOf
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UstadAccountManagerAndroid
+import com.ustadmobile.core.account.UstadAccountManagerAndroid.Companion.KEY_ENDPOINT
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.android.view.MainActivity
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.android.closestDI
+import org.kodein.di.instance
+import org.kodein.di.on
+import com.ustadmobile.core.db.UmAppDatabase
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 // As per https://developer.android.com/training/id-auth/custom_auth
 //see https://developer.android.com/reference/kotlin/android/accounts/AbstractAccountAuthenticator
-class AccountAuthenticator(
+class UstadAccountAuthenticator(
     private val context: Context
-): AbstractAccountAuthenticator (context){
+): AbstractAccountAuthenticator (context), DIAware{
+
+    override val di: DI by closestDI { context }
 
     override fun editProperties(p0: AccountAuthenticatorResponse?, p1: String?): Bundle? {
         return null
@@ -26,6 +41,8 @@ class AccountAuthenticator(
         requiredFeatures: Array<out String>?,
         options: Bundle?
     ): Bundle {
+
+
         val intent = Intent(context, MainActivity::class.java).apply {
             //TODO: HERE put intent info needed to start the login screen for this flow.
         }
@@ -47,12 +64,37 @@ class AccountAuthenticator(
     }
 
     override fun getAuthToken(
-        p0: AccountAuthenticatorResponse?,
-        p1: Account?,
-        p2: String?,
-        p3: Bundle?
-    ): Bundle {
-        TODO("Not yet implemented")
+        response: AccountAuthenticatorResponse,
+        account: Account,
+        authTokenType: String,
+        options: Bundle
+    ): Bundle? {
+        val endpointUrl = options.getString(KEY_ENDPOINT)
+        val auth = options.getString(AccountManager.KEY_AUTHTOKEN)
+
+        if(endpointUrl != null && auth != null) {
+            val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_DB)
+            GlobalScope.launch {
+                if(db.authTokenDao.validateToken(auth))
+                    response.onResult(bundleOf(
+                        AccountManager.KEY_AUTHTOKEN to auth,
+                        AccountManager.KEY_ACCOUNT_TYPE to UstadAccountManagerAndroid.ACCOUNT_TYPE,
+                        AccountManager.KEY_ACCOUNT_NAME to account.name,
+                    ))
+            }
+        }else {
+            val authIntent = Intent(context, MainActivity::class.java).apply {
+
+            }
+
+            response.onResult(Bundle().apply {
+                putParcelable(AccountManager.KEY_INTENT, authIntent)
+            })
+        }
+
+
+
+        return null
     }
 
     override fun getAuthTokenLabel(p0: String?): String {
@@ -75,4 +117,6 @@ class AccountAuthenticator(
     ): Bundle {
         TODO("Not yet implemented")
     }
+
+
 }
