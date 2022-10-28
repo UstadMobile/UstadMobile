@@ -3,10 +3,12 @@ appId: com.toughra.ustadmobile
 - runFlow: "../common/add_content.yaml"
 - tapOn: "EDIT"
 - scroll
+- takeScreenshot: "results/Publiclyaccessible-on"
 - extendedWaitUntil:
       visible: "Publicly accessible"
       timeout: 10000
 - tapOn: "Publicly accessible"
+- takeScreenshot: "results/Publiclyaccessible-off"
 - tapOn: "SAVE"
 - back
 - runFlow: "../common/enable_guest_login.yaml"
