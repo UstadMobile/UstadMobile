@@ -2,6 +2,8 @@ appId: com.toughra.ustadmobile
 ---
 - runFlow: "../common/add_content.yaml"
 - tapOn: "EDIT"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/entry_title_text"
 - scroll
 - scroll
 - takeScreenshot: "results/Publiclyaccessible-on"
