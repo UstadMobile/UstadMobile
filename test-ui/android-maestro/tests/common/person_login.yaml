@@ -8,9 +8,8 @@ appId: com.toughra.ustadmobile
 - hideKeyboard
 - tapOn: "NEXT"
 - tapOn: "Username"
-- inputText: "Sudha"
+- inputText: ${PERSONNAME}
 - tapOn: "Password"
 - inputText: "test"
 - hideKeyboard
 - tapOn: "LOGIN"
-- takeScreenshot: "results/TeacherAbleToLogin"

@@ -20,7 +20,6 @@ appId: com.toughra.ustadmobile
     when:
       notVisible: "Downloads"
     file: redirect_to_downloads.yaml
-- scroll
 - tapOn: ${TESTFILENAME}
 - tapOn:
     id: "com.toughra.ustadmobile:id/entry_title_text"
@@ -34,6 +33,10 @@ appId: com.toughra.ustadmobile
 - eraseText
 - inputText: ${TESTCONTENTNAME}
 - tapOn: "SAVE"
+- runFlow:
+    when:
+      visible: "Allow Ustad Mobile to send you notifications?"
+    file: dismiss_notification.yaml
 - tapOn: ${TESTCONTENTNAME}
 - extendedWaitUntil:
     visible: "Delete"
