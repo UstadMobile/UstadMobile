@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -19,11 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -48,9 +43,6 @@ import com.ustadmobile.port.android.ui.theme.ui.theme.gray
 import com.ustadmobile.port.android.ui.theme.ui.theme.primary
 import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
-import kotlinx.coroutines.Dispatchers.Unconfined
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import java.util.*

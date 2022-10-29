@@ -30,7 +30,15 @@
         android:supportsRtl="true"
         android:theme="@style/UmTheme.App"
         android:usesCleartextTraffic="true">
-
+        <activity
+            android:name=".PersonDetailsScreen"
+            android:exported="false"
+            android:label="@string/title_activity_person_details_screen"
+            android:theme="@style/UmTheme.App">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
         <activity
             android:name="com.ustadmobile.port.android.view.OnboardingActivity"
             android:exported="false"

@@ -45,35 +45,6 @@ import com.ustadmobile.core.generated.locale.MessageID.content
 import com.ustadmobile.port.android.ui.theme.ui.theme.primary
 
 @Composable
-fun ButtonWithIcon(text: String, icon: ImageVector) {
-
-    Button(
-        onClick = {},
-        modifier = Modifier.padding(12.dp),
-        elevation = null,
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.Transparent,
-            contentColor = Color.Transparent,
-            disabledBackgroundColor = Color.Transparent,),
-    ) {
-        Row() {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = primary,
-                modifier = Modifier.padding(start = 4.dp)
-            )
-            Text(
-                text = text,
-                color = primary,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
 fun ButtonWithRoundCorners(text: String, onClick: () -> Unit) {
     val drawableId = R.drawable.pre_lollipop_btn_selector_bg_onboarding
     Button(
