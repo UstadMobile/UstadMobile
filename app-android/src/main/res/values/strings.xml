@@ -15,4 +15,6 @@
     <string name="title_activity_reports">Reports</string>
     <string name="title_activity_text_field">TextField</string>
     <string name="title_activity_person_details_screen">PersonDetailsScreen</string>
+    <string name="title_activity_horizontal_pager_screen">HorizontalPagerScreen</string>
+    <string name="title_activity_test_compose">TestCompose</string>
 </resources>
