@@ -2,14 +2,12 @@ appId: com.toughra.ustadmobile
 ---
 - runFlow: "../common/add_content.yaml"
 - tapOn: "EDIT"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/entry_title_text"
+- hideKeyboard
 - scroll
-- scroll
+- swipe:
+    start: 100,400
+    end: 100,100
 - takeScreenshot: "results/Publiclyaccessible-on"
-#- extendedWaitUntil:
-#      visible: "Publicly accessible"
-#      timeout: 10000
 - tapOn: "Publicly accessible"
 - takeScreenshot: "results/Publiclyaccessible-off"
 - tapOn: "SAVE"

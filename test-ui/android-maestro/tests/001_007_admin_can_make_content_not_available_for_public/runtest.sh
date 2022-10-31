@@ -3,10 +3,10 @@
 echo "Run admin can add make content not accessible for public test"
 echo "admin username=$TESTUSER"
 
- FILENAME="../Content/Epub_Content.epub"
- FILEBASENAME=$(basename $FILENAME)
-  CONTENTNAME="ContentNotAvailableForPublicTest"
-  adb push $FILENAME /sdcard/Download/$FILEBASENAME
+FILENAME="../Content/Epub_Content.epub"
+FILEBASENAME=$(basename $FILENAME)
+CONTENTNAME="ContentNotAvailableForPublicTest"
+adb push $FILENAME /sdcard/Download/$FILEBASENAME
 
    ../../../../runserver.sh --password testpass  --clear --background --nobuild
     ../../start-screenrecord.sh $TESTSERIAL $CONTENTNAME.mp4
@@ -14,7 +14,7 @@ echo "admin username=$TESTUSER"
   maestro $MAESTRO_BASE_OPTS \
     -e TESTFILENAME=Epub_Content.epub -e TESTCONTENTNAME=$CONTENTNAME \
     admin_can_make_content_not_available_for_public.yaml
- sleep 10
+ #sleep 10
  TESTRESULT=$?
  if [ "$TESTRESULT" == "0" ]; then
     echo "pass" > results/result
