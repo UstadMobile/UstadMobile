@@ -191,8 +191,8 @@ ext {
     version_better_link_movement="2.2.0"
 
     /*Kotlin react web app*/
-    kotlinWrappersVersion = "1.0.0-pre.408"
-    version_kotlin_extensions = "1.0.1-pre.408"
+    kotlinWrappersVersion = "1.0.0-pre.421"
+    version_kotlin_extensions = "1.0.1-pre.421"
 
     version_npm_moment = "^2.29.4"
     version_npm_moment_timezone = "^0.5.34"
@@ -209,7 +209,7 @@ ext {
     version_npm_timezones = "^1.6.1"
     version_npm_buffer = "^6.0.3"
     version_npm_asmcrypto = "2.3.2"
-    version_npm_emotion = "11.6.0"
+    version_npm_emotion = "11.10.5"
     version_npm_google_charts = "^3.0.15"
     version_npm_html_to_image = "^1.9.0"
     version_npm_date_fns = "2.29.1"

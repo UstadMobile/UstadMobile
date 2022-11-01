@@ -62,6 +62,9 @@ actual open class UstadMobileSystemImpl(
         return (displayLocaleStringsXml ?: defaultStringsXml)[messageCode]
     }
 
+    actual override fun getString(messageCode: Int): String {
+        return (displayLocaleStringsXml ?: defaultStringsXml)[messageCode]
+    }
 
     /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)
