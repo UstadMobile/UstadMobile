@@ -1,6 +1,6 @@
 package com.ustadmobile.view
 
-import IndexProps
+//import IndexProps
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.mui.components.*
@@ -16,7 +16,7 @@ import react.RBuilder
 import react.RComponent
 import styled.css
 import styled.styledDiv
-
+/*
 class ExtraActiveTabWarningComponent (props: IndexProps): RComponent<IndexProps, UmState>(props){
 
     val impl : UstadMobileSystemImpl by props.di.instance()
@@ -51,3 +51,4 @@ fun RBuilder.renderExtraActiveTabWarningComponent(
     di: DI) = child(ExtraActiveTabWarningComponent::class) {
     attrs.di = di
 }
+*/

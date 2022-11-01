@@ -32,7 +32,7 @@ class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,
     private lateinit var selectedLanguage: Any
 
     override fun UmState.init(props: LanguageProps) {
-        languageOptions = props.systemImpl.getAllUiLanguagesList(this)
+        languageOptions = props.systemImpl.getAllUiLanguagesList()
         val selectedLocaleIndex = languageOptions.indexOfFirst {
             it.langCode == props.systemImpl.getDisplayedLocale()
         }
