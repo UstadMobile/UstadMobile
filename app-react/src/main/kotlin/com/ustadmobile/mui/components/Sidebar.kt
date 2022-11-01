@@ -1,6 +1,8 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.common.Area
+import com.ustadmobile.mui.common.Sizes
+import com.ustadmobile.view.UstadScreensContext
 import csstype.Color
 import csstype.None
 import mui.material.*
@@ -11,8 +13,10 @@ import react.Props
 import react.router.dom.NavLink
 import emotion.react.css
 import react.ReactNode
+import react.useContext
 
 val Sidebar = FC<Props> {
+    val ustadScreens = useContext(UstadScreensContext)
     Box {
         component = nav
         sx {
@@ -26,19 +30,24 @@ val Sidebar = FC<Props> {
             Box {
                 Toolbar()
 
+
                 List {
-                    NavLink {
-                        to = "index.html.old"
-                    }
+                    sx { width = Sizes.Sidebar.Width }
 
-                    css {
-                        textDecoration = None.none
-                        color = Color.currentcolor
-                    }
+                    for((key, name) in ustadScreens) {
+                        NavLink {
+                            to = key
 
-                    ListItemButton {
-                        ListItemText {
-                            primary = ReactNode("Home")
+                            css {
+                                textDecoration = None.none
+                                color = Color.currentcolor
+                            }
+
+                            ListItemButton {
+                                ListItemText {
+                                    primary = ReactNode(name)
+                                }
+                            }
                         }
                     }
                 }
