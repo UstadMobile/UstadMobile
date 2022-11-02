@@ -7,7 +7,7 @@ plugins {
      *
      *
      */
-    id "com.github.turansky.kfc.legacy-union" version "4.88.0"
+    id "io.github.turansky.kfc.legacy-union" version "5.65.0"
     id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
@@ -54,11 +54,11 @@ dependencies {
     implementation "org.jetbrains.kotlin-wrappers:kotlin-redux"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-mui"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-icons"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-emotion"
     implementation project(":core")
     implementation project(":lib-util")
     implementation project(":lib-database")
-    implementation npm("@emotion/react", "$version_npm_emotion")
-    implementation npm("@emotion/styled", "$version_npm_emotion")
     implementation npm("moment","$version_npm_moment")
     implementation npm("moment-timezone","$version_npm_moment_timezone")
     implementation npm("@date-io/moment","$version_npm_mement_io")
