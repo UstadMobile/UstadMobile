@@ -138,9 +138,21 @@ android {
         abortOnError false
     }
     namespace 'com.toughra.ustadmobile'
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.3.2"
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = '1.8'
     }
 }
 
@@ -293,8 +305,10 @@ dependencies {
     implementation "androidx.compose.material:material:$version_compose_material"
     implementation "androidx.compose.ui:ui-tooling-preview:$version_compose_material"
     debugImplementation "androidx.compose.ui:ui-tooling:$version_compose_material"
+    implementation "androidx.activity:activity-compose:$version_compose_material"
     implementation "com.google.android.material:compose-theme-adapter:$version_compose_theme_adapter"
     implementation "com.google.accompanist:accompanist-pager:$version_compose_accompanist"
+    implementation "com.google.accompanist:accompanist-pager-indicators:$version_compose_accompanist"
 
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"

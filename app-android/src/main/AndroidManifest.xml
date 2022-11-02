@@ -15,7 +15,6 @@
     Temporarily disabled until we introduce syncable attachments
     <uses-permission android:name="android.permission.CAMERA" />
     -->
-
     <!-- Required for peer-to-peer connecting using WiFi direct -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -46,7 +45,18 @@
         android:supportsRtl="true"
         android:theme="@style/UmTheme.App"
         android:usesCleartextTraffic="true">
-        <activity android:name="com.ustadmobile.port.android.view.MainActivity"
+
+        <activity
+            android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
+            android:exported="false"
+            android:noHistory="true"
+            android:theme="@style/UmTheme.App">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name="com.ustadmobile.port.android.view.MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:exported="true"
             android:launchMode="singleTask">
@@ -64,18 +74,8 @@
                     android:scheme="https" />
                 <data android:host="*" android:pathPattern="/.*/umapp/.*"
                     android:scheme="https" />
-
             </intent-filter>
-
-
         </activity>
-
-        <!-- previously used: android:theme="@style/UmTheme.App.OnBoarding"  -->
-        <activity
-            android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
-            android:noHistory="true"
-            android:exported="true"
-            />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -88,28 +88,25 @@
         </provider>
 
         <activity
-            android:exported="false"
             android:name="com.ustadmobile.port.android.view.EpubContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:exported="false"
             android:label="" />
-
         <activity
-            android:exported="true"
             android:name="com.ustadmobile.port.android.view.AboutActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:exported="true" />
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="@string/app_name"
             android:exported="true"
+            android:label="@string/app_name"
             android:noHistory="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
     </application>
 
