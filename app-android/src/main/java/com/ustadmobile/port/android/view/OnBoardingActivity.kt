@@ -3,38 +3,24 @@ package com.ustadmobile.port.android.view
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
-import android.graphics.Shader
-import android.graphics.drawable.BitmapDrawable
 import androidx.compose.ui.graphics.Color
 import android.os.Bundle
-import android.widget.ImageView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -43,13 +29,13 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.OnboardingUiState
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.ui.theme.ui.theme.UstadMobileTheme
 import com.ustadmobile.port.android.ui.theme.ui.theme.gray
 import com.ustadmobile.port.android.ui.theme.ui.theme.primary
 import com.ustadmobile.port.android.util.ext.getActivityContext
@@ -82,8 +68,8 @@ class OnBoardingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            UstadMobileTheme {
-                OnboardingScreen(viewModel = viewModel)
+            MdcTheme {
+                OnboardingScreenViewModel(viewModel = viewModel)
             }
         }
     }
@@ -106,19 +92,17 @@ class OnBoardingActivity : ComponentActivity() {
 }
 
 @Composable
-private fun OnboardingScreen(viewModel: OnBoardingViewModel) {
+private fun OnboardingScreenViewModel(viewModel: OnBoardingViewModel) {
     val uiState: OnboardingUiState by viewModel.uiState.collectAsState(initial = OnboardingUiState())
     val context = LocalContext.current.getActivityContext()
     OnboardingScreen(uiState.languageList, uiState.currentLanguage,
         onSetLanguage = { viewModel.onLanguageSelected(it) },
-        onClickNext = { onClickNext({ viewModel.onClickNext() }, context)  }
+        onClickNext = {
+            viewModel.onClickNext()
+            val intent = Intent(context, MainActivity::class.java)
+            context.getActivityContext().startActivity(intent)
+        }
     )
-}
-
-private fun onClickNext(onClickNext: () -> Unit = {}, context: Context){
-    val intent = Intent(context, MainActivity::class.java)
-    onClickNext()
-    context.startActivity(intent)
 }
 
 @Composable
@@ -136,28 +120,27 @@ private fun OnboardingScreen(
             .padding(16.dp)
             .background(Color.White)
     ) {
-
-        Box(modifier = Modifier.weight(0.13F)){
-            topRow(langList, currentLanguage, onSetLanguage = {
+        Box {
+            TopRow(langList, currentLanguage, onSetLanguage = {
                 onSetLanguage(it)
             })
         }
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        Box(modifier = Modifier.weight(0.74F)){
+        Box(modifier = Modifier.weight(1f)){
             PagerView()
         }
 
-        Box(modifier = Modifier.weight(0.13F)){
-            bottomRow(onClickNext)
+        Box {
+            BottomRow(onClickNext)
         }
     }
 
 }
 
 @Composable
-private fun topRow(
+private fun TopRow(
     langList: List<UstadMobileSystemCommon.UiLanguage> = listOf(),
     currentLanguage: UstadMobileSystemCommon.UiLanguage
     = UstadMobileSystemCommon.UiLanguage("en", "English"),
@@ -168,21 +151,21 @@ private fun topRow(
             .wrapContentHeight()
             .fillMaxWidth()
     ) {
-        Box(modifier = Modifier
-            .weight(1f)){
+        Box{
             SetLanguageMenu(langList = langList,
                 currentLanguage,
                 onItemSelected = onSetLanguage,)
         }
+        
+        Spacer(modifier = Modifier.weight(1f))
 
-        Box(modifier = Modifier
-            .weight(1f),){
+        Box {
             Image(
                 painter = painterResource(id = R.drawable.expo2020_logo),
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .height(110.dp))
+                    .height(80.dp))
         }
     }
 }
@@ -246,20 +229,26 @@ private fun SetLanguageMenu(
 
 }
 
+data class OnboardingItem(
+    val headerId: Int,
+    val subheaderId: Int,
+    val illustrationId: Int
+)
 
 @OptIn(ExperimentalPagerApi::class)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 private fun PagerView() {
 
-    val pagesList = arrayOf(
-        arrayOf(
-            R.string.onboarding_no_internet_headline,
+    val onboardingItems: List<OnboardingItem> = remember {
+        listOf(OnboardingItem(R.string.onboarding_no_internet_headline,
             R.string.onboarding_no_internet_subheadline, R.drawable.illustration_offline_usage),
-        arrayOf(R.string.onboarding_offline_sharing,
+        OnboardingItem(R.string.onboarding_offline_sharing,
             R.string.onboarding_offline_sharing_subheading, R.drawable.illustration_offline_sharing),
-        arrayOf(R.string.onboarding_stay_organized_headline,
-            R.string.onboarding_stay_organized_subheading, R.drawable.illustration_organized))
+        OnboardingItem(R.string.onboarding_stay_organized_headline,
+            R.string.onboarding_stay_organized_subheading, R.drawable.illustration_organized)
+        )
+    }
 
     val state = rememberPagerState(0)
     Column(
@@ -269,8 +258,9 @@ private fun PagerView() {
         Box(Modifier.weight(0.76f)) {
             HorizontalPager(
                 state = state,
-                count = pagesList.size) { page ->
-                ItemView(pagesList[page])
+                count = onboardingItems.size
+            ) { page ->
+                ItemView(onboardingItems[page])
             }
         }
 
@@ -290,152 +280,73 @@ private fun PagerView() {
 }
 
 @Composable
-private fun ItemView(item: Array<Int>) {
+private fun ItemView(onboardingItem: OnboardingItem) {
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp, 0.dp, 10.dp,0.dp),
+            .padding(20.dp, 0.dp, 10.dp, 0.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Box(Modifier.weight(0.9f)) {
             Image(
-                painter = painterResource(id = item[2]),
+                painter = painterResource(id = onboardingItem.illustrationId),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(10.dp))
         }
 
         Box(modifier = Modifier.weight(0.4f)){
-            pagerBottomRow(item)
+            PagerBottomRow(onboardingItem)
         }
 
     }
 }
 
 @Composable
-private fun pagerBottomRow(item: Array<Int>){
+private fun PagerBottomRow(onboardingItem: OnboardingItem){
     Column(
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Text(text =  stringResource(item[0]),
-            style = Typography.h3, color = Color.DarkGray)
+        Text(text =  stringResource(onboardingItem.headerId),
+            style = Typography.h3)
 
-        Text(text =  stringResource(item[1]),
-            style = Typography.h3, color = Color.DarkGray)
+        Text(text =  stringResource(onboardingItem.subheaderId),
+            style = Typography.body1)
 
     }
 }
 
 @Composable
-private fun bottomRow(onClickNext: () -> Unit = { }){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(150.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+private fun BottomRow(onClickNext: () -> Unit = { }){
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
-        Box(modifier = Modifier.weight(1f)){}
-
-        Box(modifier = Modifier
-            .weight(1f)){
-            ButtonWithRoundCorners(stringResource(R.string.onboarding_get_started_label))
-            { onClickNext() }
+        Button(
+            onClick = onClickNext,
+        ) {
+            Text(stringResource(R.string.onboarding_get_started_label))
         }
 
-        Column(
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(text = stringResource(R.string.created_partnership),
+            style = Typography.body2, color = gray)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Image(
+            painter = painterResource(id = R.drawable.ic_irc),
+            contentDescription = null,
             modifier = Modifier
-                .weight(1f),
-            horizontalAlignment = Alignment.End
-        ) {
+                .size(64.dp))
 
-            Text(text = stringResource(R.string.created_partnership),
-                style = Typography.body2, color = gray)
-
-            Image(
-                painter = painterResource(id = R.drawable.ic_irc),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(90.dp))
-        }
     }
 }
 
-@Composable
-fun ButtonWithRoundCorners(text: String, onClick: () -> Unit) {
-    val drawableId = R.drawable.pre_lollipop_btn_selector_bg_onboarding
-    Button(
-        onClick = {onClick()},
-        contentPadding = PaddingValues(0.dp),
-        shape = RoundedCornerShape(5.dp),
-        elevation = null,
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = primary,
-            contentColor = Color.White,
-            disabledBackgroundColor = Color.Transparent,
-            disabledContentColor = primary.copy(alpha = ContentAlpha.disabled),
-        ),
-        modifier = Modifier.height(40.dp)
-            .width(120.dp)
-            .shadow(AppBarDefaults.BottomAppBarElevation)
-            .zIndex(1f)
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-        ) {
-            TileAndroidImage(
-                drawableId = drawableId,
-                contentDescription = "...",
-                modifier = Modifier.matchParentSize()
-            )
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp),){
-                Text(
-                    text = text,
-                    style = TextStyle(color = Color.White)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun TileAndroidImage(
-    @DrawableRes drawableId: Int,
-    contentDescription: String,
-    modifier: Modifier = Modifier,
-) {
-    val context = LocalContext.current
-    val drawable = remember(drawableId) {
-        BitmapDrawable(
-            context.resources,
-            BitmapFactory.decodeResource(
-                context.resources,
-                drawableId
-            )
-        ).apply {
-            tileModeX = Shader.TileMode.REPEAT
-            tileModeY = Shader.TileMode.REPEAT
-        }
-    }
-    AndroidView(
-        factory = {
-            ImageView(it)
-        },
-        update = { imageView ->
-            imageView.background = drawable
-        },
-        modifier = modifier
-            .semantics {
-                this.contentDescription = contentDescription
-                role = Role.Image
-            }
-    )
-}
