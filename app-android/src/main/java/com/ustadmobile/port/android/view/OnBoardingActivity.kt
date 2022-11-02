@@ -3,143 +3,350 @@ package com.ustadmobile.port.android.view
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.os.Build
+import androidx.compose.ui.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.*
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.savedstate.SavedStateRegistryOwner
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.HorizontalPagerIndicator
+import com.google.accompanist.pager.rememberPagerState
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.OnBoardingPresenter
-import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.OnBoardingView
-import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.coroutines.CompletableDeferred
-import org.kodein.di.direct
-import org.kodein.di.instance
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
+import com.ustadmobile.core.viewmodel.OnBoardingViewModel
+import com.ustadmobile.core.viewmodel.OnboardingUiState
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.ui.theme.ui.theme.gray
+import com.ustadmobile.port.android.ui.theme.ui.theme.primary
+import com.ustadmobile.port.android.util.ext.getActivityContext
+import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
+import org.kodein.di.DI
+import org.kodein.di.android.closestDI
+import java.util.*
 
-class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnItemClickListener {
+class OnBoardingActivity : ComponentActivity() {
 
-    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
-
-    private var presenter: OnBoardingPresenter? = null
-
-    private lateinit var languageOptions: AutoCompleteTextView
-
-    private lateinit var viewPager: ViewPager2
-
-    private var getStartedBtn: Button? = null
-
-    private lateinit var screenList: List<OnBoardScreen>
-
-    //Do nothing - there isn't really any loading of this
-    override var loading: Boolean = false
-
-    /**
-     * Model for the the onboarding screen
-     */
-    private enum class OnBoardScreen(val headlineStringResId: Int, val subHeadlineStringResId: Int,
-                                     val layoutResId: Int, val drawableResId: Int) {
-        SCREEN_1(R.string.onboarding_no_internet_headline,
-                R.string.onboarding_no_internet_subheadline,
-                R.layout.onboard_screen_view, R.drawable.illustration_offline_usage),
-        SCREEN_2(R.string.onboarding_offline_sharing,
-                R.string.onboarding_offline_sharing_subheading,
-                R.layout.onboard_screen_view, R.drawable.illustration_offline_sharing),
-        SCREEN_3(R.string.onboarding_stay_organized_headline,
-                R.string.onboarding_stay_organized_subheading,
-                R.layout.onboard_screen_view, R.drawable.illustration_organized)
+    val di: DI by closestDI()
+    private val viewModel: OnBoardingViewModel by viewModels {
+        provideFactory(di, this, null)
     }
 
+    override fun attachBaseContext(newBase: Context) {
+        val res = newBase.resources
+        val config = res.configuration
+        val languageSetting = newBase.getUstadLocaleSetting()
 
-    /**
-     * Custom pager adapter for the screen
-     */
-    private inner class OnBoardingPagerAdapter constructor(private val context: Context)
-        : RecyclerView.Adapter<OnBoardingPagerAdapter.BoardScreenHolder>() {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BoardScreenHolder {
-            return BoardScreenHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))
-        }
-
-        override fun getItemViewType(position: Int): Int {
-            return screenList[position].layoutResId
-        }
-
-        override fun getItemCount(): Int {
-            return screenList.size
-        }
-
-        override fun onBindViewHolder(holder: BoardScreenHolder, position: Int) {
-            holder.bind(screenList[position])
-        }
-
-        inner class BoardScreenHolder internal constructor(val view: View) :
-                RecyclerView.ViewHolder(view) {
-
-            internal fun bind(screen: OnBoardScreen) {
-                (view.findViewById<View>(R.id.heading) as TextView).text = context.getString(screen.headlineStringResId)
-                (view.findViewById<View>(R.id.sub_heading) as TextView).text = context.getString(screen.subHeadlineStringResId)
-                (view.findViewById<View>(R.id.drawable_res) as ImageView)
-                        .setImageResource(screen.drawableResId)
-            }
-
-        }
+        val locale = if (languageSetting == UstadMobileSystemCommon.LOCALE_USE_SYSTEM)
+            Locale.getDefault()
+        else
+            Locale(languageSetting)
+        config.setLocale(locale)
+        super.attachBaseContext(newBase.createConfigurationContext(config))
     }
 
-    //We target lower than SDK 19, this check is a false flag when the devMinApi21Debug variant is selected
-    @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_on_boarding)
-        viewPager = findViewById(R.id.onBoardPagerView)
-        getStartedBtn = findViewById(R.id.get_started_btn)
-        languageOptions = findViewById(R.id.language_options_autocomplete_textview)
 
+        setContent {
+            MdcTheme {
+                OnboardingScreenViewModel(viewModel = viewModel)
+            }
+        }
+    }
 
-        //We have to put this here because there is no VIEW_NAME for MainActivity. This will
-        // have to be resolved by RedirectFragment
-        getStartedBtn?.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-            systemImpl.setAppPref(OnBoardingView.PREF_TAG, true.toString())
+    companion object {
+        fun provideFactory(
+            di: DI,
+            owner: SavedStateRegistryOwner,
+            defaultArgs: Bundle? = null,
+        ): AbstractSavedStateViewModelFactory = object: AbstractSavedStateViewModelFactory(owner, defaultArgs) {
+            override fun <T : ViewModel?> create(
+                key: String,
+                modelClass: Class<T>,
+                handle: SavedStateHandle
+            ): T {
+                return OnBoardingViewModel(di, SavedStateHandleAdapter(handle)) as T
+            }
+        }
+    }
+}
 
-            startActivity(intent)
+@Composable
+private fun OnboardingScreenViewModel(viewModel: OnBoardingViewModel) {
+    val uiState: OnboardingUiState by viewModel.uiState.collectAsState(initial = OnboardingUiState())
+    val context = LocalContext.current.getActivityContext()
+    OnboardingScreen(uiState.languageList, uiState.currentLanguage,
+        onSetLanguage = { viewModel.onLanguageSelected(it) },
+        onClickNext = {
+            viewModel.onClickNext()
+            val intent = Intent(context, MainActivity::class.java)
+            context.getActivityContext().startActivity(intent)
+        }
+    )
+}
+
+@Composable
+@Preview
+private fun OnboardingScreen(
+    langList: List<UstadMobileSystemCommon.UiLanguage> = listOf(),
+    currentLanguage: UstadMobileSystemCommon.UiLanguage
+    = UstadMobileSystemCommon.UiLanguage("en", "English"),
+    onSetLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit = { },
+    onClickNext: () -> Unit = { }
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .padding(16.dp)
+            .background(Color.White)
+    ) {
+        Box {
+            TopRow(langList, currentLanguage, onSetLanguage = {
+                onSetLanguage(it)
+            })
         }
 
-        screenList =  OnBoardScreen.values().toList()
+        Spacer(modifier = Modifier.height(15.dp))
 
-        if (Build.VERSION.SDK_INT <= 19) {
-            getStartedBtn?.setBackgroundResource(R.drawable.pre_lollipop_btn_selector_bg_onboarding)
-            getStartedBtn?.setTextColor(ContextCompat.getColor(this,
-                    R.color.pre_lollipop_btn_selector_txt_onboarding))
+        Box(modifier = Modifier.weight(1f)){
+            PagerView()
         }
 
-        viewPager.adapter = OnBoardingPagerAdapter(this)
-
-
-        presenter = OnBoardingPresenter(this,
-                bundleToMap(intent.extras), this, di)
-        presenter?.onCreate(bundleToMap(savedInstanceState))
-    }
-
-    override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        presenter?.handleLanguageSelected(position)
-    }
-
-    override fun setLanguageOptions(languages: List<String>, currentSelection: String) {
-        val adapter = ArrayAdapter(this, R.layout.autocomplete_list_item, languages)
-        languageOptions.setAdapter(adapter)
-        languageOptions.setText(currentSelection, false)
-        languageOptions.onItemClickListener = this
-    }
-
-    override fun restartUI() {
-        recreate()
+        Box {
+            BottomRow(onClickNext)
+        }
     }
 
 }
+
+@Composable
+private fun TopRow(
+    langList: List<UstadMobileSystemCommon.UiLanguage> = listOf(),
+    currentLanguage: UstadMobileSystemCommon.UiLanguage
+    = UstadMobileSystemCommon.UiLanguage("en", "English"),
+    onSetLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit = { },
+){
+    Row(
+        modifier = Modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+    ) {
+        Box{
+            SetLanguageMenu(langList = langList,
+                currentLanguage,
+                onItemSelected = onSetLanguage,)
+        }
+        
+        Spacer(modifier = Modifier.weight(1f))
+
+        Box {
+            Image(
+                painter = painterResource(id = R.drawable.expo2020_logo),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .height(80.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun SetLanguageMenu(
+    langList: List<UstadMobileSystemCommon.UiLanguage>,
+    currentLanguage: UstadMobileSystemCommon.UiLanguage,
+    onItemSelected: (UstadMobileSystemCommon.UiLanguage) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            expanded = !expanded
+        }
+    ) {
+        OutlinedTextField(
+            readOnly = true,
+            value = currentLanguage.langDisplay,
+            onValueChange = { },
+            label = { stringResource(R.string.language) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded
+                )
+            },
+            colors = ExposedDropdownMenuDefaults.textFieldColors(
+                backgroundColor = Color.White,
+                focusedIndicatorColor = primary,
+                unfocusedIndicatorColor = primary,
+                disabledIndicatorColor = primary,
+            )
+        )
+
+        ExposedDropdownMenu(
+            modifier = Modifier.fillMaxWidth(),
+            expanded = expanded,
+            onDismissRequest = {
+                expanded = false
+
+            }
+        ) {
+            val activity = LocalContext.current.getActivityContext()
+            langList.forEachIndexed { index, uiLanguage ->
+                DropdownMenuItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        expanded = false
+                        onItemSelected(uiLanguage)
+                        activity.recreate()
+                    }
+                ) {
+                    Text(text = uiLanguage.langDisplay)
+                }
+            }
+        }
+    }
+
+}
+
+data class OnboardingItem(
+    val headerId: Int,
+    val subheaderId: Int,
+    val illustrationId: Int
+)
+
+@OptIn(ExperimentalPagerApi::class)
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
+private fun PagerView() {
+
+    val onboardingItems: List<OnboardingItem> = remember {
+        listOf(OnboardingItem(R.string.onboarding_no_internet_headline,
+            R.string.onboarding_no_internet_subheadline, R.drawable.illustration_offline_usage),
+        OnboardingItem(R.string.onboarding_offline_sharing,
+            R.string.onboarding_offline_sharing_subheading, R.drawable.illustration_offline_sharing),
+        OnboardingItem(R.string.onboarding_stay_organized_headline,
+            R.string.onboarding_stay_organized_subheading, R.drawable.illustration_organized)
+        )
+    }
+
+    val state = rememberPagerState(0)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Box(Modifier.weight(0.76f)) {
+            HorizontalPager(
+                state = state,
+                count = onboardingItems.size
+            ) { page ->
+                ItemView(onboardingItems[page])
+            }
+        }
+
+        Box() {
+            HorizontalPagerIndicator(
+                pagerState = state,
+                pageCount = 3,
+                activeColor = primary,
+                inactiveColor = Color.LightGray,
+                indicatorWidth = 12.dp,
+                indicatorShape = CircleShape,
+                spacing = 8.dp,
+                modifier = Modifier.height(20.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ItemView(onboardingItem: OnboardingItem) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp, 0.dp, 10.dp, 0.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Box(Modifier.weight(0.9f)) {
+            Image(
+                painter = painterResource(id = onboardingItem.illustrationId),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(10.dp))
+        }
+
+        Box(modifier = Modifier.weight(0.4f)){
+            PagerBottomRow(onboardingItem)
+        }
+
+    }
+}
+
+@Composable
+private fun PagerBottomRow(onboardingItem: OnboardingItem){
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Text(text =  stringResource(onboardingItem.headerId),
+            style = Typography.h3)
+
+        Text(text =  stringResource(onboardingItem.subheaderId),
+            style = Typography.body1)
+
+    }
+}
+
+@Composable
+private fun BottomRow(onClickNext: () -> Unit = { }){
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+
+        Button(
+            onClick = onClickNext,
+        ) {
+            Text(stringResource(R.string.onboarding_get_started_label))
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(text = stringResource(R.string.created_partnership),
+            style = Typography.body2, color = gray)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Image(
+            painter = painterResource(id = R.drawable.ic_irc),
+            contentDescription = null,
+            modifier = Modifier
+                .size(64.dp))
+
+    }
+}
+

@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -20,7 +23,6 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.PersonDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonDetailView
@@ -195,3 +197,4 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
     }
 
 }
+
