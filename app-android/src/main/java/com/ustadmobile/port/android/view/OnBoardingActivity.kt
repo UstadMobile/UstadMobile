@@ -3,41 +3,52 @@ package com.ustadmobile.port.android.view
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.Shader
+import android.graphics.drawable.BitmapDrawable
+import androidx.compose.ui.graphics.Color
 import android.os.Bundle
+import android.widget.ImageView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.savedstate.SavedStateRegistryOwner
-import com.example.ustadmobile.ui.ButtonWithRoundCorners
-import com.example.ustadmobile.ui.ImageCompose
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.HorizontalPagerIndicator
+import com.google.accompanist.pager.rememberPagerState
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.OnboardingUiState
-import com.ustadmobile.port.android.ui.compose.TextBody1
-import com.ustadmobile.port.android.ui.compose.TextBody2
-import com.ustadmobile.port.android.ui.compose.TextHeader3
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.ui.theme.ui.theme.UstadMobileTheme
 import com.ustadmobile.port.android.ui.theme.ui.theme.gray
 import com.ustadmobile.port.android.ui.theme.ui.theme.primary
@@ -47,7 +58,7 @@ import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import java.util.*
 
-class OnboardingActivity : ComponentActivity() {
+class OnBoardingActivity : ComponentActivity() {
 
     val di: DI by closestDI()
     private val viewModel: OnBoardingViewModel by viewModels {
@@ -115,7 +126,7 @@ private fun onClickNext(onClickNext: () -> Unit = {}, context: Context){
 private fun OnboardingScreen(
     langList: List<UstadMobileSystemCommon.UiLanguage> = listOf(),
     currentLanguage: UstadMobileSystemCommon.UiLanguage
-        = UstadMobileSystemCommon.UiLanguage("en", "English"),
+    = UstadMobileSystemCommon.UiLanguage("en", "English"),
     onSetLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit = { },
     onClickNext: () -> Unit = { }
 ) {
@@ -166,10 +177,12 @@ private fun topRow(
 
         Box(modifier = Modifier
             .weight(1f),){
-            ImageCompose(image = R.drawable.expo2020_logo,
+            Image(
+                painter = painterResource(id = R.drawable.expo2020_logo),
+                contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .height(110.dp),)
+                    .height(110.dp))
         }
     }
 }
@@ -233,6 +246,8 @@ private fun SetLanguageMenu(
 
 }
 
+
+@OptIn(ExperimentalPagerApi::class)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 private fun PagerView() {
@@ -246,33 +261,30 @@ private fun PagerView() {
         arrayOf(R.string.onboarding_stay_organized_headline,
             R.string.onboarding_stay_organized_subheading, R.drawable.illustration_organized))
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    var currentIndex by remember { mutableStateOf(0) }
-    val listState = rememberLazyListState()
-
+    val state = rememberPagerState(0)
     Column(
-        modifier = Modifier
-            .width(screenWidth),
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Box(modifier = Modifier.weight(0.95F)){
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                state = listState,
-            ) {
-                itemsIndexed(pagesList) { _, item ->
-                    ItemView(item)
-                }
+        Box(Modifier.weight(0.76f)) {
+            HorizontalPager(
+                state = state,
+                count = pagesList.size) { page ->
+                ItemView(pagesList[page])
             }
         }
 
-        currentIndex = listState.firstVisibleItemIndex
-
-        Box(modifier = Modifier.weight(0.05F)){
-            threeDots(currentIndex)
+        Box() {
+            HorizontalPagerIndicator(
+                pagerState = state,
+                pageCount = 3,
+                activeColor = primary,
+                inactiveColor = Color.LightGray,
+                indicatorWidth = 12.dp,
+                indicatorShape = CircleShape,
+                spacing = 8.dp,
+                modifier = Modifier.height(20.dp)
+            )
         }
     }
 }
@@ -280,21 +292,18 @@ private fun PagerView() {
 @Composable
 private fun ItemView(item: Array<Int>) {
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = (configuration.screenWidthDp-20).dp
-
     Column(
         modifier = Modifier
-            .width(screenWidth)
-            .height(IntrinsicSize.Max)
+            .fillMaxWidth()
             .padding(20.dp, 0.dp, 10.dp,0.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Box(Modifier.weight(0.9f)) {
-            ImageCompose(
-                item[2] as Int,
+            Image(
+                painter = painterResource(id = item[2]),
+                contentDescription = null,
                 modifier = Modifier
                     .padding(10.dp))
         }
@@ -311,47 +320,18 @@ private fun pagerBottomRow(item: Array<Int>){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TextHeader3(
-            text = stringResource(item[0] as Int),
-            color = Color.DarkGray
-        )
-        TextBody1(
-            text = stringResource(item[1] as Int),
-            color = Color.DarkGray,
-        )
-    }
-}
 
-@Composable
-private fun threeDots(index: Int){
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.height(15.dp)
-    ) {
-        for (i in 0..2){
-            if (i == index){
-                dotShape(size = 15)
-            } else {
-                dotShape(size = 8)
-            }
-        }
-    }
-}
+        Text(text =  stringResource(item[0]),
+            style = Typography.h3, color = Color.DarkGray)
 
-@Composable
-private fun dotShape(size: Int){
-    Box(
-        modifier = Modifier
-            .size(size.dp)
-            .clip(CircleShape)
-            .background(gray)
-    )
-    Spacer(modifier = Modifier.width(5.dp))
+        Text(text =  stringResource(item[1]),
+            style = Typography.h3, color = Color.DarkGray)
+
+    }
 }
 
 @Composable
 private fun bottomRow(onClickNext: () -> Unit = { }){
-    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -360,12 +340,11 @@ private fun bottomRow(onClickNext: () -> Unit = { }){
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Box(modifier = Modifier.weight(1f)){
-        }
+        Box(modifier = Modifier.weight(1f)){}
 
         Box(modifier = Modifier
             .weight(1f)){
-            ButtonWithRoundCorners(context.getString(R.string.onboarding_get_started_label))
+            ButtonWithRoundCorners(stringResource(R.string.onboarding_get_started_label))
             { onClickNext() }
         }
 
@@ -374,10 +353,89 @@ private fun bottomRow(onClickNext: () -> Unit = { }){
                 .weight(1f),
             horizontalAlignment = Alignment.End
         ) {
-            TextBody2(text = context.getString(R.string.created_partnership), color = gray)
-            ImageCompose(
-                image = R.drawable.ic_irc,
-                size = 90)
+
+            Text(text = stringResource(R.string.created_partnership),
+                style = Typography.body2, color = gray)
+
+            Image(
+                painter = painterResource(id = R.drawable.ic_irc),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(90.dp))
         }
     }
+}
+
+@Composable
+fun ButtonWithRoundCorners(text: String, onClick: () -> Unit) {
+    val drawableId = R.drawable.pre_lollipop_btn_selector_bg_onboarding
+    Button(
+        onClick = {onClick()},
+        contentPadding = PaddingValues(0.dp),
+        shape = RoundedCornerShape(5.dp),
+        elevation = null,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = primary,
+            contentColor = Color.White,
+            disabledBackgroundColor = Color.Transparent,
+            disabledContentColor = primary.copy(alpha = ContentAlpha.disabled),
+        ),
+        modifier = Modifier.height(40.dp)
+            .width(120.dp)
+            .shadow(AppBarDefaults.BottomAppBarElevation)
+            .zIndex(1f)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+        ) {
+            TileAndroidImage(
+                drawableId = drawableId,
+                contentDescription = "...",
+                modifier = Modifier.matchParentSize()
+            )
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(8.dp),){
+                Text(
+                    text = text,
+                    style = TextStyle(color = Color.White)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TileAndroidImage(
+    @DrawableRes drawableId: Int,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val drawable = remember(drawableId) {
+        BitmapDrawable(
+            context.resources,
+            BitmapFactory.decodeResource(
+                context.resources,
+                drawableId
+            )
+        ).apply {
+            tileModeX = Shader.TileMode.REPEAT
+            tileModeY = Shader.TileMode.REPEAT
+        }
+    }
+    AndroidView(
+        factory = {
+            ImageView(it)
+        },
+        update = { imageView ->
+            imageView.background = drawable
+        },
+        modifier = modifier
+            .semantics {
+                this.contentDescription = contentDescription
+                role = Role.Image
+            }
+    )
 }
