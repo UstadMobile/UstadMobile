@@ -10,7 +10,7 @@ abstract class DetailViewModel<T>(
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadViewModel(di, savedStateHandle){
 
-    abstract val entity: Flow<T?>
+    //abstract val entity: Flow<T?>
 
 
 }
