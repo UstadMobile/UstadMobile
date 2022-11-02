@@ -30,35 +30,9 @@
         android:supportsRtl="true"
         android:theme="@style/UmTheme.App"
         android:usesCleartextTraffic="true">
+
         <activity
-            android:name=".TestCompose"
-            android:exported="false"
-            android:label="@string/title_activity_test_compose"
-            android:theme="@style/UmTheme.App">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".HorizontalPagerScreen"
-            android:exported="false"
-            android:label="@string/title_activity_horizontal_pager_screen"
-            android:theme="@style/UmTheme.App">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".PersonDetailsScreen"
-            android:exported="false"
-            android:label="@string/title_activity_person_details_screen"
-            android:theme="@style/UmTheme.App">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name="com.ustadmobile.port.android.view.OnboardingActivity"
+            android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
             android:exported="false"
             android:theme="@style/UmTheme.App">
             <meta-data
