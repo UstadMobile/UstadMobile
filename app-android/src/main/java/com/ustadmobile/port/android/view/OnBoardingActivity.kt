@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,8 +37,6 @@ import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.OnboardingUiState
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.ui.theme.ui.theme.gray
-import com.ustadmobile.port.android.ui.theme.ui.theme.primary
 import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
 import org.kodein.di.DI
@@ -197,9 +196,9 @@ private fun SetLanguageMenu(
             },
             colors = ExposedDropdownMenuDefaults.textFieldColors(
                 backgroundColor = Color.White,
-                focusedIndicatorColor = primary,
-                unfocusedIndicatorColor = primary,
-                disabledIndicatorColor = primary,
+                focusedIndicatorColor = colorResource(R.color.primaryColor),
+                unfocusedIndicatorColor = colorResource(R.color.primaryColor),
+                disabledIndicatorColor = colorResource(R.color.primaryColor),
             )
         )
 
@@ -268,7 +267,7 @@ private fun PagerView() {
             HorizontalPagerIndicator(
                 pagerState = state,
                 pageCount = 3,
-                activeColor = primary,
+                activeColor = colorResource(R.color.primaryColor),
                 inactiveColor = Color.LightGray,
                 indicatorWidth = 12.dp,
                 indicatorShape = CircleShape,
@@ -337,7 +336,8 @@ private fun BottomRow(onClickNext: () -> Unit = { }){
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(text = stringResource(R.string.created_partnership),
-            style = Typography.body2, color = gray)
+            style = Typography.body2,
+            color = Color.DarkGray)
 
         Spacer(modifier = Modifier.height(8.dp))
 

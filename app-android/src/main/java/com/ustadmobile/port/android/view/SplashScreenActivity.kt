@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,7 +23,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.ui.theme.ui.theme.UstadMobileTheme
-import com.ustadmobile.port.android.ui.theme.ui.theme.gray
 import kotlinx.coroutines.delay
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
@@ -75,7 +75,9 @@ private fun SplashScreen(){
                     .size(110.dp))
 
             Text(text = "Ustad Mobile",
-                style = Typography.h1, color = gray)
+                style = Typography.h1,
+                color = Color.Gray
+            )
         }
 
         Image(
@@ -91,7 +93,8 @@ private fun SplashScreen(){
         ) {
 
             Text(text = stringResource(R.string.created_partnership),
-                style = Typography.body1, color = gray)
+                style = Typography.body1,
+                color = Color.DarkGray)
 
             Image(
                 painter = painterResource(id = R.drawable.ic_irc),
