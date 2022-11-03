@@ -24,15 +24,17 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>, view: Sett
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        GlobalScope.launch(doorMainDispatcher()){
+        presenterScope.launch {
             val isAdmin = repo.personDao.personIsAdmin(accountManager.activeAccount.personUid)
             view.workspaceSettingsVisible = isAdmin
-            // TODO check permission
-            view.holidayCalendarVisible = true
-            view.reasonLeavingVisible = true
-            view.langListVisible = true
+            view.holidayCalendarVisible = isAdmin
+            view.reasonLeavingVisible = isAdmin
+            view.langListVisible = isAdmin
+            val currentLangCode = impl.getLocale(context)
+            view.displayLanguage = impl.getAllUiLanguagesList(context).firstOrNull {
+                it.langCode == currentLangCode
+            }?.langDisplay ?: ""
         }
-
     }
 
     fun goToHolidayCalendarList() {

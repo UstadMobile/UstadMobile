@@ -12,6 +12,14 @@
             type="com.ustadmobile.core.controller.SettingsPresenter" />
 
         <variable
+            name="fragmentEventListener"
+            type="com.ustadmobile.port.android.view.SettingsFragmentEventListener" />
+
+        <variable
+            name="displayLanguage"
+            type="String" />
+
+        <variable
             name="workspaceSettingsVisible"
             type="boolean" />
 
@@ -38,6 +46,56 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+
+            <!-- App language -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/activity_settings2_display_lang_cl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="?android:selectableItemBackground"
+                android:onClick="@{() -> fragmentEventListener.onClickAppLanguage()}">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/activity_settings2_displaylang_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:tint="?colorOnIconTint"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    app:srcCompat="@drawable/ic_language_blue_grey_600_24dp" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/activity_settings_app_language_text1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:text="@string/app_language"
+                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_displaylang_iv"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    android:id="@+id/activity_settings_app_language_text2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:text="@{displayLanguage}"
+                    tools:text="English"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_displaylang_iv"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_settings_app_language_text1" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- Holiday Calendars-->
             <androidx.constraintlayout.widget.ConstraintLayout

@@ -1,9 +1,8 @@
-apply plugin: 'com.android.application'
-apply plugin: "kotlin-multiplatform"
-apply plugin: "jacoco"
 
-//See:
-// https://developer.android.com/studio/projects/android-library.html
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
 def keyStoreFile = System.getenv("KEYSTORE")
@@ -18,13 +17,6 @@ def baseAppId = "com.toughra.ustadmobile"
 if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file(keyStoreFile)))
 }
-
-kotlin {
-    targets {
-        fromPreset(presets.android, 'android')
-    }
-}
-
 
 android {
 
@@ -73,7 +65,7 @@ android {
         applicationId "${baseAppId}"
         resConfigs 'en', 'fa', 'ps', 'ar', 'tg', 'bn', 'ne', 'my', 'ru', 'tl'
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.ext.ustadVersion
         multiDexEnabled true //required for all variants to use java library desugaring

@@ -7,10 +7,9 @@ plugins {
      *
      *
      */
-    id "com.github.turansky.kfc.legacy-union" version "4.88.0"
+    id "io.github.turansky.kfc.legacy-union" version "5.65.0"
+    id 'org.jetbrains.kotlin.plugin.serialization'
 }
-
-apply plugin: 'kotlinx-serialization'
 
 group = rootProject.group
 version = rootProject.version
@@ -67,6 +66,7 @@ dependencies {
     implementation npm("@mui/styles","$version_npm_mui_styles")
     implementation npm("@mui/material","$version_npm_mui_material")
     implementation npm("@mui/icons-material","$version_npm_mui_icons")
+    implementation npm("@mui/x-date-pickers", "$version_npm_mui_x_date_pickers")
     implementation npm("date-fns","$version_npm_date_fns")
     implementation npm("html-to-image","$version_npm_html_to_image")
     implementation "com.github.UstadMobile.door:door-annotations:$version_door"

@@ -19,7 +19,7 @@ external interface SortableListProps: StyledProps{
 }
 
 external interface SortableItemProps: StyledProps {
-    var key: String
+    override var key: String?
 }
 
 external interface  SortableKnobProps: StyledProps

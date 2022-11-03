@@ -225,8 +225,9 @@ class DbReplicationIntegrationTest {
             .instance(tag = DoorTag.TAG_REPO)
         runBlocking { remoteRepo.preload() }
         remoteRepo.ktorInitRepo(remoteDi)
+        val authManager : AuthManager = remoteDi.direct.on(Endpoint("localhost")).instance()
         runBlocking {
-            remoteRepo.initAdminUser(remoteEndpoint, remoteDi)
+            remoteRepo.initAdminUser(remoteEndpoint, authManager, remoteDi)
         }
 
 

@@ -1,32 +1,26 @@
 package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.container.ContainerAddOptions.Companion.NEVER_COMPRESS_FILTER
 import com.ustadmobile.core.contentjob.*
+import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.addFileToContainer
-import com.ustadmobile.core.io.ext.guessMimeType
-import com.ustadmobile.core.io.ext.isRemote
-import com.ustadmobile.core.network.NetworkProgressListenerAdapter
+import com.ustadmobile.core.io.ContainerBuilder
+import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ShrinkUtils
 import com.ustadmobile.core.util.ext.fitWithin
 import com.ustadmobile.core.util.ext.requirePostfix
-import com.ustadmobile.core.util.ext.updateTotalFromContainerSize
-import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
+import com.ustadmobile.core.view.VideoContentView
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.toFile
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import io.github.aakira.napier.Napier
-import io.ktor.client.*
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -35,21 +29,25 @@ import org.kodein.di.on
 import java.io.File
 
 class VideoTypePluginJvm(
-        private var context: Any,
-        private val endpoint: Endpoint,
-        override val di: DI,
-        private val uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
-): VideoTypePlugin() {
+    context: Any,
+    endpoint: Endpoint,
+    override val di: DI,
+    uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
+): ContentImportContentPlugin(endpoint, context, uploader) {
+
+    val viewName: String
+        get() = VideoContentView.VIEW_NAME
+
+    override val supportedMimeTypes: List<String>
+        get() = VIDEO_MIME_MAP.keys.toList()
+
+    override val supportedFileExtensions: List<String>
+        get() = VideoContentPresenterCommon.VIDEO_EXT_LIST.map { it.removePrefix(".") }
+
+    override val pluginId: Int
+        get() = VideoTypePlugin.PLUGIN_ID
 
     private val VIDEO_JVM = "VideoPluginJVM"
-
-    private val httpClient: HttpClient = di.direct.instance()
-
-    private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
-
-    private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
-
-    val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     private val ffmpegFile: File by di.instance(tag = DiTag.TAG_FILE_FFMPEG)
 
@@ -62,114 +60,56 @@ class VideoTypePluginJvm(
         return getEntry(uri, process)
     }
 
-    override suspend fun processJob(
+    override suspend fun makeContainer(
         jobItem: ContentJobItemAndContentJob,
         process: ContentJobProcessContext,
-        progress: ContentJobProgressListener
-    ): ProcessResult {
-        val contentJobItem = jobItem.contentJobItem ?: throw IllegalArgumentException("missing job item")
-        return withContext(Dispatchers.Default) {
-            val uri = contentJobItem.sourceUri ?: throw IllegalStateException("missing uri")
-            val videoUri = DoorUri.parse(uri)
-            val localVideoUri = process.getLocalOrCachedUri()
-            val videoFile = localVideoUri.toFile()
-            var pathInContainer = if(!videoUri.isRemote()) {
-                videoFile.name
-            }else {
-                val extension = videoUri.guessMimeType(context, di)?.let { mimeType ->
-                    VIDEO_MIME_MAP[mimeType]
-                } ?: throw IllegalArgumentException("Unknown mime type for $videoUri")
+        progressListener: ContentJobProgressListener,
+        containerStorageUri: DoorUri,
+    ) : Container{
+        val repo: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
 
-                videoUri.getFileName(context).requirePostfix(extension)
-            }
+        val videoUri = jobItem.contentJobItem?.sourceUri?.let {DoorUri.parse(it) }
+            ?: throw IllegalArgumentException("No source uri!")
+        val localVideoUri = process.getLocalOrCachedUri()
+        val videoFile = localVideoUri.toFile()
+        var pathInContainer = if(!videoUri.isRemote()) {
+            videoFile.name
+        }else {
+            val extension = videoUri.guessMimeType(context, di)?.let { mimeType ->
+                VIDEO_MIME_MAP[mimeType]
+            } ?: throw IllegalArgumentException("Unknown mime type for $videoUri")
 
-            var videoFileToAddToContainer = videoFile
-            val contentNeedUpload = !videoUri.isRemote()
-            contentJobItem.updateTotalFromLocalUriIfNeeded(localVideoUri, contentNeedUpload,
-                progress, context, di)
-
-            try {
-
-                if(!contentJobItem.cjiContainerProcessed) {
-
-                    val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
-
-                    Napier.d(tag = VIDEO_JVM, message = "conversion Params compress video is $compressVideo")
-
-                    if (compressVideo) {
-                        videoFileToAddToContainer = File(videoFile.parentFile,
-                            "new${videoFile.nameWithoutExtension}.mp4")
-                        val fileVideoDimensionsAndAspectRatio = ShrinkUtils.getVideoResolutionMetadata(
-                            videoFile, ffprobeFile)
-                        val newVideoDimensions = Pair(fileVideoDimensionsAndAspectRatio.first, fileVideoDimensionsAndAspectRatio.second).fitWithin()
-                        ShrinkUtils.optimiseVideo(videoFile, videoFileToAddToContainer, ffmpegFile,
-                            newVideoDimensions, fileVideoDimensionsAndAspectRatio.third)
-                        pathInContainer = "new${videoFile.nameWithoutExtension}.mp4"
-                    }
-
-                    val container = db.containerDao.findByUid(contentJobItem.cjiContainerUid)
-                            ?: Container().apply {
-                                containerContentEntryUid = contentJobItem.cjiContentEntryUid
-                                cntLastModified = System.currentTimeMillis()
-                                mimeType = supportedMimeTypes.first()
-                                containerUid = repo.containerDao.insertAsync(this)
-
-                            }
-
-                    contentJobItem.cjiContainerUid = container.containerUid
-                    process.withContentJobItemTransactionMutex { txDb ->
-                        txDb.contentJobItemDao.updateContentJobItemContainer(contentJobItem.cjiUid,
-                            container.containerUid)
-                    }
-
-                    val containerFolder = jobItem.contentJob?.toUri
-                            ?: defaultContainerDir.toURI().toString()
-                    val containerFolderUri = DoorUri.parse(containerFolder)
-
-                    repo.addFileToContainer(container.containerUid, videoFileToAddToContainer.toDoorUri(),
-                        pathInContainer, context, di,
-                        ContainerAddOptions(containerFolderUri, compressionFilter = NEVER_COMPRESS_FILTER))
-
-                    contentJobItem.updateTotalFromContainerSize(contentNeedUpload, db,
-                        progress)
-
-                    val haveConnectivityToContinueJob = process.withContentJobItemTransactionMutex { txDb ->
-                        txDb.contentJobItemDao.updateContainerProcessed(contentJobItem.cjiUid, true)
-
-                        contentJobItem.cjiConnectivityNeeded = true
-                        txDb.contentJobItemDao.updateConnectivityNeeded(contentJobItem.cjiUid, true)
-
-                        txDb.contentJobDao.isConnectivityAcceptableForJob(jobItem.contentJob?.cjUid
-                            ?: 0)
-                    }
-
-                    if (!haveConnectivityToContinueJob) {
-                        return@withContext ProcessResult(JobStatus.WAITING_FOR_CONNECTION)
-                    }
-                }
-
-
-                if(contentNeedUpload) {
-                    return@withContext ProcessResult(uploader.upload(contentJobItem,
-                        NetworkProgressListenerAdapter(progress, contentJobItem), httpClient,
-                        endpoint, process
-                    ))
-                }
-
-                return@withContext ProcessResult(JobStatus.COMPLETE)
-            }catch (c: CancellationException){
-
-                withContext(NonCancellable){
-                    videoFile.delete()
-                    videoFileToAddToContainer.delete()
-
-                }
-
-                throw c
-
-            }
+            videoUri.getFileName(context).requirePostfix(extension)
         }
+
+        val compressVideo: Boolean = process.params["compress"]?.toBoolean() ?: false
+
+        Napier.d(tag = VIDEO_JVM, message = "conversion Params compress video is $compressVideo")
+
+        var videoFileToAddToContainer = videoFile
+        if (compressVideo) {
+            videoFileToAddToContainer = File(videoFile.parentFile,
+                "new${videoFile.nameWithoutExtension}.mp4")
+            val fileVideoDimensionsAndAspectRatio = ShrinkUtils.getVideoResolutionMetadata(
+                videoFile, ffprobeFile)
+            val newVideoDimensions = Pair(fileVideoDimensionsAndAspectRatio.first,
+                fileVideoDimensionsAndAspectRatio.second).fitWithin()
+            ShrinkUtils.optimiseVideo(videoFile, videoFileToAddToContainer, ffmpegFile,
+                newVideoDimensions, fileVideoDimensionsAndAspectRatio.third)
+            pathInContainer = "new${videoFile.nameWithoutExtension}.mp4"
+        }
+
+        val container = repo.containerBuilder(jobItem.contentJobItem?.cjiContentEntryUid ?: 0,
+                supportedMimeTypes.first(), containerStorageUri)
+            .addFile(pathInContainer, videoFileToAddToContainer, ContainerBuilder.Compression.NONE)
+            .build()
+
+        videoFile.delete()
+        videoFileToAddToContainer.delete()
+
+        return container
     }
+
 
     suspend fun getEntry(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {
         return withContext(Dispatchers.Default){
@@ -198,6 +138,10 @@ class VideoTypePluginJvm(
             }
             MetadataResult(entry, PLUGIN_ID)
         }
+    }
+
+    companion object {
+        const val PLUGIN_ID = 12
     }
 
 }
