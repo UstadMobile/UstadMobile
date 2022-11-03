@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.lib.db.entities.Role
@@ -13,8 +14,6 @@ import org.kodein.di.instance
 
 data class PersonDetailUiState(
 
-    //Keep this as a flow from the database so that it can be collected in a lifecycle-aware way
-    // e.g. avoid observing this and running db queries when the screen is not visible
     val person: PersonWithPersonParentJoin? = null,
 
     val changePasswordVisible: Boolean = false,
@@ -23,7 +22,9 @@ data class PersonDetailUiState(
 
     val chatVisible: Boolean = false,
 
-    )
+    val clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
+
+)
 
 class PersonDetailViewModel(
     di: DI,
