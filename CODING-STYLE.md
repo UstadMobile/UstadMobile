@@ -1,3 +1,41 @@
+
+### Architecture
+
+The project uses Kotlin Multiplatform to provide an Android App (using Kotlin / Jetpack compose),
+web client app (using Kotlin/JS wrappers for React and MUI), and an http server backend. Door
+(Room for Kotlin Multiplatform) is used to provide a Kotlin Multiplatform database and sync.
+
+### ViewModels
+
+The BaseName should be suffixed with List, Detail, or Edit to describe it's function:
+
+*Name*ListViewModel, *Name*DetailViewModel, *Name*EditViewModel for list, detail, and edit screens
+e.g. *ContentEntry*ListViewModel, *ContentEntry*DetailViewModel, *ContentEntry*EditViewModel.
+
+There is a base abstract ViewModel class in common that uses expect/actual. This is a child class of 
+the Android ViewModel itself on Android. There is a minimal implementation that creates and destroys
+the Coroutinescope for Javascript.
+
+```
+data class SomeViewUiState {
+    
+}
+
+class SomeView: ViewModel {
+    val _uiState: MutableStateFlow<SomeViewUiState>()
+    
+    val uiState: Flow<SomeViewUiState>
+}
+
+```
+
+### Views
+
+Views are written using Jetpack Compose for Android and the Kotlin/JS MUI wrapper for Javascript.
+
+
+
+
 ## Coding style
 
 Avoid terms that could be considered racist and/or discriminatory
@@ -55,12 +93,8 @@ memberVar = SomeEntity()
 memberVar!!.someField = "aValue"
 ```
 
-
 ### Presenters
 
-The BaseName should be suffixed with List, Detail, or Edit to describe it's function:
-
-*Name*List, *Name*Detail, *Name*Edit for list, detail, and edit screens e.g. *ContentEntry*List, *ContentEntry*Detail, *ContentEntry*Edit
 
 For each screen there should be the following classes:
 

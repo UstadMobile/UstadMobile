@@ -1,0 +1,21 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: "People"
+- tapOn: "Person"
+- tapOn: "First names"
+- inputText: ${PERSONNAME}
+- tapOn: "Last name"
+- inputText: "Test"
+- tapOn: "Gender"
+- tapOn: ${GENDER}
+- tapOn: "SAVE"
+- takeScreenshot: "results/AddedNewStudent"
+- tapOn: "CREATE ACCOUNT"
+- tapOn: "Username"
+- inputText: ${PERSONNAME}
+- tapOn: "New password"
+- inputText: "test"
+- tapOn: "Confirm password"
+- inputText: "test"
+- tapOn: "SAVE"
+- takeScreenshot: "results/NewStudentAccountCreated"

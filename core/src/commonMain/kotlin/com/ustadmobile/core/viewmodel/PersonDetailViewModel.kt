@@ -23,7 +23,7 @@ data class PersonDetailUiState(
 
     val chatVisible: Boolean = false,
 
-)
+    )
 
 class PersonDetailViewModel(
     di: DI,
@@ -60,3 +60,4 @@ class PersonDetailViewModel(
     }
 
 }
+

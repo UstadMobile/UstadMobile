@@ -225,6 +225,7 @@ expect abstract class PersonDao : BaseDao<Person> {
     @QueryLiveTables(["Person", "PersonParentJoin"])
     abstract fun findByUidWithDisplayDetailsLive(personUid: Long, activeUserPersonUid: Long): LiveData<PersonWithPersonParentJoin?>
 
+
     @Query("""
         SELECT Person.*, PersonParentJoin.* 
           FROM Person
@@ -241,6 +242,7 @@ expect abstract class PersonDao : BaseDao<Person> {
         personUid: Long,
         activeUserPersonUid: Long
     ): Flow<PersonWithPersonParentJoin?>
+
 
     @Insert
     abstract fun insertAuditLog(entity: AuditLog): Long
