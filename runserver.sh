@@ -13,10 +13,11 @@ BACKGROUND="false"
 STOP="false"
 NOBUILD="false"
 
+#The root path of the project (e.g. the directory into which it was checked out from git)
 cd $BASEDIR
 
 
-SERVERARGS=""
+SERVERARGS=" -DLOG_DIR=$BASEDIR/build "
 while true; do
   case "$1" in
     '-h'|'--help')
@@ -36,9 +37,9 @@ while true; do
       continue
       ;;
     '-c'|'--clear')
-      echo "Clearing ALL DATA as requested"
+      echo "Clearing ALL DATA as requested: Delete $BASEDIR/app-ktor-server/data"
       SERVERARGS="$SERVERARGS -P:ktor.database.cleardb=true"
-      rm -rf app-ktor-server/data
+      rm -rf $BASEDIR/app-ktor-server/data
       shift 1
       continue
       ;;
@@ -84,16 +85,16 @@ if [ "$NOBUILD" != "true" ] && [ "$STOP" != "true" ]; then
   fi
 fi
 
-if [ ! -e app-ktor-server/build/libs/ustad-server-all.jar ]; then
+if [ ! -e $BASEDIR/app-ktor-server/build/libs/ustad-server-all.jar ]; then
   echo "Please build the server jar: ./gradlew app-ktor-server:shadowJar"
   exit 1
 fi
 
-if [ ! -e app-ktor-server/ustad-server.conf ]; then
-  cp app-ktor-server/src/main/resources/application.conf app-ktor-server/ustad-server.conf
+if [ ! -e $BASEDIR/app-ktor-server/ustad-server.conf ]; then
+  cp $BASEDIR/app-ktor-server/src/main/resources/application.conf $BASEDIR/app-ktor-server/ustad-server.conf
 fi
 
-cd app-ktor-server
+cd $BASEDIR/app-ktor-server
 
 if [ "$STOP" == "true" ];then
   if [ -e build/server.pid ]; then
@@ -112,11 +113,12 @@ elif [ "$BACKGROUND" == "true" ]; then
   fi
 
   echo "SERVERARGS =$SERVERARGS"
-  java $DEBUGARGS -jar build/libs/ustad-server-all.jar -config=ustad-server.conf $SERVERARGS 2>&1 > build/server.stdout &
+  java $DEBUGARGS -jar build/libs/ustad-server-all.jar -config=ustad-server.conf $SERVERARGS &
   PID=$!
   echo $PID > build/server.pid
-  echo "Server started as PID $PID"
+  echo "Server started as PID $PID Logging to app-ktor-server/log/ustad-server.log"
 else
+  echo "Server starting: logging to app-ktor-server/log/ustad-server.log"
   java $DEBUGARGS -jar build/libs/ustad-server-all.jar -config=ustad-server.conf $SERVERARGS
 fi
 

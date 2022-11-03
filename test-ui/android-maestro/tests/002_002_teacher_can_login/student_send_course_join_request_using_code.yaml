@@ -1,0 +1,9 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: "COURSE"
+- tapOn: "Join existing course"
+- tapOn: "Class code"
+- longPressOn: "Class code"
+- tapOn: "Paste"
+- tapOn: "Join Class"
+- takeScreenshot: "results/PendingStudent"

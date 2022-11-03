@@ -1,0 +1,28 @@
+appId: com.toughra.ustadmobile
+---
+- runFlow: "../common/add_content.yaml"
+- tapOn: "EDIT"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/entry_title_text"
+- scroll
+- scroll
+- takeScreenshot: "results/Publiclyaccessible-on"
+#- extendedWaitUntil:
+#      visible: "Publicly accessible"
+#      timeout: 10000
+- tapOn: "Publicly accessible"
+- takeScreenshot: "results/Publiclyaccessible-off"
+- tapOn: "SAVE"
+- back
+- runFlow: "../common/enable_guest_login.yaml"
+- clearState: com.toughra.ustadmobile
+- launchApp
+- hideKeyboard
+- tapOn: "GET STARTED"
+- inputText: ${ENDPOINT}
+- hideKeyboard
+- tapOn: "NEXT"
+- tapOn: "Connect as Guest"
+- tapOn: "Library"
+- takeScreenshot: "results/${TESTCONTENTNAME}_finalresult"
+
