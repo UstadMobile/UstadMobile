@@ -4,7 +4,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.android.library'
     id 'maven-publish'
-    id "com.google.devtools.ksp"
+    id "com.google.devtools.ksp" version "$version_kotlin-$version_ksp"
 }
 
 
@@ -18,11 +18,11 @@ group rootProject.group
 version rootProject.version
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
     sourceSets.main.manifest.srcFile('src/androidMain/AndroidManifest.xml')
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 32
+        targetSdkVersion rootProject.ext.version_android_target_sdk
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

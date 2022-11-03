@@ -30,6 +30,7 @@ import kotlinx.css.*
 import mui.material.FabColor
 import mui.material.FabVariant
 import mui.material.Size
+import react.Key
 import react.Props
 import react.RBuilder
 import react.setState
@@ -157,6 +158,7 @@ class ChatDetailComponent(props: UmProps): UstadBaseComponent<UmProps, UmState>(
                             fontSize = (1.3).em
                         }
                         attrs.asDynamic().inputProps = object: Props {
+                            override var key: Key?= "${StyleManager.name}-chatInputMessageClass"
                             val className = "${StyleManager.name}-chatInputMessageClass"
                         }
                     }
