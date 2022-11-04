@@ -248,7 +248,7 @@ private fun DetailFeilds(uiState: PersonDetailUiState, gender: String){
                 stringResource(R.string.gender_literal))
         }
 
-        if (uiState.person.personOrgId != null){
+        if (uiState.person?.personOrgId != null){
             DetailFeild(
                 R.drawable.ic_badge_24dp,
                 uiState.person?.personOrgId ?: "",
