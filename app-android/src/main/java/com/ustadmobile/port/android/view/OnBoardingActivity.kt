@@ -68,7 +68,8 @@ class OnBoardingActivity : ComponentActivity() {
 
         setContent {
             MdcTheme {
-                OnboardingScreenViewModel(viewModel = viewModel)
+//                OnboardingScreenViewModel(viewModel = viewModel)
+                PersonDetailScreen()
             }
         }
     }

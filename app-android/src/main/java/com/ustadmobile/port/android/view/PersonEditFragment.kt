@@ -289,68 +289,6 @@ fun PersonEditScreen(){
 
     val genderList: List<MessageIdOption> = listOf()
     Column(
-        modifier = Modifier.fillMaxHeight()
-            .fillMaxWidth().background(Color.White),
-    ) {
-
-        TitleBar()
-
-        Spacer(modifier = Modifier.height(5.dp))
-
-        Content(genderList)
-    }
-}
-
-@Composable
-private fun TitleBar(){
-    Row (
-        modifier = Modifier.background(colorResource(R.color.primaryColor))
-            .height(60.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BackButton(){}
-
-            Text(stringResource(R.string.edit_person),
-                style = Typography.h6,
-                color = Color.White)
-        }
-
-        SaveButton(){}
-    }
-}
-
-@Composable
-private fun BackButton(onClick: () -> Unit){
-    TextButton(onClick = {onClick},
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = colorResource(R.color.primaryColor),
-            disabledBackgroundColor =  colorResource(R.color.primaryColor))){
-        Image(
-            painter = painterResource(id = R.drawable.ic_arrow_back_white_24dp),
-            contentDescription = null)
-    }
-}@Composable
-
-private fun SaveButton(onClick: () -> Unit){
-    TextButton(onClick = {onClick},
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor =  colorResource(R.color.primaryColor),
-            disabledBackgroundColor =  colorResource(R.color.primaryColor))
-    ){
-        Text(stringResource(R.string.save),
-            style = Typography.h6,
-            color = Color.White)
-    }
-}
-
-@Composable
-private fun Content(genderList: List<MessageIdOption>){
-    Column(
         modifier = Modifier.padding(8.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -470,7 +408,5 @@ private fun SetGenderMenu(
 @Preview
 @Composable
 private fun PersonEditPreview() {
-    UstadMobileTheme {
-        PersonEditScreen()
-    }
+    PersonEditScreen()
 }
