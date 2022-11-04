@@ -17,23 +17,88 @@ the Android ViewModel itself on Android. There is a minimal implementation that 
 the Coroutinescope for Javascript.
 
 ```
-data class SomeViewUiState {
+data class PersonDetailUiState(
+    val person: PersonWithPersonParentJoin? = null,
+
+    val changePasswordVisible: Boolean = false,
+
+    val showCreateAccountVisible: Boolean = false,
+
+    val chatVisible: Boolean = false,
+
+    val clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
+) {
     
+    //Where view information is derived from other parts of the state, use a simple getter e.g.
+    val emailAddressVisible: Boolean
+        get() = person?.emailAddress.isNullOrEmpty()
 }
 
-class SomeView: ViewModel {
-    val _uiState: MutableStateFlow<SomeViewUiState>()
+class PersonDetailViewModel: ViewModel {
+    val uiState: Flow<PersonDetailUiState>
     
-    val uiState: Flow<SomeViewUiState>
+    init {
+        //Logic to seutp the uiState here
+    }
+    
+    //Event handlers here
+    fun onClickCreateAccount() {
+    
+    }
+    
+    fun onClickChat() {
+    
+    }
+    
+    fun onClickClazz(clazz: ClazzEnrolmentWithClazzAndAttendance) {
+        
+    }
 }
 
 ```
 
 ### Views
 
-Views are written using Jetpack Compose for Android and the Kotlin/JS MUI wrapper for Javascript.
+Views are written using Jetpack Compose for Android and the Kotlin/JS MUI wrapper for Javascript. 
+The view function should use the UiState as an argument, 
 
+e.g. Android Jetpack Compose
+```
+@Preview
+@Composable
+function PersonDetailScreen(
+    uiState: PersonDetailUiState = PersonDetailUiState(person = PersonWithParentJoin().apply {
+         firstNames = "Example"
+         lastName = "Surname"
+    }),
+    onClickCreateAccount: () -> Unit,
+    onClickChat: () -> Unit,
+    onClickClazz: (ClazzEnrolmentWithClazzAndAttendance) -> Unit,
+) {
+    //UI functions go here eg.
+    Row {
+        if(uiState.chatVisible) {
+            Button(onClick = onClickChat) {
+                Text(stringResource(R.id.chat))
+            }
+        }
+    }
+}
 
+function PersonDetailScreenViewModel(
+    viewModel: PersonDetailViewModel
+) {
+    val uiState: PersonDetailUiState by viewModel.uiState.collectAsState(initial = null)
+    
+    PersonDetailScreen(
+        uiState = uiState, 
+        onClickChat = viewModel::onClickChat,
+        onClickClazz = viewModel::onClickClazz, 
+        onClickCreateAccount = viewModel::onClickCreateAccount
+    )
+}
+
+```
 
 
 ## Coding style
@@ -50,20 +115,9 @@ Do not use:
 master, slave, whitelist, blacklist
 ```
 
-The app fundamentally follows a Model-View-Presenter (MVP) design. E.g.
 
-```
-class BaseNamePresenter: UstadPresenter
-
-     fun onCreate(savedState: Map<String,String>)
-
-     fun handleUserClickedButton()
-
-     fun handleUserClickedEntity(entity: BaseEntity)
-
-```
-
-**Never, ever, shall thy ever use !! in production Kotlin code.** The !! operator is OK in unit tests, but should never be used in production code.
+**Never, ever, shall thy ever use !! in production Kotlin code.** The !! operator is OK in unit tests, 
+but should never be used in non-test code.
 
 e.g. use:
 
@@ -92,69 +146,6 @@ Do not do this:
 memberVar = SomeEntity()
 memberVar!!.someField = "aValue"
 ```
-
-### Presenters
-
-
-For each screen there should be the following classes:
-
-* *BaseName*Presenter - the core Kotlin multiplatform presenter
-* *BaseName*View - the view interface
-* *BaseName*(Activity|Fragment) - the Android implementation of the view
-* *base-name*.component.ts - the Angular implementation of the view
-
-
-### Views
-
-Views should **not** contain any business logic. They simply display information. They are an interface and should have methods like:
-
-```
-interface BaseNameView: UstadView
-
-   var BaseName: BaseEntity
-
-   var someButtonVisible: Boolean
-
-   companion object {
-        const val VIEW_NAME = "BaseName"
-
-        const val ARG_SOMEPARAM = "someParam"
-   }
-
-```
-
-Displaying the properties of an entity is handled by data binding on Android and by Angulars own template pattern.
-Do not create a variable for each property (e.g. title, author, etc). Just pass the entity itself
-and use data binding.
-
-If handling an event would require permission (e.g. download requires file permission), the native
-element (eg. fragment) should check for permission before calling the view method.
-
-e.g.
-```
-class SomeDetailFragment {
-
-   var mPresenter: SomeDetailPresenter? = null
-
-   ...
-
-   fun handleClickDownload() {
-       runAfterRequestingPermissionIfNeeded(WRITE_EXTERNAL_STORAGE) { granted ->
-            if(granted) {
-                mPresenter?.handleClickDownload()
-            }else {
-                //Show snackbar that permission is required
-            }
-       }
-   }
-
-}
-
-```
-
-
-*ARG_ constants that are used with more than one view should be placed on UstadView*
-
 
 ### Entities
 
