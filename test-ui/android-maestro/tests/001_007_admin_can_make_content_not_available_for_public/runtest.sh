@@ -14,7 +14,6 @@ adb push $FILENAME /sdcard/Download/$FILEBASENAME
   maestro $MAESTRO_BASE_OPTS \
     -e TESTFILENAME=Epub_Content.epub -e TESTCONTENTNAME=$CONTENTNAME \
     admin_can_make_content_not_available_for_public.yaml
- #sleep 10
  TESTRESULT=$?
  if [ "$TESTRESULT" == "0" ]; then
     echo "pass" > results/result
