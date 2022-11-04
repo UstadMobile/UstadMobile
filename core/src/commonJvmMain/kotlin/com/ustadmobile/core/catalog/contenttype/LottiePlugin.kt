@@ -2,8 +2,10 @@ package com.ustadmobile.core.catalog.contenttype
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.io.ext.readString
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.*
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentJobItemAndContentJob
 import kotlinx.serialization.json.Json
@@ -14,13 +16,15 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import com.ustadmobile.door.ext.openInputStream
+import com.ustadmobile.lib.db.entities.Container
+import org.kodein.di.on
 
 class LottiePlugin(
-    private var context: Any,
-    val endpoint: Endpoint,
+    context: Any,
+    endpoint: Endpoint,
     override val di: DI,
-    private val uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
-): ContentPlugin {
+    uploader: ContentPluginUploader = DefaultContentPluginUploader(di)
+): ContentImportContentPlugin(endpoint, context, uploader) {
 
     override val pluginId: Int = PLUGIN_ID
 
@@ -45,16 +49,33 @@ class LottiePlugin(
 
         return MetadataResult(ContentEntryWithLanguage().apply {
             title = nm?.jsonPrimitive?.content
+            leaf = true
         }, PLUGIN_ID)
     }
 
-    override suspend fun processJob(
+    override suspend fun makeContainer(
         jobItem: ContentJobItemAndContentJob,
         process: ContentJobProcessContext,
-        progress: ContentJobProgressListener
-    ): ProcessResult {
-        TODO("Not yet implemented")
+        progressListener: ContentJobProgressListener,
+        containerStorageUri: DoorUri,
+    ): Container {
+        val repo: UmAppDatabase = on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+
+        val mimeType = supportedMimeTypes.first()
+
+        return repo.containerBuilder(jobItem.contentJobItem?.cjiContentEntryUid ?: 0,
+            supportedMimeTypes.first(), containerStorageUri)
+            .addUri("lottie.json", process.getLocalOrCachedUri(), context)
+            .build()
     }
+
+//    override suspend fun processJob(
+//        jobItem: ContentJobItemAndContentJob,
+//        process: ContentJobProcessContext,
+//        progress: ContentJobProgressListener
+//    ): ProcessResult {
+//        TODO("Not yet implemented")
+//    }
 
     companion object {
         const val PLUGIN_ID = 105
