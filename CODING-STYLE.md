@@ -82,6 +82,11 @@ function PersonDetailScreen(
                 Text(stringResource(R.id.chat))
             }
         }
+        
+        //Use the object on the UiState to show properties
+        Text(uiState.person?.firstNames + uiState.person?.lastName)
+       
+        Text(uiState.person?.phoneNumber)
     }
 }
 
