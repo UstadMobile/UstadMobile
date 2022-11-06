@@ -4,6 +4,7 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.Context
 import android.os.Build
+import androidx.core.os.bundleOf
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.Person
 import org.kodein.di.DI
@@ -33,7 +34,7 @@ class UstadAccountManagerAndroid(
         val androidAccountManager = AccountManager.get(androidContext)
         val accountedAdded = androidAccountManager.addAccountExplicitly(sessionCreated.toAndroidAccount(),
             sessionCreated.userSession.usAuth ?: throw IllegalArgumentException("No usersession auth!"),
-            null)
+            bundleOf(KEY_ENDPOINT to endpointUrl))
         if(!accountedAdded) {
             throw IllegalStateException("Could not add account to AccountManager!")
         }

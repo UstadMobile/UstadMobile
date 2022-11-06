@@ -178,6 +178,9 @@ class NavControllerExtTest {
         }, any())
     }
 
+    /**
+     *
+     */
     fun givenViewUri_whenUserCanSelectServer_thenShouldNavigateToEnterSiteLink() {
 
     }

@@ -55,7 +55,9 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.BrowserLinkOpener
 import com.ustadmobile.core.util.UmPlatformUtil
+import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.*
 
 
@@ -63,6 +65,10 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         UstadActivityWithProgressBar,
         NavController.OnDestinationChangedListener,
         DIAware{
+
+    private val browserLinkOpener = BrowserLinkOpener { url ->
+
+    }
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
@@ -112,28 +118,13 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val uri = intent?.data?.toString()
 
         if(uri != null){
-            impl.goToDeepLink(uri, accountManager, this)
-        }
-    }
-
-
-    private fun onGrantAppPermissionIntentReceived(intent: Intent) {
-        lifecycleScope.launch {
-            val destViewUri = "${GrantAppPermissionView.VIEW_NAME}?"
-            val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION,
-                this)
-            if(accountManager.activeSessionCount(Long.MAX_VALUE) > 0) {
-                //there are existing accounts that might be used... go to accountmanager
-                ustadNavController.navigate(AccountListView.VIEW_NAME, mapOf(
-                    UstadView.ARG_NEXT to destViewUri,
-                    UstadView.ARG_TITLE to getString(R.string.select_account),
-                    UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
-                ))
-            }else if(canSelectServer){
-                ustadNavController.navigate(SiteEnterLinkView.VIEW_NAME)
+            lifecycleScope.launchWhenResumed {
+                ustadNavController.navigateToLink(uri, accountManager, browserLinkOpener,
+                    forceAccountSelection = true)
             }
         }
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

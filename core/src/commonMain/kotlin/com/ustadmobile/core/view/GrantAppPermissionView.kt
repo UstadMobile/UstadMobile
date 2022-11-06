@@ -11,6 +11,10 @@ interface GrantAppPermissionView: UstadView {
 
         const val VIEW_NAME = "GrantAppPermission"
 
+        const val ARG_GRANT_PERMISSION_CALLER_UID = "callerUid"
+
+        const val ARG_APPROVAL_URI = "approvalUri"
+
     }
 
 }

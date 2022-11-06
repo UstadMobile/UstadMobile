@@ -19,16 +19,20 @@ import org.kodein.di.android.closestDI
 import org.kodein.di.instance
 import org.kodein.di.on
 import com.ustadmobile.core.db.UmAppDatabase
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.ustadmobile.core.view.GrantAppPermissionView
+import com.ustadmobile.core.view.UstadView
+import kotlinx.coroutines.*
 
 // As per https://developer.android.com/training/id-auth/custom_auth
 //see https://developer.android.com/reference/kotlin/android/accounts/AbstractAccountAuthenticator
+// Also helpful: http://blog.udinic.com/2013/04/24/write-your-own-android-authenticator/
 class UstadAccountAuthenticator(
     private val context: Context
 ): AbstractAccountAuthenticator (context), DIAware{
 
     override val di: DI by closestDI { context }
+
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
     override fun editProperties(p0: AccountAuthenticatorResponse?, p1: String?): Bundle? {
         return null
@@ -74,25 +78,33 @@ class UstadAccountAuthenticator(
 
         if(endpointUrl != null && auth != null) {
             val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_DB)
-            GlobalScope.launch {
-                if(db.authTokenDao.validateToken(auth))
-                    response.onResult(bundleOf(
-                        AccountManager.KEY_AUTHTOKEN to auth,
-                        AccountManager.KEY_ACCOUNT_TYPE to UstadAccountManagerAndroid.ACCOUNT_TYPE,
-                        AccountManager.KEY_ACCOUNT_NAME to account.name,
-                    ))
+            coroutineScope.launch {
+                if(db.authTokenDao.validateToken(auth)) {
+                    response.onResult(
+                        bundleOf(
+                            AccountManager.KEY_AUTHTOKEN to auth,
+                            AccountManager.KEY_ACCOUNT_TYPE to UstadAccountManagerAndroid.ACCOUNT_TYPE,
+                            AccountManager.KEY_ACCOUNT_NAME to account.name,
+                        )
+                    )
+                }else {
+                    response.onError(403, "Invalid token")
+                }
             }
         }else {
+            //Get application name
+            // see https://stackoverflow.com/questions/11229219/android-how-to-get-application-name-not-package-name
             val authIntent = Intent(context, MainActivity::class.java).apply {
-
+                putExtra(UstadView.ARG_OPEN_LINK, GrantAppPermissionView.VIEW_NAME)
+                putExtra(UstadView.ARG_ACCOUNT_NAME, account.name)
+                putExtra(UstadView.ARG_ACCOUNT_ENDPOINT,
+                    AccountManager.get(context).getUserData(account, KEY_ENDPOINT))
             }
 
             response.onResult(Bundle().apply {
                 putParcelable(AccountManager.KEY_INTENT, authIntent)
             })
         }
-
-
 
         return null
     }

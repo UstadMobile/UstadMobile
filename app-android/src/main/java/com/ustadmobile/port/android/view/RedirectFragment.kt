@@ -32,17 +32,25 @@ class RedirectFragment : UstadBaseFragment(), RedirectView {
 
     //This needs to be done in onStart, not onCreate. The activity's views are not ready on onCreate,
     // and this causes systemImpl.go to fail at finding the nav controller
-    val viewLifecycleObserver = object: DefaultLifecycleObserver {
+    private val viewLifecycleObserver = object: DefaultLifecycleObserver {
 
         override fun onStart(owner: LifecycleOwner) {
             super.onStart(owner)
 
-            val intentData = requireActivity().intent.data
-            val intentMap: Map<String, String> = if (intentData == null || intentData.toString().isEmpty()) {
-                mapOf()
-            } else {
-                mapOf(UstadView.ARG_DEEPLINK to intentData.toString())
+            val intent = requireActivity().intent
+            val intentData = intent.data?.toString()
+
+            val intentMap = mutableMapOf<String, String>()
+
+            if(!intentData.isNullOrEmpty()) {
+                intentMap[UstadView.ARG_OPEN_LINK] = intentData
             }
+
+            intent.getStringExtra(UstadView.ARG_OPEN_LINK)?.also {
+                intentMap[UstadView.ARG_OPEN_LINK] = it
+            }
+
+
             mPresenter = RedirectPresenter(requireContext(),
                 arguments.toStringMap() + requireActivity().intent.extras.toStringMap() + intentMap,
                 this@RedirectFragment, di).withViewLifecycle()

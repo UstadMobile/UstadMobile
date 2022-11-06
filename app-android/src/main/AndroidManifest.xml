@@ -117,7 +117,7 @@
         </activity>
         
         <service
-                android:name="com.ustadmobile.port.android.authenticator.UstadAccountAuthenticator"
+                android:name="com.ustadmobile.port.android.authenticator.UstadAuthenticatorService"
                 android:exported="true">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />

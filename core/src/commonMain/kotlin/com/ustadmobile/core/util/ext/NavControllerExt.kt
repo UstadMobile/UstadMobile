@@ -43,6 +43,7 @@ suspend fun UstadNavController.navigateToLink(
     goOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions.Default,
     forceAccountSelection: Boolean = false,
     userCanSelectServer: Boolean = true,
+    presetAccount: String? = null,
 ) {
     var endpointUrl: String? = null
     var viewUri: String? = null
@@ -70,7 +71,13 @@ suspend fun UstadNavController.navigateToLink(
 
     when {
         //when the link is not an ustad link, open in browser
-        viewUri == null -> browserLinkOpener.onOpenLink(link)
+        viewUri == null -> {
+            browserLinkOpener.onOpenLink(link)
+        }
+
+        presetAccount != null -> {
+
+        }
 
         //when the active account is already on the given endpoint, or there is no endpoint
         //specified, then go directly to the given view (unless the force account selection option
@@ -103,7 +110,7 @@ suspend fun UstadNavController.navigateToLink(
 
         //else - go to the account manager
         else -> {
-            val args = mutableMapOf(ARG_NEXT to UMURLEncoder.encodeUTF8(viewUri))
+            val args = mutableMapOf(ARG_NEXT to viewUri)
             if(endpointUrl != null)
                 args[AccountListView.ARG_FILTER_BY_ENDPOINT] = endpointUrl
 

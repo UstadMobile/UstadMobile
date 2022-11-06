@@ -4,7 +4,7 @@ import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
 
 @DoorDao
-abstract class AuthTokenDao {
+expect abstract class AuthTokenDao {
 
     @Query("""
         SELECT EXISTS(
