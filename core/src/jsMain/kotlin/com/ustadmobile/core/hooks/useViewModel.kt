@@ -1,4 +1,4 @@
-package com.ustadmobile.hooks
+package com.ustadmobile.core.hooks
 
 import com.ustadmobile.core.viewmodel.ViewModel
 import react.*

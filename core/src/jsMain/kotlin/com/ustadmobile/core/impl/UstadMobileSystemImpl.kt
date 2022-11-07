@@ -26,33 +26,13 @@ import org.w3c.dom.HTMLAnchorElement
  *        if the display locale is not English.
  */
 actual open class UstadMobileSystemImpl(
-    private val xppFactory: XmlPullParserFactory,
     private val navController: UstadNavController,
-    defaultStringsXmlStr: String,
-    displayLocaleStringsXmlStr: String?
+    private val defaultStringsXml: StringsXml,
+    private val displayLocaleStringsXml: StringsXml?
 ): UstadMobileSystemCommon() {
 
     private val messageIdMapFlipped: Map<String, Int> by lazy {
         MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
-    }
-
-    private val defaultStringsXml: StringsXml
-
-    private val displayLocaleStringsXml: StringsXml?
-
-    init {
-        val defaultXpp = xppFactory.newPullParser()
-        defaultXpp.setInputString(defaultStringsXmlStr)
-        defaultStringsXml = StringsXml(defaultXpp, xppFactory, messageIdMapFlipped, "en")
-
-        displayLocaleStringsXml = if(displayLocaleStringsXmlStr != null) {
-            val foreignXpp = xppFactory.newPullParser()
-            foreignXpp.setInputString(displayLocaleStringsXmlStr)
-            StringsXml(foreignXpp, xppFactory, messageIdMapFlipped,
-                displayedLocale, defaultStringsXml)
-        }else {
-            null
-        }
     }
 
     /**
