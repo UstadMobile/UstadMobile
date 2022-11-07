@@ -193,6 +193,11 @@ ext {
 
     /*Kotlin react web app*/
     kotlinWrappersVersion = "1.0.0-pre.421"
+
+    //Kotlin multiplatform does not support BOM until Kotlin 1.8 - so need to specify wrappers used in core :(
+    // https://youtrack.jetbrains.com/issue/KT-40489
+    version_kotlin_react = "18.2.0-pre.421"
+    version_kotlin_react_router = "6.3.0-pre.421"
     version_kotlin_extensions = "1.0.1-pre.421"
 
     version_npm_moment = "^2.29.4"

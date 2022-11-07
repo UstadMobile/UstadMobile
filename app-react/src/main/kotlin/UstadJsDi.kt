@@ -2,7 +2,9 @@
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.RepSubscriptionInitListener
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.navigation.NavControllerJs
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
@@ -20,6 +22,7 @@ import com.ustadmobile.redux.ReduxThemeState
 import com.ustadmobile.util.ContainerMounterJs
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.XmlSerializer
+import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
 import io.ktor.client.engine.js.*
 import io.ktor.client.plugins.*
@@ -31,6 +34,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
+import com.ustadmobile.core.impl.locale.JsStringXml
 
 /**
  * KodeIn DI builder for JS/Browser.
@@ -43,9 +47,33 @@ internal fun ustadJsDi(
     defaultStringsXmlStr: String,
     displayLocaleStringsXmlStr: String?,
 ) = DI {
+
+    val messageIdMapFlipped: Map<String, Int> by lazy {
+        MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
+    }
+
+    val xppFactory = XmlPullParserFactory.newInstance()
+
+    bind<StringsXml>(tag = JsStringXml.DEFAULT) with singleton {
+        val defaultXpp = xppFactory.newPullParser()
+        defaultXpp.setInputString(defaultStringsXmlStr)
+        StringsXml(defaultXpp, xppFactory, messageIdMapFlipped, "en")
+    }
+
+    if(displayLocaleStringsXmlStr != null) {
+        bind<StringsXml>(tag = JsStringXml.DISPLAY) with singleton{
+            val foreignXpp = xppFactory.newPullParser()
+            foreignXpp.setInputString(displayLocaleStringsXmlStr)
+            val defaultStringsXml = instance<StringsXml>(tag = JsStringXml.DEFAULT)
+            StringsXml(foreignXpp, xppFactory, messageIdMapFlipped,
+                UstadMobileSystemImpl.displayedLocale, defaultStringsXml)
+        }
+    }
+
     bind<UstadMobileSystemImpl>() with singleton {
-        UstadMobileSystemImpl(XmlPullParserFactory.newInstance(), instance(),
-            defaultStringsXmlStr, displayLocaleStringsXmlStr
+        UstadMobileSystemImpl(
+            instance(),
+            instance(tag = JsStringXml.DEFAULT), instanceOrNull(tag = JsStringXml.DISPLAY)
         ).also { impl ->
             appConfigs.forEach {
                 val value = when(it.key){

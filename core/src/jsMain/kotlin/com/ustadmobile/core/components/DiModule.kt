@@ -1,4 +1,4 @@
-package com.ustadmobile.mui.components
+package com.ustadmobile.core.components
 
 import org.kodein.di.DI
 import react.FC
