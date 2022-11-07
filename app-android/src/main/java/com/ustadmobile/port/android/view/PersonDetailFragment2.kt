@@ -37,10 +37,16 @@ import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import org.kodein.di.DI
 import org.kodein.di.android.x.closestDI
 import android.text.format.DateFormat
+import android.widget.Space
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.toUpperCase
 import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import java.util.*
 import kotlin.text.Typography
@@ -97,7 +103,7 @@ class PersonDetailFragment2 : Fragment(){
 }
 
 @Composable
-fun PersonDetailScreen(
+private fun PersonDetailScreen(
     uiState: PersonDetailUiState = PersonDetailUiState(),
     gender: String = "",
     onClickDial: () -> Unit = {},
@@ -106,60 +112,65 @@ fun PersonDetailScreen(
     onClickCreateAccount: () -> Unit = {},
     onClickChangePassword: () -> Unit = {},
     onClickManageParentalConsent: () -> Unit = {},
-    onClickChat: () -> Unit = {}
+    onClickChat: () -> Unit = {},
+    onClickClazz: () -> Unit = {}
 ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    )  {
 
-   Column(
-       modifier = Modifier
-           .fillMaxSize()
-           .verticalScroll(rememberScrollState())
-   )  {
+        Image(
+            painter = painterResource(id = R.drawable.ic_person_black_24dp),
+            contentDescription = null,
+            modifier = Modifier
+                .height(256.dp)
+                .fillMaxWidth())
 
-       Image(
-           painter = painterResource(id = R.drawable.ic_person_black_24dp),
-           contentDescription = null,
-           modifier = Modifier
-               .height(256.dp))
+        QuickActionBar(
+            uiState,
+            onClickDial,
+            onClickSms,
+            onClickEmail,
+            onClickCreateAccount,
+            onClickChangePassword,
+            onClickManageParentalConsent,
+            onClickChat)
 
-       QuickActionBar(
-           uiState,
-           onClickDial,
-           onClickSms,
-           onClickEmail,
-           onClickCreateAccount,
-           onClickChangePassword,
-           onClickManageParentalConsent,
-           onClickChat)
+        Divider(color = Color.LightGray, thickness = 1.dp)
 
-       Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-       Divider(color = Color.LightGray, thickness = 1.dp)
+        Text(stringResource(R.string.basic_details),
+            style = Typography.h4,
+            modifier = Modifier.padding(8.dp))
 
-       Spacer(modifier = Modifier.height(10.dp))
+        DetailFeilds(uiState, gender)
 
-       Text(stringResource(R.string.basic_details))
+        Divider(color = Color.LightGray, thickness = 1.dp)
 
-       DetailFeilds(uiState, gender)
+        Spacer(modifier = Modifier.height(10.dp))
 
-       Divider(color = Color.LightGray, thickness = 1.dp)
+        Text(stringResource(R.string.contact_details),
+            style = Typography.h4,
+            modifier = Modifier.padding(8.dp))
 
-       Spacer(modifier = Modifier.height(10.dp))
+        ContactDetails(uiState,
+            onClickDial,
+            onClickSms,
+            onClickEmail)
 
-       Text(stringResource(R.string.contact_details))
+        Divider(color = Color.LightGray, thickness = 1.dp)
 
-       ContactDetails(uiState,
-           onClickDial,
-           onClickSms,
-           onClickEmail)
+        Spacer(modifier = Modifier.height(10.dp))
 
-       Divider(color = Color.LightGray, thickness = 1.dp)
+        Text(stringResource(R.string.classes),
+            style = Typography.h4,
+            modifier = Modifier.padding(8.dp))
 
-       Spacer(modifier = Modifier.height(10.dp))
-
-       Text(stringResource(R.string.classes))
-
-       Classes()
-   }
+        Classes(uiState.clazzes, onClickClazz)
+    }
 }
 
 @Composable
@@ -234,15 +245,17 @@ private fun DetailFeilds(uiState: PersonDetailUiState, gender: String){
         modifier = Modifier.padding(8.dp)
     ){
 
+        val dateOfBirth = remember { DateFormat.getDateFormat(context)
+            .format(Date(uiState.person?.dateOfBirth ?: 0)).toString() }
+
         if (uiState.person?.dateOfBirth != 0L){
             DetailFeild(
                 R.drawable.ic_date_range_black_24dp,
-                DateFormat.getDateFormat(context)
-                    .format(Date(uiState.person?.dateOfBirth ?: 0)).toString(),
+                dateOfBirth,
                 stringResource(R.string.birthday))
         }
 
-        if (gender.isNullOrEmpty()){
+        if (!gender.isNullOrEmpty()){
             DetailFeild(0,
                 gender,
                 stringResource(R.string.gender_literal))
@@ -270,7 +283,9 @@ private fun ContactDetails(
     onClickDial: () -> Unit = {},
     onClickSms: () -> Unit = {},
     onClickEmail: () -> Unit = {},){
-    Column {
+    Column(
+        modifier = Modifier.padding(8.dp)
+    ) {
 
         if (!uiState.person?.phoneNum.isNullOrEmpty()){
             CallRow(
@@ -303,6 +318,7 @@ private fun CallRow(
     onClickSms: () -> Unit = {},){
 
     Row(
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
 
@@ -326,8 +342,51 @@ private fun CallRow(
 }
 
 @Composable
-private fun Classes(){
+private fun Classes(
+    clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
+    onClickClazz: () -> Unit = {}){
 
+    clazzes.forEach { clazz ->
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Button(onClick = onClickClazz) {
+            ClassItem(clazz)
+        }
+    }
+}
+
+@Composable
+private fun ClassItem(clazz: ClazzEnrolmentWithClazzAndAttendance){
+    Row(modifier = Modifier.padding(8.dp)
+    ){
+        Image(
+            painter = painterResource(id = R.drawable.ic_group_black_24dp),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(color = Color.Gray),
+            modifier = Modifier
+                .width(70.dp))
+
+        Column {
+            Text(text = "Par")
+            Text(text = "Par")
+
+            if (clazz.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT){
+                Row (
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Image(painter = painterResource(id = R.drawable.ic_lens_black_24dp),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(color = Color.Gray),
+                        modifier = Modifier
+                            .size(12.dp))
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Text(text = "Par")
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -340,7 +399,7 @@ private fun DetailFeild(
     TextButton(
         onClick = onClick
     ){
-        Row {
+        Row{
             if (imageId != 0){
                 Image(
                     painter = painterResource(id = imageId),
@@ -348,12 +407,16 @@ private fun DetailFeild(
                     colorFilter = ColorFilter.tint(color = Color.Gray),
                     modifier = Modifier
                         .size(24.dp))
+            } else {
+                Box(modifier = Modifier.width(24.dp))
             }
+
+            Spacer(modifier = Modifier.width(10.dp))
 
             Column {
                 Text(valueText,
                     style = Typography.h4,
-                    color = Color.Gray)
+                    color = Color.Black)
 
                 Text(labelText,
                     style = Typography.body2,
@@ -365,24 +428,29 @@ private fun DetailFeild(
 
 @Composable
 private fun QuickActionButton(text: String, imageId: Int, onClick: () -> Unit){
-   TextButton(
-       onClick = onClick
-   ){
-       Column{
-           Image(
-               painter = painterResource(id = imageId),
-               contentDescription = null,
-               colorFilter = ColorFilter.tint(color = colorResource(R.color.primaryColor)),
-               modifier = Modifier
-                   .size(24.dp))
+    TextButton(
+        modifier = Modifier.width(110.dp),
+        onClick = onClick
+    ){
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
+            Image(
+                painter = painterResource(id = imageId),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(color = colorResource(R.color.primaryColor)),
+                modifier = Modifier
+                    .size(24.dp))
 
-           Text(text, color = colorResource(R.color.primaryColor))
-       }
-   }
+            Text(text.uppercase(),
+                style= Typography.h4,
+                color = colorResource(R.color.primaryColor))
+        }
+    }
 }
 
 @Composable
-fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
+private fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
     val uiState: PersonDetailUiState by viewModel.uiState.collectAsState(PersonDetailUiState())
     val gender: String = viewModel.getGender(uiState.person?.gender ?: 0)
     PersonDetailScreen(uiState, gender)
@@ -391,9 +459,7 @@ fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
 @Composable
 @Preview
 fun PersonDetailScreenPreview() {
-    val uiState = PersonDetailUiState(person = PersonWithPersonParentJoin().apply {
-        firstNames = "Bob"
-    }, showCreateAccountVisible = true)
-    PersonDetailScreen(uiState)
+    val uiState = PersonDetailUiState()
+    PersonDetailScreen(uiState, "")
 }
 

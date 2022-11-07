@@ -374,7 +374,7 @@ private fun SetGenderMenu(
                 )
             },
             colors = ExposedDropdownMenuDefaults.textFieldColors(
-                backgroundColor = Color.White,
+                backgroundColor = Color.Transparent,
                 focusedIndicatorColor = colorResource(R.color.primaryColor),
                 unfocusedIndicatorColor = colorResource(R.color.primaryColor),
                 disabledIndicatorColor = colorResource(R.color.primaryColor),
