@@ -1,11 +1,11 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -16,13 +16,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
+import androidx.savedstate.SavedStateRegistryOwner
 import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -45,8 +53,12 @@ import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 import com.ustadmobile.port.android.view.util.RunAfterTextChangedTextWatcher
 import org.kodein.di.direct
 import org.kodein.di.instance
-import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
+import org.kodein.di.DI
+import com.ustadmobile.core.viewmodel.PersonEditUiState
+import com.ustadmobile.core.viewmodel.PersonEditViewModel
+import java.util.*
 
 interface PersonEditFragmentEventHandler {
 
@@ -55,6 +67,10 @@ interface PersonEditFragmentEventHandler {
 }
 
 class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView {
+
+    private val viewModel: PersonEditViewModel by viewModels {
+        PersonEditFragment.provideFactory(di, this, requireArguments())
+    }
 
     private var mBinding: FragmentPersonEditBinding? = null
 
@@ -258,7 +274,19 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         })
 
 
-        return rootView
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
+
+            setContent {
+                MaterialTheme {
+                    PersonEditScreen(viewModel)
+                }
+            }
+        }
+
+//        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -282,35 +310,60 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
     }
 
+    companion object {
+
+        fun provideFactory(
+            di: DI,
+            owner: SavedStateRegistryOwner,
+            defaultArgs: Bundle? = null,
+        ): AbstractSavedStateViewModelFactory = object: AbstractSavedStateViewModelFactory(owner, defaultArgs) {
+            override fun <T : ViewModel?> create(
+                key: String,
+                modelClass: Class<T>,
+                handle: SavedStateHandle
+            ): T {
+                return PersonEditViewModel(di, SavedStateHandleAdapter(handle)) as T
+            }
+        }
+    }
 }
 
 @Composable
-fun PersonEditScreen(){
-
-    val genderList: List<MessageIdOption> = listOf()
+fun PersonEditScreen(
+    uiState: PersonEditUiState = PersonEditUiState(),
+    gender: String = "",
+    genderList: List<MessageIdOption> = listOf(),
+    onSetGender: (MessageIdOption) -> Unit = { },
+    onSetUserImage: () -> Unit = { },
+){
     Column(
         modifier = Modifier.padding(8.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        SetUserImageButton(){}
 
-        TextInput(stringResource(R.string.first_names), "")
+        SetUserImageButton(onSetUserImage)
 
-        TextInput(stringResource(R.string.last_name), "")
+        TextInput(stringResource(R.string.first_names), uiState.person?.firstNames ?: "")
+
+        TextInput(stringResource(R.string.last_name), uiState.person?.lastName ?: "")
 
         SetGenderMenu(
             genderList = genderList,
-            selectedGender = "",
-            onItemSelected = {})
+            selectedGender = gender,
+            onItemSelected = onSetGender)
 
-        TextInput(stringResource(R.string.birthday), "")
+        val context = LocalContext.current
+        val dateOfBirth = remember { DateFormat.getDateFormat(context)
+            .format(Date(uiState.person?.dateOfBirth ?: 0)).toString() }
 
-        TextInput(stringResource(R.string.phone_number), "")
+        TextInput(stringResource(R.string.birthday), dateOfBirth)
 
-        TextInput(stringResource(R.string.email), "")
+        TextInput(stringResource(R.string.phone_number), uiState.person?.phoneNum ?: "")
 
-        TextInput(stringResource(R.string.address), "")
+        TextInput(stringResource(R.string.email), uiState.person?.emailAddr ?: "")
+
+        TextInput(stringResource(R.string.address), uiState.person?.personAddress ?: "")
     }
 }
 
@@ -330,7 +383,7 @@ private fun TextInput(label: String, value: String) {
 }
 @Composable
 private fun SetUserImageButton(onClick: () -> Unit){
-    Button(onClick = {onClick},
+    Button(onClick = onClick,
         shape = CircleShape,
         modifier = Modifier
             .size(60.dp),
@@ -405,8 +458,16 @@ private fun SetGenderMenu(
 
 }
 
+@Composable
+private fun PersonEditScreen(viewModel: PersonEditViewModel) {
+    val uiState: PersonEditUiState by viewModel.uiState.collectAsState(PersonEditUiState())
+    val gender: String = viewModel.getGender(uiState.person?.gender ?: 0)
+    PersonEditScreen(uiState, gender, uiState.genderList)
+}
+
 @Preview
 @Composable
 private fun PersonEditPreview() {
-    PersonEditScreen()
+    val uiState = PersonEditUiState()
+    PersonEditScreen(uiState, "")
 }

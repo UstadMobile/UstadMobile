@@ -1,13 +1,11 @@
 package com.ustadmobile.port.android.view
 
-import android.icu.text.DateFormat.getDateInstance
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,24 +30,16 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
 import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.PersonDetailViewModel
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import org.kodein.di.DI
 import org.kodein.di.android.x.closestDI
 import android.text.format.DateFormat
-import android.widget.Space
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.toUpperCase
-import com.ustadmobile.core.controller.PersonConstants
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import java.util.*
-import kotlin.text.Typography
 
 class PersonDetailFragment2 : Fragment(){
 
