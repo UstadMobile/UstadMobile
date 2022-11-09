@@ -328,7 +328,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 @Composable
 fun PersonEditScreen(
     uiState: PersonEditUiState = PersonEditUiState(),
-    onPersonChanged: (PersonWithPersonParentJoin) -> Unit = {},
+    onPersonChanged: (PersonWithPersonParentJoin?) -> Unit = {},
 ){
     Column(
         modifier = Modifier
@@ -357,7 +357,7 @@ fun PersonEditScreen(
             error = uiState.dateOfBirthError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                println("New birthday: $it")
+
             }
         )
 
