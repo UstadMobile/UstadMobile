@@ -1,4 +1,4 @@
-package com.ustadmobile.hooks
+package com.ustadmobile.core.hooks
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow

@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.getOrPut
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DatabaseBuilderOptions
@@ -14,11 +15,11 @@ import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
-import com.ustadmobile.mui.components.DIModule
+import com.ustadmobile.core.components.DIModule
 import com.ustadmobile.mui.components.Header
 import com.ustadmobile.mui.components.Sidebar
 import com.ustadmobile.mui.components.ThemeModule
-import com.ustadmobile.util.urlSearchParamsToMap
+import com.ustadmobile.util.Util
 import com.ustadmobile.view.Content
 import com.ustadmobile.view.UstadScreensModule
 import csstype.Auto.auto
@@ -29,22 +30,17 @@ import io.github.aakira.napier.Napier
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import mui.material.useMediaQuery
-import mui.system.Box
-import mui.system.sx
+import mui.system.*
 import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.singleton
 import org.w3c.dom.url.URLSearchParams
 import react.FC
 import react.Props
 import react.create
 import react.dom.client.createRoot
-import react.router.dom.BrowserRouter
 import react.router.dom.HashRouter
+import ustadJsDi
 import kotlin.random.Random
 
 fun main() {
@@ -53,9 +49,6 @@ fun main() {
     val url = window.location.href
     val apiUrl = URLSearchParams().get(AppConfig.KEY_API_URL)
         ?: url.substringBefore(if(url.indexOf("umapp/") != -1) "umapp/" else "#/")
-
-//    val apiUrl = urlSearchParamsToMap()[AppConfig.KEY_API_URL]
-//        ?: url.substringBefore(if(url.indexOf("umapp/") != -1) "umapp/" else "#/")
 
     val dbName = sanitizeDbNameFromUrl(window.location.origin)
     val dbUrl = "sqlite:$dbName"
@@ -80,15 +73,22 @@ fun main() {
     val defaultAssetPath = "locales/en.xml"
 
     GlobalScope.launch {
-        val builtDi: DI = DI {
-            bind<String>() with singleton {
-                "Hello"
-            }
+        val dbBuilt = dbBuilder.build()
+        val appConfigs = Util.loadFileContentAsMap<HashMap<String, String>>("appconfig.json")
+        Napier.d("Index: loaded appConfig")
+        val defaultStringsXmlStr = Util.loadAssetsAsText(defaultAssetPath)
+        val displayedLocale = UstadMobileSystemImpl.displayedLocale
+        val foreignStringXmlStr = if(displayedLocale != "en") {
+            Util.loadAssetsAsText("locales/$displayedLocale.xml")
+        }else {
+            null
         }
 
-        //dbBuilder.build()
+        val ustadDi = ustadJsDi(dbBuilt, dbNodeIdAndAuth, appConfigs, apiUrl, defaultStringsXmlStr,
+            foreignStringXmlStr)
+
         createRoot(document.createElement("div").also { document.body!!.appendChild(it) })
-            .render(App.create() { di = builtDi })
+            .render(App.create() { di = ustadDi })
     }
 
 }
@@ -100,7 +100,7 @@ external interface AppProps: Props {
 private val App = FC<AppProps> { props ->
     val mobileMode = false//useMediaQuery("(max-width:960px)")
 
-    BrowserRouter {
+    HashRouter {
         DIModule {
             di = props.di
             UstadScreensModule {
