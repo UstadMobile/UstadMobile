@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.util.ext.getActivityContext
 
@@ -104,6 +106,7 @@ fun UstadDateEditTextField(
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    @Suppress("UNUSED_PARAMETER") //Reserved for future use
     timezoneId: String = "UTC",
     error: String? = null,
     onValueChange: (Long) -> Unit = {},
@@ -150,4 +153,105 @@ private fun UstadDateTextFieldPreview() {
     )
 }
 
+@Composable
+@OptIn(ExperimentalMaterialApi::class)
+fun <T> UstadExposedDropDownMenuField(
+    value: T?,
+    label: String,
+    options: List<T>,
+    onOptionSelected: (T) -> Unit,
+    itemText: @Composable (T) -> String,
+    modifier: Modifier = Modifier,
+    error: String? = null,
+) {
+
+    var errorText: String? by remember {
+        mutableStateOf(error)
+    }
+
+    UstadEditField(
+        modifier = modifier,
+        error = error,
+    ) {
+        var expanded by remember { mutableStateOf(false) }
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = {
+                expanded = !expanded
+            }
+        ) {
+            OutlinedTextField(
+                value = value?.let { itemText(it) } ?: "",
+                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { },
+                readOnly = true,
+                label = { Text(label) },
+                isError = errorText != null,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = expanded
+                    )
+                },
+                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded ,
+                onDismissRequest = {
+                    expanded = false
+                }
+            ) {
+                options.forEach { option ->
+                    DropdownMenuItem(
+                        onClick = {
+                            expanded = false
+                            errorText = null
+                            onOptionSelected(option)
+                        }
+                    ) {
+                        Text(text = itemText(option))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun UstadMessageIdOptionExposedDropDownMenuField(
+    value: Int,
+    label: String,
+    options: List<MessageIdOption2>,
+    onOptionSelected: (MessageIdOption2) -> Unit,
+    modifier: Modifier = Modifier,
+    error: String? = null,
+) {
+    UstadExposedDropDownMenuField(
+        value = options.firstOrNull { it.value == value },
+        label = label,
+        options = options,
+        onOptionSelected,
+        itemText = { messageIdResource(id = it.messageId) },
+        modifier = modifier,
+        error = error,
+    )
+}
+
+@Preview
+@Composable
+private fun UstadExposedDropDownMenuFieldPreview() {
+    var selectedOption by remember {
+        mutableStateOf("Coffee")
+    }
+
+    UstadExposedDropDownMenuField<String>(
+        value = selectedOption,
+        label = "Drink",
+        options = listOf("Coffee", "Tea"),
+        onOptionSelected = {
+            selectedOption = it
+        },
+        itemText =  { it }
+    )
+}
 
