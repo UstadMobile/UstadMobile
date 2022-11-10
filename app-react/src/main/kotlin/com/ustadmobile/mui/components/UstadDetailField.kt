@@ -9,7 +9,7 @@ import react.FC
 import react.Props
 import react.ReactNode
 
-external interface DetailRowProps: Props {
+external interface UstadDetailFieldProps: Props {
     var valueText: String
 
     var labelText: String
@@ -17,7 +17,7 @@ external interface DetailRowProps: Props {
     var icon: ReactNode
 }
 
-val DetailRow = FC<DetailRowProps> { props ->
+val UstadDetailField = FC<UstadDetailFieldProps> { props ->
     Stack {
         direction = responsive(StackDirection.row)
 
