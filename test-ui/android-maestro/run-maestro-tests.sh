@@ -101,7 +101,7 @@ if [ -e $SCRIPTDIR/results/results-summary.txt ]; then
   rm $SCRIPTDIR/results/results-summary.txt
 fi
 
-
+FAILCOUNT=0
 for TESTFILE in $TESTS; do
   TESTABSPATH=$(realpath $TESTFILE)
   export ANDROID_SERIAL=$TESTSERIAL
@@ -121,6 +121,7 @@ for TESTFILE in $TESTS; do
 
   if [ "$(cat $TESTDIR/results/result)" == "fail" ]; then
     echo "$(basename $TESTDIR) : FAIL" >> $SCRIPTDIR/results/results-summary.txt
+    FAILCOUNT=$((FAILCOUNT+1))
   fi
 
   cd $BASEDIR
@@ -128,3 +129,7 @@ done
 
 cd $WORKDIR
 
+if [ "$FAILCOUNT" != "0" ]; then
+  echo "There were failing Maestro tests"
+  exit 1
+fi
