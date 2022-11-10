@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -31,6 +29,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.savedstate.SavedStateRegistryOwner
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -41,11 +40,6 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.PersonPicture
-import com.ustadmobile.lib.db.entities.PersonWithAccount
-import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.port.android.ui.theme.ui.theme.UstadMobileTheme
 import com.ustadmobile.port.android.view.PersonAccountEditFragment.Companion.USERNAME_FILTER
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
@@ -58,6 +52,9 @@ import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
 import org.kodein.di.DI
 import com.ustadmobile.core.viewmodel.PersonEditUiState
 import com.ustadmobile.core.viewmodel.PersonEditViewModel
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import java.util.*
 
 interface PersonEditFragmentEventHandler {
@@ -280,7 +277,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             )
 
             setContent {
-                MaterialTheme {
+                MdcTheme {
                     PersonEditScreen(viewModel)
                 }
             }
@@ -331,33 +328,38 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 @Composable
 fun PersonEditScreen(
     uiState: PersonEditUiState = PersonEditUiState(),
-    gender: String = "",
-    genderList: List<MessageIdOption> = listOf(),
-    onSetGender: (MessageIdOption) -> Unit = { },
-    onSetUserImage: () -> Unit = { },
+    onPersonChanged: (PersonWithPersonParentJoin?) -> Unit = {},
 ){
     Column(
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier
+            .padding(8.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        SetUserImageButton(onSetUserImage)
+        //SetUserImageButton(onSetUserImage)
 
-        TextInput(stringResource(R.string.first_names), uiState.person?.firstNames ?: "")
+        UstadTextEditField(
+            value = uiState.person?.firstNames ?: "",
+            label = stringResource(id = R.string.first_names),
+            error = uiState.firstNamesFieldError,
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+
+            }
+        )
 
         TextInput(stringResource(R.string.last_name), uiState.person?.lastName ?: "")
 
-        SetGenderMenu(
-            genderList = genderList,
-            selectedGender = gender,
-            onItemSelected = onSetGender)
+        UstadDateEditTextField(
+            value = uiState.person?.dateOfBirth ?: 0,
+            label = stringResource(id = R.string.birthday),
+            error = uiState.dateOfBirthError,
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
 
-        val context = LocalContext.current
-        val dateOfBirth = remember { DateFormat.getDateFormat(context)
-            .format(Date(uiState.person?.dateOfBirth ?: 0)).toString() }
-
-        TextInput(stringResource(R.string.birthday), dateOfBirth)
+            }
+        )
 
         TextInput(stringResource(R.string.phone_number), uiState.person?.phoneNum ?: "")
 
@@ -368,7 +370,11 @@ fun PersonEditScreen(
 }
 
 @Composable
-private fun TextInput(label: String, value: String) {
+private fun TextInput(
+    label: String,
+    value: String,
+    error: String? = null,
+) {
     OutlinedTextField(
         value = value,
         modifier = Modifier
@@ -418,7 +424,8 @@ private fun SetGenderMenu(
             readOnly = true,
             value = selectedGender,
             onValueChange = { },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(8.dp),
             label = { stringResource(R.string.gender_literal) },
             trailingIcon = {
@@ -461,13 +468,12 @@ private fun SetGenderMenu(
 @Composable
 private fun PersonEditScreen(viewModel: PersonEditViewModel) {
     val uiState: PersonEditUiState by viewModel.uiState.collectAsState(PersonEditUiState())
-    val gender: String = viewModel.getGender(uiState.person?.gender ?: 0)
-    PersonEditScreen(uiState, gender, uiState.genderList)
+    PersonEditScreen(uiState)
 }
 
 @Preview
 @Composable
 private fun PersonEditPreview() {
     val uiState = PersonEditUiState()
-    PersonEditScreen(uiState, "")
+    PersonEditScreen(uiState)
 }

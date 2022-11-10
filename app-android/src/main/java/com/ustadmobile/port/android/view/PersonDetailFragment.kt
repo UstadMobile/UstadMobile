@@ -2,28 +2,12 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -45,8 +29,6 @@ import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.ui.theme.ui.theme.UstadMobileTheme
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import org.kodein.di.direct
@@ -214,103 +196,5 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
 
     }
 
-}
-
-@Composable
-private fun PersonDetailScreen(
-    onClickChangePassword: () -> Unit = {}
-){
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-    ) {
-
-        ChangePasswordButton(onClickChangePassword)
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Divider(color = Color.LightGray, modifier = Modifier.fillMaxWidth().width(1.dp))
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Column(modifier = Modifier.padding(12.dp)) {
-
-            Text(stringResource(R.string.import_content),
-                style = Typography.body1,
-                color = Color.Black)
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            UserRow()
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            TextButton(onClick = {}){
-                Text(stringResource(R.string.contact_details),
-                    style = Typography.body1,
-                    color = Color.Black)
-            }
-
-            TextButton(onClick = {}){
-                Text(stringResource(R.string.classes),
-                    style = Typography.body1,
-                    color = Color.Black)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ChangePasswordButton(onClick: () -> Unit) {
-
-    TextButton(onClick = onClick) {
-
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally,)
-        {
-            Image(
-                painter = painterResource(id = R.drawable.person_with_key),
-                contentDescription = "",
-                modifier = Modifier.size(35.dp),
-                colorFilter = ColorFilter.tint(color = Color.Black))
-
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Text(stringResource(R.string.change_password),
-                style = Typography.body1,
-                color = Color.Black)
-        }
-    }
-}
-
-@Composable
-private fun UserRow(){
-    Row {
-        Image(
-            painter = painterResource(id = R.drawable.ic_account_circle_black_24dp),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(color = Color.DarkGray),
-            modifier = Modifier
-                .size(35.dp))
-
-        Spacer(modifier = Modifier.width(5.dp))
-
-        Column {
-            Text(stringResource(R.string.change_password),
-                style = Typography.body1,
-                color = Color.Black)
-
-            Text(stringResource(R.string.username),
-                style = Typography.body1,
-                color = Color.Gray)
-        }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-private fun PersonDetailPreview() {
-    PersonDetailScreen()
 }
 

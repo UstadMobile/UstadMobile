@@ -32,14 +32,17 @@ import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.PersonDetailViewModel
 import org.kodein.di.DI
 import org.kodein.di.android.x.closestDI
-import android.text.format.DateFormat
 import androidx.compose.material.*
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.core.controller.PersonConstants
+import com.ustadmobile.core.util.ext.OUTCOME_TO_MESSAGE_ID_MAP
+import com.ustadmobile.core.util.ext.ROLE_TO_MESSAGEID_MAP
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
+import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import java.util.*
+import com.ustadmobile.port.android.util.compose.messageIdMapResource
+import com.ustadmobile.port.android.util.compose.rememberFormattedDate
+import com.ustadmobile.port.android.view.composable.UstadDetailField
 
 class PersonDetailFragment2 : Fragment(){
 
@@ -95,7 +98,6 @@ class PersonDetailFragment2 : Fragment(){
 @Composable
 private fun PersonDetailScreen(
     uiState: PersonDetailUiState = PersonDetailUiState(),
-    gender: String = "",
     onClickDial: () -> Unit = {},
     onClickSms: () -> Unit = {},
     onClickEmail: () -> Unit = {},
@@ -136,7 +138,7 @@ private fun PersonDetailScreen(
             style = Typography.h4,
             modifier = Modifier.padding(8.dp))
 
-        DetailFeilds(uiState, gender)
+        DetailFeilds(uiState)
 
         Divider(color = Color.LightGray, thickness = 1.dp)
 
@@ -229,40 +231,42 @@ private fun QuickActionBar(
 }
 
 @Composable
-private fun DetailFeilds(uiState: PersonDetailUiState, gender: String){
+private fun DetailFeilds(uiState: PersonDetailUiState){
     val context = LocalContext.current
     Column(
         modifier = Modifier.padding(8.dp)
     ){
+        val dateOfBirth = rememberFormattedDate(timeInMillis = uiState.person?.dateOfBirth ?: 0)
 
-        val dateOfBirth = remember { DateFormat.getDateFormat(context)
-            .format(Date(uiState.person?.dateOfBirth ?: 0)).toString() }
 
         if (uiState.person?.dateOfBirth != 0L){
-            DetailFeild(
-                R.drawable.ic_date_range_black_24dp,
-                dateOfBirth,
-                stringResource(R.string.birthday))
+            UstadDetailField(
+                imageId = R.drawable.ic_date_range_black_24dp,
+                valueText = dateOfBirth,
+                labelText = stringResource(R.string.birthday)
+            )
         }
 
-        if (!gender.isNullOrEmpty()){
-            DetailFeild(0,
-                gender,
-                stringResource(R.string.gender_literal))
-        }
+        UstadDetailField(
+                valueText = messageIdMapResource(PersonConstants.GENDER_MESSAGE_ID_MAP,
+                    uiState.person?.gender ?: 0),
+                labelText = stringResource(R.string.gender_literal)
+        )
 
         if (uiState.person?.personOrgId != null){
-            DetailFeild(
-                R.drawable.ic_badge_24dp,
-                uiState.person?.personOrgId ?: "",
-                stringResource(R.string.organization_id))
+            UstadDetailField(
+                imageId = R.drawable.ic_badge_24dp,
+                valueText = uiState.person?.personOrgId ?: "",
+                labelText = stringResource(R.string.organization_id)
+            )
         }
 
         if (!uiState.person?.username.isNullOrEmpty()){
-            DetailFeild(
-                R.drawable.ic_account_circle_black_24dp,
-                uiState.person?.username ?: "",
-                stringResource(R.string.username))
+            UstadDetailField(
+                imageId = R.drawable.ic_account_circle_black_24dp,
+                valueText = uiState.person?.username ?: "",
+                labelText = stringResource(R.string.username)
+            )
         }
     }
 }
@@ -272,7 +276,8 @@ private fun ContactDetails(
     uiState: PersonDetailUiState,
     onClickDial: () -> Unit = {},
     onClickSms: () -> Unit = {},
-    onClickEmail: () -> Unit = {},){
+    onClickEmail: () -> Unit = {},
+){
     Column(
         modifier = Modifier.padding(8.dp)
     ) {
@@ -285,18 +290,18 @@ private fun ContactDetails(
         }
 
         if (!uiState.person?.emailAddr.isNullOrEmpty()){
-            DetailFeild(
-                R.drawable.ic_email_black_24dp,
-                uiState.person?.emailAddr ?: "",
-                stringResource(R.string.email),
-                onClickEmail)
+            UstadDetailField(
+                imageId = R.drawable.ic_email_black_24dp,
+                    valueText = uiState.person?.emailAddr ?: "",
+                    labelText = stringResource(R.string.email),
+                    onClick = onClickEmail)
         }
 
         if (!uiState.person?.personAddress.isNullOrEmpty()){
-            DetailFeild(
-                R.drawable.ic_location_pin_24dp,
-                uiState.person?.personAddress ?: "",
-                stringResource(R.string.address))
+            UstadDetailField(
+                imageId = R.drawable.ic_location_pin_24dp,
+                labelText = uiState.person?.personAddress ?: "",
+                valueText = stringResource(R.string.address))
         }
     }
 }
@@ -312,11 +317,12 @@ private fun CallRow(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
 
-        DetailFeild(
-            R.drawable.ic_phone_black_24dp,
-            phoneNum,
-            stringResource(R.string.phone),
-            onClickDial)
+        UstadDetailField(
+            imageId = R.drawable.ic_phone_black_24dp,
+            valueText = phoneNum,
+            labelText = stringResource(R.string.phone),
+            onClick = onClickDial
+        )
 
         TextButton(
             onClick = onClickSms
@@ -325,8 +331,8 @@ private fun CallRow(
                 painter = painterResource(id = R.drawable.ic_message_bcd4_24dp),
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(color = Color.Gray),
-                modifier = Modifier
-                    .size(24.dp))
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
@@ -346,7 +352,10 @@ private fun Classes(
 }
 
 @Composable
-private fun ClassItem(clazz: ClazzEnrolmentWithClazzAndAttendance){
+private fun ClassItem(
+    clazzEnrolment: ClazzEnrolmentWithClazzAndAttendance
+){
+    val context = LocalContext.current
     Row(modifier = Modifier.padding(8.dp)
     ){
         Image(
@@ -356,65 +365,23 @@ private fun ClassItem(clazz: ClazzEnrolmentWithClazzAndAttendance){
             modifier = Modifier
                 .width(70.dp))
 
+
+        val roleText = messageIdMapResource(ROLE_TO_MESSAGEID_MAP, clazzEnrolment.clazzEnrolmentRole)
+        val outcomeText = messageIdMapResource(OUTCOME_TO_MESSAGE_ID_MAP,
+            clazzEnrolment.clazzEnrolmentOutcome)
+
+        val fromDate = rememberFormattedDate(timeInMillis = clazzEnrolment.clazzEnrolmentDateJoined)
+
+        val toDate = rememberFormattedDate(timeInMillis = clazzEnrolment.clazzEnrolmentDateLeft)
+
         Column {
-            Text(text = "Par")
-            Text(text = "Par")
-
-            if (clazz.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT){
-                Row (
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    Image(painter = painterResource(id = R.drawable.ic_lens_black_24dp),
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(color = Color.Gray),
-                        modifier = Modifier
-                            .size(12.dp))
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Text(text = "Par")
-                }
-            }
+            Text(text = "${clazzEnrolment.clazz?.clazzName} $roleText $outcomeText")
+            Text("$fromDate - $toDate")
         }
     }
 }
 
-@Composable
-private fun DetailFeild(
-    imageId: Int = 0,
-    valueText: String,
-    labelText: String,
-    onClick: () -> Unit = {}
-){
-    TextButton(
-        onClick = onClick
-    ){
-        Row{
-            if (imageId != 0){
-                Image(
-                    painter = painterResource(id = imageId),
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(color = Color.Gray),
-                    modifier = Modifier
-                        .size(24.dp))
-            } else {
-                Box(modifier = Modifier.width(24.dp))
-            }
 
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Column {
-                Text(valueText,
-                    style = Typography.h4,
-                    color = Color.Black)
-
-                Text(labelText,
-                    style = Typography.body2,
-                    color = Color.Gray)
-            }
-        }
-    }
-}
 
 @Composable
 private fun QuickActionButton(text: String, imageId: Int, onClick: () -> Unit){
@@ -442,14 +409,21 @@ private fun QuickActionButton(text: String, imageId: Int, onClick: () -> Unit){
 @Composable
 private fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
     val uiState: PersonDetailUiState by viewModel.uiState.collectAsState(PersonDetailUiState())
-    val gender: String = viewModel.getGender(uiState.person?.gender ?: 0)
-    PersonDetailScreen(uiState, gender)
+    PersonDetailScreen(uiState)
 }
 
 @Composable
 @Preview
 fun PersonDetailScreenPreview() {
-    val uiState = PersonDetailUiState()
-    PersonDetailScreen(uiState, "")
+    val uiState = PersonDetailUiState(
+        person = PersonWithPersonParentJoin().apply {
+            firstNames = "Bob"
+            lastName = "Jones"
+            dateOfBirth = 657973799000
+            emailAddr = "bob@jones.com"
+            phoneNum = "+12312121"
+        }
+    )
+    PersonDetailScreen(uiState)
 }
 
