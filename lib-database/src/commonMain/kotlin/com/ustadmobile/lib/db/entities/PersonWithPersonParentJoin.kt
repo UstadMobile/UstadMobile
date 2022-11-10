@@ -1,11 +1,11 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Embedded
-import com.ustadmobile.door.annotation.ShallowCopy
+import com.ustadmobile.door.annotation.ShallowCopyable
 import kotlinx.serialization.Serializable
 
 @Serializable
-@ShallowCopy
+@ShallowCopyable
 class PersonWithPersonParentJoin : Person(){
 
     @Embedded
