@@ -1,6 +1,5 @@
 package com.ustadmobile.core.impl
 
-import android.app.Application
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.years
 import com.ustadmobile.core.account.UstadAccountManager
@@ -15,7 +14,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
-import io.ktor.http.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
@@ -24,7 +22,7 @@ import kotlin.js.JsName
 /**
  * Class has all the shared function across all supported platforms
  */
-abstract class UstadMobileSystemCommon: Application() {
+abstract class UstadMobileSystemCommon {
 
     //for testing purpose only
     var networkManager: Any? = null
@@ -132,7 +130,7 @@ abstract class UstadMobileSystemCommon: Application() {
                         AccountListView.ARG_FILTER_BY_ENDPOINT to endpointUrl,
                         AccountListView.ARG_ACTIVE_ACCOUNT_MODE to AccountListView.ACTIVE_ACCOUNT_MODE_INLIST,
                         UstadView.ARG_TITLE to getString(MessageID.select_account, context),
-                        ARG_INTENT_MESSAGE to intentMessage,
+                        UstadView.ARG_INTENT_MESSAGE to intentMessage,
                         UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString(),
                         UstadView.ARG_MAX_DATE_OF_BIRTH to maxDateOfBirth.toString())
                     go(AccountListView.VIEW_NAME, args, context)
@@ -167,10 +165,6 @@ abstract class UstadMobileSystemCommon: Application() {
 
     open fun go(viewName: String, args: Map<String, String?>, context: Any) {
         go(viewName, args, context, 0, UstadGoOptions(null, false))
-    }
-
-    open fun go(viewName: String, args: Map<String, String?>) {
-        go(viewName, args, applicationContext,0, UstadGoOptions(null, false))
     }
 
     open fun go(viewName: String, args: Map<String, String?>, context: Any, ustadGoOptions: UstadGoOptions) {
