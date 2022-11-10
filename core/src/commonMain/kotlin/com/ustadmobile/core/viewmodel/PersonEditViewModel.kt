@@ -12,11 +12,12 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.launch
 import org.kodein.di.on
 
 data class PersonEditUiState(
 
-    val person: PersonWithPersonParentJoin? = null,
+    val person: PersonWithAccount? = null,
 
     val personPicture: PersonPicture? = null,
 
@@ -60,7 +61,9 @@ class PersonEditViewModel(
     savedStateHandle: UstadSavedStateHandle
 ): DetailViewModel<Person>(di, savedStateHandle) {
 
-    val uiState: Flow<PersonEditUiState>
+    private val _uiState: MutableStateFlow<PersonEditUiState> = MutableStateFlow(PersonEditUiState())
+
+    val uiState: Flow<PersonEditUiState> = _uiState.asStateFlow()
 
     init {
 
@@ -73,18 +76,18 @@ class PersonEditViewModel(
 
         val entityUid: Long = savedStateHandle.get<String>(UstadView.ARG_ENTITY_UID)!!.toLong()
 
-        val dbPersonFlow = db.personDao
-            .findByUidWithDisplayDetailsFlow(entityUid, currentUserUid)
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+        viewModelScope.launch {
+            val person = db.personDao.findPersonAccountByUid(entityUid)
+            _uiState.update { prev ->
+                prev.copy(person = person)
+            }
+        }
+    }
 
-        val dbHasPermissionFlow = db.personDao.personHasPermissionFlow(currentUserUid,
-            entityUid, Role.PERMISSION_RESET_PASSWORD)
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
-        uiState = dbPersonFlow.combine(dbHasPermissionFlow) { person, personHasPermission ->
-            PersonEditUiState(
-                person = person,
-            )
+    fun onEntityChanged(entity: PersonWithAccount?) {
+        _uiState.update { prev ->
+            prev.copy(person = entity)
         }
     }
 
