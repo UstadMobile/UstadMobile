@@ -12,7 +12,7 @@ import react.FC
 import react.Props
 import react.dom.events.MouseEventHandler
 
-external interface QuickActionButtonProps : Props {
+external interface UstadQuickActionButtonProps : Props {
     var onClick: MouseEventHandler<*>
 
     var text: String
@@ -21,7 +21,7 @@ external interface QuickActionButtonProps : Props {
 
 }
 
-val QuickActionButton = FC<QuickActionButtonProps> { props ->
+val UstadQuickActionButton = FC<UstadQuickActionButtonProps> { props ->
     Button {
         variant = ButtonVariant.text
         onClick = props.onClick
