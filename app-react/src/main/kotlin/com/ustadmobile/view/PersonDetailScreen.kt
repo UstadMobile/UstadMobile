@@ -5,8 +5,8 @@ import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.core.components.DIContext
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.mui.components.DetailRow
-import com.ustadmobile.mui.components.QuickActionButton
+import com.ustadmobile.mui.components.UstadDetailField
+import com.ustadmobile.mui.components.UstadQuickActionButton
 import mui.icons.material.Call
 import mui.icons.material.Email
 import mui.material.*
@@ -58,18 +58,18 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
             Stack {
                 direction = responsive(StackDirection.row)
 
-                QuickActionButton {
+                UstadQuickActionButton {
                     icon = Call.create()
                     text = strings[MessageID.call]
                 }
 
-                QuickActionButton {
+                UstadQuickActionButton {
                     icon = Email.create()
                     text = strings[MessageID.email]
                 }
             }
 
-            DetailRow{
+            UstadDetailField {
                 icon = mui.icons.material.AccountCircle.create()
                 labelText = strings[MessageID.name]
                 valueText = props.uiState.person?.firstNames ?: ""
@@ -79,7 +79,7 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
                 Date(props.uiState.person?.dateOfBirth ?: 0L).toLocaleDateString()
             }
 
-            DetailRow{
+            UstadDetailField{
                 icon = mui.icons.material.CalendarToday.create()
                 labelText = strings[MessageID.birthday]
                 valueText = birthdayFormatted
