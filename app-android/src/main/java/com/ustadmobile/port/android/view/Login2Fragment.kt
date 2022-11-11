@@ -156,6 +156,8 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
 private fun LoginScreen(
     uiState: LoginUiState = LoginUiState(),
     onClickLogin: () -> Unit = {},
+    onClickCreateAccount: () -> Unit = {},
+    onClickConnectAsGuest: () -> Unit = {},
     onUsernameValueChange: (String) -> Unit = {},
     onPasswordValueChange: (String) -> Unit = {},
 ) {
@@ -182,7 +184,7 @@ private fun LoginScreen(
                 onPasswordValueChange("")
             },
             error = uiState.passwordErrorMessage,
-            enabled = true,
+            enabled = false,
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -200,7 +202,7 @@ private fun LoginScreen(
         }
 
         OutlinedButton(
-            onClick = {  },
+            onClick = onClickCreateAccount,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -208,7 +210,7 @@ private fun LoginScreen(
         }
 
         OutlinedButton(
-            onClick = {  },
+            onClick = onClickConnectAsGuest,
             modifier = Modifier
                 .fillMaxWidth()
         ) {

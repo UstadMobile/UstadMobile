@@ -161,15 +161,14 @@ private fun SiteEnterLinkScreen(
             modifier = Modifier
                 .height(200.dp))
 
-        Text(
-            stringResource(R.string.please_enter_the_linK))
+        Text(stringResource(R.string.please_enter_the_linK))
 
         UstadTextEditField(
             value = "",
             label = stringResource(id = R.string.site_link),
             onValueChange = onEditTextValueChange,
             error = uiState.errorMessage,
-            enabled = true,
+            enabled = false,
         )
 
         Spacer(modifier = Modifier.height(20.dp))
