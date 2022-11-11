@@ -11,10 +11,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,12 +22,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSiteEnterLinkBinding
 import com.ustadmobile.core.controller.SiteEnterLinkPresenter
@@ -37,6 +39,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.PersonDetailViewModel
+import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
@@ -85,6 +88,8 @@ class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
         mBinding?.siteLinkView?.error = if(isError) getString(R.string.invalid_link) else null
     }
 
+    private val uiState = SiteEnterLinkUiState()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView: View
@@ -94,7 +99,18 @@ class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
             it.showProgress = false
         }
 
-        return rootView
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
+
+            setContent {
+                MdcTheme {
+                    SiteEnterLinkScreen(uiState)
+                }
+            }
+        }
+//        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -126,6 +142,7 @@ class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
 
 @Composable
 private fun SiteEnterLinkScreen(
+    uiState: SiteEnterLinkUiState = SiteEnterLinkUiState(),
     onClickNext: () -> Unit = {},
     onClickNewLearningEnvironment: () -> Unit = {},
     onEditTextValueChange: (String) -> Unit = {},
@@ -145,72 +162,56 @@ private fun SiteEnterLinkScreen(
                 .height(200.dp))
 
         Text(
-            stringResource(R.string.please_enter_the_linK),
-            style = Typography.h4)
+            stringResource(R.string.please_enter_the_linK))
 
         UstadTextEditField(
             value = "",
             label = stringResource(id = R.string.site_link),
             onValueChange = onEditTextValueChange,
-            error =null,
+            error = uiState.errorMessage,
             enabled = true,
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        NextButton(onClickNext)
+        Button(
+            onClick = onClickNext,
+            modifier = Modifier
+                .fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = colorResource(id = R.color.secondaryColor)
+            )
+        ) {
+            Text(stringResource(R.string.next))
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(stringResource(R.string.or))
 
-        NewLearningEnvironmentButton(onClickNewLearningEnvironment)
-    }
-}
+        Button(
+            onClick = onClickNewLearningEnvironment,
+            modifier = Modifier
+                .fillMaxWidth(),
+            elevation = null,
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent,
+                contentColor = colorResource(id = R.color.primaryColor),
+            )
+        ) {
 
-@Composable
-private fun NextButton(
-    onClickNext: () -> Unit = {}
-){
-    TextButton(
-        onClick = onClickNext,
-        modifier = Modifier
-            .background(colorResource(id = R.color.secondaryColor))
-            .fillMaxWidth()
-    ) {
-        Text(
-            stringResource(R.string.next),
-            style = Typography.h3,
-            color = colorResource(id = R.color.almost_black))
-    }
-}
+            Icon(Icons.Filled.Add, contentDescription = "")
 
-@Composable
-private fun NewLearningEnvironmentButton(
-    onClickNewLearningEnvironment: () -> Unit = {}
-){
-    TextButton(
-        onClick = onClickNewLearningEnvironment,
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-
-        Image(
-            painter = painterResource(id = R.drawable.ic_add_black_24dp),
-            contentDescription = null,
-            colorFilter = ColorFilter
-                .tint(color = colorResource(id = R.color.primaryColor)),)
-
-        Text(
-            stringResource(R.string.create_a_new_learning_env),
-            style = Typography.h3,
-            color = colorResource(id = R.color.primaryColor))
+            Text(stringResource(R.string.create_a_new_learning_env))
+        }
     }
 }
 
 @Composable
 @Preview
 fun SiteEnterLinkScreenPreview() {
-    SiteEnterLinkScreen()
+    MdcTheme {
+        SiteEnterLinkScreen()
+    }
 }
 
