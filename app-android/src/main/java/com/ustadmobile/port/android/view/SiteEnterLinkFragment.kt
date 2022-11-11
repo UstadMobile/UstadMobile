@@ -169,12 +169,12 @@ private fun SiteEnterLinkScreen(
                 backgroundColor = colorResource(id = R.color.secondaryColor)
             )
         ) {
-            Text(stringResource(R.string.next))
+            Text(stringResource(R.string.next).uppercase())
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(stringResource(R.string.or))
+        Text(stringResource(R.string.or).uppercase())
 
         Button(
             onClick = onClickNewLearningEnvironment,
@@ -189,7 +189,9 @@ private fun SiteEnterLinkScreen(
 
             Icon(Icons.Filled.Add, contentDescription = "")
 
-            Text(stringResource(R.string.create_a_new_learning_env))
+            Text(stringResource(R.string.create_a_new_learning_env)
+                .uppercase()
+            )
         }
     }
 }

@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -171,8 +172,10 @@ private fun LoginScreen(
         UstadTextEditField(
             value = "",
             label = stringResource(id = R.string.username),
-            onValueChange = onUsernameValueChange,
-            error = uiState.usernameErrorMessage,
+            onValueChange = {
+                onUsernameValueChange(it)
+            },
+            error = uiState.usernameError,
             enabled = false,
         )
 
@@ -180,14 +183,18 @@ private fun LoginScreen(
             value = "",
             label = stringResource(id = R.string.password),
             onValueChange = {
-                onPasswordValueChange("")
+                onPasswordValueChange(it)
             },
-            error = uiState.passwordErrorMessage,
+            error = uiState.passwordError,
             enabled = false,
-            trailingIcon = { Icon(Icons.Sharp.Lock, contentDescription = "") }
+            trailingIcon = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_baseline_visibility_24),
+                    contentDescription = "")
+            }
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Button(
             onClick = onClickLogin,
@@ -198,24 +205,38 @@ private fun LoginScreen(
                 backgroundColor = colorResource(id = R.color.secondaryColor)
             )
         ) {
-            Text(stringResource(R.string.login))
+            Text(stringResource(R.string.login).uppercase())
         }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedButton(
             onClick = onClickCreateAccount,
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent,
+                contentColor = colorResource(id = R.color.primaryColor)
+            )
         ) {
-            Text(stringResource(R.string.create_account))
+            Text(stringResource(R.string.create_account).uppercase())
         }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedButton(
             onClick = onClickConnectAsGuest,
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent,
+                contentColor = colorResource(id = R.color.primaryColor)
+            )
         ) {
-            Text(stringResource(R.string.connect_as_guest))
+            Text(stringResource(R.string.connect_as_guest).uppercase())
         }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(uiState.versionInfo)
     }

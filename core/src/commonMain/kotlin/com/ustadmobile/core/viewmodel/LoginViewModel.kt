@@ -16,9 +16,11 @@ import kotlinx.coroutines.launch
 import org.kodein.di.on
 
 data class LoginUiState(
+    val username: String = "",
+    val password: String = "",
     val isEmptyPassword: Boolean = false,
-    val usernameErrorMessage: String = "",
-    val passwordErrorMessage: String = "",
+    val usernameError: String = "",
+    val passwordError: String = "",
     val versionInfo: String = "v42",
     val isEmptyUsername: Boolean = false,
     val inProgress: Boolean = false,
