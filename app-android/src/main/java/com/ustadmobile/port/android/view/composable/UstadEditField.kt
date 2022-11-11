@@ -56,6 +56,7 @@ fun UstadTextEditField(
     readOnly: Boolean = false,
     onClick: (() -> Unit)? = null,
     onValueChange: (String) -> Unit,
+    trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     var errorText by remember(error) {
         mutableStateOf(error)
@@ -84,6 +85,7 @@ fun UstadTextEditField(
             enabled = enabled,
             interactionSource = interactionSource,
             readOnly = readOnly,
+            trailingIcon = trailingIcon
         )
     }
 }

@@ -8,8 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.sharp.Lock
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,12 +26,10 @@ import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentLogin2Binding
 import com.ustadmobile.core.controller.Login2Presenter
-import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.core.viewmodel.LoginUiState
-import org.kodein.di.DI
 
 
 class Login2Fragment : UstadBaseFragment(), Login2View {
@@ -174,7 +173,7 @@ private fun LoginScreen(
             label = stringResource(id = R.string.username),
             onValueChange = onUsernameValueChange,
             error = uiState.usernameErrorMessage,
-            enabled = true,
+            enabled = false,
         )
 
         UstadTextEditField(
@@ -185,6 +184,7 @@ private fun LoginScreen(
             },
             error = uiState.passwordErrorMessage,
             enabled = false,
+            trailingIcon = { Icon(Icons.Sharp.Lock, contentDescription = "") }
         )
 
         Spacer(modifier = Modifier.height(20.dp))

@@ -5,7 +5,6 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
-import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,15 +14,10 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -37,13 +31,7 @@ import com.ustadmobile.core.controller.SiteEnterLinkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SiteEnterLinkView
-import com.ustadmobile.core.viewmodel.PersonDetailUiState
-import com.ustadmobile.core.viewmodel.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
-import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import java.util.*
 
