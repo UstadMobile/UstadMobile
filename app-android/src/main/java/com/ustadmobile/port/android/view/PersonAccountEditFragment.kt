@@ -216,10 +216,6 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 @Composable
 private fun PersonAccountEditScreen(
     uiState: PersonAccountEditUiState = PersonAccountEditUiState(),
-    onUsernameValueChange: (String) -> Unit = {},
-    onCurrentPasswordValueChange: (String) -> Unit = {},
-    onNewPasswordValueChange: (String) -> Unit = {},
-    onConfirmPasswordValueChange: (String) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -230,18 +226,24 @@ private fun PersonAccountEditScreen(
     )  {
 
         UstadTextEditField(
-            value = "",
+            value = uiState.personUsernameAndPassword.username,
             label = stringResource(id = R.string.username),
-            onValueChange = onUsernameValueChange,
+            onValueChange = {
+                uiState.personUsernameAndPassword.copy(
+                    username = it
+                )
+            },
             error = "",
             enabled = false,
         )
 
         UstadTextEditField(
-            value = "",
+            value = uiState.personUsernameAndPassword.currentPassword,
             label = stringResource(id = R.string.current_password),
             onValueChange = {
-                onCurrentPasswordValueChange("")
+                uiState.personUsernameAndPassword.copy(
+                    currentPassword = it
+                )
             },
             error = "",
             enabled = false,
@@ -253,10 +255,12 @@ private fun PersonAccountEditScreen(
         )
 
         UstadTextEditField(
-            value = "",
+            value = uiState.personUsernameAndPassword.newPassword,
             label = stringResource(id = R.string.new_password),
             onValueChange = {
-                onNewPasswordValueChange("")
+                uiState.personUsernameAndPassword.copy(
+                    newPassword = it
+                )
             },
             error = "",
             enabled = false,
@@ -268,10 +272,12 @@ private fun PersonAccountEditScreen(
         )
 
         UstadTextEditField(
-            value = "",
+            value = uiState.personUsernameAndPassword.passwordConfirmed,
             label = stringResource(id = R.string.confirm_password),
             onValueChange = {
-                onConfirmPasswordValueChange("")
+                uiState.personUsernameAndPassword.copy(
+                    passwordConfirmed = it
+                )
             },
             error = "",
             enabled = false,

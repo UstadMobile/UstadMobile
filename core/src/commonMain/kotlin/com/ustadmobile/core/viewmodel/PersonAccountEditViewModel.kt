@@ -4,7 +4,9 @@ data class PersonUsernameAndPasswordModel(
 
     val username: String = "",
 
-    val password: String = "",
+    val currentPassword: String = "",
+
+    val newPassword: String = "",
 
     val passwordConfirmed: String = "",
 )

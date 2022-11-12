@@ -8,10 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.sharp.Lock
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -176,7 +172,7 @@ private fun LoginScreen(
                 onUsernameValueChange(it)
             },
             error = uiState.usernameError,
-            enabled = false,
+            enabled = true,
         )
 
         UstadTextEditField(
@@ -186,7 +182,7 @@ private fun LoginScreen(
                 onPasswordValueChange(it)
             },
             error = uiState.passwordError,
-            enabled = false,
+            enabled = true,
             trailingIcon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_baseline_visibility_24),
