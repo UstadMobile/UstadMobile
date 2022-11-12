@@ -23,6 +23,8 @@
     <color name="onPrimaryColorLight">#E8EAED</color>
     <color name="onErrorColor">#ffffff</color>
 
+    <color name="list_subheader">#757575</color>
+
     <color name="navigationBarColor">#000000</color>
     <color name="iconTintColor">#727272</color>
     <color name="successColor">#4CAF50</color>

@@ -93,10 +93,8 @@ fun PersonDetailScreen(
 
 @Composable
 fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
-    val uiState: PersonDetailUiState by viewModel.uiState.collectAsState()
-    val person: Person? by uiState.person.collectAsState(initial = null)
 
-    PersonDetailScreen(person)
+
 }
 
 @Composable

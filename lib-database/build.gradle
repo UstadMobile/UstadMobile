@@ -28,6 +28,12 @@ android {
 
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
+        debug {
+            java.srcDirs += ["build/generated/ksp/android/androidDebug/kotlin"]
+        }
+        release {
+            java.srcDirs += ["build/generated/ksp/android/androidRelease/kotlin"]
+        }
     }
 
     compileOptions {
@@ -79,6 +85,8 @@ kotlin {
 
     sourceSets {
         commonMain {
+            kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
+
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
@@ -154,6 +162,7 @@ ksp {
 }
 
 dependencies {
+    kspAndroid "com.github.UstadMobile.door:door-shallowcopy:$version_door"
     kspJvm "com.github.UstadMobile.door:door-compiler:$version_door"
     kspJs "com.github.UstadMobile.door:door-compiler:$version_door"
     kspAndroid "com.github.UstadMobile.door:door-compiler:$version_door"
