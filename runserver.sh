@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 'p:hdcbsn' --long 'password:,help,debug,clear,background,stop,nobuild' -n 'runserver.sh' -- "$@")
+TEMP=$(getopt -o 'p:hdcbsnj' --long 'password:,help,debug,clear,background,stop,nobuild,bundlejs' -n 'runserver.sh' -- "$@")
 
 eval set -- "$TEMP"
 unset TEMP
@@ -12,6 +12,7 @@ BASEDIR="$(realpath $(dirname $0))"
 BACKGROUND="false"
 STOP="false"
 NOBUILD="false"
+BUNDLEJS="false"
 
 #The root path of the project (e.g. the directory into which it was checked out from git)
 cd $BASEDIR
@@ -29,6 +30,7 @@ while true; do
       echo " -s --stop stop server that was started in the background"
       echo " -n --nobuild skip gradle build"
       echo " -p --password set the admin password to be generated (if not already set or db is cleared)"
+      echo " -j --bundlejs if building the server, build the production javascript bundle. Required to show the webui using the http server. Not required for Javascript development or Android"
       exit 0
       ;;
     '-d'|'--debug')
@@ -63,6 +65,11 @@ while true; do
       shift 2
       continue
       ;;
+    '-j'|'--bundlejs')
+      BUNDLEJS="true"
+      shift 1
+      continue
+      ;;
     '--')
       shift
       break
@@ -78,6 +85,11 @@ if [ "$NOBUILD" != "true" ] && [ "$STOP" != "true" ]; then
     echo "Error preparing locale"
     exit 2
   fi
+  SERVER_BUILD_ARGS=""
+  if [ "$BUNDLEJS" == "true" ]; then
+    SERVER_BUILD_ARGS=" -Pktorbundleproductionjs=true "
+  fi
+
   ./gradlew app-ktor-server:shadowJar
   if [ "$?" != "0" ]; then
     echo "Error compiling server"
