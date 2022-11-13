@@ -1,10 +1,7 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
@@ -13,7 +10,6 @@ import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.flow.*
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 
 data class PersonDetailUiState(
@@ -62,12 +58,6 @@ class PersonDetailViewModel(
                 chatVisible = person != null && person.personUid != currentUserUid
             )
         }
-    }
-
-    fun getGender(gender: Int = 0): String {
-        val genderId: Int? = PersonConstants.GENDER_MESSAGE_ID_MAP[gender]
-        val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-        return systemImpl.getString(genderId ?: 0)
     }
 }
 

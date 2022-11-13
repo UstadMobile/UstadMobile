@@ -110,9 +110,7 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val rootView: View
         mBinding = FragmentLogin2Binding.inflate(inflater, container, false).also {
-            rootView = it.root
             it.buttonEnabled = true
             it.fieldsEnabled = true
         }
@@ -128,8 +126,6 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
                 }
             }
         }
-
-//        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -166,23 +162,23 @@ private fun LoginScreen(
     )  {
 
         UstadTextEditField(
-            value = "",
+            value = uiState.username,
             label = stringResource(id = R.string.username),
             onValueChange = {
                 onUsernameValueChange(it)
             },
             error = uiState.usernameError,
-            enabled = true,
+            enabled = uiState.usernameEnabled,
         )
 
         UstadTextEditField(
-            value = "",
+            value = uiState.password,
             label = stringResource(id = R.string.password),
             onValueChange = {
                 onPasswordValueChange(it)
             },
             error = uiState.passwordError,
-            enabled = true,
+            enabled = uiState.passwordEnabled,
             trailingIcon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_baseline_visibility_24),
@@ -210,10 +206,6 @@ private fun LoginScreen(
             onClick = onClickCreateAccount,
             modifier = Modifier
                 .fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Transparent,
-                contentColor = colorResource(id = R.color.primaryColor)
-            )
         ) {
             Text(stringResource(R.string.create_account).uppercase())
         }
@@ -224,10 +216,6 @@ private fun LoginScreen(
             onClick = onClickConnectAsGuest,
             modifier = Modifier
                 .fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Transparent,
-                contentColor = colorResource(id = R.color.primaryColor)
-            )
         ) {
             Text(stringResource(R.string.connect_as_guest).uppercase())
         }

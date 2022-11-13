@@ -36,9 +36,15 @@ import android.text.format.DateFormat
 import androidx.compose.material.*
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import com.ustadmobile.core.controller.PersonConstants
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.util.compose.messageIdMapResource
+import com.ustadmobile.port.android.util.compose.messageIdResource
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.util.*
 
 class PersonDetailFragment2 : Fragment(){
@@ -95,7 +101,6 @@ class PersonDetailFragment2 : Fragment(){
 @Composable
 private fun PersonDetailScreen(
     uiState: PersonDetailUiState = PersonDetailUiState(),
-    gender: String = "",
     onClickDial: () -> Unit = {},
     onClickSms: () -> Unit = {},
     onClickEmail: () -> Unit = {},
@@ -136,7 +141,7 @@ private fun PersonDetailScreen(
             style = Typography.h4,
             modifier = Modifier.padding(8.dp))
 
-        DetailFeilds(uiState, gender)
+        DetailFeilds(uiState)
 
         Divider(color = Color.LightGray, thickness = 1.dp)
 
@@ -229,23 +234,29 @@ private fun QuickActionBar(
 }
 
 @Composable
-private fun DetailFeilds(uiState: PersonDetailUiState, gender: String){
+private fun DetailFeilds(uiState: PersonDetailUiState){
     val context = LocalContext.current
     Column(
         modifier = Modifier.padding(8.dp)
     ){
 
+        val gender = messageIdMapResource(
+            map = PersonConstants.GENDER_MESSAGE_ID_MAP,
+            key = uiState.person?.gender ?: 1)
+
         val dateOfBirth = remember { DateFormat.getDateFormat(context)
             .format(Date(uiState.person?.dateOfBirth ?: 0)).toString() }
 
-        if (uiState.person?.dateOfBirth != 0L){
+        if (uiState.person?.dateOfBirth != 0L
+            && uiState.person?.dateOfBirth != null){
             DetailFeild(
                 R.drawable.ic_date_range_black_24dp,
                 dateOfBirth,
                 stringResource(R.string.birthday))
         }
 
-        if (!gender.isNullOrEmpty()){
+        if (uiState.person?.gender != 0
+            && uiState.person?.gender != null){
             DetailFeild(0,
                 gender,
                 stringResource(R.string.gender_literal))
@@ -442,14 +453,13 @@ private fun QuickActionButton(text: String, imageId: Int, onClick: () -> Unit){
 @Composable
 private fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
     val uiState: PersonDetailUiState by viewModel.uiState.collectAsState(PersonDetailUiState())
-    val gender: String = viewModel.getGender(uiState.person?.gender ?: 0)
-    PersonDetailScreen(uiState, gender)
+    PersonDetailScreen(uiState)
 }
 
 @Composable
 @Preview
 fun PersonDetailScreenPreview() {
     val uiState = PersonDetailUiState()
-    PersonDetailScreen(uiState, "")
+    PersonDetailScreen(uiState)
 }
 
