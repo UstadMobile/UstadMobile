@@ -240,7 +240,9 @@ private fun DetailFeilds(uiState: PersonDetailUiState){
         modifier = Modifier.padding(8.dp)
     ){
 
-        val gender = messageIdMapResource(map = PersonConstants.GENDER_MESSAGE_ID_MAP, key = uiState.person?.gender ?: 1)
+        val gender = messageIdMapResource(
+            map = PersonConstants.GENDER_MESSAGE_ID_MAP,
+            key = uiState.person?.gender ?: 1)
 
         val dateOfBirth = remember { DateFormat.getDateFormat(context)
             .format(Date(uiState.person?.dateOfBirth ?: 0)).toString() }
