@@ -119,10 +119,8 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        val rootView: View
         mBinding = FragmentPersonAccountEditBinding.inflate(inflater, container,
             false).also {
-            rootView = it.root
         }
 
         mPresenter = PersonAccountEditPresenter(requireContext(), arguments.toStringMap(),
@@ -160,7 +158,6 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
                 }
             }
         }
-//        return rootView
     }
 
     override fun onResume() {
