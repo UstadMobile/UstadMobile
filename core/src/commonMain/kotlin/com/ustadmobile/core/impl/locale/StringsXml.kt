@@ -79,7 +79,7 @@ class StringsXml (
 
     operator fun get(messageId: Int): String {
         return messageMap[messageId] ?: fallback?.get(messageId)
-            ?: throw IllegalArgumentException("$stringsXmlName does not contain")
+            ?: throw IllegalArgumentException("StringsXml: Locale: '$stringsXmlName' does not contain message id $messageId")
     }
 
     /**
