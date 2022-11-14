@@ -83,6 +83,19 @@ class StringsXml (
     }
 
     /**
+     * This is a simple shorthand to lookup the MessageId from a map using a key. It will return null
+     * if the key is not found in the map. This is often used to map constants of
+     * some kind (e.g. filter chip flags, sort flags, etc) to a MessageID that is used in the
+     * user interface
+     *
+     * @param lookupKey the key to lookup in the given map
+     * @param map map of key to message id
+     */
+    fun <K> mapLookup(lookupKey: K, map: Map<K, Int>): String? {
+        return map[lookupKey]?.let { get(it) }
+    }
+
+    /**
      * This is a simple shorthand to lookup the MessageId from a map using a key. An exception will
      * be thrown if the given lookupKey is not in the map. This is often used to map constants of
      * some kind (e.g. filter chip flags, sort flags, etc) to a MessageID that is used in the
@@ -91,9 +104,9 @@ class StringsXml (
      * @param lookupKey the key to lookup in the given map
      * @param map map of key to message id
      */
-    fun <K> mapLookup(lookupKey: K, map: Map<K, Int>): String {
-        val messageId = map[lookupKey] ?:
-            throw IllegalArgumentException("StringsXml: mapLookup: key $lookupKey not found in map provided ")
+    fun <K> requireMapLookup(lookupKey: K, map: Map<K, Int>): String {
+        val messageId = map[lookupKey]
+            ?: throw IllegalArgumentException("StringsXml: requireMapLookup: key $lookupKey not found in map")
         return get(messageId)
     }
 
