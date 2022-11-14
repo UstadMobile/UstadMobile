@@ -1,9 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
-import com.ustadmobile.door.annotation.ShallowCopyable
 import kotlinx.serialization.Serializable
 
-@ShallowCopyable
 @Serializable
 class PersonWithAccount : Person() {
 

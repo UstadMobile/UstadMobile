@@ -37,12 +37,12 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
             }
 
             UstadTextEditField {
-                value = props.uiState.personUsernameAndPassword.password
-                label = "password"
+                value = props.uiState.personUsernameAndPassword.currentPassword
+                label = "current password"
                 onChange = {
                     props.onUsernameAndPasswordChanged(
                         props.uiState.personUsernameAndPassword.copy(
-                            password = it
+                            currentPassword = it
                         )
                     )
                 }
@@ -69,7 +69,6 @@ val PersonAccountEditPreview = FC<Props> {
         PersonAccountEditUiState(
             personUsernameAndPassword = PersonUsernameAndPasswordModel(
                 username = "mullahnasruddin",
-                password = "secret",
                 passwordConfirmed = "secret"
             )
         )
