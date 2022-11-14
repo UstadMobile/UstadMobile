@@ -14,7 +14,7 @@ external interface UstadDetailFieldProps: Props {
 
     var labelText: String
 
-    var icon: ReactNode
+    var icon: ReactNode?
 }
 
 val UstadDetailField = FC<UstadDetailFieldProps> { props ->

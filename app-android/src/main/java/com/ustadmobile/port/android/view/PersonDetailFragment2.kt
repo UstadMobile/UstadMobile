@@ -37,14 +37,10 @@ import androidx.compose.material.*
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.ustadmobile.core.controller.PersonConstants
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
-import com.ustadmobile.port.android.util.compose.messageIdResource
-import org.kodein.di.direct
-import org.kodein.di.instance
 import java.util.*
 
 class PersonDetailFragment2 : Fragment(){
@@ -368,8 +364,8 @@ private fun ClassItem(clazz: ClazzEnrolmentWithClazzAndAttendance){
                 .width(70.dp))
 
         Column {
-            Text(text = "Par")
-            Text(text = "Par")
+            Text(text = "")
+            Text(text = "")
 
             if (clazz.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT){
                 Row (
@@ -383,7 +379,7 @@ private fun ClassItem(clazz: ClazzEnrolmentWithClazzAndAttendance){
 
                     Spacer(modifier = Modifier.width(10.dp))
 
-                    Text(text = "Par")
+                    Text(text = "")
                 }
             }
         }
