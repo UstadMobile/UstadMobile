@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.Person
@@ -24,7 +25,24 @@ data class PersonDetailUiState(
 
     val clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
 
-)
+) {
+
+    val dateOfBirthVisible: Boolean
+        get() = person?.dateOfBirth.isDateSet()
+
+    val phoneNumVisible: Boolean
+        get() = !person?.phoneNum.isNullOrBlank()
+
+    val emailVisible: Boolean
+        get() = !person?.emailAddr.isNullOrBlank()
+
+    val personOrgIdVisible: Boolean
+        get() = !person?.personOrgId.isNullOrBlank()
+
+    val personUsernameVisible: Boolean
+        get() = !person?.username.isNullOrBlank()
+
+}
 
 class PersonDetailViewModel(
     di: DI,
