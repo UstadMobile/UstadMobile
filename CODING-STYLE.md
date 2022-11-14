@@ -83,8 +83,12 @@ class PersonDetailViewModel: ViewModel {
 Views are written using Jetpack Compose for Android and the Kotlin/JS MUI wrapper for Javascript. 
 The view function should use the UiState as an argument, 
 
-e.g. Android Jetpack Compose
+Android Jetpack Compose:
 ```
+/*
+ * Main composable function: this should always take the UI state as the first parameter, and then
+ * have parameters for event handlers.
+ */ 
 @Composable
 function PersonDetailScreen(
     uiState: PersonDetailUiState = PersonDetailUiState(),
@@ -107,13 +111,18 @@ function PersonDetailScreen(
     }
 }
 
-//Note: Different function name to avoid rendering issues in Android studio
+/*
+ * Note: different function name is used to avoid rendering issues in Android studio if using
+ * the same function name with different parameters (which is valid and will compile, but then the 
+ * the preview in Android Studio sometimes won't work).
+ */
 @Composable
 function PersonDetailScreenForViewModel(
     viewModel: PersonDetailViewModel
 ) {
     val uiState: PersonDetailUiState by viewModel.uiState.collectAsState(initial = null)
     
+    //Always use named arguments here e.g. onClickChat to avoid potential mismatch.
     PersonDetailScreen(
         uiState = uiState, 
         onClickChat = viewModel::onClickChat,
@@ -132,7 +141,6 @@ function PersonDetailScreenPreview(
          }
     )
 )
-
 ```
 
 
