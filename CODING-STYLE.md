@@ -14,9 +14,14 @@ The app follows an MVVM pattern as follows:
 ### UiState classes
 
 The UiState class contains everything needed to render a screen. It is emitted as a flow from the
-ViewModel.
+ViewModel. It is a data class contained in the same file as the ViewModel.
 
-e.g.
+When converting an existing MVP screen, the ViewModel should generally have all the same properties that
+are found on the existing view interface (but properties should be non-mutable val instead of var).
+
+The UiState class should also contain the model entity. It should use the same model type as found
+on the view (e.g. because PersonDetailView uses PersonWithPersonParentJoin, PersonDetailUiState 
+should contain PersonWithPersonParentJoin).
 
 ```
 data class PersonDetailUiState(
