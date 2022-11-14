@@ -42,6 +42,9 @@ data class PersonDetailUiState(
     val personUsernameVisible: Boolean
         get() = !person?.username.isNullOrBlank()
 
+    val manageParentalConsentVisible: Boolean
+        get() = person?.parentJoin != null
+
 }
 
 class PersonDetailViewModel(
