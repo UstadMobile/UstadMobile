@@ -79,7 +79,7 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
                 Date(props.uiState.person?.dateOfBirth ?: 0L).toLocaleDateString()
             }
 
-            UstadDetailField{
+            UstadDetailField {
                 icon = mui.icons.material.CalendarToday.create()
                 labelText = strings[MessageID.birthday]
                 valueText = birthdayFormatted
