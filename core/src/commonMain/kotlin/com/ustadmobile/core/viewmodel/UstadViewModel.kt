@@ -6,7 +6,7 @@ import org.kodein.di.DIAware
 
 abstract class UstadViewModel(
     override val di: DI,
-    savedStateHandle: UstadSavedStateHandle,
+    protected val savedStateHandle: UstadSavedStateHandle,
 ): ViewModel(savedStateHandle), DIAware {
 
 
