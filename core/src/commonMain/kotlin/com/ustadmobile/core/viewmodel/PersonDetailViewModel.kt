@@ -30,6 +30,13 @@ data class PersonDetailUiState(
     val dateOfBirthVisible: Boolean
         get() = person?.dateOfBirth.isDateSet()
 
+    val personGenderVisible: Boolean
+        get() = person?.gender  != null
+                && person.gender != 0
+
+    val personAddressVisible: Boolean
+        get() = !person?.personAddress.isNullOrBlank()
+
     val phoneNumVisible: Boolean
         get() = !person?.phoneNum.isNullOrBlank()
 

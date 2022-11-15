@@ -15,5 +15,19 @@ data class PersonAccountEditUiState(
 
     val personUsernameAndPassword: PersonUsernameAndPasswordModel = PersonUsernameAndPasswordModel(),
 
-    val currentPasswordError: String = "",
+    val usernameError: String? = null,
+
+    val currentPasswordError: String? = null,
+
+    val newPasswordError: String? = null,
+
+    val passwordConfirmedError: String? = null,
+
+    val errorMessage: String? = null,
+
+    val currentPasswordVisible: Boolean = false,
+
+    val usernameVisible: Boolean = false,
+
+    val fieldsEnabled: Boolean = true,
 )

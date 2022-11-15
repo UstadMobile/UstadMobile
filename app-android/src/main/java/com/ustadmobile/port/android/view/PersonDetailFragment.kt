@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,6 +34,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonDetailBinding
 import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentWithClazzDetailBinding
@@ -124,12 +127,10 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        val rootView: View
 
         clazzEnrolmentWithClazzRecyclerAdapter = ClazzEnrolmentWithClazzRecyclerAdapter(
             null)
         mBinding = FragmentPersonDetailBinding.inflate(inflater, container, false).also {
-            rootView = it.root
             it.createAccountVisibility = View.GONE
             it.changePasswordVisibility = View.GONE
             it.chatVisibility = View.GONE
@@ -139,7 +140,18 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
 
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
-        return rootView
+
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
+
+            setContent {
+                MdcTheme {
+                    PersonDetailScreen()
+                }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -218,7 +230,9 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
 
 @Composable
 private fun PersonDetailScreen(
-    onClickChangePassword: () -> Unit = {}
+    onClickChangePassword: () -> Unit = {},
+    onClickContactDetails: () -> Unit = {},
+    onClickClasses: () -> Unit = {}
 ){
     Column(
         modifier = Modifier
@@ -229,15 +243,14 @@ private fun PersonDetailScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Divider(color = Color.LightGray, modifier = Modifier.fillMaxWidth().width(1.dp))
+        Divider(modifier = Modifier.fillMaxWidth().width(1.dp))
 
         Spacer(modifier = Modifier.height(10.dp))
 
         Column(modifier = Modifier.padding(12.dp)) {
 
             Text(stringResource(R.string.import_content),
-                style = Typography.body1,
-                color = Color.Black)
+                style = Typography.body1)
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -245,16 +258,18 @@ private fun PersonDetailScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            TextButton(onClick = {}){
+            TextButton(
+                onClick = onClickContactDetails
+            ){
                 Text(stringResource(R.string.contact_details),
-                    style = Typography.body1,
-                    color = Color.Black)
+                    style = Typography.body1)
             }
 
-            TextButton(onClick = {}){
+            TextButton(
+                onClick = onClickClasses
+            ){
                 Text(stringResource(R.string.classes),
-                    style = Typography.body1,
-                    color = Color.Black)
+                    style = Typography.body1)
             }
         }
     }
@@ -271,8 +286,7 @@ private fun ChangePasswordButton(onClick: () -> Unit) {
             Image(
                 painter = painterResource(id = R.drawable.person_with_key),
                 contentDescription = "",
-                modifier = Modifier.size(35.dp),
-                colorFilter = ColorFilter.tint(color = Color.Black))
+                modifier = Modifier.size(35.dp))
 
             Spacer(modifier = Modifier.height(5.dp))
 
@@ -297,12 +311,10 @@ private fun UserRow(){
 
         Column {
             Text(stringResource(R.string.change_password),
-                style = Typography.body1,
-                color = Color.Black)
+                style = Typography.body1)
 
             Text(stringResource(R.string.username),
-                style = Typography.body1,
-                color = Color.Gray)
+                style = Typography.body1)
         }
     }
 }
@@ -311,6 +323,8 @@ private fun UserRow(){
 @Preview(showBackground = true)
 @Composable
 private fun PersonDetailPreview() {
-    PersonDetailScreen()
+    MdcTheme {
+        PersonDetailScreen()
+    }
 }
 
