@@ -184,8 +184,7 @@ private fun LoginScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(text = uiState.errorMessage ?: "",
-            color = contentColorFor(colorResource(id = R.color.almost_black)))
+        Text(text = uiState.errorMessage ?: "")
 
         Button(
             onClick = onClickLogin,
