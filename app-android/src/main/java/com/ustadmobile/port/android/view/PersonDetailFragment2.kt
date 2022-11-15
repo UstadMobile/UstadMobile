@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.*
-import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,7 +34,8 @@ import org.kodein.di.DI
 import org.kodein.di.android.x.closestDI
 import android.text.format.DateFormat
 import androidx.compose.material.*
-import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.composethemeadapter.MdcTheme
@@ -46,6 +46,7 @@ import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
 import java.util.*
 
 class PersonDetailFragment2 : Fragment(){
@@ -184,52 +185,59 @@ private fun QuickActionBar(
         modifier = Modifier.horizontalScroll(rememberScrollState())
     ) {
 
-        if (!uiState.phoneNumVisible){
+        if (uiState.phoneNumVisible){
 
-            QuickActionButton(
-                stringResource(R.string.call),
-                R.drawable.ic_call_bcd4_24dp,
-                onClickDial)
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.call),
+                imageId = R.drawable.ic_call_bcd4_24dp,
+                onClick = onClickDial
+            )
 
-            QuickActionButton(
-                stringResource(R.string.text),
-                R.drawable.ic_baseline_sms_24,
-                onClickSms)
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.text),
+                imageId = R.drawable.ic_baseline_sms_24,
+                onClick = onClickSms
+            )
         }
 
-        if (!uiState.emailVisible){
-            QuickActionButton(
-                stringResource(R.string.email),
-                R.drawable.ic_email_black_24dp,
-                onClickEmail)
+        if (uiState.emailVisible){
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.email),
+                imageId = R.drawable.ic_email_black_24dp,
+                onClick = onClickEmail
+            )
         }
 
         if(uiState.showCreateAccountVisible){
-            QuickActionButton(
-                stringResource(R.string.create_account),
-                R.drawable.ic_person_black_24dp,
-                onClickCreateAccount)
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.create_account),
+                imageId = R.drawable.ic_person_black_24dp,
+                onClick = onClickCreateAccount
+            )
         }
 
         if(uiState.changePasswordVisible){
-            QuickActionButton(
-                stringResource(R.string.change_password),
-                R.drawable.person_with_key,
-                onClickChangePassword)
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.change_password),
+                imageId = R.drawable.person_with_key,
+                onClick = onClickChangePassword
+            )
         }
 
         if (uiState.manageParentalConsentVisible){
-            QuickActionButton(
-                stringResource(R.string.manage_parental_consent),
-                R.drawable.ic_baseline_supervised_user_circle_24,
-                onClickManageParentalConsent)
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.manage_parental_consent),
+                imageId = R.drawable.ic_baseline_supervised_user_circle_24,
+                onClick = onClickManageParentalConsent
+            )
         }
 
         if (uiState.chatVisible){
-            QuickActionButton(
-                stringResource(R.string.chat),
-                R.drawable.ic_baseline_chat_24,
-                onClickChat)
+            UstadQuickActionButton(
+                labelText = stringResource(R.string.chat),
+                imageId = R.drawable.ic_baseline_chat_24,
+                onClick = onClickChat
+            )
         }
     }
 }
@@ -288,10 +296,22 @@ private fun ContactDetails(
     ) {
 
         if (uiState.phoneNumVisible){
-            CallRow(
-                uiState.person?.phoneNum ?: "",
-                onClickDial,
-                onClickSms)
+            UstadDetailField(
+                valueText = uiState.person?.phoneNum ?: "",
+                labelText = stringResource(R.string.phone),
+                imageId = R.drawable.ic_phone_black_24dp,
+                onClick = onClickDial,
+                secondaryActionContent = {
+                    IconButton(
+                        onClick = onClickSms,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Message,
+                            contentDescription = stringResource(id = R.string.message),
+                        )
+                    }
+                }
+            )
         }
 
         if (uiState.emailVisible){
@@ -307,32 +327,6 @@ private fun ContactDetails(
                 imageId = R.drawable.ic_location_pin_24dp,
                 valueText = uiState.person?.personAddress ?: "",
                 labelText = stringResource(R.string.address))
-        }
-    }
-}
-
-@Composable
-private fun CallRow(
-    phoneNum: String,
-    onClickDial: () -> Unit = {},
-    onClickSms: () -> Unit = {},){
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-
-        UstadDetailField(
-            imageId = R.drawable.ic_phone_black_24dp,
-            valueText = phoneNum,
-            labelText = stringResource(R.string.phone),
-            onClick = onClickDial)
-
-        IconButton(
-            onClick = onClickSms
-        ){
-            Icon(Icons.Filled.MailOutline,
-                contentDescription = "")
         }
     }
 }
@@ -362,47 +356,7 @@ private fun ClassItem(clazz: ClazzEnrolmentWithClazzAndAttendance){
                 .width(70.dp))
 
         Column {
-            Text(text = "")
-            Text(text = "")
-
-            if (clazz.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT){
-                Row (
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    Image(painter = painterResource(id = R.drawable.ic_lens_black_24dp),
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(color = Color.Gray),
-                        modifier = Modifier
-                            .size(12.dp))
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Text(text = stringResource(id = R.string.attendance))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun QuickActionButton(text: String, imageId: Int, onClick: () -> Unit){
-    TextButton(
-        modifier = Modifier.width(110.dp),
-        onClick = onClick
-    ){
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            Image(
-                painter = painterResource(id = imageId),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(color = colorResource(R.color.primaryColor)),
-                modifier = Modifier
-                    .size(24.dp))
-
-            Text(text.uppercase(),
-                style= Typography.h4,
-                color = colorResource(R.color.primaryColor))
+            Text(text = clazz?.clazz?.clazzName ?: "")
         }
     }
 }
@@ -431,6 +385,8 @@ fun PersonDetailScreenPreview() {
         changePasswordVisible = true,
         chatVisible = true,
         clazzes = listOf())
-    PersonDetailScreen(uiState)
+    MdcTheme{
+        PersonDetailScreen(uiState)
+    }
 }
 

@@ -127,10 +127,11 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-
+        val rootView: View
         clazzEnrolmentWithClazzRecyclerAdapter = ClazzEnrolmentWithClazzRecyclerAdapter(
             null)
         mBinding = FragmentPersonDetailBinding.inflate(inflater, container, false).also {
+            rootView = it.root
             it.createAccountVisibility = View.GONE
             it.changePasswordVisibility = View.GONE
             it.chatVisibility = View.GONE
@@ -141,17 +142,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
 
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(
-                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
-            )
-
-            setContent {
-                MdcTheme {
-                    PersonDetailScreen()
-                }
-            }
-        }
+        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -227,104 +218,3 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
     }
 
 }
-
-@Composable
-private fun PersonDetailScreen(
-    onClickChangePassword: () -> Unit = {},
-    onClickContactDetails: () -> Unit = {},
-    onClickClasses: () -> Unit = {}
-){
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-    ) {
-
-        ChangePasswordButton(onClickChangePassword)
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Divider(modifier = Modifier.fillMaxWidth().width(1.dp))
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Column(modifier = Modifier.padding(12.dp)) {
-
-            Text(stringResource(R.string.import_content),
-                style = Typography.body1)
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            UserRow()
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            TextButton(
-                onClick = onClickContactDetails
-            ){
-                Text(stringResource(R.string.contact_details),
-                    style = Typography.body1)
-            }
-
-            TextButton(
-                onClick = onClickClasses
-            ){
-                Text(stringResource(R.string.classes),
-                    style = Typography.body1)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ChangePasswordButton(onClick: () -> Unit) {
-
-    TextButton(onClick = onClick) {
-
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally,)
-        {
-            Image(
-                painter = painterResource(id = R.drawable.person_with_key),
-                contentDescription = "",
-                modifier = Modifier.size(35.dp))
-
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Text(stringResource(R.string.change_password),
-                style = Typography.body1,
-                color = Color.Black)
-        }
-    }
-}
-
-@Composable
-private fun UserRow(){
-    Row {
-        Image(
-            painter = painterResource(id = R.drawable.ic_account_circle_black_24dp),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(color = Color.DarkGray),
-            modifier = Modifier
-                .size(35.dp))
-
-        Spacer(modifier = Modifier.width(5.dp))
-
-        Column {
-            Text(stringResource(R.string.change_password),
-                style = Typography.body1)
-
-            Text(stringResource(R.string.username),
-                style = Typography.body1)
-        }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-private fun PersonDetailPreview() {
-    MdcTheme {
-        PersonDetailScreen()
-    }
-}
-
