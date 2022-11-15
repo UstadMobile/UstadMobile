@@ -222,34 +222,38 @@ private fun PersonAccountEditScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
 
-        UstadTextEditField(
-            value = uiState.personUsernameAndPassword.username,
-            label = stringResource(id = R.string.username),
-            onValueChange = {
-                uiState.personUsernameAndPassword.copy(
-                    username = it
-                )
-            },
-            error = "",
-            enabled = false,
-        )
+        if (uiState.usernameVisible){
+            UstadTextEditField(
+                value = uiState.personUsernameAndPassword.username,
+                label = stringResource(id = R.string.username),
+                onValueChange = {
+                    uiState.personUsernameAndPassword.copy(
+                        username = it
+                    )
+                },
+                error = uiState.usernameError,
+                enabled = uiState.fieldsEnabled,
+            )
+        }
 
-        UstadTextEditField(
-            value = uiState.personUsernameAndPassword.currentPassword,
-            label = stringResource(id = R.string.current_password),
-            onValueChange = {
-                uiState.personUsernameAndPassword.copy(
-                    currentPassword = it
-                )
-            },
-            error = "",
-            enabled = false,
-            trailingIcon = {
-                Icon(
-                    painter = painterResource(R.drawable.ic_baseline_visibility_24),
-                    contentDescription = "")
-            }
-        )
+        if (uiState.currentPasswordVisible){
+            UstadTextEditField(
+                value = uiState.personUsernameAndPassword.currentPassword,
+                label = stringResource(id = R.string.current_password),
+                onValueChange = {
+                    uiState.personUsernameAndPassword.copy(
+                        currentPassword = it
+                    )
+                },
+                error = uiState.currentPasswordError,
+                enabled = uiState.fieldsEnabled,
+                trailingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_baseline_visibility_24),
+                        contentDescription = "")
+                }
+            )
+        }
 
         UstadTextEditField(
             value = uiState.personUsernameAndPassword.newPassword,
@@ -259,8 +263,8 @@ private fun PersonAccountEditScreen(
                     newPassword = it
                 )
             },
-            error = "",
-            enabled = false,
+            error = uiState.newPasswordError,
+            enabled = uiState.fieldsEnabled,
             trailingIcon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_baseline_visibility_24),
@@ -276,8 +280,8 @@ private fun PersonAccountEditScreen(
                     passwordConfirmed = it
                 )
             },
-            error = "",
-            enabled = false,
+            error = uiState.passwordConfirmedError,
+            enabled = uiState.fieldsEnabled,
             trailingIcon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_baseline_visibility_24),

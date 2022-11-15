@@ -80,9 +80,7 @@ class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView: View
         mBinding = FragmentSiteEnterLinkBinding.inflate(inflater, container, false).also {
-            rootView = it.root
             it.showButton = false
             it.showProgress = false
         }
@@ -98,7 +96,6 @@ class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
                 }
             }
         }
-//        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -155,8 +152,8 @@ private fun SiteEnterLinkScreen(
             value = "",
             label = stringResource(id = R.string.site_link),
             onValueChange = onEditTextValueChange,
-            error = uiState.errorMessage,
-            enabled = false,
+            error = uiState.linkError,
+            enabled = uiState.fieldsEnabled,
         )
 
         Spacer(modifier = Modifier.height(20.dp))

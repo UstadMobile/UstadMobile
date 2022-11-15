@@ -22,7 +22,8 @@ data class SiteEnterLinkUiState(
     val siteLink: String = "",
     val validLink: Boolean = false,
     val progressVisible: Boolean = false,
-    val errorMessage: String? = null,
+    val linkError: String? = null,
+    val fieldsEnabled: Boolean = true,
 )
 
 class SiteEnterLinkViewModel(

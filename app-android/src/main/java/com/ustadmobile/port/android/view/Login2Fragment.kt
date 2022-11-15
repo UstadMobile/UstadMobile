@@ -35,9 +35,7 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
 
     private var mPresenter: Login2Presenter? = null
 
-    private val uiState = LoginUiState(
-        isEmptyPassword = true
-    )
+    private val uiState = LoginUiState()
 
     override var isEmptyPassword: Boolean = false
         set(value) {
@@ -161,6 +159,8 @@ private fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
 
+        Text(text = uiState.loginIntentMessage ?: "")
+
         UstadTextEditField(
             value = uiState.username,
             label = stringResource(id = R.string.username),
@@ -168,7 +168,7 @@ private fun LoginScreen(
                 onUsernameValueChange(it)
             },
             error = uiState.usernameError,
-            enabled = uiState.usernameEnabled,
+            enabled = uiState.fieldsEnabled,
         )
 
         UstadTextEditField(
@@ -178,7 +178,7 @@ private fun LoginScreen(
                 onPasswordValueChange(it)
             },
             error = uiState.passwordError,
-            enabled = uiState.passwordEnabled,
+            enabled = uiState.fieldsEnabled,
             trailingIcon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_baseline_visibility_24),
@@ -188,16 +188,23 @@ private fun LoginScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
+        Text(text = uiState.errorMessage ?: "",
+            color = contentColorFor(colorResource(id = R.color.almost_black)))
+
+        Spacer(modifier = Modifier.height(10.dp))
+
         Button(
             onClick = onClickLogin,
             modifier = Modifier
                 .fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                contentColor = Color.Black,
                 backgroundColor = colorResource(id = R.color.secondaryColor)
             )
         ) {
-            Text(stringResource(R.string.login).uppercase())
+            Text(stringResource(R.string.login).uppercase(),
+                color = contentColorFor(
+                    colorResource(id = R.color.secondaryColor))
+            )
         }
 
         Spacer(modifier = Modifier.height(10.dp))
