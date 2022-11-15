@@ -147,7 +147,8 @@ private fun PersonDetailScreen(
             style = Typography.h4,
             modifier = Modifier.padding(8.dp))
 
-        ContactDetails(uiState,
+        ContactDetails(
+            uiState,
             onClickDial,
             onClickSms,
             onClickEmail)

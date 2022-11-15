@@ -8,8 +8,7 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadQuickActionButton
-import csstype.AlignContent
-import csstype.Display
+import mui.material.List
 import mui.icons.material.*
 import mui.material.*
 import mui.material.Box
@@ -39,20 +38,41 @@ val PersonDetailScreen = FC<Props>() {
 
 external interface PersonDetailProps : Props {
     var uiState: PersonDetailUiState
-    val clazzes: List<ClazzEnrolmentWithClazzAndAttendance>
-    val onClickDial: () -> Unit
-    val onClickSms: () -> Unit
-    val onClickEmail: () -> Unit
-    val onClickCreateAccount: () -> Unit
-    val onClickChangePassword: () -> Unit
-    val onClickManageParentalConsent: () -> Unit
-    val onClickChat: () -> Unit
-    val onClickClazz: () -> Unit
+    var clazzes: List<ClazzEnrolmentWithClazzAndAttendance>
+    var onClickDial: () -> Unit
+    var onClickSms: () -> Unit
+    var onClickEmail: () -> Unit
+    var onClickCreateAccount: () -> Unit
+    var onClickChangePassword: () -> Unit
+    var onClickManageParentalConsent: () -> Unit
+    var onClickChat: () -> Unit
+    var onClickClazz: () -> Unit
 }
 
 val PersonDetailPreview = FC<Props> {
     PersonDetailComponent2 {
-        uiState = PersonDetailUiState()
+        uiState = PersonDetailUiState(
+            person = PersonWithPersonParentJoin().apply {
+                firstNames = "Bob Jones"
+                phoneNum = "0799999"
+                emailAddr = "Bob@gmail.com"
+                gender = 1
+                username = "Bob12"
+                dateOfBirth = 12
+                personOrgId = "123"
+                personAddress = "Herat"
+            },
+            showCreateAccountVisible = true,
+            changePasswordVisible = true,
+            chatVisible = true,
+            clazzes = listOf(
+                ClazzEnrolmentWithClazzAndAttendance(),
+                ClazzEnrolmentWithClazzAndAttendance(),
+                ClazzEnrolmentWithClazzAndAttendance(),
+                ClazzEnrolmentWithClazzAndAttendance(),
+                ClazzEnrolmentWithClazzAndAttendance(),
+            )
+        )
     }
 }
 
@@ -65,175 +85,237 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
 
         Stack {
             direction = responsive(StackDirection.column)
+            spacing = responsive(10.px)
 
-            //Quick action bar here
-            Stack {
-                direction = responsive(StackDirection.row)
-
-                if (!props.uiState.person?.phoneNum.isNullOrEmpty()) {
-                    UstadQuickActionButton {
-                        icon = Call.create()
-                        text = strings[MessageID.call]
-                        onClick = { props.onClickDial }
-                    }
-
-                    UstadQuickActionButton {
-                        icon = Sms.create()
-                        text = strings[MessageID.text]
-                        onClick = { props.onClickSms }
-                    }
-                }
-
-                if (!props.uiState.person?.emailAddr.isNullOrEmpty()) {
-                    UstadQuickActionButton {
-                        icon = Email.create()
-                        text = strings[MessageID.email]
-                        onClick = { props.onClickEmail }
-                    }
-                }
-
-                if (props.uiState.showCreateAccountVisible) {
-                    UstadQuickActionButton {
-                        icon = Person.create()
-                        text = strings[MessageID.create_account]
-                        onClick = { props.onClickCreateAccount}
-                    }
-                }
-
-                if (props.uiState.changePasswordVisible) {
-                    UstadQuickActionButton {
-                        icon = Key.create()
-                        text = strings[MessageID.change_password]
-                        onClick = { props.onClickChangePassword }
-                    }
-                }
-
-                if (props.uiState.person?.parentJoin != null) {
-                    UstadQuickActionButton {
-                        icon = SupervisedUserCircle.create()
-                        text = strings[MessageID.manage_parental_consent]
-                        onClick = { props.onClickManageParentalConsent }
-                    }
-                }
-
-                if (props.uiState.chatVisible) {
-                    UstadQuickActionButton {
-                        icon = Chat.create()
-                        text = strings[MessageID.chat]
-                        onClick = { props.onClickChat }
-                    }
-                }
+            QuickActionBar{
+                uiState = props.uiState
             }
 
             Divider { orientation = Orientation.horizontal }
-
-            Box {
-                sx {
-                    height = 10.px
-                }
-            }
 
             Typography {
                 variant = TypographyVariant.h6
                 + strings[MessageID.basic_details]
             }
 
-            if (props.uiState.person?.dateOfBirth != 0L
-                && props.uiState.person?.dateOfBirth != null){
-                val birthdayFormatted = useMemo(dependencies = arrayOf(props.uiState.person?.dateOfBirth)) {
-                    Date(props.uiState.person?.dateOfBirth ?: 0L).toLocaleDateString()
-                }
-
-                UstadDetailField {
-                    icon = CalendarToday.create()
-                    labelText = strings[MessageID.birthday]
-                    valueText = birthdayFormatted
-                }
-            }
-
-            if (props.uiState.person?.gender != 0
-                && props.uiState.person?.gender != null){
-
-                UstadDetailField {
-                    icon = null
-                    labelText = strings[MessageID.gender_literal]
-                    valueText = props.uiState.person?.firstNames ?: ""
-                }
-            }
-
-            if (props.uiState.person?.personOrgId != null){
-                UstadDetailField {
-                    icon = Badge.create()
-                    labelText = strings[MessageID.organization_id]
-                    valueText = props.uiState.person?.personOrgId ?: ""
-                }
-            }
-
-            if (!props.uiState.person?.username.isNullOrEmpty()){
-                UstadDetailField {
-                    icon = AccountCircle.create()
-                    labelText = strings[MessageID.username]
-                    valueText = props.uiState.person?.username ?: ""
-                }
+            DetailFeilds{
+                uiState = props.uiState
             }
 
             Divider { orientation = Orientation.horizontal }
-
-            Box {
-                sx {
-                    height = 10.px
-                }
-            }
 
             Typography {
                 variant = TypographyVariant.h6
                 + strings[MessageID.contact_details]
             }
 
-            if (!props.uiState.person?.phoneNum.isNullOrEmpty()){
-                Stack{
-                    direction = responsive(StackDirection.row)
-
-                    UstadDetailField {
-                        icon = Call.create()
-                        labelText = strings[MessageID.phone]
-                        valueText = props.uiState.person?.phoneNum ?: ""
-                    }
-
-                    + Message.create()
-                }
-            }
-
-            if (!props.uiState.person?.emailAddr.isNullOrEmpty()){
-                UstadDetailField {
-                    icon = Email.create()
-                    labelText = strings[MessageID.email]
-                    valueText = props.uiState.person?.emailAddr ?: ""
-                }
-            }
-
-            if (!props.uiState.person?.personAddress.isNullOrEmpty()){
-                UstadDetailField {
-                    icon = LocationOn.create()
-                    labelText = strings[MessageID.address]
-                    valueText = props.uiState.person?.personAddress ?: ""
-                }
+            ContactDetails{
+                uiState = props.uiState
             }
 
             Divider { orientation = Orientation.horizontal }
-
-            Box {
-                sx {
-                    height = 10.px
-                }
-            }
 
             Typography {
                 variant = TypographyVariant.h6
                 + strings[MessageID.classes]
             }
 
+            Classes{
+                uiState = props.uiState
+            }
+        }
+    }
+}
 
+private val QuickActionBar = FC<PersonDetailProps> { props ->
+
+    val strings = useStringsXml()
+
+    Stack {
+        direction = responsive(StackDirection.row)
+
+        if (!props.uiState.person?.phoneNum.isNullOrEmpty()) {
+            UstadQuickActionButton {
+                icon = Call.create()
+                text = strings[MessageID.call]
+                onClick = { props.onClickDial }
+            }
+
+            UstadQuickActionButton {
+                icon = Sms.create()
+                text = strings[MessageID.text]
+                onClick = { props.onClickSms }
+            }
+        }
+
+        if (!props.uiState.person?.emailAddr.isNullOrEmpty()) {
+            UstadQuickActionButton {
+                icon = Email.create()
+                text = strings[MessageID.email]
+                onClick = { props.onClickEmail }
+            }
+        }
+
+        if (props.uiState.showCreateAccountVisible) {
+            UstadQuickActionButton {
+                icon = Person.create()
+                text = strings[MessageID.create_account]
+                onClick = { props.onClickCreateAccount }
+            }
+        }
+
+        if (props.uiState.changePasswordVisible) {
+            UstadQuickActionButton {
+                icon = Key.create()
+                text = strings[MessageID.change_password]
+                onClick = { props.onClickChangePassword }
+            }
+        }
+
+        if (props.uiState.person?.parentJoin != null) {
+            UstadQuickActionButton {
+                icon = SupervisedUserCircle.create()
+                text = strings[MessageID.manage_parental_consent]
+                onClick = { props.onClickManageParentalConsent }
+            }
+        }
+
+        if (props.uiState.chatVisible) {
+            UstadQuickActionButton {
+                icon = Chat.create()
+                text = strings[MessageID.chat]
+                onClick = { props.onClickChat }
+            }
+        }
+    }
+}
+
+private val DetailFeilds = FC<PersonDetailProps> { props ->
+
+    val strings = useStringsXml()
+
+    if (props.uiState.person?.dateOfBirth != 0L
+        && props.uiState.person?.dateOfBirth != null){
+        val birthdayFormatted = useMemo(dependencies = arrayOf(props.uiState.person?.dateOfBirth)) {
+            Date(props.uiState.person?.dateOfBirth ?: 0L).toLocaleDateString()
+        }
+
+        UstadDetailField {
+            icon = CalendarToday.create()
+            labelText = strings[MessageID.birthday]
+            valueText = birthdayFormatted
+        }
+    }
+
+    if (props.uiState.person?.gender != 0
+        && props.uiState.person?.gender != null){
+
+        UstadDetailField {
+            icon = null
+            labelText = strings[MessageID.gender_literal]
+            valueText = props.uiState.person?.firstNames ?: ""
+        }
+    }
+
+    if (props.uiState.person?.personOrgId != null){
+        UstadDetailField {
+            icon = Badge.create()
+            labelText = strings[MessageID.organization_id]
+            valueText = props.uiState.person?.personOrgId ?: ""
+        }
+    }
+
+    if (!props.uiState.person?.username.isNullOrEmpty()){
+        UstadDetailField {
+            icon = AccountCircle.create()
+            labelText = strings[MessageID.username]
+            valueText = props.uiState.person?.username ?: ""
+        }
+    }
+}
+
+private val ContactDetails = FC<PersonDetailProps> { props ->
+
+    val strings = useStringsXml()
+
+    if (!props.uiState.person?.phoneNum.isNullOrEmpty()){
+        Stack{
+            direction = responsive(StackDirection.row)
+
+            UstadDetailField {
+                icon = Call.create()
+                labelText = strings[MessageID.phone]
+                valueText = props.uiState.person?.phoneNum ?: ""
+            }
+
+            + Message.create()
+        }
+    }
+
+    if (!props.uiState.person?.emailAddr.isNullOrEmpty()){
+        UstadDetailField {
+            icon = Email.create()
+            labelText = strings[MessageID.email]
+            valueText = props.uiState.person?.emailAddr ?: ""
+        }
+    }
+
+    if (!props.uiState.person?.personAddress.isNullOrEmpty()){
+        UstadDetailField {
+            icon = LocationOn.create()
+            labelText = strings[MessageID.address]
+            valueText = props.uiState.person?.personAddress ?: ""
+        }
+    }
+}
+
+private val Classes = FC<PersonDetailProps> { props ->
+
+    val strings = useStringsXml()
+
+    List{
+        props.uiState.clazzes.map {
+            ListItem{
+                Button {
+                    variant = ButtonVariant.text
+                    onClick = { props.onClickClazz }
+
+                    Stack {
+                        direction = responsive(StackDirection.row)
+
+                        + People.create()
+
+                        Stack {
+                            direction = responsive(StackDirection.column)
+                            Typography {
+                                align = TypographyAlign.center
+                                +"text"
+                            }
+
+                            Typography {
+                                align = TypographyAlign.center
+                                +"text"
+                            }
+
+                            Stack {
+                                direction = responsive(StackDirection.row)
+
+                                + Circle.create{
+                                    sx {
+                                        width = 10.px
+                                        height = 10.px
+                                    }
+                                }
+
+                                Typography {
+                                    align = TypographyAlign.center
+                                    +strings[MessageID.attendance]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
