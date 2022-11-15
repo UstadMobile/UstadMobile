@@ -239,7 +239,7 @@ fun PersonEditScreen(
             )
         }
 
-        if (uiState.usernameVisible){
+        if (uiState.passwordVisible){
             UstadTextEditField(
                 value = uiState.person?.newPassword ?: "",
                 label = stringResource(id = R.string.password),
