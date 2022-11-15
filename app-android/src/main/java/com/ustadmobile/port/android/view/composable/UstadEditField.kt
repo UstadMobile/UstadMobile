@@ -7,12 +7,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
@@ -56,10 +64,14 @@ fun UstadTextEditField(
     readOnly: Boolean = false,
     onClick: (() -> Unit)? = null,
     onValueChange: (String) -> Unit,
-    trailingIcon: @Composable (() -> Unit)? = null,
+    password: Boolean = false,
 ) {
     var errorText by remember(error) {
         mutableStateOf(error)
+    }
+
+    var passwordVisible by remember {
+        mutableStateOf(false)
     }
 
     val interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
@@ -85,7 +97,32 @@ fun UstadTextEditField(
             enabled = enabled,
             interactionSource = interactionSource,
             readOnly = readOnly,
-            trailingIcon = trailingIcon
+            visualTransformation = if (password && !passwordVisible) {
+                PasswordVisualTransformation()
+            } else {
+                VisualTransformation.None
+            },
+            trailingIcon = if(password) {
+                {
+                    IconButton(
+                        onClick = {
+                            passwordVisible = !passwordVisible
+                        }
+                    ) {
+                        val icon = if(passwordVisible) {
+                            Icons.Filled.VisibilityOff
+                        }else {
+                            Icons.Filled.Visibility
+                        }
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = stringResource(R.string.toggle_visibility)
+                        )
+                    }
+                }
+            }else {
+                null
+            }
         )
     }
 }
@@ -99,6 +136,25 @@ fun UstadTextEditFieldPreview() {
         onValueChange = {},
         error =null,
         enabled = true,
+    )
+}
+
+@Preview
+@Composable
+fun UstadTextEditPasswordPreview() {
+    var passwordText by remember {
+        mutableStateOf("secret")
+    }
+
+    UstadTextEditField(
+        value = passwordText,
+        label = "password",
+        onValueChange = {
+            passwordText = it
+        },
+        error = null,
+        enabled = true,
+        password = true,
     )
 }
 

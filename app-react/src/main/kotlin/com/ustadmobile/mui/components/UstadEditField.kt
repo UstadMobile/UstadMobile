@@ -1,14 +1,20 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.mui.common.value
 import com.ustadmobile.mui.common.label
 import com.ustadmobile.mui.common.onChange
 import com.ustadmobile.mui.common.renderInput
+import kotlinx.js.jso
+import mui.icons.material.Visibility
+import mui.icons.material.VisibilityOff
 import mui.material.*
 import muix.pickers.*
 import react.*
+import react.dom.aria.ariaLabel
+import react.dom.html.InputType
 import react.dom.onChange
 import kotlin.js.Date
 
@@ -39,6 +45,14 @@ external interface UstadEditFieldProps: PropsWithChildren {
      * onChange event handler
      */
     var onChange: (String) -> Unit
+
+    /**
+     * True if this is a password field, false otherwise (default). If this is a password field, then
+     * the field content will be hidden by default. A button will be added to the end of the field
+     * to allow the user to toggle visibility.
+     */
+    var password: Boolean
+
 }
 
 /**
@@ -47,6 +61,11 @@ external interface UstadEditFieldProps: PropsWithChildren {
  */
 val UstadTextEditField = FC<UstadEditFieldProps> { props ->
     var errorText by useState { props.error }
+
+    var passwordVisible by useState { false }
+
+    val strings = useStringsXml()
+
     TextField {
         label = ReactNode(props.label ?: "")
         value = props.value
@@ -57,6 +76,33 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
             val currentVal = it.target.asDynamic().value
             errorText = null
             props.onChange(currentVal?.toString() ?: "")
+        }
+
+        if(props.password) {
+            type = if(passwordVisible) {
+                InputType.text
+            }else {
+                InputType.password
+            }
+
+            //As per MUI showcase
+            asDynamic().InputProps = jso<InputBaseProps> {
+                endAdornment = InputAdornment.create {
+                    position = InputAdornmentPosition.end
+                    IconButton {
+                        ariaLabel = strings[MessageID.toggle_visibility]
+                        onClick = {
+                            passwordVisible = !passwordVisible
+                        }
+
+                        if(passwordVisible) {
+                            VisibilityOff { }
+                        }else {
+                            Visibility { }
+                        }
+                    }
+                }
+            }
         }
     }
 }
