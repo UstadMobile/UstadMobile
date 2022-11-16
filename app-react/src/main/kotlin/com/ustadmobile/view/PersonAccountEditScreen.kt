@@ -1,5 +1,7 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.PersonAccountEditUiState
 import com.ustadmobile.core.viewmodel.PersonUsernameAndPasswordModel
 import com.ustadmobile.mui.components.UstadTextEditField
@@ -20,44 +22,68 @@ external interface PersonAccountEditScreenProps : Props {
 }
 
 val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
+
+    val strings = useStringsXml()
+
     Container {
         Stack {
             spacing = responsive(3)
 
-            UstadTextEditField {
-                value = props.uiState.personUsernameAndPassword.username
-                label = "username"
-                onChange = {
-                    props.onUsernameAndPasswordChanged(
-                        props.uiState.personUsernameAndPassword.copy(
-                            username = it
+            if (props.uiState.usernameVisible){
+                UstadTextEditField {
+                    value = props.uiState.personUsernameAndPassword.username
+                    label = strings[MessageID.username]
+                    onChange = {
+                        props.onUsernameAndPasswordChanged(
+                            props.uiState.personUsernameAndPassword.copy(
+                                username = it
+                            )
                         )
-                    )
+                    }
+                    error = props.uiState.usernameError
+                    enabled = props.uiState.fieldsEnabled
+                }
+            }
+
+            if (props.uiState.currentPasswordVisible){
+                UstadTextEditField {
+                    value = props.uiState.personUsernameAndPassword.currentPassword
+                    label = strings[MessageID.current_password]
+                    onChange = {
+                        props.uiState.personUsernameAndPassword.copy(
+                            currentPassword = it
+                        )
+                    }
+                    error = props.uiState.currentPasswordError
+                    enabled = props.uiState.fieldsEnabled
+                    password = true
                 }
             }
 
             UstadTextEditField {
-                value = props.uiState.personUsernameAndPassword.currentPassword
-                label = "current password"
+                value = props.uiState.personUsernameAndPassword.newPassword
+                label = strings[MessageID.new_password]
                 onChange = {
-                    props.onUsernameAndPasswordChanged(
-                        props.uiState.personUsernameAndPassword.copy(
-                            currentPassword = it
-                        )
+                    props.uiState.personUsernameAndPassword.copy(
+                        newPassword = it
                     )
                 }
+                error = props.uiState.newPasswordError
+                enabled = props.uiState.fieldsEnabled
+                password = true
             }
 
             UstadTextEditField {
                 value = props.uiState.personUsernameAndPassword.passwordConfirmed
-                label = "confirm password"
+                label = strings[MessageID.confirm_password]
                 onChange = {
-                    props.onUsernameAndPasswordChanged(
-                        props.uiState.personUsernameAndPassword.copy(
-                            passwordConfirmed = it
-                        )
+                    props.uiState.personUsernameAndPassword.copy(
+                        passwordConfirmed = it
                     )
                 }
+                error = props.uiState.passwordConfirmedError
+                enabled = props.uiState.fieldsEnabled
+                password = true
             }
         }
     }
@@ -68,9 +94,13 @@ val PersonAccountEditPreview = FC<Props> {
     var uiStateVar : PersonAccountEditUiState by useState {
         PersonAccountEditUiState(
             personUsernameAndPassword = PersonUsernameAndPasswordModel(
-                username = "mullahnasruddin",
-                passwordConfirmed = "secret"
-            )
+                username = "Bob12",
+                currentPassword = "current",
+                newPassword = "secret",
+                passwordConfirmed = "secret",
+            ),
+            usernameVisible = true,
+            currentPasswordVisible = true
         )
     }
 
