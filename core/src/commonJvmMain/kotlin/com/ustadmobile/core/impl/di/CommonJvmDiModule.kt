@@ -7,11 +7,10 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.json.*
 import io.ktor.serialization.gson.*
 
 
-val commonJvmDiModule = DI.Module("CommonJvm") {
+val CommonJvmDiModule = DI.Module("CommonJvm") {
     bind<OkHttpClient>() with singleton {
         OkHttpClient.Builder()
             .dispatcher(Dispatcher().also {

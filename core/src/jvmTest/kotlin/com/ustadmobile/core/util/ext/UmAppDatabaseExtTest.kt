@@ -65,7 +65,7 @@ class UmAppDatabaseExtTest {
             nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, httpClient, okHttpClient))
 
         mockSystemImpl = mock {
-            on { getString(any(), any())}.thenAnswer {
+            on { getString(any<Int>(), any())}.thenAnswer {
                 "${it.arguments[0]}"
             }
         }

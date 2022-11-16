@@ -29,7 +29,7 @@ class OnBoardingPresenterTest {
         view = mock()
         impl = mock()
 
-        whenever(impl.getAllUiLanguagesList(any())).thenReturn(
+        whenever(impl.getAllUiLanguagesList()).thenReturn(
             listOf(
                 UstadMobileSystemCommon.UiLanguage("", "sys default"),
                 UstadMobileSystemCommon.UiLanguage("en", "English"),
