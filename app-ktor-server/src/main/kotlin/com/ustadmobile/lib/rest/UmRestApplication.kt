@@ -68,6 +68,7 @@ import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
+import com.ustadmobile.lib.rest.logging.LogbackAntiLog
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -142,9 +143,8 @@ fun Application.umRestApplication(
 
     install(CallLogging)
 
-    //TODO: Put in a proper log filter here
     Napier.takeLogarithm()
-    Napier.base(DebugAntilog())
+    Napier.base(LogbackAntiLog())
 
     install(ContentNegotiation) {
         gson {

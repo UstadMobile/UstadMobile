@@ -127,6 +127,7 @@ class SelectExtractFileComponent(
                                 visibility = Visibility.hidden
                             }
                             attrs.type = InputType.file
+                            attrs.id = "um-file-select"
                             attrs.accept = acceptedMimeTypes.joinToString(",")
                         }
                     }
