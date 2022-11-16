@@ -54,6 +54,11 @@ data class PersonEditUiState(
 
     var lastNameError: String? = null,
 
+    val usernameVisible: Boolean = false,
+
+    val passwordVisible: Boolean = false,
+
+    val parentalEmailVisible: Boolean = false,
 )
 
 class PersonEditViewModel(

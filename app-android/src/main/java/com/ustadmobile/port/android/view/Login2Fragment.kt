@@ -179,19 +179,12 @@ private fun LoginScreen(
             },
             error = uiState.passwordError,
             enabled = uiState.fieldsEnabled,
-            trailingIcon = {
-                Icon(
-                    painter = painterResource(R.drawable.ic_baseline_visibility_24),
-                    contentDescription = "")
-            }
+            password = true
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(text = uiState.errorMessage ?: "",
-            color = contentColorFor(colorResource(id = R.color.almost_black)))
-
-        Spacer(modifier = Modifier.height(10.dp))
+        Text(text = uiState.errorMessage ?: "")
 
         Button(
             onClick = onClickLogin,

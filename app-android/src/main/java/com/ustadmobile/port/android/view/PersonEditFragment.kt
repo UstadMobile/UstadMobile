@@ -42,9 +42,9 @@ import org.kodein.di.DI
 import com.ustadmobile.core.viewmodel.PersonEditUiState
 import com.ustadmobile.core.viewmodel.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
-import com.ustadmobile.lib.db.entities.shallowCopy
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import org.kodein.di.android.x.closestDI
 
@@ -118,6 +118,7 @@ class PersonEditFragment: Fragment() {
 fun PersonEditScreen(
     uiState: PersonEditUiState = PersonEditUiState(),
     onPersonChanged: (PersonWithAccount?) -> Unit = {},
+    onApprovalPersonParentJoinChanged: (PersonParentJoin?) -> Unit = {},
 ){
     Column(
         modifier = Modifier
@@ -134,7 +135,9 @@ fun PersonEditScreen(
             error = uiState.firstNamesFieldError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy(firstNames = it))
+                onPersonChanged(uiState.person?.shallowCopy{
+                    firstNames = it
+                })
             }
         )
 
@@ -144,7 +147,9 @@ fun PersonEditScreen(
             error = uiState.lastNameError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy(lastName = it))
+                onPersonChanged(uiState.person?.shallowCopy{
+                    lastName = it
+                })
             }
         )
 
@@ -153,10 +158,27 @@ fun PersonEditScreen(
             label = stringResource(R.string.gender_literal),
             options = GENDER_MESSAGE_IDS,
             onOptionSelected = {
-                onPersonChanged(uiState.person?.shallowCopy(gender = it.value))
+                onPersonChanged(uiState.person?.shallowCopy{
+                    gender = it.value
+                })
             },
             error = uiState.genderFieldError,
         )
+
+        if (uiState.parentalEmailVisible){
+            UstadTextEditField(
+                value = uiState?.approvalPersonParentJoin?.ppjEmail ?: "",
+                label = stringResource(id = R.string.parents_email_address),
+                error = uiState.parentContactError,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onApprovalPersonParentJoinChanged(
+                        uiState.approvalPersonParentJoin?.shallowCopy {
+                            ppjEmail = it
+                        })
+                }
+            )
+        }
 
         UstadDateEditTextField(
             value = uiState.person?.dateOfBirth ?: 0,
@@ -164,7 +186,9 @@ fun PersonEditScreen(
             error = uiState.dateOfBirthError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy(dateOfBirth = it))
+                onPersonChanged(uiState.person?.shallowCopy{
+                    dateOfBirth = it
+                })
             }
         )
 
@@ -173,7 +197,9 @@ fun PersonEditScreen(
             label = stringResource(id = R.string.phone_number),
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy(phoneNum = it))
+                onPersonChanged(uiState.person?.shallowCopy{
+                    phoneNum = it
+                })
             }
         )
 
@@ -183,7 +209,9 @@ fun PersonEditScreen(
             error = uiState.emailError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy(emailAddr = it))
+                onPersonChanged(uiState.person?.shallowCopy{
+                    emailAddr = it
+                })
             }
         )
 
@@ -192,9 +220,37 @@ fun PersonEditScreen(
             label = stringResource(id = R.string.address),
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy(personAddress = it))
+                onPersonChanged(uiState.person?.shallowCopy{
+                    personAddress = it
+                })
             }
         )
+
+        if (uiState.usernameVisible){
+            UstadTextEditField(
+                value = uiState.person?.username ?: "",
+                label = stringResource(id = R.string.username),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        username = it
+                    })
+                }
+            )
+        }
+
+        if (uiState.passwordVisible){
+            UstadTextEditField(
+                value = uiState.person?.newPassword ?: "",
+                label = stringResource(id = R.string.password),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        newPassword = it
+                    })
+                }
+            )
+        }
     }
 }
 
@@ -206,8 +262,8 @@ private fun SetUserImageButton(onClick: () -> Unit){
         modifier = Modifier
             .size(60.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = colorResource(R.color.secondaryColor),
-            disabledBackgroundColor = Color.Transparent),){
+            backgroundColor = colorResource(R.color.secondaryColor))
+    ){
         Image(
             painter = painterResource(id = R.drawable.ic_add_a_photo_24),
             contentDescription = null,

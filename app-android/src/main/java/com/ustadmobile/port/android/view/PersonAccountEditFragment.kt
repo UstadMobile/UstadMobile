@@ -247,11 +247,7 @@ private fun PersonAccountEditScreen(
                 },
                 error = uiState.currentPasswordError,
                 enabled = uiState.fieldsEnabled,
-                trailingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_baseline_visibility_24),
-                        contentDescription = "")
-                }
+                password = true
             )
         }
 
@@ -265,11 +261,7 @@ private fun PersonAccountEditScreen(
             },
             error = uiState.newPasswordError,
             enabled = uiState.fieldsEnabled,
-            trailingIcon = {
-                Icon(
-                    painter = painterResource(R.drawable.ic_baseline_visibility_24),
-                    contentDescription = "")
-            }
+            password = true
         )
 
         UstadTextEditField(
@@ -282,11 +274,7 @@ private fun PersonAccountEditScreen(
             },
             error = uiState.passwordConfirmedError,
             enabled = uiState.fieldsEnabled,
-            trailingIcon = {
-                Icon(
-                    painter = painterResource(R.drawable.ic_baseline_visibility_24),
-                    contentDescription = "")
-            }
+            password = true
         )
     }
 }
