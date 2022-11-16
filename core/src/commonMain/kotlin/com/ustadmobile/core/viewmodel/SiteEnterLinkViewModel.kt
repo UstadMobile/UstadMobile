@@ -60,7 +60,7 @@ class SiteEnterLinkViewModel(
                 }
 
                 _uiState.update { previous ->
-                    previous.copy(validLink =  true, errorMessage = null)
+                    previous.copy(validLink =  true, linkError = null)
                 }
 
                 navController.navigate(Login2View.VIEW_NAME, args)
@@ -68,10 +68,16 @@ class SiteEnterLinkViewModel(
                 _uiState.update { previous ->
                     previous.copy(
                         validLink = false,
-                        errorMessage = impl.getString(MessageID.invalid_link)
+                        linkError = impl.getString(MessageID.invalid_link)
                     )
                 }
             }
+        }
+    }
+
+    fun onSiteLinkUpdated(siteLink: String) {
+        _uiState.update { previous ->
+            previous.copy(siteLink = siteLink)
         }
     }
 
