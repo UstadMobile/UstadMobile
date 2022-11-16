@@ -73,7 +73,8 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
 
             Button {
                 onClick = { props.onClickNext }
-                variant = ButtonVariant.outlined
+                variant = ButtonVariant.contained
+                color = ButtonColor.secondary
 
                 + strings[MessageID.next]
             }
@@ -85,8 +86,7 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
 
             Button {
                 onClick = { props.onClickNewLearningEnvironment }
-                variant = ButtonVariant.contained
-                color = ButtonColor.secondary
+                variant = ButtonVariant.text
 
                 startIcon = Add.create()
 
