@@ -14,20 +14,17 @@ import com.ustadmobile.core.contentjob.DummyContentPluginUploader
 import com.ustadmobile.core.contentjob.MetadataResult
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import com.ustadmobile.core.impl.di.commonJvmDiModule
+import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import org.junit.Before
 import org.junit.Test
 import java.io.File
 import com.ustadmobile.door.ext.writeToFile
-import io.ktor.http.content.*
 import io.ktor.server.routing.*
 import java.util.UUID
 import java.io.FileInputStream
-import io.ktor.utils.io.streams.asInput
 import kotlinx.serialization.json.Json
 import org.junit.Assert
 import org.kodein.di.*
-import org.kodein.di.ktor.closestDI
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.ContainerStorageManager
@@ -76,7 +73,7 @@ class ContentUploadRouteIntegrationTest {
 
         endpointScope = EndpointScope()
         di = DI {
-            import(commonJvmDiModule)
+            import(CommonJvmDiModule)
             import(commonTestKtorDiModule(endpointScope, temporaryFolder))
             bind<ContainerStorageManager>() with scoped(endpointScope).singleton {
                 mockContainerStorageManager
