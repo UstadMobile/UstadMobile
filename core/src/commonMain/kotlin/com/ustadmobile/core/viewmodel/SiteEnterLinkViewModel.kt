@@ -4,6 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.StringAndSerialNum
 import com.ustadmobile.core.util.ext.requireHttpPrefix
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
@@ -22,7 +23,7 @@ data class SiteEnterLinkUiState(
     val siteLink: String = "",
     val validLink: Boolean = false,
     val progressVisible: Boolean = false,
-    val linkError: String? = null,
+    val linkError: StringAndSerialNum? = null,
     val fieldsEnabled: Boolean = true,
 )
 
@@ -43,7 +44,13 @@ class SiteEnterLinkViewModel(
 
     private val impl: UstadMobileSystemImpl by instance()
 
+    var counter = 0
+
     fun onClickNext() {
+        _uiState.update {
+            it.copy(fieldsEnabled = false)
+        }
+
         viewModelScope.launch {
             try {
                 val endpointUrl = _uiState.value.siteLink.requireHttpPrefix()
@@ -60,7 +67,7 @@ class SiteEnterLinkViewModel(
                 }
 
                 _uiState.update { previous ->
-                    previous.copy(validLink =  true, linkError = null)
+                    previous.copy(validLink =  true, linkError = null, fieldsEnabled = true)
                 }
 
                 navController.navigate(Login2View.VIEW_NAME, args)
@@ -68,7 +75,8 @@ class SiteEnterLinkViewModel(
                 _uiState.update { previous ->
                     previous.copy(
                         validLink = false,
-                        linkError = impl.getString(MessageID.invalid_link)
+                        fieldsEnabled = true,
+                        linkError = StringAndSerialNum(impl.getString(MessageID.invalid_link))
                     )
                 }
             }
