@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -21,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.util.StringAndSerialNum
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
@@ -61,13 +61,14 @@ fun UstadTextEditField(
     enabled: Boolean,
     modifier: Modifier = Modifier,
     error: String? = null,
+    errorString: StringAndSerialNum? = null,
     readOnly: Boolean = false,
     onClick: (() -> Unit)? = null,
     onValueChange: (String) -> Unit,
     password: Boolean = false,
 ) {
-    var errorText by remember(error) {
-        mutableStateOf(error)
+    var errorText by remember(errorString) {
+        mutableStateOf(errorString?.toString())
     }
 
     var passwordVisible by remember {
