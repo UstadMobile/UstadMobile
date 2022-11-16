@@ -80,9 +80,7 @@ class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView: View
         mBinding = FragmentSiteEnterLinkBinding.inflate(inflater, container, false).also {
-            rootView = it.root
             it.showButton = false
             it.showProgress = false
         }
@@ -98,7 +96,6 @@ class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
                 }
             }
         }
-//        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -152,11 +149,11 @@ private fun SiteEnterLinkScreen(
         Text(stringResource(R.string.please_enter_the_linK))
 
         UstadTextEditField(
-            value = "",
+            value = uiState.siteLink,
             label = stringResource(id = R.string.site_link),
             onValueChange = onEditTextValueChange,
-            error = uiState.errorMessage,
-            enabled = false,
+            error = uiState.linkError,
+            enabled = uiState.fieldsEnabled,
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -169,7 +166,11 @@ private fun SiteEnterLinkScreen(
                 backgroundColor = colorResource(id = R.color.secondaryColor)
             )
         ) {
-            Text(stringResource(R.string.next).uppercase())
+            Text(stringResource(R.string.next).uppercase(),
+                color = contentColorFor(
+                    colorResource(id = R.color.secondaryColor)
+                )
+            )
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -187,7 +188,12 @@ private fun SiteEnterLinkScreen(
             )
         ) {
 
-            Icon(Icons.Filled.Add, contentDescription = "")
+            Icon(Icons.Filled.Add,
+                contentDescription = "",
+                modifier = Modifier.size(ButtonDefaults.IconSize)
+            )
+
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 
             Text(stringResource(R.string.create_a_new_learning_env)
                 .uppercase()

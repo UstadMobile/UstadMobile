@@ -4,5 +4,6 @@ data class SiteEnterLinkUiState(
     val siteLink: String = "",
     val validLink: Boolean = false,
     val progressVisible: Boolean = false,
-    val errorMessage: String = ""
+    val linkError: String? = null,
+    val fieldsEnabled: Boolean = true,
 )

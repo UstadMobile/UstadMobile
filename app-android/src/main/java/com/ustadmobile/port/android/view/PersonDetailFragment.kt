@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,6 +34,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonDetailBinding
 import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentWithClazzDetailBinding
@@ -125,7 +128,6 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         val rootView: View
-
         clazzEnrolmentWithClazzRecyclerAdapter = ClazzEnrolmentWithClazzRecyclerAdapter(
             null)
         mBinding = FragmentPersonDetailBinding.inflate(inflater, container, false).also {
@@ -139,6 +141,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
 
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
+
         return rootView
     }
 
@@ -215,102 +218,3 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithPersonParentJoin>(), P
     }
 
 }
-
-@Composable
-private fun PersonDetailScreen(
-    onClickChangePassword: () -> Unit = {}
-){
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-    ) {
-
-        ChangePasswordButton(onClickChangePassword)
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Divider(color = Color.LightGray, modifier = Modifier.fillMaxWidth().width(1.dp))
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Column(modifier = Modifier.padding(12.dp)) {
-
-            Text(stringResource(R.string.import_content),
-                style = Typography.body1,
-                color = Color.Black)
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            UserRow()
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            TextButton(onClick = {}){
-                Text(stringResource(R.string.contact_details),
-                    style = Typography.body1,
-                    color = Color.Black)
-            }
-
-            TextButton(onClick = {}){
-                Text(stringResource(R.string.classes),
-                    style = Typography.body1,
-                    color = Color.Black)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ChangePasswordButton(onClick: () -> Unit) {
-
-    TextButton(onClick = onClick) {
-
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally,)
-        {
-            Image(
-                painter = painterResource(id = R.drawable.person_with_key),
-                contentDescription = "",
-                modifier = Modifier.size(35.dp),
-                colorFilter = ColorFilter.tint(color = Color.Black))
-
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Text(stringResource(R.string.change_password),
-                style = Typography.body1,
-                color = Color.Black)
-        }
-    }
-}
-
-@Composable
-private fun UserRow(){
-    Row {
-        Image(
-            painter = painterResource(id = R.drawable.ic_account_circle_black_24dp),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(color = Color.DarkGray),
-            modifier = Modifier
-                .size(35.dp))
-
-        Spacer(modifier = Modifier.width(5.dp))
-
-        Column {
-            Text(stringResource(R.string.change_password),
-                style = Typography.body1,
-                color = Color.Black)
-
-            Text(stringResource(R.string.username),
-                style = Typography.body1,
-                color = Color.Gray)
-        }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-private fun PersonDetailPreview() {
-    PersonDetailScreen()
-}
-
