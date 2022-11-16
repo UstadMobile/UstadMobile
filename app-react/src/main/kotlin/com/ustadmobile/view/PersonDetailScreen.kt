@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.core.components.DIContext
+import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
@@ -11,7 +12,7 @@ import com.ustadmobile.mui.components.UstadQuickActionButton
 import mui.material.List
 import mui.icons.material.*
 import mui.material.*
-import mui.material.Box
+import react.dom.html.ReactHTML.img
 import mui.icons.material.Badge
 import mui.material.Container
 import mui.material.styles.TypographyVariant
@@ -87,6 +88,11 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
+            img {
+                src = "${""}?w=164&h=164&fit=crop&auto=format"
+                alt = "https://images.unsplash.com/photo-1518756131217-31eb79b20e8f"
+            }
+
             QuickActionBar{
                 uiState = props.uiState
             }
@@ -134,7 +140,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
     Stack {
         direction = responsive(StackDirection.row)
 
-        if (!props.uiState.person?.phoneNum.isNullOrEmpty()) {
+        if (props.uiState.phoneNumVisible) {
             UstadQuickActionButton {
                 icon = Call.create()
                 text = strings[MessageID.call]
@@ -148,7 +154,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
             }
         }
 
-        if (!props.uiState.person?.emailAddr.isNullOrEmpty()) {
+        if (props.uiState.emailVisible) {
             UstadQuickActionButton {
                 icon = Email.create()
                 text = strings[MessageID.email]
@@ -172,7 +178,7 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
             }
         }
 
-        if (props.uiState.person?.parentJoin != null) {
+        if (props.uiState.manageParentalConsentVisible) {
             UstadQuickActionButton {
                 icon = SupervisedUserCircle.create()
                 text = strings[MessageID.manage_parental_consent]
@@ -194,8 +200,7 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
 
     val strings = useStringsXml()
 
-    if (props.uiState.person?.dateOfBirth != 0L
-        && props.uiState.person?.dateOfBirth != null){
+    if (props.uiState.dateOfBirthVisible){
         val birthdayFormatted = useMemo(dependencies = arrayOf(props.uiState.person?.dateOfBirth)) {
             Date(props.uiState.person?.dateOfBirth ?: 0L).toLocaleDateString()
         }
@@ -207,17 +212,21 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
         }
     }
 
-    if (props.uiState.person?.gender != 0
-        && props.uiState.person?.gender != null){
+    if (props.uiState.personGenderVisible){
+
+        val gender = strings.mapLookup(
+            props.uiState?.person?.gender ?: 1,
+            PersonConstants.GENDER_MESSAGE_ID_MAP
+        )
 
         UstadDetailField {
             icon = null
             labelText = strings[MessageID.gender_literal]
-            valueText = props.uiState.person?.firstNames ?: ""
+            valueText = gender ?: ""
         }
     }
 
-    if (props.uiState.person?.personOrgId != null){
+    if (props.uiState.personOrgIdVisible){
         UstadDetailField {
             icon = Badge.create()
             labelText = strings[MessageID.organization_id]
@@ -225,7 +234,7 @@ private val DetailFeilds = FC<PersonDetailProps> { props ->
         }
     }
 
-    if (!props.uiState.person?.username.isNullOrEmpty()){
+    if (props.uiState.personUsernameVisible){
         UstadDetailField {
             icon = AccountCircle.create()
             labelText = strings[MessageID.username]
@@ -238,21 +247,17 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
 
     val strings = useStringsXml()
 
-    if (!props.uiState.person?.phoneNum.isNullOrEmpty()){
-        Stack{
-            direction = responsive(StackDirection.row)
+    if (props.uiState.phoneNumVisible){
 
-            UstadDetailField {
-                icon = Call.create()
-                labelText = strings[MessageID.phone]
-                valueText = props.uiState.person?.phoneNum ?: ""
-            }
-
-            + Message.create()
+        UstadDetailField{
+            valueText = props.uiState.person?.phoneNum ?: ""
+            labelText = strings[MessageID.phone]
+            icon = Call.create()
+            onClick = props.onClickDial
         }
     }
 
-    if (!props.uiState.person?.emailAddr.isNullOrEmpty()){
+    if (props.uiState.emailVisible){
         UstadDetailField {
             icon = Email.create()
             labelText = strings[MessageID.email]
@@ -260,7 +265,7 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
         }
     }
 
-    if (!props.uiState.person?.personAddress.isNullOrEmpty()){
+    if (props.uiState.personAddressVisible){
         UstadDetailField {
             icon = LocationOn.create()
             labelText = strings[MessageID.address]
