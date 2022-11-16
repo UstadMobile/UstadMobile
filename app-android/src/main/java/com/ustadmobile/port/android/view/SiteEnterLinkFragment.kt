@@ -33,8 +33,6 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
-import java.util.*
-
 
 class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
 
@@ -149,7 +147,7 @@ private fun SiteEnterLinkScreen(
         Text(stringResource(R.string.please_enter_the_linK))
 
         UstadTextEditField(
-            value = uiState.siteLink,
+            value = uiState.site?.siteName ?: "",
             label = stringResource(id = R.string.site_link),
             onValueChange = onEditTextValueChange,
             error = uiState.linkError,

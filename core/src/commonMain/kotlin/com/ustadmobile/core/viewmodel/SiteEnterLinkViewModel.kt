@@ -1,7 +1,9 @@
 package com.ustadmobile.core.viewmodel
 
+import com.ustadmobile.lib.db.entities.Site
+
 data class SiteEnterLinkUiState(
-    val siteLink: String = "",
+    var site: Site? = null,
     val validLink: Boolean = false,
     val progressVisible: Boolean = false,
     val linkError: String? = null,

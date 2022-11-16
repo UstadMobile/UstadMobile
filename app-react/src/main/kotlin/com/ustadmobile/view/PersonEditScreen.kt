@@ -185,6 +185,13 @@ val PersonEditScreenPreview = FC<Props> {
             person = PersonWithAccount().apply {
                 firstNames = "Bob"
                 lastName = "Jones"
+                phoneNum = "0799999"
+                emailAddr = "Bob@gmail.com"
+                gender = 1
+                username = "Bob12"
+                dateOfBirth = 12
+                personOrgId = "123"
+                personAddress = "Herat"
             }
         )
     }

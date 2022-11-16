@@ -1,14 +1,9 @@
 package com.ustadmobile.hooks
 
-import com.ustadmobile.core.view.PersonAccountEditView
-import com.ustadmobile.core.view.PersonDetailView
-import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
-import com.ustadmobile.view.PersonAccountEditPreview
-import com.ustadmobile.view.PersonDetailPreview
-import com.ustadmobile.view.PersonDetailScreen
-import com.ustadmobile.view.PersonEditScreenPreview
+import com.ustadmobile.view.*
 import react.useMemo
 
 fun useUstadScreens(): UstadScreens {
@@ -20,7 +15,11 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(PersonEditView.VIEW_NAME, "Person Edit Preview",
                 PersonEditScreenPreview),
             UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",
-                PersonAccountEditPreview)
+                PersonAccountEditPreview),
+            UstadScreen(Login2View.VIEW_NAME, "Login Preview",
+                LoginPreview),
+            UstadScreen(SiteEnterLinkView.VIEW_NAME, "Site Enter Link Preview",
+                SiteEnterLinkScreenPreview),
         )
     }
 }
