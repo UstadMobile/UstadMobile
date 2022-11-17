@@ -44,7 +44,6 @@ import org.junit.runner.Description
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
-import java.net.URL
 import java.nio.file.Files
 import javax.naming.InitialContext
 import kotlin.random.Random
@@ -207,7 +206,7 @@ class UstadTestRule(
             }
 
             bind<UstadNavController>() with singleton {
-                spy(TestUstadNavController(di))
+                spy(TestUstadNavController())
             }
 
             bind<CoroutineScope>(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE) with singleton {

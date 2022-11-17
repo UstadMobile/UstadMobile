@@ -24,7 +24,7 @@ import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_KEYLENGTH
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
-import com.ustadmobile.core.impl.di.commonJvmDiModule
+import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
@@ -67,7 +67,7 @@ import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
 open class UstadApp : Application(), DIAware {
 
     val diModule = DI.Module("UstadApp-Android") {
-        import(commonJvmDiModule)
+        import(CommonJvmDiModule)
 
         bind<UstadMobileSystemImpl>() with singleton {
             UstadMobileSystemImpl(applicationContext)
