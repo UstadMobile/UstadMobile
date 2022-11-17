@@ -33,6 +33,8 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
                 UstadTextEditField {
                     value = props.uiState.personUsernameAndPassword.username
                     label = strings[MessageID.username]
+                    error = props.uiState.usernameError
+                    enabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onUsernameAndPasswordChanged(
                             props.uiState.personUsernameAndPassword.copy(
@@ -40,8 +42,6 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
                             )
                         )
                     }
-                    error = props.uiState.usernameError
-                    enabled = props.uiState.fieldsEnabled
                 }
             }
 
@@ -49,41 +49,41 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
                 UstadTextEditField {
                     value = props.uiState.personUsernameAndPassword.currentPassword
                     label = strings[MessageID.current_password]
+                    error = props.uiState.currentPasswordError
+                    enabled = props.uiState.fieldsEnabled
+                    password = true
                     onChange = {
                         props.uiState.personUsernameAndPassword.copy(
                             currentPassword = it
                         )
                     }
-                    error = props.uiState.currentPasswordError
-                    enabled = props.uiState.fieldsEnabled
-                    password = true
                 }
             }
 
             UstadTextEditField {
                 value = props.uiState.personUsernameAndPassword.newPassword
                 label = strings[MessageID.new_password]
+                error = props.uiState.newPasswordError
+                enabled = props.uiState.fieldsEnabled
+                password = true
                 onChange = {
                     props.uiState.personUsernameAndPassword.copy(
                         newPassword = it
                     )
                 }
-                error = props.uiState.newPasswordError
-                enabled = props.uiState.fieldsEnabled
-                password = true
             }
 
             UstadTextEditField {
                 value = props.uiState.personUsernameAndPassword.passwordConfirmed
                 label = strings[MessageID.confirm_password]
+                error = props.uiState.passwordConfirmedError
+                enabled = props.uiState.fieldsEnabled
+                password = true
                 onChange = {
                     props.uiState.personUsernameAndPassword.copy(
                         passwordConfirmed = it
                     )
                 }
-                error = props.uiState.passwordConfirmedError
-                enabled = props.uiState.fieldsEnabled
-                password = true
             }
         }
     }

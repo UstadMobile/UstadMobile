@@ -75,7 +75,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
 
             if (props.uiState.parentalEmailVisible){
                 UstadTextEditField {
-                    value = props.uiState?.approvalPersonParentJoin?.ppjEmail ?: ""
+                    value = props.uiState.approvalPersonParentJoin?.ppjEmail ?: ""
                     label = strings[MessageID.parents_email_address]
                     error = props.uiState.parentContactError
                     enabled = props.uiState.fieldsEnabled

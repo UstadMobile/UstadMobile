@@ -82,7 +82,6 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 onClick = { props.onClickLogin }
                 variant = contained
                 + strings[MessageID.login].uppercase()
-                color = ButtonColor.secondary
             }
 
             Box{

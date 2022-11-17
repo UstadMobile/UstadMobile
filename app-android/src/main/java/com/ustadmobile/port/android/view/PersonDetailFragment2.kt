@@ -40,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.ustadmobile.core.controller.PersonConstants
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
@@ -263,11 +264,15 @@ private fun DetailFeilds(uiState: PersonDetailUiState){
                 labelText = stringResource(R.string.birthday))
         }
 
+        Spacer(modifier = Modifier.height(10.dp))
+
         if (uiState.personGenderVisible){
             UstadDetailField(
                 valueText = gender,
                 labelText = stringResource(R.string.gender_literal))
         }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.personOrgIdVisible){
             UstadDetailField(
@@ -275,6 +280,8 @@ private fun DetailFeilds(uiState: PersonDetailUiState){
                 valueText = uiState.person?.personOrgId ?: "",
                 labelText = stringResource(R.string.organization_id))
         }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.personUsernameVisible){
             UstadDetailField(
@@ -333,31 +340,31 @@ private fun ContactDetails(
 
 @Composable
 private fun Classes(
-    clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
-    onClickClazz: () -> Unit = {}){
+    clazzes: List<Clazz> = emptyList(),
+    onClickClazz: () -> Unit = {}
+){
 
     clazzes.forEach { clazz ->
-        Spacer(modifier = Modifier.height(15.dp))
-
-        Button(onClick = onClickClazz) {
+        TextButton(onClick = onClickClazz) {
             ClassItem(clazz)
         }
     }
 }
 
 @Composable
-private fun ClassItem(clazz: ClazzEnrolmentWithClazzAndAttendance){
-    Row(modifier = Modifier.padding(8.dp)
+private fun ClassItem(clazz: Clazz){
+    Row(
+        modifier = Modifier.padding(8.dp).
+                fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
     ){
         Image(
             painter = painterResource(id = R.drawable.ic_group_black_24dp),
             contentDescription = null,
             modifier = Modifier
-                .width(70.dp))
+                .width(35.dp))
 
-        Column {
-            Text(text = clazz?.clazz?.clazzName ?: "")
-        }
+        Text(text = clazz.clazzName ?: "")
     }
 }
 
@@ -384,7 +391,15 @@ fun PersonDetailScreenPreview() {
         showCreateAccountVisible = true,
         changePasswordVisible = true,
         chatVisible = true,
-        clazzes = listOf())
+        clazzes = listOf(
+            Clazz().apply {
+                clazzName = "Jetpack Compose Class"
+            },
+            Clazz().apply {
+                clazzName = "React Class"
+            },
+        )
+    )
     MdcTheme{
         PersonDetailScreen(uiState)
     }

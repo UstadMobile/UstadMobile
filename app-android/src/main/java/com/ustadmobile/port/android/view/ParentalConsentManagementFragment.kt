@@ -2,15 +2,42 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.material.composethemeadapter.MdcTheme
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentParentalConsentManagementBinding
 import com.ustadmobile.core.controller.ParentalConsentManagementPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
+import com.ustadmobile.core.impl.locale.entityconstants.PersonParentJoinConstants
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ParentalConsentManagementView
+import com.ustadmobile.core.viewmodel.ParentalConsentManagementUiState
+import com.ustadmobile.core.viewmodel.PersonAccountEditUiState
+import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
+import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
 import com.ustadmobile.lib.db.entities.SiteTerms
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 
 
@@ -128,4 +155,134 @@ class ParentalConsentManagementFragment: UstadEditFragment<PersonParentJoinWithM
             field = value
             mBinding?.fieldsEnabled = value
         }
+}
+
+@Composable
+private fun ParentalConsentManagementScreen(
+    uiState: ParentalConsentManagementUiState = ParentalConsentManagementUiState(),
+    onClickConsent: () -> Unit = {},
+    onClickDoNotConsent: () -> Unit = {},
+    onClickChangeConsent: () -> Unit = {},
+    onChangeRelation: (PersonParentJoin?) -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+    )  {
+
+        Text(stringResource(id = R.string.parent_consent_explanation))
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        if (uiState.relationshipVisible){
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.personParentJoin?.ppjRelationship ?: 0,
+                label = stringResource(R.string.relationship),
+                options = PersonParentJoinConstants.RELATIONSHIP_MESSAGE_IDS,
+                onOptionSelected = {
+                    onChangeRelation(uiState.personParentJoin?.shallowCopy{
+                        ppjRelationship = it.value
+                    })
+                },
+                error = uiState.relationshipError,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(stringResource(id = R.string.terms_and_policies),
+            style = Typography.h4
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        AndroidView(factory = {
+            WebView(it).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                webViewClient = WebViewClient()
+                loadUrl(uiState.siteTerms?.termsHtml!!)
+            }},
+              update = {
+                  it.loadUrl(uiState.siteTerms?.termsHtml!!)
+            }
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        if (uiState.consentVisible){
+            Button(
+                onClick = onClickConsent,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                enabled = uiState.fieldsEnabled,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.secondaryColor)
+                )
+            ) {
+                Text(stringResource(R.string.i_consent).uppercase(),
+                    color = contentColorFor(
+                        colorResource(id = R.color.secondaryColor)
+                    )
+                )
+            }
+        }
+
+        if (uiState.dontConsentVisible){
+            OutlinedButton(
+                onClick = onClickDoNotConsent,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                enabled = uiState.fieldsEnabled,
+            ) {
+                Text(stringResource(R.string.i_do_not_consent).uppercase())
+            }
+        }
+        if (uiState.changeConsentVisible){
+            val changeConsentText: Int =
+                if (uiState.personParentJoin?.ppjStatus == PersonParentJoin.STATUS_APPROVED)
+                    R.string.revoke_consent
+                else
+                    R.string.restore_consent
+
+            Button(
+                onClick = onClickChangeConsent,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                enabled = uiState.fieldsEnabled,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.secondaryColor)
+                )
+            ) {
+                Text(stringResource(changeConsentText).uppercase(),
+                    color = contentColorFor(
+                        colorResource(id = R.color.secondaryColor)
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+@Preview
+fun ParentalConsentManagementScreenPreview() {
+    val uiState = ParentalConsentManagementUiState(
+        siteTerms = SiteTerms().apply {
+            termsHtml = "https://www.ustadmobile.com"
+        },
+        personParentJoin = PersonParentJoin().apply {
+            ppjParentPersonUid = 0
+            ppjRelationship = 1
+        },
+        fieldsEnabled = true
+    )
+
+    MdcTheme {
+        ParentalConsentManagementScreen(uiState)
+    }
 }

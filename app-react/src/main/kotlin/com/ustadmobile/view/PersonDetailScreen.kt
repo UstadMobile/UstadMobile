@@ -6,6 +6,7 @@ import com.ustadmobile.core.components.DIContext
 import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadQuickActionButton
@@ -39,15 +40,13 @@ val PersonDetailScreen = FC<Props>() {
 
 external interface PersonDetailProps : Props {
     var uiState: PersonDetailUiState
-    var clazzes: List<ClazzEnrolmentWithClazzAndAttendance>
+    var clazzes: List<Clazz>
     var onClickDial: () -> Unit
-    var onClickSms: () -> Unit
     var onClickEmail: () -> Unit
     var onClickCreateAccount: () -> Unit
     var onClickChangePassword: () -> Unit
     var onClickManageParentalConsent: () -> Unit
     var onClickChat: () -> Unit
-    var onClickClazz: () -> Unit
 }
 
 val PersonDetailPreview = FC<Props> {
@@ -67,11 +66,12 @@ val PersonDetailPreview = FC<Props> {
             changePasswordVisible = true,
             chatVisible = true,
             clazzes = listOf(
-                ClazzEnrolmentWithClazzAndAttendance(),
-                ClazzEnrolmentWithClazzAndAttendance(),
-                ClazzEnrolmentWithClazzAndAttendance(),
-                ClazzEnrolmentWithClazzAndAttendance(),
-                ClazzEnrolmentWithClazzAndAttendance(),
+                Clazz().apply {
+                    clazzName = "Jetpack Compose Class"
+                },
+                Clazz().apply {
+                    clazzName = "React Class"
+                },
             )
         )
     }
@@ -90,7 +90,7 @@ val PersonDetailComponent2 = FC<PersonDetailProps> { props ->
 
             img {
                 src = "${""}?w=164&h=164&fit=crop&auto=format"
-                alt = "https://images.unsplash.com/photo-1518756131217-31eb79b20e8f"
+                alt = "user image"
             }
 
             QuickActionBar{
@@ -145,12 +145,6 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
                 icon = Call.create()
                 text = strings[MessageID.call]
                 onClick = { props.onClickDial }
-            }
-
-            UstadQuickActionButton {
-                icon = Sms.create()
-                text = strings[MessageID.text]
-                onClick = { props.onClickSms }
             }
         }
 
@@ -248,12 +242,10 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
     val strings = useStringsXml()
 
     if (props.uiState.phoneNumVisible){
-
         UstadDetailField{
             valueText = props.uiState.person?.phoneNum ?: ""
             labelText = strings[MessageID.phone]
             icon = Call.create()
-            onClick = props.onClickDial
         }
     }
 
@@ -276,48 +268,18 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
 
 private val Classes = FC<PersonDetailProps> { props ->
 
-    val strings = useStringsXml()
-
     List{
         props.uiState.clazzes.map {
             ListItem{
-                Button {
-                    variant = ButtonVariant.text
-                    onClick = { props.onClickClazz }
+                Stack {
+                    direction = responsive(StackDirection.row)
+                    spacing = responsive(10.px)
 
-                    Stack {
-                        direction = responsive(StackDirection.row)
+                    + People.create()
 
-                        + People.create()
-
-                        Stack {
-                            direction = responsive(StackDirection.column)
-                            Typography {
-                                align = TypographyAlign.center
-                                +"text"
-                            }
-
-                            Typography {
-                                align = TypographyAlign.center
-                                +"text"
-                            }
-
-                            Stack {
-                                direction = responsive(StackDirection.row)
-
-                                + Circle.create{
-                                    sx {
-                                        width = 10.px
-                                        height = 10.px
-                                    }
-                                }
-
-                                Typography {
-                                    align = TypographyAlign.center
-                                    +strings[MessageID.attendance]
-                                }
-                            }
-                        }
+                    Typography {
+                        align = TypographyAlign.center
+                        + (it.clazzName ?: "")
                     }
                 }
             }

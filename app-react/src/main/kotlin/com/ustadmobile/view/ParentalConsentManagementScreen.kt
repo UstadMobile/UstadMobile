@@ -8,8 +8,10 @@ import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
+import csstype.px
 import kotlinx.js.jso
 import mui.material.*
+import mui.material.styles.TypographyVariant
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
@@ -39,7 +41,7 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
     Container {
         Stack {
             direction = responsive(StackDirection.column)
-            spacing = responsive(3)
+            spacing = responsive(10.px)
 
             Typography {
                 + strings[MessageID.parent_consent_explanation]
@@ -61,6 +63,7 @@ val ParentalConsentManagementComponent2 = FC<ParentalConsentManagementScreenProp
             }
 
             Typography {
+                variant = TypographyVariant.h6
                 + strings[MessageID.terms_and_policies]
             }
 

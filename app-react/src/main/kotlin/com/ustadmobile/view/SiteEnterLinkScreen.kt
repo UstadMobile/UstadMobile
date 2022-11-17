@@ -74,7 +74,6 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
             Button {
                 onClick = { props.onClickNext }
                 variant = ButtonVariant.contained
-                color = ButtonColor.secondary
 
                 + strings[MessageID.next]
             }
@@ -98,7 +97,7 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
 
 val SiteEnterLinkScreenPreview = FC<Props> {
 
-    var uiStateVar by useState {
+    val uiStateVar by useState {
         SiteEnterLinkUiState()
     }
 

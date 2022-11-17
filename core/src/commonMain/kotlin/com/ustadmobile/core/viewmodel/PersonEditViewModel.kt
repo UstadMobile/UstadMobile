@@ -26,29 +26,29 @@ data class PersonEditUiState(
     /**
      * This is set only when registering a minor
      */
-    var approvalPersonParentJoin: PersonParentJoin? = null,
+    val approvalPersonParentJoin: PersonParentJoin? = null,
 
-    var registrationMode: Int = 0,
+    val registrationMode: Int = 0,
 
-    var usernameError: String? = null,
+    val usernameError: String? = null,
 
-    var passwordConfirmedError: String? = null,
+    val passwordConfirmedError: String? = null,
 
-    var passwordError: String? = null,
+    val passwordError: String? = null,
 
-    var emailError: String? = null,
+    val emailError: String? = null,
 
-    var confirmError: String? = null,
+    val confirmError: String? = null,
 
-    var dateOfBirthError: String? = null,
+    val dateOfBirthError: String? = null,
 
-    var parentContactError: String? = null,
+    val parentContactError: String? = null,
 
-    var genderError: String? = null,
+    val genderError: String? = null,
 
-    var firstNameError: String? = null,
+    val firstNameError: String? = null,
 
-    var lastNameError: String? = null,
+    val lastNameError: String? = null,
 
     val usernameVisible: Boolean = false,
 
