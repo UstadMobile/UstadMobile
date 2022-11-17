@@ -30,7 +30,7 @@ external interface SiteEnterLinkProps : Props {
 
     var onClickNewLearningEnvironment: () -> Unit
 
-    var onEditTextValueChange: (Site?) -> Unit
+    var onEditTextValueChange: (String) -> Unit
 }
 
 val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
@@ -53,15 +53,14 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
             }
 
             UstadTextEditField {
-                value = props.uiState.site?.siteName
+                value = props.uiState.siteLink
                 label = strings[MessageID.site_link]
-                error = props.uiState.linkError
+                error = props.uiState.linkError?.message ?: ""
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onEditTextValueChange(
-                        props.uiState.site?.shallowCopy {
-                            siteName = it
-                        })
+                        props.uiState.siteLink ?: ""
+                    )
                 }
             }
 
