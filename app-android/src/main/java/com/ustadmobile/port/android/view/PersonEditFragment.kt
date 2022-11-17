@@ -132,7 +132,7 @@ fun PersonEditScreen(
         UstadTextEditField(
             value = uiState.person?.firstNames ?: "",
             label = stringResource(id = R.string.first_names),
-            error = uiState.firstNamesFieldError,
+            error = uiState.firstNameError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onPersonChanged(uiState.person?.shallowCopy{
@@ -162,7 +162,7 @@ fun PersonEditScreen(
                     gender = it.value
                 })
             },
-            error = uiState.genderFieldError,
+            error = uiState.genderError,
         )
 
         if (uiState.parentalEmailVisible){

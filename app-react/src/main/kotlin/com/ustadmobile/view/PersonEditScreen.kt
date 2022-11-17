@@ -37,7 +37,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             UstadTextEditField {
                 value = props.uiState.person?.firstNames ?: ""
                 label = strings[MessageID.first_names]
-                error = props.uiState.firstNamesFieldError
+                error = props.uiState.firstNameError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onPersonChanged(

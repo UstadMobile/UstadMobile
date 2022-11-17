@@ -20,6 +20,8 @@ fun useUstadScreens(): UstadScreens {
                 LoginPreview),
             UstadScreen(SiteEnterLinkView.VIEW_NAME, "Site Enter Link Preview",
                 SiteEnterLinkScreenPreview),
+            UstadScreen(ParentalConsentManagementView.VIEW_NAME, "Parental Consent Management Preview",
+                ParentalConsentManagementPreview),
         )
     }
 }

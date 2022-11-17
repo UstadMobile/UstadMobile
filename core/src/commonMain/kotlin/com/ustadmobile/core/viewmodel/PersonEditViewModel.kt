@@ -32,7 +32,7 @@ data class PersonEditUiState(
 
     var usernameError: String? = null,
 
-    var noMatchPasswordError: String? = null,
+    var passwordConfirmedError: String? = null,
 
     var passwordError: String? = null,
 
@@ -44,11 +44,7 @@ data class PersonEditUiState(
 
     var parentContactError: String? = null,
 
-    var firstNamesFieldError: String? = null,
-
-    var lastNameFieldError: String? = null,
-
-    var genderFieldError: String? = null,
+    var genderError: String? = null,
 
     var firstNameError: String? = null,
 
