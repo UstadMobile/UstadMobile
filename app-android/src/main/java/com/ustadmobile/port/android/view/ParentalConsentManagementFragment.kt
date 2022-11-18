@@ -30,12 +30,11 @@ import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementUiState
 import com.ustadmobile.core.viewmodel.PersonAccountEditUiState
 import com.ustadmobile.core.viewmodel.PersonDetailUiState
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
-import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
-import com.ustadmobile.lib.db.entities.SiteTerms
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.util.compose.rememberFormattedDate
+import com.ustadmobile.port.android.view.binding.loadHtmlData
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
@@ -172,7 +171,11 @@ private fun ParentalConsentManagementScreen(
             .verticalScroll(rememberScrollState()),
     )  {
 
-        Text(stringResource(id = R.string.parent_consent_explanation))
+        val minorDateOfBirth = rememberFormattedDate(
+            uiState.personParentJoin?.minorPerson?.dateOfBirth ?: 0)
+        Text(stringResource(id = R.string.parent_consent_explanation,
+            uiState.personParentJoin?.minorPerson?.fullName() ?: "",
+            minorDateOfBirth, uiState.appName))
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -205,10 +208,12 @@ private fun ParentalConsentManagementScreen(
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
                 webViewClient = WebViewClient()
-                loadUrl(uiState.siteTerms?.termsHtml!!)
+                loadHtmlData(uiState.siteTerms?.termsHtml)
+                setTag(R.id.tag_webview_html, uiState.siteTerms?.termsHtml)
             }},
-              update = {
-                  it.loadUrl(uiState.siteTerms?.termsHtml!!)
+            update = {
+                if(uiState.siteTerms?.termsHtml != it.getTag(R.id.tag_webview_html))
+                    it.loadUrl(uiState.siteTerms?.termsHtml!!)
             }
         )
 
@@ -275,9 +280,13 @@ fun ParentalConsentManagementScreenPreview() {
         siteTerms = SiteTerms().apply {
             termsHtml = "https://www.ustadmobile.com"
         },
-        personParentJoin = PersonParentJoin().apply {
+        personParentJoin = PersonParentJoinWithMinorPerson().apply {
             ppjParentPersonUid = 0
             ppjRelationship = 1
+            minorPerson = Person().apply {
+                firstNames = "Pit"
+                lastName = "The Young"
+            }
         },
         fieldsEnabled = true
     )
