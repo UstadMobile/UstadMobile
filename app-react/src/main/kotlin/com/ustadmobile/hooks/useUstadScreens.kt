@@ -4,8 +4,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.UstadEditFieldPreviews
-import com.ustadmobile.view.PersonDetailPreview
-import com.ustadmobile.view.PersonDetailScreen
+import com.ustadmobile.view.*
 import react.useMemo
 
 fun useUstadScreens(): UstadScreens {
@@ -14,8 +13,7 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(PersonDetailView.VIEW_NAME, "Person Detail", PersonDetailScreen),
             UstadScreen("PersonDetailPreview", "Person Detail Preview",
                 PersonDetailPreview),
-            UstadScreen("UstadEditFields", "Edit Fields", UstadEditFieldPreviews)
-                PersonDetailPreview),
+            UstadScreen("UstadEditFields", "Edit Fields", UstadEditFieldPreviews),
             UstadScreen(PersonEditView.VIEW_NAME, "Person Edit Preview",
                 PersonEditScreenPreview),
             UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",

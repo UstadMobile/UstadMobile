@@ -3,13 +3,8 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
-import com.ustadmobile.lib.db.entities.Site
 import react.dom.html.ReactHTML.img
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadDateEditField
-import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.mui.components.UstadTextEditField
 import csstype.px
 import mui.icons.material.Add
@@ -30,7 +25,7 @@ external interface SiteEnterLinkProps : Props {
 
     var onClickNewLearningEnvironment: () -> Unit
 
-    var onEditTextValueChange: (Site?) -> Unit
+    var onEditTextValueChange: (String) -> Unit
 }
 
 val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
@@ -53,15 +48,12 @@ val SiteEnterLinkComponent2 = FC <SiteEnterLinkProps> { props ->
             }
 
             UstadTextEditField {
-                value = props.uiState.site?.siteName
+                value = props.uiState.siteLink
                 label = strings[MessageID.site_link]
-                error = props.uiState.linkError
+                error = props.uiState.linkError?.toString()
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
-                    props.onEditTextValueChange(
-                        props.uiState.site?.shallowCopy {
-                            siteName = it
-                        })
+                    props.onEditTextValueChange(it)
                 }
             }
 
