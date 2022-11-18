@@ -190,6 +190,7 @@ private fun ParentalConsentManagementScreen(
                     })
                 },
                 error = uiState.relationshipError,
+                enabled = uiState.fieldsEnabled,
             )
         }
 
