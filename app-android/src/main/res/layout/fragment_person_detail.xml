@@ -50,8 +50,9 @@
             name="presenter"
             type="PersonDetailPresenter" />
 
-        <variable name="dateTimeMode"
-            type="Integer"/>
+        <variable
+            name="dateTimeMode"
+            type="Integer" />
 
         <variable
             name="timeZoneId"

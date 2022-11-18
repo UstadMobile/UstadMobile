@@ -4,30 +4,49 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
-import com.ustadmobile.core.controller.PersonEditPresenter
-import com.ustadmobile.core.controller.UstadEditPresenter
+import androidx.savedstate.SavedStateRegistryOwner
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.ustadmobile.core.impl.DestinationProvider
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.hasFlag
-import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
-import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.PersonPicture
-import com.ustadmobile.lib.db.entities.PersonWithAccount
-import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.port.android.view.PersonAccountEditFragment.Companion.USERNAME_FILTER
-import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
-import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
-import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
-import com.ustadmobile.port.android.view.util.RunAfterTextChangedTextWatcher
 import org.kodein.di.direct
 import org.kodein.di.instance
+import com.toughra.ustadmobile.R
+import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants.GENDER_MESSAGE_IDS
+import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
+import org.kodein.di.DI
+import com.ustadmobile.core.viewmodel.PersonEditUiState
+import com.ustadmobile.core.viewmodel.PersonEditViewModel
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
+import org.kodein.di.android.x.closestDI
 
 interface PersonEditFragmentEventHandler {
 
@@ -35,131 +54,16 @@ interface PersonEditFragmentEventHandler {
     
 }
 
-class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView {
+class PersonEditFragment: Fragment() {
 
-    private var mBinding: FragmentPersonEditBinding? = null
+    val di: DI by closestDI()
 
-    private var mPresenter: PersonEditPresenter? = null
-
-    override val mEditPresenter: UstadEditPresenter<*, PersonWithAccount>?
-        get() = mPresenter
-
-    override var genderOptions: List<MessageIdOption>? = null
-        set(value) {
-            field = value
-        }
-
-    override var approvalPersonParentJoin: PersonParentJoin?
-        get() = mBinding?.approvalPersonParentJoin
-        set(value) {
-            mBinding?.approvalPersonParentJoin = value
-        }
+    private val viewModel: PersonEditViewModel by viewModels {
+        PersonEditFragment.provideFactory(di, this, requireArguments())
+    }
 
 
-    override var entity: PersonWithAccount? = null
-        get() = field
-        set(value) {
-            field = value
-            mBinding?.person = value
-
-            //for some reason setting the options before (and indepently from) the value causes
-            // a databinding problem
-            mBinding?.genderOptions = genderOptions
-            mBinding?.dateTimeMode = MODE_START_OF_DAY
-            mBinding?.timeZoneId = "UTC"
-            loading = false
-        }
-
-
-    override var personPicture: PersonPicture?
-        get() = mBinding?.personPicture
-        set(value) {
-            mBinding?.personPicture = value
-        }
-
-    override var registrationMode: Int
-        get() = mBinding?.registrationMode ?: 0
-        set(value) {
-            mBinding?.registrationMode = value
-        }
-
-    override var parentContactError: String?
-        get() = mBinding?.parentContactError
-        set(value) {
-            mBinding?.parentContactError = value
-        }
-
-    override var usernameError: String?
-        set(value) {
-            mBinding?.usernameError = value
-        }
-        get() = mBinding?.usernameError
-
-    override var emailError: String?
-        set(value){
-            mBinding?.emailError = value
-        }
-        get()= mBinding?.emailError
-
-    override var firstNamesFieldError: String?
-        set(value) {
-            mBinding?.firstNamesError = value
-        }
-        get() = mBinding?.firstNamesError
-
-    override var lastNameFieldError: String?
-        set(value) {
-            mBinding?.lastNameError = value
-        }
-        get() = mBinding?.lastNameError
-
-    override var genderFieldError: String?
-        set(value) {
-            mBinding?.genderFieldError = value
-        }
-        get() = mBinding?.genderFieldError
-
-    override var passwordError: String?
-        set(value) {
-            mBinding?.passwordError = value
-        }
-        get() = mBinding?.passwordError
-
-    override var noMatchPasswordError: String?
-        set(value) {
-            mBinding?.passwordConfirmError = value
-            mBinding?.passwordError = value
-        }
-        get() = mBinding?.passwordConfirmError
-
-
-    override var confirmError: String?
-        set(value) {
-            mBinding?.passwordConfirmError = value
-        }
-        get() = mBinding?.passwordConfirmError
-
-    override var dateOfBirthError: String?
-        set(value) {
-            mBinding?.dateOfBirthFieldError = value
-        }
-        get() = mBinding?.dateOfBirthFieldError
-
-    override var lastNameError: String?
-        set(value) {
-            mBinding?.lastNameError = value
-        }
-        get() = mBinding?.lastNameError
-
-    override var firstNameError: String?
-        set(value) {
-            mBinding?.firstNamesError = value
-        }
-        get() = mBinding?.firstNamesError
-
-    private var imageViewLifecycleObserver: ImageViewLifecycleObserver2? = null
-
-    override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
+    fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
         val navController = findNavController()
         val destinationProvider: DestinationProvider = di.direct.instance()
 
@@ -173,94 +77,218 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
     }
 
-    override var fieldsEnabled: Boolean = false
-        get() = field
-        set(value) {
-            super.fieldsEnabled = value
-            field = value
-            mBinding?.fieldsEnabled = value
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
-            requireActivity().activityResultRegistry,null, 1).also {
-            lifecycle.addObserver(it)
+            setContent {
+                MdcTheme {
+                    PersonEditScreen(viewModel)
+                }
+            }
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
-        val rootView: View
-        mBinding = FragmentPersonEditBinding.inflate(inflater, container, false).also {
-            rootView = it.root
-            it.imageViewLifecycleObserver = imageViewLifecycleObserver
-            it.hideClazzes =  arguments?.getString(ARG_HIDE_CLAZZES)?.toBoolean() ?: false
+
+    companion object {
+
+        fun provideFactory(
+            di: DI,
+            owner: SavedStateRegistryOwner,
+            defaultArgs: Bundle? = null,
+        ): AbstractSavedStateViewModelFactory = object: AbstractSavedStateViewModelFactory(owner, defaultArgs) {
+            override fun <T : ViewModel?> create(
+                key: String,
+                modelClass: Class<T>,
+                handle: SavedStateHandle
+            ): T {
+                return PersonEditViewModel(di, SavedStateHandleAdapter(handle)) as T
+            }
+        }
+    }
+}
+
+@Composable
+fun PersonEditScreen(
+    uiState: PersonEditUiState = PersonEditUiState(),
+    onPersonChanged: (PersonWithAccount?) -> Unit = {},
+    onApprovalPersonParentJoinChanged: (PersonParentJoin?) -> Unit = {},
+){
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        //SetUserImageButton(onSetUserImage)
+
+        UstadTextEditField(
+            value = uiState.person?.firstNames ?: "",
+            label = stringResource(id = R.string.first_names),
+            error = uiState.firstNameError,
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onPersonChanged(uiState.person?.shallowCopy{
+                    firstNames = it
+                })
+            }
+        )
+
+        UstadTextEditField(
+            value = uiState.person?.lastName ?: "",
+            label = stringResource(id = R.string.last_name),
+            error = uiState.lastNameError,
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onPersonChanged(uiState.person?.shallowCopy{
+                    lastName = it
+                })
+            }
+        )
+
+        UstadMessageIdOptionExposedDropDownMenuField(
+            value = uiState.person?.gender ?: 0,
+            label = stringResource(R.string.gender_literal),
+            options = GENDER_MESSAGE_IDS,
+            onOptionSelected = {
+                onPersonChanged(uiState.person?.shallowCopy{
+                    gender = it.value
+                })
+            },
+            error = uiState.genderError,
+            enabled = uiState.fieldsEnabled,
+        )
+
+        if (uiState.parentalEmailVisible){
+            UstadTextEditField(
+                value = uiState.approvalPersonParentJoin?.ppjEmail ?: "",
+                label = stringResource(id = R.string.parents_email_address),
+                error = uiState.parentContactError,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onApprovalPersonParentJoinChanged(
+                        uiState.approvalPersonParentJoin?.shallowCopy {
+                            ppjEmail = it
+                        })
+                }
+            )
         }
 
-        mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner).withViewLifecycle()
+        UstadDateEditTextField(
+            value = uiState.person?.dateOfBirth ?: 0,
+            label = stringResource(id = R.string.birthday),
+            error = uiState.dateOfBirthError,
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onPersonChanged(uiState.person?.shallowCopy{
+                    dateOfBirth = it
+                })
+            }
+        )
 
-        mBinding?.usernameText?.addTextChangedListener(ClearErrorTextWatcher {
-            mBinding?.usernameError = null
-        })
+        UstadTextEditField(
+            value = uiState.person?.phoneNum ?: "",
+            label = stringResource(id = R.string.phone_number),
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onPersonChanged(uiState.person?.shallowCopy{
+                    phoneNum = it
+                })
+            }
+        )
 
-        mBinding?.firstnamesText?.addTextChangedListener(ClearErrorTextWatcher {
-            mBinding?.firstNamesError = null
-        })
+        UstadTextEditField(
+            value = uiState.person?.emailAddr ?: "",
+            label = stringResource(id = R.string.email),
+            error = uiState.emailError,
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onPersonChanged(uiState.person?.shallowCopy{
+                    emailAddr = it
+                })
+            }
+        )
 
-        mBinding?.lastnameText?.addTextChangedListener(ClearErrorTextWatcher {
-            mBinding?.lastNameError = null
-        })
+        UstadTextEditField(
+            value = uiState.person?.personAddress ?: "",
+            label = stringResource(id = R.string.address),
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onPersonChanged(uiState.person?.shallowCopy{
+                    personAddress = it
+                })
+            }
+        )
 
-        mBinding?.genderValue?.addTextChangedListener(ClearErrorTextWatcher {
-            mBinding?.genderFieldError = null
-        })
-
-        mBinding?.passwordText?.addTextChangedListener(ClearErrorTextWatcher {
-            mBinding?.passwordError = null
-        })
-
-        mBinding?.confirmPasswordText?.addTextChangedListener(ClearErrorTextWatcher {
-            mBinding?.passwordConfirmError = null
-        })
-
-        mBinding?.birthdayText?.addTextChangedListener(ClearErrorTextWatcher {
-            mBinding?.dateOfBirthFieldError = null
-        })
-        mBinding?.emailText?.addTextChangedListener(ClearErrorTextWatcher{
-            mBinding?.emailError = null
-        })
-
-        mBinding?.usernameText?.filters = arrayOf(USERNAME_FILTER)
-        mBinding?.parentcontactText?.addTextChangedListener(RunAfterTextChangedTextWatcher {
-            parentContactError = null
-        })
-
-
-        return rootView
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        mPresenter?.onCreate(backStackSavedState)
-
-        if(registrationMode.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
-            ustadFragmentTitle = requireContext().getString(R.string.register)
-        }else {
-            setEditFragmentTitle(R.string.add_a_new_person, R.string.edit_person)
+        if (uiState.usernameVisible){
+            UstadTextEditField(
+                value = uiState.person?.username ?: "",
+                label = stringResource(id = R.string.username),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        username = it
+                    })
+                }
+            )
         }
 
+        if (uiState.passwordVisible){
+            UstadTextEditField(
+                value = uiState.person?.newPassword ?: "",
+                label = stringResource(id = R.string.password),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        newPassword = it
+                    })
+                }
+            )
+        }
     }
+}
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mPresenter?.onDestroy()
-        mBinding = null
-        mPresenter = null
-        entity = null
 
+@Composable
+private fun SetUserImageButton(onClick: () -> Unit){
+    Button(onClick = onClick,
+        shape = CircleShape,
+        modifier = Modifier
+            .size(60.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = colorResource(R.color.secondaryColor))
+    ){
+        Image(
+            painter = painterResource(id = R.drawable.ic_add_a_photo_24),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(color = Color.White),
+            modifier = Modifier
+                .size(60.dp))
     }
+}
 
+
+@Composable
+private fun PersonEditScreen(viewModel: PersonEditViewModel) {
+    val uiState: PersonEditUiState by viewModel.uiState.collectAsState(PersonEditUiState())
+    PersonEditScreen(
+        uiState,
+        onPersonChanged = {
+            viewModel.onEntityChanged(it)
+        }
+    )
+}
+
+@Preview
+@Composable
+private fun PersonEditPreview() {
+    val uiState = PersonEditUiState()
+    PersonEditScreen(uiState)
 }
