@@ -28,6 +28,8 @@ fun useUstadScreens(): UstadScreens {
                 SettingsPreview),
             UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
                 InviteViaLinkPreview),
+            UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",
+                RegisterMinorWaitForParentPreview),
         )
     }
 }
