@@ -222,6 +222,7 @@ fun <T> UstadExposedDropDownMenuField(
     itemText: @Composable (T) -> String,
     modifier: Modifier = Modifier,
     error: String? = null,
+    enabled: Boolean = true,
 ) {
 
     var errorText: String? by remember {
@@ -246,6 +247,7 @@ fun <T> UstadExposedDropDownMenuField(
                 readOnly = true,
                 label = { Text(label) },
                 isError = errorText != null,
+                enabled = enabled,
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(
                         expanded = expanded
@@ -284,6 +286,7 @@ fun UstadMessageIdOptionExposedDropDownMenuField(
     onOptionSelected: (MessageIdOption2) -> Unit,
     modifier: Modifier = Modifier,
     error: String? = null,
+    enabled: Boolean = true,
 ) {
     UstadExposedDropDownMenuField(
         value = options.firstOrNull { it.value == value },
@@ -293,6 +296,7 @@ fun UstadMessageIdOptionExposedDropDownMenuField(
         itemText = { messageIdResource(id = it.messageId) },
         modifier = modifier,
         error = error,
+        enabled = enabled,
     )
 }
 
@@ -310,7 +314,7 @@ private fun UstadExposedDropDownMenuFieldPreview() {
         onOptionSelected = {
             selectedOption = it
         },
-        itemText =  { it }
+        itemText =  { it },
     )
 }
 

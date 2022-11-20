@@ -3,10 +3,8 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.mui.common.value
-import com.ustadmobile.mui.common.label
-import com.ustadmobile.mui.common.onChange
-import com.ustadmobile.mui.common.renderInput
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.mui.common.*
 import kotlinx.js.jso
 import mui.icons.material.Visibility
 import mui.icons.material.VisibilityOff
@@ -124,6 +122,10 @@ external interface UstadDateEditFieldProps : Props {
      */
     var onChange: (Long) -> Unit
 
+    var error: String?
+
+    var enabled: Boolean?
+
 }
 
 /**
@@ -149,6 +151,7 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
         dateAdapter = AdapterDateFns
 
         MobileDatePicker {
+            disabled = !(props.enabled ?: true)
             label = ReactNode(props.label)
             value = props.timeInMillis.asDate()
 
@@ -159,6 +162,11 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
             renderInput = { params ->
                 TextField.create {
                     +params
+
+                    if(props.error != null) {
+                        error = true
+                        helperText = props.error?.let { ReactNode(it) }
+                    }
                 }
             }
         }
@@ -192,6 +200,16 @@ external interface MessageIDDropDownFieldProps: Props {
      * DOM element id
      */
     var id: String?
+
+    /**
+     *
+     */
+    var enabled: Boolean?
+
+    /**
+     *
+     */
+    var error: String?
 }
 
 val UstadMessageIdDropDownField = FC<MessageIDDropDownFieldProps> { props ->
@@ -210,6 +228,7 @@ val UstadMessageIdDropDownField = FC<MessageIDDropDownFieldProps> { props ->
             id = props.id
             labelId = "${props.id}_label"
             label = ReactNode(props.label)
+            disabled = !(props.enabled ?: true)
             onChange = { event, _ ->
                 val selectedVal = ("" + event.target.value).toInt()
                 val selectedItem = props.options.firstOrNull { it.value ==  selectedVal }
@@ -223,8 +242,29 @@ val UstadMessageIdDropDownField = FC<MessageIDDropDownFieldProps> { props ->
                 }
             }
         }
+
+        val helperText = props.error
+        if(helperText != null) {
+            FormHelperText {
+                +helperText
+            }
+        }
     }
 }
+
+val UstadEditFieldPreviews = FC<Props> {
+    Stack {
+        UstadDateEditField {
+            timeInMillis = systemTimeInMillis()
+            label = "Date"
+            onChange = { }
+            error = "Bad Day"
+            enabled = false
+        }
+
+    }
+}
+
 
 
 

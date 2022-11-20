@@ -269,7 +269,7 @@ private val ContactDetails = FC<PersonDetailProps> { props ->
 private val Classes = FC<PersonDetailProps> { props ->
 
     List{
-        props.uiState.clazzes.map {
+        props.uiState.clazzes.forEach {
             ListItem{
                 Stack {
                     direction = responsive(StackDirection.row)
