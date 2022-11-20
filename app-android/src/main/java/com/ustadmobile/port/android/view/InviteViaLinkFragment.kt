@@ -8,11 +8,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Divider
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentInviteViaLinkBinding
 import com.ustadmobile.core.controller.InviteViaLinkPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.InviteViaLinkView
+import com.ustadmobile.core.viewmodel.InviteViaLinkUiState
+import com.ustadmobile.port.android.view.composable.UstadButton
+import com.ustadmobile.port.android.view.composable.UstadButtonVariant
 
 
 interface InvitationLinkHandler{
@@ -45,14 +61,23 @@ class InviteViaLinkFragment: UstadBaseFragment(), InviteViaLinkView, InvitationL
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView: View
+
         mBinding = FragmentInviteViaLinkBinding.inflate(inflater, container,
                 false).also {
-            rootView = it.root
         }
         mBinding?.activityEventHandler = this
 
-        return rootView
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
+
+            setContent {
+                MdcTheme {
+                    InviteViaLinkScreen()
+                }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -92,4 +117,74 @@ class InviteViaLinkFragment: UstadBaseFragment(), InviteViaLinkView, InvitationL
     }
 
 
+}
+
+@Composable
+private fun InviteViaLinkScreen(
+    uiState: InviteViaLinkUiState = InviteViaLinkUiState(), 
+    onClickCopyLink: () -> Unit = {},
+    onClickShareLink: () -> Unit = {},
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    )  {
+
+        Text(text = String.format(
+            stringResource(id = R.string.invite_link_desc), 
+            uiState.entityName)
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row {
+            
+            Image(
+                painter = painterResource(id = R.drawable.ic_insert_link_black_24dp),
+                contentDescription = null
+            )
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Text(text = uiState.inviteLink ?: "")
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Divider(thickness = 1.dp)
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        UstadButton(
+            labelText = stringResource(id = R.string.copy_link), 
+            variant = UstadButtonVariant.TEXT,
+            startImageId = R.drawable.ic_outline_file_copy_24,
+            onClick = onClickCopyLink
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        UstadButton(
+            labelText = stringResource(id = R.string.share_link),
+            variant = UstadButtonVariant.TEXT,
+            startImageId = R.drawable.ic_baseline_share_24,
+            onClick = onClickShareLink
+        )
+    }
+}
+
+@Composable
+@Preview
+fun  InviteViaLinkScreenPreview() {
+    val uiStateVal = InviteViaLinkUiState(
+        entityName = stringResource(id = R.string.invite_link_desc),
+        inviteLink = "http://wwww.ustadmobile.com/ClazzJoin?code=12ASDncd",
+    )
+    
+    MdcTheme {
+        InviteViaLinkScreen(
+            uiState = uiStateVal
+        )
+    }
 }
