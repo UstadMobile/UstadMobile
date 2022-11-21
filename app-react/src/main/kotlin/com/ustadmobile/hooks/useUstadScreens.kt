@@ -32,6 +32,8 @@ fun useUstadScreens(): UstadScreens {
                 RegisterMinorWaitForParentPreview),
             UstadScreen(ContentEntryDetailOverviewView.VIEW_NAME, "ContentEntryDetailOverview Preview",
                 ContentEntryDetailOverviewScreenPreview),
+            UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
+                SiteTermsDetailScreenPreview),
         )
     }
 }
