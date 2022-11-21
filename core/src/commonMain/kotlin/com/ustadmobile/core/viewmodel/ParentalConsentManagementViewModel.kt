@@ -4,13 +4,15 @@ import com.ustadmobile.lib.db.entities.*
 
 data class ParentalConsentManagementUiState(
 
-    val personParentJoin: PersonParentJoin? = null,
+    val personParentJoin: PersonParentJoinWithMinorPerson? = null,
 
     val relationshipError: String? = null,
 
     val siteTerms: SiteTerms? = null,
 
-    val fieldsEnabled: Boolean = true
+    val fieldsEnabled: Boolean = true,
+
+    val appName: String = "Ustad Mobile"
 
 ) {
 

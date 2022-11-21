@@ -2,9 +2,7 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.PersonEditUiState
 import com.ustadmobile.core.viewmodel.SettingsUiState
-import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.mui.components.UstadDetailField
 import csstype.px
 import mui.icons.material.*
@@ -77,7 +75,7 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
 
             if (props.uiState.workspaceSettingsVisible){
                 UstadDetailField {
-                    icon = AssuredWorkloadOutlined.create()
+                    icon = AccountBalance.create()
                     labelText = strings[MessageID.manage_site_settings]
                     valueText = strings[MessageID.site]
                     onClick = props.onClickWorkspace

@@ -163,11 +163,12 @@ fun PersonEditScreen(
                 })
             },
             error = uiState.genderError,
+            enabled = uiState.fieldsEnabled,
         )
 
         if (uiState.parentalEmailVisible){
             UstadTextEditField(
-                value = uiState?.approvalPersonParentJoin?.ppjEmail ?: "",
+                value = uiState.approvalPersonParentJoin?.ppjEmail ?: "",
                 label = stringResource(id = R.string.parents_email_address),
                 error = uiState.parentContactError,
                 enabled = uiState.fieldsEnabled,

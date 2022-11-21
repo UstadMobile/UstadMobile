@@ -102,6 +102,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             UstadTextEditField {
                 error = props.uiState.parentContactError
                 enabled = props.uiState.fieldsEnabled
+                label = strings[MessageID.parents_email_address]
                 onChange = {
                     props.onApprovalPersonParentJoinChanged(
                         props.uiState.approvalPersonParentJoin?.shallowCopy {

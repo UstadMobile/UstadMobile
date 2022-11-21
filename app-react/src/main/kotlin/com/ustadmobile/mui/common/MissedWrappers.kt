@@ -72,3 +72,10 @@ inline var MobileDatePickerProps.onChange: (Date) -> Unit
     set(noinline value) {
         asDynamic().onChange = value
     }
+
+
+inline var MobileDatePickerProps.disabled: Boolean
+    get() = asDynamic().disabled
+    set(value) {
+        asDynamic().disabled = value
+    }

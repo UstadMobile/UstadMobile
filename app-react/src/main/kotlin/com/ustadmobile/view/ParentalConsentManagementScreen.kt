@@ -4,7 +4,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.PersonParentJoinConstants
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementUiState
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
@@ -120,9 +122,13 @@ val ParentalConsentManagementPreview = FC<Props> {
             siteTerms = SiteTerms().apply {
                 termsHtml = "hello <b>world</b>"
             },
-            personParentJoin = PersonParentJoin().apply {
+            personParentJoin = PersonParentJoinWithMinorPerson().apply {
                 ppjParentPersonUid = 0
                 ppjRelationship = 1
+                minorPerson = Person().apply {
+                    firstNames = "Pit"
+                    lastName = "The Younger"
+                }
             },
             fieldsEnabled = true
         )

@@ -297,7 +297,8 @@ private fun ContactDetails(
     uiState: PersonDetailUiState,
     onClickDial: () -> Unit = {},
     onClickSms: () -> Unit = {},
-    onClickEmail: () -> Unit = {},){
+    onClickEmail: () -> Unit = {},
+){
     Column(
         modifier = Modifier.padding(8.dp)
     ) {
