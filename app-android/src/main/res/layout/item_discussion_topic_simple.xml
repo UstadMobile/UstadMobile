@@ -48,7 +48,6 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/delete"
-            android:onClick="@{() -> mPresenter.handleClickDeleteTopic(discussionTopic)}"
             android:padding="@dimen/dimen_16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

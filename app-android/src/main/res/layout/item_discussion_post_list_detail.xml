@@ -13,7 +13,7 @@
 
         <variable
             name="mPresenter"
-            type="com.ustadmobile.core.controller.DiscussionTopicDetailPresenter" />
+            type="com.ustadmobile.core.controller.CourseDiscussionDetailPresenter" />
 
 
     </data>

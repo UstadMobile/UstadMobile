@@ -56,6 +56,7 @@ open class DiscussionPost() {
 
     var discussionPostStartDate: Long = 0
 
+    //TODO: Change this This is going to be the Discussion Uid instead.
     var discussionPostDiscussionTopicUid: Long = 0
 
     var discussionPostVisible: Boolean = true

@@ -6,10 +6,8 @@
 
     <data>
 
-        <variable
-            name="presenter"
-            type="com.ustadmobile.core.controller.CourseDiscussionDetailPresenter" />
     </data>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/coordinator_layout"
         android:layout_width="match_parent"
@@ -29,6 +27,17 @@
             tools:itemCount="8" />
 
 
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            style="@style/UmTheme.ShapeAppearance.SmallComponent"
+            android:id="@+id/fragment_course_discussion_detail_efab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/post"
+            android:layout_marginBottom="68dp"
+            app:icon="@drawable/ic_add_black_24dp"
+            android:layout_marginRight="16dp"
+            android:layout_gravity="bottom|end"
+            />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

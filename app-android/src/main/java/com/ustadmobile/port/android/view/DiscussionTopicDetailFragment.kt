@@ -98,7 +98,7 @@ class DiscussionTopicDetailFragment: UstadDetailFragment<DiscussionTopic>(),
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         // 2
-        postsRecyclerAdapter = DiscussionPostRecyclerAdapter(mPresenter)
+        //postsRecyclerAdapter = DiscussionPostRecyclerAdapter(mPresenter)
 
         mBinding?.fragmentDiscussionTopicDetailEfab?.setOnClickListener{
             mPresenter?.onClickAddPost()

@@ -23,7 +23,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.CourseDiscussion
-import com.ustadmobile.lib.db.entities.DiscussionTopicListDetail
+import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -47,30 +47,30 @@ class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
 
     private var descriptionRecyclerAdapter: CourseDiscussionDescriptionRecyclerAdapter? = null
 
-    private var topicsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
+    private var postsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
 
-    private var topicsLiveData: LiveData<PagedList<DiscussionTopicListDetail>>? = null
+    private var postsLiveData: LiveData<PagedList<DiscussionPostWithDetails>>? = null
 
 
     private var repo: UmAppDatabase? = null
 
 
-    private var topicsRecyclerAdapter: DiscussionTopicRecyclerAdapter? = null
+    private var postsRecyclerAdapter: DiscussionPostRecyclerAdapter? = null
 
-    private val topicsObserver = Observer<PagedList<DiscussionTopicListDetail>?> {
-            t -> topicsRecyclerAdapter?.submitList(t)
+    private val postsObserver = Observer<PagedList<DiscussionPostWithDetails>?> {
+            t -> postsRecyclerAdapter?.submitList(t)
     }
 
 
 
-    override var topics: DataSourceFactory<Int, DiscussionTopicListDetail>? = null
+    override var posts: DataSourceFactory<Int, DiscussionPostWithDetails>? = null
         set(value) {
 
-            topicsLiveData?.removeObserver(topicsObserver)
+            postsLiveData?.removeObserver(postsObserver)
             field = value
-            val topicsDao = repo?.discussionTopicDao ?:return
-            topicsLiveData = value?.asRepositoryLiveData(topicsDao)
-            topicsLiveData?.observe(this, topicsObserver)
+            val postsDao = repo?.discussionPostDao ?:return
+            postsLiveData = value?.asRepositoryLiveData(postsDao)
+            postsLiveData?.observe(this, postsObserver)
         }
 
 
@@ -94,8 +94,8 @@ class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
         descriptionRecyclerAdapter = CourseDiscussionDescriptionRecyclerAdapter()
 
         // 2
-        topicsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(getString(R.string.topics))
-        topicsHeadingRecyclerAdapter?.visible = true
+        postsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(getString(R.string.posts))
+        postsHeadingRecyclerAdapter?.visible = true
 
 
 
@@ -107,11 +107,11 @@ class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         // 3
-        topicsRecyclerAdapter = DiscussionTopicRecyclerAdapter(mPresenter)
+        postsRecyclerAdapter = DiscussionPostRecyclerAdapter(mPresenter)
 
 
         detailMergerRecyclerAdapter = ConcatAdapter(descriptionRecyclerAdapter,
-            topicsHeadingRecyclerAdapter, topicsRecyclerAdapter)
+            postsHeadingRecyclerAdapter, postsRecyclerAdapter)
 
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
@@ -129,7 +129,7 @@ class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
         entity = null
 
         descriptionRecyclerAdapter = null
-        topicsHeadingRecyclerAdapter = null
+        postsHeadingRecyclerAdapter = null
         detailMergerRecyclerView?.adapter = null
         detailMergerRecyclerView = null
 

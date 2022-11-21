@@ -3,11 +3,11 @@ package com.ustadmobile.core.controller
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.OneToManyJoinEditHelperMp
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -17,13 +17,12 @@ import com.ustadmobile.core.view.DiscussionTopicEditView
 import com.ustadmobile.core.view.ItemTouchHelperListener
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
-import io.github.aakira.napier.Napier
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
@@ -44,14 +43,14 @@ class CourseDiscussionEditPresenter(context: Any,
     private var clazzUid: Long = 0L
 
 
-    private val topicsOneToManyJoinEditHelper
-            = OneToManyJoinEditHelperMp(DiscussionTopic::discussionTopicUid,
+    private val postsOneToManyJoinEditHelper
+            = OneToManyJoinEditHelperMp(DiscussionPost::discussionPostUid,
         ARG_SAVEDSTATE_DISCUSSION_TOPIC,
-        ListSerializer(DiscussionTopic.serializer()),
-        ListSerializer(DiscussionTopic.serializer()),
+        ListSerializer(DiscussionPost.serializer()),
+        ListSerializer(DiscussionPost.serializer()),
         this,
         requireSavedStateHandle(),
-        DiscussionTopic::class) {discussionTopicUid = it}
+        DiscussionPost::class) { discussionPostUid = it }
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
@@ -59,7 +58,7 @@ class CourseDiscussionEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.topicList = topicsOneToManyJoinEditHelper.liveList
+        view.postList = postsOneToManyJoinEditHelper.liveList
 
     }
 
@@ -68,29 +67,32 @@ class CourseDiscussionEditPresenter(context: Any,
 
 
         observeSavedStateResult(
-            SAVEDSTATE_KEY_DISCUSSION_TOPIC,
-            ListSerializer(DiscussionTopic.serializer()), DiscussionTopic::class){
-            val newTopic = it.firstOrNull() ?: return@observeSavedStateResult
+            SAVEDSTATE_KEY_DISCUSSION_POST,
+            ListSerializer(DiscussionPost.serializer()), DiscussionPost::class){
+            val newPost = it.firstOrNull() ?: return@observeSavedStateResult
 
-            val foundTopic: DiscussionTopic = topicsOneToManyJoinEditHelper.liveList.getValue()?.find {
-                    topic -> topic.discussionTopicUid == newTopic.discussionTopicUid
-            } ?: DiscussionTopic().apply{
-                //Creating a new one from newTopic
-                discussionTopicUid = newTopic.discussionTopicUid
-                discussionTopicStartDate = systemTimeInMillis()
-                discussionTopicCourseDiscussionUid = entity?.cbEntityUid?:0L
-                discussionTopicTitle = newTopic.discussionTopicTitle
-                discussionTopicDesc  = newTopic.discussionTopicDesc
+            val foundPost: DiscussionPost = postsOneToManyJoinEditHelper.liveList.getValue()?.find {
+                    topic -> topic.discussionPostUid == newPost.discussionPostUid
+            } ?: DiscussionPost().apply{
+                //Creating a new one from newPost
+                discussionPostUid = newPost.discussionPostUid
+                discussionPostStartDate = systemTimeInMillis()
+                //TODO: rename this to discussionPostDiscussionUid
+                discussionPostDiscussionTopicUid = entity?.cbEntityUid?:0L
+                discussionPostTitle = newPost.discussionPostTitle
+                discussionPostMessage  = newPost.discussionPostMessage
+                discussionPostStartedPersonUid = accountManager.activeAccount.personUid
+                discussionPostClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
             }
 
             //Any updated title desc
-            foundTopic.discussionTopicTitle = newTopic.discussionTopicTitle
-            foundTopic.discussionTopicDesc  = newTopic.discussionTopicDesc
-            foundTopic.discussionTopicClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
+            foundPost.discussionPostTitle = newPost.discussionPostTitle
+            foundPost.discussionPostMessage  = newPost.discussionPostMessage
+            foundPost.discussionPostClazzUid = arguments[ARG_CLAZZUID]?.toLong() ?: 0L
 
-            topicsOneToManyJoinEditHelper.onEditResult(foundTopic)
+            postsOneToManyJoinEditHelper.onEditResult(foundPost)
 
-            requireSavedStateHandle()[SAVEDSTATE_KEY_DISCUSSION_TOPIC] = null
+            requireSavedStateHandle()[SAVEDSTATE_KEY_DISCUSSION_POST] = null
 
         }
 
@@ -117,9 +119,9 @@ class CourseDiscussionEditPresenter(context: Any,
         }
 
 
-        topicsOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
+        postsOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
 
-        topicsOneToManyJoinEditHelper.liveList.postValue(editEntity.topics ?: listOf())
+        postsOneToManyJoinEditHelper.liveList.postValue(editEntity.posts ?: listOf())
         presenterScope.launch {
 
 
@@ -142,7 +144,7 @@ class CourseDiscussionEditPresenter(context: Any,
         val entityVal = entity
         if (entityVal != null) {
             saveDateTimeIntoEntity(entityVal)
-            entityVal.topics = topicsOneToManyJoinEditHelper.liveList.getValue()
+            entityVal.posts = postsOneToManyJoinEditHelper.liveList.getValue()
         }
         savedState.putEntityAsJson(ARG_ENTITY_JSON, json, CourseBlockWithEntity.serializer(),
                 entityVal)
@@ -172,9 +174,6 @@ class CourseDiscussionEditPresenter(context: Any,
 
     }
 
-    fun handleClickDeleteTopic(discussionTopic: DiscussionTopic){
-        topicsOneToManyJoinEditHelper.onDeactivateEntity(discussionTopic)
-    }
 
     fun handleClickTopic(discussionTopic: DiscussionTopic){
         navigateForResult(
@@ -227,10 +226,10 @@ class CourseDiscussionEditPresenter(context: Any,
             view.fieldsEnabled = false
 
 
-            entity.topics = topicsOneToManyJoinEditHelper.entitiesToInsert +
-                    topicsOneToManyJoinEditHelper.entitiesToUpdate
+            entity.posts = postsOneToManyJoinEditHelper.entitiesToInsert +
+                    postsOneToManyJoinEditHelper.entitiesToUpdate
 
-            entity.topicUidsToRemove = topicsOneToManyJoinEditHelper.primaryKeysToDeactivate
+            entity.postUidsToRemove = postsOneToManyJoinEditHelper.primaryKeysToDeactivate
 
             finishWithResult(safeStringify(di,
                             ListSerializer(CourseBlockWithEntity.serializer()),
@@ -242,9 +241,10 @@ class CourseDiscussionEditPresenter(context: Any,
         }
     }
 
+    //TODO: Remove this
     override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
 
-        val currentList = topicsOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: mutableListOf()
+        val currentList = postsOneToManyJoinEditHelper.liveList.getValue()?.toMutableList() ?: mutableListOf()
 
         val movingBlock = currentList[fromPosition]
 
@@ -253,10 +253,10 @@ class CourseDiscussionEditPresenter(context: Any,
 
         // finally update the list with new index values
         currentList.forEachIndexed{ index , item ->
-            item.discussionTopicIndex = index
+            //item.discussionTopicIndex = index
         }
 
-        topicsOneToManyJoinEditHelper.liveList.postValue(currentList.toList())
+        postsOneToManyJoinEditHelper.liveList.postValue(currentList.toList())
 
         return true
     }
@@ -270,8 +270,10 @@ class CourseDiscussionEditPresenter(context: Any,
     companion object {
 
         const val SAVEDSTATE_KEY_DISCUSSION_TOPIC = "DiscussionTopic"
+        const val SAVEDSTATE_KEY_DISCUSSION_POST = "DiscussionPost"
 
         const val ARG_SAVEDSTATE_DISCUSSION_TOPIC = "ArgSavedStateDiscussionTopic"
+        const val ARG_SAVEDSTATE_DISCUSSION_POST = "ArgSavedStateDiscussionPost"
 
     }
 

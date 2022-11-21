@@ -5,14 +5,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemDiscussionPostListDetailBinding
-import com.ustadmobile.core.controller.DiscussionTopicDetailPresenter
+import com.ustadmobile.core.controller.CourseDiscussionDetailPresenter
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class DiscussionPostListDetailViewHolder(val itemBinding: ItemDiscussionPostListDetailBinding)
     : RecyclerView.ViewHolder(itemBinding.root)
 
-class DiscussionPostRecyclerAdapter(var presenter: DiscussionTopicDetailPresenter?)
+class DiscussionPostRecyclerAdapter(var presenter: CourseDiscussionDetailPresenter?)
     : SelectablePagedListAdapter<DiscussionPostWithDetails,
         DiscussionPostListDetailViewHolder>(DIFF_CALLBACK) {
 

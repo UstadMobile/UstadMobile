@@ -117,6 +117,46 @@ expect abstract class DiscussionPostDao: BaseDao<DiscussionPost>{
 
 
     @Query("""
+        SELECT DiscussionPost.*,
+            Person.firstNames as authorPersonFirstNames,
+            Person.lastName as authorPersonLastName,
+            (
+                SELECT Message.messageText 
+                  FROM Message 
+                 WHERE Message.messageTableId = ${DiscussionPost.TABLE_ID}
+                   AND Message.messageEntityUid = DiscussionPost.discussionPostUid 
+                 ORDER BY messageTimestamp 
+                  DESC LIMIT 1
+            ) AS postLatestMessage,
+            (
+                SELECT COUNT(*) 
+                  FROM Message
+                 WHERE Message.messageTableId = ${DiscussionPost.TABLE_ID}
+                   AND Message.messageEntityUid = DiscussionPost.discussionPostUid 
+                   
+            ) AS postRepliesCount, 
+            
+            (
+                SELECT Message.messageTimestamp 
+                  FROM Message 
+                 WHERE Message.messageTableId = ${DiscussionPost.TABLE_ID}
+                   AND Message.messageEntityUid = DiscussionPost.discussionPostUid 
+                 ORDER BY messageTimestamp 
+                  DESC LIMIT 1
+            ) AS postLatestMessageTimestamp
+             
+          FROM DiscussionPost     
+          LEFT JOIN Person ON Person.personUid = DiscussionPost.discussionPostStartedPersonUid
+          
+         WHERE DiscussionPost.discussionPostDiscussionTopicUid = :discussionTopicUid
+           AND CAST(DiscussionPost.discussionPostVisible AS INTEGER) = 1
+           AND CAST(DiscussionPost.discussionPostArchive AS INTEGER) = 0
+      ORDER BY DiscussionPost.discussionPostStartDate DESC
+    """)
+    abstract fun getPostsByDiscussionUid(discussionTopicUid: Long)
+            : DataSourceFactory<Int, DiscussionPostWithDetails>
+
+    @Query("""
         SELECT DiscussionPost.discussionPostTitle 
           FROM DiscussionPost 
          WHERE DiscussionPost.discussionPostUid = :postUid

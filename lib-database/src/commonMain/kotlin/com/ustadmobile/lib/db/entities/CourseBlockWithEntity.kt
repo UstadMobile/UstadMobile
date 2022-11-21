@@ -6,8 +6,12 @@ import kotlinx.serialization.Serializable
 class CourseBlockWithEntity: CourseBlockWithEntityDb() {
 
     var topics: List<DiscussionTopic>? = null
+    var posts: List<DiscussionPost>? = null
 
     var topicUidsToRemove: List<Long>? = null
+    var postUidsToRemove: List<Long>? = null
+
+
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -17,7 +21,9 @@ class CourseBlockWithEntity: CourseBlockWithEntityDb() {
         other as CourseBlockWithEntity
 
         if (topics != other.topics) return false
+        if (posts != other.posts) return false
         if (topicUidsToRemove != other.topicUidsToRemove) return false
+        if (postUidsToRemove != other.postUidsToRemove) return false
 
         return true
     }
@@ -25,7 +31,9 @@ class CourseBlockWithEntity: CourseBlockWithEntityDb() {
     override fun hashCode(): Int {
         var result = super.hashCode()
         result = 31 * result + (topics?.hashCode() ?: 0)
+        result = 31 * result + (posts?.hashCode() ?: 0)
         result = 31 * result + (topicUidsToRemove?.hashCode() ?: 0)
+        result = 31 * result + (postUidsToRemove?.hashCode() ?: 0)
         return result
     }
 
