@@ -7,11 +7,8 @@ import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -21,21 +18,12 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSiteTermsDetailBinding
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.controller.SiteTermsDetailPresenter
-import com.ustadmobile.core.impl.locale.entityconstants.PersonParentJoinConstants
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SiteTermsDetailView
-import com.ustadmobile.core.viewmodel.ParentalConsentManagementUiState
 import com.ustadmobile.core.viewmodel.SiteTermsDetailUiState
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
 import com.ustadmobile.lib.db.entities.SiteTerms
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.binding.loadHtmlData
-import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 
 
 class SiteTermsDetailFragment: UstadDetailFragment<SiteTerms>(), SiteTermsDetailView {

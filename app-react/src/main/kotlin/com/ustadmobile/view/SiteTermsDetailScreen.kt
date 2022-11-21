@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.SiteTermsDetailUiState
 import com.ustadmobile.lib.db.entities.SiteTerms
 import csstype.px
