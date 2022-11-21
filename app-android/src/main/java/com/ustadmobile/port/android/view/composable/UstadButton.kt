@@ -5,6 +5,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -27,6 +28,7 @@ fun UstadButton(
     onClick: (() -> Unit),
     modifier: Modifier = Modifier,
     startImageId: Int? = null,
+    colorId: Int? = null
 ) {
     if (variant == UstadButtonVariant.CONTAINED){
         ContainedButton(
@@ -34,7 +36,7 @@ fun UstadButton(
             disabled,
             onClick,
             modifier,
-            startImageId,
+            startImageId
         )
     } else if (variant == UstadButtonVariant.TEXT){
         TextButton(
@@ -55,6 +57,7 @@ private fun TextButton(
     onClick: (() -> Unit),
     modifier: Modifier = Modifier,
     startImageId: Int? = null,
+    colorId: Int? = null
 ){
     TextButton(
         modifier = modifier,
@@ -91,19 +94,24 @@ private fun ContainedButton(
     onClick: (() -> Unit) = {  },
     modifier: Modifier = Modifier,
     startImageId: Int? = null,
+    colorId: Int? = null
 ){
     Button(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = colorResource(id = R.color.secondaryColor)
+            backgroundColor = colorResource(id =
+                colorId ?: R.color.primaryColor
+            )
         )
     ) {
         Text(
             labelText.uppercase(),
             color = contentColorFor(
-                colorResource(id = R.color.secondaryColor)
+                colorResource(id =
+                   colorId ?: R.color.primaryColor
+                )
             )
         )
     }

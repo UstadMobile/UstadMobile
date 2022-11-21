@@ -30,6 +30,8 @@ fun useUstadScreens(): UstadScreens {
                 InviteViaLinkPreview),
             UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",
                 RegisterMinorWaitForParentPreview),
+            UstadScreen(ContentEntryDetailOverviewView.VIEW_NAME, "ContentEntryDetailOverview Preview",
+                ContentEntryDetailOverviewScreenPreview),
         )
     }
 }

@@ -1,8 +1,26 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
+import android.icu.number.Scale
 import android.os.Bundle
 import android.view.*
+import android.widget.ImageView.ScaleType
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -15,6 +33,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntry2DetailBinding
@@ -28,9 +47,16 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
+import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
+import com.ustadmobile.core.viewmodel.LoginUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.view.composable.UstadButton
+import com.ustadmobile.port.android.view.composable.UstadButtonVariant
+import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -229,12 +255,20 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView: View
         mBinding = FragmentContentEntry2DetailBinding.inflate(inflater, container, false).also {
-            rootView = it.root
             it.fragmentEventHandler = this
         }
-        return rootView
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
+
+            setContent {
+                MdcTheme {
+                    ContentEntryDetailOverviewScreen()
+                }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -345,5 +379,301 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
                 return oldItem == newItem
             }
         }
+    }
+}
+
+@Composable
+private fun ContentEntryDetailOverviewScreen(
+    uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
+    onClickDownload: () -> Unit = {},
+    onClickOpen: () -> Unit = {},
+    onClickMarkComplete: () -> Unit = {},
+    onClickDelete: () -> Unit = {},
+    onClickManageDownload: () -> Unit = {},
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+    )  {
+
+        ContentDetails(
+            uiState = uiState
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        if (uiState.contentEntryButtons?.showDownloadButton == true){
+            UstadButton(
+                labelText = stringResource(id = R.string.download),
+                variant = UstadButtonVariant.CONTAINED,
+                onClick = onClickDownload
+            )
+        }
+
+        if (uiState.contentEntryButtons?.showOpenButton == true){
+            UstadButton(
+                labelText = stringResource(id = R.string.open),
+                variant = UstadButtonVariant.CONTAINED,
+                onClick = onClickOpen
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        if (uiState.locallyAvailable) {
+            LocallyAvailableRow()
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Divider(thickness = 1.dp)
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        QuickActionBarsRow(
+            uiState = uiState,
+            onClickMarkComplete = onClickMarkComplete,
+            onClickDelete = onClickDelete,
+            onClickManageDownload = onClickManageDownload
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(text = "Locally Available")
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Divider(thickness = 1.dp)
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(text = uiState.contentEntry?.description ?: "")
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Divider(thickness = 1.dp)
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        if (uiState.translationVisibile){
+            Text(text = stringResource(id = R.string.also_available_in))
+        }
+    }
+}
+
+@Composable
+fun ContentDetails(
+    uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
+){
+    Row {
+
+        Box(
+            modifier = Modifier.weight(0.3F)
+        ) {
+            LeftColumn(
+                uiState = uiState
+            )
+        }
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Box(
+            modifier = Modifier.weight(0.7F)
+        ) {
+            RightColumn(
+                uiState = uiState
+            )
+        }
+    }
+}
+
+@Composable
+fun LeftColumn(
+    uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
+){
+    Column{
+        Image(painter = painterResource(id = R.drawable.book_24px),
+            contentDescription = "",
+            modifier = Modifier.size(110.dp),
+            contentScale = ContentScale.Crop
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (uiState.scoreProgressVisible){
+                LinearProgressIndicator(
+                    progress = 0.6F,
+                    modifier = Modifier
+                        .height(4.dp)
+                        .weight(0.6F),
+                    backgroundColor = contentColorFor(
+                        backgroundColor = colorResource(id = R.color.primaryColor)
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Image(painter = painterResource(id = R.drawable.ic_content_complete),
+                contentDescription = "",
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun RightColumn(
+    uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
+){
+    Column(
+        modifier = Modifier.height(IntrinsicSize.Max),
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+
+        Text(
+            text = uiState.contentEntry?.title ?: "",
+            style = Typography.h4
+        )
+
+        if (uiState.authorVisible){
+            Text(text = uiState.contentEntry?.author ?: "")
+        }
+
+        if (uiState.publisherVisible){
+            Text(text = uiState.contentEntry?.publisher ?: "")
+        }
+
+        if (uiState.licenseNameVisible){
+            Row{
+
+                Text(text = stringResource(id = R.string.entry_details_license))
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+                Text(
+                    text = uiState.contentEntry?.licenseName ?: "",
+                    style = Typography.h6
+                )
+            }
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ){
+
+            if (uiState.fileSizeVisible){
+                Text(text = uiState.contentEntry?.container?.fileSize.toString())
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Row {
+                Image(painter = painterResource(id = R.drawable.ic_baseline_emoji_events_24),
+                    contentDescription = "",
+                    modifier = Modifier.size(18.dp)
+                )
+
+                Text(uiState.scoreProgress?.progress.toString())
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text("(" +
+                    (uiState.scoreProgress?.resultScore ?: "") +
+                    "/" +
+                    (uiState.scoreProgress?.resultMax ?: "") +
+                    ")"
+            )
+        }
+    }
+}
+
+@Composable
+fun LocallyAvailableRow(){
+    Row{
+        Image(painter = painterResource(id = R.drawable.ic_nearby_black_24px),
+            contentDescription = "",
+            modifier = Modifier.size(18.dp)
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Text(text = stringResource(id = R.string.download_locally_availability))
+    }
+}
+
+@Composable
+fun QuickActionBarsRow(
+    uiState: ContentEntryDetailOverviewUiState,
+    onClickMarkComplete: () -> Unit = {},
+    onClickDelete: () -> Unit = {},
+    onClickManageDownload: () -> Unit = {}
+){
+    Row {
+        if (uiState.markCompleteVisible){
+            UstadQuickActionButton(
+                labelText = stringResource(id = R.string.mark_complete).uppercase(),
+                imageId = R.drawable.ic_checkbox_multiple_marked,
+                onClick = onClickMarkComplete
+            )
+        }
+
+        if (uiState.contentEntryButtons?.showDeleteButton == true){
+            UstadQuickActionButton(
+                labelText = stringResource(id = R.string.delete).uppercase(),
+                imageId = R.drawable.ic_delete_black_24dp,
+                onClick = onClickDelete
+            )
+        }
+
+        if (uiState.contentEntryButtons?.showManageDownloadButton == true){
+            UstadQuickActionButton(
+                labelText = stringResource(id = R.string.manage_download).uppercase(),
+                imageId = R.drawable.ic_file_download_black_24dp,
+                onClick = onClickManageDownload
+            )
+        }
+    }
+}
+
+@Composable
+@Preview
+fun ContentEntryDetailOverviewScreenPreview() {
+    var uiStateVal = ContentEntryDetailOverviewUiState(
+        contentEntry = ContentEntryWithMostRecentContainer().apply {
+            title = "Content Title"
+            author = "Author"
+            publisher = "Publisher"
+            licenseName = "BY_SA"
+            container = Container().apply {
+                fileSize = 50
+            }
+            description = "Content Description"
+        },
+        scoreProgress = ContentEntryStatementScoreProgress().apply {
+            /*@FloatRange(from = 0.0, to = 1.0)*/
+            progress = 4
+
+            resultScore = 4
+            resultMax = 40
+        },
+        contentEntryButtons = ContentEntryButtonModel().apply {
+            showDownloadButton = true
+            showOpenButton = true
+            showDeleteButton = true
+            showManageDownloadButton = true
+        },
+        locallyAvailable = true,
+        markCompleteVisible = true,
+        translationVisibile = true
+    )
+    MdcTheme {
+        ContentEntryDetailOverviewScreen(
+            uiState = uiStateVal
+        )
     }
 }
