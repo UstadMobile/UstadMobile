@@ -6,19 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.People
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzEnrolmentBinding
 import com.ustadmobile.core.controller.ClazzEnrolmentEditPresenter
@@ -26,7 +14,6 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
-import com.ustadmobile.core.viewmodel.ClazzEnrolmentEditUiState
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -48,8 +35,9 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
         get() = mPresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-
+        val rootView: View
         mBinding = FragmentClazzEnrolmentBinding.inflate(inflater, container, false).also {
+            rootView = it.root
             it.presenter = mPresenter
             it.statusSelectorListener = this
         }
@@ -58,17 +46,7 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
                 viewLifecycleOwner, di).withViewLifecycle()
         mBinding?.presenter = mPresenter
 
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(
-                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
-            )
-
-            setContent {
-                MdcTheme {
-                    ClazzEnrolmentEditScreen()
-                }
-            }
-        }
+        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -151,42 +129,5 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
 
-    }
-}
-
-@Composable
-fun ClazzEnrolmentEditScreen(
-    uiState: ClazzEnrolmentEditUiState = ClazzEnrolmentEditUiState()
-) {
-    Row(
-        modifier = Modifier
-            .padding(16.dp)
-    )  {
-
-        Icon(
-            imageVector = Icons.Filled.People,
-            contentDescription = ""
-        )
-
-        Spacer(modifier = Modifier.width(5.dp))
-
-        Column{
-            Text("")
-
-            Text("")
-        }
-    }
-}
-
-@Composable
-@Preview
-fun ClazzEnrolmentEditScreenPreview() {
-    val uiState = ClazzEnrolmentEditUiState(
-        entity = ClazzEnrolmentWithLeavingReason().apply {
-        },
-    )
-
-    MdcTheme {
-        ClazzEnrolmentEditScreen(uiState)
     }
 }
