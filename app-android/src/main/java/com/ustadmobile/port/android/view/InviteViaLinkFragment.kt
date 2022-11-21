@@ -4,15 +4,16 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import androidx.compose.ui.graphics.ColorFilter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -27,8 +28,6 @@ import com.ustadmobile.core.controller.InviteViaLinkPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.InviteViaLinkView
 import com.ustadmobile.core.viewmodel.InviteViaLinkUiState
-import com.ustadmobile.port.android.view.composable.UstadButton
-import com.ustadmobile.port.android.view.composable.UstadButtonVariant
 
 
 interface InvitationLinkHandler{
@@ -138,7 +137,7 @@ private fun InviteViaLinkScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Row {
+        Row{
             
             Image(
                 painter = painterResource(id = R.drawable.ic_insert_link_black_24dp),
@@ -156,21 +155,53 @@ private fun InviteViaLinkScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        UstadButton(
-            labelText = stringResource(id = R.string.copy_link), 
-            variant = UstadButtonVariant.TEXT,
-            startImageId = R.drawable.ic_outline_file_copy_24,
-            onClick = onClickCopyLink
+        TextIconButton(
+            onClickCopyLink,
+            R.drawable.ic_outline_file_copy_24,
+            R.string.copy_link
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        UstadButton(
-            labelText = stringResource(id = R.string.share_link),
-            variant = UstadButtonVariant.TEXT,
-            startImageId = R.drawable.ic_baseline_share_24,
-            onClick = onClickShareLink
+        TextIconButton(
+            onClickShareLink,
+            R.drawable.ic_baseline_share_24,
+            R.string.share_link
         )
+    }
+}
+
+@Composable
+fun TextIconButton(
+    onClick: () -> Unit,
+    imageId: Int,
+    textId: Int
+){
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth(),
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = imageId),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(
+                    color = contentColorFor(backgroundColor = MaterialTheme.colors.background)
+                ),
+            )
+
+            Spacer(modifier = Modifier.width(5.dp))
+
+            Text(
+                stringResource(id = textId).uppercase(),
+                color = contentColorFor(MaterialTheme.colors.secondary)
+            )
+        }
     }
 }
 
