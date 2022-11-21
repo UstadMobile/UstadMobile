@@ -38,6 +38,8 @@ fun useUstadScreens(): UstadScreens {
                 ClazzEnrolmentEditScreenPreview),
             UstadScreen(ScopedGrantEditView.VIEW_NAME, "ScopedGrantEdit Preview",
                 ScopedGrantEditScreenPreview),
+            UstadScreen(ClazzEdit2View.VIEW_NAME, "Clazz Edit Preview",
+                ClazzEditScreenPreview),
         )
     }
 }
