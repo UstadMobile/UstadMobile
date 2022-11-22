@@ -98,6 +98,9 @@ class CourseDiscussionDetailFragment: UstadDetailFragment<CourseDiscussion>(),
         postsHeadingRecyclerAdapter?.visible = true
 
 
+        mBinding?.fragmentCourseDiscussionDetailEfab?.setOnClickListener{
+            mPresenter?.onClickAddPost()
+        }
 
 
         val accountManager: UstadAccountManager by instance()

@@ -59,7 +59,7 @@ class CourseDiscussionDetailPresenter(
                 DiscussionPost.serializer(),
                 DiscussionTopicDetailPresenter.RESULT_NEW_POST,
                 arguments = mutableMapOf(
-                    ARG_DISCUSSION_UID to
+                    DiscussionPostEditPresenter.ARG_DISCUSSION_TOPIC_UID to
                             discussionUid.toString(),
                     ARG_CLAZZUID to view.entity?.courseDiscussionClazzUid.toString()
                 )
@@ -83,6 +83,8 @@ class CourseDiscussionDetailPresenter(
 //        args[ARG_ENTITY_UID] = discussionTopic.discussionTopicUid.toString() ?: ""
 //        ustadNavController?.navigate(
 //            DiscussionTopicDetailView.VIEW_NAME, args)
+
+
     }
 
     companion object{
