@@ -2,6 +2,15 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import androidx.paging.PagedList
@@ -16,14 +25,21 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SiteDetailView
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.SiteDetailUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
+import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.util.ListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 
 
 interface WorkspaceDetailFragmentEventHandler {
@@ -183,4 +199,50 @@ class SiteDetailFragment: UstadDetailFragment<Site>(), SiteDetailView, Workspace
 
     }
 
+}
+
+@Composable
+fun SiteDetailScreen(
+    uiState: SiteDetailUiState,
+    onClickLang: (SiteTermsWithLanguage) -> Unit = {}
+){
+
+    Column {
+        UstadDetailField(
+            valueText = uiState.site?.siteName ?: "",
+            labelText = stringResource(R.string.name),
+            imageId = R.drawable.ic_account_balance_black_24dp
+        )
+        UstadDetailField(valueText = stringResource(if(uiState.site?.guestLogin == true){R.string.yes} else {R.string.no}), labelText = "Guest login enabled", imageId = R.drawable.ic_document_preview)
+        UstadDetailField(valueText = stringResource(if(uiState.site?.registrationAllowed == true){R.string.yes} else {R.string.no}), labelText = "Registration allowed", imageId = R.drawable.ic_baseline_how_to_reg_24)
+        Text(stringResource(R.string.terms_and_policies), style = Typography.h6)
+
+        uiState.siteTerms.forEach {
+            TextButton(
+                onClick = { onClickLang(it) },
+            ) {
+                Text(text = it.stLanguage?.name ?: "")
+            }
+        }
+    }
+}
+
+@Composable
+@Preview
+fun SiteDetailScreenPreview(){
+    SiteDetailScreen(
+        uiState = SiteDetailUiState(
+            site = Site().apply {
+                siteName = "My Site"
+            },
+            siteTerms = listOf(
+                SiteTermsWithLanguage().apply {
+                    stLanguage = Language().apply {
+                        name = "fa"
+                    }
+                }
+            )
+        ),
+        onClickLang = {  }
+    )
 }
