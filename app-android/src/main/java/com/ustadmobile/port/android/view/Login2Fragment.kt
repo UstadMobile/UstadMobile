@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
@@ -29,7 +27,6 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.core.viewmodel.LoginUiState
-import com.ustadmobile.port.android.view.composable.UstadOutlinedButton
 
 
 class Login2Fragment : UstadBaseFragment(), Login2View {
@@ -226,10 +223,6 @@ private fun LoginScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(uiState.versionInfo)
-
-        UstadOutlinedButton(
-            labelText = "LOgingnggn",
-            onClick = { })
     }
 }
 
