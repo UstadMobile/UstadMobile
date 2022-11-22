@@ -5,15 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,10 +22,7 @@ import com.toughra.ustadmobile.databinding.FragmentRegisterMinorWaitForParentBin
 import com.ustadmobile.core.controller.RegisterMinorWaitForParentPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RegisterMinorWaitForParentView
-import com.ustadmobile.core.viewmodel.InviteViaLinkUiState
 import com.ustadmobile.core.viewmodel.RegisterMinorWaitForParentUiState
-import com.ustadmobile.port.android.view.composable.UstadButton
-import com.ustadmobile.port.android.view.composable.UstadButtonVariant
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 
 class RegisterMinorWaitForParentFragment: UstadBaseFragment(), RegisterMinorWaitForParentView {
@@ -140,11 +136,20 @@ private fun RegisterMinorWaitForParentScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        UstadButton(
-            labelText = stringResource(id = R.string.ok),
-            variant = UstadButtonVariant.CONTAINED,
-            onClick = onClickOk
-        )
+        Button(
+            onClick = onClickOk,
+            modifier = Modifier
+                .fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = colorResource(id = R.color.secondaryColor)
+            )
+        ) {
+            Text(stringResource(R.string.ok).uppercase(),
+                color = contentColorFor(
+                    colorResource(id = R.color.secondaryColor)
+                )
+            )
+        }
     }
 }
 

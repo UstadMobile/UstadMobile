@@ -213,8 +213,10 @@ private fun ParentalConsentManagementScreen(
                 setTag(R.id.tag_webview_html, uiState.siteTerms?.termsHtml)
             }},
             update = {
-                if(uiState.siteTerms?.termsHtml != it.getTag(R.id.tag_webview_html))
-                    it.loadUrl(uiState.siteTerms?.termsHtml!!)
+                if(uiState.siteTerms?.termsHtml != it.getTag(R.id.tag_webview_html)) {
+                    it.loadHtmlData(uiState.siteTerms?.termsHtml)
+                    it.setTag(R.id.tag_webview_html, uiState.siteTerms?.termsHtml)
+                }
             }
         )
 
