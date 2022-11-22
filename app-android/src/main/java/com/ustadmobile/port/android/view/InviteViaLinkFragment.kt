@@ -131,7 +131,7 @@ private fun InviteViaLinkScreen(
     )  {
 
         Text(text = String.format(
-            stringResource(id = R.string.invite_link_desc), 
+            stringResource(id = R.string.invite_link_desc),
             uiState.entityName)
         )
 
@@ -198,8 +198,7 @@ fun TextIconButton(
             Spacer(modifier = Modifier.width(5.dp))
 
             Text(
-                stringResource(id = textId).uppercase(),
-                color = contentColorFor(MaterialTheme.colors.secondary)
+                stringResource(id = textId).uppercase()
             )
         }
     }
