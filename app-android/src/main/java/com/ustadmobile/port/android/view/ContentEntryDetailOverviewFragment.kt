@@ -1,10 +1,8 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
-import android.icu.number.Scale
 import android.os.Bundle
 import android.view.*
-import android.widget.ImageView.ScaleType
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -48,15 +46,11 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
-import com.ustadmobile.core.viewmodel.LoginUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.view.composable.UstadButton
-import com.ustadmobile.port.android.view.composable.UstadButtonVariant
 import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -405,19 +399,35 @@ private fun ContentEntryDetailOverviewScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.contentEntryButtons?.showDownloadButton == true){
-            UstadButton(
-                labelText = stringResource(id = R.string.download),
-                variant = UstadButtonVariant.CONTAINED,
-                onClick = onClickDownload
-            )
+            Button(
+                onClick = onClickDownload,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.primaryColor)
+                )
+            ) {
+                Text(stringResource(R.string.download).uppercase(),
+                    color = contentColorFor(
+                        colorResource(id = R.color.primaryColor))
+                )
+            }
         }
 
         if (uiState.contentEntryButtons?.showOpenButton == true){
-            UstadButton(
-                labelText = stringResource(id = R.string.open),
-                variant = UstadButtonVariant.CONTAINED,
-                onClick = onClickOpen
-            )
+            Button(
+                onClick = onClickOpen,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.primaryColor)
+                )
+            ) {
+                Text(stringResource(R.string.open).uppercase(),
+                    color = contentColorFor(
+                        colorResource(id = R.color.primaryColor))
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(10.dp))
