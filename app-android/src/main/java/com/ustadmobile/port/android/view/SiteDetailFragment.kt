@@ -243,6 +243,5 @@ fun SiteDetailScreenPreview(){
                 }
             )
         ),
-        onClickLang = {  }
     )
 }
