@@ -5,17 +5,37 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.widget.doAfterTextChanged
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.generated.locale.MessageID.class_timezone_set
+import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
+import com.ustadmobile.core.viewmodel.LoginUiState
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.CourseGroupSet
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.binding.isSet
+import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
+import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 
 class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), ClazzAssignmentEditView {
@@ -243,4 +263,152 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
         mBinding?.textSubmissionVisibility = if(isChecked) View.VISIBLE else View.GONE
     }
 
+}
+
+@Composable
+private fun ClazzAssignmentEditScreen(
+    uiState: ClazzAssignmentEditUiState = ClazzAssignmentEditUiState(),
+    onCaTitleValueChange: (CourseBlockWithEntity?) -> Unit = {},
+    onCaDescriptionValueChange: (CourseBlockWithEntity?) -> Unit = {},
+    onCaStartDateValueChange: (Long?) -> Unit = {},
+    onCompletionCriteriaValueChange: (CourseBlockWithEntity?) -> Unit = {},
+    onCbMaxPointsValueChange: (CourseBlockWithEntity?) -> Unit = {},
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    )  {
+
+        UstadTextEditField(
+            value = uiState.entity?.assignment?.caTitle ?: "",
+            label = stringResource(id = R.string.title),
+            onValueChange = {
+                onCaTitleValueChange(uiState.entity?.shallowCopy{
+                    assignment?.caTitle = it
+                })
+            },
+            error = uiState.caTitleError,
+            enabled = uiState.fieldsEnabled,
+        )
+
+        UstadTextEditField(
+            value = uiState.entity?.assignment?.caDescription ?: "",
+            label = stringResource(id = R.string.description),
+            onValueChange = {
+                onCaDescriptionValueChange(uiState.entity?.shallowCopy{
+                    assignment?.caDescription = it
+                })
+            },
+            enabled = uiState.fieldsEnabled
+        )
+
+        TextValueRow(
+            onCaStartDateValueChange,
+            0,
+            stringResource(id = R.string.dont_show_before),
+            uiState.caStartDateError,
+            "",
+            "Class timezone: Dubai",
+            stringResource(id = R.string.time),
+            uiState.fieldsEnabled
+        )
+
+        CompletionCriteriaRow(
+            uiState,
+            onCompletionCriteriaValueChange
+        )
+
+        UstadTextEditField(
+            value = (uiState.entity?.cbMaxPoints ?: 0).toString(),
+            label = stringResource(id = R.string.maximum_points),
+            onValueChange = {
+                onCbMaxPointsValueChange(uiState.entity?.shallowCopy{
+                    cbMaxPoints = Integer.parseInt(it ?: "0")
+                })
+            },
+            enabled = uiState.fieldsEnabled,
+            error = uiState.caMaxPointsError
+        )
+    }
+}
+
+@Composable
+fun TextValueRow(
+    onValueChange: (Long) -> Unit = {},
+    dateValue: Long,
+    descriptionLabel: String,
+    descriptionError: String?,
+    descriptionMessage: String?,
+    value: String,
+    label: String,
+    enabled: Boolean
+){
+    Row {
+        Column(
+            modifier = Modifier.weight(0.5F)
+        ) {
+            UstadDateEditTextField(
+                value = dateValue,
+                label = descriptionLabel,
+                error = descriptionError,
+                onValueChange = onValueChange,
+            )
+
+            Text(text = descriptionMessage ?: "")
+        }
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        UstadTextEditField(
+            value = value,
+            label = label,
+            enabled = enabled,
+            onValueChange = {},
+            modifier = Modifier.weight(0.5F)
+        )
+    }
+}
+
+@Composable
+fun CompletionCriteriaRow(
+    uiState: ClazzAssignmentEditUiState = ClazzAssignmentEditUiState(),
+    onValueChange: (completionCriteriaOptions?) -> Unit = {},
+){
+    Row {
+
+        UstadMessageIdOptionExposedDropDownMenuField(
+            value = uiState.entity?.cbCompletionCriteria ?: 0,
+            label = stringResource(R.string.completion_criteria),
+            options = PersonConstants.GENDER_MESSAGE_IDS,
+            onOptionSelected = {
+                onValueChange(uiState.entity?.shallowCopy{
+                    cbCompletionCriteria = it.value
+                })
+            },
+            enabled = uiState.fieldsEnabled,
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        if (uiState.minScoreVisible){
+            UstadTextEditField(
+                value = uiState.entity?.cbMaxPoints.toString(),
+                label = stringResource(id = R.string.points),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {},
+                modifier = Modifier.weight(0.5F)
+            )
+        }
+    }
+}
+
+@Composable
+@Preview
+fun ClazzAssignmentEditScreenPreview() {
+    MdcTheme {
+        ClazzAssignmentEditScreen()
+    }
 }
