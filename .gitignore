@@ -242,5 +242,6 @@ app-react/src/main/resources/locales
 test-ui/android-maestro/results
 test-ui/android-maestro/tests/*/results
 
-
+#node-modules inside webapp-cypress
+node_modules
 
