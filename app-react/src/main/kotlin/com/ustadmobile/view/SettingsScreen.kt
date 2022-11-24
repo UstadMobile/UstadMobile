@@ -37,12 +37,17 @@ val SettingsPreview = FC<Props> {
             reasonLeavingVisible = true,
             holidayCalendarVisible = true,
             workspaceSettingsVisible = true,
-            langListVisible = true
+            langListVisible = true,
         )
     }
 
     SettingsComponent2 {
         uiState = uiStateVar
+        onClickAppLanguage =  { }
+        onClickGoToHolidayCalendarList = { }
+        onClickWorkspace = { }
+        onClickLeavingReason = { }
+        onClickLangList = { }
     }
 }
 
