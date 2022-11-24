@@ -38,64 +38,52 @@ private val InviteViaLinkComponent2 = FC<InviteViaLinkProps> { props ->
     Container {
         maxWidth = "lg"
 
-        Typography {
-            + (strings[MessageID.invite_link_desc])
-                .format(props.uiState.entityName)
-        }
-
-        Box{
-            sx {
-                height = 20.px
-            }
-        }
-
         Stack {
-            direction = responsive(StackDirection.row)
-            spacing = responsive(16.px)
-
-            + Attachment.create()
-
             Typography {
-                + (props.uiState.inviteLink ?: "")
+                + (strings[MessageID.invite_link_desc])
+                    .format(props.uiState.entityName)
             }
-        }
 
-        Box{
-            sx {
-                height = 20.px
+            Box{
+                sx {
+                    height = 20.px
+                }
             }
-        }
 
-        Divider { orientation = Orientation.horizontal }
+            Stack {
+                direction = responsive(StackDirection.row)
+                spacing = responsive(16.px)
 
-        Box{
-            sx {
-                height = 20.px
+                + Attachment.create()
+
+                Typography {
+                    + (props.uiState.inviteLink ?: "")
+                }
             }
-        }
 
-        Button {
-            onClick = { props.onClickCopyLink }
-            variant = ButtonVariant.text
+            Divider { orientation = Orientation.horizontal }
 
-            startIcon = FolderCopy.create()
-
-            + strings[MessageID.copy_link].uppercase()
-        }
-
-        Box{
-            sx {
-                height = 20.px
+            Box{
+                sx {
+                    height = 20.px
+                }
             }
-        }
 
-        Button {
-            onClick = { props.onClickShareLink }
-            variant = ButtonVariant.text
 
-            startIcon = Share.create()
+            Button {
+                onClick = { props.onClickCopyLink }
+                variant = ButtonVariant.outlined
 
-            + strings[MessageID.share_link].uppercase()
+                startIcon = ContentCopy.create()
+
+                + strings[MessageID.copy_link].uppercase()
+            }
+
+            Box{
+                sx {
+                    height = 20.px
+                }
+            }
         }
     }
 }

@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import androidx.compose.ui.graphics.ColorFilter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,8 +11,10 @@ import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -118,6 +119,7 @@ class InviteViaLinkFragment: UstadBaseFragment(), InviteViaLinkView, InvitationL
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun InviteViaLinkScreen(
     uiState: InviteViaLinkUiState = InviteViaLinkUiState(), 
@@ -137,16 +139,20 @@ private fun InviteViaLinkScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Row{
-            
-            Image(
-                painter = painterResource(id = R.drawable.ic_insert_link_black_24dp),
-                contentDescription = null
-            )
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Text(text = uiState.inviteLink ?: "")
+        Surface(
+            onClick = onClickCopyLink
+        ) {
+            Row{
+
+                Image(
+                    painter = painterResource(id = R.drawable.ic_insert_link_black_24dp),
+                    contentDescription = null
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Text(text = uiState.inviteLink ?: "")
+            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -155,51 +161,24 @@ private fun InviteViaLinkScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        TextIconButton(
-            onClickCopyLink,
-            R.drawable.ic_outline_file_copy_24,
-            R.string.copy_link
-        )
+        OutlinedButton(
+            onClick = onClickCopyLink,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Outlined.ContentCopy, contentDescription = null)
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(stringResource(R.string.copy_link).uppercase())
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        TextIconButton(
-            onClickShareLink,
-            R.drawable.ic_baseline_share_24,
-            R.string.share_link
-        )
-    }
-}
-
-@Composable
-fun TextIconButton(
-    onClick: () -> Unit,
-    imageId: Int,
-    textId: Int
-){
-    TextButton(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth(),
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Start,
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+        OutlinedButton(
+            onClick = onClickShareLink,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Image(
-                painter = painterResource(id = imageId),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(
-                    color = contentColorFor(backgroundColor = MaterialTheme.colors.background)
-                ),
-            )
-
-            Spacer(modifier = Modifier.width(5.dp))
-
-            Text(
-                stringResource(id = textId).uppercase()
-            )
+            Icon(Icons.Filled.Share, contentDescription = null)
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(stringResource(R.string.copy_link).uppercase())
         }
     }
 }
