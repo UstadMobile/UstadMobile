@@ -2,6 +2,31 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +43,7 @@ import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 
 interface InviteWithLinkHandler{
     fun handleClickInviteWithLink()
@@ -161,4 +187,159 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
             }
         }
     }
+}
+
+data class PersonObject(
+    val firstName: String,
+    val lastName: String,
+    val image: String
+)
+
+@Composable
+fun PersonListScreen(){
+
+    val peopleList: List<PersonObject> = remember {
+        listOf(PersonObject("admin",
+            "ustadMobile", "")
+        )
+    }
+
+    Column(
+        modifier = Modifier.fillMaxHeight()
+            .fillMaxWidth().background(Color.White),
+    ) {
+
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Content(peopleList)
+    }
+}
+
+@Composable
+private fun Content(peopleList: List<PersonObject>){
+
+    Column(
+        modifier = Modifier
+            .padding(8.dp, 0.dp, 8.dp, 8.dp)
+            .fillMaxHeight()
+    ) {
+        Header()
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Box(modifier = Modifier.weight(1f)){
+            PeopleList(peopleList)
+        }
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.End
+        ){
+            AddPersonButton{}
+        }
+    }
+}
+
+@Composable
+private fun Header(){
+    Row(
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(stringResource(R.string.first_name),
+            style = Typography.body2,
+            color = Color.Black)
+
+        Spacer(modifier = Modifier.width(5.dp))
+
+        Image(modifier = Modifier.size(15.dp),
+            painter = painterResource(id = R.drawable.ic_arrow_downward_24),
+            contentDescription = null)
+    }
+}
+
+@Composable
+private fun PeopleList(peopleList: List<PersonObject>){
+
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        state = LazyListState(),
+    ) {
+        itemsIndexed(peopleList) { _, item ->
+            PersonItem(item)
+        }
+    }
+}
+
+@Composable
+private fun PersonItem(person: PersonObject){
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+
+        CircleImageView(R.drawable.ic_account_circle_black_24dp)
+
+        Spacer(modifier = Modifier.width(5.dp))
+
+        Column() {
+            Text(person.firstName,
+                style = Typography.h4)
+
+            Text(person.lastName,
+                style = Typography.body1,
+                color = Color.Gray)
+        }
+    }
+}
+
+@Composable
+private fun CircleImageView(image: Int) {
+    Image(
+        painter = painterResource(image),
+        contentDescription = "avatar",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .size(45.dp)
+            .clip(CircleShape)
+    )
+}
+
+@Composable
+private fun AddPersonButton(onClick: () -> Unit) {
+    Button(
+        shape = RoundedCornerShape(50),
+        onClick = {onClick()},
+        modifier = Modifier.padding(12.dp)
+            .height(45.dp)
+            .width(120.dp),
+        elevation = null,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = colorResource(R.color.secondaryColor),
+            contentColor = Color.Transparent,
+            disabledBackgroundColor = Color.Transparent,),
+    ) {
+        Row (
+            horizontalArrangement = Arrangement.End) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_add_black_24dp),
+                contentDescription = null,
+                modifier = Modifier.width(25.dp),
+                colorFilter = ColorFilter.tint(color = Color.Black))
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(
+                text = stringResource(R.string.person),
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                style = Typography.h5
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PersonEditPreview() {
+    PersonListScreen()
 }

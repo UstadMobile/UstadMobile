@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.compose.runtime.Composable
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemSimpleHeadingBinding
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter

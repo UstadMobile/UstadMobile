@@ -6,7 +6,26 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.sharp.Lock
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.composethemeadapter.MdcTheme
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonAccountEditBinding
 import com.ustadmobile.core.controller.PersonAccountEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -15,7 +34,9 @@ import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.PersonAccountEditView.Companion.BLOCK_CHARACTER_SET
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
+import com.ustadmobile.core.viewmodel.PersonAccountEditUiState
 
 
 class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonAccountEditView {
@@ -94,13 +115,12 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
     override val mEditPresenter: UstadEditPresenter<*, PersonWithAccount>?
         get() = mPresenter
 
+    private val uiState = PersonAccountEditUiState()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        val rootView: View
         mBinding = FragmentPersonAccountEditBinding.inflate(inflater, container,
             false).also {
-            rootView = it.root
         }
 
         mPresenter = PersonAccountEditPresenter(requireContext(), arguments.toStringMap(),
@@ -127,7 +147,17 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 
         mBinding?.accountUsernameText?.filters = arrayOf(USERNAME_FILTER)
 
-        return rootView
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
+
+            setContent {
+                MdcTheme {
+                    PersonAccountEditScreen(uiState)
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -177,5 +207,82 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
                 sb
             }
         }
+    }
+}
+
+@Composable
+private fun PersonAccountEditScreen(
+    uiState: PersonAccountEditUiState = PersonAccountEditUiState(),
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    )  {
+
+        if (uiState.usernameVisible){
+            UstadTextEditField(
+                value = uiState.personUsernameAndPassword.username,
+                label = stringResource(id = R.string.username),
+                onValueChange = {
+                    uiState.personUsernameAndPassword.copy(
+                        username = it
+                    )
+                },
+                error = uiState.usernameError,
+                enabled = uiState.fieldsEnabled,
+            )
+        }
+
+        if (uiState.currentPasswordVisible){
+            UstadTextEditField(
+                value = uiState.personUsernameAndPassword.currentPassword,
+                label = stringResource(id = R.string.current_password),
+                onValueChange = {
+                    uiState.personUsernameAndPassword.copy(
+                        currentPassword = it
+                    )
+                },
+                error = uiState.currentPasswordError,
+                enabled = uiState.fieldsEnabled,
+                password = true
+            )
+        }
+
+        UstadTextEditField(
+            value = uiState.personUsernameAndPassword.newPassword,
+            label = stringResource(id = R.string.new_password),
+            onValueChange = {
+                uiState.personUsernameAndPassword.copy(
+                    newPassword = it
+                )
+            },
+            error = uiState.newPasswordError,
+            enabled = uiState.fieldsEnabled,
+            password = true
+        )
+
+        UstadTextEditField(
+            value = uiState.personUsernameAndPassword.passwordConfirmed,
+            label = stringResource(id = R.string.confirm_password),
+            onValueChange = {
+                uiState.personUsernameAndPassword.copy(
+                    passwordConfirmed = it
+                )
+            },
+            error = uiState.passwordConfirmedError,
+            enabled = uiState.fieldsEnabled,
+            password = true
+        )
+    }
+}
+
+@Composable
+@Preview
+fun PersonAccountEditScreenPreview() {
+    MdcTheme {
+        PersonAccountEditScreen()
     }
 }

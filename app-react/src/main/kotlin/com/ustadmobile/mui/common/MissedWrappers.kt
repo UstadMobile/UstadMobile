@@ -1,9 +1,9 @@
 package com.ustadmobile.mui.common
 
-import mui.material.BoxProps
-import mui.material.GridProps
-import mui.material.TabsProps
-import mui.material.TypographyProps
+import mui.material.*
+import muix.pickers.MobileDatePickerProps
+import react.ReactNode
+import kotlin.js.Date
 
 //As per MissedWrappers on MUI-Showcase
 // TODO: Remove when it will be implemented in MUI wrappers
@@ -47,4 +47,35 @@ inline var TabsProps.ariaLabel: String
     get() = TODO("Prop is write-only!")
     set(value) {
         asDynamic()["aria-label"] = value
+    }
+
+inline var MobileDatePickerProps.label: ReactNode?
+    get() = asDynamic().label
+    set(value) {
+        asDynamic().label = value
+    }
+
+inline var MobileDatePickerProps.renderInput: (BaseTextFieldProps) -> ReactNode
+    get() = asDynamic().renderInput
+    set(noinline value) {
+        asDynamic().renderInput = value
+    }
+
+inline var MobileDatePickerProps.value: Date?
+    get() = asDynamic().value
+    set(value) {
+        asDynamic().value = value
+    }
+
+inline var MobileDatePickerProps.onChange: (Date) -> Unit
+    get() = asDynamic().onChange
+    set(noinline value) {
+        asDynamic().onChange = value
+    }
+
+
+inline var MobileDatePickerProps.disabled: Boolean
+    get() = asDynamic().disabled
+    set(value) {
+        asDynamic().disabled = value
     }

@@ -40,5 +40,7 @@
 
     <item name="tag_dateadapter_dateformatter" type="id"/>
 
+    <item name="tag_webview_html" type="id"/>
+
 
 </resources>

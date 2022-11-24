@@ -2,19 +2,26 @@
 ### Architecture
 
 The project uses Kotlin Multiplatform to provide an Android App (using Kotlin / Jetpack compose),
-web client app (using Kotlin/JS wrappers for React and MUI), and an http server backend. Door
-(Room for Kotlin Multiplatform) is used to provide a Kotlin Multiplatform database and sync.
+web client app (using Kotlin/JS wrappers for React and MUI), and an http server backend (using KTOR). 
+Door (Room for Kotlin Multiplatform) is used to provide a Kotlin Multiplatform database and sync.
 
-### ViewModels
+The app follows an MVVM pattern as follows:
 
-The BaseName should be suffixed with List, Detail, or Edit to describe it's function:
+* UIState classes contain all information needed to show a screen. This often includes entity objects
+* ViewModels contain the logic and emit a flow of the UIState class.
+* Views observe the UIState flow to render the user interface (using Jetpack Compose or React/JS)
 
-*Name*ListViewModel, *Name*DetailViewModel, *Name*EditViewModel for list, detail, and edit screens
-e.g. *ContentEntry*ListViewModel, *ContentEntry*DetailViewModel, *ContentEntry*EditViewModel.
+### UiState classes
 
-There is a base abstract ViewModel class in common that uses expect/actual. This is a child class of 
-the Android ViewModel itself on Android. There is a minimal implementation that creates and destroys
-the Coroutinescope for Javascript.
+The UiState class contains everything needed to render a screen. It is emitted as a flow from the
+ViewModel. It is a data class contained in the same file as the ViewModel.
+
+When converting an existing MVP screen, the ViewModel should generally have all the same properties that
+are found on the existing view interface (but properties should be non-mutable val instead of var).
+
+The UiState class should also contain the model entity. It should use the same model type as found
+on the view (e.g. because PersonDetailView uses PersonWithPersonParentJoin, PersonDetailUiState 
+should contain PersonWithPersonParentJoin).
 
 ```
 data class PersonDetailUiState(
@@ -31,9 +38,28 @@ data class PersonDetailUiState(
     
     //Where view information is derived from other parts of the state, use a simple getter e.g.
     val emailAddressVisible: Boolean
-        get() = person?.emailAddress.isNullOrEmpty()
+        get() = !person?.emailAddress.isNullOrEmpty()
 }
+```
 
+### ViewModels
+
+The ViewModel is responsible for all business logic. It emits a flow of the UiState class, which is
+observed and rendered by the view (e.g. via Jetpack Compose and React/JS). It has event handling
+functions that can be called by the view when events take place (e.g. when a user clicks a button).
+
+The BaseName should be suffixed with List, Detail, or Edit to describe it's function:
+
+*Name*ListViewModel, *Name*DetailViewModel, *Name*EditViewModel for list, detail, and edit screens
+e.g. *ContentEntry*ListViewModel, *ContentEntry*DetailViewModel, *ContentEntry*EditViewModel.
+
+**Kotlin multiplatform implementation**: There is a base abstract ViewModel class in common that uses expect/actual. This is a child class of 
+the Android ViewModel itself on Android. There is a minimal implementation that creates and destroys
+the Coroutinescope for Javascript.
+
+e.g.
+
+```
 class PersonDetailViewModel: ViewModel {
     val uiState: Flow<PersonDetailUiState>
     
@@ -51,7 +77,7 @@ class PersonDetailViewModel: ViewModel {
     }
     
     fun onClickClazz(clazz: ClazzEnrolmentWithClazzAndAttendance) {
-        
+
     }
 }
 
@@ -62,15 +88,15 @@ class PersonDetailViewModel: ViewModel {
 Views are written using Jetpack Compose for Android and the Kotlin/JS MUI wrapper for Javascript. 
 The view function should use the UiState as an argument, 
 
-e.g. Android Jetpack Compose
+Android Jetpack Compose:
 ```
-@Preview
+/*
+ * Main composable function: this should always take the UI state as the first parameter, and then
+ * have parameters for event handlers.
+ */ 
 @Composable
 function PersonDetailScreen(
-    uiState: PersonDetailUiState = PersonDetailUiState(person = PersonWithParentJoin().apply {
-         firstNames = "Example"
-         lastName = "Surname"
-    }),
+    uiState: PersonDetailUiState = PersonDetailUiState(),
     onClickCreateAccount: () -> Unit,
     onClickChat: () -> Unit,
     onClickClazz: (ClazzEnrolmentWithClazzAndAttendance) -> Unit,
@@ -90,11 +116,18 @@ function PersonDetailScreen(
     }
 }
 
-function PersonDetailScreenViewModel(
+/*
+ * Note: different function name is used to avoid rendering issues in Android studio if using
+ * the same function name with different parameters (which is valid and will compile, but then the 
+ * the preview in Android Studio sometimes won't work).
+ */
+@Composable
+function PersonDetailScreenForViewModel(
     viewModel: PersonDetailViewModel
 ) {
     val uiState: PersonDetailUiState by viewModel.uiState.collectAsState(initial = null)
     
+    //Always use named arguments here e.g. onClickChat to avoid potential mismatch.
     PersonDetailScreen(
         uiState = uiState, 
         onClickChat = viewModel::onClickChat,
@@ -103,6 +136,16 @@ function PersonDetailScreenViewModel(
     )
 }
 
+@Composable
+@Preview
+function PersonDetailScreenPreview(
+    uiState = PersonDetailUiState(
+         person = Person().apply {
+              firstNames = "Preview"
+              lastName = "Person"
+         }
+    )
+)
 ```
 
 
@@ -119,7 +162,6 @@ Do not use:
 ```
 master, slave, whitelist, blacklist
 ```
-
 
 **Never, ever, shall thy ever use !! in production Kotlin code.** The !! operator is OK in unit tests, 
 but should never be used in non-test code.
@@ -152,23 +194,11 @@ memberVar = SomeEntity()
 memberVar!!.someField = "aValue"
 ```
 
-### Entities
-
-Entities are plain Kotlin classes that are used with Room persistence (and on JDBC using lib-door). They must have an empty constructor and a primary constructor in Kotlin.  All number and boolean types must not be nullable. All Strings must be nullable. See [lib-database-entities/README.md](lib-database-entities/README.md) for more details.
-
 ### Conventions
 
 #### Spelling
 
 Use US English spellings, the same as system libraries etc.
-
-#### runOnUiThread
-
-It is the job of the presenter to call runOnUiThread when needed. *DO NOT* put runOnUiThread in the view itself.
-
-#### Tab lists
-
-The presenter should build a list of subviews as a String list. This can be a list containing only the VIEW_NAME of each tab to be displayed, or it can contain arguments as a query string. The name of the tab might be fixed (e.g. an instance of VIEW_NAME always has the same tab name, in which case a constant map can be used) or it might be needed to build this into the string. e.g. ["Tab1?arg1=value1", "Tab12arg1=value1"] or ["TabTitleMessageID;Tab1?arg1=value1", "TabTitleMessageID;Tab2?arg1=value1"]
 
 #### Localization strings
 
@@ -192,7 +222,13 @@ new class, new assignment, etc. %1$s will be replaced with the name of the item.
 <string name="new_entity">New %1$s</string>
 ```
 
-# MVVM
+
+
+
+*Below is work-in-progress...*
+
+
+# MVVM thoughts, ideas, drafts, etc.
 
 Passing items:
 

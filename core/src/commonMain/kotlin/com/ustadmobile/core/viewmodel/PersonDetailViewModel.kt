@@ -3,11 +3,9 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzAndAttendance
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
-import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.*
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -22,9 +20,36 @@ data class PersonDetailUiState(
 
     val chatVisible: Boolean = false,
 
-    val clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
+    val clazzes: List<Clazz> = emptyList(),
 
-)
+    ) {
+
+    val dateOfBirthVisible: Boolean
+        get() = person?.dateOfBirth.isDateSet()
+
+    val personGenderVisible: Boolean
+        get() = person?.gender  != null
+                && person.gender != 0
+
+    val personAddressVisible: Boolean
+        get() = !person?.personAddress.isNullOrBlank()
+
+    val phoneNumVisible: Boolean
+        get() = !person?.phoneNum.isNullOrBlank()
+
+    val emailVisible: Boolean
+        get() = !person?.emailAddr.isNullOrBlank()
+
+    val personOrgIdVisible: Boolean
+        get() = !person?.personOrgId.isNullOrBlank()
+
+    val personUsernameVisible: Boolean
+        get() = !person?.username.isNullOrBlank()
+
+    val manageParentalConsentVisible: Boolean
+        get() = person?.parentJoin != null
+
+}
 
 class PersonDetailViewModel(
     di: DI,
@@ -59,6 +84,5 @@ class PersonDetailViewModel(
             )
         }
     }
-
 }
 

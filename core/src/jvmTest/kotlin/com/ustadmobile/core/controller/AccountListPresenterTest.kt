@@ -104,7 +104,7 @@ class AccountListPresenterTest {
         mockView = mock { }
         impl = mock{
             on { getAppConfigDefaultFirstDest(any()) }.thenReturn(ContentEntryList2View.VIEW_NAME)
-            on { getString(any(), any()) }.thenAnswer {
+            on { getString(any<Int>(), any()) }.thenAnswer {
                 val messageId = it.getArgument<Int>(0)
                 if(messageId == MessageID.logged_in_as) {
                     "Logged in as  %1\$s on %2\$s"
