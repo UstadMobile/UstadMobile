@@ -24,13 +24,10 @@ import com.toughra.ustadmobile.databinding.FragmentRegisterAgeRedirectBinding
 import com.ustadmobile.core.controller.RegisterAgeRedirectPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RegisterAgeRedirectView
-import com.ustadmobile.core.viewmodel.LoginUiState
 import com.ustadmobile.core.viewmodel.RegisterAgeRedirectUiState
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.composable.DatePickerSpinner
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 class RegisterAgeRedirectFragment() : UstadBaseFragment(), RegisterAgeRedirectView {
 
