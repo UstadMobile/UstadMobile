@@ -147,13 +147,6 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
     }
 }
 
-private val AddPersonOrGroupButton = FC<SchoolEditScreenProps> { props ->
-
-    val strings = useStringsXml()
-
-
-}
-
 private val ScopedGrantsOneToNList = FC<SchoolEditScreenProps> { props ->
     List{
         props.uiState.scopedGrants.forEach {
