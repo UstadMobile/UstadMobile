@@ -34,6 +34,7 @@ import com.ustadmobile.core.viewmodel.SchoolEditUiState
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
@@ -234,9 +235,11 @@ private fun SchoolEditScreen(
             },
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        Text(stringResource(id = R.string.permissions))
+        Text(stringResource(id = R.string.permissions),
+            style = Typography.h6
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
