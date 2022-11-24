@@ -3,28 +3,19 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.viewmodel.SchoolEditUiState
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.PersonWithAccount
-import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
-import com.ustadmobile.lib.db.entities.ScopedGrantAndName
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.*
-import csstype.AlignContent
-import csstype.AlignItems
-import csstype.TextAlign
-import csstype.px
+import com.ustadmobile.mui.components.UstadDetailField
+import com.ustadmobile.mui.components.UstadTextEditField
+import csstype.*
+import mui.material.List
 import mui.icons.material.*
-import mui.material.Button
-import mui.material.ListItem
-import mui.material.Typography
-import mui.material.TypographyAlign
+import mui.material.*
+import mui.material.Container
 import mui.system.*
-import react.FC
-import react.Props
-import react.create
-import react.useState
+import mui.material.Stack
+import react.*
 
 external interface SchoolEditScreenProps : Props {
     var uiState: SchoolEditUiState
@@ -48,8 +39,10 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
     val strings: StringsXml = useStringsXml()
 
     Container {
+        maxWidth = "lg"
+
         Stack {
-            spacing = responsive(2)
+            spacing = responsive(10.px)
 
             UstadTextEditField {
                 value = props.uiState.entity?.schoolName ?: ""
@@ -128,11 +121,15 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
                 + strings[MessageID.permissions]
             }
 
-            AddPersonOrGroupButton{
-                onClickNew = props.onClickNew
+            Button {
+                onClick = { props.onClickNew }
+                variant = ButtonVariant.text
+                startIcon = Add.create()
+
+                + strings[MessageID.add_person_or_group]
             }
 
-            ScopedGrantsOneToNList {
+            ScopedGrantsOneToNList{
                 uiState = props.uiState
                 onClickEditScopedGrant = props.onClickEditScopedGrant
                 onClickDeleteScopedGrant = props.onClickDeleteScopedGrant
@@ -145,16 +142,7 @@ private val AddPersonOrGroupButton = FC<SchoolEditScreenProps> { props ->
 
     val strings = useStringsXml()
 
-    Button {
-        onClick = { props.onClickNew }
-        sx {
-           textAlign = TextAlign.start
-        }
 
-        + Add.create()
-
-        + strings[MessageID.add_person_or_group]
-    }
 }
 
 private val ScopedGrantsOneToNList = FC<SchoolEditScreenProps> { props ->
@@ -184,7 +172,7 @@ private val ScopedGrantsOneToNList = FC<SchoolEditScreenProps> { props ->
 
 val SchoolEditScreenPreview = FC<Props> {
 
-    var uiStateVar by useState {
+    val uiStateVar by useState {
         SchoolEditUiState(
             entity = SchoolWithHolidayCalendar().apply {
                 schoolName = "School A"
