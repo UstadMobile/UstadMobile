@@ -10,11 +10,13 @@ import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadTextEditField
 import csstype.*
 import mui.material.List
+import mui.material.Box
 import mui.icons.material.*
 import mui.material.*
 import mui.material.Container
 import mui.system.*
 import mui.material.Stack
+import mui.material.styles.TypographyVariant
 import react.*
 
 external interface SchoolEditScreenProps : Props {
@@ -42,7 +44,7 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
         maxWidth = "lg"
 
         Stack {
-            spacing = responsive(10.px)
+            spacing = responsive(15.px)
 
             UstadTextEditField {
                 value = props.uiState.entity?.schoolName ?: ""
@@ -117,8 +119,15 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
                 }
             }
 
+            Box {
+                sx {
+                    height = 10.px
+                }
+            }
+
             Typography{
                 + strings[MessageID.permissions]
+                variant = TypographyVariant.h6
             }
 
             Button {
