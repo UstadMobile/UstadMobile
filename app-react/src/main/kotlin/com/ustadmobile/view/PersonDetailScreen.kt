@@ -27,7 +27,7 @@ import csstype.px
 val PersonDetailScreen = FC<Props>() {
     val di = useContext(DIContext)
 
-    val viewModel = useViewModel { DummyViewModel() }
+    //val viewModel = useViewModel { DummyViewModel() }
 //
 //    val dummyUiState: DummyUiState by viewModel.uiState.collectAsState(DummyUiState())
 //
