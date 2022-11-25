@@ -111,7 +111,7 @@ private fun PersonDetailScreen(
     onClickChangePassword: () -> Unit = {},
     onClickManageParentalConsent: () -> Unit = {},
     onClickChat: () -> Unit = {},
-    onClickClazz: () -> Unit = {}
+    onClickClazz: (Clazz) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -342,11 +342,13 @@ private fun ContactDetails(
 @Composable
 private fun Classes(
     clazzes: List<Clazz> = emptyList(),
-    onClickClazz: () -> Unit = {}
+    onClickClazz: (Clazz) -> Unit = {}
 ){
 
     clazzes.forEach { clazz ->
-        TextButton(onClick = onClickClazz) {
+        TextButton(
+            onClick = { onClickClazz(clazz) }
+        ) {
             ClassItem(clazz)
         }
     }
