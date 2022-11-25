@@ -120,7 +120,7 @@ fun SiteTermsDetailScreen(
             }},
             update = {
                 if(uiState.siteTerms?.termsHtml != it.getTag(R.id.tag_webview_html))
-                    it.loadUrl(uiState.siteTerms?.termsHtml!!)
+                    it.loadHtmlData(uiState.siteTerms?.termsHtml)
             }
         )
     }
