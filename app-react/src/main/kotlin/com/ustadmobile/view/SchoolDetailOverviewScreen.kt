@@ -15,6 +15,7 @@ import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 import react.create
 
 external interface SchoolDetailOverviewProps : Props {
@@ -22,7 +23,7 @@ external interface SchoolDetailOverviewProps : Props {
     var onClickSchoolCode: () -> Unit
     var onClickSchoolPhoneNumber: () -> Unit
     var onClickEmail: () -> Unit
-    var onClickClazz: () -> Unit
+    var onClickClazz: (Clazz) -> Unit
 }
 
 val SchoolDetailOverviewScreenPreview = FC<Props> {
@@ -147,17 +148,17 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
 private val Clazzes = FC<SchoolDetailOverviewProps> { props ->
 
     List{
-        props.uiState.clazzes.forEach {
+        props.uiState.clazzes.forEach { clazzEntry ->
             ListItem{
-                Stack {
-                    direction = responsive(StackDirection.column)
+                onClick = {
+                    props.onClickClazz(clazzEntry.value)
+                }
 
-                    Typography {
-                        variant = TypographyVariant.h6
-                        + (it.value.clazzName ?: "")
+                ListItemButton {
+                    ListItemText {
+                        primary = ReactNode(clazzEntry.value.clazzName ?: "")
+                        secondary = ReactNode(clazzEntry.value.clazzDesc ?: "")
                     }
-
-                    + (it.value.clazzDesc ?: "")
                 }
             }
         }
