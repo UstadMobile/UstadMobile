@@ -30,6 +30,8 @@ fun useUstadScreens(): UstadScreens {
                 InviteViaLinkPreview),
             UstadScreen(SettingsView.VIEW_NAME, "Settings Preview",
                 SettingsPreview),
+            UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
+                SiteTermsDetailScreenPreview),
         )
     }
 }
