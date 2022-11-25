@@ -25,14 +25,14 @@ Cypress.Commands.add('logout', () => {
 })
 
 
-Cypress.Commands.add('addContent',(fileLocation) => {
+Cypress.Commands.add('addContent',(fileLocation,contentTitle) => {
   cy.contains('Library').click()
   cy.contains('Content').click()
   cy.contains('Add file').click()
   cy.contains('Drag and drop a file here or click').click()
   cy.get('input[type=file]').selectFile((fileLocation),{force: true})
   cy.contains('Upload').click()
-  cy.contains("label", "Title").parent().find("input").clear().type('Content001')
+  cy.contains("label", "Title").parent().find("input").clear().type(contentTitle)
   cy.contains('Done').click()
   cy.wait(2000)
   })

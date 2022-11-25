@@ -13,7 +13,7 @@ echo "SERIAL=$TESTSERIAL"
  # adb push $FILENAME /sdcard/Download/$FILEBASENAME
   #CONTENTNAME="ContentUploadDownloadTest"$INDEX
  ../../../../runserver.sh --password testpass  --clear --background --nobuild
- npx cypress run
+ #npx cypress run --spec "cypress/e2e/001_001_admin_can_add_content.cy.js"
   TESTRESULT=$?
   if [ "$TESTRESULT" == "0" ]; then
     echo "pass" > results/result-$CONTENTNAME

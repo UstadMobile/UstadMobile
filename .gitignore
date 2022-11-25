@@ -241,6 +241,9 @@ app-react/src/main/resources/locales
 #location for tests screenshots
 test-ui/android-maestro/results
 test-ui/android-maestro/tests/*/results
+test-ui/webapp-cypress/results
+test-ui/webapp-cypress/cypress/videos
+test-ui/webapp-cypress/cypress/screenshots
 
 #node-modules inside webapp-cypress
 node_modules
