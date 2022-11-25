@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
@@ -43,16 +42,16 @@ val SchoolDetailOverviewScreenPreview = FC<Props> {
                 schoolTimeZone = "Asia/Dubai"
             },
             schoolCodeVisible = true,
-            clazzes = listOf(
-                ClazzWithListDisplayDetails().apply {
+            clazzes = mapOf(
+                1 to ClazzWithListDisplayDetails().apply {
                     clazzName = "Class A"
                     clazzDesc = "Class description"
                 },
-                ClazzWithListDisplayDetails().apply {
+                2 to ClazzWithListDisplayDetails().apply {
                     clazzName = "Class B"
                     clazzDesc = "Class description"
                 },
-                ClazzWithListDisplayDetails().apply {
+                3 to ClazzWithListDisplayDetails().apply {
                     clazzName = "Class C"
                     clazzDesc = "Class description"
                 }
@@ -72,21 +71,12 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-            val gender = strings.mapLookup(
-                props.uiState?.entity?.schoolGender ?: 1,
-                PersonConstants.GENDER_MESSAGE_ID_MAP
-            )
-
             if (props.uiState.schoolDescVisible) {
                 Typography {
                     variant = TypographyVariant.h6
 
                     +(props.uiState.entity?.schoolDesc ?: "")
                 }
-            }
-
-            if (props.uiState.schoolGenderVisible){
-                + "Mixed gender"
             }
 
             if (props.uiState.schoolCodeLayoutVisible){
@@ -128,6 +118,7 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
                     valueText = props.uiState.entity?.schoolAddress ?: ""
                     labelText = strings[MessageID.email]
                     icon = Email.create()
+                    onClick = props.onClickEmail
                 }
             }
 
@@ -136,7 +127,6 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
                     valueText = props.uiState.entity?.schoolTimeZone ?: ""
                     labelText = strings[MessageID.timezone]
                     icon = Language.create()
-                    onClick = props.onClickEmail
                 }
             }
 
@@ -164,10 +154,10 @@ private val Clazzes = FC<SchoolDetailOverviewProps> { props ->
 
                     Typography {
                         variant = TypographyVariant.h6
-                        + (it.clazzName ?: "")
+                        + (it.value.clazzName ?: "")
                     }
 
-                    + (it.clazzDesc ?: "")
+                    + (it.value.clazzDesc ?: "")
                 }
             }
         }

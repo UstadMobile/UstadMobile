@@ -34,7 +34,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolOverviewBinding
 import com.toughra.ustadmobile.databinding.ItemClazzSimpleDetailBinding
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.controller.SchoolDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.util.ext.toStringMap
@@ -48,7 +47,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 
 interface SchoolDetailOverviewEventListener {
@@ -214,18 +212,10 @@ private fun SchoolDetailOverviewScreen(
             .verticalScroll(rememberScrollState()),
     )  {
 
-        val gender = messageIdMapResource(
-            map = PersonConstants.GENDER_MESSAGE_ID_MAP,
-            key = uiState.entity?.schoolGender ?: 2)
-
         if (uiState.schoolDescVisible){
             Text(text = uiState.entity?.schoolDesc ?: "",
                 style = Typography.h6
             )
-        }
-
-        if (uiState.schoolGenderVisible){
-            Text(text = "Mixed gender")
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -286,7 +276,8 @@ private fun SchoolDetailOverviewScreen(
             UstadDetailField(
                 valueText = uiState.entity?.schoolAddress ?: "",
                 labelText = stringResource(id = R.string.email),
-                imageId = R.drawable.ic_email_black_24dp
+                imageId = R.drawable.ic_email_black_24dp,
+                onClick = onClickEmail
             )
         }
 
@@ -297,7 +288,6 @@ private fun SchoolDetailOverviewScreen(
                 valueText = uiState.entity?.schoolTimeZone ?: "",
                 labelText = stringResource(id = R.string.timezone),
                 imageId = R.drawable.ic_language_blue_grey_600_24dp,
-                onClick = onClickEmail
             )
         }
 
@@ -317,21 +307,21 @@ private fun SchoolDetailOverviewScreen(
 
 @Composable
 private fun Clazzes(
-    clazzes: List<ClazzWithListDisplayDetails>,
+    clazzes: Map<Int, ClazzWithListDisplayDetails>,
     onClickClazz: () -> Unit
 ){
 
-    clazzes.forEach { clazz ->
+    clazzes.forEach { (key, value) ->
         TextButton(onClick = onClickClazz) {
             Column(
                 modifier = Modifier.padding(20.dp, 0.dp, 0.dp, 0.dp)
             ) {
 
-                Text(text = clazz.clazzName ?: "",
+                Text(text = value.clazzName ?: "",
                     style = Typography.h6
                 )
 
-                Text(text = clazz.clazzDesc ?: "")
+                Text(text = value.clazzDesc ?: "")
             }
         }
     }
@@ -355,16 +345,16 @@ fun SchoolDetailOverviewScreenPreview() {
             schoolTimeZone = "Asia/Dubai"
         },
         schoolCodeVisible = true,
-        clazzes = listOf(
-            ClazzWithListDisplayDetails().apply {
+        clazzes = mapOf(
+            1 to ClazzWithListDisplayDetails().apply {
                 clazzName = "Class A"
                 clazzDesc = "Class description"
             },
-            ClazzWithListDisplayDetails().apply {
+            2 to ClazzWithListDisplayDetails().apply {
                 clazzName = "Class B"
                 clazzDesc = "Class description"
             },
-            ClazzWithListDisplayDetails().apply {
+            3 to ClazzWithListDisplayDetails().apply {
                 clazzName = "Class C"
                 clazzDesc = "Class description"
             }

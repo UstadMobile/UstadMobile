@@ -9,16 +9,12 @@ data class SchoolDetailOverviewUiState(
 
     val schoolCodeVisible: Boolean = false,
 
-    val clazzes: List<ClazzWithListDisplayDetails> = emptyList(),
+    val clazzes: Map<Int, ClazzWithListDisplayDetails> = emptyMap()
 
 ) {
 
     val schoolDescVisible: Boolean
         get() = !entity?.schoolDesc.isNullOrBlank()
-
-    val schoolGenderVisible: Boolean
-        get() = entity?.schoolGender != null
-                && entity?.schoolGender != 0
 
     val schoolCodeLayoutVisible: Boolean
         get() = entity?.schoolCode != null
