@@ -34,6 +34,7 @@ import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
+import com.ustadmobile.port.android.view.composable.*
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
@@ -285,24 +286,24 @@ private fun ClazzAssignmentEditScreen(
         UstadTextEditField(
             value = uiState.entity?.assignment?.caTitle ?: "",
             label = stringResource(id = R.string.title),
+            error = uiState.caTitleError,
+            enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onCaTitleValueChange(uiState.entity?.shallowCopy{
                     assignment?.caTitle = it
                 })
             },
-            error = uiState.caTitleError,
-            enabled = uiState.fieldsEnabled,
         )
 
         UstadTextEditField(
             value = uiState.entity?.assignment?.caDescription ?: "",
-            label = stringResource(id = R.string.description),
+            label = stringResource(id = R.string.description).addOptionalSuffix(),
+            enabled = uiState.fieldsEnabled,
             onValueChange = {
                 onCaDescriptionValueChange(uiState.entity?.shallowCopy{
                     assignment?.caDescription = it
                 })
             },
-            enabled = uiState.fieldsEnabled
         )
 
         TextValueRow(
@@ -311,7 +312,7 @@ private fun ClazzAssignmentEditScreen(
             stringResource(id = R.string.dont_show_before),
             uiState.caStartDateError,
             "",
-            "Class timezone: Dubai",
+            uiState.timeZone ?: "US",
             stringResource(id = R.string.time),
             uiState.fieldsEnabled
         )
@@ -375,7 +376,7 @@ fun TextValueRow(
 @Composable
 fun CompletionCriteriaRow(
     uiState: ClazzAssignmentEditUiState = ClazzAssignmentEditUiState(),
-    onValueChange: (completionCriteriaOptions?) -> Unit = {},
+    onValueChange: (CourseBlockWithEntity?) -> Unit = {},
 ){
     Row {
 

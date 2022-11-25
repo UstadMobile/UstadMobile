@@ -10,6 +10,8 @@ data class ClazzAssignmentEditUiState(
 
     val caTitleError: String? = null,
 
+    val timeZone: String? = null,
+
     val caStartDateError: String? = null,
 
     val caMaxPointsError: String? = null,
