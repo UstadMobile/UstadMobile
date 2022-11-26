@@ -1,11 +1,12 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.mui.common.md
+import com.ustadmobile.mui.common.xs
 import csstype.*
+import mui.icons.material.AccountCircle
 import mui.icons.material.CheckBoxOutlineBlank
-import mui.material.Box
-import mui.material.ButtonBase
-import mui.material.Typography
-import mui.material.TypographyAlign
+import mui.icons.material.Visibility
+import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.Stack
 import mui.system.StackDirection
@@ -38,47 +39,80 @@ external interface UstadDetailFieldProps: Props {
      * provide a ripple effect.
      */
     var onClick: (() -> Unit)?
+
+    /**
+     * Optional secondary space (will be end-aligned)
+     */
+    var secondaryActionContent: ReactNode?
 }
 
 /**
  * Base component for showing detail fields e.g. phone number, start date, end date, etc.
  */
 val UstadDetailField = FC<UstadDetailFieldProps> { props ->
-    val contentNode = Stack.create {
-        direction = responsive(StackDirection.row)
+    val contentNode = Grid.create {
+        //direction = responsive(mui.material.StackDirection.row)
+        container = true
 
-        Box {
-            sx {
-                padding = 8.px
-            }
+        Grid {
+            item = true
+            xs = 2
+            md = 1
 
-            if(props.icon != null) {
-                +props.icon
-            }else {
-                CheckBoxOutlineBlank {
-                    sx {
-                        opacity = number(0.0)
+            Box {
+                sx {
+                    padding = 8.px
+                }
+
+                if(props.icon != null) {
+                    +props.icon
+                }else {
+                    CheckBoxOutlineBlank {
+                        sx {
+                            opacity = number(0.0)
+                        }
                     }
                 }
             }
         }
 
+        Grid {
+            item = true
+            xs = 8
+            md = 10
 
-        Stack {
-            direction = responsive(StackDirection.column)
+            Stack {
+                direction = responsive(StackDirection.column)
 
-            Typography {
-                align = TypographyAlign.left
-                variant = TypographyVariant.body1
+                Typography {
+                    sx {
 
-                + props.valueText
+                    }
+                    align = TypographyAlign.left
+                    variant = TypographyVariant.body1
+
+                    + props.valueText
+                }
+
+                Typography {
+                    align = TypographyAlign.left
+
+                    variant = TypographyVariant.caption
+                    + props.labelText
+                }
             }
+        }
 
-            Typography {
-                align = TypographyAlign.left
+        if(props.secondaryActionContent != null) {
+            Grid {
+                sx {
+                    justifyContent = JustifyContent.end
+                }
 
-                variant = TypographyVariant.caption
-                + props.labelText
+                xs = 2
+                md = 1
+
+                +props.secondaryActionContent
             }
         }
     }
@@ -95,3 +129,38 @@ val UstadDetailField = FC<UstadDetailFieldProps> { props ->
         }
     }
 }
+
+val UstadDetailFieldPreview = FC<Props> {
+    Container {
+        maxWidth = "lg"
+
+        Stack {
+            direction = responsive(StackDirection.column)
+            spacing = responsive(10.px)
+
+            UstadDetailField {
+                valueText = "Demo value"
+                labelText = "With icon and secondary action"
+                icon = AccountCircle.create()
+                secondaryActionContent = IconButton.create {
+                    onClick = { }
+                    Visibility {
+
+                    }
+                }
+            }
+
+            UstadDetailField {
+                valueText = "Demo value"
+                labelText = "With icon and secondary action"
+                icon = AccountCircle.create()
+            }
+
+            UstadDetailField {
+                valueText = "Demo value"
+                labelText = "With no icon or secondary action"
+            }
+        }
+    }
+}
+
