@@ -62,6 +62,7 @@ val UstadDetailField = FC<UstadDetailFieldProps> { props ->
             Box {
                 sx {
                     padding = 8.px
+                    textAlign = TextAlign.center
                 }
 
                 if(props.icon != null) {
@@ -105,6 +106,7 @@ val UstadDetailField = FC<UstadDetailFieldProps> { props ->
 
         if(props.secondaryActionContent != null) {
             Grid {
+                item = true
                 sx {
                     justifyContent = JustifyContent.end
                 }
@@ -123,6 +125,9 @@ val UstadDetailField = FC<UstadDetailFieldProps> { props ->
         ButtonBase {
             sx {
                 justifyContent = JustifyContent.start
+                padding = 0.px
+                margin = 0.px
+                border = 0.px
             }
 
             +contentNode
@@ -159,6 +164,14 @@ val UstadDetailFieldPreview = FC<Props> {
             UstadDetailField {
                 valueText = "Demo value"
                 labelText = "With no icon or secondary action"
+            }
+
+
+            UstadDetailField {
+                valueText = "Demo value"
+                labelText = "Clickable with icon and secondary action"
+                icon = AccountCircle.create()
+                onClick = {}
             }
         }
     }
