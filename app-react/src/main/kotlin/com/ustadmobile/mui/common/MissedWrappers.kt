@@ -19,6 +19,13 @@ inline var GridProps.sm: Int
         asDynamic().sm = value
     }
 
+inline var GridProps.md: Int
+    get() = TODO()
+    set(value) {
+        asDynamic().md = value
+    }
+
+
 inline var GridProps.lg: Int
     get() = TODO()
     set(value) {

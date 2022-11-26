@@ -3,6 +3,7 @@ package com.ustadmobile.hooks
 import com.ustadmobile.core.view.*
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
+import com.ustadmobile.mui.components.UstadDetailFieldPreview
 import com.ustadmobile.mui.components.UstadEditFieldPreviews
 import com.ustadmobile.view.*
 import react.useMemo
@@ -14,6 +15,7 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("PersonDetailPreview", "Person Detail Preview",
                 PersonDetailPreview),
             UstadScreen("UstadEditFields", "Edit Fields", UstadEditFieldPreviews),
+            UstadScreen("UstadDetailFields", "Detail Fields", UstadDetailFieldPreview),
             UstadScreen(PersonEditView.VIEW_NAME, "Person Edit Preview",
                 PersonEditScreenPreview),
             UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",
@@ -24,8 +26,14 @@ fun useUstadScreens(): UstadScreens {
                 SiteEnterLinkScreenPreview),
             UstadScreen(ParentalConsentManagementView.VIEW_NAME, "Parental Consent Management Preview",
                 ParentalConsentManagementPreview),
-            UstadScreen(ClazzEnrolmentEditView.VIEW_NAME, "ClazzEnrolmentEdit Preview",
-                ClazzEnrolmentEditScreenPreview),
+            UstadScreen(RegisterAgeRedirectView.VIEW_NAME, "RegisterAgeRedirect Preview",
+                RegisterAgeRedirectPreview),
+            UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
+                InviteViaLinkPreview),
+            UstadScreen(SettingsView.VIEW_NAME, "Settings Preview",
+                SettingsPreview),
+            UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
+                SiteTermsDetailScreenPreview),
         )
     }
 }
