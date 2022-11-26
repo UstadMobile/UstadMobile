@@ -64,27 +64,6 @@ val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
                     + it.stLanguage.toString()
                 }
             }
-
-//            ReactHTML.img {
-//                src = "${""}?w=164&h=164&fit=crop&auto=format"
-//                alt = "user image"
-//            }
-
-//            Divider { orientation = Orientation.horizontal }
-
-//            Typography {
-//                variant = TypographyVariant.h6
-//                + strings[MessageID.basic_details]
-//            }
-
-//            Divider { orientation = Orientation.horizontal }
-
-//            Typography {
-//                variant = TypographyVariant.h6
-//                + strings[MessageID.contact_details]
-//            }
-
-//            Divider { orientation = Orientation.horizontal }
         }
     }
 }
