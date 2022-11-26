@@ -9,7 +9,7 @@ data class SchoolDetailOverviewUiState(
 
     val schoolCodeVisible: Boolean = false,
 
-    val clazzes: Map<Int, ClazzWithListDisplayDetails> = emptyMap()
+    val clazzes: List<ClazzWithListDisplayDetails> = emptyList()
 
 ) {
 

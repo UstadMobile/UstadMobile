@@ -42,16 +42,16 @@ val SchoolDetailOverviewScreenPreview = FC<Props> {
                 schoolTimeZone = "Asia/Dubai"
             },
             schoolCodeVisible = true,
-            clazzes = mapOf(
-                1 to ClazzWithListDisplayDetails().apply {
+            clazzes = listOf(
+                ClazzWithListDisplayDetails().apply {
                     clazzName = "Class A"
                     clazzDesc = "Class description"
                 },
-                2 to ClazzWithListDisplayDetails().apply {
+                ClazzWithListDisplayDetails().apply {
                     clazzName = "Class B"
                     clazzDesc = "Class description"
                 },
-                3 to ClazzWithListDisplayDetails().apply {
+                ClazzWithListDisplayDetails().apply {
                     clazzName = "Class C"
                     clazzDesc = "Class description"
                 }
@@ -154,10 +154,10 @@ private val Clazzes = FC<SchoolDetailOverviewProps> { props ->
 
                     Typography {
                         variant = TypographyVariant.h6
-                        + (it.value.clazzName ?: "")
+                        + (it.clazzName ?: "")
                     }
 
-                    + (it.value.clazzDesc ?: "")
+                    + (it.clazzDesc ?: "")
                 }
             }
         }

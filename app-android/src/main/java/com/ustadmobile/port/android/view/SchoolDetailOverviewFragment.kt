@@ -7,7 +7,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -196,6 +199,7 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun SchoolDetailOverviewScreen(
     uiState: SchoolDetailOverviewUiState = SchoolDetailOverviewUiState(),
@@ -205,124 +209,110 @@ private fun SchoolDetailOverviewScreen(
     onClickEmail: () -> Unit = {},
     onClickClazz: () -> Unit = {},
 ) {
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(16.dp),
     )  {
 
         if (uiState.schoolDescVisible){
-            Text(text = uiState.entity?.schoolDesc ?: "",
+           item {
+               Text(text = uiState.entity?.schoolDesc ?: "",
+                   style = Typography.h6
+               )
+           }
+        }
+
+        if (uiState.schoolCodeLayoutVisible){
+            item {
+                UstadDetailField(
+                    valueText = uiState.entity?.schoolCode ?: "",
+                    labelText = stringResource(id = R.string.school_code),
+                    imageId = R.drawable.ic_login_24px,
+                    onClick = onClickSchoolCode
+                )
+            }
+        }
+
+        if (uiState.schoolAddressVisible){
+            item {
+                UstadDetailField(
+                    valueText = uiState.entity?.schoolAddress ?: "",
+                    labelText = stringResource(id = R.string.address),
+                    imageId = R.drawable.ic_location_pin_24dp
+                )
+            }
+        }
+
+        if (uiState.schoolPhoneNumberVisible){
+            item {
+                UstadDetailField(
+                    valueText = uiState.entity?.schoolPhoneNumber ?: "",
+                    labelText = stringResource(id = R.string.phone_number),
+                    imageId = R.drawable.ic_call_bcd4_24dp,
+                    onClick = onClickSchoolPhoneNumber,
+                    secondaryActionContent = {
+                        IconButton(
+                            onClick = onClickSms,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Message,
+                                contentDescription = stringResource(id = R.string.message),
+                            )
+                        }
+                    }
+                )
+            }
+        }
+
+        if (uiState.calendarUidVisible){
+            item {
+                UstadDetailField(
+                    valueText = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
+                    labelText = stringResource(id = R.string.holiday_calendar),
+                    imageId = R.drawable.ic_perm_contact_calendar_black_24dp
+                )
+            }
+        }
+
+        if (uiState.schoolEmailAddressVisible){
+            item {
+                UstadDetailField(
+                    valueText = uiState.entity?.schoolAddress ?: "",
+                    labelText = stringResource(id = R.string.email),
+                    imageId = R.drawable.ic_email_black_24dp,
+                    onClick = onClickEmail
+                )
+            }
+        }
+
+        if (uiState.schoolTimeZoneVisible){
+            item {
+                UstadDetailField(
+                    valueText = uiState.entity?.schoolTimeZone ?: "",
+                    labelText = stringResource(id = R.string.timezone),
+                    imageId = R.drawable.ic_language_blue_grey_600_24dp,
+                )
+            }
+        }
+
+        item {
+            Text(text = stringResource(id = R.string.classes),
                 style = Typography.h6
             )
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
 
-        if (uiState.schoolCodeLayoutVisible){
-            UstadDetailField(
-                valueText = uiState.entity?.schoolCode ?: "",
-                labelText = stringResource(id = R.string.school_code),
-                imageId = R.drawable.ic_login_24px,
-                onClick = onClickSchoolCode
+        items(
+            uiState.clazzes.size
+        ){
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickClazz()
+                },
+                text = { Text(uiState.clazzes[it].clazzName ?: "") },
+                secondaryText = { Text(uiState.clazzes[it].clazzDesc ?: "") }
             )
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        if (uiState.schoolAddressVisible){
-            UstadDetailField(
-                valueText = uiState.entity?.schoolAddress ?: "",
-                labelText = stringResource(id = R.string.address),
-                imageId = R.drawable.ic_location_pin_24dp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        if (uiState.schoolPhoneNumberVisible){
-            UstadDetailField(
-                valueText = uiState.entity?.schoolPhoneNumber ?: "",
-                labelText = stringResource(id = R.string.phone_number),
-                imageId = R.drawable.ic_call_bcd4_24dp,
-                onClick = onClickSchoolPhoneNumber,
-                secondaryActionContent = {
-                    IconButton(
-                        onClick = onClickSms,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Message,
-                            contentDescription = stringResource(id = R.string.message),
-                        )
-                    }
-                }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        if (uiState.calendarUidVisible){
-            UstadDetailField(
-                valueText = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
-                labelText = stringResource(id = R.string.holiday_calendar),
-                imageId = R.drawable.ic_perm_contact_calendar_black_24dp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        if (uiState.schoolEmailAddressVisible){
-            UstadDetailField(
-                valueText = uiState.entity?.schoolAddress ?: "",
-                labelText = stringResource(id = R.string.email),
-                imageId = R.drawable.ic_email_black_24dp,
-                onClick = onClickEmail
-            )
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        if (uiState.schoolTimeZoneVisible){
-            UstadDetailField(
-                valueText = uiState.entity?.schoolTimeZone ?: "",
-                labelText = stringResource(id = R.string.timezone),
-                imageId = R.drawable.ic_language_blue_grey_600_24dp,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(15.dp))
-
-        Text(text = stringResource(id = R.string.classes),
-            style = Typography.h6
-        )
-
-        Clazzes(
-            clazzes = uiState.clazzes,
-            onClickClazz = onClickClazz
-        )
-    }
-}
-
-
-@Composable
-private fun Clazzes(
-    clazzes: Map<Int, ClazzWithListDisplayDetails>,
-    onClickClazz: () -> Unit
-){
-
-    clazzes.forEach { (key, value) ->
-        TextButton(onClick = onClickClazz) {
-            Column(
-                modifier = Modifier.padding(20.dp, 0.dp, 0.dp, 0.dp)
-            ) {
-
-                Text(text = value.clazzName ?: "",
-                    style = Typography.h6
-                )
-
-                Text(text = value.clazzDesc ?: "")
-            }
         }
     }
 }
@@ -345,16 +335,16 @@ fun SchoolDetailOverviewScreenPreview() {
             schoolTimeZone = "Asia/Dubai"
         },
         schoolCodeVisible = true,
-        clazzes = mapOf(
-            1 to ClazzWithListDisplayDetails().apply {
+        clazzes = listOf(
+            ClazzWithListDisplayDetails().apply {
                 clazzName = "Class A"
                 clazzDesc = "Class description"
             },
-            2 to ClazzWithListDisplayDetails().apply {
+            ClazzWithListDisplayDetails().apply {
                 clazzName = "Class B"
                 clazzDesc = "Class description"
             },
-            3 to ClazzWithListDisplayDetails().apply {
+            ClazzWithListDisplayDetails().apply {
                 clazzName = "Class C"
                 clazzDesc = "Class description"
             }
