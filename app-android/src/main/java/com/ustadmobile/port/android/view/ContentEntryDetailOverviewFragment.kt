@@ -653,7 +653,7 @@ fun QuickActionBarsRow(
 @Composable
 @Preview
 fun ContentEntryDetailOverviewScreenPreview() {
-    var uiStateVal = ContentEntryDetailOverviewUiState(
+    val uiStateVal = ContentEntryDetailOverviewUiState(
         contentEntry = ContentEntryWithMostRecentContainer().apply {
             title = "Content Title"
             author = "Author"
