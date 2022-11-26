@@ -213,8 +213,16 @@ fun SiteDetailScreen(
             labelText = stringResource(R.string.name),
             imageId = R.drawable.ic_account_balance_black_24dp
         )
-        UstadDetailField(valueText = stringResource(if(uiState.site?.guestLogin == true){R.string.yes} else {R.string.no}), labelText = "Guest login enabled", imageId = R.drawable.ic_document_preview)
-        UstadDetailField(valueText = stringResource(if(uiState.site?.registrationAllowed == true){R.string.yes} else {R.string.no}), labelText = "Registration allowed", imageId = R.drawable.ic_baseline_how_to_reg_24)
+        UstadDetailField(
+            valueText = stringResource(if(uiState.site?.guestLogin == true){R.string.yes} else {R.string.no}),
+            labelText = "Guest login enabled",
+            imageId = R.drawable.ic_document_preview
+        )
+        UstadDetailField(
+            valueText = stringResource(if(uiState.site?.registrationAllowed == true){R.string.yes} else {R.string.no}),
+            labelText = "Registration allowed",
+            imageId = R.drawable.ic_baseline_how_to_reg_24
+        )
         Text(stringResource(R.string.terms_and_policies), style = Typography.h6)
 
         uiState.siteTerms.forEach {
