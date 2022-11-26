@@ -1,5 +1,7 @@
 package com.ustadmobile.util.ext
 
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.util.urlSearchParamsToMap
 
 /**
@@ -47,4 +49,13 @@ fun String.wordBreakLimit(numOfWords: Int = 10): String{
  */
 fun String.toArgumentsMap(): Map<String, String>{
     return urlSearchParamsToMap(this)
+}
+
+
+/**
+ * Shorthand to add (optional) to a field title
+ * e.g. "FieldName" -> "Field name (optional)"
+ */
+fun String.addOptionalSuffix(stringsXml: StringsXml): String {
+    return "$this (${stringsXml.get(MessageID.optional)})"
 }
