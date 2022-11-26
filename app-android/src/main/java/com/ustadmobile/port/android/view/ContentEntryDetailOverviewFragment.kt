@@ -384,6 +384,7 @@ private fun ContentEntryDetailOverviewScreen(
     onClickMarkComplete: () -> Unit = {},
     onClickDelete: () -> Unit = {},
     onClickManageDownload: () -> Unit = {},
+    onClickTranslation: (ContentEntryRelatedEntryJoinWithLanguage) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -470,6 +471,11 @@ private fun ContentEntryDetailOverviewScreen(
         if (uiState.translationVisibile){
             Text(text = stringResource(id = R.string.also_available_in))
         }
+
+        AvailableTranslations(
+            uiState.availableTranslationsMap,
+            onClickTranslation
+        )
     }
 }
 
@@ -651,6 +657,21 @@ fun QuickActionBarsRow(
 }
 
 @Composable
+private fun AvailableTranslations(
+    availableTranslationsMap: Map<Int, ContentEntryRelatedEntryJoinWithLanguage>,
+    onClickTranslation: (ContentEntryRelatedEntryJoinWithLanguage) -> Unit
+){
+
+    availableTranslationsMap.forEach { contentEntry ->
+        TextButton(
+            onClick = { onClickTranslation(contentEntry.value) }
+        ) {
+            Text(contentEntry.value.language?.name ?: "")
+        }
+    }
+}
+
+@Composable
 @Preview
 fun ContentEntryDetailOverviewScreenPreview() {
     val uiStateVal = ContentEntryDetailOverviewUiState(
@@ -679,7 +700,24 @@ fun ContentEntryDetailOverviewScreenPreview() {
         },
         locallyAvailable = true,
         markCompleteVisible = true,
-        translationVisibile = true
+        translationVisibile = true,
+        availableTranslationsMap = mapOf(
+            1 to ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    name = "English"
+                }
+            },
+            2 to ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    name = "French"
+                }
+            },
+            3 to ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    name = "Persian"
+                }
+            }
+        )
     )
     MdcTheme {
         ContentEntryDetailOverviewScreen(
