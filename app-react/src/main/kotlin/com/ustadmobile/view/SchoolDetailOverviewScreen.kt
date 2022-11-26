@@ -15,6 +15,7 @@ import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 import react.create
 
 external interface SchoolDetailOverviewProps : Props {
@@ -22,7 +23,7 @@ external interface SchoolDetailOverviewProps : Props {
     var onClickSchoolCode: () -> Unit
     var onClickSchoolPhoneNumber: () -> Unit
     var onClickEmail: () -> Unit
-    var onClickClazz: () -> Unit
+    var onClickClazz: (Clazz) -> Unit
 }
 
 val SchoolDetailOverviewScreenPreview = FC<Props> {
@@ -42,16 +43,16 @@ val SchoolDetailOverviewScreenPreview = FC<Props> {
                 schoolTimeZone = "Asia/Dubai"
             },
             schoolCodeVisible = true,
-            clazzes = listOf(
-                ClazzWithListDisplayDetails().apply {
+            clazzes = mapOf(
+                1 to ClazzWithListDisplayDetails().apply {
                     clazzName = "Class A"
                     clazzDesc = "Class description"
                 },
-                ClazzWithListDisplayDetails().apply {
+                2 to ClazzWithListDisplayDetails().apply {
                     clazzName = "Class B"
                     clazzDesc = "Class description"
                 },
-                ClazzWithListDisplayDetails().apply {
+                3 to ClazzWithListDisplayDetails().apply {
                     clazzName = "Class C"
                     clazzDesc = "Class description"
                 }
@@ -147,17 +148,17 @@ val SchoolDetailOverviewScreenComponent2 = FC<SchoolDetailOverviewProps> { props
 private val Clazzes = FC<SchoolDetailOverviewProps> { props ->
 
     List{
-        props.uiState.clazzes.forEach {
+        props.uiState.clazzes.forEach { clazzEntry ->
             ListItem{
-                Stack {
-                    direction = responsive(StackDirection.column)
+                onClick = {
+                    props.onClickClazz(clazzEntry.value)
+                }
 
-                    Typography {
-                        variant = TypographyVariant.h6
-                        + (it.clazzName ?: "")
+                ListItemButton {
+                    ListItemText {
+                        primary = ReactNode(clazzEntry.value.clazzName ?: "")
+                        secondary = ReactNode(clazzEntry.value.clazzDesc ?: "")
                     }
-
-                    + (it.clazzDesc ?: "")
                 }
             }
         }
