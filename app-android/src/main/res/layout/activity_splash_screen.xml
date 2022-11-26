@@ -26,6 +26,7 @@
 
    <androidx.appcompat.widget.AppCompatImageView
        android:id="@+id/expo_logo"
+       android:visibility="invisible"
        android:layout_width="@dimen/dimen_100dp"
        android:layout_height="@dimen/dimen_100dp"
        android:layout_marginVertical="@dimen/dimen_8dp"
@@ -40,7 +41,7 @@
 
    <LinearLayout
        android:id="@+id/partnership_with_linearlayout"
-       android:layout_width="wrap_content"
+       android:layout_width="300dp"
        android:layout_height="wrap_content"
        android:orientation="vertical"
        app:layout_constraintBottom_toBottomOf="parent"
@@ -53,7 +54,7 @@
           android:id="@+id/partnership_text"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:text="@string/created_partnership"
+          android:text="@string/powered_by"
           android:textAppearance="@style/UmTheme.TextAppearance.Body2" />
 
       <androidx.appcompat.widget.AppCompatImageView
@@ -61,10 +62,10 @@
           android:id="@+id/irc_logo"
           android:layout_width="match_parent"
           android:layout_height="@dimen/dimen_80dp"
-          android:minHeight="@dimen/dimen_70dp"
-          android:maxHeight="@dimen/dimen_150dp"
+          android:maxHeight="30dp"
+          android:width="120dp"
           android:layout_marginBottom="@dimen/dimen_30dp"
-          app:srcCompat="@drawable/ic_irc"
+          app:srcCompat="@drawable/ic_powered_by_ustad_logo"
           tools:ignore="ContentDescription" />
 
    </LinearLayout>
