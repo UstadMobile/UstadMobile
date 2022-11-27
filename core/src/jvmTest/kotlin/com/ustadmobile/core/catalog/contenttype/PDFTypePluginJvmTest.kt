@@ -7,6 +7,7 @@ import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.SysPathUtil
 import com.ustadmobile.core.util.UstadTestRule
@@ -59,15 +60,8 @@ class PDFTypePluginJvmTest {
         endpointScope = EndpointScope()
         di = DI {
             import(ustadTestRule.diModule)
-            bind<File>(tag = DiTag.TAG_FILE_FFMPEG) with singleton {
-                SysPathUtil.findCommandInPath("ffmpeg")
-                    ?: throw IllegalStateException("Could not find ffmpeg. " +
-                            "ffmpeg must be in path to run VideoTypePluginJvmTest")
-            }
-
-            bind<File>(tag = DiTag.TAG_FILE_FFPROBE) with singleton {
-                SysPathUtil.findCommandInPath("ffprobe")
-                    ?: throw IllegalStateException("ffprobe must be in path to run VideoTypePluginJvmTest")
+            bind<ContainerStorageManager>() with scoped(endpointScope).singleton {
+                ContainerStorageManager(listOf(tmpFolder.newFolder()))
             }
         }
 

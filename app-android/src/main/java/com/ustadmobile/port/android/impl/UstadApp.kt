@@ -178,7 +178,7 @@ open class UstadApp : Application(), DIAware {
             VideoTypePluginAndroid(applicationContext, context, di)
         }
 
-        bind<PDFPluginAndroid>() with scoped(EndpointScope.Default).singleton{
+        bind<PDFTypePlugin>() with scoped(EndpointScope.Default).singleton{
             PDFPluginAndroid(applicationContext, context, di)
         }
 
@@ -200,7 +200,7 @@ open class UstadApp : Application(), DIAware {
                     di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
                     di.on(context).direct.instance<VideoTypePluginAndroid>(),
-                    di.on(context).direct.instance<PDFPluginAndroid>(),
+                    di.on(context).direct.instance<PDFTypePlugin>(),
                     di.on(context).direct.instance<FolderIndexerPlugin>(),
                     di.on(context).direct.instance<ContainerDownloadPlugin>(),
                     di.on(context).direct.instance<DeleteContentEntryPlugin>(),
