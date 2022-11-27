@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import com.pdfview.PDFView
 import com.pdfview.subsamplincscaleimageview.SubsamplingScaleImageView
 import com.toughra.ustadmobile.databinding.FragmentPdfContentBinding
@@ -18,7 +19,6 @@ import com.ustadmobile.core.view.PDFContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -29,8 +29,6 @@ class PDFContentFragment : UstadBaseFragment(), PDFContentView {
     private var mBinding: FragmentPdfContentBinding? = null
 
     private var mPresenter: PDFContentPresenter? = null
-
-    private var currentWindow = 0
 
     private var pdfView: PDFView? = null
 
@@ -110,17 +108,14 @@ class PDFContentFragment : UstadBaseFragment(), PDFContentView {
             loading = false
             try{
                 //Load PDF file from database:
-                GlobalScope.launch {
+                viewLifecycleOwner.lifecycleScope.launch {
                     val filePath: String? =
-                        db?.containerEntryDao?.findByContainer(containerUid)?.get(0)?.containerEntryFile?.cefPath
+                        db?.containerEntryDao?.findByContainerAsync(containerUid)?.get(0)?.containerEntryFile?.cefPath
                     if(filePath != null){
-
-                        runOnUiThread({
-                            pdfView?.fromFile(filePath?:"")
-                            pdfView?.show()
-                        })
+                        pdfView?.fromFile(filePath)
+                        pdfView?.show()
                     }else{
-                        showError();
+                        showError()
                     }
                 }
 
@@ -130,7 +125,7 @@ class PDFContentFragment : UstadBaseFragment(), PDFContentView {
 
         }
 
-    fun showError() {
+    private fun showError() {
         showSnackBar(systemImpl.getString(MessageID.error_opening_file,
                 requireContext()), {}, 0)
     }
@@ -140,8 +135,5 @@ class PDFContentFragment : UstadBaseFragment(), PDFContentView {
                 requireContext()) + " " + message, {}, 0)
     }
 
-    companion object {
-
-    }
 
 }
