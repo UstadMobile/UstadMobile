@@ -86,6 +86,8 @@ class ViewNameToDestMap: DestinationProvider {
             SelectFolderView.VIEW_NAME to UstadDestination(R.id.select_folder_view),
             ContentEntryImportLinkView.VIEW_NAME to UstadDestination(R.id.import_link_view),
             VideoContentView.VIEW_NAME to UstadDestination(R.id.video_content),
+            PDFContentView.VIEW_NAME to UstadDestination(R.id.pdf_content,
+                    hideBottomNavigation = true, actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             WebChunkView.VIEW_NAME to UstadDestination(R.id.webchunk_view,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
             // If ActionBarScrollBehavior is collapsing/scroll, then the WebView for Xapi content

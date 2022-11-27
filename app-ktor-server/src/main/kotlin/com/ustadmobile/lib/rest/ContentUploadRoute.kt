@@ -82,7 +82,7 @@ fun Route.ContentUploadRoute() {
             }
 
             if(!filePartFound) {
-                call.respond(HttpStatusCode.BadRequest, "No file found")
+                call.respond(HttpStatusCode.BadRequest, "No file found.")
             }
 
         }
