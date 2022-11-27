@@ -658,15 +658,15 @@ fun QuickActionBarsRow(
 
 @Composable
 private fun AvailableTranslations(
-    availableTranslationsMap: Map<Int, ContentEntryRelatedEntryJoinWithLanguage>,
+    availableTranslationsMap: List<ContentEntryRelatedEntryJoinWithLanguage>,
     onClickTranslation: (ContentEntryRelatedEntryJoinWithLanguage) -> Unit
 ){
 
     availableTranslationsMap.forEach { contentEntry ->
         TextButton(
-            onClick = { onClickTranslation(contentEntry.value) }
+            onClick = { onClickTranslation(contentEntry) }
         ) {
-            Text(contentEntry.value.language?.name ?: "")
+            Text(contentEntry.language?.name ?: "")
         }
     }
 }
@@ -701,18 +701,18 @@ fun ContentEntryDetailOverviewScreenPreview() {
         locallyAvailable = true,
         markCompleteVisible = true,
         translationVisibile = true,
-        availableTranslationsMap = mapOf(
-            1 to ContentEntryRelatedEntryJoinWithLanguage().apply {
+        availableTranslationsMap = listOf(
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
                 language = Language().apply {
                     name = "English"
                 }
             },
-            2 to ContentEntryRelatedEntryJoinWithLanguage().apply {
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
                 language = Language().apply {
                     name = "French"
                 }
             },
-            3 to ContentEntryRelatedEntryJoinWithLanguage().apply {
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
                 language = Language().apply {
                     name = "Persian"
                 }

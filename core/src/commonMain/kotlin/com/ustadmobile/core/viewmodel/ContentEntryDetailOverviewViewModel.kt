@@ -6,7 +6,7 @@ data class ContentEntryDetailOverviewUiState(
 
     val contentEntryButtons: ContentEntryButtonModel? = null,
 
-    val availableTranslationsMap: Map<Int, ContentEntryRelatedEntryJoinWithLanguage> = emptyMap(),
+    val availableTranslationsMap: List<ContentEntryRelatedEntryJoinWithLanguage> = emptyList(),
 
     val scoreProgress: ContentEntryStatementScoreProgress? = null,
 

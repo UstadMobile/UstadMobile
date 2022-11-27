@@ -60,18 +60,18 @@ val ContentEntryDetailOverviewPreview = FC<Props> {
             locallyAvailable = true,
             markCompleteVisible = true,
             translationVisibile = true,
-            availableTranslationsMap = mapOf(
-                1 to ContentEntryRelatedEntryJoinWithLanguage().apply {
+            availableTranslationsMap = listOf(
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
                     language = Language().apply {
                         name = "English"
                     }
                 },
-                2 to ContentEntryRelatedEntryJoinWithLanguage().apply {
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
                     language = Language().apply {
                         name = "French"
                     }
                 },
-                3 to ContentEntryRelatedEntryJoinWithLanguage().apply {
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
                     language = Language().apply {
                         name = "Persian"
                     }
@@ -182,15 +182,15 @@ private val QuickActionBarsRow = FC<ContentEntryDetailOverviewProps> { props ->
 private val AvailableTranslations = FC<ContentEntryDetailOverviewProps> { props ->
 
     List{
-        props.uiState.availableTranslationsMap.forEach { (_, value)->
+        props.uiState.availableTranslationsMap.forEach { availableTranslation ->
             ListItem{
                 Button {
                     onClick = {
-                        props.onClickTranslation(value)
+                        props.onClickTranslation(availableTranslation)
                     }
                     variant = ButtonVariant.text
 
-                    + (value.language?.name ?: "")
+                    + (availableTranslation.language?.name ?: "")
                 }
             }
         }
