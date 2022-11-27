@@ -34,6 +34,7 @@ class ScopedGrantOneToManyHelper(
     serializationStrategy = ListSerializer(ScopedGrantAndName.serializer()),
     deserializationStrategy = ListSerializer(ScopedGrantAndName.serializer()),
     editPresenter = editPresenter,
+    di = editPresenter.di,
     entityClass = ScopedGrantAndName::class,
     pkSetter = {scopedGrant?.sgUid = it}
 ), OneToManyJoinEditListener<ScopedGrantAndName> {

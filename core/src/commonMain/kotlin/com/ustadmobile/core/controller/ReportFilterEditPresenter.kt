@@ -82,7 +82,7 @@ class ReportFilterEditPresenter(
     private val uidAndLabelOneToManyHelper = DefaultOneToManyJoinEditHelper(
             UidAndLabel::uid, "state_uid_list",
             ListSerializer(UidAndLabel.serializer()),
-            ListSerializer(UidAndLabel.serializer()), this, UidAndLabel::class) { uid = it }
+            ListSerializer(UidAndLabel.serializer()), this, di, UidAndLabel::class) { uid = it }
 
     private fun handleAddOrEditUidAndLabel(entry: UidAndLabel) {
         GlobalScope.launch(doorMainDispatcher()) {

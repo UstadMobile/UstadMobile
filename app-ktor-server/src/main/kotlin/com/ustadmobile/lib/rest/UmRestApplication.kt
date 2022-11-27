@@ -68,6 +68,8 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.websocket.*
 import org.kodein.di.ktor.di
 import java.util.*
+import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
+import com.ustadmobile.lib.rest.logging.LogbackAntiLog
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -142,9 +144,8 @@ fun Application.umRestApplication(
 
     install(CallLogging)
 
-    //TODO: Put in a proper log filter here
     Napier.takeLogarithm()
-    Napier.base(DebugAntilog())
+    Napier.base(LogbackAntiLog())
 
     install(ContentNegotiation) {
         gson {
@@ -232,9 +233,15 @@ fun Application.umRestApplication(
                     dbPassword = appConfig.propertyOrNull("ktor.database.password")?.getString(),
                     attachmentDir = attachmentsDir)
                 .addSyncCallback(nodeIdAndAuth)
-                    .addCallback(ContentJobItemTriggersCallback())
-                    .addMigrations(*migrationList().toTypedArray())
+                .addCallback(ContentJobItemTriggersCallback())
+                .addMigrations(*migrationList().toTypedArray())
                 .build()
+
+            if(appConfig.propertyOrNull("ktor.database.cleardb")?.getString()?.toBoolean() == true) {
+                Napier.i("Clearing database ${db} as ktor.database.cleardb is set")
+                    db.clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
+            }
+
             db.addIncomingReplicationListener(PermissionManagementIncomingReplicationListener(db))
 
             //Add listener that will end sessions when authentication has been updated
@@ -283,17 +290,13 @@ fun Application.umRestApplication(
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             val doorNode = instance<NodeIdAndAuth>()
-            val repo: UmAppDatabase = db.asRepository(repositoryConfig(Any(), "http://localhost/",
+            db.asRepository(repositoryConfig(Any(), "http://localhost/",
                 doorNode.nodeId, doorNode.auth, instance(), instance()) {
                 useReplicationSubscription = false
-            })
-
-            runBlocking { repo.preload() }
-            repo.ktorInitRepo(di)
-            runBlocking {
-                repo.initAdminUser(context, di)
+            }).also { repo ->
+                runBlocking { repo.preload() }
+                repo.ktorInitRepo(di)
             }
-            repo
         }
 
         bind<Scheduler>() with singleton {
@@ -336,7 +339,14 @@ fun Application.umRestApplication(
         }
 
         bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
-            AuthManager(context, di)
+            AuthManager(context, di).also { authManager ->
+                val repo: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_REPO)
+                runBlocking {
+                    repo.initAdminUser(context, authManager, di,
+                        appConfig.propertyOrNull("ktor.ustad.adminpass")?.getString())
+                }
+            }
+
         }
 
         bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
@@ -403,6 +413,8 @@ fun Application.umRestApplication(
             if(dbMode == CONF_DBMODE_SINGLETON) {
                 //Get the container dir so that any old directories (build/storage etc) are moved if required
                 di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+                //Generate the admin username/password etc.
+                di.on(Endpoint("localhost")).direct.instance<AuthManager>()
             }
 
             instance<Scheduler>().start()

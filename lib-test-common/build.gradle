@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.multiplatform'
     id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'maven-publish'
 }
 
 android {
@@ -20,12 +21,10 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion rootProject.ext.version_android_target_sdk
     }
     namespace 'com.ustadmobile.lib.test'
 }
-
-apply plugin: "maven-publish"
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
