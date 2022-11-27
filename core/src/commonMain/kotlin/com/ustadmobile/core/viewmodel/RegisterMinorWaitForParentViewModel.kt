@@ -6,5 +6,4 @@ data class RegisterMinorWaitForParentUiState(
 
     val password: String = "",
 
-    val passwordVisible: Boolean = false,
 )

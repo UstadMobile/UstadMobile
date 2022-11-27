@@ -94,6 +94,7 @@ private fun RegisterMinorWaitForParentScreen(
     uiState: RegisterMinorWaitForParentUiState = RegisterMinorWaitForParentUiState(),
     onClickTogglePasswordVisibility: () -> Unit = {},
     onClickOk: () -> Unit = {},
+    passwordVisible: Boolean = false,
 ) {
     Column(
         modifier = Modifier
@@ -101,7 +102,7 @@ private fun RegisterMinorWaitForParentScreen(
             .padding(16.dp)
     )  {
 
-        val password = if(uiState.passwordVisible)
+        val password = if(passwordVisible)
             uiState.password
         else
             "*****"
@@ -159,12 +160,12 @@ fun  RegisterMinorWaitForParentScreenPreview() {
     val uiStateVal = RegisterMinorWaitForParentUiState(
         username = "new.username",
         password = "secret",
-        passwordVisible = false
     )
 
     MdcTheme {
         RegisterMinorWaitForParentScreen(
-            uiState = uiStateVal
+            uiState = uiStateVal,
+            passwordVisible = false
         )
     }
 }

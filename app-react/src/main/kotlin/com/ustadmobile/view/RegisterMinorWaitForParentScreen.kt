@@ -23,13 +23,14 @@ external interface RegisterMinorWaitForParentScreenProps : Props {
 
     var onClickOk: () -> Unit
 
+    var passwordVisible: Boolean
 }
 
 val RegisterMinorWaitForParentComponent2 = FC<RegisterMinorWaitForParentScreenProps> { props ->
 
     val strings = useStringsXml()
 
-    val password = if(props.uiState.passwordVisible)
+    val password = if(props.passwordVisible)
         props.uiState.password
     else
         "*****"
@@ -66,16 +67,16 @@ val RegisterMinorWaitForParentComponent2 = FC<RegisterMinorWaitForParentScreenPr
 
 val RegisterMinorWaitForParentPreview = FC<Props> {
 
-    val uiStateVar : RegisterMinorWaitForParentUiState by useState {
+    val uiStateVal : RegisterMinorWaitForParentUiState by useState {
         RegisterMinorWaitForParentUiState(
             username = "new.username",
             password = "secret",
-            passwordVisible = false
         )
     }
 
     RegisterMinorWaitForParentComponent2 {
-        uiState = uiStateVar
+        uiState = uiStateVal
+        passwordVisible = false
     }
 }
 
