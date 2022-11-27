@@ -131,7 +131,7 @@ class PDFContentFragment : UstadBaseFragment(), PDFContentView {
         }
 
     fun showError() {
-        showSnackBar(systemImpl.getString(MessageID.no_pdf_file_found,
+        showSnackBar(systemImpl.getString(MessageID.error_opening_file,
                 requireContext()), {}, 0)
     }
 
