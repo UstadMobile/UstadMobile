@@ -51,6 +51,17 @@ external interface UstadEditFieldProps: PropsWithChildren {
      */
     var password: Boolean
 
+    /**
+     * Optional onClick handler. This is generally used for fields that actually lead to a picker
+     * of some kind.
+     */
+    var onClick: (() -> Unit)?
+
+    /**
+     * Sets the readonly attribute on the underlying Input element. Roughly as per
+     *  https://codesandbox.io/s/rect-material-ui-textfield-readonly-st5of?from-embed=&file=/src/index.js:232-249
+     */
+    var readOnly: Boolean
 }
 
 /**
@@ -70,6 +81,18 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
         disabled = !(props.enabled ?: true)
         error = errorText != null
         helperText = errorText?.let { ReactNode(it) }
+        if(props.readOnly) {
+            inputProps = jso {
+                readOnly = true
+            }
+        }
+
+        onClick = props.onClick?.let { onClickHandler ->
+            {
+                onClickHandler()
+            }
+        }
+
         onChange = {
             val currentVal = it.target.asDynamic().value
             errorText = null
@@ -262,6 +285,15 @@ val UstadEditFieldPreviews = FC<Props> {
             enabled = false
         }
 
+        UstadTextEditField {
+            label = "Read only field"
+            value = "Cant change me"
+            onChange = { }
+            readOnly = true
+            onClick = {
+                println("Read only field clicked")
+            }
+        }
     }
 }
 
