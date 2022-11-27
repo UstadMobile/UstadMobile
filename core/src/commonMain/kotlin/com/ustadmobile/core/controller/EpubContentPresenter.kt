@@ -38,7 +38,6 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DiTag
@@ -47,11 +46,13 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.ContainerMounter.Companion.FILTER_MODE_EPUB
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.*
 import org.kodein.di.DI
@@ -112,7 +113,7 @@ class EpubContentPresenter(context: Any,
     @Volatile
     private var mNavDocument: EpubNavDocument? = null
 
-    private val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+    private val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -162,7 +163,7 @@ class EpubContentPresenter(context: Any,
     private suspend fun handleMountedContainer(){
         try {
             val client : HttpClient = di.direct.instance()
-            val ocfContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, OCF_CONTAINER_PATH))
+            val ocfContent: String = client.get(UMFileUtil.joinPaths(mountedPath, OCF_CONTAINER_PATH)).body()
             val xppFactoryNsAware: XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSAWARE)
 
             ocf = OcfDocument()
@@ -174,7 +175,7 @@ class EpubContentPresenter(context: Any,
             val opfUrl = ocf?.rootFiles?.get(0)?.fullPath?.let {
                 UMFileUtil.joinPaths(mountedPath, it)
             }
-            val opfContent = client.get<String>(opfUrl.toString())
+            val opfContent: String = client.get(opfUrl.toString()).body()
 
             val opf = OpfDocument()
             val xppFactoryNsUnaware: XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSUNAWARE)
@@ -237,7 +238,7 @@ class EpubContentPresenter(context: Any,
             val navUrlToLoad = navXhtmlUrl ?: ncxUrl
 
             if(navUrlToLoad != null) {
-                val navContent = client.get<String>(navUrlToLoad)
+                val navContent: String = client.get(navUrlToLoad).body()
 
                 val navDocument = EpubNavDocument().also {
                     mNavDocument = it

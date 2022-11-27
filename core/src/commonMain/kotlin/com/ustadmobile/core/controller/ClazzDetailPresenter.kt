@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.ClazzDetailView.Companion.ARG_TABS
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
@@ -27,7 +27,7 @@ import org.kodein.di.instance
 
 class ClazzDetailPresenter(context: Any,
                            arguments: Map<String, String>, view: ClazzDetailView, di: DI,
-                           lifecycleOwner: DoorLifecycleOwner)
+                           lifecycleOwner: LifecycleOwner)
     : UstadDetailPresenter<ClazzDetailView, Clazz>(context, arguments, view, di, lifecycleOwner) {
 
     private val scope: CoroutineScope by instance(tag = DiTag.TAG_PRESENTER_COROUTINE_SCOPE)
@@ -67,9 +67,9 @@ class ClazzDetailPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, Clazz.serializer(),
                 entityVal)
-        savedState.putEntityAsJson(ARG_TABS, null, view.tabs)
+        savedState.putEntityAsJson(ARG_TABS, json, ListSerializer(String.serializer()), view.tabs)
     }
 
 

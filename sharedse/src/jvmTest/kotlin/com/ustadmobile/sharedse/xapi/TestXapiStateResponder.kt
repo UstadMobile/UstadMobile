@@ -19,9 +19,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementSerializer
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.XapiStateResponder
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder
@@ -32,8 +33,9 @@ import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.json.*
 import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.rules.TemporaryFolder
@@ -77,7 +79,7 @@ class TestXapiStateResponder {
 
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp){
-            install(JsonFeature)
+            install(ContentNegotiation)
             install(HttpTimeout)
 
             engine {
@@ -123,7 +125,7 @@ class TestXapiStateResponder {
         }
 
         accountManager = di.direct.instance()
-        db = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
+        db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
 
         mockUriResource = mock<RouterNanoHTTPD.UriResource> {
             on { initParameter(0, DI::class.java) }.thenReturn(di)

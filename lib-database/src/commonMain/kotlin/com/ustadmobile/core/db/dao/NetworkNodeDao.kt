@@ -1,13 +1,15 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
+import com.ustadmobile.core.db.dao.NetworkNodeDaoCommon.findByBluetoothAddrSql
+import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.lib.db.entities.NetworkNode
 
 /**
  * Created by mike on 1/30/18.
  */
-@Dao
-abstract class NetworkNodeDao {
+@DoorDao
+expect abstract class NetworkNodeDao {
 
     @Query("SELECT * FROM NetworkNode")
     abstract fun all(): List<NetworkNode>
@@ -61,19 +63,5 @@ abstract class NetworkNodeDao {
 
     @Query("SELECT endpointUrl FROM NetworkNode WHERE groupSsid = :ssid")
     abstract fun getEndpointUrlByGroupSsid(ssid: String): String?
-
-    @Transaction
-    open suspend fun updateNodeLastSeen(knownNodes: Map<String, Long>) {
-        val nodeIterator = knownNodes.entries.iterator()
-        while (nodeIterator.hasNext()) {
-            val nodeUpdates = nodeIterator.next()
-            updateLastSeenAsync(nodeUpdates.key, nodeUpdates.value)
-        }
-    }
-
-    companion object {
-
-        const val findByBluetoothAddrSql = "SELECT * from NetworkNode WHERE bluetoothMacAddress = :bluetoothAddress"
-    }
 
 }

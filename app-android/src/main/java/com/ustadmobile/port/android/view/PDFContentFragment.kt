@@ -18,6 +18,8 @@ import com.ustadmobile.core.view.PDFContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -102,16 +104,30 @@ class PDFContentFragment : UstadBaseFragment(), PDFContentView {
             mBinding?.entry = value
         }
 
-    override var filePath: String? = null
+    override var pdfContainerUid: Long = 0
         set(value) {
             field = value
             loading = false
-            try {
-                pdfView?.fromFile(value ?: "")
-                pdfView?.show()
+            try{
+                //Load PDF file from database:
+                GlobalScope.launch {
+                    val filePath: String? =
+                        db?.containerEntryDao?.findByContainer(containerUid)?.get(0)?.containerEntryFile?.cefPath
+                    if(filePath != null){
+
+                        runOnUiThread({
+                            pdfView?.fromFile(filePath?:"")
+                            pdfView?.show()
+                        })
+                    }else{
+                        showError();
+                    }
+                }
+
             }catch(e: Exception){
                 showError()
             }
+
         }
 
     fun showError() {

@@ -6,8 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
-import com.ustadmobile.core.db.dao.ScrapeQueueItemDao.Companion.STATUS_RUNNING
-import com.ustadmobile.core.db.dao.ScrapeRunDao
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDaoCommon.STATUS_RUNNING
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
@@ -21,7 +20,6 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.staging.contentscrapers.edraakK12.EdraakK12ContentScraper
 import com.ustadmobile.core.util.LiveDataWorkQueue
-import com.ustadmobile.lib.staging.contentscrapers.replaceMeWithDi
 import io.ktor.utils.io.charsets.Charset
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -237,7 +235,7 @@ class IndexEdraakK12Content {
 
             try {
                 //This needs replaced with DI
-                lateinit var runDao: ScrapeRunDao
+                //lateinit var runDao: ScrapeRunDao
                 //val runDao = UmAppDatabase.getInstance(Any(), replaceMeWithDi()).scrapeRunDao
 
 

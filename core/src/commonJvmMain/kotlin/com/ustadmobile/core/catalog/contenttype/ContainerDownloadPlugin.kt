@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlinx.serialization.json.Json
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.core.impl.ContainerStorageManager
+import io.ktor.client.call.*
 
 class ContainerDownloadPlugin(
     context: Any,
@@ -129,7 +130,7 @@ class ContainerDownloadPlugin(
                 val containerEntryListUrl = UMFileUtil.joinPaths(endpoint.url,
                         "$CONTAINER_ENTRY_LIST_PATH?containerUid=${contentJobItem.cjiContainerUid}")
                 val containerEntryListVal: List<ContainerEntryWithMd5> = httpClient.get(
-                        containerEntryListUrl)
+                        containerEntryListUrl).body()
                 val containerEntriesList = mutableListOf<ContainerEntryWithMd5>()
                 containerEntriesList.addAll(containerEntryListVal)
 
@@ -161,7 +162,7 @@ class ContainerDownloadPlugin(
                 val containerEntryFileEntities = containerDownloadDir
                     .getContentEntryJsonFilesFromDir(json)
 
-                db.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                db.withDoorTransactionAsync { txDb ->
                     txDb.containerEntryFileDao.insertListAsync(containerEntryFileEntities)
 
                     //now everything is downloaded, link it

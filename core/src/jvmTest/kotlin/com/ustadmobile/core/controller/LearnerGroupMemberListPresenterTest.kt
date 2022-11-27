@@ -6,12 +6,15 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.LearnerGroupMemberDao
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.core.util.test.waitUntilAsyncOrTimeout
 import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.LifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.runBlocking
@@ -32,7 +35,7 @@ class LearnerGroupMemberListPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoLearnerGroupMemberDaoSpy: LearnerGroupMemberDao
 
@@ -47,9 +50,7 @@ class LearnerGroupMemberListPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         entryOpener = mock()
@@ -59,8 +60,8 @@ class LearnerGroupMemberListPresenterTest {
         }
         accountManager = di.direct.instance()
 
-        db = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
-        repo = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
+        repo = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
 
         repoLearnerGroupMemberDaoSpy = spy(repo.learnerGroupMemberDao)
         whenever(repo.learnerGroupMemberDao).thenReturn(repoLearnerGroupMemberDaoSpy)

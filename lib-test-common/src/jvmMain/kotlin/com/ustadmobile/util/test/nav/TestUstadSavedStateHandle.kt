@@ -1,7 +1,7 @@
 package com.ustadmobile.util.test.nav
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -9,19 +9,19 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class TestUstadSavedStateHandle: UstadSavedStateHandle {
 
-    private val mLiveDatas: MutableMap<String, DoorMutableLiveData<*>> = ConcurrentHashMap()
+    private val mLiveDatas: MutableMap<String, MutableLiveData<*>> = ConcurrentHashMap()
 
     override fun <T> set(key: String, value: T?) {
-        mLiveDatas[key] = DoorMutableLiveData(value as Any)
+        mLiveDatas[key] = MutableLiveData(value as Any)
     }
 
     override fun <T> get(key: String): T? {
         return mLiveDatas[key]?.getValue() as T?
     }
 
-    override fun <T> getLiveData(key: String): DoorMutableLiveData<T> {
+    override fun <T> getLiveData(key: String): MutableLiveData<T> {
         return mLiveDatas.getOrPut(key) {
-            DoorMutableLiveData(null)
-        } as DoorMutableLiveData<T>
+            MutableLiveData(null)
+        } as MutableLiveData<T>
     }
 }

@@ -12,6 +12,7 @@ import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.HarView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
@@ -35,9 +36,9 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
 
     private val accountManager: UstadAccountManager by instance()
 
-    val dbRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+    val dbRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
-    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_DB)
 
     private val contentEntryOpener: ContentEntryOpener by di.on(accountManager.activeAccount).instance()
 

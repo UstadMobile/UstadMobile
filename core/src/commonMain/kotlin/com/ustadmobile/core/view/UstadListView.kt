@@ -3,7 +3,7 @@ package com.ustadmobile.core.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 
 enum class ListViewMode(val mode: String) {
     BROWSER("browser"),
@@ -34,7 +34,7 @@ interface UstadListView<RT, DT>: UstadView {
 
     var addMode: ListViewAddMode
 
-    var list: DoorDataSourceFactory<Int, DT>?
+    var list: DataSourceFactory<Int, DT>?
 
     @Deprecated("impl sortOptions from UstadListPresenter")
     var sortOptions: List<MessageIdOption>?

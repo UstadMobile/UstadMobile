@@ -177,11 +177,9 @@ class EpubContentPresenterTest {
                     Assert.assertTrue("Spine itemk $index ends with expected url",
                             url.endsWith(opf!!.linearSpineHREFs[index]))
 
-                    val responseStatusCode = client.get<HttpStatement>(url).execute {
-                        it.status.value
-                    }
-                    Assert.assertEquals("Making HTTP request to spine url status code is 200 OK", 200,
-                            responseStatusCode)
+                    val responseStatusCode = client.get(url).status.value
+                    Assert.assertEquals("Making HTTP request to spine url status code is 200 OK",
+                        200, responseStatusCode)
                 }
             }
             client.close()

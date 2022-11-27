@@ -1,9 +1,13 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
-import androidx.room.Dao
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.core.db.dao.SchoolMemberDaoCommon.SORT_FIRST_NAME_ASC
+import com.ustadmobile.core.db.dao.SchoolMemberDaoCommon.SORT_FIRST_NAME_DESC
+import com.ustadmobile.core.db.dao.SchoolMemberDaoCommon.SORT_LAST_NAME_ASC
+import com.ustadmobile.core.db.dao.SchoolMemberDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.SchoolMember.Companion.FROM_SCHOOLMEMBER_TO_SCOPEDGRANT_JOIN_ON_PERSON_OR_CLAZZ_PERMISSION_CLAUSE
@@ -11,8 +15,8 @@ import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLME
 import com.ustadmobile.lib.db.entities.SchoolMember.Companion.JOIN_FROM_SCHOOLMEMBER_TO_USERSESSION_VIA_SCOPEDGRANT_PT2
 
 @Repository
-@Dao
-abstract class SchoolMemberDao : BaseDao<SchoolMember> {
+@DoorDao
+expect abstract class SchoolMemberDao : BaseDao<SchoolMember> {
 
     @Query("""
      REPLACE INTO SchoolMemberReplicate(smPk, smDestination)
@@ -117,7 +121,7 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
                                                         sortOrder: Int,
                                                         searchQuery: String,
                                                         accountPersonUid: Long)
-            : DoorDataSourceFactory<Int, SchoolMemberWithPerson>
+            : DataSourceFactory<Int, SchoolMemberWithPerson>
 
     @Query("""SELECT SchoolMember.*, Person.* FROM SchoolMember
         LEFT JOIN Person ON Person.personUid = SchoolMember.schoolMemberPersonUid
@@ -129,16 +133,5 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
         ORDER BY Person.firstNames DESC""")
     abstract suspend fun findAllTest(schoolUid: Long, role: Int, searchQuery: String): List<SchoolMemberWithPerson>
 
-    companion object {
-
-        const val SORT_FIRST_NAME_ASC = 1
-
-        const val SORT_FIRST_NAME_DESC = 2
-
-        const val SORT_LAST_NAME_ASC = 3
-
-        const val SORT_LAST_NAME_DESC = 4
-
-    }
 
 }

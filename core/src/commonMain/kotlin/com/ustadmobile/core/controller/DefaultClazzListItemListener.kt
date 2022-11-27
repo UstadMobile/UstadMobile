@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.safeStringify
@@ -11,6 +10,7 @@ import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
@@ -31,7 +31,7 @@ class DefaultClazzListItemListener(var view: ClazzList2View?,
 
     override fun onClickClazz(clazz: Clazz) {
         if(listViewMode == ListViewMode.BROWSER) {
-            val db = on(accountManager.activeAccount).direct.instance<UmAppDatabase>(tag = TAG_DB)
+            val db = on(accountManager.activeAccount).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
             //Check if person is part of Pending
             GlobalScope.launch(doorMainDispatcher()) {

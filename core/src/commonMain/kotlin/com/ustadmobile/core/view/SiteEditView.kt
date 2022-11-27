@@ -1,13 +1,13 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 
 
 interface SiteEditView: UstadEditView<Site> {
 
-    var siteTermsList: DoorLiveData<List<SiteTermsWithLanguage>>?
+    var siteTermsList: LiveData<List<SiteTermsWithLanguage>>?
 
     companion object {
 

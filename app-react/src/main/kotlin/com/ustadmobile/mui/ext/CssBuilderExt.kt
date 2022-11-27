@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.ext
 
-import kotlinext.js.Object
 import kotlinx.css.CssBuilder
+import kotlinx.js.Object
 
 /**
  * This is only a simple jsObjectToCss converter. So far it can only handle

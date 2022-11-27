@@ -42,18 +42,18 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
 
     override var autoMergeRecyclerViewAdapter: Boolean = false
 
+    override var inviteViaLinkVisibile: Boolean
+        get() = mUstadListHeaderRecyclerViewAdapter?.newItemVisible ?: false
+        set(value) {
+            inviteWithLinkRecyclerViewAdapter?.visible = value
+        }
+
     override var addMode: ListViewAddMode = ListViewAddMode.NONE
         get() = field
         set(value) {
             mDataBinding?.addMode = value
-            mUstadListHeaderRecyclerViewAdapter?.newItemVisible =
-                    (value == ListViewAddMode.FIRST_ITEM)
-            if(arguments?.containsKey(UstadView.ARG_CODE_TABLE) == true){
-                inviteWithLinkRecyclerViewAdapter?.visible = mUstadListHeaderRecyclerViewAdapter?.newItemVisible?:false
-            }
-
-            fabManager?.visible =
-                    (value == ListViewAddMode.FAB)
+            mUstadListHeaderRecyclerViewAdapter?.newItemVisible = (value == ListViewAddMode.FIRST_ITEM)
+            fabManager?.visible = (value == ListViewAddMode.FAB)
 
             field = value
         }
@@ -129,8 +129,8 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
-    override fun onClick(view: View?) {
-        if (view?.id == R.id.item_createnew_layout)
+    override fun onClick(v: View?) {
+        if (v?.id == R.id.item_createnew_layout)
             mPresenter?.handleClickAddNewItem()
         else {
             super.onClick(view)

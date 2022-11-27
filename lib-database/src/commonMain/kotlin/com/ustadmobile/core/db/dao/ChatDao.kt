@@ -1,17 +1,15 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
-@Dao
+@DoorDao
 @Repository
-abstract class ChatDao: BaseDao<Chat>{
+expect abstract class ChatDao: BaseDao<Chat>{
 
     @Query("""
      REPLACE INTO chatReplicate(chatPk, chatDestination)
@@ -181,7 +179,7 @@ abstract class ChatDao: BaseDao<Chat>{
          ORDER BY latestMessageTimestamp DESC
     """)
     abstract fun findAllChatsForUser(searchBit: String, personUid: Long)
-        : DoorDataSourceFactory<Int, ChatWithLatestMessageAndCount>
+        : DataSourceFactory<Int, ChatWithLatestMessageAndCount>
 
 
     @Query("""

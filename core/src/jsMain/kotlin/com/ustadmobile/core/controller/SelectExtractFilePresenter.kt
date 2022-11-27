@@ -21,8 +21,6 @@ actual class SelectExtractFilePresenter actual constructor(
     di: DI,
 ) : SelectExtractFilePresenterCommon(context, arguments, view, di){
 
-    private val json: Json by instance()
-
     override suspend fun extractMetadata(uri: String, fileName: String): MetadataResult {
         //turn the object url back into a blob
         val completeableMetadataResult = CompletableDeferred<MetadataResult>()

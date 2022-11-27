@@ -1,6 +1,6 @@
 package com.ustadmobile.core.impl.nav
 
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 
 interface UstadSavedStateHandle {
 
@@ -8,7 +8,7 @@ interface UstadSavedStateHandle {
 
     operator fun <T> get(key: String): T?
 
-    fun <T> getLiveData(key:String): DoorMutableLiveData<T>
+    fun <T> getLiveData(key:String): MutableLiveData<T>
 
 
 }

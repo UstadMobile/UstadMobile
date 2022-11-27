@@ -1,6 +1,6 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.mui.ext.createStyledComponent
+import com.ustadmobile.mui.ext.convertFunctionalToClassElement
 import com.ustadmobile.util.DraftJsUtil.convertDataToEditorState
 import com.ustadmobile.util.DraftJsUtil.convertEditorContentToHtml
 import com.ustadmobile.util.UmState
@@ -44,7 +44,7 @@ fun RBuilder.umMuiHtmlEditor(
     className: String? = null,
     maxLength: Int? = null,
     handler: StyledHandler<MuiEditorProps>? = null
-) = createStyledComponent(muiHtmlEditorComponent.unsafeCast<ComponentType<MuiEditorProps>>(), className, handler) {
+) = convertFunctionalToClassElement(muiHtmlEditorComponent.unsafeCast<ComponentType<MuiEditorProps>>(), className, handler) {
     attrs.defaultValue = convertDataToEditorState(value ?: "")
     attrs.toolbarButtonSize = "medium"
     attrs.inheritFontSize = true

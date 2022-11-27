@@ -56,12 +56,12 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
         tempDir = Files.createTempDirectory(fileId).toFile()
         runBlocking {
 
-            httpClient.get<HttpStatement>(apiCall) {
+            httpClient.prepareGet(apiCall) {
                 parameter("key", googleApiKey)
                 parameter("fields", "id,modifiedTime,name,mimeType,description,thumbnailLink")
             }.execute() { fileResponse ->
 
-                val googleFileResponse = fileResponse.receive<GoogleFile>()
+                val googleFileResponse = fileResponse.body<GoogleFile>()
 
                 contentImportManager.getMimeTypeSupported().find { fileMimeType -> fileMimeType == googleFileResponse.mimeType }
                         ?: return@execute
@@ -78,13 +78,13 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     return@execute
                 }
 
-                httpClient.get<HttpStatement>(apiCall) {
+                httpClient.prepareGet(apiCall) {
                     parameter("alt", "media")
                     parameter("key", googleApiKey)
                 }.execute() {
 
                     val contentFile = File(tempDir, googleFileResponse.name ?: googleFileResponse.id!!)
-                    val stream = it.receive<InputStream>()
+                    val stream = it.body<InputStream>()
                     FileOutputStream(contentFile).use { fileOut ->
                         stream.copyTo(fileOut)
                         fileOut.flush()

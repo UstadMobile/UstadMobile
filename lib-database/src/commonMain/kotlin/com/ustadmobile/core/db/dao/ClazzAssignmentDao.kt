@@ -1,17 +1,18 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.core.db.dao.ClazzAssignmentDaoCommon.SUBMITTER_LIST_CTE
+import com.ustadmobile.door.paging.DataSourceFactory
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
 
-@Dao
+@DoorDao
 @Repository
-abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<ClazzAssignment> {
+expect abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<ClazzAssignment> {
 
     @Query("""
      REPLACE INTO ClazzAssignmentReplicate(caPk, caDestination)
@@ -85,12 +86,6 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
          WHERE caUid = :cbUid""")
     abstract suspend fun updateActiveByUid(cbUid: Long, active: Boolean,  changeTime: Long)
 
-    override suspend fun deactivateByUids(uidList: List<Long>, changeTime: Long) {
-        uidList.forEach {
-            updateActiveByUid(it, false, changeTime)
-        }
-    }
-
     @Query("""
             $SUBMITTER_LIST_CTE
             
@@ -130,7 +125,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
           AND caUid = :assignmentUid                  
     """)
     abstract fun getProgressSummaryForAssignment(
-        assignmentUid: Long, clazzUid: Long, group: String) : DoorLiveData<AssignmentProgressSummary?>
+        assignmentUid: Long, clazzUid: Long, group: String) : LiveData<AssignmentProgressSummary?>
 
 
     @Query("""
@@ -192,7 +187,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
         clazzUid: Long,
         group: String,
         searchText: String
-    ): DoorDataSourceFactory<Int, PersonGroupAssignmentSummary>
+    ): DataSourceFactory<Int, PersonGroupAssignmentSummary>
 
 
     @Query("""
@@ -247,62 +242,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment>, OneToManyJoinDao<C
     @Query("""SELECT * 
                       FROM ClazzAssignment 
                      WHERE caUid = :uid""")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzAssignment?>
+    abstract fun findByUidLive(uid: Long): LiveData<ClazzAssignment?>
 
-    companion object{
-
-        const val SUBMITTER_LIST_CTE = """
-            WITH SubmitterList (submitterId, name)
-            AS (SELECT DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid AS submitterId, 
-                       Person.firstNames || ' ' || Person.lastName AS name
-                  FROM ClazzEnrolment
-                  
-                       JOIN Person 
-                       ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
-                        
-                       JOIN ClazzAssignment
-                       ON ClazzAssignment.caUid = :assignmentUid
-
-                       JOIN CourseBlock
-                       ON CourseBlock.cbEntityUid = ClazzAssignment.caUid
-                       AND CourseBlock.cbType = ${CourseBlock.BLOCK_ASSIGNMENT_TYPE}
-                       
-                 WHERE ClazzAssignment.caGroupUid = 0
-                   AND clazzEnrolmentClazzUid = :clazzUid
-                   AND clazzEnrolmentActive
-                   AND clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
-                   AND CourseBlock.cbGracePeriodDate <= ClazzEnrolment.clazzEnrolmentDateLeft
-                   AND ClazzEnrolment.clazzEnrolmentDateJoined <= CourseBlock.cbGracePeriodDate
-              GROUP BY submitterId, name
-            UNION                 
-             SELECT DISTINCT CourseGroupMember.cgmGroupNumber AS submitterId,
-                    :group || ' ' || CourseGroupMember.cgmGroupNumber AS name  
-               FROM CourseGroupMember
-                    JOIN ClazzAssignment
-                    ON ClazzAssignment.caUid = :assignmentUid
-              WHERE CourseGroupMember.cgmSetUid = ClazzAssignment.caGroupUid
-                AND ClazzAssignment.caGroupUid != 0
-                AND CourseGroupMember.cgmGroupNumber != 0
-           GROUP BY submitterId, name
-            )
-        """
-
-        const val SORT_DEADLINE_ASC = 1
-
-        const val SORT_DEADLINE_DESC = 2
-
-        const val SORT_TITLE_ASC = 3
-
-        const val SORT_TITLE_DESC = 4
-
-        const val SORT_SCORE_ASC = 5
-
-        const val SORT_SCORE_DESC = 6
-
-        const val SORT_START_DATE_ASC = 7
-
-        const val SORT_START_DATE_DESC = 8
-
-    }
 
 }

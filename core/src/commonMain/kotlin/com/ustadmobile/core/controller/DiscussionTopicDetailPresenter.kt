@@ -7,8 +7,8 @@ import com.ustadmobile.core.view.DiscussionPostEditView
 import com.ustadmobile.core.view.DiscussionTopicDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.DiscussionPost
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.DiscussionTopic
@@ -20,7 +20,7 @@ class DiscussionTopicDetailPresenter(
         context: Any, arguments: Map<String, String>,
         view: DiscussionTopicDetailView,
         di: DI,
-        lifecycleOwner: DoorLifecycleOwner
+        lifecycleOwner: LifecycleOwner
     ) : UstadDetailPresenter<DiscussionTopicDetailView, DiscussionTopic>(
                 context,
                 arguments,
@@ -37,7 +37,7 @@ class DiscussionTopicDetailPresenter(
         return true
     }
 
-    override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<DiscussionTopic?>? {
+    override fun onLoadLiveData(repo: UmAppDatabase): LiveData<DiscussionTopic?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         view.posts = repo.discussionPostDao.getPostsByDiscussionTopic(entityUid)

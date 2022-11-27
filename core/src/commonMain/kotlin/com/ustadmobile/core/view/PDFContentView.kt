@@ -6,7 +6,8 @@ interface PDFContentView : UstadView {
 
     var entry: ContentEntry?
 
-    var filePath: String?
+    // The file's container uid. This is then set on the view.
+    var pdfContainerUid: Long
 
     companion object {
 

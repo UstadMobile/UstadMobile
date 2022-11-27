@@ -1,9 +1,9 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CoursePicture
@@ -11,9 +11,9 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UserSession
 
 
-@Dao
+@DoorDao
 @Repository
-abstract class CoursePictureDao : BaseDao<CoursePicture> {
+expect abstract class CoursePictureDao : BaseDao<CoursePicture> {
 
     @Query("""
      REPLACE INTO CoursePictureReplicate(cpPk, cpDestination)
@@ -87,15 +87,11 @@ abstract class CoursePictureDao : BaseDao<CoursePicture> {
     abstract suspend fun findByClazzUidAsync(clazzUid: Long): CoursePicture?
 
     @Query("SELECT * FROM CoursePicture where coursePictureClazzUid = :clazzUid ORDER BY " + " coursePictureTimestamp DESC LIMIT 1")
-    abstract fun findByClazzUidLive(clazzUid: Long): DoorLiveData<CoursePicture?>
+    abstract fun findByClazzUidLive(clazzUid: Long): LiveData<CoursePicture?>
 
 
     @Update
     abstract suspend fun updateAsync(coursePicture: CoursePicture)
-
-    companion object {
-
-    }
 
 
 

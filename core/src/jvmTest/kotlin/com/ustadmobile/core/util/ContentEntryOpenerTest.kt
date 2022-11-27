@@ -5,13 +5,14 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.VideoContentView
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.Lifecycle
+import com.ustadmobile.door.lifecycle.LifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -33,8 +34,12 @@ ContentEntryOpenerTest {
 
     private lateinit var impl: UstadMobileSystemImpl
 
-    private val context = mock<DoorLifecycleOwner>() {
-        on { currentState }.thenReturn(DoorLifecycleObserver.STARTED)
+    private val mockLifecycle = mock<Lifecycle> {
+        on { realCurrentDoorState }.thenReturn(DoorState.STARTED)
+    }
+
+    private val context = mock<LifecycleOwner>() {
+        on { getLifecycle() }.thenReturn(mockLifecycle)
     } as Any
 
     @JvmField
@@ -56,8 +61,8 @@ ContentEntryOpenerTest {
         endpoint = Endpoint(accountManager.activeAccount.endpointUrl)
         impl = di.direct.instance()
 
-        umAppDatabase = di.on(endpoint).direct.instance(tag = TAG_DB)
-        umAppRepository = di.on(endpoint).direct.instance(tag = TAG_REPO)
+        umAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+        umAppRepository = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
 
 
         contentEntry = ContentEntry()
@@ -143,26 +148,26 @@ ContentEntryOpenerTest {
     fun givenDownloadNotRequired_whenEntryDownloadedAndMimeTypeDoesNotMatch_openInDefaultViewer(){
         runBlocking {
 
-            var contentEntry = ContentEntry()
+            val contentEntry = ContentEntry()
             contentEntry.contentEntryUid = umAppRepository.contentEntryDao.insert(contentEntry)
 
-            var container = Container()
+            val container = Container()
             container.containerContentEntryUid = contentEntry.contentEntryUid
             container.fileSize = 10
             container.mimeType = "video/wav"
             container.cntLastModified = System.currentTimeMillis()
             container.containerUid = umAppRepository.containerDao.insert(container)
 
-            var containerEntryFile = ContainerEntryFile()
+            val containerEntryFile = ContainerEntryFile()
             containerEntryFile.cefPath = "hello"
             containerEntryFile.cefUid = umAppDatabase.containerEntryFileDao.insert(containerEntryFile)
 
-            var containerEntry = ContainerEntry()
+            val containerEntry = ContainerEntry()
             containerEntry.ceContainerUid = container.containerUid
             containerEntry.ceCefUid = containerEntryFile.cefUid
             containerEntry.ceUid = umAppDatabase.containerEntryDao.insert(containerEntry)
 
-            var dj = ContentJobItem()
+            val dj = ContentJobItem()
             dj.cjiContainerUid = container.containerUid
             dj.cjiContentEntryUid = contentEntry.contentEntryUid
             dj.cjiRecursiveStatus = JobStatus.COMPLETE
