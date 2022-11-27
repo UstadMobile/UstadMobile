@@ -39,6 +39,7 @@ class ApacheIndexerPlugin(private var context: Any, private val endpoint: Endpoi
             di.on(endpoint).direct.instance<EpubTypePluginCommonJvm>(),
             di.on(endpoint).direct.instance<XapiTypePluginCommonJvm>(),
             di.on(endpoint).direct.instance<H5PTypePluginCommonJvm>(),
+            di.on(endpoint).direct.instance<PDFTypePluginJvm>(),
             di.on(endpoint).direct.instance<VideoTypePluginJvm>()))
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {

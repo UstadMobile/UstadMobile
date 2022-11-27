@@ -4,7 +4,7 @@ This module contains the web client application built using Kotlin/JS using Reac
 via [kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers).
 
 ## Prerequisites
-Install [Node 14x](https://nodejs.org/en/download/) on your machine since Kotlin/JS depends on it
+Install [Node 18x](https://nodejs.org/en/download/) on your machine since Kotlin/JS depends on it
 to build.
 
 ## Development

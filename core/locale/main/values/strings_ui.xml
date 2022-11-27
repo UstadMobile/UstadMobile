@@ -1940,5 +1940,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="app_language">App language</string>
 
-
+    <!-- PDF e.g. a PDF file. -->
+    <string name="pdf">PDF</string>
 </resources>

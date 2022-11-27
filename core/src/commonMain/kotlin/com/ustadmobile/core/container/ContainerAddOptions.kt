@@ -1,8 +1,9 @@
-package com.ustadmobile.core.container
+  package com.ustadmobile.core.container
 
 import com.ustadmobile.door.DoorUri
 
-data class ContainerAddOptions(
+data class
+ContainerAddOptions(
 
     /**
      * Where the files will actually be stored. Typically selected by the user at download time from
@@ -40,7 +41,7 @@ data class ContainerAddOptions(
 
         val DEFAULT_COMPRESSION_FILTER = object: CompressionFilter {
             private val mediaExtensions = listOf(".mp4", ".mkv", ".webm", ".mov", ".avi", ".flv",
-                ".mp3", ".ogg", ".wav", ".au", ".3gp", ".m4a", ".m4v")
+                ".mp3", ".ogg", ".wav", ".au", ".3gp", ".m4a", ".m4v", ".pdf")
 
             override fun shouldCompress(pathInContainer: String, mimeType: String?) : Boolean{
                 val isVideoExtension = pathInContainer.lowercase().let { pathLowerCase ->

@@ -17,8 +17,7 @@ include ':app-android',
         ':lib-util',
         ':lib-http-testserver',
         ':lib-database',
-        ':lib-content-scrapers',
-        ':app-react-e2e-test'
+        ':lib-content-scrapers'
 
 rootProject.name = "UstadMobile"
 

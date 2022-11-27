@@ -19,7 +19,7 @@ See [app-ktor-server](app-ktor-server/) for instructions on building the server 
 
 ## Getting started building from source:
 
-* __Install latest Node-14x__ as per [Instructions on Node website](https://nodejs.org/en/download/).
+* __Install latest Node-18x__ as per [Instructions on Node website](https://nodejs.org/en/download/).
   Kotlin/JS depends on it to build
 
 * __Import the project in Android Studio__: Select File, New, Project from Version Control. Enter

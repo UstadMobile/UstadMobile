@@ -1,0 +1,6 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn:
+   id:  "com.android.permissioncontroller:id/permission_deny_button"
+   #text: "Don't allow"
+

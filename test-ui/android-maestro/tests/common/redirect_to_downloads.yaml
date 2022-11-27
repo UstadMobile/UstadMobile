@@ -1,0 +1,6 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn:
+   text: "Show roots"
+- tapOn: "Downloads"
+

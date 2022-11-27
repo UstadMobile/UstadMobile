@@ -5,6 +5,8 @@ import com.ustadmobile.core.contentjob.SupportedContent.EPUB_EXTENSIONS
 import com.ustadmobile.core.contentjob.SupportedContent.EPUB_MIME_TYPES
 import com.ustadmobile.core.contentjob.SupportedContent.H5P_EXTENSIONS
 import com.ustadmobile.core.contentjob.SupportedContent.H5P_MIME_TYPES
+import com.ustadmobile.core.contentjob.SupportedContent.PDF_EXTENSIONS
+import com.ustadmobile.core.contentjob.SupportedContent.PDF_MIME_TYPES
 import com.ustadmobile.core.contentjob.SupportedContent.XAPI_MIME_TYPES
 import com.ustadmobile.core.contentjob.SupportedContent.ZIP_EXTENSIONS
 import com.ustadmobile.core.db.dao.ContentEntryDao
@@ -14,6 +16,7 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
@@ -30,6 +33,7 @@ import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -364,6 +368,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
             ZIP_EXTENSIONS.joinToString(";"),
             H5P_MIME_TYPES.joinToString(";"),
             H5P_EXTENSIONS.joinToString(";"),
+            PDF_EXTENSIONS.joinToString(";"),
+            PDF_MIME_TYPES.joinToString(";"),
             SELECTION_MODE_GALLERY
         ).joinToString (";")
         val args = mutableMapOf(
