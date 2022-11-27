@@ -7,6 +7,7 @@ import com.ustadmobile.mui.components.UstadDetailField
 import csstype.px
 import mui.icons.material.AccountCircle
 import mui.icons.material.Key
+import mui.icons.material.Visibility
 import mui.material.*
 import mui.material.Button
 import mui.system.responsive
@@ -49,6 +50,13 @@ val RegisterMinorWaitForParentComponent2 = FC<RegisterMinorWaitForParentScreenPr
                 valueText = password
                 labelText = strings[MessageID.password]
                 icon = Key.create()
+
+                secondaryActionContent = IconButton.create {
+                    onClick = {  }
+                    Visibility {
+                        props.onClickTogglePasswordVisibility
+                    }
+                }
             }
 
             Typography {
