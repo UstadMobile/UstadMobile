@@ -20,6 +20,7 @@ import mui.material.styles.TypographyVariant
 import react.*
 
 external interface SchoolEditScreenProps : Props {
+
     var uiState: SchoolEditUiState
 
     var onSchoolChanged: (SchoolWithHolidayCalendar?) -> Unit
@@ -72,8 +73,8 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
                 value = props.uiState.entity?.schoolTimeZone ?: ""
                 label = strings[MessageID.description]
                 enabled = props.uiState.fieldsEnabled
-//                readOnly = true
-//                onClick = props.onClickTimeZone
+                readOnly = true
+                onClick = props.onClickTimeZone
                 onChange = { }
             }
 
@@ -81,8 +82,8 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
                 value = props.uiState.entity?.holidayCalendar?.umCalendarName ?: ""
                 label = strings[MessageID.holiday_calendar]
                 enabled = props.uiState.fieldsEnabled
-//                readOnly = true
-//                onClick = props.onClickHolidayCalendar
+                readOnly = true
+                onClick = props.onClickHolidayCalendar
                 onChange = { }
             }
 
@@ -149,23 +150,17 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
 
 private val ScopedGrantsOneToNList = FC<SchoolEditScreenProps> { props ->
     List{
-        props.uiState.scopedGrants.forEach {
+        props.uiState.scopedGrants.forEach { scopedGrant ->
             ListItem{
                 UstadDetailField {
-                    valueText = it.name ?: ""
-                    labelText = (it.scopedGrant?.sgPermissions ?: 0).toString()
-                    onClick = { props.onClickEditScopedGrant(it) }
+                    valueText = scopedGrant.name ?: ""
+                    labelText = (scopedGrant.scopedGrant?.sgPermissions ?: 0).toString()
+                    onClick = { props.onClickEditScopedGrant(scopedGrant) }
 
-//                    secondaryActionContent = {
-//                        IconButton(
-//                            onClick = { onClickDeleteScopedGrant(scopedGrant) },
-//                        ) {
-//                            Icon(
-//                                imageVector = Icons.Filled.Delete,
-//                                contentDescription = stringResource(id = R.string.delete),
-//                            )
-//                        }
-//                    }
+                    secondaryActionContent = IconButton.create {
+                        onClick = { props.onClickDeleteScopedGrant(scopedGrant) }
+                        Delete {}
+                    }
                 }
             }
         }
