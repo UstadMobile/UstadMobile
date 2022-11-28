@@ -10,9 +10,9 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateEditField
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import csstype.*
+import io.ktor.websocket.*
+import mui.material.*
 import mui.system.Container
-import mui.material.Stack
-import mui.material.StackDirection
 import mui.system.responsive
 import mui.system.sx
 import react.FC
@@ -30,6 +30,7 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
     val strings: StringsXml = useStringsXml()
 
     Container {
+        maxWidth = "lg"
 
         Stack {
             spacing = responsive(2)
@@ -50,9 +51,6 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
             Stack {
                 direction = responsive(StackDirection.row)
                 spacing = responsive(10.px)
-                sx {
-                    alignItems = AlignItems.flexEnd
-                }
 
                 UstadDateEditField {
                     timeInMillis = props.uiState.entity?.sceduleStartTime ?: 0
@@ -81,7 +79,6 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
                     }
                 }
             }
-
         }
     }
 }
