@@ -86,3 +86,9 @@ inline var MobileDatePickerProps.disabled: Boolean
     set(value) {
         asDynamic().disabled = value
     }
+
+inline var InputBaseComponentProps.readOnly: Boolean
+    get() = asDynamic().readOnly
+    set(value) {
+        asDynamic().readOnly = value
+    }
