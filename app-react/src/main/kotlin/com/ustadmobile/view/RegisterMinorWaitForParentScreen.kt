@@ -8,6 +8,7 @@ import csstype.px
 import mui.icons.material.AccountCircle
 import mui.icons.material.Key
 import mui.icons.material.Visibility
+import mui.icons.material.VisibilityOff
 import mui.material.*
 import mui.material.Button
 import mui.system.responsive
@@ -20,18 +21,17 @@ external interface RegisterMinorWaitForParentScreenProps : Props {
 
     var uiState: RegisterMinorWaitForParentUiState
 
-    var onClickTogglePasswordVisibility: () -> Unit
-
     var onClickOk: () -> Unit
 
-    var passwordVisible: Boolean
 }
 
 val RegisterMinorWaitForParentComponent2 = FC<RegisterMinorWaitForParentScreenProps> { props ->
 
     val strings = useStringsXml()
 
-    val password = if(props.passwordVisible)
+    var passwordVisible: Boolean by useState { false }
+
+    val password = if(passwordVisible)
         props.uiState.password
     else
         "*****"
@@ -52,9 +52,14 @@ val RegisterMinorWaitForParentComponent2 = FC<RegisterMinorWaitForParentScreenPr
                 icon = Key.create()
 
                 secondaryActionContent = IconButton.create {
-                    onClick = {  }
-                    Visibility {
-                        props.onClickTogglePasswordVisibility
+                    onClick = {
+                        passwordVisible = !passwordVisible
+                    }
+
+                    if(!passwordVisible) {
+                        Visibility { }
+                    }else {
+                        VisibilityOff { }
                     }
                 }
             }
@@ -79,12 +84,12 @@ val RegisterMinorWaitForParentPreview = FC<Props> {
         RegisterMinorWaitForParentUiState(
             username = "new.username",
             password = "secret",
+            parentContact = "parent@email.com"
         )
     }
 
     RegisterMinorWaitForParentComponent2 {
         uiState = uiStateVal
-        passwordVisible = false
     }
 }
 

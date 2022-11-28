@@ -8,7 +8,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -92,10 +97,10 @@ class RegisterMinorWaitForParentFragment: UstadBaseFragment(), RegisterMinorWait
 @Composable
 private fun RegisterMinorWaitForParentScreen(
     uiState: RegisterMinorWaitForParentUiState = RegisterMinorWaitForParentUiState(),
-    onClickTogglePasswordVisibility: () -> Unit = {},
     onClickOk: () -> Unit = {},
-    passwordVisible: Boolean = false,
 ) {
+    var passwordVisible: Boolean by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -121,10 +126,16 @@ private fun RegisterMinorWaitForParentScreen(
             imageId = R.drawable.ic_baseline_vpn_key_24,
             secondaryActionContent = {
                 IconButton(
-                    onClick = onClickTogglePasswordVisibility,
+                    onClick = {
+                        passwordVisible = !passwordVisible
+                    },
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Visibility,
+                        imageVector = if(!passwordVisible) {
+                            Icons.Filled.Visibility
+                        }else {
+                            Icons.Filled.VisibilityOff
+                        },
                         contentDescription = stringResource(id = R.string.toggle_visibility),
                     )
                 }
@@ -133,7 +144,10 @@ private fun RegisterMinorWaitForParentScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(text = stringResource(id = R.string.we_sent_a_message_to_your_parent))
+        Text(
+            text = stringResource(id = R.string.we_sent_a_message_to_your_parent,
+                uiState.parentContact)
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -160,12 +174,12 @@ fun  RegisterMinorWaitForParentScreenPreview() {
     val uiStateVal = RegisterMinorWaitForParentUiState(
         username = "new.username",
         password = "secret",
+        parentContact = "parent@email.com"
     )
 
     MdcTheme {
         RegisterMinorWaitForParentScreen(
             uiState = uiStateVal,
-            passwordVisible = false
         )
     }
 }
