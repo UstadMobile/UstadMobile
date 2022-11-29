@@ -58,11 +58,15 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                     + strings[MessageID.update_content].uppercase()
                 }
 
-                + updateContentText
+                Typography {
+                    + updateContentText
+                }
             }
 
             if (props.uiState.entity?.leaf == true){
-                + strings[MessageID.supported_files]
+                Typography {
+                    + strings[MessageID.supported_files]
+                }
             }
 
             UstadTextEditField {
@@ -116,6 +120,22 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                             licenseType = it?.value ?: 0
                         }
                     )
+                }
+            }
+
+            if (props.uiState.containerStorageOptionVisible){
+                UstadMessageIdDropDownField {
+                    value = props.uiState.entity?.licenseType ?: 0
+                    options = props.uiState.storageOptions
+                    label = strings[MessageID.licence]
+                    id = (props.uiState.entity?.licenseType ?: 0).toString()
+                    onChange = {
+                        props.onContentChanged(
+                            props.uiState.entity?.shallowCopy {
+                                licenseType = it?.value ?: 0
+                            }
+                        )
+                    }
                 }
             }
         }

@@ -15,6 +15,8 @@ data class ContentEntryEditUiState(
 
     val storageOptions: List<ContainerStorageDir> = emptyList(),
 
+    val courseBlockEditUiState: CourseBlockEditUiState? = null,
+
     val fieldsEnabled: Boolean = true,
 
     val updateContentVisible: Boolean = false,
@@ -28,4 +30,7 @@ data class ContentEntryEditUiState(
 ) {
     val contentCompressVisible: Boolean
         get() = metadataResult != null
+
+    val containerStorageOptionVisible: Boolean
+        get() = entity?.leaf == true
 }

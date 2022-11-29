@@ -6,20 +6,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
-private data class CourseBlockEditData(
-    val caStartDateError: String? = null
-)
+
 
 @Composable
 fun CourseBlockEdit(
-    courseBlock: CourseBlock,
+    uiState: CourseBlockEditUiState,
     onCourseBlockChange: (CourseBlock) -> Unit
 ){
-
-    val data = CourseBlockEditData()
 
     Row{
         UstadTextEditField(
