@@ -8,6 +8,8 @@ data class ContentEntryDetailOverviewUiState(
 
     val availableTranslationsMap: List<ContentEntryRelatedEntryJoinWithLanguage> = emptyList(),
 
+    val activeContentJobItems:List<ContentJobItemProgress> = emptyList(),
+
     val scoreProgress: ContentEntryStatementScoreProgress? = null,
 
     val contentEntry: ContentEntryWithMostRecentContainer? = null,
@@ -18,7 +20,7 @@ data class ContentEntryDetailOverviewUiState(
 
     val translationVisibile: Boolean = false,
 
-    ) {
+) {
 
     val scoreProgressVisible: Boolean
         get() = scoreProgress?.progress != null
@@ -36,4 +38,5 @@ data class ContentEntryDetailOverviewUiState(
     val fileSizeVisible: Boolean
         get() = contentEntry?.container?.fileSize != null
                 && contentEntry.container?.fileSize != 0L
+
 }

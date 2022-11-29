@@ -4,13 +4,20 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.*
-import csstype.px
+import com.ustadmobile.mui.components.UstadQuickActionButton
+import csstype.*
+import mui.icons.material.*
+import mui.material.Icon
 import mui.material.*
-import mui.system.Stack
-import mui.system.StackDirection
+import mui.material.List
+import mui.material.styles.TypographyVariant
+import mui.material.Stack
+import mui.material.StackDirection
 import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
+import react.create
 
 external interface ContentEntryDetailOverviewProps : Props {
 
@@ -164,19 +171,167 @@ private val ContentDetails = FC<ContentEntryDetailOverviewProps> { props ->
 private val LeftColumn = FC<ContentEntryDetailOverviewProps> { props ->
 
     Stack {
+
+        Box {
+            sx {
+                width = 110.px
+                height = 110.px
+                alignItems = AlignItems.center
+            }
+            + BookOutlined.create()
+        }
+
+        Stack {
+            direction = responsive(StackDirection.row)
+            sx {
+                alignItems = AlignItems.center
+            }
+
+            LinearProgress {
+                sx {
+                    width = 110.px
+                    height = 6.px
+                }
+                value = 50
+                variant = LinearProgressVariant.determinate
+            }
+
+            Icon {
+                sx {
+                    width = 45.px
+                    color = Color("green")
+                }
+               + CheckCircle.create()
+            }
+        }
     }
 }
 
 private val RightColumn = FC<ContentEntryDetailOverviewProps> { props ->
 
+    val strings = useStringsXml()
+
+    Stack {
+
+        Typography {
+            + (props.uiState.contentEntry?.title ?: "")
+            variant = TypographyVariant.h4
+        }
+
+        if (props.uiState.authorVisible){
+            Typography {
+                + (props.uiState.contentEntry?.author ?: "")
+            }
+        }
+
+        if (props.uiState.publisherVisible){
+            Typography {
+                + (props.uiState.contentEntry?.publisher ?: "")
+            }
+        }
+
+        if (props.uiState.licenseNameVisible){
+            Stack {
+                direction = responsive(StackDirection.row)
+                spacing = responsive(10.px)
+                sx {
+                    alignItems = AlignItems.center
+                }
+
+                Typography {
+                    + strings[MessageID.entry_details_license]
+                }
+
+                Typography {
+                    variant = TypographyVariant.h6
+
+                    +(props.uiState.contentEntry?.licenseName ?: "")
+                }
+            }
+        }
+
+        Stack {
+            direction = responsive(StackDirection.row)
+            spacing = responsive(16.px)
+
+            if (props.uiState.fileSizeVisible){
+                Typography {
+                    + (props.uiState.contentEntry?.container?.fileSize.toString())
+                }
+            }
+
+            Stack {
+                direction = responsive(StackDirection.row)
+                spacing = responsive(5.px)
+
+                Box {
+                    sx {
+                        width = 18.px
+                        height = 18.px
+                        alignContent = AlignContent.center
+                        display = Display.block
+                    }
+                    + EmojiEvents.create()
+                }
+
+                Typography {
+                    + (props.uiState.scoreProgress?.progress.toString())
+                }
+            }
+
+
+            Typography {
+                + ("(${(props.uiState.scoreProgress?.resultScore ?: "")}" +
+                        "/${(props.uiState.scoreProgress?.resultMax ?: "")})" )
+            }
+        }
+    }
 }
 
-private val LocallyAvailableRow = FC<ContentEntryDetailOverviewProps> { props ->
+private val LocallyAvailableRow = FC<ContentEntryDetailOverviewProps> { _ ->
 
+    val strings = useStringsXml()
+
+    Stack {
+        direction = responsive(StackDirection.row)
+
+        + LocationOn.create()
+
+        + strings[MessageID.download_locally_availability]
+    }
 }
 
 private val QuickActionBarsRow = FC<ContentEntryDetailOverviewProps> { props ->
 
+    val strings = useStringsXml()
+
+    Stack {
+        direction = responsive(StackDirection.row)
+
+        if (props.uiState.markCompleteVisible){
+            UstadQuickActionButton {
+                icon = CheckBox.create()
+                text = strings[MessageID.mark_complete].uppercase()
+                onClick = { props.onClickMarkComplete }
+            }
+        }
+
+        if (props.uiState.contentEntryButtons?.showDeleteButton == true){
+            UstadQuickActionButton {
+                icon = Delete.create()
+                text = strings[MessageID.delete].uppercase()
+                onClick = { props.onClickDelete }
+            }
+        }
+
+        if (props.uiState.contentEntryButtons?.showManageDownloadButton == true){
+            UstadQuickActionButton {
+                icon = Download.create()
+                text = strings[MessageID.manage_download].uppercase()
+                onClick = { props.onClickManageDownload }
+            }
+        }
+    }
 }
 
 private val AvailableTranslations = FC<ContentEntryDetailOverviewProps> { props ->
