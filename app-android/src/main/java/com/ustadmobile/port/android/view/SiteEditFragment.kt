@@ -1,23 +1,48 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.text.style.BackgroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSiteEditBinding
 import com.toughra.ustadmobile.databinding.ItemSiteTermsEditBinding
 import com.ustadmobile.core.controller.SiteEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SiteEditView
+import com.ustadmobile.core.viewmodel.SiteDetailUiState
+import com.ustadmobile.core.viewmodel.SiteEditUiState
 import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.port.android.view.composable.UstadEditField
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 
 class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView {
@@ -128,4 +153,113 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView {
 
     }
 
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun SiteEditScreen(
+    uiState: SiteEditUiState,
+    onSiteChanged: (Site?) -> Unit = {},
+    onItemClicked: (SiteTermsWithLanguage) -> Unit = {}
+){
+    Column (
+        modifier = Modifier
+            .padding(8.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.Start
+    ){
+
+        UstadTextEditField(
+            value = uiState.site?.siteName ?: "",
+            label = stringResource(id = R.string.name),
+            error = uiState.siteNameError,
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onSiteChanged(uiState.site?.shallowCopy{
+                    siteName = it
+                })
+            }
+        )
+
+        CustomSwitch(
+            checked = uiState.site?.guestLogin ?: false,
+            label = stringResource(R.string.guest_login_enabled),
+            onSwitchChanged = {
+                onSiteChanged(uiState.site?.shallowCopy{
+                    guestLogin = it
+                })
+            }
+        )
+
+        CustomSwitch(
+            checked = uiState.site?.registrationAllowed ?: false,
+            label = stringResource(R.string.registration_allowed),
+            onSwitchChanged = {
+                onSiteChanged(uiState.site?.shallowCopy{
+                    registrationAllowed = it
+                })
+            }
+        )
+
+        Text(
+            stringResource(R.string.terms_and_policies),
+            style = Typography.h6
+        )
+
+        uiState.siteTerms.forEach {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onItemClicked(it)
+                },
+                text = {Text(it.stLanguage?.name ?: "")}
+            )
+        }
+
+    }
+}
+
+@Composable
+fun CustomSwitch(
+    checked: Boolean,
+    label: String,
+    onSwitchChanged: (Boolean) -> Unit
+){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+
+        Text(
+            label,
+            style = Typography.h6
+        )
+
+        Switch(
+            checked = checked,
+            onCheckedChange = {
+                onSwitchChanged(it)
+            }
+        )
+    }
+}
+
+@Composable
+@Preview
+fun SiteEditScreenPreview(){
+    SiteEditScreen(
+        uiState = SiteEditUiState(
+            site = Site().apply {
+                siteName = "My Site"
+            },
+            siteTerms = listOf(
+                SiteTermsWithLanguage().apply {
+                    stLanguage = Language().apply {
+                        name = "fa"
+                    }
+                }
+            )
+        ),
+    )
 }

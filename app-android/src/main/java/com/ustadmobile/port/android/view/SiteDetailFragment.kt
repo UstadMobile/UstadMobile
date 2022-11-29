@@ -2,8 +2,11 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -201,6 +204,7 @@ class SiteDetailFragment: UstadDetailFragment<Site>(), SiteDetailView, Workspace
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SiteDetailScreen(
     uiState: SiteDetailUiState,
@@ -226,11 +230,12 @@ fun SiteDetailScreen(
         Text(stringResource(R.string.terms_and_policies), style = Typography.h6)
 
         uiState.siteTerms.forEach {
-            TextButton(
-                onClick = { onClickLang(it) },
-            ) {
-                Text(text = it.stLanguage?.name ?: "")
-            }
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickLang(it)
+                },
+                text = {Text(it.stLanguage?.name ?: "")}
+            )
         }
     }
 }
