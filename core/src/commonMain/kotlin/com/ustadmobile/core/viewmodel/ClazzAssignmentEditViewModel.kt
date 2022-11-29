@@ -3,12 +3,17 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
+import com.ustadmobile.lib.db.entities.CourseGroupSet
 
 data class ClazzAssignmentEditUiState(
 
     val fieldsEnabled: Boolean = true,
 
+    val groupSetEnabled: Boolean = true,
+
     val caTitleError: String? = null,
+
+    val groupSet: CourseGroupSet? = null,
 
     val timeZone: String? = null,
 
@@ -24,4 +29,6 @@ data class ClazzAssignmentEditUiState(
            CompletionCriteriaOptionsMessageIdOption>? = null,
 
     val minScoreVisible: Boolean = false,
+
+    val fileSubmissionVisible: Boolean = false,
 )

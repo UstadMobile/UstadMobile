@@ -12,6 +12,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.node.modifierElementOf
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,6 +24,7 @@ import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID.class_timezone_set
+import com.ustadmobile.core.impl.locale.entityconstants.FileTypeConstants
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
@@ -274,6 +276,8 @@ private fun ClazzAssignmentEditScreen(
     onCaStartDateValueChange: (Long?) -> Unit = {},
     onCompletionCriteriaValueChange: (CourseBlockWithEntity?) -> Unit = {},
     onCbMaxPointsValueChange: (CourseBlockWithEntity?) -> Unit = {},
+    onClickSubmissionType: () -> Unit = {},
+    onChangedFileRequired: (Boolean) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -332,6 +336,53 @@ private fun ClazzAssignmentEditScreen(
             },
             enabled = uiState.fieldsEnabled,
             error = uiState.caMaxPointsError
+        )
+
+        UstadTextEditField(
+            value = uiState.groupSet?.cgsName ?: "",
+            label = stringResource(id = R.string.submission_type),
+            enabled = uiState.groupSetEnabled,
+            onValueChange = {},
+            onClick = onClickSubmissionType,
+            modifier = Modifier.weight(0.5F)
+        )
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+           Text(text = stringResource(id = R.string.require_file_submission))
+
+           Switch(
+               checked = uiState.entity?.assignment?.caRequireFileSubmission ?: false,
+               onCheckedChange = { onChangedFileRequired(it) },
+               enabled = uiState.fieldsEnabled,
+           )
+        }
+
+        if (uiState.fileSubmissionVisible){
+
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.entity?.assignment?.caFileType ?: 0,
+                label = stringResource(R.string.file_type),
+                options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS,
+                onOptionSelected = {
+                    onPersonChanged(uiState.person?.shallowCopy{
+                        gender = it.value
+                    })
+                },
+                error = uiState.genderError,
+                enabled = uiState.fieldsEnabled,
+            )
+        }
+        UstadTextEditField(
+            value = uiState.groupSet?.cgsName ?: "",
+            label = stringResource(id = R.string.file_type),
+            enabled = uiState.groupSetEnabled,
+            onValueChange = {},
+            onClick = onClickSubmissionType,
+            modifier = Modifier.weight(0.5F)
         )
     }
 }
