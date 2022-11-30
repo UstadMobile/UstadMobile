@@ -16,18 +16,6 @@ data class CourseBlockEditUiState(
 
     val caGracePeriodError: String? = null,
 
-    val startTime: Long = 0L,
-
-    val deadlineDate: Long = 0L,
-
-    val deadlineTime: Long = 0L,
-
-    val gracePeriodDate: Long = 0L,
-
-    val gracePeriodTime: Long = 0L,
-
-    val timeZone: String = "US",
-
     val minScoreVisible: Boolean = false,
 
     val gracePeriodVisible: Boolean = false,

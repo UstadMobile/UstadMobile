@@ -16,21 +16,14 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 @Composable
 fun CourseBlockEdit(
     uiState: CourseBlockEditUiState,
-    onCourseBlockChange: (CourseBlock?) -> Unit = {},
-    onCaStartDateChange: (Long?) -> Unit = {},
-    onCaStartTimeChange: (Long?) -> Unit = {},
-    onDeadlineDateChange: (Long?) -> Unit = {},
-    onDeadlineTimeChange: (Long?) -> Unit = {},
-    onGracePeriodDateChange: (Long?) -> Unit = {},
-    onGracePeriodTimeChange: (Long?) -> Unit = {}
+    onCourseBlockChange: (CourseBlock?) -> Unit = {}
 ){
 
     Column{
 
         FirstRow(
             uiState = uiState,
-            onCaStartDateChange = onCaStartDateChange,
-            onCaStartTimeChange = onCaStartTimeChange
+            onCourseBlockChange = onCourseBlockChange
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -59,8 +52,7 @@ fun CourseBlockEdit(
 
         FourthRow(
             uiState = uiState,
-            onDeadlineDateChange = onDeadlineDateChange,
-            onDeadlineTimeChange = onDeadlineTimeChange
+            onCourseBlockChange = onCourseBlockChange
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -69,8 +61,7 @@ fun CourseBlockEdit(
 
             FifthRow(
                 uiState = uiState,
-                onGracePeriodDateChange = onGracePeriodDateChange,
-                onGracePeriodTimeChange = onGracePeriodTimeChange
+                onCourseBlockChange = onCourseBlockChange
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -97,8 +88,7 @@ fun CourseBlockEdit(
 @Composable
 private fun FirstRow(
     uiState: CourseBlockEditUiState,
-    onCaStartDateChange: (Long?) -> Unit = {},
-    onCaStartTimeChange: (Long?) -> Unit,
+    onCourseBlockChange: (CourseBlock?) -> Unit
 ){
     Row {
         Column(
@@ -106,25 +96,33 @@ private fun FirstRow(
         ) {
 
             UstadDateEditTextField(
-                value = uiState.startTime,
+                value = uiState.courseBlock?.cbHideUntilDate ?: 0,
                 label = stringResource(id = R.string.dont_show_before)
                     .addOptionalSuffix(),
                 error = uiState.caStartDateError,
                 enabled = uiState.fieldsEnabled,
-                onValueChange = { onCaStartDateChange(it) }
+                onValueChange = {
+                    onCourseBlockChange(uiState.courseBlock?.shallowCopy{
+                        cbHideUntilDate = it
+                    })
+                }
             )
 
-            Text(uiState.timeZone)
+            Text("timeZone")
         }
 
         Spacer(modifier = Modifier.width(15.dp))
 
         UstadDateEditTextField(
             modifier = Modifier.weight(0.5F),
-            value = uiState.startTime,
+            value = uiState.courseBlock?.cbHideUntilDate ?: 0,
             label = stringResource(id = R.string.time),
             enabled = uiState.fieldsEnabled,
-            onValueChange = { onCaStartTimeChange(it) }
+            onValueChange = {
+                onCourseBlockChange(uiState.courseBlock?.shallowCopy{
+                    cbHideUntilDate = it
+                })
+            }
         )
     }
 }
@@ -132,7 +130,7 @@ private fun FirstRow(
 @Composable
 private fun SecondRow(
     uiState: CourseBlockEditUiState,
-    onCourseBlockChange: (CourseBlock?) -> Unit,
+    onCourseBlockChange: (CourseBlock?) -> Unit
 ){
     Row() {
         UstadMessageIdOptionExposedDropDownMenuField(
@@ -170,28 +168,35 @@ private fun SecondRow(
 @Composable
 private fun FourthRow(
     uiState: CourseBlockEditUiState,
-    onDeadlineDateChange: (Long?) -> Unit = {},
-    onDeadlineTimeChange: (Long?) -> Unit = {}
+    onCourseBlockChange: (CourseBlock?) -> Unit
 ){
     Row {
         UstadDateEditTextField(
             modifier = Modifier.weight(0.5F),
-            value = uiState.deadlineDate,
+            value = uiState.courseBlock?.cbDeadlineDate ?: 0,
             label = stringResource(id = R.string.deadline).addOptionalSuffix(),
             error = uiState.caDeadlineError,
             enabled = uiState.fieldsEnabled,
-            onValueChange = { onDeadlineDateChange(it) }
+            onValueChange = {
+                onCourseBlockChange(uiState.courseBlock?.shallowCopy{
+                    cbDeadlineDate = it
+                })
+            }
         )
 
         Spacer(modifier = Modifier.width(15.dp))
 
         UstadDateEditTextField(
             modifier = Modifier.weight(0.5F),
-            value = uiState.deadlineTime,
+            value = uiState.courseBlock?.cbDeadlineDate ?: 0,
             label = stringResource(id = R.string.time),
             error = uiState.caDeadlineError,
             enabled = uiState.fieldsEnabled,
-            onValueChange = { onDeadlineTimeChange(it) }
+            onValueChange = {
+                onCourseBlockChange(uiState.courseBlock?.shallowCopy{
+                    cbDeadlineDate = it
+                })
+            }
         )
     }
 }
@@ -199,28 +204,35 @@ private fun FourthRow(
 @Composable
 private fun FifthRow(
     uiState: CourseBlockEditUiState,
-    onGracePeriodDateChange: (Long?) -> Unit = {},
-    onGracePeriodTimeChange: (Long?) -> Unit = {}
+    onCourseBlockChange: (CourseBlock?) -> Unit
 ){
     Row {
         UstadDateEditTextField(
             modifier = Modifier.weight(0.5F),
-            value = uiState.gracePeriodDate,
+            value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
             label = stringResource(id = R.string.end_of_grace_period),
             error = uiState.caGracePeriodError,
             enabled = uiState.fieldsEnabled,
-            onValueChange = { onGracePeriodDateChange(it) }
+            onValueChange = {
+                onCourseBlockChange(uiState.courseBlock?.shallowCopy{
+                    cbGracePeriodDate = it
+                })
+            }
         )
 
         Spacer(modifier = Modifier.width(15.dp))
 
         UstadDateEditTextField(
             modifier = Modifier.weight(0.5F),
-            value = uiState.gracePeriodTime,
+            value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
             label = stringResource(id = R.string.time),
             error = uiState.caGracePeriodError,
             enabled = uiState.fieldsEnabled,
-            onValueChange = { onGracePeriodTimeChange(it) }
+            onValueChange = {
+                onCourseBlockChange(uiState.courseBlock?.shallowCopy{
+                    cbGracePeriodDate = it
+                })
+            }
         )
     }
 }
@@ -233,9 +245,6 @@ private fun CourseBlockEditPreview() {
             cbMaxPoints = 78
             cbCompletionCriteria = 14
         },
-        gracePeriodDate = 1669788143000,
-        gracePeriodTime = 1669788143000,
-        timeZone = "Class timezone: Dubai",
         minScoreVisible = true,
         gracePeriodVisible = true,
     )
