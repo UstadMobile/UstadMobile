@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -160,7 +162,8 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView {
 fun SiteEditScreen(
     uiState: SiteEditUiState,
     onSiteChanged: (Site?) -> Unit = {},
-    onItemClicked: (SiteTermsWithLanguage) -> Unit = {}
+    onItemClicked: (SiteTermsWithLanguage) -> Unit = {},
+    onDeleteIconClicked: () -> Unit = {}
 ){
     Column (
         modifier = Modifier
@@ -211,7 +214,17 @@ fun SiteEditScreen(
                 modifier = Modifier.clickable {
                     onItemClicked(it)
                 },
-                text = {Text(it.stLanguage?.name ?: "")}
+                text = {Text(it.stLanguage?.name ?: "")},
+                        trailing = {
+                    IconButton(onClick = {
+                        onDeleteIconClicked()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = stringResource(R.string.delete)
+                        )
+                    }
+                }
             )
         }
 
