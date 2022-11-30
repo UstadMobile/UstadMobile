@@ -33,14 +33,70 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
     Stack{
         spacing = responsive(20.px)
 
-        FirstRow {
-            uiState = props.uiState
-            onCourseBlockChange = props.onCourseBlockChange
+        Stack {
+            direction = responsive(StackDirection.row)
+            spacing = responsive(15.px)
+
+            Stack {
+
+                UstadDateEditField {
+                    timeInMillis = props.uiState.courseBlock?.cbHideUntilDate ?: 0
+                    label = strings[MessageID.dont_show_before].addOptionalSuffix(strings)
+                    error = props.uiState.caStartDateError
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                            cbHideUntilDate = it
+                        })
+                    }
+                }
+
+                Typography{
+                    + "timeZone"
+                }
+            }
+
+            UstadDateEditField {
+                timeInMillis = props.uiState.courseBlock?.cbHideUntilDate ?: 0
+                label = strings[MessageID.time]
+                enabled = props.uiState.fieldsEnabled
+                onChange = {
+                    props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                        cbHideUntilDate = it
+                    })
+                }
+            }
         }
 
-        SecondRow{
-            uiState = props.uiState
-            onCourseBlockChange = props.onCourseBlockChange
+        Stack {
+            direction = responsive(StackDirection.row)
+            spacing = responsive(15.px)
+
+            UstadMessageIdDropDownField {
+                value = props.uiState.courseBlock?.cbCompletionCriteria ?: 0
+                label = strings[MessageID.completion_criteria]
+                options = CompletionCriteriaConstants.COMPLETION_CRITERIA_MESSAGE_IDS
+                enabled = props.uiState.fieldsEnabled
+                onChange = {
+                    props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                        cbCompletionCriteria = it?.value ?: 0
+                    })
+                }
+            }
+
+            if (props.uiState.minScoreVisible){
+                UstadTextEditField {
+                    value = ((props.uiState.courseBlock?.cbMaxPoints ?: 0).toString() + " " +
+                            strings[MessageID.points])
+                    label = strings[MessageID.maximum_points]
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                            cbMaxPoints = it.toInt()
+                        })
+                    }
+                }
+            }
         }
 
         UstadTextEditField {
@@ -56,16 +112,65 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             }
         }
 
-        FourthRow{
-            uiState = props.uiState
-            onCourseBlockChange = props.onCourseBlockChange
+        Stack {
+            direction = responsive(StackDirection.row)
+            spacing = responsive(15.px)
+
+            UstadDateEditField {
+                timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0
+                label = strings[MessageID.deadline].addOptionalSuffix(strings)
+                error = props.uiState.caDeadlineError
+                enabled = props.uiState.fieldsEnabled
+                onChange = {
+                    props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                        cbDeadlineDate = it
+                    })
+                }
+            }
+
+
+            UstadDateEditField {
+                timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0
+                label = strings[MessageID.time]
+                error = props.uiState.caDeadlineError
+                enabled = props.uiState.fieldsEnabled
+                onChange = {
+                    props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                        cbDeadlineDate = it
+                    })
+                }
+            }
         }
 
         if (props.uiState.gracePeriodVisible){
 
-            FifthRow{
-                uiState = props.uiState
-                onCourseBlockChange = props.onCourseBlockChange
+            Stack {
+                direction = responsive(StackDirection.row)
+                spacing = responsive(15.px)
+
+                UstadDateEditField {
+                    timeInMillis = props.uiState.courseBlock?.cbGracePeriodDate ?: 0
+                    label = strings[MessageID.end_of_grace_period]
+                    error = props.uiState.caGracePeriodError
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                            cbGracePeriodDate = it
+                        })
+                    }
+                }
+
+                UstadDateEditField {
+                    timeInMillis = props.uiState.courseBlock?.cbGracePeriodDate ?: 0
+                    label = strings[MessageID.time]
+                    error = props.uiState.caGracePeriodError
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
+                            cbGracePeriodDate = it
+                        })
+                    }
+                }
             }
 
             UstadTextEditField {
@@ -83,151 +188,6 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
             Typography {
                + strings[MessageID.penalty_label]
-            }
-        }
-    }
-}
-
-val FirstRow = FC<UstadCourseBlockEditProps> { props ->
-
-    val strings = useStringsXml()
-
-    Stack {
-        direction = responsive(StackDirection.row)
-        spacing = responsive(15.px)
-
-        Stack {
-
-            UstadDateEditField {
-                timeInMillis = props.uiState.courseBlock?.cbHideUntilDate ?: 0
-                label = strings[MessageID.dont_show_before].addOptionalSuffix(strings)
-                error = props.uiState.caStartDateError
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                        cbHideUntilDate = it
-                    })
-                }
-            }
-
-            Typography{
-                + "timeZone"
-            }
-        }
-
-        UstadDateEditField {
-            timeInMillis = props.uiState.courseBlock?.cbHideUntilDate ?: 0
-            label = strings[MessageID.time]
-            enabled = props.uiState.fieldsEnabled
-            onChange = {
-                props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                    cbHideUntilDate = it
-                })
-            }
-        }
-    }
-}
-
-val SecondRow = FC<UstadCourseBlockEditProps> { props ->
-
-    val strings = useStringsXml()
-
-    Stack {
-        direction = responsive(StackDirection.row)
-        spacing = responsive(15.px)
-
-        UstadMessageIdDropDownField {
-            value = props.uiState.courseBlock?.cbCompletionCriteria ?: 0
-            label = strings[MessageID.completion_criteria]
-            options = CompletionCriteriaConstants.COMPLETION_CRITERIA_MESSAGE_IDS
-            onChange = {
-                props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                    cbCompletionCriteria = it?.value ?: 0
-                })
-            }
-            enabled = props.uiState.fieldsEnabled
-        }
-
-        if (props.uiState.minScoreVisible){
-            UstadTextEditField {
-                value = ((props.uiState.courseBlock?.cbMaxPoints ?: 0).toString() + " " +
-                        strings[MessageID.points])
-                label = strings[MessageID.maximum_points]
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                        cbMaxPoints = it.toInt()
-                    })
-                }
-            }
-        }
-    }
-}
-
-val FourthRow = FC<UstadCourseBlockEditProps> { props ->
-
-    val strings = useStringsXml()
-
-    Stack {
-        direction = responsive(StackDirection.row)
-        spacing = responsive(15.px)
-
-        UstadDateEditField {
-            timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0
-            label = strings[MessageID.deadline].addOptionalSuffix(strings)
-            error = props.uiState.caDeadlineError
-            enabled = props.uiState.fieldsEnabled
-            onChange = {
-                props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                    cbDeadlineDate = it
-                })
-            }
-        }
-
-
-        UstadDateEditField {
-            timeInMillis = props.uiState.courseBlock?.cbDeadlineDate ?: 0
-            label = strings[MessageID.time]
-            error = props.uiState.caDeadlineError
-            enabled = props.uiState.fieldsEnabled
-            onChange = {
-                props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                    cbDeadlineDate = it
-                })
-            }
-        }
-    }
-}
-
-val FifthRow = FC<UstadCourseBlockEditProps> { props ->
-
-    val strings = useStringsXml()
-
-    Stack {
-        direction = responsive(StackDirection.row)
-        spacing = responsive(15.px)
-
-        UstadDateEditField {
-            timeInMillis = props.uiState.courseBlock?.cbGracePeriodDate ?: 0
-            label = strings[MessageID.end_of_grace_period]
-            error = props.uiState.caGracePeriodError
-            enabled = props.uiState.fieldsEnabled
-            onChange = {
-                props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                    cbGracePeriodDate = it
-                })
-            }
-        }
-
-        UstadDateEditField {
-            timeInMillis = props.uiState.courseBlock?.cbGracePeriodDate ?: 0
-            label = strings[MessageID.time]
-            error = props.uiState.caGracePeriodError
-            enabled = props.uiState.fieldsEnabled
-            onChange = {
-                props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                    cbGracePeriodDate = it
-                })
             }
         }
     }

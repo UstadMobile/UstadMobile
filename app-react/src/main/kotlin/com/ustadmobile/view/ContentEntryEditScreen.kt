@@ -31,8 +31,6 @@ external interface ContentEntryEditScreenProps : Props {
 
     var uiState: ContentEntryEditUiState
 
-    var courseBlockEditUiState: CourseBlockEditUiState
-
     var onCourseBlockChange: (CourseBlock?) -> Unit
 
     var onClickUpdateContent: () -> Unit
@@ -58,15 +56,15 @@ val ContentEntryEditScreenPreview = FC<Props> {
             metadataResult = MetadataResult(
                 entry = ContentEntryWithLanguage(),
                 pluginId = 0
+            ),
+            courseBlockEditUiState = CourseBlockEditUiState(
+                courseBlock = CourseBlock().apply {
+                    cbMaxPoints = 78
+                    cbCompletionCriteria = 14
+                },
+                minScoreVisible = true,
+                gracePeriodVisible = true,
             )
-        )
-        courseBlockEditUiState = CourseBlockEditUiState(
-            courseBlock = CourseBlock().apply {
-                cbMaxPoints = 78
-                cbCompletionCriteria = 14
-            },
-            minScoreVisible = true,
-            gracePeriodVisible = true,
         )
     }
 }
@@ -133,7 +131,7 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             }
 
             UstadCourseBlockEdit {
-                uiState = props.courseBlockEditUiState
+                uiState = props.uiState.courseBlockEditUiState
                 onCourseBlockChange = props.onCourseBlockChange
             }
 

@@ -15,7 +15,7 @@ data class ContentEntryEditUiState(
 
     val storageOptions: List<ContainerStorageDir> = emptyList(),
 
-    val courseBlockEditUiState: CourseBlockEditUiState? = null,
+    val courseBlockEditUiState: CourseBlockEditUiState = CourseBlockEditUiState(),
 
     val fieldsEnabled: Boolean = true,
 
@@ -24,6 +24,8 @@ data class ContentEntryEditUiState(
     val importError: String? = null,
 
     val titleError: String? = null,
+
+    val selectedStorageIndex: Int = 0,
 
     val metadataResult: MetadataResult? = null,
 

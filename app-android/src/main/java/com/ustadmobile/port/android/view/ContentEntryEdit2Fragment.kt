@@ -56,6 +56,7 @@ import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragme
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.composable.CourseBlockEdit
+import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
@@ -484,14 +485,13 @@ class ContentEntryEdit2Fragment(
 @Composable
 private fun ContentEntryEditScreen(
     uiState: ContentEntryEditUiState = ContentEntryEditUiState(),
-    courseBlockEditUiState: CourseBlockEditUiState = CourseBlockEditUiState(),
     onCourseBlockChange: (CourseBlock?) -> Unit = {},
     onClickUpdateContent: () -> Unit = {},
     onContentChanged: (ContentEntryWithBlockAndLanguage?) -> Unit = {},
     onChangeCompress: (Boolean) -> Unit = {},
     onChangePubliclyAccessible: (Boolean) -> Unit = {},
     onClickLanguage: () -> Unit = {},
-
+    onSelectContainerStorageDir: (ContainerStorageDir) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -565,7 +565,7 @@ private fun ContentEntryEditScreen(
         Spacer(modifier = Modifier.height(15.dp))
 
         CourseBlockEdit(
-            uiState = courseBlockEditUiState,
+            uiState = uiState.courseBlockEditUiState,
             onCourseBlockChange = onCourseBlockChange
         )
 
@@ -617,8 +617,8 @@ private fun ContentEntryEditScreen(
         if (uiState.containerStorageOptionVisible){
             UstadMessageIdOptionExposedDropDownMenuField(
                 value = uiState.entity?.licenseType ?: 0,
+                label = "",
                 options = PersonConstants.GENDER_MESSAGE_IDS,
-                label = stringResource(id = R.string.content_creation_storage_option_title),
                 enabled = uiState.fieldsEnabled,
                 onOptionSelected = {
                     onContentChanged(uiState.entity?.shallowCopy {
@@ -626,6 +626,15 @@ private fun ContentEntryEditScreen(
                         }
                     )
                 }
+            )
+
+            UstadExposedDropDownMenuField(
+                value = uiState.selectedStorageIndex,
+                label = stringResource(R.string.content_creation_storage_option_title),
+                options = uiState.storageOptions,
+                onOptionSelected = { onSelectContainerStorageDir(it as ContainerStorageDir) },
+                itemText = { (it as ContainerStorageDir).name ?: "" },
+                enabled = uiState.fieldsEnabled,
             )
         }
 
@@ -692,20 +701,20 @@ fun ContentEntryEditScreenPreview() {
         metadataResult = MetadataResult(
             entry = ContentEntryWithLanguage(),
             pluginId = 0
+        ),
+        courseBlockEditUiState = CourseBlockEditUiState(
+            courseBlock = CourseBlock().apply {
+                cbMaxPoints = 78
+                cbCompletionCriteria = 14
+            },
+            minScoreVisible = true,
+            gracePeriodVisible = true,
         )
     )
-    val courseBlockEditUiStateVal = CourseBlockEditUiState(
-        courseBlock = CourseBlock().apply {
-            cbMaxPoints = 78
-            cbCompletionCriteria = 14
-        },
-        minScoreVisible = true,
-        gracePeriodVisible = true,
-    )
+
     MdcTheme {
         ContentEntryEditScreen(
-            uiState = uiStateVal,
-            courseBlockEditUiState = courseBlockEditUiStateVal
+            uiState = uiStateVal
         )
     }
 }

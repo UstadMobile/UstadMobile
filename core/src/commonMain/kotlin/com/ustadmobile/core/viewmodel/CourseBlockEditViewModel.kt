@@ -19,4 +19,6 @@ data class CourseBlockEditUiState(
     val minScoreVisible: Boolean = false,
 
     val gracePeriodVisible: Boolean = false,
+
+    val timeZone: String = "UTC"
 )
