@@ -13,10 +13,7 @@ import csstype.px
 import kotlinx.css.span
 import mui.icons.material.AccountBalanceRounded
 import mui.icons.material.WidthFull
-import mui.material.Container
-import mui.material.Stack
-import mui.material.Switch
-import mui.material.Typography
+import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.Spacing
 import mui.system.StackDirection
@@ -29,10 +26,13 @@ import react.create
 
 external interface SiteEditProps: Props {
     var uiState: SiteEditUiState
-    var onSiteNameChanged: (Site?) -> Unit
-    var onGuestLoginEnabledChanged: (Boolean) -> Unit
-    var onRegistrationAllowedChanged: (Boolean) -> Unit
-    var onAddButtonClicked: () -> Unit
+    var onSiteChanged: (Site?) -> Unit
+    var onClickLang: (SiteTermsWithLanguage) -> Unit
+}
+
+private interface CustomSwitchProps: Props {
+    var label: String
+    var checked: Boolean
 }
 
 val SiteEditComponent2 = FC<SiteEditProps> { props ->
@@ -52,36 +52,62 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
                 error = props.uiState.siteNameError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
-//                    props.onPersonChanged(
-//                        props.uiState.person?.shallowCopy {
-//                            firstNames = it
-//                        })
+                    props.onSiteChanged(
+                        props.uiState.site?.shallowCopy {
+                            siteName = it
+                        })
                 }
             }
-        }
-    }
 
-    Container{
-        maxWidth = "lg"
-
-        Stack{
-            sx{
-                width = width
+            CustomSwitch{
+                label = strings[MessageID.guest_login_enabled]
+                checked = props.uiState.site?.guestLogin ?: true
             }
-            direction = responsive(mui.material.StackDirection.row)
-            spacing = responsive(600.px)
+
+            CustomSwitch{
+                label = strings[MessageID.registration_allowed]
+                checked = props.uiState.site?.registrationAllowed ?: true
+            }
 
             Typography {
                 variant = TypographyVariant.h6
                 + strings[MessageID.terms_and_policies]
             }
 
-            Switch{
-                defaultChecked = props.uiState.site?.guestLogin
+            props.uiState.siteTerms.forEach {
+                ListItem {
+                    var item = it
+                    onClick = {
+                        props.onClickLang(item)
+                    }
+                    ListItemText {
+                        + (it.stLanguage?.name ?: "")
+                    }
+                }
             }
         }
     }
 
+}
+
+private var CustomSwitch = FC<CustomSwitchProps> { props ->
+
+    Stack{
+        sx{
+            width = width
+        }
+        direction = responsive(mui.material.StackDirection.row)
+        spacing = responsive(100.px)
+
+        Typography {
+            variant = TypographyVariant.h6
+            + props.label
+        }
+
+        Switch{
+            defaultChecked = props.checked
+        }
+    }
 }
 
 val SiteEditPreview = FC<Props> {

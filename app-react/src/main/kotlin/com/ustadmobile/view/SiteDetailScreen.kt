@@ -20,7 +20,7 @@ import react.dom.html.ReactHTML
 
 external interface SiteDetailProps : Props {
     var uiState: SiteDetailUiState
-    var onClickLang: () -> Unit
+    var onClickLang: (SiteTermsWithLanguage) -> Unit
 }
 
 val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
@@ -58,10 +58,14 @@ val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
             }
 
             props.uiState.siteTerms.forEach {
-                Button {
-                    onClick = { props.onClickLang }
-                    variant = ButtonVariant.outlined
-                    + it.stLanguage.toString()
+                ListItem {
+                    var item = it
+                    onClick = {
+                        props.onClickLang(item)
+                    }
+                    ListItemText {
+                        + (it.stLanguage?.name ?: "")
+                    }
                 }
             }
         }
