@@ -25,7 +25,9 @@ data class ContentEntryEditUiState(
 
     val titleError: String? = null,
 
-    var metadataResult: MetadataResult? = null
+    val metadataResult: MetadataResult? = null,
+
+    val compressionEnabled: Boolean = false,
 
 ) {
     val contentCompressVisible: Boolean

@@ -10,6 +10,17 @@ import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.AdapterView
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -19,25 +30,34 @@ import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
+import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
+import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryPicture
-import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
-import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.core.viewmodel.ContentEntryEditUiState
+import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
+import com.ustadmobile.core.viewmodel.LoginUiState
+import com.ustadmobile.core.viewmodel.PersonDetailUiState
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.isSet
+import com.ustadmobile.port.android.view.composable.CourseBlockEdit
+import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -459,4 +479,233 @@ class ContentEntryEdit2Fragment(
 
     }
 
+}
+
+@Composable
+private fun ContentEntryEditScreen(
+    uiState: ContentEntryEditUiState = ContentEntryEditUiState(),
+    courseBlockEditUiState: CourseBlockEditUiState = CourseBlockEditUiState(),
+    onCourseBlockChange: (CourseBlock?) -> Unit = {},
+    onClickUpdateContent: () -> Unit = {},
+    onContentChanged: (ContentEntryWithBlockAndLanguage?) -> Unit = {},
+    onChangeCompress: (Boolean) -> Unit = {},
+    onChangePubliclyAccessible: (Boolean) -> Unit = {},
+    onClickLanguage: () -> Unit = {},
+
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+    )  {
+
+        val updateContentText =
+            if (!uiState.importError.isNullOrBlank())
+                stringResource(id = R.string.file_required_prompt)
+            else
+                stringResource(id = R.string.file_selected)
+
+        if (uiState.updateContentVisible){
+
+            Button(
+                onClick = onClickUpdateContent,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.secondaryColor)
+                )
+            ) {
+                Text(stringResource(R.string.update_content).uppercase(),
+                    color = contentColorFor(
+                        colorResource(id = R.color.secondaryColor))
+                )
+            }
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Text(updateContentText)
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        if (uiState.entity?.leaf == true){
+            Text(text = stringResource(id = R.string.supported_files))
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        UstadTextEditField(
+            value = uiState.entity?.title ?: "",
+            label = stringResource(id = R.string.title),
+            error = uiState.titleError,
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onContentChanged(uiState.entity?.shallowCopy {
+                        title = it
+                    }
+                )
+            }
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        UstadTextEditField(
+            value = uiState.entity?.description ?: "",
+            label = stringResource(id = R.string.description),
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onContentChanged(uiState.entity?.shallowCopy {
+                        description = it
+                    }
+                )
+            }
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        CourseBlockEdit(
+            uiState = courseBlockEditUiState,
+            onCourseBlockChange = onCourseBlockChange
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        UstadTextEditField(
+            value = uiState.entity?.author ?: "",
+            label = stringResource(id = R.string.entry_details_author),
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onContentChanged(uiState.entity?.shallowCopy {
+                        author = it
+                    }
+                )
+            }
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        UstadTextEditField(
+            value = uiState.entity?.publisher ?: "",
+            label = stringResource(id = R.string.entry_details_publisher),
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onContentChanged(uiState.entity?.shallowCopy {
+                        publisher = it
+                    }
+                )
+            }
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        UstadMessageIdOptionExposedDropDownMenuField(
+            value = uiState.entity?.licenseType ?: 0,
+            options = LicenceConstants.LICENSE_MESSAGE_IDS,
+            label = stringResource(id = R.string.licence),
+            enabled = uiState.fieldsEnabled,
+            onOptionSelected = {
+                onContentChanged(uiState.entity?.shallowCopy {
+                        licenseType = it.value
+                    }
+                )
+            }
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        if (uiState.containerStorageOptionVisible){
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.entity?.licenseType ?: 0,
+                options = PersonConstants.GENDER_MESSAGE_IDS,
+                label = stringResource(id = R.string.content_creation_storage_option_title),
+                enabled = uiState.fieldsEnabled,
+                onOptionSelected = {
+                    onContentChanged(uiState.entity?.shallowCopy {
+                            licenseType = it.value
+                        }
+                    )
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        if (uiState.contentCompressVisible){
+            SwitchRow(
+                text = stringResource(id = R.string.compress),
+                checked = uiState.compressionEnabled,
+                onChange = onChangeCompress
+            )
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        SwitchRow(
+            text = stringResource(id = R.string.publicly_accessible),
+            checked = uiState.entity?.publik ?: false,
+            onChange = onChangePubliclyAccessible
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        UstadTextEditField(
+            value = uiState.entity?.language?.name ?: "",
+            label = stringResource(id = R.string.language),
+            readOnly = true,
+            enabled = uiState.fieldsEnabled,
+            onClick = onClickLanguage,
+            onValueChange = {}
+        )
+    }
+}
+
+@Composable
+fun SwitchRow(
+    text: String,
+    checked: Boolean,
+    onChange: (Boolean) -> Unit,
+){
+    Row (
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ){
+
+        Text(text)
+
+        Switch(
+            checked= checked,
+            onCheckedChange = { onChange(it) }
+        )
+    }
+}
+
+@Composable
+@Preview
+fun ContentEntryEditScreenPreview() {
+    val uiStateVal = ContentEntryEditUiState(
+        entity = ContentEntryWithBlockAndLanguage().apply {
+            leaf = true
+        },
+        updateContentVisible = true,
+        metadataResult = MetadataResult(
+            entry = ContentEntryWithLanguage(),
+            pluginId = 0
+        )
+    )
+    val courseBlockEditUiStateVal = CourseBlockEditUiState(
+        courseBlock = CourseBlock().apply {
+            cbMaxPoints = 78
+            cbCompletionCriteria = 14
+        },
+        minScoreVisible = true,
+        gracePeriodVisible = true,
+    )
+    MdcTheme {
+        ContentEntryEditScreen(
+            uiState = uiStateVal,
+            courseBlockEditUiState = courseBlockEditUiStateVal
+        )
+    }
 }
