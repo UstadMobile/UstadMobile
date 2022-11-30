@@ -1,0 +1,8 @@
+appId: org.chromium.webview_shell
+---
+- launchApp
+- tapOn:
+    id: "org.chromium.webview_shell:id/url_field"
+- eraseText
+- inputText: "${CONTROLSERVER}start"
+- pressKey: Enter

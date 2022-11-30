@@ -8,8 +8,6 @@ import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.ContainerStorageManager
-import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.SysPathUtil
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.onActiveAccountDirect
 import com.ustadmobile.door.DoorUri
@@ -32,7 +30,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import java.io.File
 
 class PDFTypePluginJvmTest {
 

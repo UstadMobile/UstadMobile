@@ -87,12 +87,10 @@ Code is contained (mostly) in the following modules:
   app-android-launcher but can also be used as a library in other apps.
 * [app-react](app-react/): Contains the web version implemented using Kotlin/JS
 * [app-android-launcher/](app-android-launcher/): Standalone app launcher that uses app-android.
-* [lib-database](lib-database/): core Database and Data Access Object (DAO) classes. See this
-module's README for further details on the relationship between different database modules.
-* [lib-database-entities](lib-database-entities): Database entity objects
-* [lib-database-android](lib-database-android/) Android database
-implementation (a Room Persistence Framework database generated from lib-database).
+* [lib-database](lib-database/): contains the database, DAO, and entity classes.
 * [lib-util](lib-util/): Small utility functions
+* [testserver-controller](testserver-controller/) An HTTP server that can control starting and 
+  stopping the main server, and manage adb screen recording. Used by end-to-end testing.
 
 To build debug / release versions for any given platform please see the README in the directory for that platform.
 
