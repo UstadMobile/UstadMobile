@@ -5,9 +5,12 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.viewmodel.ContentEntryEditUiState
+import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
+import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.mui.components.UstadTextEditField
 import csstype.px
@@ -126,7 +129,7 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             if (props.uiState.containerStorageOptionVisible){
                 UstadMessageIdDropDownField {
                     value = props.uiState.entity?.licenseType ?: 0
-                    options = props.uiState.storageOptions
+//                    options = props.uiState.storageOptions
                     label = strings[MessageID.licence]
                     id = (props.uiState.entity?.licenseType ?: 0).toString()
                     onChange = {
