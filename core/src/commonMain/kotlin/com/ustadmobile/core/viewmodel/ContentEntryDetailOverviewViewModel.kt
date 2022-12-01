@@ -17,11 +17,9 @@ data class ContentEntryDetailOverviewUiState(
 
     val translationVisibile: Boolean = false,
 
-    val translations: List<ContentEntryRelatedEntryJoinWithLanguage> = listOf(),
+    val availableTranslations: List<ContentEntryRelatedEntryJoinWithLanguage> = emptyList(),
 
-    val availableTranslationsList: DataSourceFactory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null,
-
-    val activeContentJobItems: List<ContentJobItemProgress>? = null
+    val activeContentJobItems: List<ContentJobItemProgress> = emptyList()
 
 ) {
     val scoreProgressVisible: Boolean

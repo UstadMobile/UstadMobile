@@ -7,20 +7,21 @@ import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadQuickActionButton
 import csstype.*
-import mui.material.IconSize
+import mui.material.List
 import mui.icons.material.*
 import mui.material.*
 import mui.material.styles.TypographyVariant
-import mui.system.*
 import mui.system.Container
 import mui.material.Stack
 import mui.material.StackDirection
+import mui.system.*
 import react.FC
 import react.Props
 import react.create
 import react.useState
 
 external interface ContentEntryDetailOverviewScreenProps : Props {
+
     var uiState: ContentEntryDetailOverviewUiState
 
     var onClickDownload: () -> Unit
@@ -33,6 +34,9 @@ external interface ContentEntryDetailOverviewScreenProps : Props {
 
     var onClickManageDownload: () -> Unit
 
+    var onClickTranslation: () -> Unit
+
+    var onClickContentJobItem: () -> Unit
 }
 
 val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenProps> { props ->
@@ -65,6 +69,10 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                 }
             }
 
+            ContentJobList{
+                uiState = props.uiState
+            }
+
             if (props.uiState.locallyAvailable) {
                 LocallyAvailableRow()
             }
@@ -93,6 +101,18 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
             if (props.uiState.translationVisibile){
                 Typography{
                     + strings[MessageID.also_available_in]
+                }
+
+                List{
+                    props.uiState.availableTranslations.forEach {
+                        ListItem{
+                            Button {
+                                onClick = { props.onClickTranslation }
+
+                                + (it.language?.name ?: "")
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -163,7 +183,6 @@ private val RightColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
 
     Stack {
         direction = responsive(StackDirection.column)
-        spacing = responsive(10.px)
 
         Typography{
             variant = TypographyVariant.h4
@@ -228,6 +247,39 @@ private val RightColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
             Typography {
                 + ("(" + (props.uiState.scoreProgress?.resultScore ?: "") +
                         "/" + (props.uiState.scoreProgress?.resultMax ?: "") + ")")
+            }
+        }
+    }
+}
+
+private val ContentJobList = FC <ContentEntryDetailOverviewScreenProps> { props ->
+
+    List{
+        props.uiState.activeContentJobItems.forEach {
+            ListItem{
+                Button {
+                    onClick = { props.onClickContentJobItem }
+
+                    Stack {
+                        Stack {
+                            direction = responsive(StackDirection.row)
+                            spacing = responsive(20.px)
+
+                            Typography {
+                                + (it.progressTitle ?: "")
+                            }
+
+                            Typography {
+                                + (it.progress.toString()+" %")
+                            }
+                        }
+
+                        LinearProgress {
+                            value = props.uiState.scoreProgress?.progress
+                            variant = LinearProgressVariant.determinate
+                        }
+                    }
+                }
             }
         }
     }
@@ -313,6 +365,32 @@ val ContentEntryDetailOverviewScreenPreview = FC<Props> {
                 showDeleteButton = true
                 showManageDownloadButton = true
             },
+            availableTranslations = listOf(
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Persian"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "English"
+                    }
+                }
+            ),
+            activeContentJobItems = listOf(
+                ContentJobItemProgress().apply {
+                    progressTitle = "First"
+                    progress = 30
+                },
+                ContentJobItemProgress().apply {
+                    progressTitle = "Second"
+                    progress = 10
+                },
+                ContentJobItemProgress().apply {
+                    progressTitle = "Third"
+                    progress = 70
+                }
+            ),
             locallyAvailable = true,
             markCompleteVisible = true,
             translationVisibile = true

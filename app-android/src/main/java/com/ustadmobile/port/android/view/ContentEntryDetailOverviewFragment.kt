@@ -4,10 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -376,6 +378,7 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ContentEntryDetailOverviewScreen(
     uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
@@ -384,91 +387,153 @@ private fun ContentEntryDetailOverviewScreen(
     onClickMarkComplete: () -> Unit = {},
     onClickDelete: () -> Unit = {},
     onClickManageDownload: () -> Unit = {},
+    onClickTranslation: () -> Unit = {},
+    onClickContentJobItem: () -> Unit = {},
 ) {
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
     )  {
 
-        ContentDetails(
-            uiState = uiState
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            ContentDetails(
+                uiState = uiState
+            )
+        }
 
         if (uiState.contentEntryButtons?.showDownloadButton == true){
-            Button(
-                onClick = onClickDownload,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorResource(id = R.color.primaryColor)
-                )
-            ) {
-                Text(stringResource(R.string.download).uppercase(),
-                    color = contentColorFor(
-                        colorResource(id = R.color.primaryColor))
-                )
+            item {
+                Button(
+                    onClick = onClickDownload,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = colorResource(id = R.color.primaryColor)
+                    )
+                ) {
+                    Text(stringResource(R.string.download).uppercase(),
+                        color = contentColorFor(
+                            colorResource(id = R.color.primaryColor))
+                    )
+                }
             }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
         }
 
         if (uiState.contentEntryButtons?.showOpenButton == true){
-            Button(
-                onClick = onClickOpen,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorResource(id = R.color.primaryColor)
-                )
-            ) {
-                Text(stringResource(R.string.open).uppercase(),
-                    color = contentColorFor(
-                        colorResource(id = R.color.primaryColor))
-                )
+            item {
+                Button(
+                    onClick = onClickOpen,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = colorResource(id = R.color.primaryColor)
+                    )
+                ) {
+                    Text(stringResource(R.string.open).uppercase(),
+                        color = contentColorFor(
+                            colorResource(id = R.color.primaryColor))
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-        if (uiState.locallyAvailable) {
-            LocallyAvailableRow()
+        items(
+            uiState.activeContentJobItems.size
+        ){
+            ContentJobListItem(
+                uiState = uiState,
+                onClickContentJobItem = onClickContentJobItem,
+                index = it
+            )
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        Divider(thickness = 1.dp)
+        if (uiState.locallyAvailable) {
+            item {
+                LocallyAvailableRow()
+            }
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        QuickActionBarsRow(
-            uiState = uiState,
-            onClickMarkComplete = onClickMarkComplete,
-            onClickDelete = onClickDelete,
-            onClickManageDownload = onClickManageDownload
-        )
+        item {
+            Divider(thickness = 1.dp)
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        Text(text = "Locally Available")
+        item {
+            QuickActionBarsRow(
+                uiState = uiState,
+                onClickMarkComplete = onClickMarkComplete,
+                onClickDelete = onClickDelete,
+                onClickManageDownload = onClickManageDownload
+            )
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        Divider(thickness = 1.dp)
+        item {
+            Text(text = "Locally Available")
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        Text(text = uiState.contentEntry?.description ?: "")
+        item {
+            Divider(thickness = 1.dp)
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        Divider(thickness = 1.dp)
+        item {
+            Text(text = uiState.contentEntry?.description ?: "")
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            Divider(thickness = 1.dp)
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
         if (uiState.translationVisibile){
-            Text(text = stringResource(id = R.string.also_available_in))
+            item {
+                Text(text = stringResource(id = R.string.also_available_in))
+            }
+
+            items(
+                uiState.availableTranslations.size
+            ){
+                ListItem(
+                    modifier = Modifier.clickable {
+                        onClickTranslation()
+                    },
+                    text = { Text(uiState.availableTranslations[it].language?.name ?: "") },
+                )
+            }
         }
     }
 }
@@ -602,6 +667,35 @@ fun RightColumn(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ContentJobListItem(
+    uiState: ContentEntryDetailOverviewUiState,
+    onClickContentJobItem: () -> Unit,
+    index: Int
+){
+    ListItem(
+        modifier = Modifier.clickable {
+            onClickContentJobItem()
+        },
+        text = {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(uiState.activeContentJobItems[index].progressTitle ?: "")
+                Text(uiState.activeContentJobItems[index].progress.toString()+" %")
+            }
+        },
+        secondaryText = {
+            LinearProgressIndicator(
+                progress = (uiState.activeContentJobItems[index].progress/100.0).toFloat(),
+                modifier = Modifier
+                    .height(4.dp),
+            )
+        }
+    )
+}
+
 @Composable
 fun LocallyAvailableRow(){
     Row{
@@ -653,7 +747,7 @@ fun QuickActionBarsRow(
 @Composable
 @Preview
 fun ContentEntryDetailOverviewScreenPreview() {
-    var uiStateVal = ContentEntryDetailOverviewUiState(
+    val uiStateVal = ContentEntryDetailOverviewUiState(
         contentEntry = ContentEntryWithMostRecentContainer().apply {
             title = "Content Title"
             author = "Author"
@@ -677,6 +771,32 @@ fun ContentEntryDetailOverviewScreenPreview() {
             showDeleteButton = true
             showManageDownloadButton = true
         },
+        availableTranslations = listOf(
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    name = "Persian"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    name = "English"
+                }
+            }
+        ),
+        activeContentJobItems = listOf(
+            ContentJobItemProgress().apply {
+                progressTitle = "First"
+                progress = 30
+            },
+            ContentJobItemProgress().apply {
+                progressTitle = "Second"
+                progress = 10
+            },
+            ContentJobItemProgress().apply {
+                progressTitle = "Third"
+                progress = 70
+            }
+        ),
         locallyAvailable = true,
         markCompleteVisible = true,
         translationVisibile = true
