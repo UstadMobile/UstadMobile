@@ -1,6 +1,5 @@
 package com.ustadmobile.core.viewmodel
 
-import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
 data class ContentEntryDetailOverviewUiState(

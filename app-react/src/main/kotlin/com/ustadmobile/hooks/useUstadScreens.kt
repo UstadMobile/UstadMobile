@@ -29,7 +29,7 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
                 InviteViaLinkPreview),
             UstadScreen(ContentEntryDetailOverviewView.VIEW_NAME, "ContentEntryDetailOverview Preview",
-                ContentEntryDetailOverviewPreview),
+                ContentEntryDetailOverviewScreenPreview),
         )
     }
 }
