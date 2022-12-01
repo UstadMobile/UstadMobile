@@ -3,7 +3,6 @@ package com.ustadmobile.hooks
 import com.ustadmobile.core.view.*
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
-import com.ustadmobile.mui.components.UstadCourseBlockEditPreview
 import com.ustadmobile.mui.components.UstadDetailFieldPreview
 import com.ustadmobile.mui.components.UstadEditFieldPreviews
 import com.ustadmobile.view.*
@@ -17,7 +16,6 @@ fun useUstadScreens(): UstadScreens {
                 PersonDetailPreview),
             UstadScreen("UstadEditFields", "Edit Fields", UstadEditFieldPreviews),
             UstadScreen("UstadDetailFields", "Detail Fields", UstadDetailFieldPreview),
-            UstadScreen("UstadCourseBlockEdit", "CourseBlockEdit", UstadCourseBlockEditPreview),
             UstadScreen(PersonEditView.VIEW_NAME, "Person Edit Preview",
                 PersonEditScreenPreview),
             UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",
@@ -36,8 +34,8 @@ fun useUstadScreens(): UstadScreens {
                 SettingsPreview),
             UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
                 SiteTermsDetailScreenPreview),
-            UstadScreen(ContentEntryEdit2View.VIEW_NAME, "ContentEntryEdit Preview",
-                ContentEntryEditScreenPreview),
+            UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",
+                RegisterMinorWaitForParentPreview),
         )
     }
 }
