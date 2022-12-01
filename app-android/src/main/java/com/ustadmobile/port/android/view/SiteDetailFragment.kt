@@ -208,7 +208,6 @@ class SiteDetailFragment: UstadDetailFragment<Site>(), SiteDetailView, Workspace
 fun SiteDetailScreen(
     uiState: SiteDetailUiState,
     onClickLang: (SiteTermsWithLanguage) -> Unit = {},
-    onDeleteIconClicked: () -> Unit = {}
 ){
 
     Column {
@@ -219,32 +218,22 @@ fun SiteDetailScreen(
         )
         UstadDetailField(
             valueText = stringResource(if(uiState.site?.guestLogin == true){R.string.yes} else {R.string.no}),
-            labelText = "Guest login enabled",
+            labelText = stringResource(id = R.string.guest_login_enabled),
             imageId = R.drawable.ic_document_preview
         )
         UstadDetailField(
             valueText = stringResource(if(uiState.site?.registrationAllowed == true){R.string.yes} else {R.string.no}),
-            labelText = "Registration allowed",
+            labelText = stringResource(id = R.string.registration_allowed),
             imageId = R.drawable.ic_baseline_how_to_reg_24
         )
         Text(stringResource(R.string.terms_and_policies), style = Typography.h6)
 
-        uiState.siteTerms.forEach {
+        uiState.siteTerms.forEach {siteTermsWithLanguage -> 
             ListItem(
                 modifier = Modifier.clickable {
-                    onClickLang(it)
+                    onClickLang(siteTermsWithLanguage)
                 },
-                text = {Text(it.stLanguage?.name ?: "")},
-                trailing = {
-                    IconButton(onClick = {
-                        onDeleteIconClicked()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(R.string.delete)
-                        )
-                    }
-                }
+                text = {Text(siteTermsWithLanguage.stLanguage?.name ?: "")},
             )
         }
     }

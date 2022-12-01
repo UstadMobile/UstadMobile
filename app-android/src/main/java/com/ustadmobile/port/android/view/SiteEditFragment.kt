@@ -163,7 +163,7 @@ fun SiteEditScreen(
     uiState: SiteEditUiState,
     onSiteChanged: (Site?) -> Unit = {},
     onItemClicked: (SiteTermsWithLanguage) -> Unit = {},
-    onDeleteIconClicked: () -> Unit = {}
+    onDeleteIconClicked: (SiteTermsWithLanguage) -> Unit = {}
 ){
     Column (
         modifier = Modifier
@@ -209,15 +209,15 @@ fun SiteEditScreen(
             style = Typography.h6
         )
 
-        uiState.siteTerms.forEach {
+        uiState.siteTerms.forEach {item ->
             ListItem(
                 modifier = Modifier.clickable {
-                    onItemClicked(it)
+                    onItemClicked(item)
                 },
-                text = {Text(it.stLanguage?.name ?: "")},
+                text = {Text(item.stLanguage?.name ?: "")},
                         trailing = {
                     IconButton(onClick = {
-                        onDeleteIconClicked()
+                        onDeleteIconClicked(item)
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Delete,

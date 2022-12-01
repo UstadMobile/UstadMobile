@@ -12,6 +12,7 @@ import com.ustadmobile.mui.components.UstadTextEditField
 import csstype.px
 import kotlinx.css.span
 import mui.icons.material.AccountBalanceRounded
+import mui.icons.material.Delete
 import mui.icons.material.WidthFull
 import mui.material.*
 import mui.material.styles.TypographyVariant
@@ -23,11 +24,13 @@ import org.kodein.di.bindings.WithContext
 import react.FC
 import react.Props
 import react.create
+import react.dom.onChange
 
 external interface SiteEditProps: Props {
     var uiState: SiteEditUiState
     var onSiteChanged: (Site?) -> Unit
     var onClickLang: (SiteTermsWithLanguage) -> Unit
+    var onDeleteClick: (SiteTermsWithLanguage) -> Unit
 }
 
 private interface CustomSwitchProps: Props {
@@ -74,14 +77,23 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
                 + strings[MessageID.terms_and_policies]
             }
 
-            props.uiState.siteTerms.forEach {
-                ListItem {
-                    var item = it
-                    onClick = {
-                        props.onClickLang(item)
-                    }
-                    ListItemText {
-                        + (it.stLanguage?.name ?: "")
+            List{
+                props.uiState.siteTerms.forEach { item ->
+                    ListItem {
+
+                        onClick = {
+                            props.onClickLang(item)
+                        }
+                        ListItemText {
+                            + (item.stLanguage?.name ?: "")
+                        }
+
+                        secondaryAction = IconButton.create {
+                            onClick = {
+                                props.onDeleteClick(item)
+                            }
+                            Delete {}
+                        }
                     }
                 }
             }
@@ -96,6 +108,7 @@ private var CustomSwitch = FC<CustomSwitchProps> { props ->
         sx{
             width = width
         }
+
         direction = responsive(mui.material.StackDirection.row)
         spacing = responsive(100.px)
 

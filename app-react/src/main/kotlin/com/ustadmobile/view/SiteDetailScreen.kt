@@ -57,14 +57,14 @@ val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
                 + strings[MessageID.terms_and_policies]
             }
 
-            props.uiState.siteTerms.forEach {
+            props.uiState.siteTerms.forEach { item ->
                 ListItem {
-                    var item = it
+                    var item = item
                     onClick = {
                         props.onClickLang(item)
                     }
                     ListItemText {
-                        + (it.stLanguage?.name ?: "")
+                        + (item.stLanguage?.name ?: "")
                     }
                 }
             }
