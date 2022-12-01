@@ -1,6 +1,7 @@
 package com.ustadmobile.mui.common
 
 import mui.material.*
+import muix.pickers.DateTimePickerProps
 import muix.pickers.MobileDatePickerProps
 import react.ReactNode
 import kotlin.js.Date
@@ -82,6 +83,37 @@ inline var MobileDatePickerProps.onChange: (Date) -> Unit
 
 
 inline var MobileDatePickerProps.disabled: Boolean
+    get() = asDynamic().disabled
+    set(value) {
+        asDynamic().disabled = value
+    }
+
+inline var DateTimePickerProps.label: ReactNode?
+    get() = asDynamic().label
+    set(value) {
+        asDynamic().label = value
+    }
+
+inline var DateTimePickerProps.renderInput: (BaseTextFieldProps) -> ReactNode
+    get() = asDynamic().renderInput
+    set(noinline value) {
+        asDynamic().renderInput = value
+    }
+
+inline var DateTimePickerProps.value: Date?
+    get() = asDynamic().value
+    set(value) {
+        asDynamic().value = value
+    }
+
+inline var DateTimePickerProps.onChange: (Date) -> Unit
+    get() = asDynamic().onChange
+    set(noinline value) {
+        asDynamic().onChange = value
+    }
+
+
+inline var DateTimePickerProps.disabled: Boolean
     get() = asDynamic().disabled
     set(value) {
         asDynamic().disabled = value

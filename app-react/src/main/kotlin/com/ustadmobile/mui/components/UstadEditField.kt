@@ -137,6 +137,12 @@ external interface UstadDateEditFieldProps : Props {
     var timeInMillis: Long
 
     /**
+     * Reserved for future usage: will be required
+     */
+    @Suppress("unused")
+    var timeZoneId: String
+
+    /**
      * Field label
      */
     var label: String
@@ -367,6 +373,16 @@ val UstadEditFieldPreviews = FC<Props> {
             onChange = { }
             error = "Bad Day"
             enabled = false
+        }
+
+        var dateTime: Long by useState { systemTimeInMillis() }
+        UstadDateTimeEditField {
+            timeInMillis = dateTime
+            label = "Date and time"
+            onChange = {
+                dateTime = it
+            }
+            enabled = true
         }
 
         UstadTextEditField {
