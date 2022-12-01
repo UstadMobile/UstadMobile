@@ -179,7 +179,7 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
     LocalizationProvider {
         dateAdapter = AdapterDateFns
 
-        MobileDatePicker {
+        DatePicker {
             disabled = !(props.enabled ?: true)
             label = ReactNode(props.label)
             value = props.timeInMillis.asDate()
@@ -372,7 +372,6 @@ val UstadEditFieldPreviews = FC<Props> {
             label = "Date"
             onChange = { }
             error = "Bad Day"
-            enabled = false
         }
 
         var dateTime: Long by useState { systemTimeInMillis() }
@@ -383,6 +382,16 @@ val UstadEditFieldPreviews = FC<Props> {
                 dateTime = it
             }
             enabled = true
+        }
+
+        var time: Long by useState { systemTimeInMillis() }
+
+        UstadTimeEditField {
+            timeInMillis = time
+            label = "Time"
+            onChange = {
+                time = it
+            }
         }
 
         UstadTextEditField {

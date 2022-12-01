@@ -3,24 +3,18 @@ package com.ustadmobile.mui.components
 import com.ustadmobile.mui.common.*
 import mui.material.TextField
 import muix.pickers.AdapterDateFns
-import muix.pickers.DateTimePicker
 import muix.pickers.LocalizationProvider
+import muix.pickers.TimePicker
 import react.FC
 import react.Props
 import react.ReactNode
 import react.create
 
-external interface UstadDateTimeEditFieldProps: Props {
+external interface UstadTimeEditFieldProps: Props {
     /**
-     * The value as time in millis since 1970
+     * The value as time in millis since midnight
      */
     var timeInMillis: Long
-
-    /**
-     * Reserved for future usage: will be required
-     */
-    @Suppress("unused")
-    var timeZoneId: String
 
     /**
      * Field label
@@ -32,24 +26,17 @@ external interface UstadDateTimeEditFieldProps: Props {
      */
     var onChange: (Long) -> Unit
 
-    /**
-     * Error text to show, if any
-     */
     var error: String?
 
-    /**
-     * Set to false to disable. Default (null) will set the component as enabled.
-     */
     var enabled: Boolean?
-
 
 }
 
-val UstadDateTimeEditField = FC<UstadDateTimeEditFieldProps> { props ->
+val UstadTimeEditField = FC<UstadTimeEditFieldProps> { props ->
     LocalizationProvider {
         dateAdapter = AdapterDateFns
 
-        DateTimePicker {
+        TimePicker {
             disabled = !(props.enabled ?: true)
             label = ReactNode(props.label)
             value = props.timeInMillis.asDate()
@@ -69,6 +56,6 @@ val UstadDateTimeEditField = FC<UstadDateTimeEditFieldProps> { props ->
                 }
             }
         }
+
     }
 }
-

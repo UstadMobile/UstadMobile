@@ -1,8 +1,7 @@
 package com.ustadmobile.mui.common
 
 import mui.material.*
-import muix.pickers.DateTimePickerProps
-import muix.pickers.MobileDatePickerProps
+import muix.pickers.*
 import react.ReactNode
 import kotlin.js.Date
 
@@ -57,32 +56,32 @@ inline var TabsProps.ariaLabel: String
         asDynamic()["aria-label"] = value
     }
 
-inline var MobileDatePickerProps.label: ReactNode?
+inline var DatePickerProps.label: ReactNode?
     get() = asDynamic().label
     set(value) {
         asDynamic().label = value
     }
 
-inline var MobileDatePickerProps.renderInput: (BaseTextFieldProps) -> ReactNode
+inline var DatePickerProps.renderInput: (BaseTextFieldProps) -> ReactNode
     get() = asDynamic().renderInput
     set(noinline value) {
         asDynamic().renderInput = value
     }
 
-inline var MobileDatePickerProps.value: Date?
+inline var DatePickerProps.value: Date?
     get() = asDynamic().value
     set(value) {
         asDynamic().value = value
     }
 
-inline var MobileDatePickerProps.onChange: (Date) -> Unit
+inline var DatePickerProps.onChange: (Date) -> Unit
     get() = asDynamic().onChange
     set(noinline value) {
         asDynamic().onChange = value
     }
 
 
-inline var MobileDatePickerProps.disabled: Boolean
+inline var DatePickerProps.disabled: Boolean
     get() = asDynamic().disabled
     set(value) {
         asDynamic().disabled = value
@@ -118,6 +117,39 @@ inline var DateTimePickerProps.disabled: Boolean
     set(value) {
         asDynamic().disabled = value
     }
+
+
+inline var TimePickerProps.label: ReactNode?
+    get() = asDynamic().label
+    set(value) {
+        asDynamic().label = value
+    }
+
+inline var TimePickerProps.renderInput: (BaseTextFieldProps) -> ReactNode
+    get() = asDynamic().renderInput
+    set(noinline value) {
+        asDynamic().renderInput = value
+    }
+
+inline var TimePickerProps.value: Date?
+    get() = asDynamic().value
+    set(value) {
+        asDynamic().value = value
+    }
+
+inline var TimePickerProps.onChange: (Date) -> Unit
+    get() = asDynamic().onChange
+    set(noinline value) {
+        asDynamic().onChange = value
+    }
+
+
+inline var TimePickerProps.disabled: Boolean
+    get() = asDynamic().disabled
+    set(value) {
+        asDynamic().disabled = value
+    }
+
 
 inline var InputBaseComponentProps.readOnly: Boolean
     get() = asDynamic().readOnly
