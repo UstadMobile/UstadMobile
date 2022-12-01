@@ -1,0 +1,11 @@
+appId: com.toughra.ustadmobile
+---
+- runFlow:
+    file: "../common/add_content.yaml"
+    env:
+      TESTFILENAME: "Epub_Content.epub"
+      TESTCONTENTNAME: "HideContentTest"
+- runFlow:
+    file: "../common/hide_content.yaml"
+    env:
+       TESTCONTENTNAME: "HideContentTest"
