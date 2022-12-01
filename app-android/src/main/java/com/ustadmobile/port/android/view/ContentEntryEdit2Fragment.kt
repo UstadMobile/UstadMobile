@@ -653,7 +653,7 @@ private fun ContentEntryEditScreen(
 }
 
 @Composable
-fun SwitchRow(
+private fun SwitchRow(
     text: String,
     checked: Boolean,
     onChange: (Boolean) -> Unit,

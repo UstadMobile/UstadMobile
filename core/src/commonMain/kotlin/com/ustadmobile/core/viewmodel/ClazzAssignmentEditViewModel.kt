@@ -31,4 +31,8 @@ data class ClazzAssignmentEditUiState(
     val minScoreVisible: Boolean = false,
 
     val fileSubmissionVisible: Boolean = false,
+
+    val textSubmissionVisible: Boolean = false,
+
+    val courseBlockEditUiState: CourseBlockEditUiState = CourseBlockEditUiState(),
 )

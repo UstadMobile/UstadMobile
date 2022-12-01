@@ -12,8 +12,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.node.modifierElementOf
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,16 +21,17 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.generated.locale.MessageID.class_timezone_set
 import com.ustadmobile.core.impl.locale.entityconstants.FileTypeConstants
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
+import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
+import com.ustadmobile.core.impl.locale.entityconstants.TextLimitTypeConstants
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
-import com.ustadmobile.core.viewmodel.LoginUiState
-import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
-import com.ustadmobile.lib.db.entities.CourseGroupSet
+import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
@@ -275,6 +274,9 @@ private fun ClazzAssignmentEditScreen(
     onCaStartDateValueChange: (Long?) -> Unit = {},
     onClickSubmissionType: () -> Unit = {},
     onChangedFileRequired: (Boolean) -> Unit = {},
+    onChangedTextRequired: (Boolean) -> Unit = {},
+    onChangedAllowClassComments: (Boolean) -> Unit = {},
+    onChangedAllowPrivateCommentsFromStudents: (Boolean) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -290,7 +292,7 @@ private fun ClazzAssignmentEditScreen(
             error = uiState.caTitleError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onChangeCourseBlock(uiState.entity?.shallowCopy{
+                onChangeCourseBlock(uiState.entity?.shallowCopy {
                     assignment?.caTitle = it
                 })
             },
@@ -306,6 +308,8 @@ private fun ClazzAssignmentEditScreen(
                 })
             },
         )
+
+        UstadCourseBlockEdit(uiState = uiState.courseBlockEditUiState)
 
         TextValueRow(
             onCaStartDateValueChange,
@@ -343,45 +347,108 @@ private fun ClazzAssignmentEditScreen(
             onClick = onClickSubmissionType,
             modifier = Modifier.weight(0.5F)
         )
-        
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-           Text(text = stringResource(id = R.string.require_file_submission))
 
-           Switch(
-               checked = uiState.entity?.assignment?.caRequireFileSubmission ?: false,
-               onCheckedChange = { onChangedFileRequired(it) },
-               enabled = uiState.fieldsEnabled,
-           )
-        }
+        SwitchRow(
+            text = stringResource(id = R.string.require_file_submission),
+            checked = uiState.entity?.assignment?.caRequireFileSubmission ?: false,
+            onChange = { onChangedFileRequired(it) }
+        )
+
 
         if (uiState.fileSubmissionVisible){
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.entity?.assignment?.caFileType ?: 0,
+                label = stringResource(R.string.file_type),
+                options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS,
+                onOptionSelected = {
+                    onChangeCourseBlock(uiState.entity?.shallowCopy{
+                        assignment?.caFileType = it.value
+                    })
+                },
+                enabled = uiState.fieldsEnabled,
+            )
 
-//            UstadMessageIdOptionExposedDropDownMenuField(
-//                value = uiState.entity?.assignment?.caFileType ?: 0,
-//                label = stringResource(R.string.file_type),
-//                options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS,
-//                onOptionSelected = {
-//                    onPersonChanged(uiState.person?.shallowCopy{
-//                        gender = it.value
-//                    })
-//                },
-//                error = uiState.genderError,
-//                enabled = uiState.fieldsEnabled,
-//            )
+            UstadTextEditField(
+                value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toString(),
+                label = stringResource(id = R.string.size_limit),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onChangeCourseBlock(uiState.entity?.shallowCopy{
+                        assignment?.caSizeLimit = it
+                    })
+                },
+                modifier = Modifier.weight(0.5F)
+            )
+
+            UstadTextEditField(
+                value = (uiState.entity?.assignment?.caNumberOfFiles ?: 0).toString(),
+                label = stringResource(id = R.string.number_of_files),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onChangeCourseBlock(uiState.entity?.shallowCopy{
+                        assignment?.caNumberOfFiles = it
+                    })
+                },
+                modifier = Modifier.weight(0.5F)
+            )
         }
-        UstadTextEditField(
-            value = uiState.groupSet?.cgsName ?: "",
-            label = stringResource(id = R.string.file_type),
-            enabled = uiState.groupSetEnabled,
-            onValueChange = {},
-            onClick = onClickSubmissionType,
-            modifier = Modifier.weight(0.5F)
+
+        SwitchRow(
+            text = stringResource(id = R.string.require_text_submission),
+            checked = uiState.entity?.assignment?.caRequireTextSubmission ?: false,
+            onChange = { onChangedTextRequired(it) }
+        )
+
+        if (uiState.textSubmissionVisible) {
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.entity?.assignment?.caTextLimitType ?: 0,
+                label = stringResource(R.string.limit),
+                options = TextLimitTypeConstants.TEXT_LIMIT_TYPE_MESSAGE_IDS,
+                onOptionSelected = {
+                    onChangeCourseBlock(uiState.entity?.shallowCopy{
+                        assignment?.caTextLimitType = it.value
+                    })
+                },
+                enabled = uiState.fieldsEnabled,
+            )
+
+            UstadTextEditField(
+                value = (uiState.entity?.assignment?.caTextLimit ?: 0).toString(),
+                label = stringResource(id = R.string.maximum),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onChangeCourseBlock(uiState.entity?.shallowCopy{
+                        assignment?.caTextLimit = it
+                    })
+                },
+                modifier = Modifier.weight(0.5F)
+            )
+        }
+
+        UstadMessageIdOptionExposedDropDownMenuField(
+            value = uiState.entity?.assignment?.caSubmissionPolicy ?: 0,
+            label = stringResource(R.string.submission_policy),
+            options = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS,
+            onOptionSelected = {
+                onChangeCourseBlock(uiState.entity?.shallowCopy{
+                    assignment?.caSubmissionPolicy = it.value
+                })
+            },
+            enabled = uiState.fieldsEnabled,
         )
     }
+
+    SwitchRow(
+        text = stringResource(id = R.string.allow_class_comments),
+        checked = uiState.entity?.assignment?.caClassCommentEnabled ?: false,
+        onChange = { onChangedAllowClassComments(it) }
+    )
+
+    SwitchRow(
+        text = stringResource(id = R.string.allow_private_comments_from_students),
+        checked = uiState.entity?.assignment?.caPrivateCommentsEnabled ?: false,
+        onChange = { onChangedAllowPrivateCommentsFromStudents(it) }
+    )
 }
 
 @Composable
@@ -455,9 +522,40 @@ fun CompletionCriteriaRow(
 }
 
 @Composable
+private fun SwitchRow(
+    text: String,
+    checked: Boolean,
+    onChange: (Boolean) -> Unit,
+){
+    Row (
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ){
+
+        Text(text)
+
+        Switch(
+            checked= checked,
+            onCheckedChange = { onChange(it) }
+        )
+    }
+}
+
+@Composable
 @Preview
 fun ClazzAssignmentEditScreenPreview() {
+    val uiStateVal = ClazzAssignmentEditUiState(
+        courseBlockEditUiState = CourseBlockEditUiState(
+            courseBlock = CourseBlock().apply {
+                cbMaxPoints = 78
+                cbCompletionCriteria = 14
+            },
+            minScoreVisible = true,
+            gracePeriodVisible = true,
+        ),
+    )
     MdcTheme {
-        ClazzAssignmentEditScreen()
+        ClazzAssignmentEditScreen(uiStateVal)
     }
 }
