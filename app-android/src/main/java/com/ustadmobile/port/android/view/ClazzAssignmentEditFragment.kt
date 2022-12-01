@@ -271,11 +271,8 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
 @Composable
 private fun ClazzAssignmentEditScreen(
     uiState: ClazzAssignmentEditUiState = ClazzAssignmentEditUiState(),
-    onCaTitleValueChange: (CourseBlockWithEntity?) -> Unit = {},
-    onCaDescriptionValueChange: (CourseBlockWithEntity?) -> Unit = {},
+    onChangeCourseBlock: (CourseBlockWithEntity?) -> Unit = {},
     onCaStartDateValueChange: (Long?) -> Unit = {},
-    onCompletionCriteriaValueChange: (CourseBlockWithEntity?) -> Unit = {},
-    onCbMaxPointsValueChange: (CourseBlockWithEntity?) -> Unit = {},
     onClickSubmissionType: () -> Unit = {},
     onChangedFileRequired: (Boolean) -> Unit = {},
 ) {
@@ -293,7 +290,7 @@ private fun ClazzAssignmentEditScreen(
             error = uiState.caTitleError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onCaTitleValueChange(uiState.entity?.shallowCopy{
+                onChangeCourseBlock(uiState.entity?.shallowCopy{
                     assignment?.caTitle = it
                 })
             },
@@ -304,7 +301,7 @@ private fun ClazzAssignmentEditScreen(
             label = stringResource(id = R.string.description).addOptionalSuffix(),
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onCaDescriptionValueChange(uiState.entity?.shallowCopy{
+                onChangeCourseBlock(uiState.entity?.shallowCopy{
                     assignment?.caDescription = it
                 })
             },
@@ -323,14 +320,14 @@ private fun ClazzAssignmentEditScreen(
 
         CompletionCriteriaRow(
             uiState,
-            onCompletionCriteriaValueChange
+            onChangeCourseBlock
         )
 
         UstadTextEditField(
             value = (uiState.entity?.cbMaxPoints ?: 0).toString(),
             label = stringResource(id = R.string.maximum_points),
             onValueChange = {
-                onCbMaxPointsValueChange(uiState.entity?.shallowCopy{
+                onChangeCourseBlock(uiState.entity?.shallowCopy{
                     cbMaxPoints = Integer.parseInt(it ?: "0")
                 })
             },
@@ -363,18 +360,18 @@ private fun ClazzAssignmentEditScreen(
 
         if (uiState.fileSubmissionVisible){
 
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = uiState.entity?.assignment?.caFileType ?: 0,
-                label = stringResource(R.string.file_type),
-                options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS,
-                onOptionSelected = {
-                    onPersonChanged(uiState.person?.shallowCopy{
-                        gender = it.value
-                    })
-                },
-                error = uiState.genderError,
-                enabled = uiState.fieldsEnabled,
-            )
+//            UstadMessageIdOptionExposedDropDownMenuField(
+//                value = uiState.entity?.assignment?.caFileType ?: 0,
+//                label = stringResource(R.string.file_type),
+//                options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS,
+//                onOptionSelected = {
+//                    onPersonChanged(uiState.person?.shallowCopy{
+//                        gender = it.value
+//                    })
+//                },
+//                error = uiState.genderError,
+//                enabled = uiState.fieldsEnabled,
+//            )
         }
         UstadTextEditField(
             value = uiState.groupSet?.cgsName ?: "",
