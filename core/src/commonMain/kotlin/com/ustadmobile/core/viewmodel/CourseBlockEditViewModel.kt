@@ -1,5 +1,6 @@
 package com.ustadmobile.core.viewmodel
 
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 
 data class CourseBlockEditUiState(
@@ -16,9 +17,10 @@ data class CourseBlockEditUiState(
 
     val caGracePeriodError: String? = null,
 
-    val minScoreVisible: Boolean = false,
-
     val gracePeriodVisible: Boolean = false,
 
     val timeZone: String = "UTC"
-)
+) {
+    val minScoreVisible: Boolean
+        get() = courseBlock?.cbCompletionCriteria == ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
+}

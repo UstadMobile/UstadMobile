@@ -21,41 +21,14 @@ fun UstadCourseBlockEdit(
 
     Column{
 
-        Row {
-            Column(
-                modifier = Modifier.weight(0.5F)
-            ) {
+        UstadDateTimeEditTextField(
+            value = uiState.courseBlock?.cbHideUntilDate ?: 0,
+            dateLabel = stringResource(id = R.string.dont_show_before)
+                .addOptionalSuffix(),
+            timeLabel = stringResource(id = R.string.time)
+        )
 
-                UstadDateEditTextField(
-                    value = uiState.courseBlock?.cbHideUntilDate ?: 0,
-                    label = stringResource(id = R.string.dont_show_before)
-                        .addOptionalSuffix(),
-                    error = uiState.caStartDateError,
-                    enabled = uiState.fieldsEnabled,
-                    onValueChange = {
-                        onCourseBlockChange(uiState.courseBlock?.shallowCopy{
-                            cbHideUntilDate = it
-                        })
-                    }
-                )
-
-                Text(stringResource(R.string.class_timezone_set, uiState.timeZone))
-            }
-
-            Spacer(modifier = Modifier.width(15.dp))
-
-            UstadDateEditTextField(
-                modifier = Modifier.weight(0.5F),
-                value = uiState.courseBlock?.cbHideUntilDate ?: 0,
-                label = stringResource(id = R.string.time),
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onCourseBlockChange(uiState.courseBlock?.shallowCopy{
-                        cbHideUntilDate = it
-                    })
-                }
-            )
-        }
+        Text(stringResource(R.string.class_timezone_set, uiState.timeZone))
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -108,69 +81,20 @@ fun UstadCourseBlockEdit(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Row {
-            UstadDateEditTextField(
-                modifier = Modifier.weight(0.5F),
-                value = uiState.courseBlock?.cbDeadlineDate ?: 0,
-                label = stringResource(id = R.string.deadline).addOptionalSuffix(),
-                error = uiState.caDeadlineError,
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onCourseBlockChange(uiState.courseBlock?.shallowCopy{
-                        cbDeadlineDate = it
-                    })
-                }
-            )
-
-            Spacer(modifier = Modifier.width(15.dp))
-
-            UstadDateEditTextField(
-                modifier = Modifier.weight(0.5F),
-                value = uiState.courseBlock?.cbDeadlineDate ?: 0,
-                label = stringResource(id = R.string.time),
-                error = uiState.caDeadlineError,
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onCourseBlockChange(uiState.courseBlock?.shallowCopy{
-                        cbDeadlineDate = it
-                    })
-                }
-            )
-        }
+        UstadDateTimeEditTextField(
+            value = uiState.courseBlock?.cbDeadlineDate ?: 0,
+            dateLabel = stringResource(id = R.string.deadline).addOptionalSuffix(),
+            timeLabel = stringResource(id = R.string.time)
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.gracePeriodVisible){
-
-            Row {
-                UstadDateEditTextField(
-                    modifier = Modifier.weight(0.5F),
-                    value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
-                    label = stringResource(id = R.string.end_of_grace_period),
-                    error = uiState.caGracePeriodError,
-                    enabled = uiState.fieldsEnabled,
-                    onValueChange = {
-                        onCourseBlockChange(uiState.courseBlock?.shallowCopy{
-                            cbGracePeriodDate = it
-                        })
-                    }
-                )
-
-                Spacer(modifier = Modifier.width(15.dp))
-
-                UstadDateEditTextField(
-                    modifier = Modifier.weight(0.5F),
-                    value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
-                    label = stringResource(id = R.string.time),
-                    error = uiState.caGracePeriodError,
-                    enabled = uiState.fieldsEnabled,
-                    onValueChange = {
-                        onCourseBlockChange(uiState.courseBlock?.shallowCopy{
-                            cbGracePeriodDate = it
-                        })
-                    }
-                )
-            }
+            UstadDateTimeEditTextField(
+                value = uiState.courseBlock?.cbGracePeriodDate ?: 0,
+                dateLabel = stringResource(id = R.string.end_of_grace_period),
+                timeLabel = stringResource(id = R.string.time)
+            )
 
             Spacer(modifier = Modifier.height(10.dp))
 
