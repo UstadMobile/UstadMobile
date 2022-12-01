@@ -615,21 +615,8 @@ private fun ContentEntryEditScreen(
         Spacer(modifier = Modifier.height(15.dp))
 
         if (uiState.containerStorageOptionVisible){
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = uiState.entity?.licenseType ?: 0,
-                label = "",
-                options = PersonConstants.GENDER_MESSAGE_IDS,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = {
-                    onContentChanged(uiState.entity?.shallowCopy {
-                            licenseType = it.value
-                        }
-                    )
-                }
-            )
-
             UstadExposedDropDownMenuField(
-                value = uiState.selectedStorageIndex,
+                value = uiState.selectedContainerStorageDir,
                 label = stringResource(R.string.content_creation_storage_option_title),
                 options = uiState.storageOptions,
                 onOptionSelected = { onSelectContainerStorageDir(it as ContainerStorageDir) },
@@ -709,6 +696,20 @@ fun ContentEntryEditScreenPreview() {
             },
             minScoreVisible = true,
             gracePeriodVisible = true,
+        ),
+        storageOptions = listOf(
+            ContainerStorageDir(
+                name = "Device Memory",
+                dirUri = ""
+            ),
+            ContainerStorageDir(
+                name = "Memory Card",
+                dirUri = ""
+            ),
+        ),
+        selectedContainerStorageDir = ContainerStorageDir(
+            name = "Device Memory",
+            dirUri = ""
         )
     )
 

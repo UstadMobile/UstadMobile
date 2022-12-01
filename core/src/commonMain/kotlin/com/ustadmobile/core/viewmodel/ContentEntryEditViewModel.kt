@@ -25,7 +25,7 @@ data class ContentEntryEditUiState(
 
     val titleError: String? = null,
 
-    val selectedStorageIndex: Int = 0,
+    val selectedContainerStorageDir: ContainerStorageDir? = null,
 
     val metadataResult: MetadataResult? = null,
 

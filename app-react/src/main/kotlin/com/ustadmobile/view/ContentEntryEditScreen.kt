@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.viewmodel.ContentEntryEditUiState
@@ -11,9 +12,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithBlockAndLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadCourseBlockEdit
-import com.ustadmobile.mui.components.UstadMessageIdDropDownField
-import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.mui.components.*
 import csstype.AlignItems
 import csstype.px
 import dom.html.HTMLInputElement
@@ -25,6 +24,7 @@ import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
+import react.ReactNode
 import react.dom.events.ChangeEvent
 
 external interface ContentEntryEditScreenProps : Props {
@@ -42,6 +42,8 @@ external interface ContentEntryEditScreenProps : Props {
     var onChangePubliclyAccessible: (ChangeEvent<HTMLInputElement>, Boolean) -> Unit
 
     var onClickLanguage: () -> Unit
+
+    var onSelectContainerStorageDir: (ContainerStorageDir?) -> Unit
 
 }
 
@@ -64,6 +66,20 @@ val ContentEntryEditScreenPreview = FC<Props> {
                 },
                 minScoreVisible = true,
                 gracePeriodVisible = true,
+            ),
+            storageOptions = listOf(
+                ContainerStorageDir(
+                    name = "Device Memory",
+                    dirUri = ""
+                ),
+                ContainerStorageDir(
+                    name = "Memory Card",
+                    dirUri = ""
+                ),
+            ),
+            selectedContainerStorageDir = ContainerStorageDir(
+                name = "Device Memory",
+                dirUri = ""
             )
         )
     }
@@ -176,17 +192,14 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             }
 
             if (props.uiState.containerStorageOptionVisible){
-                UstadMessageIdDropDownField {
-                    value = props.uiState.entity?.licenseType ?: 0
-                    options = PersonConstants.GENDER_MESSAGE_IDS
+                UstadDropDownField {
+                    value = props.uiState.selectedContainerStorageDir
                     label = strings[MessageID.content_creation_storage_option_title]
-                    id = (props.uiState.entity?.licenseType ?: 0).toString()
+                    options = props.uiState.storageOptions
+                    itemLabel = { ReactNode((it as? ContainerStorageDir)?.name ?: "") }
+                    itemValue = { (it as? ContainerStorageDir)?.name ?: "" }
                     onChange = {
-                        props.onContentChanged(
-                            props.uiState.entity?.shallowCopy {
-                                licenseType = it?.value ?: 0
-                            }
-                        )
+                        props.onSelectContainerStorageDir(it as? ContainerStorageDir)
                     }
                 }
             }
