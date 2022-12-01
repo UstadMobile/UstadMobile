@@ -688,7 +688,8 @@ fun ContentJobListItem(
         },
         secondaryText = {
             LinearProgressIndicator(
-                progress = (uiState.activeContentJobItems[index].progress/100.0).toFloat(),
+                progress = (uiState.activeContentJobItems[index].progress /
+                        uiState.activeContentJobItems[index].total).toFloat(),
                 modifier = Modifier
                     .height(4.dp),
             )
