@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
 @Composable
-fun CourseBlockEdit(
+fun UstadCourseBlockEdit(
     uiState: CourseBlockEditUiState,
     onCourseBlockChange: (CourseBlock?) -> Unit = {}
 ){
@@ -204,5 +204,5 @@ private fun CourseBlockEditPreview() {
         minScoreVisible = true,
         gracePeriodVisible = true,
     )
-    CourseBlockEdit(uiState)
+    UstadCourseBlockEdit(uiState)
 }
