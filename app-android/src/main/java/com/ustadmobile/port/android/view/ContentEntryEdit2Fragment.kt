@@ -36,10 +36,8 @@ import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ContainerStorageDir
 import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toBundle
@@ -47,15 +45,13 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.viewmodel.ContentEntryEditUiState
 import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
-import com.ustadmobile.core.viewmodel.LoginUiState
-import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.isSet
-import com.ustadmobile.port.android.view.composable.CourseBlockEdit
+import com.ustadmobile.port.android.view.composable.UstadCourseBlockEdit
 import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
@@ -564,7 +560,7 @@ private fun ContentEntryEditScreen(
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        CourseBlockEdit(
+        UstadCourseBlockEdit(
             uiState = uiState.courseBlockEditUiState,
             onCourseBlockChange = onCourseBlockChange
         )
