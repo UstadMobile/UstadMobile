@@ -19,6 +19,13 @@ inline var GridProps.sm: Int
         asDynamic().sm = value
     }
 
+inline var GridProps.md: Int
+    get() = TODO()
+    set(value) {
+        asDynamic().md = value
+    }
+
+
 inline var GridProps.lg: Int
     get() = TODO()
     set(value) {
@@ -78,4 +85,10 @@ inline var MobileDatePickerProps.disabled: Boolean
     get() = asDynamic().disabled
     set(value) {
         asDynamic().disabled = value
+    }
+
+inline var InputBaseComponentProps.readOnly: Boolean
+    get() = asDynamic().readOnly
+    set(value) {
+        asDynamic().readOnly = value
     }
