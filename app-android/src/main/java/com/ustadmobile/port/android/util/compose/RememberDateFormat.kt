@@ -15,12 +15,16 @@ import java.util.*
  */
 @Composable
 fun rememberFormattedDate(
-    timeInMillis: Long
+    timeInMillis: Long,
+    timeZoneId: String,
 ): String {
     val context = LocalContext.current
     return remember(timeInMillis) {
         DateFormat
             .getDateFormat(context)
+            .apply {
+                timeZone = TimeZone.getTimeZone(timeZoneId)
+            }
             .format(Date(timeInMillis))
     }
 }
