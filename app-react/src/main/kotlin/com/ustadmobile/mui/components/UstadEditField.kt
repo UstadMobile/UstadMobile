@@ -9,6 +9,7 @@ import kotlinx.js.jso
 import mui.icons.material.Visibility
 import mui.icons.material.VisibilityOff
 import mui.material.*
+import mui.system.responsive
 import muix.pickers.*
 import react.*
 import react.dom.aria.ariaLabel
@@ -51,6 +52,17 @@ external interface UstadEditFieldProps: PropsWithChildren {
      */
     var password: Boolean
 
+    /**
+     * Optional onClick handler. This is generally used for fields that actually lead to a picker
+     * of some kind.
+     */
+    var onClick: (() -> Unit)?
+
+    /**
+     * Sets the readonly attribute on the underlying Input element. Roughly as per
+     *  https://codesandbox.io/s/rect-material-ui-textfield-readonly-st5of?from-embed=&file=/src/index.js:232-249
+     */
+    var readOnly: Boolean
 }
 
 /**
@@ -70,6 +82,18 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
         disabled = !(props.enabled ?: true)
         error = errorText != null
         helperText = errorText?.let { ReactNode(it) }
+        if(props.readOnly) {
+            inputProps = jso {
+                readOnly = true
+            }
+        }
+
+        onClick = props.onClick?.let { onClickHandler ->
+            {
+                onClickHandler()
+            }
+        }
+
         onChange = {
             val currentVal = it.target.asDynamic().value
             errorText = null
@@ -113,6 +137,12 @@ external interface UstadDateEditFieldProps : Props {
     var timeInMillis: Long
 
     /**
+     * Reserved for future usage: will be required
+     */
+    @Suppress("unused")
+    var timeZoneId: String
+
+    /**
      * Field label
      */
     var label: String
@@ -146,11 +176,10 @@ fun Long.asDate(): Date? {
 
 
 val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
-
     LocalizationProvider {
         dateAdapter = AdapterDateFns
 
-        MobileDatePicker {
+        DatePicker {
             disabled = !(props.enabled ?: true)
             label = ReactNode(props.label)
             value = props.timeInMillis.asDate()
@@ -212,9 +241,67 @@ external interface MessageIDDropDownFieldProps: Props {
     var error: String?
 }
 
-val UstadMessageIdDropDownField = FC<MessageIDDropDownFieldProps> { props ->
-    val strings = useStringsXml()
+external interface UstadDropDownFieldProps: Props {
+    /**
+     * The currently selected value. If there is no such value in the list, the selection will be blank
+     */
+    var value: Any?
 
+    /**
+     * A list of options to show.
+     */
+    var options: List<Any>
+
+    /**
+     * A function that will generate a ReactNode to show in the dropdown for an item that is in the
+     * list of options. Normally this would just be ReactNode with plain text, but it could also
+     * include images or other nodes.
+     *
+     * e.g. itemLabel = {
+     *   ReactNode((it as MyItemType).name)
+     * }
+     */
+    var itemLabel: (Any) -> ReactNode
+
+    /**
+     * A function that will generate a unique string for any item in the list of options. This string
+     * will be used for the value tag in the select menuItem.
+     *
+     * e.g. itemValue = {
+     *    (it as MyItemType).id
+     * }
+     */
+    var itemValue: (Any) -> String
+
+    /**
+     * Field label
+     */
+    var label: String
+
+    /**
+     * Event handler
+     */
+    var onChange: (Any?) -> Unit
+
+    /**
+     * DOM element id
+     */
+    var id: String?
+
+    /**
+     * Enabled / disabled control
+     */
+    var enabled: Boolean?
+
+    /**
+     * An error message to show the user. If non-null, the component will be shown in an error state
+     * and the error message will be shown below.
+     */
+    var error: String?
+}
+
+
+val UstadDropDownField = FC<UstadDropDownFieldProps> { props ->
     FormControl {
         fullWidth = true
 
@@ -224,21 +311,21 @@ val UstadMessageIdDropDownField = FC<MessageIDDropDownFieldProps> { props ->
         }
 
         Select {
-            value = props.value
+            value = props.value?.let { props.itemValue(it) }
             id = props.id
             labelId = "${props.id}_label"
             label = ReactNode(props.label)
             disabled = !(props.enabled ?: true)
             onChange = { event, _ ->
-                val selectedVal = ("" + event.target.value).toInt()
-                val selectedItem = props.options.firstOrNull { it.value ==  selectedVal }
+                val selectedVal = ("" + event.target.value)
+                val selectedItem = props.options.firstOrNull { props.itemValue(it) ==  selectedVal }
                 props.onChange(selectedItem)
             }
 
             props.options.forEach { option ->
                 MenuItem {
-                    value = option.value
-                    +strings[option.messageId]
+                    value = props.itemValue(option)
+                    + props.itemLabel(option)
                 }
             }
         }
@@ -252,16 +339,84 @@ val UstadMessageIdDropDownField = FC<MessageIDDropDownFieldProps> { props ->
     }
 }
 
+val UstadMessageIdDropDownField = FC<MessageIDDropDownFieldProps> { props ->
+    val strings = useStringsXml()
+
+    UstadDropDownField {
+        value = props.options.firstOrNull { it.value == props.value }
+        label = props.label
+        options = props.options
+        itemLabel = { ReactNode(strings[(it as MessageIdOption2).messageId]) }
+        itemValue = { (it as MessageIdOption2).value.toString() }
+        onChange = {
+            props.onChange(it as? MessageIdOption2)
+        }
+        id = props.id
+        enabled = props.enabled
+        error = props.error
+    }
+}
+
+class DropDownOption(val label: String, val value: String) {
+    override fun toString(): String {
+        return "DropDownOption label=$label value=$value"
+    }
+}
+
 val UstadEditFieldPreviews = FC<Props> {
     Stack {
+        spacing = responsive(5)
+
         UstadDateEditField {
             timeInMillis = systemTimeInMillis()
             label = "Date"
             onChange = { }
             error = "Bad Day"
-            enabled = false
         }
 
+        var dateTime: Long by useState { systemTimeInMillis() }
+        UstadDateTimeEditField {
+            timeInMillis = dateTime
+            label = "Date and time"
+            onChange = {
+                dateTime = it
+            }
+            enabled = true
+        }
+
+        var time: Long by useState { systemTimeInMillis() }
+
+        UstadTimeEditField {
+            timeInMillis = time
+            label = "Time"
+            onChange = {
+                time = it
+            }
+        }
+
+        UstadTextEditField {
+            label = "Read only field"
+            value = "Cant change me"
+            onChange = { }
+            readOnly = true
+            onClick = {
+                println("Read only field clicked")
+            }
+        }
+
+        var selectedOption: DropDownOption? by useState { DropDownOption("One", "1") }
+
+        UstadDropDownField {
+            value = selectedOption
+            label = "Select options"
+            options = listOf(DropDownOption("One", "1"),
+                DropDownOption("Two", "2"))
+            itemLabel = { ReactNode((it as? DropDownOption)?.label ?: "") }
+            itemValue = { (it as? DropDownOption)?.value ?: "" }
+            onChange = {
+                selectedOption = it as? DropDownOption
+            }
+        }
     }
 }
 

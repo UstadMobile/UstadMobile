@@ -84,6 +84,8 @@ ext {
     version_ktor = "2.1.2"
     version_coroutines = "1.6.3"
     version_atomicfu = "0.18.4"
+    version_kotlinx_datetime = "0.4.0"
+
 
     version_junit = "4.13"
     version_nanohttpd = "2.3.1"
