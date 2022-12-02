@@ -84,6 +84,8 @@ ext {
     version_ktor = "2.1.2"
     version_coroutines = "1.6.3"
     version_atomicfu = "0.18.4"
+    version_kotlinx_datetime = "0.4.0"
+
 
     version_junit = "4.13"
     version_nanohttpd = "2.3.1"
@@ -204,6 +206,9 @@ ext {
     version_npm_moment_timezone = "^0.5.34"
     version_npm_mement_io = "^2.14.0"
     version_npm_mui_lab = "5.0.0-alpha.89"
+
+    //Should be as specified by kotlinx datetime lib https://github.com/Kotlin/kotlinx-datetime#note-about-time-zones-in-js
+    version_npm_joda_timezone = "2.3.0"
 
     // These should be EXACTLY the same version as MUI kotlin wrapper.
     version_npm_mui_styles = "5.10.2"

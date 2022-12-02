@@ -1,7 +1,7 @@
 package com.ustadmobile.mui.common
 
 import mui.material.*
-import muix.pickers.MobileDatePickerProps
+import muix.pickers.*
 import react.ReactNode
 import kotlin.js.Date
 
@@ -18,6 +18,13 @@ inline var GridProps.sm: Int
     set(value) {
         asDynamic().sm = value
     }
+
+inline var GridProps.md: Int
+    get() = TODO()
+    set(value) {
+        asDynamic().md = value
+    }
+
 
 inline var GridProps.lg: Int
     get() = TODO()
@@ -49,33 +56,103 @@ inline var TabsProps.ariaLabel: String
         asDynamic()["aria-label"] = value
     }
 
-inline var MobileDatePickerProps.label: ReactNode?
+inline var DatePickerProps.label: ReactNode?
     get() = asDynamic().label
     set(value) {
         asDynamic().label = value
     }
 
-inline var MobileDatePickerProps.renderInput: (BaseTextFieldProps) -> ReactNode
+inline var DatePickerProps.renderInput: (BaseTextFieldProps) -> ReactNode
     get() = asDynamic().renderInput
     set(noinline value) {
         asDynamic().renderInput = value
     }
 
-inline var MobileDatePickerProps.value: Date?
+inline var DatePickerProps.value: Date?
     get() = asDynamic().value
     set(value) {
         asDynamic().value = value
     }
 
-inline var MobileDatePickerProps.onChange: (Date) -> Unit
+inline var DatePickerProps.onChange: (Date) -> Unit
     get() = asDynamic().onChange
     set(noinline value) {
         asDynamic().onChange = value
     }
 
 
-inline var MobileDatePickerProps.disabled: Boolean
+inline var DatePickerProps.disabled: Boolean
     get() = asDynamic().disabled
     set(value) {
         asDynamic().disabled = value
+    }
+
+inline var DateTimePickerProps.label: ReactNode?
+    get() = asDynamic().label
+    set(value) {
+        asDynamic().label = value
+    }
+
+inline var DateTimePickerProps.renderInput: (BaseTextFieldProps) -> ReactNode
+    get() = asDynamic().renderInput
+    set(noinline value) {
+        asDynamic().renderInput = value
+    }
+
+inline var DateTimePickerProps.value: Date?
+    get() = asDynamic().value
+    set(value) {
+        asDynamic().value = value
+    }
+
+inline var DateTimePickerProps.onChange: (Date) -> Unit
+    get() = asDynamic().onChange
+    set(noinline value) {
+        asDynamic().onChange = value
+    }
+
+
+inline var DateTimePickerProps.disabled: Boolean
+    get() = asDynamic().disabled
+    set(value) {
+        asDynamic().disabled = value
+    }
+
+
+inline var TimePickerProps.label: ReactNode?
+    get() = asDynamic().label
+    set(value) {
+        asDynamic().label = value
+    }
+
+inline var TimePickerProps.renderInput: (BaseTextFieldProps) -> ReactNode
+    get() = asDynamic().renderInput
+    set(noinline value) {
+        asDynamic().renderInput = value
+    }
+
+inline var TimePickerProps.value: Date?
+    get() = asDynamic().value
+    set(value) {
+        asDynamic().value = value
+    }
+
+inline var TimePickerProps.onChange: (Date) -> Unit
+    get() = asDynamic().onChange
+    set(noinline value) {
+        asDynamic().onChange = value
+    }
+
+
+inline var TimePickerProps.disabled: Boolean
+    get() = asDynamic().disabled
+    set(value) {
+        asDynamic().disabled = value
+    }
+
+
+inline var InputBaseComponentProps.readOnly: Boolean
+    get() = asDynamic().readOnly
+    set(value) {
+        asDynamic().readOnly = value
     }

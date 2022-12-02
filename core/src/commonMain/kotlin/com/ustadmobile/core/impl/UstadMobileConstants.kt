@@ -49,6 +49,11 @@ object UstadMobileConstants {
     const val LOCALE_CODE = 0
 
     /**
+     * String constant for Coordinated Universal Time
+     */
+    const val UTC = "UTC"
+
+    /**
      * Map of all supported UI language to the language name (in its respective language)
      */
     val LANGUAGE_NAMES = mapOf(
