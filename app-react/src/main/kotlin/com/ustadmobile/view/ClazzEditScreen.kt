@@ -20,10 +20,7 @@ import mui.material.Stack
 import mui.material.StackDirection
 import mui.system.responsive
 import mui.system.sx
-import react.FC
-import react.Props
-import react.create
-import react.useState
+import react.*
 
 external interface ClazzEditScreenProps : Props {
 
@@ -212,14 +209,13 @@ val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
         props.uiState.clazzSchedules.forEach { schedule ->
             ListItem{
                 onClick = { props.onClickEditSchedule(schedule) }
-                UstadDetailField {
-                    valueText = "Line one"
-                    labelText = "Line Two"
-                    onClick = { props.onClickEditSchedule(schedule) }
-                    secondaryActionContent = IconButton.create {
-                        onClick = { props.onClickDeleteSchedule(schedule) }
-                        Delete {}
-                    }
+                secondaryAction = IconButton.create {
+                    onClick = { props.onClickDeleteSchedule(schedule) }
+                    Delete {}
+                }
+                ListItemText{
+                    primary = ReactNode("Line one")
+                    secondary = ReactNode("Line Two")
                 }
             }
         }
