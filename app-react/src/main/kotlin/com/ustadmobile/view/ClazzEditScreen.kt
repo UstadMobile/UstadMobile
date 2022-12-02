@@ -4,6 +4,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
+import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateEditField
 import com.ustadmobile.mui.components.UstadTextEditField
 import mui.icons.material.Add
@@ -20,7 +22,7 @@ external interface ClazzEditScreenProps : Props {
 
     var uiState: ClazzEditUiState
 
-    var onClazzNameValueChange: (String) -> Unit
+    var onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology) -> Unit
 
     var onClazzDescValueChange: (String) -> Unit
 
@@ -33,7 +35,6 @@ external interface ClazzEditScreenProps : Props {
     var onClickEditCourseBlock: () -> Unit
 
     var onCheckedAttendance: (Boolean) -> Unit
-//    var onChangedAttendanceSwitch: (Boolean) -> Unit
 
     var onClickTerminology: () -> Unit
 }
@@ -55,11 +56,13 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             UstadTextEditField {
                 value = props.uiState.entity?.clazzName ?: ""
                 label = strings[MessageID.name]
-                onChange = {
-                    props.onClazzNameValueChange(it)
-                }
-                error = props.uiState.clazzNameError
                 enabled = props.uiState.fieldsEnabled
+                onChange = {
+                    props.onClazzChanged(
+                        props.uiState.entity?.shallowCopy {
+                            gender = it?.value ?: 0
+                        })
+                }
             }
 
             UstadTextEditField {
@@ -78,7 +81,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 onChange = {
                     props.onClickSchool()
                 }
-                error = props.uiState.institutionError
+                error = props.uiState.schoo
                 enabled = props.uiState.fieldsEnabled
             }
 
@@ -108,7 +111,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 onChange = {
                     props.onClickTimezone()
                 }
-//                error = props.uiState.institutionError
+                error = props.uiState.institutionError
                 enabled = props.uiState.fieldsEnabled
             }
 
@@ -148,12 +151,12 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             }
 
             UstadTextEditField {
-//                value = props.uiState.entity?.clazzEnrolmentPolicy ?: 0
+                value = props.uiState.entity?.clazzEnrolmentPolicy ?: 0
                 label = strings[MessageID.enrolment_policy]
-//                onChange = {
-//                    props.onClickTimezone()
-//                }
-//                error = props.uiState.institutionError
+                onChange = {
+                    props.onClickTimezone()
+                }
+                error = props.uiState.institutionError
                 enabled = props.uiState.fieldsEnabled
             }
 
@@ -163,7 +166,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 onChange = {
                     props.onClickTerminology()
                 }
-//                error = props.uiState.institutionError
+                error = props.uiState.institutionError
                 enabled = props.uiState.fieldsEnabled
             }
         }

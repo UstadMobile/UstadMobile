@@ -9,8 +9,6 @@ data class ClazzEditUiState(
 
     val entity: ClazzWithHolidayCalendarAndSchoolAndTerminology? = null,
 
-    val clazzNameError: String? = null,
-
     val clazzDescError: String? = null,
 
     val institutionError: String? = null,
