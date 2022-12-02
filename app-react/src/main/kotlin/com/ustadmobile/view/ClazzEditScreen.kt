@@ -22,9 +22,7 @@ external interface ClazzEditScreenProps : Props {
 
     var uiState: ClazzEditUiState
 
-    var onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology) -> Unit
-
-    var onClazzDescValueChange: (String) -> Unit
+    var onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit
 
     var onClickSchool: () -> Unit
 
@@ -60,7 +58,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 onChange = {
                     props.onClazzChanged(
                         props.uiState.entity?.shallowCopy {
-                            gender = it?.value ?: 0
+                            clazzName = it
                         })
                 }
             }
@@ -68,11 +66,14 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             UstadTextEditField {
                 value = props.uiState.entity?.clazzDesc ?: ""
                 label = strings[MessageID.description]
-                onChange = {
-                    props.onClazzDescValueChange(it)
-                }
                 error = props.uiState.clazzDescError
                 enabled = props.uiState.fieldsEnabled
+                onChange = {
+                    props.onClazzChanged(
+                        props.uiState.entity?.shallowCopy {
+                            clazzDesc = it
+                        })
+                }
             }
 
             UstadTextEditField {
