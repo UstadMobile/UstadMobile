@@ -137,6 +137,12 @@ external interface UstadDateEditFieldProps : Props {
     var timeInMillis: Long
 
     /**
+     * Reserved for future usage: will be required
+     */
+    @Suppress("unused")
+    var timeZoneId: String
+
+    /**
      * Field label
      */
     var label: String
@@ -173,7 +179,7 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
     LocalizationProvider {
         dateAdapter = AdapterDateFns
 
-        MobileDatePicker {
+        DatePicker {
             disabled = !(props.enabled ?: true)
             label = ReactNode(props.label)
             value = props.timeInMillis.asDate()
@@ -366,7 +372,26 @@ val UstadEditFieldPreviews = FC<Props> {
             label = "Date"
             onChange = { }
             error = "Bad Day"
-            enabled = false
+        }
+
+        var dateTime: Long by useState { systemTimeInMillis() }
+        UstadDateTimeEditField {
+            timeInMillis = dateTime
+            label = "Date and time"
+            onChange = {
+                dateTime = it
+            }
+            enabled = true
+        }
+
+        var time: Long by useState { systemTimeInMillis() }
+
+        UstadTimeEditField {
+            timeInMillis = time
+            label = "Time"
+            onChange = {
+                time = it
+            }
         }
 
         UstadTextEditField {

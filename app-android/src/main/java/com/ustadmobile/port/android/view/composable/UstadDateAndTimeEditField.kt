@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view.composable
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -20,17 +19,17 @@ fun UstadDateTimeEditTextField(
     value: Long,
     dateLabel: String,
     timeLabel: String,
+    timeZoneId: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     @Suppress("UNUSED_PARAMETER") //Reserved for future use
-    timezoneId: String = "UTC",
     error: String? = null,
     onValueChange: (Long) -> Unit = {},
 ) {
 
-    val calendar = remember(value, timezoneId) {
+    val calendar = remember(value, timeZoneId) {
         Calendar.getInstance().also {
-            it.timeZone = TimeZone.getTimeZone(timezoneId)
+            it.timeZone = TimeZone.getTimeZone(timeZoneId)
             it.timeInMillis = value
         }
     }
@@ -50,7 +49,7 @@ fun UstadDateTimeEditTextField(
             value = dateInMs,
             label = dateLabel,
             enabled = enabled,
-            timezoneId = timezoneId,
+            timeZoneId = timeZoneId,
             error = error,
             onValueChange = {
                 onValueChange(it + timeOfDayInMs)
@@ -77,6 +76,7 @@ fun UstadDateTimeEditTextFieldPreview() {
     UstadDateTimeEditTextField(
         value = System.currentTimeMillis(),
         dateLabel =  "Date",
-        timeLabel = "Time"
+        timeLabel = "Time",
+        timeZoneId = TimeZone.getDefault().id
     )
 }
