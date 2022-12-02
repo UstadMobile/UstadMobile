@@ -4,7 +4,10 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.hooks.useTimeInOtherTimeZoneAsJsDate
 import com.ustadmobile.mui.common.*
+import com.ustadmobile.util.ext.toMillisInOtherTimeZone
+import kotlinx.datetime.TimeZone
 import kotlinx.js.jso
 import mui.icons.material.Visibility
 import mui.icons.material.VisibilityOff
@@ -176,16 +179,18 @@ fun Long.asDate(): Date? {
 
 
 val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
+    val dateVal = useTimeInOtherTimeZoneAsJsDate(props.timeInMillis, props.timeZoneId)
+
     LocalizationProvider {
         dateAdapter = AdapterDateFns
 
         DatePicker {
             disabled = !(props.enabled ?: true)
             label = ReactNode(props.label)
-            value = props.timeInMillis.asDate()
+            value = dateVal
 
             onChange = {
-                props.onChange(it.getTime().toLong())
+                props.onChange(it.toMillisInOtherTimeZone(props.timeZoneId))
             }
 
             renderInput = { params ->
@@ -369,6 +374,7 @@ val UstadEditFieldPreviews = FC<Props> {
 
         UstadDateEditField {
             timeInMillis = systemTimeInMillis()
+            timeZoneId = TimeZone.currentSystemDefault().id
             label = "Date"
             onChange = { }
             error = "Bad Day"
@@ -377,6 +383,7 @@ val UstadEditFieldPreviews = FC<Props> {
         var dateTime: Long by useState { systemTimeInMillis() }
         UstadDateTimeEditField {
             timeInMillis = dateTime
+            timeZoneId = TimeZone.currentSystemDefault().id
             label = "Date and time"
             onChange = {
                 dateTime = it

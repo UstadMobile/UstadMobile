@@ -1,6 +1,8 @@
 package com.ustadmobile.util.ext
 
 import com.ustadmobile.core.util.moment
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toKotlinInstant
 import kotlin.js.Date
 
 const val TIME_FORMAT_H_M = "HH:mm"
@@ -56,4 +58,21 @@ fun Date.timeInMillsFromStartOfDay(timezone: String? = null): Long {
 fun Date.addDays(days: Int, timezone: String? = null): Date {
     val utc = moment.utc(this).toDate()
     return moment(utc).utcOffset(timezone ?: "").add(days, "days").toDate()
+}
+
+/**
+ * Given that the JS Date object represents a time at the system default timezone (e.g. as we get
+ * from the MUI pickers), convert this into millis where it would be the same date and time of day
+ * in the otherTimeZone
+ *
+ * See toSameDateTimeInOtherTimeZone
+ */
+fun Date.toMillisInOtherTimeZone(
+    otherTimeZone: String,
+): Long {
+    return toKotlinInstant()
+        .toSameDateTimeInOtherTimeZone(
+            fromTimeZone = TimeZone.currentSystemDefault(),
+            toTimeZone = TimeZone.of(otherTimeZone)
+        ).toEpochMilliseconds()
 }
