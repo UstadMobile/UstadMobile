@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
+import com.ustadmobile.lib.db.entities.Schedule
 
 data class ClazzEditUiState(
 
@@ -9,13 +10,12 @@ data class ClazzEditUiState(
 
     val entity: ClazzWithHolidayCalendarAndSchoolAndTerminology? = null,
 
-    val clazzDescError: String? = null,
-
-    val institutionError: String? = null,
-
     val clazzStartDateError: String? = null,
 
     val clazzEndDateError: String? = null,
+
+    var clazzSchedules: List<Schedule> = emptyList()
+
 ) {
 
     val clazzEditAttendanceChecked: Boolean

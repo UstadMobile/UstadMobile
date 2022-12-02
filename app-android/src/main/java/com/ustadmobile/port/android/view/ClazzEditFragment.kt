@@ -4,26 +4,47 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Message
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzEditBinding
 import com.toughra.ustadmobile.databinding.ItemScheduleBinding
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.core.viewmodel.ClazzEditUiState
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
+import com.ustadmobile.port.android.util.ext.MS_PER_MIN
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
+import com.ustadmobile.port.android.view.composable.*
+import java.util.*
 
 interface ClazzEditFragmentEventHandler {
 
@@ -284,4 +305,318 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
     }
 
 
+}
+
+@Composable
+private fun ClazzEditScreen(
+    uiState: ClazzEditUiState = ClazzEditUiState(),
+    onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
+    onClickSchool: () -> Unit = {},
+    onClickTimezone: () -> Unit = {},
+    onClickAddCourseBlock: () -> Unit = {},
+    onClickAddSchedule: () -> Unit = {},
+    onClickEditSchedule: (Schedule) -> Unit = {},
+    onClickDeleteSchedule: (Schedule) -> Unit = {},
+    onClickHolidayCalendar: () -> Unit = {},
+    onCheckedAttendance: (Boolean) -> Unit = {},
+    onClickTerminology: () -> Unit = {},
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    )  {
+
+        item {
+            Text(text = stringResource(id = R.string.basic_details),
+                style = Typography.h6
+            )
+        }
+        
+        item { 
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.clazzName ?: "",
+                label = stringResource(id = R.string.name),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onClazzChanged(
+                        uiState.entity?.shallowCopy {
+                            clazzName = it
+                        }
+                    )
+                }
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.clazzDesc ?: "",
+                label = stringResource(id = R.string.description).addOptionalSuffix(),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onClazzChanged(
+                        uiState.entity?.shallowCopy {
+                            clazzDesc = it
+                        }
+                    )
+                }
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.school?.schoolName ?: "",
+                label = stringResource(id = R.string.institution),
+                enabled = uiState.fieldsEnabled,
+                onClick = onClickSchool,
+                onValueChange = {}
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            UstadDateEditTextField(
+                value = uiState.entity?.clazzStartTime ?: 0,
+                label = stringResource(id = R.string.start_date),
+                error = uiState.clazzStartDateError,
+                enabled = uiState.fieldsEnabled,
+                timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
+                onValueChange = {
+                    onClazzChanged(
+                        uiState.entity?.shallowCopy {
+                            clazzStartTime = it
+                        }
+                    )
+                }
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            UstadDateEditTextField(
+                value = uiState.entity?.clazzEndTime ?: 0,
+                label = stringResource(id = R.string.end_date).addOptionalSuffix(),
+                error = uiState.clazzEndDateError,
+                enabled = uiState.fieldsEnabled,
+                timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
+                onValueChange = {
+                    onClazzChanged(
+                        uiState.entity?.shallowCopy {
+                            clazzEndTime = it
+                        }
+                    )
+                }
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.clazzTimeZone ?: "",
+                label = stringResource(id = R.string.timezone),
+                enabled = uiState.fieldsEnabled,
+                onClick = { onClickTimezone() },
+                onValueChange = {}
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            Text(text = stringResource(id = R.string.course_blocks))
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            AddButton(
+                onclick = onClickAddCourseBlock,
+                text = stringResource(id = R.string.add_block)
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            Text(text = stringResource(id = R.string.schedule))
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            AddButton(
+                onclick = onClickAddSchedule,
+                text = stringResource(id = R.string.add_a_schedule)
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        items(
+            uiState.clazzSchedules.size
+        ){
+            UstadDetailField(
+                valueText = "Line one",
+                labelText = "Line Two",
+                onClick = { onClickEditSchedule(uiState.clazzSchedules[it]) },
+                secondaryActionContent = {
+                    IconButton(
+                        onClick = { onClickDeleteSchedule(uiState.clazzSchedules[it]) },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = stringResource(id = R.string.delete),
+                        )
+                    }
+                }
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
+                label = stringResource(id = R.string.holiday_calendar),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {},
+                onClick = onClickHolidayCalendar
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            Text(text = stringResource(id = R.string.course_setup))
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            SwitchRow(
+                text = stringResource(id = R.string.attendance),
+                checked = uiState.clazzEditAttendanceChecked,
+                onChange = { onCheckedAttendance(it) }
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.entity?.clazzEnrolmentPolicy ?: 0,
+                label = stringResource(R.string.enrolment_policy),
+                options = EnrolmentPolicyConstants.ENROLMENT_POLICY_MESSAGE_IDS,
+                enabled = uiState.fieldsEnabled,
+                onOptionSelected = {
+                    onClazzChanged(uiState.entity?.shallowCopy{
+                        clazzEnrolmentPolicy = it.value
+                    })
+                }
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.terminology?.ctTitle ?: "",
+                label = stringResource(id = R.string.terminology),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {},
+                onClick = onClickTerminology
+            )
+        }
+    }
+}
+
+@Composable
+private fun SwitchRow(
+    text: String,
+    checked: Boolean,
+    onChange: (Boolean) -> Unit,
+){
+    Row (
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ){
+
+        Text(text)
+
+        Switch(
+            checked= checked,
+            onCheckedChange = { onChange(it) }
+        )
+    }
+}
+
+@Composable
+private fun AddButton(
+    onclick: () -> Unit,
+    text: String
+){
+    TextButton(
+        onClick = onclick,
+        modifier = Modifier
+            .fillMaxWidth(),
+    ) {
+        Row {
+            Icon(
+                Icons.Filled.Add,
+                "contentDescription"
+            )
+
+            Text(text.uppercase())
+        }
+    }
+}
+
+@Composable
+@Preview
+fun ClazzEditScreenPreview() {
+    MdcTheme {
+        ClazzEditScreen()
+    }
 }

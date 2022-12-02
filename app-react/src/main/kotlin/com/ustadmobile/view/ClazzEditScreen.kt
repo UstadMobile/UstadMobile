@@ -3,16 +3,23 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
+import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadDateEditField
-import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.mui.components.*
+import com.ustadmobile.util.ext.addOptionalSuffix
+import csstype.AlignItems
+import csstype.px
 import mui.icons.material.Add
+import mui.icons.material.Delete
 import mui.material.*
 import mui.material.styles.TypographyVariant
-import mui.system.Stack
+import mui.material.Stack
+import mui.material.StackDirection
 import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
 import react.create
@@ -30,7 +37,13 @@ external interface ClazzEditScreenProps : Props {
 
     var onClickAddCourseBlock: () -> Unit
 
-    var onClickEditCourseBlock: () -> Unit
+    var onClickAddSchedule: () -> Unit
+
+    var onClickEditSchedule: (Schedule) -> Unit
+
+    var onClickDeleteSchedule: (Schedule) -> Unit
+
+    var onClickHolidayCalendar: () -> Unit
 
     var onCheckedAttendance: (Boolean) -> Unit
 
@@ -59,61 +72,65 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                     props.onClazzChanged(
                         props.uiState.entity?.shallowCopy {
                             clazzName = it
-                        })
+                        }
+                    )
                 }
             }
 
             UstadTextEditField {
                 value = props.uiState.entity?.clazzDesc ?: ""
-                label = strings[MessageID.description]
-                error = props.uiState.clazzDescError
+                label = strings[MessageID.description].addOptionalSuffix(strings)
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
                     props.onClazzChanged(
                         props.uiState.entity?.shallowCopy {
                             clazzDesc = it
-                        })
+                        }
+                    )
                 }
             }
 
             UstadTextEditField {
                 value = props.uiState.entity?.school?.schoolName ?: ""
                 label = strings[MessageID.institution]
-                onChange = {
-                    props.onClickSchool()
-                }
-                error = props.uiState.schoo
                 enabled = props.uiState.fieldsEnabled
+                onClick = props.onClickSchool
+                onChange = {}
             }
 
             UstadDateEditField {
                 timeInMillis = props.uiState.entity?.clazzStartTime ?: 0
                 label = strings[MessageID.start_date]
-                onChange = {
-
-                }
                 error = props.uiState.clazzStartDateError
                 enabled = props.uiState.fieldsEnabled
+                onChange = {
+                    props.onClazzChanged(
+                        props.uiState.entity?.shallowCopy {
+                            clazzStartTime = it
+                        }
+                    )
+                }
             }
 
             UstadDateEditField {
                 timeInMillis = props.uiState.entity?.clazzEndTime ?: 0
-                label = strings[MessageID.end_date]
-                onChange = {
-
-                }
+                label = strings[MessageID.end_date].addOptionalSuffix(strings)
                 error = props.uiState.clazzEndDateError
                 enabled = props.uiState.fieldsEnabled
+                onChange = {
+                    props.onClazzChanged(
+                        props.uiState.entity?.shallowCopy {
+                            clazzEndTime = it
+                        }
+                    )
+                }
             }
 
             UstadTextEditField {
                 value = props.uiState.entity?.clazzTimeZone ?: ""
                 label = strings[MessageID.timezone]
-                onChange = {
-                    props.onClickTimezone()
-                }
-                error = props.uiState.institutionError
                 enabled = props.uiState.fieldsEnabled
+                onClick = { props.onClickTimezone() }
             }
 
             Typography {
@@ -133,42 +150,109 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
             }
 
             Button {
-                onClick = { props.onClickAddCourseBlock }
+                onClick = { props.onClickAddSchedule }
                 variant = ButtonVariant.text
                 startIcon = Add.create()
 
                 + strings[MessageID.add_a_schedule].uppercase()
             }
 
+            ClazzSchedulesList {
+                uiState = props.uiState
+                onClickEditSchedule = props.onClickEditSchedule
+                onClickDeleteSchedule = props.onClickDeleteSchedule
+            }
+
+
+            UstadTextEditField {
+                value = props.uiState.entity?.holidayCalendar?.umCalendarName ?: ""
+                label = strings[MessageID.holiday_calendar]
+                enabled = props.uiState.fieldsEnabled
+                onChange = {}
+                onClick = props.onClickHolidayCalendar
+            }
+
             Typography {
                 + strings[MessageID.course_setup]
             }
 
-            Switch {
-                disabled = !props.uiState.fieldsEnabled
+            SwitchRow {
+                text = strings[MessageID.attendance]
                 checked = props.uiState.clazzEditAttendanceChecked
-
-                + strings[MessageID.attendance]
+                onChange = { props.onCheckedAttendance(it) }
             }
 
-            UstadTextEditField {
+            UstadMessageIdDropDownField {
                 value = props.uiState.entity?.clazzEnrolmentPolicy ?: 0
+                options = EnrolmentPolicyConstants.ENROLMENT_POLICY_MESSAGE_IDS
                 label = strings[MessageID.enrolment_policy]
+                id = (props.uiState.entity?.clazzEnrolmentPolicy ?: 0).toString()
                 onChange = {
-                    props.onClickTimezone()
+                    props.onClazzChanged(
+                        props.uiState.entity?.shallowCopy {
+                            clazzEnrolmentPolicy = it?.value ?: 0
+                        })
                 }
-                error = props.uiState.institutionError
-                enabled = props.uiState.fieldsEnabled
             }
 
             UstadTextEditField {
                 value = props.uiState.entity?.terminology?.ctTitle ?: ""
                 label = strings[MessageID.terminology]
-                onChange = {
-                    props.onClickTerminology()
-                }
-                error = props.uiState.institutionError
                 enabled = props.uiState.fieldsEnabled
+                onChange = {}
+                onClick = props.onClickTerminology
+            }
+        }
+    }
+}
+
+val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
+
+    List{
+        props.uiState.clazzSchedules.forEach { schedule ->
+            ListItem{
+                onClick = { props.onClickEditSchedule(schedule) }
+                UstadDetailField {
+                    valueText = "Line one"
+                    labelText = "Line Two"
+                    onClick = { props.onClickEditSchedule(schedule) }
+                    secondaryActionContent = IconButton.create {
+                        onClick = { props.onClickDeleteSchedule(schedule) }
+                        Delete {}
+                    }
+                }
+            }
+        }
+    }
+}
+
+external interface SwitchRowProps : Props {
+
+    var text: String
+
+    var checked: Boolean
+
+    var onChange: (Boolean) -> Unit
+
+}
+
+private val SwitchRow = FC<SwitchRowProps> { props ->
+
+    Stack {
+        direction = responsive(StackDirection.row)
+        spacing = responsive(20.px)
+        sx {
+            alignItems = AlignItems.center
+        }
+
+        Typography {
+            + props.text
+        }
+
+        Switch {
+            checked= props.checked
+            onChange = { _, it ->
+                props.onChange(it)
             }
         }
     }
