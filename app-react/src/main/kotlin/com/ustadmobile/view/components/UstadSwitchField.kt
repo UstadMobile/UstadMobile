@@ -16,7 +16,7 @@ private val labelClassName : ClassName by lazy {
 }
 
 
-external interface UstadSwitchProps: Props {
+external interface UstadSwitchFieldProps: Props {
 
     /**
      * True if the switch is on, false otherwise
@@ -49,7 +49,7 @@ external interface UstadSwitchProps: Props {
  * Standard switch implementation. This will show the label at the start (e.g. left by default),
  * and the switch itself to the end (e.g. right by default) as per normal material design.
  */
-val UstadSwitch = FC<UstadSwitchProps> { props ->
+val UstadSwitchField = FC<UstadSwitchFieldProps> { props ->
     FormControl {
         error = props.error != null
         FormControlLabel {

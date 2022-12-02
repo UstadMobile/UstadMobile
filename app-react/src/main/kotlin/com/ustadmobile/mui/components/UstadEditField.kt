@@ -9,7 +9,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useTimeInOtherTimeZoneAsJsDate
 import com.ustadmobile.mui.common.*
 import com.ustadmobile.util.ext.toMillisInOtherTimeZone
-import com.ustadmobile.view.components.UstadSwitch
+import com.ustadmobile.view.components.UstadSwitchField
 import kotlinx.datetime.TimeZone
 import kotlinx.js.jso
 import mui.icons.material.Visibility
@@ -449,7 +449,7 @@ val UstadEditFieldPreviews = FC<Props> {
 
         var switchChecked by useState { false }
 
-        UstadSwitch {
+        UstadSwitchField {
             label = "Switch"
             checked = switchChecked
             onChanged = {
