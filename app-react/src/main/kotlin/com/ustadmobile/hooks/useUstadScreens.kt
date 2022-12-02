@@ -34,8 +34,8 @@ fun useUstadScreens(): UstadScreens {
                 SettingsPreview),
             UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
                 SiteTermsDetailScreenPreview),
-            UstadScreen(ScheduleEditView.VIEW_NAME, "ScheduleEdit Preview",
-                ScheduleEditScreenPreview),
+            UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",
+                RegisterMinorWaitForParentPreview),
         )
     }
 }
