@@ -25,8 +25,11 @@ import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.viewmodel.ScheduleEditUiState
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
+import com.ustadmobile.port.android.util.ext.MS_PER_MIN
 import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.port.android.view.composable.UstadTimeEditTextField
 
 class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
 
@@ -129,30 +132,31 @@ private fun ScheduleEditScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         Row {
-            UstadDateEditTextField(
+
+            UstadTimeEditTextField(
                 modifier = Modifier.weight(0.5F),
-                value = uiState.entity?.sceduleStartTime ?: 0,
+                value = (uiState.entity?.sceduleStartTime ?: 0).toInt(),
                 label = stringResource(id = R.string.from),
                 error = uiState.fromTimeError,
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onScheduleChanged(uiState.entity?.shallowCopy{
-                        sceduleStartTime = it
+                        sceduleStartTime = it.toLong()
                     })
                 }
             )
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            UstadDateEditTextField(
+            UstadTimeEditTextField(
                 modifier = Modifier.weight(0.5F),
-                value = uiState.entity?.scheduleEndTime ?: 0,
+                value = (uiState.entity?.scheduleEndTime ?: 0).toInt(),
                 label = stringResource(id = R.string.to),
                 error = uiState.toTimeError,
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
                     onScheduleChanged(uiState.entity?.shallowCopy{
-                        scheduleEndTime = it
+                        scheduleEndTime = it.toLong()
                     })
                 }
             )

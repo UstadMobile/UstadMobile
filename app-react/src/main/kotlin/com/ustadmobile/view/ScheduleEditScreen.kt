@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateEditField
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
+import com.ustadmobile.mui.components.UstadTimeEditField
 import csstype.*
 import io.ktor.websocket.*
 import mui.material.*
@@ -52,28 +53,28 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
                 direction = responsive(StackDirection.row)
                 spacing = responsive(10.px)
 
-                UstadDateEditField {
-                    timeInMillis = props.uiState.entity?.sceduleStartTime ?: 0
+                UstadTimeEditField {
+                    timeInMillis = (props.uiState.entity?.sceduleStartTime ?: 0).toInt()
                     label = strings[MessageID.from]
                     error = props.uiState.fromTimeError
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onScheduleChanged(
                             props.uiState.entity?.shallowCopy {
-                                sceduleStartTime = it
+                                sceduleStartTime = it.toLong()
                             })
                     }
                 }
 
-                UstadDateEditField {
-                    timeInMillis = props.uiState.entity?.scheduleEndTime ?: 0
+                UstadTimeEditField {
+                    timeInMillis = (props.uiState.entity?.scheduleEndTime ?: 0).toInt()
                     label = strings[MessageID.to]
                     error = props.uiState.toTimeError
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onScheduleChanged(
                             props.uiState.entity?.shallowCopy {
-                                scheduleEndTime = it
+                                scheduleEndTime = it.toLong()
                             }
                         )
                     }
@@ -89,8 +90,8 @@ val ScheduleEditScreenPreview = FC<Props> {
         ScheduleEditUiState(
             entity = Schedule().apply {
                 scheduleDay = 0
-                sceduleStartTime = 1668153441000
-                scheduleEndTime = 1669190241000
+                sceduleStartTime = 45
+                scheduleEndTime = 78
             }
         )
     }
