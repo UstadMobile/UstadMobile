@@ -1,10 +1,12 @@
 package com.ustadmobile.hooks
 
+import com.ustadmobile.mui.components.isSetDate
 import com.ustadmobile.util.ext.toSameDateTimeInOtherTimeZone
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJSDate
 import react.useMemo
+import kotlin.js.Date
 
 /**
  * Where timeInMillis represents a specific date/time in a specific from time zone (e.g.
@@ -18,10 +20,15 @@ import react.useMemo
 fun useTimeInOtherTimeZoneAsJsDate(
     timeInMillis: Long,
     fromTimeZoneId: String
-) = useMemo(dependencies = arrayOf(timeInMillis, fromTimeZoneId)){
-    Instant.fromEpochMilliseconds(timeInMillis)
-        .toSameDateTimeInOtherTimeZone(
-            fromTimeZone = TimeZone.of(fromTimeZoneId),
-            toTimeZone = TimeZone.currentSystemDefault()
-        ).toJSDate()
+): Date? = useMemo(dependencies = arrayOf(timeInMillis, fromTimeZoneId)){
+    if(timeInMillis.isSetDate()) {
+        Instant.fromEpochMilliseconds(timeInMillis)
+            .toSameDateTimeInOtherTimeZone(
+                fromTimeZone = TimeZone.of(fromTimeZoneId),
+                toTimeZone = TimeZone.currentSystemDefault()
+            ).toJSDate()
+    }else {
+        null
+    }
+
 }

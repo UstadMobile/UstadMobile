@@ -1,8 +1,11 @@
 package com.ustadmobile.util.ext
 
+import com.ustadmobile.core.util.MS_PER_HOUR
+import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.util.moment
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toKotlinInstant
+import kotlinx.datetime.toLocalDateTime
 import kotlin.js.Date
 
 const val TIME_FORMAT_H_M = "HH:mm"
@@ -75,4 +78,12 @@ fun Date.toMillisInOtherTimeZone(
             fromTimeZone = TimeZone.currentSystemDefault(),
             toTimeZone = TimeZone.of(otherTimeZone)
         ).toEpochMilliseconds()
+}
+
+/**
+ * Provide the time of the day in milliseconds since midnight for the given JS Date object.
+ */
+fun Date.toTimeOfDayInMs(): Int {
+    val dateTime = toKotlinInstant().toLocalDateTime(TimeZone.currentSystemDefault())
+    return (dateTime.hour * MS_PER_HOUR) + (dateTime.minute * MS_PER_MIN) + (dateTime.second * 1000)
 }
