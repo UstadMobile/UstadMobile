@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -143,115 +145,165 @@ private fun SchoolEditScreen(
     onClickEditScopedGrant: (ScopedGrantAndName?) -> Unit = {},
     onClickDeleteScopedGrant: (ScopedGrantAndName?) -> Unit = {}
 ) {
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(rememberScrollState())
     )  {
 
-        UstadTextEditField(
-            value = uiState.entity?.schoolName ?: "",
-            label = stringResource(id = R.string.name),
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onSchoolChanged(uiState.entity?.shallowCopy{
-                    schoolName = it
-                })
-            },
-        )
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.schoolName ?: "",
+                label = stringResource(id = R.string.name),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onSchoolChanged(uiState.entity?.shallowCopy{
+                        schoolName = it
+                    })
+                },
+            )
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        UstadTextEditField(
-            value = uiState.entity?.schoolDesc ?: "",
-            label = stringResource(id = R.string.description),
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onSchoolChanged(uiState.entity?.shallowCopy{
-                    schoolDesc = it
-                })
-            },
-        )
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.schoolDesc ?: "",
+                label = stringResource(id = R.string.description),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onSchoolChanged(uiState.entity?.shallowCopy{
+                        schoolDesc = it
+                    })
+                },
+            )
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        UstadTextEditField(
-            value = uiState.entity?.schoolTimeZone ?: "",
-            label = stringResource(id = R.string.description),
-            enabled = uiState.fieldsEnabled,
-            readOnly = true,
-            onClick = onClickTimeZone,
-            onValueChange = {  }
-        )
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.schoolTimeZone ?: "",
+                label = stringResource(id = R.string.description),
+                enabled = uiState.fieldsEnabled,
+                readOnly = true,
+                onClick = onClickTimeZone,
+                onValueChange = {  }
+            )
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        UstadTextEditField(
-            value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
-            label = stringResource(id = R.string.holiday_calendar),
-            enabled = uiState.fieldsEnabled,
-            readOnly = true,
-            onClick = onClickHolidayCalendar,
-            onValueChange = {  }
-        )
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
+                label = stringResource(id = R.string.holiday_calendar),
+                enabled = uiState.fieldsEnabled,
+                readOnly = true,
+                onClick = onClickHolidayCalendar,
+                onValueChange = {  }
+            )
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        UstadTextEditField(
-            value = uiState.entity?.schoolAddress ?: "",
-            label = stringResource(id = R.string.address),
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onSchoolChanged(uiState.entity?.shallowCopy{
-                    schoolAddress = it
-                })
-            },
-        )
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.schoolAddress ?: "",
+                label = stringResource(id = R.string.address),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onSchoolChanged(uiState.entity?.shallowCopy{
+                        schoolAddress = it
+                    })
+                },
+            )
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        UstadTextEditField(
-            value = uiState.entity?.schoolPhoneNumber ?: "",
-            label = stringResource(id = R.string.phone_number),
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onSchoolChanged(uiState.entity?.shallowCopy{
-                    schoolPhoneNumber = it
-                })
-            },
-        )
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.schoolPhoneNumber ?: "",
+                label = stringResource(id = R.string.phone_number),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onSchoolChanged(uiState.entity?.shallowCopy{
+                        schoolPhoneNumber = it
+                    })
+                },
+            )
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        UstadTextEditField(
-            value = uiState.entity?.schoolEmailAddress ?: "",
-            label = stringResource(id = R.string.email),
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onSchoolChanged(uiState.entity?.shallowCopy{
-                    schoolEmailAddress = it
-                })
-            },
-        )
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.schoolEmailAddress ?: "",
+                label = stringResource(id = R.string.email),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onSchoolChanged(uiState.entity?.shallowCopy{
+                        schoolEmailAddress = it
+                    })
+                },
+            )
+        }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        item {
+            Spacer(modifier = Modifier.height(20.dp))
+        }
 
-        Text(stringResource(id = R.string.permissions),
-            style = Typography.h6
-        )
+        item {
+            Text(stringResource(id = R.string.permissions),
+                style = Typography.h6
+            )
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        AddPersonOrGroupButton(onClickNew)
+        item {
+            AddPersonOrGroupButton(onClickNew)
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
-        ScopedGrantsOneToNList(
-            uiState.scopedGrants,
-            onClickEditScopedGrant,
-            onClickDeleteScopedGrant
-        )
+        items(
+            uiState.scopedGrants
+        ){
+            UstadDetailField(
+                valueText = it.name ?: "",
+                labelText = (it.scopedGrant?.sgPermissions ?: 0).toString(),
+                onClick = { onClickEditScopedGrant(it) },
+
+                secondaryActionContent = {
+                    IconButton(
+                        onClick = { onClickDeleteScopedGrant(it) },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = stringResource(id = R.string.delete),
+                        )
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -277,33 +329,6 @@ fun AddPersonOrGroupButton(
 
             Text(stringResource(id = R.string.add_person_or_group))
         }
-    }
-}
-
-@Composable
-fun ScopedGrantsOneToNList(
-    scopedGrants: List<ScopedGrantAndName>,
-    onClickEditScopedGrant: (ScopedGrantAndName) -> Unit,
-    onClickDeleteScopedGrant: (ScopedGrantAndName) -> Unit
-){
-    scopedGrants.forEach { scopedGrant ->
-
-        UstadDetailField(
-            valueText = scopedGrant.name ?: "",
-            labelText = (scopedGrant.scopedGrant?.sgPermissions ?: 0).toString(),
-            onClick = { onClickEditScopedGrant(scopedGrant) },
-
-            secondaryActionContent = {
-                IconButton(
-                    onClick = { onClickDeleteScopedGrant(scopedGrant) },
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = stringResource(id = R.string.delete),
-                    )
-                }
-            }
-        )
     }
 }
 
