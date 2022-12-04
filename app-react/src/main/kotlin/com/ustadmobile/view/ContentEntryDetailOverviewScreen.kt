@@ -142,14 +142,10 @@ private val LeftColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
         direction = responsive(StackDirection.column)
         spacing = responsive(10.px)
 
-        Icon {
-            + BookOutlined.create()
-
+        BookOutlined{
             sx {
                 height = 110.px
                 width = 110.px
-                alignItems = AlignItems.center
-                fontSize = 110.px
             }
         }
 
@@ -257,29 +253,30 @@ private val ContentJobList = FC <ContentEntryDetailOverviewScreenProps> { props 
 
     List{
         props.uiState.activeContentJobItems.forEach {
-            ListItem{
-                Button {
-                    onClick = { props.onClickContentJobItem }
+            onClick = { props.onClickContentJobItem }
+            ListItemText{
+                sx {
+                    padding = 10.px
+                }
 
+                Stack {
                     Stack {
-                        Stack {
-                            direction = responsive(StackDirection.row)
-                            justifyContent = JustifyContent.spaceBetween
+                        direction = responsive(StackDirection.row)
+                        justifyContent = JustifyContent.spaceBetween
 
 
-                            Typography {
-                                + (it.progressTitle ?: "")
-                            }
-
-                            Typography {
-                                + (it.progress.toString()+" %")
-                            }
+                        Typography {
+                            + (it.progressTitle ?: "")
                         }
 
-                        LinearProgress {
-                            value = props.uiState.scoreProgress?.progress
-                            variant = LinearProgressVariant.determinate
+                        Typography {
+                            + (it.progress.toString()+" %")
                         }
+                    }
+
+                    LinearProgress {
+                        value = (it.progress) / (it.total)
+                        variant = LinearProgressVariant.determinate
                     }
                 }
             }
