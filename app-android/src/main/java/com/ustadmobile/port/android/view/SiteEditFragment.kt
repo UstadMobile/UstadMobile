@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -163,7 +164,8 @@ fun SiteEditScreen(
     uiState: SiteEditUiState,
     onSiteChanged: (Site?) -> Unit = {},
     onItemClicked: (SiteTermsWithLanguage) -> Unit = {},
-    onDeleteIconClicked: (SiteTermsWithLanguage) -> Unit = {}
+    onDeleteIconClicked: (SiteTermsWithLanguage) -> Unit = {},
+    onClickAddItem: () -> Unit = {}
 ){
     Column (
         modifier = Modifier
@@ -207,6 +209,19 @@ fun SiteEditScreen(
         Text(
             stringResource(R.string.terms_and_policies),
             style = Typography.h6
+        )
+
+        ListItem(
+            modifier = Modifier.clickable {
+                onClickAddItem()
+            },
+            icon = {
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = null
+                )
+            },
+            text = {Text(stringResource(id = R.string.terms_and_policies))}
         )
 
         uiState.siteTerms.forEach {item ->

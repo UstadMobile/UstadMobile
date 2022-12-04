@@ -11,10 +11,9 @@ import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadTextEditField
 import csstype.px
 import kotlinx.css.span
-import mui.icons.material.AccountBalanceRounded
-import mui.icons.material.Delete
-import mui.icons.material.WidthFull
+import mui.icons.material.*
 import mui.material.*
+import mui.material.List
 import mui.material.styles.TypographyVariant
 import mui.system.Spacing
 import mui.system.StackDirection
@@ -31,6 +30,7 @@ external interface SiteEditProps: Props {
     var onSiteChanged: (Site?) -> Unit
     var onClickLang: (SiteTermsWithLanguage) -> Unit
     var onDeleteClick: (SiteTermsWithLanguage) -> Unit
+    var onClickAddItem: () -> Unit
 }
 
 private interface CustomSwitchProps: Props {
@@ -75,6 +75,21 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
             Typography {
                 variant = TypographyVariant.h6
                 + strings[MessageID.terms_and_policies]
+            }
+
+            ListItem {
+
+                onClick = {
+                    props.onClickAddItem()
+                }
+
+                ListItemIcon {
+                    Add{}
+                }
+
+                ListItemText {
+                    + (strings[MessageID.terms_and_policies])
+                }
             }
 
             List{
