@@ -56,9 +56,9 @@ fun UstadCourseBlockEdit(
                             stringResource(id = R.string.points)),
                     label = stringResource(id = R.string.maximum_points),
                     enabled = uiState.fieldsEnabled,
-                    onValueChange = {
+                    onValueChange = { newString ->
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                            cbMaxPoints = it.toInt()
+                            cbMaxPoints = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                         })
                     }
                 )

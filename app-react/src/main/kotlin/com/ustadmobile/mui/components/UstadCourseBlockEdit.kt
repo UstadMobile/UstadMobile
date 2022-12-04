@@ -84,9 +84,9 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             label = strings[MessageID.points]
             error = props.uiState.caStartDateError
             enabled = props.uiState.fieldsEnabled
-            onChange = {
+            onChange = { newString ->
                 props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                    cbMaxPoints = it.toInt()
+                    cbMaxPoints = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                 })
             }
         }
