@@ -7,15 +7,13 @@ import com.ustadmobile.core.impl.locale.entityconstants.DayConstants
 import com.ustadmobile.core.viewmodel.ScheduleEditUiState
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadDateEditField
+import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.mui.components.UstadTimeEditField
 import csstype.*
-import io.ktor.websocket.*
 import mui.material.*
 import mui.system.Container
 import mui.system.responsive
-import mui.system.sx
 import react.FC
 import react.Props
 import react.useState
@@ -52,12 +50,14 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
             Stack {
                 direction = responsive(StackDirection.row)
                 spacing = responsive(10.px)
+                justifyContent = JustifyContent.spaceBetween
 
                 UstadTimeEditField {
                     timeInMillis = (props.uiState.entity?.sceduleStartTime ?: 0).toInt()
                     label = strings[MessageID.from]
                     error = props.uiState.fromTimeError
                     enabled = props.uiState.fieldsEnabled
+                    fullWidth = true
                     onChange = {
                         props.onScheduleChanged(
                             props.uiState.entity?.shallowCopy {
@@ -71,6 +71,7 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
                     label = strings[MessageID.to]
                     error = props.uiState.toTimeError
                     enabled = props.uiState.fieldsEnabled
+                    fullWidth = true
                     onChange = {
                         props.onScheduleChanged(
                             props.uiState.entity?.shallowCopy {
