@@ -162,7 +162,7 @@ fun UstadTextEditFieldSuffixPreview() {
         value = "42",
         label = "Maximum score",
         onValueChange = { newString ->
-            maxScore = newString.filter { it.isDigit() }.toInt()
+            maxScore = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
         },
         error =null,
         enabled = true,
