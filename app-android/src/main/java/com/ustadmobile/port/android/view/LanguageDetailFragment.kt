@@ -12,11 +12,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.LanguageDetailUiState
-import com.ustadmobile.core.viewmodel.LanguageEditUiState
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.composable.UstadDetailField
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 
 @Composable
