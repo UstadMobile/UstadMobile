@@ -9,7 +9,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -21,22 +20,21 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentParentalConsentManagementBinding
 import com.ustadmobile.core.controller.ParentalConsentManagementPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.entityconstants.PersonParentJoinConstants
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.core.viewmodel.ParentalConsentManagementUiState
-import com.ustadmobile.core.viewmodel.PersonAccountEditUiState
-import com.ustadmobile.core.viewmodel.PersonDetailUiState
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.PersonParentJoinWithMinorPerson
+import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.view.binding.loadHtmlData
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.util.ClearErrorTextWatcher
 
 
@@ -172,7 +170,9 @@ private fun ParentalConsentManagementScreen(
     )  {
 
         val minorDateOfBirth = rememberFormattedDate(
-            uiState.personParentJoin?.minorPerson?.dateOfBirth ?: 0)
+            timeInMillis = uiState.personParentJoin?.minorPerson?.dateOfBirth ?: 0,
+            timeZoneId = UstadMobileConstants.UTC,
+        )
         Text(stringResource(id = R.string.parent_consent_explanation,
             uiState.personParentJoin?.minorPerson?.fullName() ?: "",
             minorDateOfBirth, uiState.appName))
