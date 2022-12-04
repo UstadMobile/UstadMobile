@@ -42,13 +42,13 @@ val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
 
             UstadDetailField {
                 icon = ManageSearchOutlined.create()
-                labelText = "Guest login enabled"
+                labelText = strings[MessageID.guest_login_enabled]
                 valueText = props.uiState.site?.guestLogin.toString()
             }
 
             UstadDetailField {
                 icon = HowToRegRounded.create()
-                labelText = "Registration allowed"
+                labelText = strings[MessageID.registration_allowed]
                 valueText = props.uiState.site?.registrationAllowed.toString()
             }
 
