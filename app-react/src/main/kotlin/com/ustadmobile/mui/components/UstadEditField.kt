@@ -2,9 +2,15 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.util.MS_PER_HOUR
+import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.hooks.useTimeInOtherTimeZoneAsJsDate
 import com.ustadmobile.mui.common.*
+import com.ustadmobile.util.ext.toMillisInOtherTimeZone
+import com.ustadmobile.view.components.UstadSwitchField
+import kotlinx.datetime.TimeZone
 import kotlinx.js.jso
 import mui.icons.material.Visibility
 import mui.icons.material.VisibilityOff
@@ -164,28 +170,35 @@ external interface UstadDateEditFieldProps : Props {
  */
 val JS_DATE_MAX = 8640000000000000L
 
-fun Long.asDate(): Date? {
-    val value = if(this > JS_DATE_MAX) JS_DATE_MAX else this
+/**
+ * We often use 0 and Long.MAX_VALUE as placeholders for unset dates. This makes queries
+ * straightforward e.g. if no end date is set by the user, the end date is stored as Long.MAX_VALUE,
+ * and would appear in active courses if applicable etc.
+ *
+ * These unset dates should not (however) be displayed to the user.
+ */
+fun Long.isSetDate(): Boolean {
+    return this > 0L && this < JS_DATE_MAX
+}
 
-    return if(this == 0L || this >= JS_DATE_MAX) {
-        null
-    }else {
-        Date(value)
-    }
+fun Long.asDate(): Date? {
+    return if(isSetDate()) Date(this) else null
 }
 
 
 val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
+    val dateVal = useTimeInOtherTimeZoneAsJsDate(props.timeInMillis, props.timeZoneId)
+
     LocalizationProvider {
         dateAdapter = AdapterDateFns
 
         DatePicker {
             disabled = !(props.enabled ?: true)
             label = ReactNode(props.label)
-            value = props.timeInMillis.asDate()
+            value = dateVal
 
             onChange = {
-                props.onChange(it.getTime().toLong())
+                props.onChange(it.toMillisInOtherTimeZone(props.timeZoneId))
             }
 
             renderInput = { params ->
@@ -367,16 +380,32 @@ val UstadEditFieldPreviews = FC<Props> {
     Stack {
         spacing = responsive(5)
 
+        var date1 : Long by useState { systemTimeInMillis() }
         UstadDateEditField {
-            timeInMillis = systemTimeInMillis()
+            timeInMillis = date1
+            timeZoneId = TimeZone.currentSystemDefault().id
             label = "Date"
-            onChange = { }
+            onChange = {
+                date1 = it
+            }
             error = "Bad Day"
+        }
+
+        var unsetMinDate: Long by useState { 0L }
+
+        UstadDateEditField {
+            timeInMillis = unsetMinDate
+            timeZoneId = TimeZone.currentSystemDefault().id
+            label = "Unset min date"
+            onChange = {
+                unsetMinDate = it
+            }
         }
 
         var dateTime: Long by useState { systemTimeInMillis() }
         UstadDateTimeEditField {
             timeInMillis = dateTime
+            timeZoneId = TimeZone.currentSystemDefault().id
             label = "Date and time"
             onChange = {
                 dateTime = it
@@ -384,7 +413,7 @@ val UstadEditFieldPreviews = FC<Props> {
             enabled = true
         }
 
-        var time: Long by useState { systemTimeInMillis() }
+        var time: Int by useState { (14 * MS_PER_HOUR) + (30 * MS_PER_MIN) }
 
         UstadTimeEditField {
             timeInMillis = time
@@ -415,6 +444,16 @@ val UstadEditFieldPreviews = FC<Props> {
             itemValue = { (it as? DropDownOption)?.value ?: "" }
             onChange = {
                 selectedOption = it as? DropDownOption
+            }
+        }
+
+        var switchChecked by useState { false }
+
+        UstadSwitchField {
+            label = "Switch"
+            checked = switchChecked
+            onChanged = {
+                switchChecked = it
             }
         }
     }

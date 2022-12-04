@@ -1,5 +1,6 @@
 package com.ustadmobile.mui.common
 
+import csstype.JustifyContent
 import mui.material.*
 import muix.pickers.*
 import react.ReactNode
@@ -155,4 +156,10 @@ inline var InputBaseComponentProps.readOnly: Boolean
     get() = asDynamic().readOnly
     set(value) {
         asDynamic().readOnly = value
+    }
+
+inline var StackProps.justifyContent: JustifyContent
+    get() = asDynamic().justifyContent
+    set(value) {
+        asDynamic().justifyContent = value
     }

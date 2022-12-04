@@ -2,6 +2,7 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.viewmodel.RegisterAgeRedirectUiState
 import com.ustadmobile.mui.components.UstadDateEditField
 import csstype.px
@@ -51,7 +52,8 @@ val RegisterAgeRedirectComponent2 = FC<RegisterAgeRedirectProps> { props ->
             }
 
             UstadDateEditField {
-                timeInMillis = props.uiState.dateOfBirth ?: 0
+                timeInMillis = props.uiState.dateOfBirth
+                timeZoneId = UstadMobileConstants.UTC
                 label = strings[MessageID.birthday]
                 onChange = { props.onSetDate(it) }
             }
