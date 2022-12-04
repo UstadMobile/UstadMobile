@@ -1,15 +1,18 @@
 package com.ustadmobile.port.android.view.composable
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.locale.entityconstants.CompletionCriteriaConstants
 import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 
@@ -56,6 +59,7 @@ fun UstadCourseBlockEdit(
                             stringResource(id = R.string.points)),
                     label = stringResource(id = R.string.maximum_points),
                     enabled = uiState.fieldsEnabled,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = { newString ->
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy {
                             cbMaxPoints = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
@@ -127,6 +131,7 @@ private fun CourseBlockEditPreview() {
         courseBlock = CourseBlock().apply {
             cbMaxPoints = 78
             cbCompletionCriteria = 14
+            cbCompletionCriteria = ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
         },
         gracePeriodVisible = true,
     )

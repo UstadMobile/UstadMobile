@@ -4,6 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.CompletionCriteriaConstants
 import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.ext.addOptionalSuffix
@@ -15,6 +16,7 @@ import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.dom.html.InputMode
 
 external interface UstadCourseBlockEditProps: Props {
 
@@ -84,6 +86,9 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             label = strings[MessageID.points]
             error = props.uiState.caStartDateError
             enabled = props.uiState.fieldsEnabled
+            inputProps = {
+                it.inputMode = InputMode.numeric
+            }
             onChange = { newString ->
                 props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
                     cbMaxPoints = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
@@ -144,6 +149,7 @@ val UstadCourseBlockEditPreview = FC<Props> {
                 courseBlock = CourseBlock().apply {
                     cbMaxPoints = 78
                     cbCompletionCriteria = 14
+                    cbCompletionCriteria = ContentEntry.COMPLETION_CRITERIA_MIN_SCORE
                 },
                 gracePeriodVisible = true,
             )
