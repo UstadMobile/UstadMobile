@@ -45,6 +45,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadEditField
+import com.ustadmobile.port.android.view.composable.UstadSwitchField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 
@@ -186,21 +187,23 @@ fun SiteEditScreen(
             }
         )
 
-        CustomSwitch(
+        UstadSwitchField(
+            modifier = Modifier.padding(top = 10.dp),
             checked = uiState.site?.guestLogin ?: false,
-            label = stringResource(R.string.guest_login_enabled),
-            onSwitchChanged = {
-                onSiteChanged(uiState.site?.shallowCopy{
+            label = stringResource(id = R.string.guest_login_enabled),
+            onChange = {
+                onSiteChanged(uiState.site?.shallowCopy {
                     guestLogin = it
                 })
             }
         )
 
-        CustomSwitch(
+        UstadSwitchField(
+            modifier = Modifier.padding(top = 15.dp),
             checked = uiState.site?.registrationAllowed ?: false,
-            label = stringResource(R.string.registration_allowed),
-            onSwitchChanged = {
-                onSiteChanged(uiState.site?.shallowCopy{
+            label = stringResource(id = R.string.registration_allowed),
+            onChange = {
+                onSiteChanged(uiState.site?.shallowCopy {
                     registrationAllowed = it
                 })
             }
@@ -208,7 +211,7 @@ fun SiteEditScreen(
 
         Text(
             stringResource(R.string.terms_and_policies),
-            style = Typography.h6
+            style = Typography.h6,
         )
 
         ListItem(
@@ -243,33 +246,6 @@ fun SiteEditScreen(
             )
         }
 
-    }
-}
-
-@Composable
-fun CustomSwitch(
-    checked: Boolean,
-    label: String,
-    onSwitchChanged: (Boolean) -> Unit
-){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-
-        Text(
-            label,
-            style = Typography.h6
-        )
-
-        Switch(
-            checked = checked,
-            onCheckedChange = {
-                onSwitchChanged(it)
-            }
-        )
     }
 }
 

@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.view.components.UstadSwitchField
 import csstype.px
 import kotlinx.css.span
 import mui.icons.material.*
@@ -31,11 +32,6 @@ external interface SiteEditProps: Props {
     var onClickLang: (SiteTermsWithLanguage) -> Unit
     var onDeleteClick: (SiteTermsWithLanguage) -> Unit
     var onClickAddItem: () -> Unit
-}
-
-private interface CustomSwitchProps: Props {
-    var label: String
-    var checked: Boolean
 }
 
 val SiteEditComponent2 = FC<SiteEditProps> { props ->
@@ -62,14 +58,24 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
                 }
             }
 
-            CustomSwitch{
+            UstadSwitchField{
                 label = strings[MessageID.guest_login_enabled]
                 checked = props.uiState.site?.guestLogin ?: true
+                onChanged = {
+                    props.onSiteChanged(props.uiState.site?.shallowCopy{
+                        guestLogin = it
+                    })
+                }
             }
 
-            CustomSwitch{
+            UstadSwitchField{
                 label = strings[MessageID.registration_allowed]
                 checked = props.uiState.site?.registrationAllowed ?: true
+                onChanged = {
+                    props.uiState.site?.shallowCopy {
+                        registrationAllowed = it
+                    }
+                }
             }
 
             Typography {
@@ -115,27 +121,6 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
         }
     }
 
-}
-
-private var CustomSwitch = FC<CustomSwitchProps> { props ->
-
-    Stack{
-        sx{
-            width = width
-        }
-
-        direction = responsive(mui.material.StackDirection.row)
-        spacing = responsive(100.px)
-
-        Typography {
-            variant = TypographyVariant.h6
-            + props.label
-        }
-
-        Switch{
-            defaultChecked = props.checked
-        }
-    }
 }
 
 val SiteEditPreview = FC<Props> {
