@@ -530,10 +530,11 @@ private fun ClazzEditScreen(
         }
 
         item {
-            SwitchRow(
-                text = stringResource(id = R.string.attendance),
+            UstadSwitchField(
+                label = stringResource(id = R.string.attendance),
                 checked = uiState.clazzEditAttendanceChecked,
-                onChange = { onCheckedAttendance(it) }
+                onChange = { onCheckedAttendance(it) },
+                enabled = uiState.fieldsEnabled
             )
         }
 
@@ -568,27 +569,6 @@ private fun ClazzEditScreen(
                 onClick = onClickTerminology
             )
         }
-    }
-}
-
-@Composable
-private fun SwitchRow(
-    text: String,
-    checked: Boolean,
-    onChange: (Boolean) -> Unit,
-){
-    Row (
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ){
-
-        Text(text)
-
-        Switch(
-            checked= checked,
-            onCheckedChange = { onChange(it) }
-        )
     }
 }
 

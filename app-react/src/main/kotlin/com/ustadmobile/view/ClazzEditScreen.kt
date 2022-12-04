@@ -10,6 +10,7 @@ import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.ext.addOptionalSuffix
+import com.ustadmobile.view.components.UstadSwitchField
 import csstype.AlignItems
 import csstype.px
 import mui.icons.material.Add
@@ -173,10 +174,11 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 + strings[MessageID.course_setup]
             }
 
-            SwitchRow {
-                text = strings[MessageID.attendance]
+            UstadSwitchField {
+                label = strings[MessageID.attendance]
                 checked = props.uiState.clazzEditAttendanceChecked
-                onChange = { props.onCheckedAttendance(it) }
+                onChanged = { props.onCheckedAttendance(it) }
+                enabled = props.uiState.fieldsEnabled
             }
 
             UstadMessageIdDropDownField {
@@ -217,38 +219,6 @@ val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
                     primary = ReactNode("Line one")
                     secondary = ReactNode("Line Two")
                 }
-            }
-        }
-    }
-}
-
-external interface SwitchRowProps : Props {
-
-    var text: String
-
-    var checked: Boolean
-
-    var onChange: (Boolean) -> Unit
-
-}
-
-private val SwitchRow = FC<SwitchRowProps> { props ->
-
-    Stack {
-        direction = responsive(StackDirection.row)
-        spacing = responsive(20.px)
-        sx {
-            alignItems = AlignItems.center
-        }
-
-        Typography {
-            + props.text
-        }
-
-        Switch {
-            checked= props.checked
-            onChange = { _, it ->
-                props.onChange(it)
             }
         }
     }
