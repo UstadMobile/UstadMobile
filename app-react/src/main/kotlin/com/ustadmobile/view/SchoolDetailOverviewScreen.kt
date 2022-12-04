@@ -19,11 +19,17 @@ import react.ReactNode
 import react.create
 
 external interface SchoolDetailOverviewProps : Props {
+
     var uiState: SchoolDetailOverviewUiState
+
     var onClickSchoolCode: () -> Unit
+
     var onClickSchoolPhoneNumber: () -> Unit
+
     var onClickEmail: () -> Unit
+
     var onClickClazz: (Clazz) -> Unit
+
 }
 
 val SchoolDetailOverviewScreenPreview = FC<Props> {
@@ -154,11 +160,9 @@ private val Clazzes = FC<SchoolDetailOverviewProps> { props ->
                     props.onClickClazz(clazzEntry)
                 }
 
-                ListItemButton {
-                    ListItemText {
-                        primary = ReactNode(clazzEntry.clazzName ?: "")
-                        secondary = ReactNode(clazzEntry.clazzDesc ?: "")
-                    }
+                ListItemText {
+                    primary = ReactNode(clazzEntry.clazzName ?: "")
+                    secondary = ReactNode(clazzEntry.clazzDesc ?: "")
                 }
             }
         }
