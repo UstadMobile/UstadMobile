@@ -5,6 +5,7 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.components.UstadQuickActionButton
 import csstype.*
 import mui.material.List
@@ -263,8 +264,8 @@ private val ContentJobList = FC <ContentEntryDetailOverviewScreenProps> { props 
                     Stack {
                         Stack {
                             direction = responsive(StackDirection.row)
-                            spacing = responsive(20.px)
-                            
+                            justifyContent = JustifyContent.spaceBetween
+
 
                             Typography {
                                 + (it.progressTitle ?: "")
