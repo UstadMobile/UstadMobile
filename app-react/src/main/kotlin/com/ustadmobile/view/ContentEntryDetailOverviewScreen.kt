@@ -264,6 +264,7 @@ private val ContentJobList = FC <ContentEntryDetailOverviewScreenProps> { props 
                         Stack {
                             direction = responsive(StackDirection.row)
                             spacing = responsive(20.px)
+                            
 
                             Typography {
                                 + (it.progressTitle ?: "")
