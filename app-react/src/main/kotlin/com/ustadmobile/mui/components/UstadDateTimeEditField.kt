@@ -1,14 +1,13 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.hooks.useTimeInOtherTimeZoneAsJsDate
 import com.ustadmobile.mui.common.*
+import com.ustadmobile.util.ext.toMillisInOtherTimeZone
 import mui.material.TextField
 import muix.pickers.AdapterDateFns
 import muix.pickers.DateTimePicker
 import muix.pickers.LocalizationProvider
-import react.FC
-import react.Props
-import react.ReactNode
-import react.create
+import react.*
 
 external interface UstadDateTimeEditFieldProps: Props {
     /**
@@ -17,9 +16,10 @@ external interface UstadDateTimeEditFieldProps: Props {
     var timeInMillis: Long
 
     /**
-     * Reserved for future usage: will be required
+     * The TimeZone ID to use for this field. E.g the timezone for the course, school, etc. This is
+     * mandatory. If you want to use the system default Timezone, you can use kotlinx datetime
+     * TimeZone.currentSystemDefault().id
      */
-    @Suppress("unused")
     var timeZoneId: String
 
     /**
@@ -46,16 +46,19 @@ external interface UstadDateTimeEditFieldProps: Props {
 }
 
 val UstadDateTimeEditField = FC<UstadDateTimeEditFieldProps> { props ->
+    val jsDateVal = useTimeInOtherTimeZoneAsJsDate(props.timeInMillis,
+        props.timeZoneId)
+
     LocalizationProvider {
         dateAdapter = AdapterDateFns
 
         DateTimePicker {
             disabled = !(props.enabled ?: true)
             label = ReactNode(props.label)
-            value = props.timeInMillis.asDate()
+            value = jsDateVal
 
             onChange = {
-                props.onChange(it.getTime().toLong())
+                props.onChange(it.toMillisInOtherTimeZone(props.timeZoneId))
             }
 
             renderInput = { params ->

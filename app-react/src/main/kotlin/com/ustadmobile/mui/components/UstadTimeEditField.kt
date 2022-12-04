@@ -1,6 +1,8 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.hooks.useTimeOfDayInMsAsJsDate
 import com.ustadmobile.mui.common.*
+import com.ustadmobile.util.ext.toTimeOfDayInMs
 import mui.material.TextField
 import muix.pickers.AdapterDateFns
 import muix.pickers.LocalizationProvider
@@ -12,9 +14,9 @@ import react.create
 
 external interface UstadTimeEditFieldProps: Props {
     /**
-     * The value as time in millis since midnight
+     * The value of the time of day as milliseconds since midnight
      */
-    var timeInMillis: Long
+    var timeInMillis: Int
 
     /**
      * Field label
@@ -22,32 +24,37 @@ external interface UstadTimeEditFieldProps: Props {
     var label: String
 
     /**
-     * onChange function. Will provide the selected time in milliseconds since 1970
+     * onChange function. Will provide the selected time as milliseconds since midnight
      */
-    var onChange: (Long) -> Unit
+    var onChange: (Int) -> Unit
 
     var error: String?
 
     var enabled: Boolean?
 
+    var fullWidth: Boolean
+
 }
 
 val UstadTimeEditField = FC<UstadTimeEditFieldProps> { props ->
+    val jsDateVal = useTimeOfDayInMsAsJsDate(props.timeInMillis)
+
     LocalizationProvider {
         dateAdapter = AdapterDateFns
 
         TimePicker {
             disabled = !(props.enabled ?: true)
             label = ReactNode(props.label)
-            value = props.timeInMillis.asDate()
+            value = jsDateVal
 
             onChange = {
-                props.onChange(it.getTime().toLong())
+                props.onChange(it.toTimeOfDayInMs())
             }
 
             renderInput = { params ->
                 TextField.create {
                     +params
+                    fullWidth = props.fullWidth
 
                     if(props.error != null) {
                         error = true

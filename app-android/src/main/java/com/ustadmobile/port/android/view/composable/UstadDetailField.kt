@@ -20,16 +20,23 @@ import com.toughra.ustadmobile.R
  */
 @Composable
 fun UstadDetailField(
-    modifier: Modifier = Modifier,
-    imageId: Int = 0,
     valueText: String,
     labelText: String,
+    modifier: Modifier = Modifier,
+    imageId: Int = 0,
     onClick: (() -> Unit)? = null,
     secondaryActionContent: (@Composable () -> Unit)? = null,
+    autoPadding: Boolean = true,
 ){
+    val modifierToUse = if(autoPadding) {
+        modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+    }else {
+        modifier
+    }
+
     if(onClick != null) {
         TextButton(
-            modifier = modifier,
+            modifier = modifierToUse,
             onClick = onClick
         ){
             DetailFieldContent(
@@ -41,7 +48,7 @@ fun UstadDetailField(
         }
     }else {
         DetailFieldContent(
-            modifier = modifier,
+            modifier = modifierToUse,
             valueText = valueText,
             labelText = labelText,
             imageId = imageId,
