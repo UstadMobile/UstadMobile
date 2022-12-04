@@ -152,6 +152,7 @@ private val LeftColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
         Stack {
             direction = responsive(StackDirection.row)
             spacing = responsive(10.px)
+
             sx {
                 alignItems = AlignItems.center
             }
@@ -275,7 +276,7 @@ private val ContentJobList = FC <ContentEntryDetailOverviewScreenProps> { props 
                     }
 
                     LinearProgress {
-                        value = (it.progress) / (it.total)
+                        value = it.progress / it.total
                         variant = LinearProgressVariant.determinate
                     }
                 }
@@ -380,14 +381,17 @@ val ContentEntryDetailOverviewScreenPreview = FC<Props> {
                 ContentJobItemProgress().apply {
                     progressTitle = "First"
                     progress = 30
+                    total = 2
                 },
                 ContentJobItemProgress().apply {
                     progressTitle = "Second"
                     progress = 10
+                    total = 5
                 },
                 ContentJobItemProgress().apply {
                     progressTitle = "Third"
                     progress = 70
+                    total = 4
                 }
             ),
             locallyAvailable = true,
