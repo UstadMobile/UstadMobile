@@ -44,9 +44,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             }
         }
 
-        Typography{
-            + "timeZone"
-        }
+        + props.uiState.timeZone
 
         Stack {
             direction = responsive(StackDirection.row)

@@ -13,6 +13,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.view.components.UstadSwitchField
 import csstype.AlignItems
 import csstype.px
 import dom.html.HTMLInputElement
@@ -37,9 +38,9 @@ external interface ContentEntryEditScreenProps : Props {
 
     var onContentChanged: (ContentEntryWithBlockAndLanguage?) -> Unit
 
-    var onChangeCompress: (ChangeEvent<HTMLInputElement>, Boolean) -> Unit
+    var onChangeCompress: (Boolean) -> Unit
 
-    var onChangePubliclyAccessible: (ChangeEvent<HTMLInputElement>, Boolean) -> Unit
+    var onChangePubliclyAccessible: (Boolean) -> Unit
 
     var onClickLanguage: () -> Unit
 
@@ -204,17 +205,19 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
             }
 
             if (props.uiState.contentCompressVisible){
-                SwitchRow {
-                    text = strings[MessageID.compress]
-                    checked = props.uiState.compressionEnabled
-                    onChange = props.onChangeCompress
+                UstadSwitchField {
+                    checked= props.uiState.compressionEnabled ?: false
+                    onChanged = { props.onChangeCompress(it) }
+                    label = strings[MessageID.compress]
+                    enabled = props.uiState.fieldsEnabled
                 }
             }
 
-            SwitchRow {
-                text = strings[MessageID.publicly_accessible]
-                checked = props.uiState.entity?.publik ?: false
-                onChange = props.onChangePubliclyAccessible
+            UstadSwitchField {
+                checked= props.uiState.entity?.publik ?: false
+                onChanged = { props.onChangePubliclyAccessible(it) }
+                label = strings[MessageID.publicly_accessible]
+                enabled = props.uiState.fieldsEnabled
             }
 
             UstadTextEditField {
@@ -225,36 +228,6 @@ private val ContentEntryEditScreenComponent2 = FC<ContentEntryEditScreenProps> {
                 onClick = props.onClickLanguage
                 onChange = {}
             }
-        }
-    }
-}
-
-external interface SwitchRowProps : Props {
-
-    var text: String
-
-    var checked: Boolean
-
-    var onChange: (ChangeEvent<HTMLInputElement>, Boolean) -> Unit
-
-}
-
-private val SwitchRow = FC<SwitchRowProps> { props ->
-
-    Stack {
-        direction = responsive(StackDirection.row)
-        spacing = responsive(20.px)
-        sx {
-          alignItems = AlignItems.center
-        }
-
-        Typography {
-            + props.text
-        }
-
-        Switch {
-            checked= props.checked
-            onChange = props.onChange
         }
     }
 }

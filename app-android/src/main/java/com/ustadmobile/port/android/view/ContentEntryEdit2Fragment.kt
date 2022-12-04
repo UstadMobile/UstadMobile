@@ -51,10 +51,7 @@ import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment.Companion.ARG_SHOW_ADD_FOLDER
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.isSet
-import com.ustadmobile.port.android.view.composable.UstadCourseBlockEdit
-import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
-import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.port.android.view.composable.*
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -624,19 +621,25 @@ private fun ContentEntryEditScreen(
         Spacer(modifier = Modifier.height(15.dp))
 
         if (uiState.contentCompressVisible){
-            SwitchRow(
-                text = stringResource(id = R.string.compress),
+            UstadSwitchField(
                 checked = uiState.compressionEnabled,
-                onChange = onChangeCompress
+                label = stringResource(id = R.string.compress),
+                enabled = uiState.fieldsEnabled,
+                onChange = {
+                    onChangeCompress(it)
+                }
             )
         }
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        SwitchRow(
-            text = stringResource(id = R.string.publicly_accessible),
+        UstadSwitchField(
             checked = uiState.entity?.publik ?: false,
-            onChange = onChangePubliclyAccessible
+            label = stringResource(id = R.string.publicly_accessible),
+            enabled = uiState.fieldsEnabled,
+            onChange = {
+                onChangePubliclyAccessible(it)
+            }
         )
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -648,27 +651,6 @@ private fun ContentEntryEditScreen(
             enabled = uiState.fieldsEnabled,
             onClick = onClickLanguage,
             onValueChange = {}
-        )
-    }
-}
-
-@Composable
-fun SwitchRow(
-    text: String,
-    checked: Boolean,
-    onChange: (Boolean) -> Unit,
-){
-    Row (
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ){
-
-        Text(text)
-
-        Switch(
-            checked= checked,
-            onCheckedChange = { onChange(it) }
         )
     }
 }
