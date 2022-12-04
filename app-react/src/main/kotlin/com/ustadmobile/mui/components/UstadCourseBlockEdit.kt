@@ -7,6 +7,7 @@ import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.ext.addOptionalSuffix
+import com.ustadmobile.util.ext.format
 import csstype.px
 import mui.material.*
 import mui.system.Stack
@@ -44,7 +45,7 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             }
         }
 
-        + props.uiState.timeZone
+        + strings[MessageID.class_timezone_set].format(props.uiState.timeZone)
 
         Stack {
             direction = responsive(StackDirection.row)
