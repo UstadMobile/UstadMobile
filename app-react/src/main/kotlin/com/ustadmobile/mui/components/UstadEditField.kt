@@ -19,6 +19,7 @@ import mui.system.responsive
 import muix.pickers.*
 import react.*
 import react.dom.aria.ariaLabel
+import react.dom.html.InputMode
 import react.dom.html.InputType
 import react.dom.onChange
 import kotlin.js.Date
@@ -69,6 +70,17 @@ external interface UstadEditFieldProps: PropsWithChildren {
      *  https://codesandbox.io/s/rect-material-ui-textfield-readonly-st5of?from-embed=&file=/src/index.js:232-249
      */
     var readOnly: Boolean
+
+    /**
+     * Sets a suffix string at the end e.g. a unit of measurement e.g. "points", "%", etc. Displayed
+     * at the end of the TextField as an adornment.
+     */
+    var suffixText: String?
+
+    /**
+     * InputProps setter functions - can be used to add adornments, set the input type, etc.
+     */
+    var inputProps: ((InputBaseProps) -> Unit)?
 }
 
 /**
@@ -106,15 +118,18 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
             props.onChange(currentVal?.toString() ?: "")
         }
 
+
         if(props.password) {
-            type = if(passwordVisible) {
+            type = if (passwordVisible) {
                 InputType.text
-            }else {
+            } else {
                 InputType.password
             }
+        }
 
-            //As per MUI showcase
-            asDynamic().InputProps = jso<InputBaseProps> {
+        //As per MUI showcase
+        asDynamic().InputProps = jso<InputBaseProps> {
+            if(props.password) {
                 endAdornment = InputAdornment.create {
                     position = InputAdornmentPosition.end
                     IconButton {
@@ -130,6 +145,15 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
                         }
                     }
                 }
+            }else if(props.suffixText != null) {
+                endAdornment = InputAdornment.create {
+                    position = InputAdornmentPosition.end
+                    +(props.suffixText ?: "")
+                }
+            }
+
+            props.inputProps?.also { inputPropsFn ->
+                inputPropsFn(this)
             }
         }
     }
@@ -180,11 +204,6 @@ val JS_DATE_MAX = 8640000000000000L
 fun Long.isSetDate(): Boolean {
     return this > 0L && this < JS_DATE_MAX
 }
-
-fun Long.asDate(): Date? {
-    return if(isSetDate()) Date(this) else null
-}
-
 
 val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
     val dateVal = useTimeInOtherTimeZoneAsJsDate(props.timeInMillis, props.timeZoneId)
@@ -456,6 +475,20 @@ val UstadEditFieldPreviews = FC<Props> {
                 switchChecked = it
             }
         }
+
+        var maxScore by useState { 42 }
+        UstadTextEditField {
+            label = "Maximum score"
+            value = maxScore.toString()
+            onChange = { newString ->
+                maxScore = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+            }
+            inputProps = {
+                it.inputMode = InputMode.numeric
+            }
+            suffixText = "Points"
+        }
+
     }
 }
 
