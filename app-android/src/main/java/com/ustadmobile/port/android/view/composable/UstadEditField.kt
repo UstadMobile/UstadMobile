@@ -25,6 +25,7 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.util.ext.getActivityContext
+import java.util.*
 
 @Composable
 fun UstadEditField(
@@ -163,10 +164,10 @@ fun UstadTextEditPasswordPreview() {
 fun UstadDateEditTextField(
     value: Long,
     label: String,
+    timeZoneId: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     @Suppress("UNUSED_PARAMETER") //Reserved for future use
-    timezoneId: String = "UTC",
     error: String? = null,
     onValueChange: (Long) -> Unit = {},
 ) {
@@ -174,7 +175,11 @@ fun UstadDateEditTextField(
         mutableStateOf(error)
     }
 
-    val dateFormatted = rememberFormattedDate(timeInMillis = value)
+    val dateFormatted = rememberFormattedDate(
+        timeInMillis = value,
+        timeZoneId = timeZoneId
+    )
+
     val context = LocalContext.current
 
     UstadTextEditField(
@@ -193,7 +198,18 @@ fun UstadDateEditTextField(
                 .build()
                 .apply {
                     addOnPositiveButtonClickListener {
-                        onValueChange(it)
+                        //The MaterialDatePicker will return the time in UTC. We need to adjust this
+                        //for the specified timezone
+                        val utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                        utcCalendar.timeInMillis = it
+
+                        val tzInstance = Calendar.getInstance(TimeZone.getTimeZone(timeZoneId))
+                        tzInstance.set(utcCalendar[Calendar.YEAR],
+                            utcCalendar[Calendar.MONTH], utcCalendar[Calendar.DAY_OF_MONTH],
+                            0, 0, 0)
+                        tzInstance[Calendar.MILLISECOND] = 0
+
+                        onValueChange(tzInstance.timeInMillis)
                         errorText = null
                     }
                 }
@@ -208,7 +224,8 @@ private fun UstadDateTextFieldPreview() {
     UstadDateEditTextField(
         value = System.currentTimeMillis(),
         label = "Date",
-        enabled = true
+        enabled = true,
+        timeZoneId = TimeZone.getDefault().id
     )
 }
 

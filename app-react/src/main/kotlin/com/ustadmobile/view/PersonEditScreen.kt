@@ -3,6 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants.GENDER_MESSAGE_IDS
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.PersonEditUiState
 import com.ustadmobile.lib.db.entities.PersonParentJoin
@@ -91,6 +92,7 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
             UstadDateEditField {
                 timeInMillis = props.uiState.person?.dateOfBirth ?: 0
                 label = strings[MessageID.birthday]
+                timeZoneId = UstadMobileConstants.UTC
                 onChange = {
                     props.onPersonChanged(
                         props.uiState.person?.shallowCopy {
@@ -190,7 +192,7 @@ val PersonEditScreenPreview = FC<Props> {
                 emailAddr = "Bob@gmail.com"
                 gender = 1
                 username = "Bob12"
-                dateOfBirth = 12
+                dateOfBirth = 0
                 personOrgId = "123"
                 personAddress = "Herat"
             }
