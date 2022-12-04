@@ -32,6 +32,8 @@ external interface UstadTimeEditFieldProps: Props {
 
     var enabled: Boolean?
 
+    var fullWidth: Boolean
+
 }
 
 val UstadTimeEditField = FC<UstadTimeEditFieldProps> { props ->
@@ -52,6 +54,7 @@ val UstadTimeEditField = FC<UstadTimeEditFieldProps> { props ->
             renderInput = { params ->
                 TextField.create {
                     +params
+                    fullWidth = props.fullWidth
 
                     if(props.error != null) {
                         error = true
