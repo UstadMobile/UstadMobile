@@ -77,9 +77,9 @@ fun UstadCourseBlockEdit(
             label = stringResource(id = R.string.points),
             error = uiState.caStartDateError,
             enabled = uiState.fieldsEnabled,
-            onValueChange = {
+            onValueChange = { newString ->
                 onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                    cbMaxPoints = it.toInt()
+                    cbMaxPoints = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                 })
             }
         )
@@ -111,9 +111,9 @@ fun UstadCourseBlockEdit(
                 label = stringResource(id = R.string.late_submission_penalty),
                 error = uiState.caStartDateError,
                 enabled = uiState.fieldsEnabled,
-                onValueChange = {
+                onValueChange = { newString ->
                     onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                        cbLateSubmissionPenalty = it.toInt()
+                        cbLateSubmissionPenalty = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                     })
                 }
             )

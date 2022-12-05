@@ -71,9 +71,9 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                             strings[MessageID.points])
                     label = strings[MessageID.maximum_points]
                     enabled = props.uiState.fieldsEnabled
-                    onChange = {
+                    onChange = { newString ->
                         props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                            cbMaxPoints = it.toInt()
+                            cbMaxPoints = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                         })
                     }
                 }
@@ -126,9 +126,9 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
                 label = strings[MessageID.late_submission_penalty]
                 error = props.uiState.caStartDateError
                 enabled = props.uiState.fieldsEnabled
-                onChange = {
+                onChange = { newString ->
                     props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
-                        cbLateSubmissionPenalty = it.toInt()
+                        cbLateSubmissionPenalty = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                     })
                 }
             }
