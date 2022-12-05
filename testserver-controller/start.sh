@@ -20,10 +20,10 @@ if [ "$NCRESULT" == "0" ]; then
   exit 1
 fi
 
-export PATH=$(realpath $BASEDIR/../):$PATH
-
+# Make the project root directory the working directory
+cd $BASEDIR/..
 java -jar $BASEDIR/build/libs/testserver-controller-all.jar &
 TESTSERVERPID=$!
 echo $TESTSERVERPID > $BASEDIR/build/server.pid
-echo "Started lib-http-testserver and saved PID [ $TESTSERVERPID ]"
+echo "Started testserver-controller and saved PID [ $TESTSERVERPID ]"
 

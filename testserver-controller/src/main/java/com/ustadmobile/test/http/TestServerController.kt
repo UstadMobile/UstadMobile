@@ -9,12 +9,22 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-@Suppress("BlockingMethodInNonBlockingContext")
-fun Application.testServerManager() {
+@Suppress("BlockingMethodInNonBlockingContext", "unused")
+fun Application.testServerController() {
+
+    val serverDir = File("app-ktor-server")
+    if(!serverDir.exists()) {
+        println("ERROR: Server dir does not exist! testServerManager working directory MUST be the " +
+                "root directory of the source code")
+        throw IllegalStateException("ERROR: Server dir does not exist! testServerManager working directory MUST be the " +
+                "root directory of the source code")
+    }
 
     var serverProcess: Process? = null
 
@@ -40,11 +50,40 @@ fun Application.testServerManager() {
         }
     }
 
+
     install(Routing) {
+        get("/") {
+            var response = ""
+            if(serverProcess != null) {
+                response = "Running pid #${serverProcess?.pid()} (running=${serverProcess?.isAlive}<br/>"
+            }else {
+                response = "Server not running <br/>"
+            }
+
+            call.response.header("cache-control", "no-cache")
+            call.respondText(
+                text = "<html><body>" +
+                        "$response <br/>" +
+                        "<a href=\"/start\">Start or restart server now</a>" +
+                        "</body></html>",
+                contentType = ContentType.Text.Html,
+            )
+        }
+
+
         get("/start") {
+            var response = SimpleDateFormat.getDateTimeInstance().format(Date()) + "<br/>"
             serverProcess?.also {
                 it.destroy()
                 it.waitFor(5, TimeUnit.SECONDS)
+                response += "Stopped server: pid #${serverProcess?.pid()}<br/>"
+                serverProcess = null
+            }
+
+            val dataDir = File(serverDir, "data")
+            if(dataDir.exists()){
+                dataDir.deleteRecursively()
+                response += "Cleared data directory: ${dataDir.absolutePath} <br/>"
             }
 
             val serverArgs = call.application.environment.config
@@ -59,12 +98,16 @@ fun Application.testServerManager() {
             }
 
             serverProcess = ProcessBuilder(serverArgs)
+                .directory(serverDir)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
 
+            response += "Started server process PID #${serverProcess?.pid()} ${serverArgs.joinToString( " ")}"
+
+            call.response.header("cache-control", "no-cache")
             call.respondText(
-                text = "<html><body>OK: ran ${serverArgs.joinToString( " ")}</body></html>",
+                text = "<html><body>$response</body></html>",
                 contentType = ContentType.Text.Html
             )
         }
@@ -76,6 +119,7 @@ fun Application.testServerManager() {
             }
 
             serverProcess = null
+            call.response.header("cache-control", "no-cache")
             call.respond(HttpStatusCode.OK, "OK")
         }
 
