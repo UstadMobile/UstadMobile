@@ -36,6 +36,7 @@ import com.ustadmobile.core.view.UstadView
 import org.kodein.di.direct
 import org.kodein.di.instance
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants.GENDER_MESSAGE_IDS
 import com.ustadmobile.core.impl.nav.SavedStateHandleAdapter
 import org.kodein.di.DI
@@ -186,6 +187,7 @@ fun PersonEditScreen(
             label = stringResource(id = R.string.birthday),
             error = uiState.dateOfBirthError,
             enabled = uiState.fieldsEnabled,
+            timeZoneId = UstadMobileConstants.UTC,
             onValueChange = {
                 onPersonChanged(uiState.person?.shallowCopy{
                     dateOfBirth = it

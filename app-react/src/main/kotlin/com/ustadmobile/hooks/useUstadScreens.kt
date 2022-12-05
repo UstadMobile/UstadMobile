@@ -30,6 +30,12 @@ fun useUstadScreens(): UstadScreens {
                 InviteViaLinkPreview),
             UstadScreen(ClazzEnrolmentEditView.VIEW_NAME, "ClazzEnrolmentEdit Preview",
                 ClazzEnrolmentEditScreenPreview),
+            UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
+                SiteTermsDetailScreenPreview),
+            UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",
+                RegisterMinorWaitForParentPreview),
+            UstadScreen(ScheduleEditView.VIEW_NAME, "ScheduleEdit Preview",
+                ScheduleEditScreenPreview),
         )
     }
 }
