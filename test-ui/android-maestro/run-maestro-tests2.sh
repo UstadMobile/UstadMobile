@@ -68,10 +68,10 @@ fi
 # Start control server
 $SCRIPTDIR/../../testserver-controller/start.sh
 
-maestro --device=$TESTSERIAL test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
+maestro test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          --format junit \
-         --output $SCRIPTDIR/results/report.xml
+         --output $SCRIPTDIR/results/report.xml \
          $SCRIPTDIR/e2e-tests
 
 $SCRIPTDIR/../../testserver-controller/stop.sh

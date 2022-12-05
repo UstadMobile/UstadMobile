@@ -1,0 +1,16 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: "DELETE"
+- tapOn: "DELETE"
+- extendedWaitUntil:
+    visible: "DOWNLOAD"
+    timeout: 10000
+- takeScreenshot: "results/${TESTCONTENTNAME}AfterDeletetion"
+- tapOn: "DOWNLOAD"
+- tapOn: "DOWNLOAD"
+- extendedWaitUntil:
+    visible: "Delete"
+    timeout: 10000
+- tapOn: "OPEN"
+- scroll
+- takeScreenshot: "results/${TESTCONTENTNAME}contentscreen"
