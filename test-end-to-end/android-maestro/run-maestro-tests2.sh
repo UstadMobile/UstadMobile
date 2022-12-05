@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
 TEMP=$(getopt -o 's:u:p:e:t:a:' --long 'serial1:,username:,password:,endpoint:,tests:,apk:' -n 'run-maestro-tests.sh' -- "$@")
@@ -56,11 +58,11 @@ while true; do
 done
 
 IPADDR=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n 1)
-if [ "$ENDPOINT" == "" ]; then
+if [ "$ENDPOINT" = "" ]; then
     ENDPOINT="http://$IPADDR:8087/"
 fi
 
-if [ "$CONTROLSERVER" == "" ]; then
+if [ "$CONTROLSERVER" = "" ]; then
   CONTROLSERVER="http://localhost:8075/"
 fi
 
