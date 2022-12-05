@@ -32,11 +32,12 @@ fun UstadCourseBlockEdit(
                         .addOptionalSuffix(),
                     error = uiState.caStartDateError,
                     enabled = uiState.fieldsEnabled,
+                    timeZoneId = uiState.timeZone,
                     onValueChange = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy{
                             cbHideUntilDate = it
                         })
-                    }
+                    },
                 )
 
                 Text(stringResource(R.string.class_timezone_set, uiState.timeZone))
@@ -49,6 +50,7 @@ fun UstadCourseBlockEdit(
                 value = uiState.courseBlock?.cbHideUntilDate ?: 0,
                 label = stringResource(id = R.string.time),
                 enabled = uiState.fieldsEnabled,
+                timeZoneId = uiState.timeZone,
                 onValueChange = {
                     onCourseBlockChange(uiState.courseBlock?.shallowCopy{
                         cbHideUntilDate = it
@@ -82,9 +84,9 @@ fun UstadCourseBlockEdit(
                             stringResource(id = R.string.points)),
                     label = stringResource(id = R.string.maximum_points),
                     enabled = uiState.fieldsEnabled,
-                    onValueChange = {
+                    onValueChange = { newString ->
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                            cbMaxPoints = it.toInt()
+                            cbMaxPoints = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                         })
                     }
                 )
@@ -99,9 +101,9 @@ fun UstadCourseBlockEdit(
             label = stringResource(id = R.string.points),
             error = uiState.caStartDateError,
             enabled = uiState.fieldsEnabled,
-            onValueChange = {
+            onValueChange = { newString ->
                 onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                    cbMaxPoints = it.toInt()
+                    cbMaxPoints = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                 })
             }
         )
@@ -115,6 +117,7 @@ fun UstadCourseBlockEdit(
                 label = stringResource(id = R.string.deadline).addOptionalSuffix(),
                 error = uiState.caDeadlineError,
                 enabled = uiState.fieldsEnabled,
+                timeZoneId = uiState.timeZone,
                 onValueChange = {
                     onCourseBlockChange(uiState.courseBlock?.shallowCopy{
                         cbDeadlineDate = it
@@ -130,6 +133,7 @@ fun UstadCourseBlockEdit(
                 label = stringResource(id = R.string.time),
                 error = uiState.caDeadlineError,
                 enabled = uiState.fieldsEnabled,
+                timeZoneId = uiState.timeZone,
                 onValueChange = {
                     onCourseBlockChange(uiState.courseBlock?.shallowCopy{
                         cbDeadlineDate = it
@@ -149,6 +153,7 @@ fun UstadCourseBlockEdit(
                     label = stringResource(id = R.string.end_of_grace_period),
                     error = uiState.caGracePeriodError,
                     enabled = uiState.fieldsEnabled,
+                    timeZoneId = uiState.timeZone,
                     onValueChange = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy{
                             cbGracePeriodDate = it
@@ -164,6 +169,7 @@ fun UstadCourseBlockEdit(
                     label = stringResource(id = R.string.time),
                     error = uiState.caGracePeriodError,
                     enabled = uiState.fieldsEnabled,
+                    timeZoneId = uiState.timeZone,
                     onValueChange = {
                         onCourseBlockChange(uiState.courseBlock?.shallowCopy{
                             cbGracePeriodDate = it
@@ -180,9 +186,9 @@ fun UstadCourseBlockEdit(
                 label = stringResource(id = R.string.late_submission_penalty),
                 error = uiState.caStartDateError,
                 enabled = uiState.fieldsEnabled,
-                onValueChange = {
+                onValueChange = { newString ->
                     onCourseBlockChange(uiState.courseBlock?.shallowCopy {
-                        cbLateSubmissionPenalty = it.toInt()
+                        cbLateSubmissionPenalty = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                     })
                 }
             )

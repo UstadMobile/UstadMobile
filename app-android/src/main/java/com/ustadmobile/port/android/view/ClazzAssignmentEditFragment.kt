@@ -21,10 +21,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentEditBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.locale.entityconstants.FileTypeConstants
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
-import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
-import com.ustadmobile.core.impl.locale.entityconstants.TextLimitTypeConstants
+import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentEditView
@@ -301,6 +298,8 @@ private fun ClazzAssignmentEditScreen(
             },
         )
 
+        Spacer(modifier = Modifier.height(15.dp))
+
         UstadTextEditField(
             value = uiState.entity?.assignment?.caDescription ?: "",
             label = stringResource(id = R.string.description).addOptionalSuffix(),
@@ -313,10 +312,14 @@ private fun ClazzAssignmentEditScreen(
             },
         )
 
+        Spacer(modifier = Modifier.height(15.dp))
+
         UstadCourseBlockEdit(
             uiState = uiState.courseBlockEditUiState,
             onCourseBlockChange = onChangeCourseBlock
         )
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         UstadTextEditField(
             value = uiState.groupSet?.cgsName ?: "",
@@ -324,29 +327,34 @@ private fun ClazzAssignmentEditScreen(
             enabled = uiState.groupSetEnabled,
             onValueChange = {},
             onClick = onClickSubmissionType,
-            modifier = Modifier.weight(0.5F)
         )
 
-        SwitchRow(
-            text = stringResource(id = R.string.require_file_submission),
+        Spacer(modifier = Modifier.height(15.dp))
+
+        UstadSwitchField(
+            label = stringResource(id = R.string.require_file_submission),
             checked = uiState.entity?.assignment?.caRequireFileSubmission ?: false,
             onChange = { onChangedFileRequired(it) },
+            enabled = uiState.fieldsEnabled
         )
 
+        Spacer(modifier = Modifier.height(15.dp))
 
         if (uiState.fileSubmissionVisible){
             UstadMessageIdOptionExposedDropDownMenuField(
                 value = uiState.entity?.assignment?.caFileType ?: 0,
                 label = stringResource(R.string.file_type),
                 options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS,
+                enabled = uiState.fieldsEnabled,
                 onOptionSelected = {
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyCourseBlockWithEntity{
                             assignment?.caFileType = it.value
                     })
                 },
-                enabled = uiState.fieldsEnabled,
             )
+
+            Spacer(modifier = Modifier.height(15.dp))
 
             UstadTextEditField(
                 value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toString(),
@@ -358,8 +366,9 @@ private fun ClazzAssignmentEditScreen(
                             assignment?.caSizeLimit = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                     })
                 },
-                modifier = Modifier.weight(0.5F)
             )
+
+            Spacer(modifier = Modifier.height(15.dp))
 
             UstadTextEditField(
                 value = (uiState.entity?.assignment?.caNumberOfFiles ?: 0).toString(),
@@ -371,29 +380,35 @@ private fun ClazzAssignmentEditScreen(
                             assignment?.caNumberOfFiles = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                     })
                 },
-                modifier = Modifier.weight(0.5F)
             )
         }
 
-        SwitchRow(
-            text = stringResource(id = R.string.require_text_submission),
+        Spacer(modifier = Modifier.height(15.dp))
+
+        UstadSwitchField(
+            label = stringResource(id = R.string.require_text_submission),
             checked = uiState.entity?.assignment?.caRequireTextSubmission ?: false,
-            onChange = { onChangedTextRequired(it) }
+            onChange = { onChangedTextRequired(it) },
+            enabled = uiState.fieldsEnabled
         )
+
+        Spacer(modifier = Modifier.height(15.dp))
 
         if (uiState.textSubmissionVisible) {
             UstadMessageIdOptionExposedDropDownMenuField(
                 value = uiState.entity?.assignment?.caTextLimitType ?: 0,
                 label = stringResource(R.string.limit),
                 options = TextLimitTypeConstants.TEXT_LIMIT_TYPE_MESSAGE_IDS,
+                enabled = uiState.fieldsEnabled,
                 onOptionSelected = {
                     onChangeCourseBlockWithEntity(
                         uiState.entity?.shallowCopyCourseBlockWithEntity{
                             assignment?.caTextLimitType = it.value
                     })
                 },
-                enabled = uiState.fieldsEnabled,
             )
+
+            Spacer(modifier = Modifier.height(15.dp))
 
             UstadTextEditField(
                 value = (uiState.entity?.assignment?.caTextLimit ?: 0).toString(),
@@ -405,124 +420,55 @@ private fun ClazzAssignmentEditScreen(
                             assignment?.caTextLimit = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                     })
                 },
-                modifier = Modifier.weight(0.5F)
             )
         }
+
+        Spacer(modifier = Modifier.height(15.dp))
 
         UstadMessageIdOptionExposedDropDownMenuField(
             value = uiState.entity?.assignment?.caSubmissionPolicy ?: 0,
             label = stringResource(R.string.submission_policy),
             options = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS,
+            enabled = uiState.fieldsEnabled,
             onOptionSelected = {
                 onChangeCourseBlockWithEntity(
                     uiState.entity?.shallowCopyCourseBlockWithEntity{
                         assignment?.caSubmissionPolicy = it.value
                 })
             },
-            enabled = uiState.fieldsEnabled,
         )
-    }
 
-    SwitchRow(
-        text = stringResource(id = R.string.allow_class_comments),
-        checked = uiState.entity?.assignment?.caClassCommentEnabled ?: false,
-        onChange = { onChangedAllowClassComments(it) }
-    )
-
-    SwitchRow(
-        text = stringResource(id = R.string.allow_private_comments_from_students),
-        checked = uiState.entity?.assignment?.caPrivateCommentsEnabled ?: false,
-        onChange = { onChangedAllowPrivateCommentsFromStudents(it) }
-    )
-}
-
-@Composable
-fun TextValueRow(
-    onValueChange: (Long) -> Unit = {},
-    dateValue: Long,
-    descriptionLabel: String,
-    descriptionError: String?,
-    descriptionMessage: String?,
-    value: String,
-    label: String,
-    enabled: Boolean
-){
-    Row {
-        Column(
-            modifier = Modifier.weight(0.5F)
-        ) {
-            UstadDateEditTextField(
-                value = dateValue,
-                label = descriptionLabel,
-                error = descriptionError,
-                onValueChange = onValueChange,
-            )
-
-            Text(text = descriptionMessage ?: "")
-        }
-
-        Spacer(modifier = Modifier.width(10.dp))
-
-        UstadTextEditField(
-            value = value,
-            label = label,
-            enabled = enabled,
-            onValueChange = {},
-            modifier = Modifier.weight(0.5F)
-        )
-    }
-}
-
-@Composable
-fun CompletionCriteriaRow(
-    uiState: ClazzAssignmentEditUiState = ClazzAssignmentEditUiState(),
-    onValueChange: (CourseBlockWithEntity?) -> Unit = {},
-){
-    Row {
+        Spacer(modifier = Modifier.height(15.dp))
 
         UstadMessageIdOptionExposedDropDownMenuField(
-            value = uiState.entity?.cbCompletionCriteria ?: 0,
-            label = stringResource(R.string.completion_criteria),
-            options = PersonConstants.GENDER_MESSAGE_IDS,
-            onOptionSelected = {
-                onValueChange(uiState.entity?.shallowCopyCourseBlockWithEntity{
-                    cbCompletionCriteria = it.value
-                })
-            },
+            value = uiState.entity?.assignment?.caMarkingType ?: 0,
+            label = stringResource(R.string.marked_by),
+            options = MarkingTypeConstants.MARKING_TYPE_MESSAGE_IDS,
             enabled = uiState.fieldsEnabled,
+            onOptionSelected = {
+                onChangeCourseBlockWithEntity(
+                    uiState.entity?.shallowCopyCourseBlockWithEntity{
+                        assignment?.caMarkingType = it.value
+                    })
+            },
         )
 
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
-        if (uiState.minScoreVisible){
-            UstadTextEditField(
-                value = uiState.entity?.cbMaxPoints.toString(),
-                label = stringResource(id = R.string.points),
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {},
-                modifier = Modifier.weight(0.5F)
-            )
-        }
-    }
-}
+        UstadSwitchField(
+            label = stringResource(id = R.string.allow_class_comments),
+            checked = uiState.entity?.assignment?.caClassCommentEnabled ?: false,
+            onChange = { onChangedAllowClassComments(it) },
+            enabled = uiState.fieldsEnabled
+        )
 
-@Composable
-private fun SwitchRow(
-    text: String,
-    checked: Boolean,
-    onChange: (Boolean) -> Unit,
-){
-    Row (
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ){
+        Spacer(modifier = Modifier.height(15.dp))
 
-        Text(text)
-
-        Switch(
-            checked= checked,
-            onCheckedChange = { onChange(it) }
+        UstadSwitchField(
+            label = stringResource(id = R.string.allow_private_comments_from_students),
+            checked = uiState.entity?.assignment?.caPrivateCommentsEnabled ?: false,
+            onChange = { onChangedAllowPrivateCommentsFromStudents(it) },
+            enabled = uiState.fieldsEnabled
         )
     }
 }
