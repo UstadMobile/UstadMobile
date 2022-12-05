@@ -71,7 +71,13 @@ fi
 $SCRIPTDIR/../../testserver-controller/start.sh
 
 adb reverse tcp:8075 tcp:8075
-adb -s $TESTSERIAL shell rm /sdcard/Download/*
+
+echo run Maestro: maestro test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
+                           -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
+                           -e TESTSERIAL=$TESTSERIAL \
+                           --format junit \
+                           --output $SCRIPTDIR/results/report.xml \
+                           $SCRIPTDIR/e2e-tests
 
 maestro test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
