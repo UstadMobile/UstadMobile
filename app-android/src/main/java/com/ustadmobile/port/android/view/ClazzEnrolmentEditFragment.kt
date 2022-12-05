@@ -7,10 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.People
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -24,7 +20,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzEnrolmentBinding
 import com.ustadmobile.core.controller.ClazzEnrolmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
+import com.ustadmobile.core.impl.locale.entityconstants.OutcomeConstants
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
@@ -32,12 +28,13 @@ import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.viewmodel.ClazzEnrolmentEditUiState
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
-import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
+import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import java.util.*
 
 
@@ -164,6 +161,7 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
 fun ClazzEnrolmentEditScreen(
     uiState: ClazzEnrolmentEditUiState = ClazzEnrolmentEditUiState(),
     onClazzEnrolmentChanged: (ClazzEnrolmentWithLeavingReason?) -> Unit = {},
+    onClickLeavingReason: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -183,8 +181,59 @@ fun ClazzEnrolmentEditScreen(
             },
         )
 
-        Spacer(modifier = Modifier.width(5.dp))
+        Spacer(modifier = Modifier.width(15.dp))
 
+        UstadDateEditTextField(
+            value = uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0,
+            label = stringResource(id = R.string.start_date),
+            enabled = uiState.fieldsEnabled,
+            error = uiState.startDateError,
+            timeZoneId = uiState.clazzEnrolment?.timeZone ?: "UTC",
+            onValueChange = {
+                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                    clazzEnrolmentDateJoined = it
+                })
+            }
+        )
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        UstadDateEditTextField(
+            value = uiState.clazzEnrolment?.clazzEnrolmentDateLeft ?: 0,
+            label = stringResource(id = R.string.end_date),
+            enabled = uiState.fieldsEnabled,
+            error = uiState.endDateError,
+            timeZoneId = uiState.clazzEnrolment?.timeZone ?: "UTC",
+            onValueChange = {
+                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                    clazzEnrolmentDateLeft = it
+                })
+            }
+        )
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        UstadMessageIdOptionExposedDropDownMenuField(
+            value = uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: 0,
+            label = stringResource(R.string.outcome),
+            options = OutcomeConstants.OUTCOME_MESSAGE_IDS,
+            enabled = uiState.fieldsEnabled,
+            onOptionSelected = {
+                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                    clazzEnrolmentOutcome = it.value
+                })
+            },
+        )
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        UstadTextEditField(
+            value = uiState.clazzEnrolment?.leavingReason?.leavingReasonTitle ?: "",
+            label = stringResource(id = R.string.leaving_reason),
+            onValueChange = {},
+            enabled = uiState.leavingReasonEnabled,
+            onClick = onClickLeavingReason
+        )
     }
 }
 
@@ -193,6 +242,7 @@ fun ClazzEnrolmentEditScreen(
 fun ClazzEnrolmentEditScreenPreview() {
     val uiState = ClazzEnrolmentEditUiState(
         clazzEnrolment = ClazzEnrolmentWithLeavingReason().apply {
+            clazzEnrolmentOutcome = ClazzEnrolment.OUTCOME_GRADUATED
         },
     )
 
