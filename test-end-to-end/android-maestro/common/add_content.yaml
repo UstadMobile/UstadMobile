@@ -3,6 +3,7 @@ appId: com.toughra.ustadmobile
 ---
 - clearState: com.toughra.ustadmobile
 
+- evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
 - evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 - launchApp
 - hideKeyboard

@@ -125,6 +125,27 @@ fun Application.testServerController() {
             call.respond(HttpStatusCode.OK, "OK")
         }
 
+        get("/cleardownloads") {
+            val deviceSerial = call.request.queryParameters["device"]
+
+            val adbCommand = SysPathUtil.findCommandInPath("adb")
+                ?: throw IllegalStateException("Cannot find adb in path")
+
+            val process = ProcessBuilder(listOf(adbCommand.absolutePath,
+                    "-s", deviceSerial, "shell", "rm", "/sdcard/Download/*"))
+                .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                .redirectError(ProcessBuilder.Redirect.PIPE)
+                .start()
+
+            process.waitFor(5, TimeUnit.SECONDS)
+
+            call.response.header("cache-control", "no-cache")
+            call.respondText(
+                text = "Cleared download directory /sdcard/Download",
+                contentType = ContentType.Text.Plain,
+            )
+        }
+
         get("/pushcontent") {
             val deviceSerial = call.request.queryParameters["device"]
             val fileName = call.request.queryParameters["test-file-name"]
