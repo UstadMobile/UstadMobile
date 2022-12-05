@@ -2,9 +2,15 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.util.MS_PER_HOUR
+import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.hooks.useTimeInOtherTimeZoneAsJsDate
 import com.ustadmobile.mui.common.*
+import com.ustadmobile.util.ext.toMillisInOtherTimeZone
+import com.ustadmobile.view.components.UstadSwitchField
+import kotlinx.datetime.TimeZone
 import kotlinx.js.jso
 import mui.icons.material.Visibility
 import mui.icons.material.VisibilityOff
@@ -13,6 +19,7 @@ import mui.system.responsive
 import muix.pickers.*
 import react.*
 import react.dom.aria.ariaLabel
+import react.dom.html.InputMode
 import react.dom.html.InputType
 import react.dom.onChange
 import kotlin.js.Date
@@ -63,6 +70,17 @@ external interface UstadEditFieldProps: PropsWithChildren {
      *  https://codesandbox.io/s/rect-material-ui-textfield-readonly-st5of?from-embed=&file=/src/index.js:232-249
      */
     var readOnly: Boolean
+
+    /**
+     * Sets a suffix string at the end e.g. a unit of measurement e.g. "points", "%", etc. Displayed
+     * at the end of the TextField as an adornment.
+     */
+    var suffixText: String?
+
+    /**
+     * InputProps setter functions - can be used to add adornments, set the input type, etc.
+     */
+    var inputProps: ((InputBaseProps) -> Unit)?
 }
 
 /**
@@ -100,15 +118,18 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
             props.onChange(currentVal?.toString() ?: "")
         }
 
+
         if(props.password) {
-            type = if(passwordVisible) {
+            type = if (passwordVisible) {
                 InputType.text
-            }else {
+            } else {
                 InputType.password
             }
+        }
 
-            //As per MUI showcase
-            asDynamic().InputProps = jso<InputBaseProps> {
+        //As per MUI showcase
+        asDynamic().InputProps = jso<InputBaseProps> {
+            if(props.password) {
                 endAdornment = InputAdornment.create {
                     position = InputAdornmentPosition.end
                     IconButton {
@@ -124,6 +145,15 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
                         }
                     }
                 }
+            }else if(props.suffixText != null) {
+                endAdornment = InputAdornment.create {
+                    position = InputAdornmentPosition.end
+                    +(props.suffixText ?: "")
+                }
+            }
+
+            props.inputProps?.also { inputPropsFn ->
+                inputPropsFn(this)
             }
         }
     }
@@ -135,6 +165,12 @@ external interface UstadDateEditFieldProps : Props {
      * The value as time in millis since 1970
      */
     var timeInMillis: Long
+
+    /**
+     * Reserved for future usage: will be required
+     */
+    @Suppress("unused")
+    var timeZoneId: String
 
     /**
      * Field label
@@ -158,28 +194,30 @@ external interface UstadDateEditFieldProps : Props {
  */
 val JS_DATE_MAX = 8640000000000000L
 
-fun Long.asDate(): Date? {
-    val value = if(this > JS_DATE_MAX) JS_DATE_MAX else this
-
-    return if(this == 0L || this >= JS_DATE_MAX) {
-        null
-    }else {
-        Date(value)
-    }
+/**
+ * We often use 0 and Long.MAX_VALUE as placeholders for unset dates. This makes queries
+ * straightforward e.g. if no end date is set by the user, the end date is stored as Long.MAX_VALUE,
+ * and would appear in active courses if applicable etc.
+ *
+ * These unset dates should not (however) be displayed to the user.
+ */
+fun Long.isSetDate(): Boolean {
+    return this > 0L && this < JS_DATE_MAX
 }
 
-
 val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
+    val dateVal = useTimeInOtherTimeZoneAsJsDate(props.timeInMillis, props.timeZoneId)
+
     LocalizationProvider {
         dateAdapter = AdapterDateFns
 
-        MobileDatePicker {
+        DatePicker {
             disabled = !(props.enabled ?: true)
             label = ReactNode(props.label)
-            value = props.timeInMillis.asDate()
+            value = dateVal
 
             onChange = {
-                props.onChange(it.getTime().toLong())
+                props.onChange(it.toMillisInOtherTimeZone(props.timeZoneId))
             }
 
             renderInput = { params ->
@@ -361,12 +399,47 @@ val UstadEditFieldPreviews = FC<Props> {
     Stack {
         spacing = responsive(5)
 
+        var date1 : Long by useState { systemTimeInMillis() }
         UstadDateEditField {
-            timeInMillis = systemTimeInMillis()
+            timeInMillis = date1
+            timeZoneId = TimeZone.currentSystemDefault().id
             label = "Date"
-            onChange = { }
+            onChange = {
+                date1 = it
+            }
             error = "Bad Day"
-            enabled = false
+        }
+
+        var unsetMinDate: Long by useState { 0L }
+
+        UstadDateEditField {
+            timeInMillis = unsetMinDate
+            timeZoneId = TimeZone.currentSystemDefault().id
+            label = "Unset min date"
+            onChange = {
+                unsetMinDate = it
+            }
+        }
+
+        var dateTime: Long by useState { systemTimeInMillis() }
+        UstadDateTimeEditField {
+            timeInMillis = dateTime
+            timeZoneId = TimeZone.currentSystemDefault().id
+            label = "Date and time"
+            onChange = {
+                dateTime = it
+            }
+            enabled = true
+        }
+
+        var time: Int by useState { (14 * MS_PER_HOUR) + (30 * MS_PER_MIN) }
+
+        UstadTimeEditField {
+            timeInMillis = time
+            label = "Time"
+            onChange = {
+                time = it
+            }
         }
 
         UstadTextEditField {
@@ -392,6 +465,30 @@ val UstadEditFieldPreviews = FC<Props> {
                 selectedOption = it as? DropDownOption
             }
         }
+
+        var switchChecked by useState { false }
+
+        UstadSwitchField {
+            label = "Switch"
+            checked = switchChecked
+            onChanged = {
+                switchChecked = it
+            }
+        }
+
+        var maxScore by useState { 42 }
+        UstadTextEditField {
+            label = "Maximum score"
+            value = maxScore.toString()
+            onChange = { newString ->
+                maxScore = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+            }
+            inputProps = {
+                it.inputMode = InputMode.numeric
+            }
+            suffixText = "Points"
+        }
+
     }
 }
 
