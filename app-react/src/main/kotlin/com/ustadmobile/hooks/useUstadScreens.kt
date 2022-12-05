@@ -36,6 +36,8 @@ fun useUstadScreens(): UstadScreens {
                 SiteTermsDetailScreenPreview),
             UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",
                 RegisterMinorWaitForParentPreview),
+            UstadScreen(ScheduleEditView.VIEW_NAME, "ScheduleEdit Preview",
+                ScheduleEditScreenPreview),
             UstadScreen(ClazzAssignmentDetailOverviewView.VIEW_NAME, "ClazzAssignmentDetailOverview Preview",
                 ClazzAssignmentDetailOverviewPreview),
         )
