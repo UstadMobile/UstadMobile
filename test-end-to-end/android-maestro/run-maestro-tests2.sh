@@ -66,18 +66,20 @@ if [ "$CONTROLSERVER" = "" ]; then
   CONTROLSERVER="http://localhost:8075/"
 fi
 
+if [ -e $SCRIPTDIR/results/report.xml ]; then
+  echo "Delete previous report.xml"
+  rm $SCRIPTDIR/results/report.xml
+fi
+
+if [ ! -e $SCRIPTDIR/results ]; then
+  mkdir $SCRIPTDIR/results
+fi
 
 # Start control server
 $SCRIPTDIR/../../testserver-controller/start.sh
 
 adb reverse tcp:8075 tcp:8075
 
-echo run Maestro: maestro test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
-                           -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-                           -e TESTSERIAL=$TESTSERIAL \
-                           --format junit \
-                           --output $SCRIPTDIR/results/report.xml \
-                           $SCRIPTDIR/e2e-tests
 
 maestro test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
