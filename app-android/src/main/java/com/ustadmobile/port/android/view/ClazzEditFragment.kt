@@ -486,6 +486,7 @@ private fun ClazzEditScreen(
         items(
             uiState.clazzSchedules.size
         ){
+
             UstadDetailField(
                 valueText = "Line one",
                 labelText = "Line Two",
