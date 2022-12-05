@@ -15,10 +15,12 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-@Suppress("BlockingMethodInNonBlockingContext", "unused")
+@Suppress("BlockingMethodInNonBlockingContext", "unused", "SdCardPath")
 fun Application.testServerController() {
 
     val serverDir = File("app-ktor-server")
+    val testContentDir = File(File("test-end-to-end", "test-files"), "content")
+
     if(!serverDir.exists()) {
         println("ERROR: Server dir does not exist! testServerManager working directory MUST be the " +
                 "root directory of the source code")
@@ -121,6 +123,41 @@ fun Application.testServerController() {
             serverProcess = null
             call.response.header("cache-control", "no-cache")
             call.respond(HttpStatusCode.OK, "OK")
+        }
+
+        get("/pushcontent") {
+            val deviceSerial = call.request.queryParameters["device"]
+            val fileName = call.request.queryParameters["test-file-name"]
+                ?: throw IllegalArgumentException("No filename specified")
+            val contentFile = File(testContentDir, fileName)
+
+            val adbCommand = SysPathUtil.findCommandInPath("adb")
+                ?: throw IllegalStateException("Cannot find adb in path")
+
+            call.response.header("cache-control", "no-cache")
+
+            if(!contentFile.exists()) {
+                call.respondText(
+                    status = HttpStatusCode.NotFound,
+                    text = "No such file: $contentFile",
+                    contentType = ContentType.Text.Plain,
+                )
+                return@get
+            }
+
+            val process = ProcessBuilder(listOf(adbCommand.absolutePath,
+                "-s", deviceSerial, "push", contentFile.absolutePath, "/sdcard/Download"))
+                .directory(serverDir)
+                .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                .redirectError(ProcessBuilder.Redirect.PIPE)
+                .start()
+
+            process.waitFor(5, TimeUnit.SECONDS)
+
+            call.respondText(
+                text = "Pushed content to $deviceSerial ${contentFile.absolutePath} -> /sdcard/Download",
+                contentType = ContentType.Text.Plain
+            )
         }
 
     }

@@ -1,0 +1,16 @@
+appId: com.toughra.ustadmobile
+---
+- clearState: com.toughra.ustadmobile
+- launchApp
+- hideKeyboard
+- tapOn: "GET STARTED"
+- inputText: ${ENDPOINT}
+- hideKeyboard
+- tapOn: "NEXT"
+- tapOn: "Username"
+- inputText: "Sudha"  #teacher named sudha and password test
+- tapOn: "Password"
+- inputText: "test"
+- hideKeyboard
+- tapOn: "LOGIN"
+- takeScreenshot: "results/TeacherAbleToLogin"

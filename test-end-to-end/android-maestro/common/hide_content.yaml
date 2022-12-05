@@ -1,0 +1,24 @@
+appId: com.toughra.ustadmobile
+---
+- back
+- takeScreenshot: "results/${TESTCONTENTNAME}screen_beforeHiding"
+- longPressOn:
+    text: "${TESTCONTENTNAME}"
+- tapOn:
+    text: "Hide"
+- takeScreenshot: "results/${TESTCONTENTNAME}screen_AfterHiding"
+- clearState: com.toughra.ustadmobile
+- launchApp
+- hideKeyboard
+- tapOn: "GET STARTED"
+- inputText: ${ENDPOINT}
+- hideKeyboard
+- tapOn: "NEXT"
+- tapOn: "Username"
+- inputText: ${USERNAME}
+- tapOn: "Password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: "LOGIN"
+- tapOn: "Library"
+- takeScreenshot: "results/${TESTCONTENTNAME}Screen_OnNewDevice"

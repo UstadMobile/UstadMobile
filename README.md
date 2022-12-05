@@ -89,6 +89,7 @@ Code is contained (mostly) in the following modules:
 * [app-android-launcher/](app-android-launcher/): Standalone app launcher that uses app-android.
 * [lib-database](lib-database/): contains the database, DAO, and entity classes.
 * [lib-util](lib-util/): Small utility functions
+* [test-end-to-end](test-end-to-end/) End-to-end tests that run the app and server.
 * [testserver-controller](testserver-controller/) An HTTP server that can control starting and 
   stopping the main server, and manage adb screen recording. Used by end-to-end testing.
 

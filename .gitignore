@@ -239,8 +239,8 @@ app-react-e2e-test/src/test/resources/admin.txt
 app-react/src/main/resources/locales
 
 #location for tests screenshots
-test-ui/android-maestro/results
-test-ui/android-maestro/e2e-tests/results
+test-end-to-end/android-maestro/results
+test-end-to-end/android-maestro/e2e-tests/results
 
 
 
