@@ -481,7 +481,7 @@ val UstadEditFieldPreviews = FC<Props> {
             label = "Maximum score"
             value = maxScore.toString()
             onChange = { newString ->
-                maxScore = newString.filter { it.isDigit() }.toInt()
+                maxScore = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
             }
             inputProps = {
                 it.inputMode = InputMode.numeric
