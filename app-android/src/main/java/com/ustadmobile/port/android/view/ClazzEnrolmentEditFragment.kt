@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.fragment.findNavController
@@ -23,15 +24,20 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzEnrolmentBinding
 import com.ustadmobile.core.controller.ClazzEnrolmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
+import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.viewmodel.ClazzEnrolmentEditUiState
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
+import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
+import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import java.util.*
 
 
@@ -156,25 +162,29 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
 
 @Composable
 fun ClazzEnrolmentEditScreen(
-    uiState: ClazzEnrolmentEditUiState = ClazzEnrolmentEditUiState()
+    uiState: ClazzEnrolmentEditUiState = ClazzEnrolmentEditUiState(),
+    onClazzEnrolmentChanged: (ClazzEnrolmentWithLeavingReason?) -> Unit = {},
 ) {
-    Row(
+    Column(
         modifier = Modifier
             .padding(16.dp)
     )  {
 
-        Icon(
-            imageVector = Icons.Filled.People,
-            contentDescription = ""
+        UstadMessageIdOptionExposedDropDownMenuField(
+            value = uiState.clazzEnrolment?.clazzEnrolmentRole ?: 0,
+            label = stringResource(R.string.role),
+            options = RoleConstants.ROLE_MESSAGE_IDS,
+            error = uiState.roleSelectedError,
+            enabled = uiState.fieldsEnabled,
+            onOptionSelected = {
+                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                    clazzEnrolmentRole = it.value
+                })
+            },
         )
 
         Spacer(modifier = Modifier.width(5.dp))
 
-        Column{
-            Text("")
-
-            Text("")
-        }
     }
 }
 
@@ -182,7 +192,7 @@ fun ClazzEnrolmentEditScreen(
 @Preview
 fun ClazzEnrolmentEditScreenPreview() {
     val uiState = ClazzEnrolmentEditUiState(
-        entity = ClazzEnrolmentWithLeavingReason().apply {
+        clazzEnrolment = ClazzEnrolmentWithLeavingReason().apply {
         },
     )
 
