@@ -1,7 +1,11 @@
 appId: com.toughra.ustadmobile
 ---
-# Variable for content name goes here
-# runFlow login_add_content_download.
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+
 - runFlow:
     file: "../common/add_content.yaml"
     env:

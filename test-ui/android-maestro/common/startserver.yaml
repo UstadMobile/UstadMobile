@@ -1,8 +1,3 @@
-appId: org.chromium.webview_shell
+appId: com.toughra.ustadmobile
 ---
-- launchApp
-- tapOn:
-    id: "org.chromium.webview_shell:id/url_field"
-- eraseText
-- inputText: "${CONTROLSERVER}start"
-- pressKey: Enter
+- runScript: startserver.js

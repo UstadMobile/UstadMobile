@@ -61,12 +61,16 @@ if [ "$ENDPOINT" == "" ]; then
 fi
 
 if [ "$CONTROLSERVER" == "" ]; then
-  CONTROLSERVER="http://$IPADDR:8075/"
+  CONTROLSERVER="http://localhost:8075/"
 fi
 
 
 # Start control server
 $SCRIPTDIR/../../testserver-controller/start.sh
+
+adb reverse tcp:8075 tcp:8075
+adb -s $TESTSERIAL shell rm /sdcard/Download/*
+adb -s $TESTSERIAL push $SCRIPTDIR/../test-files/content/* /sdcard/Download/
 
 maestro test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \

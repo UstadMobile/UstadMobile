@@ -2,6 +2,13 @@ appId: com.toughra.ustadmobile
 env:
    TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
 ---
+- clearState: com.toughra.ustadmobile
+
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+
 - runFlow:
       file: "../common/add_content.yaml"
       env:
