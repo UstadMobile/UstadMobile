@@ -73,7 +73,7 @@ adb -s $TESTSERIAL shell rm /sdcard/Download/*
 
 maestro test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-         -e TESTSERIAL=$TESTSERIAL
+         -e TESTSERIAL=$TESTSERIAL \
          --format junit \
          --output $SCRIPTDIR/results/report.xml \
          $SCRIPTDIR/e2e-tests
