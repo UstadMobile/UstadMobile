@@ -62,6 +62,10 @@ open class Person() {
 
     var motherNum: String? = null
 
+    /**
+     * The date of birth of the user in milliseconds since 1/Jan/1970 (UTC). All date of birth
+     * timestamps are stored as TimeZone = UTC.
+     */
     var dateOfBirth: Long = 0
 
     var personAddress: String? = null

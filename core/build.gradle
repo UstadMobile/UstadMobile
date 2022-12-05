@@ -113,6 +113,7 @@ kotlin {
                 implementation project(":lib-util")
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
+                implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
             }
         }
 
