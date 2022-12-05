@@ -270,7 +270,6 @@ private fun ClazzAssignmentEditScreen(
     uiState: ClazzAssignmentEditUiState = ClazzAssignmentEditUiState(),
     onChangeCourseBlockWithEntity: (CourseBlockWithEntity?) -> Unit = {},
     onChangeCourseBlock: (CourseBlock?) -> Unit = {},
-    onCaStartDateValueChange: (Long?) -> Unit = {},
     onClickSubmissionType: () -> Unit = {},
     onChangedFileRequired: (Boolean) -> Unit = {},
     onChangedTextRequired: (Boolean) -> Unit = {},

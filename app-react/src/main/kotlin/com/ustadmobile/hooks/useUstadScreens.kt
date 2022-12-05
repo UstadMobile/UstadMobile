@@ -40,6 +40,8 @@ fun useUstadScreens(): UstadScreens {
                 ScheduleEditScreenPreview),
             UstadScreen(ContentEntryEdit2View.VIEW_NAME, "ContentEntryEdit Preview",
                 ContentEntryEditScreenPreview),
+            UstadScreen(ClazzAssignmentEditView.VIEW_NAME, "ClazzAssignmentEdit Preview",
+                ClazzAssignmentEditScreenPreview),
         )
     }
 }
