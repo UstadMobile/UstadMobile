@@ -33,6 +33,7 @@ import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.lib.db.entities.ext.shallowCopyCourseBlockWithEntity
 import com.ustadmobile.port.android.view.binding.isSet
 import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
 import com.ustadmobile.port.android.view.composable.*
@@ -270,7 +271,8 @@ class ClazzAssignmentEditFragment: UstadEditFragment<CourseBlockWithEntity>(), C
 @Composable
 private fun ClazzAssignmentEditScreen(
     uiState: ClazzAssignmentEditUiState = ClazzAssignmentEditUiState(),
-    onChangeCourseBlock: (CourseBlockWithEntity?) -> Unit = {},
+    onChangeCourseBlockWithEntity: (CourseBlockWithEntity?) -> Unit = {},
+    onChangeCourseBlock: (CourseBlock?) -> Unit = {},
     onCaStartDateValueChange: (Long?) -> Unit = {},
     onClickSubmissionType: () -> Unit = {},
     onChangedFileRequired: (Boolean) -> Unit = {},
@@ -292,8 +294,9 @@ private fun ClazzAssignmentEditScreen(
             error = uiState.caTitleError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onChangeCourseBlock(uiState.entity?.shallowCopy {
-                    assignment?.caTitle = it
+                onChangeCourseBlockWithEntity(
+                    uiState.entity?.shallowCopyCourseBlockWithEntity {
+                        assignment?.caTitle = it
                 })
             },
         )
@@ -303,40 +306,16 @@ private fun ClazzAssignmentEditScreen(
             label = stringResource(id = R.string.description).addOptionalSuffix(),
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onChangeCourseBlock(uiState.entity?.shallowCopy{
-                    assignment?.caDescription = it
+                onChangeCourseBlockWithEntity(
+                    uiState.entity?.shallowCopyCourseBlockWithEntity{
+                        assignment?.caDescription = it
                 })
             },
         )
 
-        UstadCourseBlockEdit(uiState = uiState.courseBlockEditUiState)
-
-        TextValueRow(
-            onCaStartDateValueChange,
-            0,
-            stringResource(id = R.string.dont_show_before),
-            uiState.caStartDateError,
-            "",
-            uiState.timeZone ?: "US",
-            stringResource(id = R.string.time),
-            uiState.fieldsEnabled
-        )
-
-        CompletionCriteriaRow(
-            uiState,
-            onChangeCourseBlock
-        )
-
-        UstadTextEditField(
-            value = (uiState.entity?.cbMaxPoints ?: 0).toString(),
-            label = stringResource(id = R.string.maximum_points),
-            onValueChange = {
-                onChangeCourseBlock(uiState.entity?.shallowCopy{
-                    cbMaxPoints = Integer.parseInt(it ?: "0")
-                })
-            },
-            enabled = uiState.fieldsEnabled,
-            error = uiState.caMaxPointsError
+        UstadCourseBlockEdit(
+            uiState = uiState.courseBlockEditUiState,
+            onCourseBlockChange = onChangeCourseBlock
         )
 
         UstadTextEditField(
@@ -351,7 +330,7 @@ private fun ClazzAssignmentEditScreen(
         SwitchRow(
             text = stringResource(id = R.string.require_file_submission),
             checked = uiState.entity?.assignment?.caRequireFileSubmission ?: false,
-            onChange = { onChangedFileRequired(it) }
+            onChange = { onChangedFileRequired(it) },
         )
 
 
@@ -361,8 +340,9 @@ private fun ClazzAssignmentEditScreen(
                 label = stringResource(R.string.file_type),
                 options = FileTypeConstants.FILE_TYPE_MESSAGE_IDS,
                 onOptionSelected = {
-                    onChangeCourseBlock(uiState.entity?.shallowCopy{
-                        assignment?.caFileType = it.value
+                    onChangeCourseBlockWithEntity(
+                        uiState.entity?.shallowCopyCourseBlockWithEntity{
+                            assignment?.caFileType = it.value
                     })
                 },
                 enabled = uiState.fieldsEnabled,
@@ -372,9 +352,10 @@ private fun ClazzAssignmentEditScreen(
                 value = (uiState.entity?.assignment?.caSizeLimit ?: 0).toString(),
                 label = stringResource(id = R.string.size_limit),
                 enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onChangeCourseBlock(uiState.entity?.shallowCopy{
-                        assignment?.caSizeLimit = it
+                onValueChange = { newString ->
+                    onChangeCourseBlockWithEntity(
+                        uiState.entity?.shallowCopyCourseBlockWithEntity{
+                            assignment?.caSizeLimit = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                     })
                 },
                 modifier = Modifier.weight(0.5F)
@@ -384,9 +365,10 @@ private fun ClazzAssignmentEditScreen(
                 value = (uiState.entity?.assignment?.caNumberOfFiles ?: 0).toString(),
                 label = stringResource(id = R.string.number_of_files),
                 enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onChangeCourseBlock(uiState.entity?.shallowCopy{
-                        assignment?.caNumberOfFiles = it
+                onValueChange = { newString ->
+                    onChangeCourseBlockWithEntity(
+                        uiState.entity?.shallowCopyCourseBlockWithEntity{
+                            assignment?.caNumberOfFiles = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                     })
                 },
                 modifier = Modifier.weight(0.5F)
@@ -405,8 +387,9 @@ private fun ClazzAssignmentEditScreen(
                 label = stringResource(R.string.limit),
                 options = TextLimitTypeConstants.TEXT_LIMIT_TYPE_MESSAGE_IDS,
                 onOptionSelected = {
-                    onChangeCourseBlock(uiState.entity?.shallowCopy{
-                        assignment?.caTextLimitType = it.value
+                    onChangeCourseBlockWithEntity(
+                        uiState.entity?.shallowCopyCourseBlockWithEntity{
+                            assignment?.caTextLimitType = it.value
                     })
                 },
                 enabled = uiState.fieldsEnabled,
@@ -416,9 +399,10 @@ private fun ClazzAssignmentEditScreen(
                 value = (uiState.entity?.assignment?.caTextLimit ?: 0).toString(),
                 label = stringResource(id = R.string.maximum),
                 enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onChangeCourseBlock(uiState.entity?.shallowCopy{
-                        assignment?.caTextLimit = it
+                onValueChange = { newString ->
+                    onChangeCourseBlockWithEntity(
+                        uiState.entity?.shallowCopyCourseBlockWithEntity{
+                            assignment?.caTextLimit = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                     })
                 },
                 modifier = Modifier.weight(0.5F)
@@ -430,8 +414,9 @@ private fun ClazzAssignmentEditScreen(
             label = stringResource(R.string.submission_policy),
             options = SubmissionPolicyConstants.SUBMISSION_POLICY_MESSAGE_IDS,
             onOptionSelected = {
-                onChangeCourseBlock(uiState.entity?.shallowCopy{
-                    assignment?.caSubmissionPolicy = it.value
+                onChangeCourseBlockWithEntity(
+                    uiState.entity?.shallowCopyCourseBlockWithEntity{
+                        assignment?.caSubmissionPolicy = it.value
                 })
             },
             enabled = uiState.fieldsEnabled,
@@ -500,7 +485,7 @@ fun CompletionCriteriaRow(
             label = stringResource(R.string.completion_criteria),
             options = PersonConstants.GENDER_MESSAGE_IDS,
             onOptionSelected = {
-                onValueChange(uiState.entity?.shallowCopy{
+                onValueChange(uiState.entity?.shallowCopyCourseBlockWithEntity{
                     cbCompletionCriteria = it.value
                 })
             },
