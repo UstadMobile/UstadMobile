@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,6 +69,8 @@ fun UstadTextEditField(
     onClick: (() -> Unit)? = null,
     onValueChange: (String) -> Unit,
     password: Boolean = false,
+    suffixText: String? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     var errorText by remember(errorString) {
         mutableStateOf(errorString?.toString())
@@ -122,9 +126,17 @@ fun UstadTextEditField(
                         )
                     }
                 }
+            }else if(suffixText != null) {
+                {
+                    Text(
+                        text = suffixText,
+                        modifier = Modifier.padding(end = 16.dp)
+                    )
+                }
             }else {
                 null
-            }
+            },
+            keyboardOptions = keyboardOptions,
         )
     }
 }
@@ -138,6 +150,24 @@ fun UstadTextEditFieldPreview() {
         onValueChange = {},
         error =null,
         enabled = true,
+    )
+}
+
+@Preview
+@Composable
+fun UstadTextEditFieldSuffixPreview() {
+    var maxScore: Int by remember { mutableStateOf(42) }
+
+    UstadTextEditField(
+        value = "42",
+        label = "Maximum score",
+        onValueChange = { newString ->
+            maxScore = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+        },
+        error =null,
+        enabled = true,
+        suffixText = "points",
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 }
 
