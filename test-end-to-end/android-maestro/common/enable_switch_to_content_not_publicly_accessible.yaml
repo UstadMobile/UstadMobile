@@ -1,9 +1,6 @@
 appId: com.toughra.ustadmobile
 ---
 - tapOn: "EDIT"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/entry_title_text"
-- scroll
 - swipe:
       start: 100,400
       end: 100,100
