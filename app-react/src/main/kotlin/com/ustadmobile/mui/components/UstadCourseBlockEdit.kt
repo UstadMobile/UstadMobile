@@ -121,11 +121,11 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
             }
 
             UstadTextEditField {
-                value = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0)
-                    .toString() + " %"
+                value = (props.uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toString()
                 label = strings[MessageID.late_submission_penalty]
                 error = props.uiState.caStartDateError
                 enabled = props.uiState.fieldsEnabled
+                suffixText = "%"
                 onChange = { newString ->
                     props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
                         cbLateSubmissionPenalty = newString.filter { it.isDigit() }.toIntOrNull() ?: 0

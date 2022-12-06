@@ -106,11 +106,11 @@ fun UstadCourseBlockEdit(
             Spacer(modifier = Modifier.height(10.dp))
 
             UstadTextEditField(
-                value = (uiState.courseBlock?.cbLateSubmissionPenalty ?: 0)
-                    .toString()+" %",
+                value = (uiState.courseBlock?.cbLateSubmissionPenalty ?: 0).toString(),
                 label = stringResource(id = R.string.late_submission_penalty),
                 error = uiState.caStartDateError,
                 enabled = uiState.fieldsEnabled,
+                suffixText = "%",
                 onValueChange = { newString ->
                     onCourseBlockChange(uiState.courseBlock?.shallowCopy {
                         cbLateSubmissionPenalty = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
