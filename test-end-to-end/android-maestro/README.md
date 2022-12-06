@@ -13,7 +13,7 @@ The end-to-end tests for the Android app are built using [Maestro](https://maest
 ### Running:
 
 ```
-$ ./run-maestro-test --serial1 emulator-5554
+$ ./run-maestro-test.sh --serial1 emulator-5554
 ```
 Where emulator-5554 is the serial of the emulator as per the **adb devices** command.
 
