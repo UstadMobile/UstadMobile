@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a:' --long 'serial1:,username:,password:,endpoint:,test:,apk:' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e:t:a:c' --long 'serial1:,username:,password:,endpoint:,test:,apk:,console-output' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -15,6 +15,7 @@ TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
 TESTAPK=$SCRIPTDIR/../../app-android-launcher/build/outputs/apk/release/app-android-launcher-release.apk
 CONTROLSERVER=""
+USECONSOLEOUTPUT=0
 
 while true; do
         case "$1" in
@@ -48,6 +49,12 @@ while true; do
                      echo "Set APK to $2"
                      TESTAPK=$2
                      shift 2
+                     continue
+               ;;
+               '-c'|'--console-output')
+                     echo "Use console output"
+                     USECONSOLEOUTPUT=1
+                     shift 1
                      continue
                ;;
                '--')
@@ -94,11 +101,15 @@ else
   TESTARG="$SCRIPTDIR/e2e-tests"
 fi
 
+OUTPUTARGS=" --format junit --output $SCRIPTDIR/results/report.xml "
+if [ "$USECONSOLEOUTPUT" == "1" ]; then
+  OUTPUTARGS=""
+fi
+
 maestro test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL \
-         --format junit \
-         --output $SCRIPTDIR/results/report.xml \
+         $OUTPUTARGS \
          $TESTARG
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
