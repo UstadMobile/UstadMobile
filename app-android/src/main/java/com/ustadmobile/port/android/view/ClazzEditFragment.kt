@@ -29,15 +29,20 @@ import com.toughra.ustadmobile.databinding.ItemScheduleBinding
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.locale.entityconstants.DayConstants
 import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
+import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.util.compose.messageIdResource
+import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
 import com.ustadmobile.port.android.util.ext.MS_PER_MIN
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
@@ -487,9 +492,15 @@ private fun ClazzEditScreen(
             uiState.clazzSchedules.size
         ){
 
+            val fromTimeFormatted = rememberFormattedTime(timeInMs = uiState.clazzSchedules[it].sceduleStartTime.toInt())
+            val toTimeFormatted = rememberFormattedTime(timeInMs = uiState.clazzSchedules[it].scheduleEndTime.toInt())
+            val text = "${messageIdResource(id = uiState.clazzSchedules[it].scheduleFrequency)} " +
+                    " ${messageIdResource(uiState.clazzSchedules[it].scheduleDay)} " +
+                    " $fromTimeFormatted - $toTimeFormatted "
+
             UstadDetailField(
-                valueText = "Line one",
-                labelText = "Line Two",
+                valueText = text,
+                labelText = "",
                 onClick = { onClickEditSchedule(uiState.clazzSchedules[it]) },
                 secondaryActionContent = {
                     IconButton(
@@ -597,7 +608,20 @@ private fun AddButton(
 @Composable
 @Preview
 fun ClazzEditScreenPreview() {
+    val uiState = ClazzEditUiState(
+        entity = ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
+
+        },
+        clazzSchedules = listOf(
+            Schedule().apply {
+                sceduleStartTime = 0
+                scheduleEndTime = 0
+                scheduleFrequency = MessageID.yearly
+                scheduleDay = MessageID.sunday
+            }
+        )
+    )
     MdcTheme {
-        ClazzEditScreen()
+        ClazzEditScreen(uiState)
     }
 }
