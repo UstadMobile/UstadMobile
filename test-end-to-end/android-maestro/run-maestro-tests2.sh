@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a:' --long 'serial1:,username:,password:,endpoint:,tests:,apk:' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e:t:a:' --long 'serial1:,username:,password:,endpoint:,test:,apk:' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -11,6 +11,7 @@ unset TEMP
 TESTUSER="admin"
 TESTPASS="testpass"
 WORKDIR=$(pwd)
+TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
 TESTAPK=$SCRIPTDIR/../../app-android-launcher/build/outputs/apk/release/app-android-launcher-release.apk
 CONTROLSERVER=""
@@ -37,9 +38,9 @@ while true; do
                       shift 2
                      continue
                ;;
-               '-t'|'--tests')
-                     echo "Set tests to $2"
-                     TESTS=$2
+               '-t'|'--test')
+                     echo "Set test to $2"
+                     TEST=$2
                      shift 2
                      continue
                ;;
@@ -86,12 +87,19 @@ if [ "$(adb shell pm list packages com.toughra.ustadmobile)" != "" ]; then
 fi
 adb install $TESTAPK
 
+TESTARG=$TEST
+if [ "$TEST" != "" ]; then
+  TESTARG="$SCRIPTDIR/e2e-tests/$TEST.yaml"
+else
+  TESTARG="$SCRIPTDIR/e2e-tests"
+fi
+
 maestro test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL \
          --format junit \
          --output $SCRIPTDIR/results/report.xml \
-         $SCRIPTDIR/e2e-tests
+         $TESTARG
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
 
