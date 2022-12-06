@@ -28,20 +28,26 @@ appId: com.toughra.ustadmobile
 - tapOn:
     id: "com.toughra.ustadmobile:id/entry_title_text"
 - longPressOn:
-    id: "com.toughra.ustadmobile:id/entry_title_text"
+   id: "com.toughra.ustadmobile:id/entry_title_text"
 - runFlow:
-      when:
-          notVisible: "Select all"
-      file: redirect_to_select.yaml
-- tapOn: "Select all"
+    when:
+      visible: "Select all"
+    file: redirect_to_select.yaml
+- runFlow:
+    when:
+      visible:
+        text: "More options"
+    file: moreOptions.yaml
 - eraseText
 - inputText: ${TESTCONTENTNAME}
+- hideKeyboard
 - tapOn: "SAVE"
 - runFlow:
     when:
       visible: "Allow Ustad Mobile to send you notifications?"
     file: dismiss_notification.yaml
-- tapOn: ${TESTCONTENTNAME}
+- tapOn:
+    text: ${TESTCONTENTNAME}
 - extendedWaitUntil:
     visible: "Delete"
     timeout: 600000

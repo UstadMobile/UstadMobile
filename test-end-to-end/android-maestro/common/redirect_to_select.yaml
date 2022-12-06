@@ -1,4 +1,3 @@
 appId: com.toughra.ustadmobile
 ---
-- tapOn:
-     text: "More options"
+- tapOn: "Select all"
