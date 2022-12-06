@@ -7,24 +7,18 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.UstadSwitchField
 import csstype.px
-import kotlinx.css.span
-import mui.icons.material.*
+import mui.icons.material.Add
+import mui.icons.material.Delete
 import mui.material.*
-import mui.material.List
 import mui.material.styles.TypographyVariant
-import mui.system.Spacing
-import mui.system.StackDirection
 import mui.system.responsive
-import mui.system.sx
-import org.kodein.di.bindings.WithContext
 import react.FC
 import react.Props
 import react.create
-import react.dom.onChange
 
 external interface SiteEditProps: Props {
     var uiState: SiteEditUiState
@@ -83,37 +77,46 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
                 + strings[MessageID.terms_and_policies]
             }
 
-            ListItem {
-
-                onClick = {
-                    props.onClickAddItem()
-                }
-
-                ListItemIcon {
-                    Add{}
-                }
-
-                ListItemText {
-                    + (strings[MessageID.terms_and_policies])
-                }
-            }
-
             List{
+                ListItem {
+                    disablePadding = true
+
+                    ListItemButton {
+                        onClick = {
+                            props.onClickAddItem()
+                        }
+
+                        ListItemIcon {
+                            Add{}
+                        }
+
+                        ListItemText {
+                            + (strings[MessageID.terms_and_policies])
+                        }
+                    }
+                }
+
                 props.uiState.siteTerms.forEach { item ->
                     ListItem {
-
-                        onClick = {
-                            props.onClickLang(item)
-                        }
-                        ListItemText {
-                            + (item.stLanguage?.name ?: "")
-                        }
-
+                        disablePadding = true
                         secondaryAction = IconButton.create {
                             onClick = {
                                 props.onDeleteClick(item)
                             }
                             Delete {}
+                        }
+
+                        ListItemButton {
+                            ListItemIcon {
+                                UstadBlankIcon { }
+                            }
+
+                            onClick = {
+                                props.onClickLang(item)
+                            }
+                            ListItemText {
+                                + (item.stLanguage?.name ?: "")
+                            }
                         }
                     }
                 }

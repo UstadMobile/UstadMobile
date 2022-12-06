@@ -2,7 +2,6 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.SiteDetailUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
@@ -16,7 +15,8 @@ import mui.system.responsive
 import react.FC
 import react.Props
 import react.create
-import react.dom.html.ReactHTML
+import mui.material.List
+
 
 external interface SiteDetailProps : Props {
     var uiState: SiteDetailUiState
@@ -57,14 +57,18 @@ val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
                 + strings[MessageID.terms_and_policies]
             }
 
-            props.uiState.siteTerms.forEach { item ->
-                ListItem {
-                    var item = item
-                    onClick = {
-                        props.onClickLang(item)
-                    }
-                    ListItemText {
-                        + (item.stLanguage?.name ?: "")
+            List {
+                props.uiState.siteTerms.forEach { item ->
+                    ListItem {
+                        disablePadding = true
+                        ListItemButton {
+                            onClick = {
+                                props.onClickLang(item)
+                            }
+                            ListItemText {
+                                + (item.stLanguage?.name ?: "")
+                            }
+                        }
                     }
                 }
             }
