@@ -1,3 +1,0 @@
-appId: org.chromium.webview_shell
----
--runFlow ../common/startserver.yaml
