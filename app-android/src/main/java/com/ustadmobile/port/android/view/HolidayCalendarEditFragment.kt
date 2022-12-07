@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,6 +41,8 @@ import com.ustadmobile.core.viewmodel.HolidayCalendarEditUiState
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
+import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
@@ -206,13 +209,12 @@ fun HolidayCalendarEditScreen(
             text = { Text(stringResource(id = R.string.add_a_holiday)) }
         )
 
-        uiState.calendarList.forEach {
+        uiState.calendarList?.forEach {
             ListItem(
-                modifier = Modifier.clickable {
-                    onClickAddItem()
-                },
+                text = { it.umCalendarName },
+                trailing = {
 
-                text = { it.umCalendarName }
+                }
             )
         }
 
@@ -227,14 +229,11 @@ fun HolidayCalendarEditPreview(){
             holidayCalendar = HolidayCalendar().apply {
                 umCalendarName = "my cal"
             },
-            calendarList = listOf<HolidayCalendar>().apply {
+            calendarList = listOf(
                 HolidayCalendar().apply {
                     umCalendarName = "first"
                 }
-                HolidayCalendar().apply {
-                    umCalendarName = "second"
-                }
-            }
+            )
         )
     )
 }

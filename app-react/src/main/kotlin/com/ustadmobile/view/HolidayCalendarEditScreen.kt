@@ -8,6 +8,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadTextEditField
 import kotlinx.css.px
 import mui.icons.material.Add
+import mui.icons.material.Delete
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
@@ -18,6 +19,7 @@ external interface HolidayCalendarEditProps: Props {
     var uiState: HolidayCalendarEditUiState
     var onAddItemClick: () -> Unit
     var onHolidayCalendarChange: (HolidayCalendar?) -> Unit
+    var onDeleteItemClick: (HolidayCalendar?) -> Unit
 }
 
 val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
@@ -58,6 +60,28 @@ val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
                     }
                 }
             }
+
+            props.uiState.calendarList?.forEach { item ->
+                ListItem {
+                    ListItemText{
+                        + (item.umCalendarName ?: "")
+                    }
+
+                    ListItemSecondaryAction{
+                        ListItemButton{
+
+                            onClick = {
+                                props.onDeleteItemClick(item)
+                            }
+
+                            ListItemIcon{
+                                Delete{}
+                            }
+                        }
+                    }
+                }
+            }
+
         }
     }
 
@@ -68,7 +92,12 @@ val HolidayCalendarEditPreview = FC<Props> {
         uiState = HolidayCalendarEditUiState(
             holidayCalendar = HolidayCalendar().apply {
                 umCalendarName = "my cal"
-            }
+            },
+            calendarList = listOf(
+                HolidayCalendar().apply {
+                    umCalendarName = "first"
+                }
+            )
         )
     }
 }
