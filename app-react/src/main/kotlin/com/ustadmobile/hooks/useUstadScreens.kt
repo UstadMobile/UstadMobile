@@ -43,7 +43,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(ContentEntryEdit2View.VIEW_NAME, "ContentEntryEdit Preview",
                 ContentEntryEditScreenPreview),
             UstadScreen(SiteDetailView.VIEW_NAME, name = "Site Detail Preview", SiteDetailPreview),
-            UstadScreen(SiteEditView.VIEW_NAME, name = "Site Edit Preview", SiteEditPreview)
+            UstadScreen(SiteEditView.VIEW_NAME, name = "Site Edit Preview", SiteEditPreview),
+            UstadScreen(SchoolDetailOverviewView.VIEW_NAME, "SchoolDetailOverview Preview",
+                SchoolDetailOverviewScreenPreview),
         )
     }
 }
