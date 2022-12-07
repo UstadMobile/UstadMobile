@@ -210,7 +210,7 @@ fun HolidayCalendarEditScreen(
 
         uiState.calendarList?.forEach { item ->
             ListItem(
-                text = { item.umCalendarName },
+                text = { Text(text = item.umCalendarName ?: "") },
                 trailing = {
                     IconButton(onClick = {
                         onDeleteItemClick(item)
