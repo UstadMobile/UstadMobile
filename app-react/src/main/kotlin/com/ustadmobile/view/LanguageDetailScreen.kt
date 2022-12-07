@@ -50,9 +50,9 @@ val LanguageDetailPreview = FC<Props> {
     LanguageDetailComponent2 {
         uiState = LanguageDetailUiState(
             language = Language().apply {
-                name = "fa"
+                name = "فارسی"
                 iso_639_1_standard = "fa"
-                iso_639_2_standard = "fa"
+                iso_639_2_standard = "per"
             }
         )
     }
