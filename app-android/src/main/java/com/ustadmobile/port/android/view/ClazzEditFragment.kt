@@ -643,10 +643,10 @@ fun ClazzEditScreenPreview() {
                 cbTitle = "First"
             },
             CourseBlockWithEntity().apply {
-                cbTitle = "second"
+                cbTitle = "Second"
             },
             CourseBlockWithEntity().apply {
-                cbTitle = "second"
+                cbTitle = "Third"
             }
         )
     )
