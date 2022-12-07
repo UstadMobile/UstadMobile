@@ -4,20 +4,18 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.SchoolEditUiState
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadTextEditField
-import csstype.*
-import mui.material.List
+import csstype.px
 import mui.material.Box
-import mui.icons.material.*
-import mui.material.*
 import mui.material.Container
-import mui.system.*
 import mui.material.Stack
-import mui.material.styles.TypographyVariant
-import react.*
+import mui.system.responsive
+import mui.system.sx
+import react.FC
+import react.Props
+import react.useState
 
 external interface SchoolEditScreenProps : Props {
 
@@ -28,12 +26,6 @@ external interface SchoolEditScreenProps : Props {
     var onClickTimeZone: () -> Unit
 
     var onClickHolidayCalendar: () -> Unit
-
-    var onClickNew: () -> Unit
-
-    var onClickEditScopedGrant: (ScopedGrantAndName?) -> Unit
-
-    var onClickDeleteScopedGrant: (ScopedGrantAndName?) -> Unit
 
 }
 
@@ -71,7 +63,7 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
 
             UstadTextEditField {
                 value = props.uiState.entity?.schoolTimeZone ?: ""
-                label = strings[MessageID.description]
+                label = strings[MessageID.timezone]
                 enabled = props.uiState.fieldsEnabled
                 readOnly = true
                 onClick = props.onClickTimeZone
@@ -125,47 +117,11 @@ val SchoolEditComponent2 = FC <SchoolEditScreenProps> { props ->
                     height = 10.px
                 }
             }
-
-            Typography{
-                + strings[MessageID.permissions]
-                variant = TypographyVariant.h6
-            }
-
-            Button {
-                onClick = { props.onClickNew }
-                variant = ButtonVariant.text
-                startIcon = Add.create()
-
-                + strings[MessageID.add_person_or_group]
-            }
-
-            ScopedGrantsOneToNList{
-                uiState = props.uiState
-                onClickEditScopedGrant = props.onClickEditScopedGrant
-                onClickDeleteScopedGrant = props.onClickDeleteScopedGrant
-            }
         }
     }
 }
 
-private val ScopedGrantsOneToNList = FC<SchoolEditScreenProps> { props ->
-    List{
-        props.uiState.scopedGrants.forEach { scopedGrant ->
-            ListItem{
-                UstadDetailField {
-                    valueText = scopedGrant.name ?: ""
-                    labelText = (scopedGrant.scopedGrant?.sgPermissions ?: 0).toString()
-                    onClick = { props.onClickEditScopedGrant(scopedGrant) }
 
-                    secondaryActionContent = IconButton.create {
-                        onClick = { props.onClickDeleteScopedGrant(scopedGrant) }
-                        Delete {}
-                    }
-                }
-            }
-        }
-    }
-}
 
 val SchoolEditScreenPreview = FC<Props> {
 
@@ -179,17 +135,6 @@ val SchoolEditScreenPreview = FC<Props> {
                 schoolPhoneNumber = "+90012345678"
                 schoolEmailAddress = "info@schoola.com"
             },
-            scopedGrants = listOf(
-                ScopedGrantAndName().apply {
-                    name = "Person Name"
-                },
-                ScopedGrantAndName().apply {
-                    name = "Person Name"
-                },
-                ScopedGrantAndName().apply {
-                    name = "Person Name"
-                }
-            )
         )
     }
 

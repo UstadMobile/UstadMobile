@@ -4,19 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,11 +28,12 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.core.viewmodel.SchoolEditUiState
 import com.ustadmobile.door.lifecycle.LiveData
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
+import com.ustadmobile.lib.db.entities.ScopedGrantAndName
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), SchoolEditView{
@@ -141,9 +136,6 @@ private fun SchoolEditScreen(
     onSchoolChanged: (SchoolWithHolidayCalendar?) -> Unit = {},
     onClickTimeZone: () -> Unit = {},
     onClickHolidayCalendar: () -> Unit = {},
-    onClickNew: () -> Unit = {},
-    onClickEditScopedGrant: (ScopedGrantAndName?) -> Unit = {},
-    onClickDeleteScopedGrant: (ScopedGrantAndName?) -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier
@@ -165,10 +157,6 @@ private fun SchoolEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
             UstadTextEditField(
                 value = uiState.entity?.schoolDesc ?: "",
                 label = stringResource(id = R.string.description),
@@ -181,23 +169,16 @@ private fun SchoolEditScreen(
             )
         }
 
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
 
         item {
             UstadTextEditField(
                 value = uiState.entity?.schoolTimeZone ?: "",
-                label = stringResource(id = R.string.description),
+                label = stringResource(id = R.string.timezone),
                 enabled = uiState.fieldsEnabled,
                 readOnly = true,
                 onClick = onClickTimeZone,
                 onValueChange = {  }
             )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
         item {
@@ -209,10 +190,6 @@ private fun SchoolEditScreen(
                 onClick = onClickHolidayCalendar,
                 onValueChange = {  }
             )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
         item {
@@ -246,10 +223,6 @@ private fun SchoolEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
             UstadTextEditField(
                 value = uiState.entity?.schoolEmailAddress ?: "",
                 label = stringResource(id = R.string.email),
@@ -261,76 +234,9 @@ private fun SchoolEditScreen(
                 },
             )
         }
-
-        item {
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-
-        item {
-            Text(stringResource(id = R.string.permissions),
-                style = Typography.h6
-            )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
-            AddPersonOrGroupButton(onClickNew)
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        items(
-            uiState.scopedGrants
-        ){
-            UstadDetailField(
-                valueText = it.name ?: "",
-                labelText = (it.scopedGrant?.sgPermissions ?: 0).toString(),
-                onClick = { onClickEditScopedGrant(it) },
-
-                secondaryActionContent = {
-                    IconButton(
-                        onClick = { onClickDeleteScopedGrant(it) },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(id = R.string.delete),
-                        )
-                    }
-                }
-            )
-        }
     }
 }
 
-@Composable
-fun AddPersonOrGroupButton(
-    onClick: () -> Unit,
-){
-    TextButton(
-        onClick = onClick
-    ){
-        Row{
-
-            Image(
-                painter = painterResource(id = R.drawable.ic_add_white_24dp),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(
-                    color = contentColorFor(backgroundColor = MaterialTheme.colors.background)
-                ),
-                modifier = Modifier
-                    .size(24.dp))
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Text(stringResource(id = R.string.add_person_or_group))
-        }
-    }
-}
 
 @Composable
 @Preview
@@ -344,17 +250,6 @@ fun SchoolEditScreenPreview() {
             schoolPhoneNumber = "+90012345678"
             schoolEmailAddress = "info@schoola.com"
         },
-        scopedGrants = listOf(
-            ScopedGrantAndName().apply {
-                name = "Person Name"
-            },
-            ScopedGrantAndName().apply {
-                name = "Person Name"
-            },
-            ScopedGrantAndName().apply {
-                name = "Person Name"
-            }
-        )
     )
     MdcTheme {
         SchoolEditScreen(uiState)

@@ -11,8 +11,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Message
@@ -209,11 +207,7 @@ private fun SchoolDetailOverviewScreen(
     onClickEmail: () -> Unit = {},
     onClickClazz: (Clazz) -> Unit = {},
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    )  {
+    LazyColumn {
 
         if (uiState.schoolDescVisible){
            item {
@@ -306,9 +300,9 @@ private fun SchoolDetailOverviewScreen(
 
 
         items(
-            uiState.clazzes.size
-        ){
-            val clazz = uiState.clazzes[it]
+            items = uiState.clazzes,
+            key = { clazz -> clazz.clazzUid }
+        ){ clazz ->
             ListItem(
                 modifier = Modifier.clickable {
                     onClickClazz(clazz)
