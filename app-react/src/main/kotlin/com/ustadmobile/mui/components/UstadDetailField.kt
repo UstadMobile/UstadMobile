@@ -2,6 +2,7 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
+import com.ustadmobile.view.components.UstadBlankIcon
 import csstype.*
 import mui.icons.material.AccountCircle
 import mui.icons.material.CheckBoxOutlineBlank
@@ -68,11 +69,7 @@ val UstadDetailField = FC<UstadDetailFieldProps> { props ->
                 if(props.icon != null) {
                     +props.icon
                 }else {
-                    CheckBoxOutlineBlank {
-                        sx {
-                            opacity = number(0.0)
-                        }
-                    }
+                    UstadBlankIcon { }
                 }
             }
         }

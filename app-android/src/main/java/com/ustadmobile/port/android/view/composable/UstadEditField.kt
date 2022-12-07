@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,9 +33,18 @@ import java.util.*
 fun UstadEditField(
     modifier: Modifier = Modifier,
     error: String? = null,
+    autoVerticalPadding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier.let {
+            if(autoVerticalPadding) {
+                it.padding(vertical = 8.dp)
+            }else {
+                it
+            }
+        }
+    ) {
         content()
 
         if(error != null) {
@@ -67,6 +78,9 @@ fun UstadTextEditField(
     onClick: (() -> Unit)? = null,
     onValueChange: (String) -> Unit,
     password: Boolean = false,
+    suffixText: String? = null,
+    autoVerticalPadding: Boolean = true,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     var errorText by remember(errorString) {
         mutableStateOf(errorString?.toString())
@@ -86,7 +100,11 @@ fun UstadTextEditField(
         }
     }
 
-    UstadEditField(modifier, errorText) {
+    UstadEditField(
+        modifier = modifier,
+        error = errorText,
+        autoVerticalPadding = autoVerticalPadding,
+    ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             label = { Text(label) },
@@ -122,9 +140,17 @@ fun UstadTextEditField(
                         )
                     }
                 }
+            }else if(suffixText != null) {
+                {
+                    Text(
+                        text = suffixText,
+                        modifier = Modifier.padding(end = 16.dp)
+                    )
+                }
             }else {
                 null
-            }
+            },
+            keyboardOptions = keyboardOptions,
         )
     }
 }
@@ -138,6 +164,24 @@ fun UstadTextEditFieldPreview() {
         onValueChange = {},
         error =null,
         enabled = true,
+    )
+}
+
+@Preview
+@Composable
+fun UstadTextEditFieldSuffixPreview() {
+    var maxScore: Int by remember { mutableStateOf(42) }
+
+    UstadTextEditField(
+        value = "42",
+        label = "Maximum score",
+        onValueChange = { newString ->
+            maxScore = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+        },
+        error =null,
+        enabled = true,
+        suffixText = "points",
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 }
 
@@ -169,6 +213,7 @@ fun UstadDateEditTextField(
     enabled: Boolean = true,
     @Suppress("UNUSED_PARAMETER") //Reserved for future use
     error: String? = null,
+    autoVerticalPadding: Boolean = true,
     onValueChange: (Long) -> Unit = {},
 ) {
     var errorText by remember(error) {
@@ -189,6 +234,7 @@ fun UstadDateEditTextField(
         modifier = modifier,
         onValueChange = {},
         readOnly = true,
+        autoVerticalPadding = autoVerticalPadding,
         onClick = {
             val supportFragmentManager =
                 (context.getActivityContext() as AppCompatActivity)
