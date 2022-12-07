@@ -32,7 +32,10 @@ fun UstadCourseBlockEdit(
             timeZoneId = uiState.timeZone
         )
 
-        Text(stringResource(R.string.class_timezone_set, uiState.timeZone))
+        Text(
+            text = stringResource(R.string.class_timezone_set, uiState.timeZone),
+            modifier = Modifier.padding(start = 16.dp)
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -55,9 +58,9 @@ fun UstadCourseBlockEdit(
             if (uiState.minScoreVisible){
                 UstadTextEditField(
                     modifier = Modifier.weight(0.5F),
-                    value = ((uiState.courseBlock?.cbMaxPoints ?: 0).toString() + " " +
-                            stringResource(id = R.string.points)),
-                    label = stringResource(id = R.string.maximum_points),
+                    value = (uiState.courseBlock?.cbMaxPoints ?: 0).toString(),
+                    suffixText = stringResource(id = R.string.points),
+                    label = stringResource(id = R.string.points),
                     enabled = uiState.fieldsEnabled,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = { newString ->
@@ -72,11 +75,12 @@ fun UstadCourseBlockEdit(
         Spacer(modifier = Modifier.height(10.dp))
 
         UstadTextEditField(
-            value = ((uiState.courseBlock?.cbMaxPoints ?: 0).toString() + " " +
-                    stringResource(id = R.string.points)),
-            label = stringResource(id = R.string.points),
+            value = (uiState.courseBlock?.cbMaxPoints ?: 0).toString(),
+            suffixText =  stringResource(id = R.string.points),
+            label = stringResource(id = R.string.maximum_points),
             error = uiState.caStartDateError,
             enabled = uiState.fieldsEnabled,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             onValueChange = { newString ->
                 onCourseBlockChange(uiState.courseBlock?.shallowCopy {
                     cbMaxPoints = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
@@ -111,6 +115,7 @@ fun UstadCourseBlockEdit(
                 error = uiState.caStartDateError,
                 enabled = uiState.fieldsEnabled,
                 suffixText = "%",
+                keyboardOptions =  KeyboardOptions(keyboardType = KeyboardType.Number),
                 onValueChange = { newString ->
                     onCourseBlockChange(uiState.courseBlock?.shallowCopy {
                         cbLateSubmissionPenalty = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
@@ -118,7 +123,10 @@ fun UstadCourseBlockEdit(
                 }
             )
 
-            Text(text = stringResource(id = R.string.penalty_label))
+            Text(
+                modifier = Modifier.padding(start = 16.dp),
+                text = stringResource(id = R.string.penalty_label)
+            )
         }
     }
 

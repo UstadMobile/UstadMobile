@@ -67,9 +67,12 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
 
             if (props.uiState.minScoreVisible){
                 UstadTextEditField {
-                    value = ((props.uiState.courseBlock?.cbMaxPoints ?: 0).toString() + " " +
-                            strings[MessageID.points])
-                    label = strings[MessageID.maximum_points]
+                    value = (props.uiState.courseBlock?.cbMinPoints ?: 0).toString()
+                    suffixText = strings[MessageID.points]
+                    inputProps = {
+                        it.inputMode = InputMode.numeric
+                    }
+                    label = strings[MessageID.points]
                     enabled = props.uiState.fieldsEnabled
                     onChange = { newString ->
                         props.onCourseBlockChange(props.uiState.courseBlock?.shallowCopy {
@@ -81,8 +84,8 @@ val UstadCourseBlockEdit = FC<UstadCourseBlockEditProps> { props ->
         }
 
         UstadTextEditField {
-            value = ((props.uiState.courseBlock?.cbMaxPoints ?: 0).toString() + " " +
-                    strings[MessageID.points])
+            value = (props.uiState.courseBlock?.cbMaxPoints ?: 0).toString()
+            suffixText = strings[MessageID.points]
             label = strings[MessageID.points]
             error = props.uiState.caStartDateError
             enabled = props.uiState.fieldsEnabled
