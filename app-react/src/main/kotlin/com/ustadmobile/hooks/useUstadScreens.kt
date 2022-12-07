@@ -28,12 +28,12 @@ fun useUstadScreens(): UstadScreens {
                 SiteEnterLinkScreenPreview),
             UstadScreen(ParentalConsentManagementView.VIEW_NAME, "Parental Consent Management Preview",
                 ParentalConsentManagementPreview),
-            UstadScreen(RegisterAgeRedirectView.VIEW_NAME, "RegisterAgeRedirect Preview",
-                RegisterAgeRedirectPreview),
-            UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
-                InviteViaLinkPreview),
             UstadScreen(SettingsView.VIEW_NAME, "Settings Preview",
                 SettingsPreview),
+            UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
+                InviteViaLinkPreview),
+            UstadScreen(ClazzEnrolmentEditView.VIEW_NAME, "ClazzEnrolmentEdit Preview",
+                ClazzEnrolmentEditScreenPreview),
             UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
                 SiteTermsDetailScreenPreview),
             UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",
@@ -43,7 +43,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(ContentEntryEdit2View.VIEW_NAME, "ContentEntryEdit Preview",
                 ContentEntryEditScreenPreview),
             UstadScreen(SiteDetailView.VIEW_NAME, name = "Site Detail Preview", SiteDetailPreview),
-            UstadScreen(SiteEditView.VIEW_NAME, name = "Site Edit Preview", SiteEditPreview)
+            UstadScreen(SiteEditView.VIEW_NAME, name = "Site Edit Preview", SiteEditPreview),
+            UstadScreen(SchoolDetailOverviewView.VIEW_NAME, "SchoolDetailOverview Preview",
+                SchoolDetailOverviewScreenPreview),
         )
     }
 }
