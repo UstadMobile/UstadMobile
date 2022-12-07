@@ -4,10 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -161,10 +168,12 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HolidayCalendarEditScreen(
     uiState: HolidayCalendarEditUiState,
-    onHolidayCalendarChange: (HolidayCalendar?) -> Unit = {}
+    onHolidayCalendarChange: (HolidayCalendar?) -> Unit = {},
+    onClickAddItem: () -> Unit = {}
 ){
     Column (
         modifier = Modifier
@@ -172,6 +181,7 @@ fun HolidayCalendarEditScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
         ){
+
         UstadTextEditField(
             value = uiState.holidayCalendar?.umCalendarName ?: "",
             label = stringResource(id = R.string.name),
@@ -182,6 +192,30 @@ fun HolidayCalendarEditScreen(
                 })
             }
         )
+
+        ListItem(
+            modifier = Modifier.clickable {
+                onClickAddItem()
+            },
+            icon = {
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(id = R.string.add_a_holiday)) }
+        )
+
+        uiState.calendarList.forEach {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickAddItem()
+                },
+
+                text = { it.umCalendarName }
+            )
+        }
+
     }
 }
 
@@ -192,6 +226,14 @@ fun HolidayCalendarEditPreview(){
         uiState = HolidayCalendarEditUiState(
             holidayCalendar = HolidayCalendar().apply {
                 umCalendarName = "my cal"
+            },
+            calendarList = listOf<HolidayCalendar>().apply {
+                HolidayCalendar().apply {
+                    umCalendarName = "first"
+                }
+                HolidayCalendar().apply {
+                    umCalendarName = "second"
+                }
             }
         )
     )
