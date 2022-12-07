@@ -334,14 +334,17 @@ fun SchoolDetailOverviewScreenPreview() {
         schoolCodeVisible = true,
         clazzes = listOf(
             ClazzWithListDisplayDetails().apply {
+                clazzUid = 0L
                 clazzName = "Class A"
                 clazzDesc = "Class description"
             },
             ClazzWithListDisplayDetails().apply {
+                clazzUid = 1L
                 clazzName = "Class B"
                 clazzDesc = "Class description"
             },
             ClazzWithListDisplayDetails().apply {
+                clazzUid = 2L
                 clazzName = "Class C"
                 clazzDesc = "Class description"
             }
