@@ -1,6 +1,7 @@
 package com.ustadmobile.hooks
 
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.HolidayCalendarEditUiState
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.UstadDetailFieldPreview
@@ -38,6 +39,7 @@ fun useUstadScreens(): UstadScreens {
                 RegisterMinorWaitForParentPreview),
             UstadScreen(ScheduleEditView.VIEW_NAME, "ScheduleEdit Preview",
                 ScheduleEditScreenPreview),
+            UstadScreen(HolidayCalendarEditView.VIEW_NAME, "HolidayCalendarEdit Preview", HolidayCalendarEditPreview)
         )
     }
 }

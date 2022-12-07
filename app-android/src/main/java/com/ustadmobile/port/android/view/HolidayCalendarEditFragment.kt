@@ -4,6 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -18,10 +29,13 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.HolidayCalendarEditView
+import com.ustadmobile.core.viewmodel.HolidayCalendarEditUiState
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), HolidayCalendarEditView{
 
@@ -145,4 +159,40 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
     }
 
 
+}
+
+@Composable
+fun HolidayCalendarEditScreen(
+    uiState: HolidayCalendarEditUiState,
+    onHolidayCalendarChange: (HolidayCalendar?) -> Unit = {}
+){
+    Column (
+        modifier = Modifier
+            .padding(8.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+        ){
+        UstadTextEditField(
+            value = uiState.holidayCalendar?.umCalendarName ?: "",
+            label = stringResource(id = R.string.name),
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onHolidayCalendarChange(uiState.holidayCalendar?.shallowCopy {
+                    umCalendarName = it
+                })
+            }
+        )
+    }
+}
+
+@Composable
+@Preview
+fun HolidayCalendarEditPreview(){
+    HolidayCalendarEditScreen(
+        uiState = HolidayCalendarEditUiState(
+            holidayCalendar = HolidayCalendar().apply {
+                umCalendarName = "my cal"
+            }
+        )
+    )
 }
