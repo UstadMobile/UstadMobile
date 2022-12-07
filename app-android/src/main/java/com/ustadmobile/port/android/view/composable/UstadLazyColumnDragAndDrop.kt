@@ -41,11 +41,13 @@ import kotlinx.coroutines.launch
 
 //As per https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/foundation/foundation/integration-tests/foundation-demos/src/main/java/androidx/compose/foundation/demos/LazyColumnDragAndDropDemo.kt
 
-@Preview
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LazyColumnDragAndDropDemo() {
-    var list by remember { mutableStateOf(List(50) { it }) }
+fun UstadLazyColumnDragAndDrop(
+    dataList: List<Any>, 
+    content: @Composable (Int, Any) -> Unit,
+) {
+    var list by remember { mutableStateOf(dataList) }
 
     val listState = rememberLazyListState()
     val dragDropState = rememberDragDropState(listState) { fromIndex, toIndex ->
@@ -63,16 +65,32 @@ fun LazyColumnDragAndDropDemo() {
         itemsIndexed(list, key = { _, item -> item }) { index, item ->
             DraggableItem(dragDropState, index) { isDragging ->
                 val elevation by animateDpAsState(if (isDragging) 4.dp else 1.dp)
-                Card(elevation = elevation) {
-                    Text("Item $item", Modifier.fillMaxWidth().padding(20.dp))
+                Card(elevation = elevation,
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(20.dp)
+                ) {
+                    content(index, item)
                 }
             }
         }
     }
 }
 
+@Preview
 @Composable
-fun rememberDragDropState(
+fun LazyColumnDragAndDropPreview() {
+    val list = List(50) { it }
+
+    UstadLazyColumnDragAndDrop(
+        dataList = list,
+        content = { _, item ->
+            Text(text = "text $item")
+        }
+    )
+}
+
+@Composable
+private fun rememberDragDropState(
     lazyListState: LazyListState,
     onMove: (Int, Int) -> Unit
 ): DragDropState {
@@ -198,7 +216,7 @@ class DragDropState internal constructor(
         get() = this.offset + this.size
 }
 
-fun Modifier.dragContainer(dragDropState: DragDropState): Modifier {
+private fun Modifier.dragContainer(dragDropState: DragDropState): Modifier {
     return pointerInput(dragDropState) {
         detectDragGesturesAfterLongPress(
             onDrag = { change, offset ->
@@ -214,7 +232,7 @@ fun Modifier.dragContainer(dragDropState: DragDropState): Modifier {
 
 @ExperimentalFoundationApi
 @Composable
-fun LazyItemScope.DraggableItem(
+private fun LazyItemScope.DraggableItem(
     dragDropState: DragDropState,
     index: Int,
     modifier: Modifier = Modifier,

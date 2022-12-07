@@ -4,14 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Message
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -312,6 +316,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
 
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ClazzEditScreen(
     uiState: ClazzEditUiState = ClazzEditUiState(),
@@ -462,6 +467,19 @@ private fun ClazzEditScreen(
             AddButton(
                 onclick = onClickAddCourseBlock,
                 text = stringResource(id = R.string.add_block)
+            )
+        }
+
+
+
+        item {
+            val list = List(50) { it }
+
+            UstadLazyColumnDragAndDrop(
+                dataList = list,
+                content = { _, item ->
+                    Text(text = "text $item")
+                }
             )
         }
 
@@ -618,6 +636,14 @@ fun ClazzEditScreenPreview() {
                 scheduleEndTime = 0
                 scheduleFrequency = MessageID.yearly
                 scheduleDay = MessageID.sunday
+            }
+        ),
+        courseBlockList = listOf(
+            CourseBlockWithEntity().apply {
+                cbTitle = "First"
+            },
+            CourseBlockWithEntity().apply {
+                cbTitle = "This is second Parima Jan"
             }
         )
     )
