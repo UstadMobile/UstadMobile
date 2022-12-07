@@ -207,17 +207,19 @@ private fun SchoolDetailOverviewScreen(
     onClickSchoolPhoneNumber: () -> Unit = {},
     onClickSms: () -> Unit = {},
     onClickEmail: () -> Unit = {},
-    onClickClazz: () -> Unit = {},
+    onClickClazz: (Clazz) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .verticalScroll(rememberScrollState())
     )  {
 
         if (uiState.schoolDescVisible){
            item {
-               Text(text = uiState.entity?.schoolDesc ?: "",
+               Text(
+                   modifier = Modifier.padding(all = 16.dp),
+                   text = uiState.entity?.schoolDesc ?: "",
                    style = Typography.h6
                )
            }
@@ -297,7 +299,7 @@ private fun SchoolDetailOverviewScreen(
         }
 
         item {
-            Text(text = stringResource(id = R.string.classes),
+            Text(text = stringResource(id = R.string.courses),
                 style = Typography.h6
             )
         }
@@ -306,12 +308,13 @@ private fun SchoolDetailOverviewScreen(
         items(
             uiState.clazzes.size
         ){
+            val clazz = uiState.clazzes[it]
             ListItem(
                 modifier = Modifier.clickable {
-                    onClickClazz()
+                    onClickClazz(clazz)
                 },
-                text = { Text(uiState.clazzes[it].clazzName ?: "") },
-                secondaryText = { Text(uiState.clazzes[it].clazzDesc ?: "") }
+                text = { Text(clazz.clazzName ?: "") },
+                secondaryText = { Text(clazz.clazzDesc ?: "") }
             )
         }
     }

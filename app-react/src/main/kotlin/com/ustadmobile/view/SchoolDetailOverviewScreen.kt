@@ -156,13 +156,15 @@ private val Clazzes = FC<SchoolDetailOverviewProps> { props ->
     List{
         props.uiState.clazzes.forEach { clazzEntry ->
             ListItem{
-                onClick = {
-                    props.onClickClazz(clazzEntry)
-                }
+                ListItemButton {
+                    onClick = {
+                        props.onClickClazz(clazzEntry)
+                    }
 
-                ListItemText {
-                    primary = ReactNode(clazzEntry.clazzName ?: "")
-                    secondary = ReactNode(clazzEntry.clazzDesc ?: "")
+                    ListItemText {
+                        primary = ReactNode(clazzEntry.clazzName ?: "")
+                        secondary = ReactNode(clazzEntry.clazzDesc ?: "")
+                    }
                 }
             }
         }
