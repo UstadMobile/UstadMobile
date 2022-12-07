@@ -14,6 +14,7 @@ import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.create
 
 external interface HolidayCalendarEditProps: Props {
     var uiState: HolidayCalendarEditUiState
@@ -67,17 +68,11 @@ val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
                         + (item.umCalendarName ?: "")
                     }
 
-                    ListItemSecondaryAction{
-                        ListItemButton{
-
-                            onClick = {
-                                props.onDeleteItemClick(item)
-                            }
-
-                            ListItemIcon{
-                                Delete{}
-                            }
+                    secondaryAction = IconButton.create {
+                        onClick = {
+                            props.onDeleteItemClick(item)
                         }
+                        Delete{}
                     }
                 }
             }

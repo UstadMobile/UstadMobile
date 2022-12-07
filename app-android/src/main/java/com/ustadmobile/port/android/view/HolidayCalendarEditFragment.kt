@@ -9,12 +9,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.ListItem
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -176,7 +174,8 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
 fun HolidayCalendarEditScreen(
     uiState: HolidayCalendarEditUiState,
     onHolidayCalendarChange: (HolidayCalendar?) -> Unit = {},
-    onClickAddItem: () -> Unit = {}
+    onClickAddItem: () -> Unit = {},
+    onDeleteItemClick: (HolidayCalendar) -> Unit = {}
 ){
     Column (
         modifier = Modifier
@@ -209,11 +208,18 @@ fun HolidayCalendarEditScreen(
             text = { Text(stringResource(id = R.string.add_a_holiday)) }
         )
 
-        uiState.calendarList?.forEach {
+        uiState.calendarList?.forEach { item ->
             ListItem(
-                text = { it.umCalendarName },
+                text = { item.umCalendarName },
                 trailing = {
-
+                    IconButton(onClick = {
+                        onDeleteItemClick(item)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = stringResource(R.string.delete)
+                        )
+                    }
                 }
             )
         }
