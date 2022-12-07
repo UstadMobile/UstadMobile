@@ -1,0 +1,12 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: "EDIT"
+- swipe:
+      start: 100,400
+      end: 100,100
+- takeScreenshot: "results/Publiclyaccessible-on"
+- tapOn: "Publicly accessible"
+- takeScreenshot: "results/Publiclyaccessible-off"
+- tapOn: "SAVE"
+- back
+

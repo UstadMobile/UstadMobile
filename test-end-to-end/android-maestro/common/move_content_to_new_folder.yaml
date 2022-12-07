@@ -1,0 +1,31 @@
+appId: com.toughra.ustadmobile
+---
+- back
+- takeScreenshot: "results/${TESTCONTENTNAME}_beforeMoving"
+- longPressOn:
+    text: "${TESTCONTENTNAME}"
+- tapOn:
+    text: "Move"
+- tapOn: "Add new content"
+- tapOn: "New folder"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/entry_title_text"
+- inputText: "New Test Folder"
+- tapOn: "SAVE"
+- takeScreenshot: "results/${TESTCONTENTNAME}_AfterMoving"
+- clearState: com.toughra.ustadmobile
+- launchApp
+- hideKeyboard
+- tapOn: "GET STARTED"
+- inputText: ${ENDPOINT}
+- hideKeyboard
+- tapOn: "NEXT"
+- tapOn: "Username"
+- inputText: ${USERNAME}
+- tapOn: "Password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: "LOGIN"
+- tapOn: "Library"
+- tapOn: "New Test Folder"
+- takeScreenshot: "results/${TESTCONTENTNAME}_AfterMovingContent"
