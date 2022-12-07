@@ -643,7 +643,10 @@ fun ClazzEditScreenPreview() {
                 cbTitle = "First"
             },
             CourseBlockWithEntity().apply {
-                cbTitle = "This is second Parima Jan"
+                cbTitle = "second"
+            },
+            CourseBlockWithEntity().apply {
+                cbTitle = "second"
             }
         )
     )
