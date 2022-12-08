@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.Message
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -317,7 +319,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
 
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzEditScreen(
     uiState: ClazzEditUiState = ClazzEditUiState(),
@@ -476,7 +478,14 @@ private fun ClazzEditScreen(
         items (
             items = uiState.courseBlockList
         ) { courseBlock ->
-            CourseBlockItem()
+
+            val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5f else 1f
+
+            ListItem(
+                modifier = Modifier.alpha(courseBlockEditAlpha),
+                text = { Text("") },
+                secondaryText = { Text("") }
+            )
         }
 
         item {
@@ -617,11 +626,6 @@ private fun AddButton(
             Text(text.uppercase())
         }
     }
-}
-
-@Composable
-fun CourseBlockItem(){
-
 }
 
 @Composable
