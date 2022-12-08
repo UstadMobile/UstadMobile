@@ -29,17 +29,19 @@ val HolidayCalendarDetailComponent2 = FC<HolidayCalendarDetailProps> { props ->
                 valueText = props.uiState.holidayCalendar?.umCalendarName ?: ""
             }
 
-            props.uiState.calendarList?.forEach { item ->
-                ListItem {
+            List{
+                props.uiState.calendarList?.forEach { item ->
+                    ListItem {
 
-                    disablePadding = true
+                        disablePadding = true
 
-                    ListItemButton {
-                        onClick = {
-                            props.onItemClick(item)
-                        }
-                        ListItemText {
-                            + (item.umCalendarName ?: "")
+                        ListItemButton {
+                            onClick = {
+                                props.onItemClick(item)
+                            }
+                            ListItemText {
+                                + (item.umCalendarName ?: "")
+                            }
                         }
                     }
                 }
