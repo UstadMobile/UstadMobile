@@ -8,6 +8,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
@@ -472,15 +473,10 @@ private fun ClazzEditScreen(
 
 
 
-        item {
-            val list = List(50) { it }
-
-            UstadLazyColumnDragAndDrop(
-                dataList = list,
-                content = { _, item ->
-                    Text(text = "text $item")
-                }
-            )
+        items (
+            items = uiState.courseBlockList
+        ) { courseBlock ->
+            CourseBlockItem()
         }
 
         item {
@@ -621,6 +617,11 @@ private fun AddButton(
             Text(text.uppercase())
         }
     }
+}
+
+@Composable
+fun CourseBlockItem(){
+
 }
 
 @Composable
