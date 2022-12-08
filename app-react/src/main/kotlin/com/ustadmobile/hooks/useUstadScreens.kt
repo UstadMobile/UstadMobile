@@ -38,6 +38,7 @@ fun useUstadScreens(): UstadScreens {
                 RegisterMinorWaitForParentPreview),
             UstadScreen(ScheduleEditView.VIEW_NAME, "ScheduleEdit Preview",
                 ScheduleEditScreenPreview),
+            UstadScreen(HolidayCalendarDetailView.VIEW_NAME, "HolidayCalendarDetail Preview", HolidayCalendarDetailPreview)
         )
     }
 }
