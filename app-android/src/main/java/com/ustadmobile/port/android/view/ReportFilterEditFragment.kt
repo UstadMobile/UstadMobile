@@ -11,18 +11,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,13 +37,10 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.locale.entityconstants.ConditionConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ContentCompletionStatusConstants
 import com.ustadmobile.core.impl.locale.entityconstants.FieldConstants
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportFilterEditView
-import com.ustadmobile.core.viewmodel.LoginUiState
-import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.ReportFilterEditUiState
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.*
@@ -382,6 +374,7 @@ private fun ReportFilterEditScreen(
                 label = stringResource(id = R.string.report_filter_edit_values),
                 error = uiState.valuesError,
                 enabled = uiState.fieldsEnabled,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 onValueChange = {
                     onReportFilterChanged(uiState.reportFilter?.shallowCopy{
                         reportFilterValue = it

@@ -5,8 +5,6 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.ConditionConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ContentCompletionStatusConstants
 import com.ustadmobile.core.impl.locale.entityconstants.FieldConstants
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
-import com.ustadmobile.core.viewmodel.LoginUiState
 import com.ustadmobile.core.viewmodel.ReportFilterEditUiState
 import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.UidAndLabel
@@ -14,19 +12,17 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.mui.components.UstadTextEditField
 import csstype.px
-import mui.icons.material.AccountCircle
 import mui.icons.material.Add
 import mui.icons.material.Delete
 import mui.material.*
-import mui.material.styles.TypographyVariant
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
-import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.dom.html.InputMode
 
 external interface ReportFilterEditScreenProps : Props {
 
@@ -116,6 +112,9 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                 label = strings[MessageID.report_filter_edit_values]
                 error = props.uiState.valuesError
                 enabled = props.uiState.fieldsEnabled
+                inputProps = {
+                    it.inputMode = InputMode.numeric
+                }
                 onChange = {
                     props.onReportFilterChanged(
                         props.uiState.reportFilter?.shallowCopy {
@@ -129,7 +128,9 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                 label = strings[MessageID.from]
                 error = props.uiState.valuesError
                 enabled = props.uiState.fieldsEnabled
-//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                inputProps = {
+                    it.inputMode = InputMode.numeric
+                }
                 onChange = {
                     props.onReportFilterChanged(
                         props.uiState.reportFilter?.shallowCopy {
@@ -143,7 +144,9 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                 label = strings[MessageID.toC]
                 error = props.uiState.valuesError
                 enabled = props.uiState.fieldsEnabled
-//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                inputProps = {
+                    it.inputMode = InputMode.numeric
+                }
                 onChange = {
                     props.onReportFilterChanged(
                         props.uiState.reportFilter?.shallowCopy {
@@ -172,15 +175,17 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
             }
 
             ListItem {
+
                 onClick = {
                     props.onClickNewItemFilter()
                 }
+
                 ListItemIcon {
                     + Add.create()
                 }
+
                 ListItemText {
                     primary = ReactNode(props.uiState.createNewFilter.uppercase())
-
                 }
             }
         }
