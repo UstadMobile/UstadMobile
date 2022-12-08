@@ -175,7 +175,8 @@ fun HolidayCalendarEditScreen(
     uiState: HolidayCalendarEditUiState,
     onHolidayCalendarChange: (HolidayCalendar?) -> Unit = {},
     onClickAddItem: () -> Unit = {},
-    onDeleteItemClick: (HolidayCalendar) -> Unit = {}
+    onDeleteItemClick: (HolidayCalendar) -> Unit = {},
+    onItemClick: (HolidayCalendar) -> Unit = {}
 ){
     Column (
         modifier = Modifier
@@ -210,6 +211,10 @@ fun HolidayCalendarEditScreen(
 
         uiState.calendarList?.forEach { item ->
             ListItem(
+                modifier = Modifier
+                    .clickable {
+                        onItemClick(item)
+                    },
                 text = { Text(text = item.umCalendarName ?: "") },
                 trailing = {
                     IconButton(onClick = {

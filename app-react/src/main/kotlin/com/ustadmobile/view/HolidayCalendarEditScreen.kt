@@ -21,6 +21,7 @@ external interface HolidayCalendarEditProps: Props {
     var onAddItemClick: () -> Unit
     var onHolidayCalendarChange: (HolidayCalendar?) -> Unit
     var onDeleteItemClick: (HolidayCalendar?) -> Unit
+    var onItemClick: (HolidayCalendar) -> Unit
 }
 
 val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
@@ -47,6 +48,9 @@ val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
             }
 
             ListItem {
+
+                disablePadding = true
+
                 ListItemButton{
                     ListItemIcon {
                         Add{}
@@ -62,17 +66,29 @@ val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
                 }
             }
 
-            props.uiState.calendarList?.forEach { item ->
-                ListItem {
-                    ListItemText{
-                        + (item.umCalendarName ?: "")
-                    }
+            List{
+                props.uiState.calendarList?.forEach { item ->
+                    ListItem {
 
-                    secondaryAction = IconButton.create {
-                        onClick = {
-                            props.onDeleteItemClick(item)
+                        disablePadding = true
+
+                        ListItemButton{
+
+                            onClick = {
+                                props.onItemClick(item)
+                            }
+
+                            ListItemText{
+                                + (item.umCalendarName ?: "")
+                            }
                         }
-                        Delete{}
+
+                        secondaryAction = IconButton.create {
+                            onClick = {
+                                props.onDeleteItemClick(item)
+                            }
+                            Delete{}
+                        }
                     }
                 }
             }
