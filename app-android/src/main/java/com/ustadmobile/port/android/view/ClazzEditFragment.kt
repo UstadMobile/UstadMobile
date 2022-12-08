@@ -14,9 +14,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Message
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -467,13 +465,13 @@ private fun ClazzEditScreen(
         }
 
         item {
-            AddButton(
-                onclick = onClickAddCourseBlock,
-                text = stringResource(id = R.string.add_block)
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickAddCourseBlock()
+                },
+                text = { Text(stringResource(id = R.string.add_block)) },
             )
         }
-
-
 
         items (
             items = uiState.courseBlockList
@@ -483,8 +481,22 @@ private fun ClazzEditScreen(
 
             ListItem(
                 modifier = Modifier.alpha(courseBlockEditAlpha),
-                text = { Text("") },
-                secondaryText = { Text("") }
+                icon = {
+                    Row {
+                        Icon(
+                            Icons.Filled.Menu,
+                            contentDescription = null
+                        )
+                        Icon(
+                            Icons.Filled.Menu,
+                            contentDescription = null
+                        )
+                    }
+                },
+                text = { Text("ListItem text") },
+                trailing = {
+                    PopUpMenu()
+                }
             )
         }
 
@@ -501,10 +513,15 @@ private fun ClazzEditScreen(
         }
 
         item {
-            AddButton(
-                onclick = onClickAddSchedule,
-                text = stringResource(id = R.string.add_a_schedule)
-            )
+            TextButton(
+                onClick = onClickAddSchedule,
+            ) {
+                Row {
+                    Icon(Icons.Filled.Add,"contentDescription")
+                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                    Text(stringResource(id = R.string.add_a_schedule).uppercase())
+                }
+            }
         }
 
         item {
@@ -608,22 +625,28 @@ private fun ClazzEditScreen(
 }
 
 @Composable
-private fun AddButton(
-    onclick: () -> Unit,
-    text: String
-){
-    TextButton(
-        onClick = onclick,
-        modifier = Modifier
-            .fillMaxWidth(),
-    ) {
-        Row {
-            Icon(
-                Icons.Filled.Add,
-                "contentDescription"
-            )
+fun PopUpMenu() {
+    var expanded by remember { mutableStateOf(false) }
 
-            Text(text.uppercase())
+    Box(modifier = Modifier
+        .wrapContentSize(Alignment.TopStart)) {
+        IconButton(onClick = { expanded = true }) {
+            Icon(Icons.Default.MoreVert, contentDescription = "Localized description")
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(onClick = { /* Handle refresh! */ }) {
+                Text("Refresh")
+            }
+            DropdownMenuItem(onClick = { /* Handle settings! */ }) {
+                Text("Settings")
+            }
+            Divider()
+            DropdownMenuItem(onClick = { /* Handle send feedback! */ }) {
+                Text("Send Feedback")
+            }
         }
     }
 }
