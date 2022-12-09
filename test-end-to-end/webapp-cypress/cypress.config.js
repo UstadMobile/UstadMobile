@@ -2,7 +2,13 @@ const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
   e2e: {
-      //baseUrl: 'http://localhost:8087/',
-      chromeWebSecurity: false
+      chromeWebSecurity: false,
+      experimentalSessionAndOrigin: true,
+      //baseUrl: 'http://localhost:8087/umapp/#/LoginView'
+       reporter: 'junit',
+        reporterOptions: {
+          mochaFile: 'results/my-test-output.xml',
+          toConsole: true
+        }
   }
 })

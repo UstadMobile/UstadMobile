@@ -10,13 +10,26 @@
 //
 //
 // -- This is a parent command --
-Cypress.Commands.add('login', (username, password) => { 
-  cy.visit('http://localhost:8087/')
-  //  cy.visit('/')
+Cypress.Commands.add('startTestServer', () => {
+ cy.visit('http://localhost:8075/start')
+ cy.wait(4000)
+ 
+ })
+
+Cypress.Commands.add('login',(username, password) => { 
+  const args = { username, password }
+ // cy.session(
+    // Username & password can be used as the cache key too
+    //args,
+   // () => {
+  cy.origin('http://localhost:8087',{ args }, ({ username, password }) => {
+  cy.visit('/umapp/#/LoginView')
+  cy.wait(4000)
   cy.get('#username-input').type(username)
   cy.get('input[id="password-input"]').type(password)
   cy.get('[id="login-btn"]').click()
-
+  cy.wait(2000)
+  })
  })
  
 Cypress.Commands.add('logout', () => { 

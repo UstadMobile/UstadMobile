@@ -2,8 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a:c' --long 'serial1:,username:,password:,endpoint:,test:,apk:,console-output' -n 'run-maestro-tests.sh' -- "$@")
-
+TEMP=$(getopt -o 's:u:p:e:c:r' --long 'serial1:,username:,password:,endpoint:,console-output,spec:' -n 'run-cypress-test.sh' -- "$@")
 
 eval set -- "$TEMP"
 unset TEMP
@@ -11,11 +10,10 @@ unset TEMP
 TESTUSER="admin"
 TESTPASS="testpass"
 WORKDIR=$(pwd)
-TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
-TESTAPK=$SCRIPTDIR/../../app-android-launcher/build/outputs/apk/release/app-android-launcher-release.apk
 CONTROLSERVER=""
 USECONSOLEOUTPUT=0
+SPEC=""
 
 while true; do
         case "$1" in
@@ -39,25 +37,19 @@ while true; do
                       shift 2
                      continue
                ;;
-               '-t'|'--test')
-                     echo "Set test to $2"
-                     TEST=$2
-                     shift 2
-                     continue
-               ;;
-               '-a'|'--apk')
-                     echo "Set APK to $2"
-                     TESTAPK=$2
-                     shift 2
-                     continue
-               ;;
-               '-c'|'--console-output')
+              '-c'|'--console-output')
                      echo "Use console output"
                      USECONSOLEOUTPUT=1
                      shift 1
                      continue
-               ;;
-               '--')
+                ;;
+              '-r'|'--spec')
+                      echo "Set spec to $2"
+                      SPEC=$2
+                      shift 2
+                      continue
+                ;;
+                '--')
                         shift
                         break
                 ;;
@@ -81,11 +73,11 @@ fi
 # Start control server
 $SCRIPTDIR/../../testserver-controller/start.sh
 
-TESTARG=$TEST
-if [ "$TEST" != "" ]; then
-  TESTARG="$SCRIPTDIR/e2e-tests/$TEST.yaml"
+SPECARG=$SPEC
+if [ "$SPEC" != "" ]; then
+  SPECARG="$SCRIPTDIR/cypress/e2e/$SPEC.cy.js"
 else
-  TESTARG="$SCRIPTDIR/e2e-tests"
+  SPECARG="$SCRIPTDIR/cypress/e2e/"
 fi
 
 OUTPUTARGS=" --format junit --output $SCRIPTDIR/results/report.xml "
@@ -93,7 +85,11 @@ if [ "$USECONSOLEOUTPUT" == "1" ]; then
   OUTPUTARGS=""
 fi
 
-npx cypress run
+cd $SCRIPTDIR
+echo $SPECARG
+npx cypress run cypress run --reporter junit \
+--reporter-options "mochaFile=results/my-test-output.xml,toConsole=false" \
+--spec $SPECARG
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
 

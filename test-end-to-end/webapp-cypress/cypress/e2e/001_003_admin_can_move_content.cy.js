@@ -1,5 +1,6 @@
 describe('The admin can move content in Library', () => {
   it('Ustad Mobile - move content test', () => {
+  cy.startTestServer()
   cy.login('admin','testpass')
   cy.addContent('/home/ustadmobile/StudioProjects/ustadmobile/test-end-to-end/test-files/content/Epub_Content.epub',"moveContentTest")
   cy.wait(2000)
@@ -13,8 +14,8 @@ describe('The admin can move content in Library', () => {
   cy.contains('Done').click()
   cy.wait(2000)
   cy.logout()
-  cy.wait(5000)
-  cy.login('admin','testpass')
-  cy.contains('Library').click()
+  //cy.wait(5000)
+  //cy.login('admin','testpass')
+  //cy.contains('Library').click()
  })
 })

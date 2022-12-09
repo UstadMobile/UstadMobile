@@ -1,6 +1,6 @@
 describe('The admin can switch off content publicly accessible switch', () => {
   it('Ustad Mobile - delete content test', () => {
-  cy.clearLocalStorage()
+  cy.startTestServer()
   cy.login('admin','testpass')
   cy.addContent('/home/ustadmobile/StudioProjects/ustadmobile/test-end-to-end/test-files/content/Epub_Content.epub',"ContentPubliclyAccessibleTest")
   cy.wait(2000)
