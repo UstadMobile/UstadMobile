@@ -6,22 +6,29 @@ import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
+import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.theme.alpha
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadSwitchField
-import csstype.AlignItems
-import csstype.px
+import csstype.opacity
+import kotlinx.css.blackAlpha
+import kotlinx.css.whiteAlpha
+import kotlinx.js.jso
 import mui.icons.material.Add
 import mui.icons.material.Delete
+import mui.icons.material.MoreVert
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.material.Stack
-import mui.material.StackDirection
 import mui.system.responsive
 import mui.system.sx
 import react.*
+import react.dom.events.MouseEvent
+import react.dom.events.MouseEventHandler
+import react.dom.html.ReactHTML
 
 external interface ClazzEditScreenProps : Props {
 
@@ -46,6 +53,17 @@ external interface ClazzEditScreenProps : Props {
     var onCheckedAttendance: (Boolean) -> Unit
 
     var onClickTerminology: () -> Unit
+
+    var onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+
+    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+
+    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+
+    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+
+    var onClickEditCourse: (CourseBlockWithEntity) -> Unit
+
 }
 
 val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
@@ -143,6 +161,11 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 + strings[MessageID.add_block].uppercase()
             }
 
+            CourseBlockList {
+                uiState = props.uiState
+                onClickEditCourse = props.onClickEditCourse
+            }
+
             Typography {
                 + strings[MessageID.schedule]
             }
@@ -224,10 +247,142 @@ val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
     }
 }
 
+private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
+
+    List {
+
+        props.uiState.courseBlockList.forEach { courseBlock ->
+
+            ListItem{
+                whiteAlpha(0.5)
+                onClick = { props.onClickEditCourse(courseBlock) }
+
+                ListItemIcon {
+                    + mui.icons.material.Menu.create()
+                }
+
+                ListItemText {
+                    primary = ReactNode(courseBlock.cbTitle ?: "")
+                }
+
+                secondaryAction = PopUpMenu.create {}
+            }
+        }
+    }
+//    val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5f else 1f
+//    items (
+//        items = uiState.courseBlockList
+//    ) {
+//        ListItem(
+//            modifier = Modifier.alpha(courseBlockEditAlpha),
+//        )
+//    }
+}
+
+private data class Point(
+    val x: Double = 10.0,
+    val y: Double = 10.0,
+)
+
+val PopUpMenu = FC<ClazzEditScreenProps> { props ->
+    var point by useState<Point>()
+
+    val handleContextMenu = { event: MouseEvent<*, *> ->
+        event.preventDefault()
+        point = if (point == null) {
+            Point(
+                x = event.clientX - 2,
+                y = event.clientY - 4,
+            )
+        } else {
+            null
+        }
+    }
+
+    val handleClose: MouseEventHandler<*> = {
+        point = null
+    }
+
+    ReactHTML.div {
+
+        IconButton{
+            onClick = handleContextMenu
+            + MoreVert.create()
+        }
+
+        Menu {
+            open = point != null
+            onClose = handleClose
+
+            anchorReference = PopoverReference.anchorPosition
+            anchorPosition = if (point != null) {
+                jso {
+                    top = point!!.y
+                    left = point!!.x
+                }
+            } else {
+                undefined
+            }
+
+            MenuItem {
+                onClick = {
+                    props.onClickHideBlockPopupMenu
+                    point = null
+                }
+                + "Hide"
+            }
+            MenuItem {
+                onClick = {
+                    props.onClickIndentBlockPopupMenu
+                    point = null
+                }
+                + "Indent"
+            }
+            MenuItem {
+                onClick = {
+                    props.onClickUnIndentBlockPopupMenu
+                    point = null
+                }
+                + "UnIndent"
+            }
+            MenuItem {
+                onClick = {
+                    props.onClickDeleteBlockPopupMenu
+                    point = null
+                }
+                + "Delete"
+            }
+        }
+    }
+}
+
 val ClazzEditScreenPreview = FC<Props> {
 
     val uiStateVar : ClazzEditUiState by useState {
-        ClazzEditUiState()
+        ClazzEditUiState(
+            entity = ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
+
+            },
+            clazzSchedules = listOf(
+                Schedule().apply {
+                    sceduleStartTime = 0
+                    scheduleEndTime = 0
+                    scheduleFrequency = MessageID.yearly
+                    scheduleDay = MessageID.sunday
+                }
+            ),
+            courseBlockList = listOf(
+                CourseBlockWithEntity().apply {
+                    cbTitle = "First"
+                },
+                CourseBlockWithEntity().apply {
+                    cbTitle = "Second"
+                },
+                CourseBlockWithEntity().apply {
+                    cbTitle = "Third"
+                },
+            ),
+        )
     }
 
     ClazzEditScreenComponent2 {

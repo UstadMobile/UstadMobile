@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -331,6 +332,10 @@ private fun ClazzEditScreen(
     onClickHolidayCalendar: () -> Unit = {},
     onCheckedAttendance: (Boolean) -> Unit = {},
     onClickTerminology: () -> Unit = {},
+    onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
+    onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
+    onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
+    onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier
@@ -342,10 +347,6 @@ private fun ClazzEditScreen(
             Text(text = stringResource(id = R.string.basic_details),
                 style = Typography.h6
             )
-        }
-        
-        item { 
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
         item {
@@ -364,10 +365,6 @@ private fun ClazzEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
             UstadTextEditField(
                 value = uiState.entity?.clazzDesc ?: "",
                 label = stringResource(id = R.string.description).addOptionalSuffix(),
@@ -383,10 +380,6 @@ private fun ClazzEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
             UstadTextEditField(
                 value = uiState.entity?.school?.schoolName ?: "",
                 label = stringResource(id = R.string.institution),
@@ -394,10 +387,6 @@ private fun ClazzEditScreen(
                 onClick = onClickSchool,
                 onValueChange = {}
             )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
         item {
@@ -418,10 +407,6 @@ private fun ClazzEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
             UstadDateEditTextField(
                 value = uiState.entity?.clazzEndTime ?: 0,
                 label = stringResource(id = R.string.end_date).addOptionalSuffix(),
@@ -436,10 +421,6 @@ private fun ClazzEditScreen(
                     )
                 }
             )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
         item {
@@ -461,10 +442,6 @@ private fun ClazzEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
             ListItem(
                 modifier = Modifier.clickable {
                     onClickAddCourseBlock()
@@ -482,20 +459,20 @@ private fun ClazzEditScreen(
             ListItem(
                 modifier = Modifier.alpha(courseBlockEditAlpha),
                 icon = {
-                    Row {
-                        Icon(
-                            Icons.Filled.Menu,
-                            contentDescription = null
-                        )
-                        Icon(
-                            Icons.Filled.Menu,
-                            contentDescription = null
-                        )
-                    }
+                    Icon(
+                        Icons.Filled.Menu,
+                        contentDescription = null
+                    )
                 },
                 text = { Text("ListItem text") },
                 trailing = {
-                    PopUpMenu()
+                    PopUpMenu(
+                        courseBlock,
+                        onClickHideBlockPopupMenu,
+                        onClickIndentBlockPopupMenu,
+                        onClickUnIndentBlockPopupMenu,
+                        onClickDeleteBlockPopupMenu,
+                    )
                 }
             )
         }
@@ -509,23 +486,18 @@ private fun ClazzEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
-            TextButton(
-                onClick = onClickAddSchedule,
-            ) {
-                Row {
-                    Icon(Icons.Filled.Add,"contentDescription")
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text(stringResource(id = R.string.add_a_schedule).uppercase())
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickAddSchedule()
+                },
+                text = { Text(stringResource(id = R.string.add_a_schedule)) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "",
+                    )
                 }
-            }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
+            )
         }
 
         items(
@@ -625,7 +597,13 @@ private fun ClazzEditScreen(
 }
 
 @Composable
-fun PopUpMenu() {
+fun PopUpMenu(
+    selectedCourseBlock: CourseBlockWithEntity,
+    onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
+    onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
+    onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
+    onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier
@@ -637,15 +615,17 @@ fun PopUpMenu() {
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            DropdownMenuItem(onClick = { /* Handle refresh! */ }) {
-                Text("Refresh")
+            DropdownMenuItem(onClick = { onClickHideBlockPopupMenu(selectedCourseBlock) } ) {
+                Text("Hide")
             }
-            DropdownMenuItem(onClick = { /* Handle settings! */ }) {
-                Text("Settings")
+            DropdownMenuItem(onClick = { onClickIndentBlockPopupMenu(selectedCourseBlock) }) {
+                Text("Indent")
             }
-            Divider()
-            DropdownMenuItem(onClick = { /* Handle send feedback! */ }) {
-                Text("Send Feedback")
+            DropdownMenuItem(onClick = { onClickUnIndentBlockPopupMenu(selectedCourseBlock) }) {
+                Text("UnIndent")
+            }
+            DropdownMenuItem(onClick = { onClickDeleteBlockPopupMenu(selectedCourseBlock) }) {
+                Text("Delete")
             }
         }
     }
@@ -675,8 +655,8 @@ fun ClazzEditScreenPreview() {
             },
             CourseBlockWithEntity().apply {
                 cbTitle = "Third"
-            }
-        )
+            },
+        ),
     )
     MdcTheme {
         ClazzEditScreen(uiState)
