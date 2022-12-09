@@ -17,7 +17,9 @@ data class ClazzEditUiState(
 
     val clazzSchedules: List<Schedule> = emptyList(),
 
-    val courseBlockList: List<CourseBlockWithEntity> = emptyList()
+    val courseBlockList: List<CourseBlockWithEntity> = emptyList(),
+
+    val timeZone: String = "UTC"
 
 ) {
 

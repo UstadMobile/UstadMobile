@@ -4,7 +4,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
+import com.ustadmobile.hooks.useFormattedDate
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
 import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.Schedule
@@ -19,6 +21,7 @@ import kotlinx.css.whiteAlpha
 import kotlinx.js.jso
 import mui.icons.material.Add
 import mui.icons.material.Delete
+import mui.icons.material.Message
 import mui.icons.material.MoreVert
 import mui.material.*
 import mui.material.styles.TypographyVariant
@@ -230,17 +233,34 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
 
 val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
 
+    val strings = useStringsXml()
+
     List{
         props.uiState.clazzSchedules.forEach { schedule ->
+
+            val fromTimeFormatted = useFormattedDate(
+                date = schedule.sceduleStartTime,
+                timezoneId = props.uiState.timeZone
+            )
+
+            val toTimeFormatted = useFormattedDate(
+                date = schedule.scheduleEndTime,
+                timezoneId = props.uiState.timeZone
+            )
+            val text = "${strings[schedule.scheduleFrequency]} " +
+                    " ${strings[(schedule.scheduleDay)]} " +
+                    " $fromTimeFormatted - $toTimeFormatted "
+
             ListItem{
                 onClick = { props.onClickEditSchedule(schedule) }
+
+                ListItemText{
+                    primary = ReactNode(text)
+                }
+                
                 secondaryAction = IconButton.create {
                     onClick = { props.onClickDeleteSchedule(schedule) }
                     Delete {}
-                }
-                ListItemText{
-                    primary = ReactNode("Line one")
-                    secondary = ReactNode("Line Two")
                 }
             }
         }
@@ -254,7 +274,10 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
         props.uiState.courseBlockList.forEach { courseBlock ->
 
             ListItem{
-                whiteAlpha(0.5)
+
+                val courseBlockEditAlpha: Double = if (courseBlock.cbHidden) 0.5 else 1.0
+                whiteAlpha(courseBlockEditAlpha)
+
                 onClick = { props.onClickEditCourse(courseBlock) }
 
                 ListItemIcon {
@@ -269,14 +292,6 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
             }
         }
     }
-//    val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5f else 1f
-//    items (
-//        items = uiState.courseBlockList
-//    ) {
-//        ListItem(
-//            modifier = Modifier.alpha(courseBlockEditAlpha),
-//        )
-//    }
 }
 
 private data class Point(
@@ -358,7 +373,7 @@ val PopUpMenu = FC<ClazzEditScreenProps> { props ->
 
 val ClazzEditScreenPreview = FC<Props> {
 
-    val uiStateVar : ClazzEditUiState by useState {
+    val uiStateVal : ClazzEditUiState by useState {
         ClazzEditUiState(
             entity = ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
 
@@ -374,18 +389,21 @@ val ClazzEditScreenPreview = FC<Props> {
             courseBlockList = listOf(
                 CourseBlockWithEntity().apply {
                     cbTitle = "First"
+                    cbHidden = true
                 },
                 CourseBlockWithEntity().apply {
                     cbTitle = "Second"
+                    cbHidden = false
                 },
                 CourseBlockWithEntity().apply {
                     cbTitle = "Third"
+                    cbHidden = false
                 },
             ),
         )
     }
 
     ClazzEditScreenComponent2 {
-        uiState = uiStateVar
+        uiState = uiStateVal
     }
 }
