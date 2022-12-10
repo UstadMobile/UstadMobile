@@ -1,5 +1,7 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.viewmodel.ScopedGrantEditUiState
 import mui.icons.material.Delete
 import mui.material.*
@@ -57,6 +59,12 @@ val ScopedGrantEditScreenPreview = FC<Props> {
 
     val uiStateVar : ScopedGrantEditUiState by useState {
         ScopedGrantEditUiState(
+            bitmaskList = listOf(
+                BitmaskFlag(
+                    messageId = MessageID.incident_id,
+                    flagVal = 0
+                )
+            )
         )
     }
 
