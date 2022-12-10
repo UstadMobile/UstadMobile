@@ -7,26 +7,55 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentReportEditBinding
 import com.toughra.ustadmobile.databinding.ItemReportEditFilterBinding
 import com.toughra.ustadmobile.databinding.ItemReportEditSeriesBinding
 import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ObjectMessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportEditView
-import com.ustadmobile.lib.db.entities.DateRangeMoment
-import com.ustadmobile.lib.db.entities.ReportFilter
-import com.ustadmobile.lib.db.entities.ReportSeries
-import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
+import com.ustadmobile.core.viewmodel.LoginUiState
+import com.ustadmobile.core.viewmodel.PersonDetailUiState
+import com.ustadmobile.core.viewmodel.ReportEditUiState
+import com.ustadmobile.core.viewmodel.ReportSeriesUiState
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.lib.db.entities.ext.shallowCopyReportWithSeriesWithFilters
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.composable.UstadDateTimeEditTextField
+import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
+import com.ustadmobile.port.android.view.composable.addOptionalSuffix
 
 
 interface ReportEditFragmentEventHandler {
@@ -345,4 +374,258 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
         }
     }
 
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ReportEditScreen(
+    uiState: ReportEditUiState = ReportEditUiState(),
+    onReportChanged: (ReportWithSeriesWithFilters?) -> Unit = {},
+    onReportSeriesListChanged: (List<ReportSeries>?) -> Unit = {},
+    onClickNewSeries: () -> Unit = {},
+    onClickRemoveSeries: (ReportSeries) -> Unit = {},
+    onClickNewFilter: (ReportSeries) -> Unit = {},
+    onClickDeleteReportFilter: (ReportFilterWithDisplayDetails) -> Unit = {},
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    )  {
+
+        item {
+            UstadTextEditField(
+                value = uiState.report?.reportTitle ?: "",
+                label = stringResource(id = R.string.xapi_options_report_title),
+                enabled = uiState.fieldsEnabled,
+                error = uiState.titleError,
+                onValueChange = {
+                    onReportChanged(uiState.report?.shallowCopyReportWithSeriesWithFilters{
+                        reportTitle = it
+                    })
+                },
+            )
+        }
+
+        item {
+            UstadTextEditField(
+                value = uiState.report?.reportDescription ?: "",
+                label = stringResource(id = R.string.description),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onReportChanged(uiState.report?.shallowCopyReportWithSeriesWithFilters{
+                        reportDescription = it
+                    })
+                },
+            )
+        }
+
+        item {
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.report?.xAxis ?: 0,
+                label = stringResource(R.string.xapi_options_x_axes),
+                options = XAxisConstants.X_AXIS_MESSAGE_IDS,
+                enabled = uiState.fieldsEnabled,
+                onOptionSelected = {
+                    onReportChanged(uiState.report?.shallowCopyReportWithSeriesWithFilters{
+                        xAxis = it.value
+                    })
+                },
+            )
+        }
+
+        item {
+            UstadMessageIdOptionExposedDropDownMenuField(
+                value = uiState.report?.reportDateRangeSelection ?: 0,
+                label = stringResource(R.string.time_range),
+                options = DateRangeConstants.DATE_RANGE_MESSAGE_IDS,
+                enabled = uiState.fieldsEnabled,
+                onOptionSelected = {
+                    onReportChanged(uiState.report?.shallowCopyReportWithSeriesWithFilters{
+                        reportDateRangeSelection = it.value
+                    })
+                },
+            )
+        }
+
+        items(
+            items = uiState.reportSeriesUiState.reportSeriesList,
+            key = { reportSeries -> reportSeries.reportSeriesUid }
+        ){ reportSeries ->
+
+            val reportSeriesMutableList by remember {
+                mutableStateOf(uiState.reportSeriesUiState.reportSeriesList)
+            }
+
+            ListItem {
+                ReportSeriesListItem(
+                    uiState = uiState,
+                    reportSeries = reportSeries,
+                    onClickRemoveSeries = onClickRemoveSeries,
+                    onClickNewFilter = onClickNewFilter,
+                    onClickDeleteReportFilter = onClickDeleteReportFilter,
+                    onReportSeriesChanged = { changedReportSeries ->
+                        val index = reportSeriesMutableList.indexOf(reportSeries)
+                        reportSeriesMutableList.toMutableList()[index] = changedReportSeries
+                        onReportSeriesListChanged(reportSeriesMutableList)
+                    },
+                )   
+            }
+        }
+
+        item {
+            ListItem(
+                modifier = Modifier.clickable { onClickNewSeries() },
+                text = { Text(stringResource(id = R.string.xapi_options_series)) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "",
+                    )
+                }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ReportSeriesListItem(
+    uiState: ReportEditUiState,
+    reportSeries: ReportSeries,
+    onReportSeriesChanged: (ReportSeries) -> Unit,
+    onClickRemoveSeries: (ReportSeries) -> Unit,
+    onClickNewFilter: (ReportSeries) -> Unit,
+    onClickDeleteReportFilter: (ReportFilterWithDisplayDetails) -> Unit,
+){
+    
+    Column{
+
+        Row {
+            UstadTextEditField(
+                modifier = Modifier.weight(0.9F),
+                value = reportSeries.reportSeriesName ?: "",
+                label = stringResource(id = R.string.title),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onReportSeriesChanged(reportSeries.shallowCopy{
+                        reportSeriesName = it
+                    })
+                },
+            )
+
+            IconButton(
+                onClick = { onClickRemoveSeries(reportSeries) },
+                modifier = Modifier.weight(0.1F)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "",
+                )
+            }
+        }
+
+        UstadMessageIdOptionExposedDropDownMenuField(
+            value = reportSeries.reportSeriesYAxis,
+            label = stringResource(R.string.xapi_options_visual_type),
+            options = VisualTypeConstants.VISUAL_TYPE_MESSAGE_IDS,
+            enabled = uiState.fieldsEnabled,
+            onOptionSelected = {
+                onReportSeriesChanged(reportSeries.shallowCopy{
+                    reportSeriesYAxis = it.value
+                })
+            },
+        )
+        
+        UstadMessageIdOptionExposedDropDownMenuField(
+            value = reportSeries.reportSeriesSubGroup,
+            label = stringResource(R.string.xapi_options_subgroup),
+            options = SubgroupConstants.SUB_GROUP_MESSAGE_IDS,
+            enabled = uiState.fieldsEnabled,
+            onOptionSelected = {
+                onReportSeriesChanged(reportSeries.shallowCopy{
+                    reportSeriesSubGroup = it.value
+                })
+            },
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(text = stringResource(id = R.string.filter))
+
+        uiState.reportSeriesUiState.filterList
+            .forEach { filter ->
+
+                ListItem(
+                    text = { Text(filter.person?.fullName() ?: "") },
+                    trailing = {
+                        IconButton(
+                            onClick = { onClickDeleteReportFilter(filter) }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "",
+                            )
+                        }
+                    }
+                )
+            }
+
+        TextButton(onClick = { onClickNewFilter(reportSeries) }) {
+            Icon(
+                Icons.Filled.Add,
+                contentDescription = null,
+            )
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+            Text(text = stringResource(id = R.string.filter))
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Divider()
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+    }
+}
+
+@Composable
+@Preview
+fun ReportEditScreenPreview() {
+    val uiState = ReportEditUiState(
+        reportSeriesUiState = ReportSeriesUiState(
+            reportSeriesList = listOf(
+                ReportSeries().apply {
+                    reportSeriesUid = 0
+                    reportSeriesName = "First Series"
+                },
+                ReportSeries().apply {
+                    reportSeriesUid = 1
+                    reportSeriesName = "Second Series"
+                },
+                ReportSeries().apply {
+                    reportSeriesUid = 2
+                    reportSeriesName = "Third Series"
+                }
+            ),
+            filterList = listOf(
+                ReportFilterWithDisplayDetails().apply {
+                    person = Person().apply {
+                        firstNames = "John"
+                        lastName = "Doe"
+                    }
+                },
+                ReportFilterWithDisplayDetails().apply {
+                    person = Person().apply {
+                        firstNames = "Ahmad"
+                        lastName = "Ahmadi"
+                    }
+                }
+            ),
+            deleteButtonVisible = true
+        )
+    )
+    MdcTheme {
+        ReportEditScreen(uiState)
+    }
 }
