@@ -6,19 +6,35 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzEnrolmentBinding
 import com.ustadmobile.core.controller.ClazzEnrolmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.locale.entityconstants.OutcomeConstants
+import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
+import com.ustadmobile.core.viewmodel.ClazzEnrolmentEditUiState
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
+import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
+import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import java.util.*
 
 
@@ -35,9 +51,8 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
         get() = mPresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView: View
+
         mBinding = FragmentClazzEnrolmentBinding.inflate(inflater, container, false).also {
-            rootView = it.root
             it.presenter = mPresenter
             it.statusSelectorListener = this
         }
@@ -46,7 +61,17 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
                 viewLifecycleOwner, di).withViewLifecycle()
         mBinding?.presenter = mPresenter
 
-        return rootView
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
+
+            setContent {
+                MdcTheme {
+                    ClazzEnrolmentEditScreen()
+                }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -129,5 +154,99 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
 
+    }
+}
+
+@Composable
+fun ClazzEnrolmentEditScreen(
+    uiState: ClazzEnrolmentEditUiState = ClazzEnrolmentEditUiState(),
+    onClazzEnrolmentChanged: (ClazzEnrolmentWithLeavingReason?) -> Unit = {},
+    onClickLeavingReason: () -> Unit = {},
+) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+    )  {
+
+        UstadMessageIdOptionExposedDropDownMenuField(
+            value = uiState.clazzEnrolment?.clazzEnrolmentRole ?: 0,
+            label = stringResource(R.string.role),
+            options = RoleConstants.ROLE_MESSAGE_IDS,
+            error = uiState.roleSelectedError,
+            enabled = uiState.fieldsEnabled,
+            onOptionSelected = {
+                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                    clazzEnrolmentRole = it.value
+                })
+            },
+        )
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        UstadDateEditTextField(
+            value = uiState.clazzEnrolment?.clazzEnrolmentDateJoined ?: 0,
+            label = stringResource(id = R.string.start_date),
+            enabled = uiState.fieldsEnabled,
+            error = uiState.startDateError,
+            timeZoneId = uiState.clazzEnrolment?.timeZone ?: "UTC",
+            onValueChange = {
+                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                    clazzEnrolmentDateJoined = it
+                })
+            }
+        )
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        UstadDateEditTextField(
+            value = uiState.clazzEnrolment?.clazzEnrolmentDateLeft ?: 0,
+            label = stringResource(id = R.string.end_date),
+            enabled = uiState.fieldsEnabled,
+            error = uiState.endDateError,
+            timeZoneId = uiState.clazzEnrolment?.timeZone ?: "UTC",
+            onValueChange = {
+                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                    clazzEnrolmentDateLeft = it
+                })
+            }
+        )
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        UstadMessageIdOptionExposedDropDownMenuField(
+            value = uiState.clazzEnrolment?.clazzEnrolmentOutcome ?: 0,
+            label = stringResource(R.string.outcome),
+            options = OutcomeConstants.OUTCOME_MESSAGE_IDS,
+            enabled = uiState.fieldsEnabled,
+            onOptionSelected = {
+                onClazzEnrolmentChanged(uiState.clazzEnrolment?.shallowCopy{
+                    clazzEnrolmentOutcome = it.value
+                })
+            },
+        )
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        UstadTextEditField(
+            value = uiState.clazzEnrolment?.leavingReason?.leavingReasonTitle ?: "",
+            label = stringResource(id = R.string.leaving_reason),
+            onValueChange = {},
+            enabled = uiState.leavingReasonEnabled,
+            onClick = onClickLeavingReason
+        )
+    }
+}
+
+@Composable
+@Preview
+fun ClazzEnrolmentEditScreenPreview() {
+    val uiState = ClazzEnrolmentEditUiState(
+        clazzEnrolment = ClazzEnrolmentWithLeavingReason().apply {
+            clazzEnrolmentOutcome = ClazzEnrolment.OUTCOME_GRADUATED
+        },
+    )
+
+    MdcTheme {
+        ClazzEnrolmentEditScreen(uiState)
     }
 }
