@@ -1,6 +1,7 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.viewmodel.ScopedGrantEditUiState
 import mui.icons.material.Delete
@@ -8,45 +9,31 @@ import mui.material.*
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
-import react.FC
-import react.Props
-import react.create
-import react.useState
+import react.*
 
 external interface ScopedGrantEditScreenProps : Props {
 
     var uiState: ScopedGrantEditUiState
 
-    var onClickEdit: () -> Unit
-
-    var onClickDelete: () -> Unit
-
 }
 
 val ScopedGrantEditScreenComponent2 = FC<ScopedGrantEditScreenProps> { props ->
 
+    val strings = useStringsXml()
+
     Container {
 
         List{
-            props.uiState.bitmaskList.forEach {
+            props.uiState.bitmaskList.forEach { bitmask ->
                 ListItem{
-                    Button {
-                        variant = ButtonVariant.text
-                        onClick = { props.onClickEdit }
+                    ListItemText {
+                        primary = ReactNode(strings[bitmask.messageId])
+                    }
 
-                        Stack {
-                            direction = responsive(StackDirection.column)
+                    secondaryAction  = Switch.create {
+                        checked = bitmask.enabled
+                        onChange = { _, isChecked ->
 
-                            + ("Hello")
-
-                            + (props.uiState.entity?.sgPermissions.toString())
-
-                            Button {
-                                variant = ButtonVariant.text
-                                onClick = { props.onClickDelete }
-
-                                + Delete.create()
-                            }
                         }
                     }
                 }

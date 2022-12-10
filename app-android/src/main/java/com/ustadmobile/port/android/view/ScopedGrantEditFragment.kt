@@ -2,9 +2,13 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.clickable
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
+import androidx.compose.material.Switch
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -106,12 +110,13 @@ fun ScopedGrantEditScreen(
 ) {
     uiState.bitmaskList.forEach { bitmask ->
 
-
-        UstadSwitchField(
-            checked = bitmask.enabled,
-            label = messageIdResource(id = bitmask.messageId),
-            onChange = {
-
+        ListItem(
+            text = { Text(messageIdResource(id = bitmask.messageId)) },
+            trailing = {
+                Switch(
+                    checked = bitmask.enabled,
+                    onCheckedChange = {}
+                )
             }
         )
     }
