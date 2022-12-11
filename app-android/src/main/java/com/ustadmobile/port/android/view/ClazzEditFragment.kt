@@ -20,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -454,17 +455,38 @@ private fun ClazzEditScreen(
             items = uiState.courseBlockList
         ) { courseBlock ->
 
+            val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
+                ContentEntry.TYPE_EBOOK to R.drawable.ic_book_black_24dp,
+                ContentEntry.TYPE_VIDEO to R.drawable.video_youtube,
+                ContentEntry.TYPE_DOCUMENT to R.drawable.text_doc_24px,
+                ContentEntry.TYPE_ARTICLE to R.drawable.article_24px,
+                ContentEntry.TYPE_COLLECTION to R.drawable.collections_24px,
+                ContentEntry.TYPE_INTERACTIVE_EXERCISE to R.drawable.ic_baseline_touch_app_24,
+                ContentEntry.TYPE_AUDIO to R.drawable.ic_audiotrack_24px
+            )
+            val image = if(courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE)
+                courseBlock.entry?.contentTypeFlag
+            else
+                courseBlock.cbType
+
             val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5f else 1f
 
             ListItem(
                 modifier = Modifier.alpha(courseBlockEditAlpha),
                 icon = {
-                    Icon(
-                        Icons.Filled.Menu,
-                        contentDescription = null
-                    )
+                    Row{
+                        Icon(
+                            Icons.Filled.Menu,
+                            contentDescription = null
+                        )
+                        Icon(
+                            painterResource(id = CONTENT_ENTRY_TYPE_ICON_MAP[image] ?: R.drawable.text_doc_24px),
+                            contentDescription = null
+                        )
+                    }
                 },
-                text = { Text("ListItem text") },
+
+                text = { Text(courseBlock.cbTitle ?: "") },
                 trailing = {
                     PopUpMenu(
                         courseBlock,
@@ -615,17 +637,23 @@ fun PopUpMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            DropdownMenuItem(onClick = { onClickHideBlockPopupMenu(selectedCourseBlock) } ) {
-                Text("Hide")
+            DropdownMenuItem(
+                onClick = { onClickHideBlockPopupMenu(selectedCourseBlock) }
+            ) {
+                Text(stringResource(id = R.string.hide))
             }
-            DropdownMenuItem(onClick = { onClickIndentBlockPopupMenu(selectedCourseBlock) }) {
-                Text("Indent")
+            DropdownMenuItem(
+                onClick = { onClickIndentBlockPopupMenu(selectedCourseBlock) }
+            ) {
+                Text(stringResource(id = R.string.indent))
             }
-            DropdownMenuItem(onClick = { onClickUnIndentBlockPopupMenu(selectedCourseBlock) }) {
-                Text("UnIndent")
+            DropdownMenuItem(
+                onClick = { onClickUnIndentBlockPopupMenu(selectedCourseBlock) }
+            ) {
+                Text(stringResource(id = R.string.unindent))
             }
             DropdownMenuItem(onClick = { onClickDeleteBlockPopupMenu(selectedCourseBlock) }) {
-                Text("Delete")
+                Text(stringResource(id = R.string.delete))
             }
         }
     }

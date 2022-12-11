@@ -4,30 +4,22 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
-import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
 import com.ustadmobile.hooks.useFormattedDate
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
-import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
-import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.alpha
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadSwitchField
-import csstype.opacity
-import kotlinx.css.blackAlpha
 import kotlinx.css.whiteAlpha
 import kotlinx.js.jso
-import mui.icons.material.Add
-import mui.icons.material.Delete
-import mui.icons.material.Message
-import mui.icons.material.MoreVert
+import mui.icons.material.*
 import mui.material.*
+import mui.material.List
+import mui.material.Menu
 import mui.material.styles.TypographyVariant
 import mui.material.Stack
 import mui.system.responsive
-import mui.system.sx
 import react.*
 import react.dom.events.MouseEvent
 import react.dom.events.MouseEventHandler
@@ -156,12 +148,14 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 + strings[MessageID.course_blocks]
             }
 
-            Button {
+            ListItem {
                 onClick = { props.onClickAddCourseBlock }
-                variant = ButtonVariant.text
-                startIcon = Add.create()
-
-                + strings[MessageID.add_block].uppercase()
+                ListItemIcon {
+                    + Add.create()
+                }
+                ListItemText {
+                    primary = ReactNode(strings[MessageID.add_block])
+                }
             }
 
             CourseBlockList {
@@ -173,12 +167,14 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 + strings[MessageID.schedule]
             }
 
-            Button {
+            ListItem {
                 onClick = { props.onClickAddSchedule }
-                variant = ButtonVariant.text
-                startIcon = Add.create()
-
-                + strings[MessageID.add_a_schedule].uppercase()
+                ListItemIcon {
+                    + Add.create()
+                }
+                ListItemText {
+                    primary = ReactNode(strings[MessageID.add_a_schedule])
+                }
             }
 
             ClazzSchedulesList {
@@ -239,12 +235,12 @@ val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
         props.uiState.clazzSchedules.forEach { schedule ->
 
             val fromTimeFormatted = useFormattedDate(
-                date = schedule.sceduleStartTime,
+                timeInMillis = schedule.sceduleStartTime,
                 timezoneId = props.uiState.timeZone
             )
 
             val toTimeFormatted = useFormattedDate(
-                date = schedule.scheduleEndTime,
+                timeInMillis = schedule.scheduleEndTime,
                 timezoneId = props.uiState.timeZone
             )
             val text = "${strings[schedule.scheduleFrequency]} " +
@@ -275,6 +271,20 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
 
             ListItem{
 
+                val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
+                    ContentEntry.TYPE_EBOOK to Book.create(),
+                    ContentEntry.TYPE_VIDEO to SmartDisplay.create(),
+                    ContentEntry.TYPE_DOCUMENT to TextSnippet.create(),
+                    ContentEntry.TYPE_ARTICLE to Article.create(),
+                    ContentEntry.TYPE_COLLECTION to Collections.create(),
+                    ContentEntry.TYPE_INTERACTIVE_EXERCISE to TouchApp.create(),
+                    ContentEntry.TYPE_AUDIO to Audiotrack.create()
+                )
+                val image = if(courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE)
+                    courseBlock.entry?.contentTypeFlag
+                else
+                    courseBlock.cbType
+
                 val courseBlockEditAlpha: Double = if (courseBlock.cbHidden) 0.5 else 1.0
                 whiteAlpha(courseBlockEditAlpha)
 
@@ -282,6 +292,8 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
 
                 ListItemIcon {
                     + mui.icons.material.Menu.create()
+
+                    + (CONTENT_ENTRY_TYPE_ICON_MAP[image] ?: TextSnippet.create())
                 }
 
                 ListItemText {
@@ -300,6 +312,9 @@ private data class Point(
 )
 
 val PopUpMenu = FC<ClazzEditScreenProps> { props ->
+
+    val strings = useStringsXml()
+
     var point by useState<Point>()
 
     val handleContextMenu = { event: MouseEvent<*, *> ->
@@ -344,28 +359,28 @@ val PopUpMenu = FC<ClazzEditScreenProps> { props ->
                     props.onClickHideBlockPopupMenu
                     point = null
                 }
-                + "Hide"
+                + strings[MessageID.hide]
             }
             MenuItem {
                 onClick = {
                     props.onClickIndentBlockPopupMenu
                     point = null
                 }
-                + "Indent"
+                + strings[MessageID.indent]
             }
             MenuItem {
                 onClick = {
                     props.onClickUnIndentBlockPopupMenu
                     point = null
                 }
-                + "UnIndent"
+                + strings[MessageID.unindent]
             }
             MenuItem {
                 onClick = {
                     props.onClickDeleteBlockPopupMenu
                     point = null
                 }
-                + "Delete"
+                + strings[MessageID.delete]
             }
         }
     }
