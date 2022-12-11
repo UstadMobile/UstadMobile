@@ -469,7 +469,7 @@ private fun ClazzEditScreen(
             else
                 courseBlock.cbType
 
-            val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5f else 1f
+            val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5F else 1F
 
             ListItem(
                 modifier = Modifier.alpha(courseBlockEditAlpha),
@@ -489,11 +489,12 @@ private fun ClazzEditScreen(
                 text = { Text(courseBlock.cbTitle ?: "") },
                 trailing = {
                     PopUpMenu(
-                        courseBlock,
-                        onClickHideBlockPopupMenu,
-                        onClickIndentBlockPopupMenu,
-                        onClickUnIndentBlockPopupMenu,
-                        onClickDeleteBlockPopupMenu,
+                        enabled = uiState.fieldsEnabled,
+                        selectedCourseBlock = courseBlock,
+                        onClickHideBlockPopupMenu = onClickHideBlockPopupMenu,
+                        onClickIndentBlockPopupMenu = onClickIndentBlockPopupMenu,
+                        onClickUnIndentBlockPopupMenu = onClickUnIndentBlockPopupMenu,
+                        onClickDeleteBlockPopupMenu = onClickDeleteBlockPopupMenu,
                     )
                 }
             )
@@ -620,6 +621,7 @@ private fun ClazzEditScreen(
 
 @Composable
 fun PopUpMenu(
+    enabled: Boolean,
     selectedCourseBlock: CourseBlockWithEntity,
     onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
     onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
@@ -630,7 +632,10 @@ fun PopUpMenu(
 
     Box(modifier = Modifier
         .wrapContentSize(Alignment.TopStart)) {
-        IconButton(onClick = { expanded = true }) {
+        IconButton(
+            onClick = { expanded = true },
+            enabled = enabled
+        ) {
             Icon(Icons.Default.MoreVert, contentDescription = "Localized description")
         }
         DropdownMenu(
@@ -677,12 +682,15 @@ fun ClazzEditScreenPreview() {
         courseBlockList = listOf(
             CourseBlockWithEntity().apply {
                 cbTitle = "First"
+                cbHidden = true
             },
             CourseBlockWithEntity().apply {
                 cbTitle = "Second"
+                cbHidden = false
             },
             CourseBlockWithEntity().apply {
                 cbTitle = "Third"
+                cbHidden = false
             },
         ),
     )

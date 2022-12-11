@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadSwitchField
+import csstype.number
 import kotlinx.css.whiteAlpha
 import kotlinx.js.jso
 import mui.icons.material.*
@@ -20,6 +21,7 @@ import mui.material.Menu
 import mui.material.styles.TypographyVariant
 import mui.material.Stack
 import mui.system.responsive
+import mui.system.sx
 import react.*
 import react.dom.events.MouseEvent
 import react.dom.events.MouseEventHandler
@@ -270,6 +272,10 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
         props.uiState.courseBlockList.forEach { courseBlock ->
 
             ListItem{
+                val courseBlockEditAlpha: Double = if (courseBlock.cbHidden) 0.5 else 1.0
+                sx {
+                    opacity = number(courseBlockEditAlpha)
+                }
 
                 val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
                     ContentEntry.TYPE_EBOOK to Book.create(),
@@ -285,9 +291,6 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
                 else
                     courseBlock.cbType
 
-                val courseBlockEditAlpha: Double = if (courseBlock.cbHidden) 0.5 else 1.0
-                whiteAlpha(courseBlockEditAlpha)
-
                 onClick = { props.onClickEditCourse(courseBlock) }
 
                 ListItemIcon {
@@ -300,7 +303,9 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
                     primary = ReactNode(courseBlock.cbTitle ?: "")
                 }
 
-                secondaryAction = PopUpMenu.create {}
+                secondaryAction = PopUpMenu.create {
+                    uiState = props.uiState
+                }
             }
         }
     }
@@ -336,7 +341,9 @@ val PopUpMenu = FC<ClazzEditScreenProps> { props ->
     ReactHTML.div {
 
         IconButton{
+            disabled = !(props.uiState.fieldsEnabled)
             onClick = handleContextMenu
+
             + MoreVert.create()
         }
 
@@ -415,6 +422,7 @@ val ClazzEditScreenPreview = FC<Props> {
                     cbHidden = false
                 },
             ),
+            fieldsEnabled = true
         )
     }
 
