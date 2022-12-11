@@ -265,6 +265,16 @@ val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
     }
 }
 
+private val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
+    ContentEntry.TYPE_EBOOK to Book.create(),
+    ContentEntry.TYPE_VIDEO to SmartDisplay.create(),
+    ContentEntry.TYPE_DOCUMENT to TextSnippet.create(),
+    ContentEntry.TYPE_ARTICLE to Article.create(),
+    ContentEntry.TYPE_COLLECTION to Collections.create(),
+    ContentEntry.TYPE_INTERACTIVE_EXERCISE to TouchApp.create(),
+    ContentEntry.TYPE_AUDIO to Audiotrack.create()
+)
+
 private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
 
     List {
@@ -277,15 +287,6 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
                     opacity = number(courseBlockEditAlpha)
                 }
 
-                val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
-                    ContentEntry.TYPE_EBOOK to Book.create(),
-                    ContentEntry.TYPE_VIDEO to SmartDisplay.create(),
-                    ContentEntry.TYPE_DOCUMENT to TextSnippet.create(),
-                    ContentEntry.TYPE_ARTICLE to Article.create(),
-                    ContentEntry.TYPE_COLLECTION to Collections.create(),
-                    ContentEntry.TYPE_INTERACTIVE_EXERCISE to TouchApp.create(),
-                    ContentEntry.TYPE_AUDIO to Audiotrack.create()
-                )
                 val image = if(courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE)
                     courseBlock.entry?.contentTypeFlag
                 else

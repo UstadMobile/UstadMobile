@@ -319,6 +319,16 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
 
 }
 
+private val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
+    ContentEntry.TYPE_EBOOK to R.drawable.ic_book_black_24dp,
+    ContentEntry.TYPE_VIDEO to R.drawable.video_youtube,
+    ContentEntry.TYPE_DOCUMENT to R.drawable.text_doc_24px,
+    ContentEntry.TYPE_ARTICLE to R.drawable.article_24px,
+    ContentEntry.TYPE_COLLECTION to R.drawable.collections_24px,
+    ContentEntry.TYPE_INTERACTIVE_EXERCISE to R.drawable.ic_baseline_touch_app_24,
+    ContentEntry.TYPE_AUDIO to R.drawable.ic_audiotrack_24px
+)
+
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzEditScreen(
@@ -455,15 +465,6 @@ private fun ClazzEditScreen(
             items = uiState.courseBlockList
         ) { courseBlock ->
 
-            val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
-                ContentEntry.TYPE_EBOOK to R.drawable.ic_book_black_24dp,
-                ContentEntry.TYPE_VIDEO to R.drawable.video_youtube,
-                ContentEntry.TYPE_DOCUMENT to R.drawable.text_doc_24px,
-                ContentEntry.TYPE_ARTICLE to R.drawable.article_24px,
-                ContentEntry.TYPE_COLLECTION to R.drawable.collections_24px,
-                ContentEntry.TYPE_INTERACTIVE_EXERCISE to R.drawable.ic_baseline_touch_app_24,
-                ContentEntry.TYPE_AUDIO to R.drawable.ic_audiotrack_24px
-            )
             val image = if(courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE)
                 courseBlock.entry?.contentTypeFlag
             else
@@ -524,26 +525,27 @@ private fun ClazzEditScreen(
         }
 
         items(
-            uiState.clazzSchedules.size
-        ){
+            uiState.clazzSchedules
+        ){ schedule ->
 
-            val fromTimeFormatted = rememberFormattedTime(timeInMs = uiState.clazzSchedules[it].sceduleStartTime.toInt())
-            val toTimeFormatted = rememberFormattedTime(timeInMs = uiState.clazzSchedules[it].scheduleEndTime.toInt())
-            val text = "${messageIdResource(id = uiState.clazzSchedules[it].scheduleFrequency)} " +
-                    " ${messageIdResource(uiState.clazzSchedules[it].scheduleDay)} " +
+            val fromTimeFormatted = rememberFormattedTime(timeInMs = schedule.sceduleStartTime.toInt())
+            val toTimeFormatted = rememberFormattedTime(timeInMs = schedule.scheduleEndTime.toInt())
+            val text = "${messageIdResource(id = schedule.scheduleFrequency)} " +
+                    " ${messageIdResource(schedule.scheduleDay)} " +
                     " $fromTimeFormatted - $toTimeFormatted "
 
-            UstadDetailField(
-                valueText = text,
-                labelText = "",
-                onClick = { onClickEditSchedule(uiState.clazzSchedules[it]) },
-                secondaryActionContent = {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickEditSchedule(schedule)
+                },
+                text = { Text(text) },
+                trailing = {
                     IconButton(
-                        onClick = { onClickDeleteSchedule(uiState.clazzSchedules[it]) },
+                        onClick = { onClickDeleteSchedule(schedule) },
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(id = R.string.delete),
+                            contentDescription = "",
                         )
                     }
                 }
