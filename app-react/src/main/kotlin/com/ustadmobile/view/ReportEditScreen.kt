@@ -147,20 +147,17 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
 
             List{
                 props.uiState.reportSeriesUiState.reportSeriesList.forEach { reportSeries ->
-                    ListItem{
-                        val reportSeriesMutableList = props.uiState.reportSeriesUiState.reportSeriesList
-
-                        ReportSeriesListItem {
-                            uiState = props.uiState
-                            selectedReportSeries = reportSeries
-                            onClickRemoveSeries = props.onClickRemoveSeries
-                            onClickNewFilter = props.onClickNewFilter
-                            onClickDeleteReportFilter = props.onClickDeleteReportFilter
-                            onReportSeriesChanged = { changedReportSeries ->
-                                val index = reportSeriesMutableList.indexOf(reportSeries)
-                                reportSeriesMutableList.toMutableList()[index] = changedReportSeries
-                                onReportSeriesListChanged(reportSeriesMutableList)
-                            }
+                    val reportSeriesMutableList = props.uiState.reportSeriesUiState.reportSeriesList
+                    ReportSeriesListItem {
+                        uiState = props.uiState
+                        selectedReportSeries = reportSeries
+                        onClickRemoveSeries = props.onClickRemoveSeries
+                        onClickNewFilter = props.onClickNewFilter
+                        onClickDeleteReportFilter = props.onClickDeleteReportFilter
+                        onReportSeriesChanged = { changedReportSeries ->
+                            val index = reportSeriesMutableList.indexOf(reportSeries)
+                            reportSeriesMutableList.toMutableList()[index] = changedReportSeries
+                            onReportSeriesListChanged(reportSeriesMutableList)
                         }
                     }
                 }
@@ -183,9 +180,22 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
 
     val strings = useStringsXml()
 
+    var seriesName = props.selectedReportSeries.reportSeriesName ?: ""
+//    var seriesYAxis = reportSeries.reportSeriesYAxis
+//    var seriesSubGroup = reportSeries.reportSeriesSubGroup
+
     ListItem {
-        ListItemText {
-            primary = ReactNode(props.selectedReportSeries.reportSeriesName ?: "")
+        UstadTextEditField {
+            value = seriesName
+            label = strings[MessageID.title]
+            enabled = props.uiState.fieldsEnabled
+            onChange = {
+                seriesName = it
+                props.onReportSeriesChanged(
+                    props.selectedReportSeries.shallowCopy {
+                        reportSeriesName = it
+                    })
+            }
         }
         secondaryAction = IconButton.create(){
             onClick = {
@@ -217,17 +227,7 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
 //                direction = responsive(StackDirection.row)
 //                justifyContent = JustifyContent.spaceAround
 //
-//                UstadTextEditField {
-//                    value = props.selectedReportSeries.reportSeriesName ?: ""
-//                    label = strings[MessageID.title]
-//                    enabled = props.uiState.fieldsEnabled
-//                    onChange = {
-//                        props.onReportSeriesChanged(
-//                            props.selectedReportSeries.shallowCopy {
-//                                reportSeriesName = it
-//                            })
-//                    }
-//                }
+//
 //
 //                Button {
 //                    variant = ButtonVariant.text

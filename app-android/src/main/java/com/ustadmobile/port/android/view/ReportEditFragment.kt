@@ -11,24 +11,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.KeyEventDispatcher.Component
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,18 +38,14 @@ import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ObjectMessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportEditView
-import com.ustadmobile.core.viewmodel.LoginUiState
-import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.ReportEditUiState
 import com.ustadmobile.core.viewmodel.ReportSeriesUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyReportWithSeriesWithFilters
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.composable.UstadDateTimeEditTextField
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
-import com.ustadmobile.port.android.view.composable.addOptionalSuffix
 
 
 interface ReportEditFragmentEventHandler {
