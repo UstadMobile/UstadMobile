@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.KeyEventDispatcher.Component
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -457,20 +459,18 @@ private fun ReportEditScreen(
                 mutableStateOf(uiState.reportSeriesUiState.reportSeriesList)
             }
 
-            ListItem {
-                ReportSeriesListItem(
-                    uiState = uiState,
-                    reportSeries = reportSeries,
-                    onClickRemoveSeries = onClickRemoveSeries,
-                    onClickNewFilter = onClickNewFilter,
-                    onClickDeleteReportFilter = onClickDeleteReportFilter,
-                    onReportSeriesChanged = { changedReportSeries ->
-                        val index = reportSeriesMutableList.indexOf(reportSeries)
-                        reportSeriesMutableList.toMutableList()[index] = changedReportSeries
-                        onReportSeriesListChanged(reportSeriesMutableList)
-                    },
-                )   
-            }
+            ReportSeriesListItem(
+                uiState = uiState,
+                reportSeries = reportSeries,
+                onClickRemoveSeries = onClickRemoveSeries,
+                onClickNewFilter = onClickNewFilter,
+                onClickDeleteReportFilter = onClickDeleteReportFilter,
+                onReportSeriesChanged = { changedReportSeries ->
+                    val index = reportSeriesMutableList.indexOf(reportSeries)
+                    reportSeriesMutableList.toMutableList()[index] = changedReportSeries
+                    onReportSeriesListChanged(reportSeriesMutableList)
+                },
+            )
         }
 
         item {
@@ -498,25 +498,27 @@ fun ReportSeriesListItem(
     onClickNewFilter: (ReportSeries) -> Unit,
     onClickDeleteReportFilter: (ReportFilterWithDisplayDetails) -> Unit,
 ){
-    
-    Column{
+    var seriesName by remember { mutableStateOf(reportSeries.reportSeriesName ?: "") }
+    var seriesYAxis by remember { mutableStateOf(reportSeries.reportSeriesYAxis) }
+    var seriesSubGroup by remember { mutableStateOf(reportSeries.reportSeriesSubGroup) }
 
-        Row {
+    ListItem(
+        text = {
             UstadTextEditField(
-                modifier = Modifier.weight(0.9F),
-                value = reportSeries.reportSeriesName ?: "",
+                value = seriesName,
                 label = stringResource(id = R.string.title),
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
+                    seriesName = it
                     onReportSeriesChanged(reportSeries.shallowCopy{
                         reportSeriesName = it
                     })
                 },
             )
-
+        },
+        trailing = {
             IconButton(
                 onClick = { onClickRemoveSeries(reportSeries) },
-                modifier = Modifier.weight(0.1F)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
@@ -524,68 +526,82 @@ fun ReportSeriesListItem(
                 )
             }
         }
+    )
 
-        UstadMessageIdOptionExposedDropDownMenuField(
-            value = reportSeries.reportSeriesYAxis,
+    ListItem(
+        text = {
+            UstadMessageIdOptionExposedDropDownMenuField(
+            value = seriesYAxis,
             label = stringResource(R.string.xapi_options_visual_type),
             options = VisualTypeConstants.VISUAL_TYPE_MESSAGE_IDS,
             enabled = uiState.fieldsEnabled,
             onOptionSelected = {
+                seriesYAxis = it.value
                 onReportSeriesChanged(reportSeries.shallowCopy{
                     reportSeriesYAxis = it.value
                 })
             },
-        )
-        
-        UstadMessageIdOptionExposedDropDownMenuField(
-            value = reportSeries.reportSeriesSubGroup,
+        ) },
+    )
+
+    ListItem(
+        text = {
+            UstadMessageIdOptionExposedDropDownMenuField(
+            value = seriesSubGroup,
             label = stringResource(R.string.xapi_options_subgroup),
             options = SubgroupConstants.SUB_GROUP_MESSAGE_IDS,
             enabled = uiState.fieldsEnabled,
             onOptionSelected = {
+                seriesSubGroup = it.value
                 onReportSeriesChanged(reportSeries.shallowCopy{
                     reportSeriesSubGroup = it.value
                 })
             },
         )
+        }
+    )
 
-        Spacer(modifier = Modifier.height(10.dp))
+    Spacer(modifier = Modifier.height(10.dp))
 
-        Text(text = stringResource(id = R.string.filter))
+    ListItem(
+        text = {
+           Text(text = stringResource(id = R.string.filter))
+        }
+    )
 
-        uiState.reportSeriesUiState.filterList
-            .forEach { filter ->
+    uiState.reportSeriesUiState.filterList
+        .forEach { filter ->
 
-                ListItem(
-                    text = { Text(filter.person?.fullName() ?: "") },
-                    trailing = {
-                        IconButton(
-                            onClick = { onClickDeleteReportFilter(filter) }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = "",
-                            )
-                        }
+            ListItem(
+                text = { Text(filter.person?.fullName() ?: "") },
+                trailing = {
+                    IconButton(
+                        onClick = { onClickDeleteReportFilter(filter) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "",
+                        )
                     }
-                )
-            }
+                }
+            )
+        }
 
-        TextButton(onClick = { onClickNewFilter(reportSeries) }) {
+    ListItem(
+        modifier = Modifier.clickable { onClickNewFilter(reportSeries) },
+        text = { Text(text = stringResource(id = R.string.filter)) },
+        icon = {
             Icon(
                 Icons.Filled.Add,
                 contentDescription = null,
             )
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text(text = stringResource(id = R.string.filter))
         }
+    )
 
-        Spacer(modifier = Modifier.height(15.dp))
+    Spacer(modifier = Modifier.height(15.dp))
 
+    ListItem {
         Divider()
-
-        Spacer(modifier = Modifier.height(15.dp))
-
     }
 }
 

@@ -3,26 +3,25 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.*
-import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.ReportEditUiState
 import com.ustadmobile.core.viewmodel.ReportSeriesUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyReportWithSeriesWithFilters
+import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.mui.components.UstadTextEditField
+import csstype.JustifyContent
 import csstype.px
+import mui.base.ItemAriaLabelType
 import mui.icons.material.Add
 import mui.icons.material.Close
 import mui.icons.material.Delete
 import mui.material.*
-import mui.system.Stack
-import mui.system.StackDirection
+import mui.material.Stack
+import mui.material.StackDirection
 import mui.system.responsive
-import react.FC
-import react.Props
-import react.ReactNode
-import react.create
+import react.*
 
 external interface ReportEditScreenProps : Props {
 
@@ -151,18 +150,16 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     ListItem{
                         val reportSeriesMutableList = props.uiState.reportSeriesUiState.reportSeriesList
 
-                        ListItem {
-                            ReportSeriesListItem {
-                                uiState = props.uiState
-                                selectedReportSeries = reportSeries
-                                onClickRemoveSeries = props.onClickRemoveSeries
-                                onClickNewFilter = props.onClickNewFilter
-                                onClickDeleteReportFilter = props.onClickDeleteReportFilter
-                                onReportSeriesChanged = { changedReportSeries ->
-                                    val index = reportSeriesMutableList.indexOf(reportSeries)
-                                    reportSeriesMutableList.toMutableList()[index] = changedReportSeries
-                                    onReportSeriesListChanged(reportSeriesMutableList)
-                                }
+                        ReportSeriesListItem {
+                            uiState = props.uiState
+                            selectedReportSeries = reportSeries
+                            onClickRemoveSeries = props.onClickRemoveSeries
+                            onClickNewFilter = props.onClickNewFilter
+                            onClickDeleteReportFilter = props.onClickDeleteReportFilter
+                            onReportSeriesChanged = { changedReportSeries ->
+                                val index = reportSeriesMutableList.indexOf(reportSeries)
+                                reportSeriesMutableList.toMutableList()[index] = changedReportSeries
+                                onReportSeriesListChanged(reportSeriesMutableList)
                             }
                         }
                     }
@@ -186,99 +183,122 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
 
     val strings = useStringsXml()
 
-    Container {
-        maxWidth = "lg"
-
-        Stack {
-            direction = responsive(StackDirection.column)
-            spacing = responsive(10.px)
-
-            Stack {
-                direction = responsive(StackDirection.row)
-
-                UstadTextEditField {
-                    value = props.selectedReportSeries.reportSeriesName ?: ""
-                    label = strings[MessageID.title]
-                    enabled = props.uiState.fieldsEnabled
-                    onChange = {
-                        props.onReportSeriesChanged(
-                            props.selectedReportSeries.shallowCopy {
-                                reportSeriesName = it
-                            })
-                    }
-                }
-
-                Button {
-                    variant = ButtonVariant.text
-                    onClick = {
-                        props.onClickRemoveSeries(props.selectedReportSeries)
-                    }
-
-                    +Close.create()
-                }
-
-
-                UstadMessageIdDropDownField {
-                    value = props.selectedReportSeries.reportSeriesYAxis
-                    label = strings[MessageID.xapi_options_visual_type]
-                    options = VisualTypeConstants.VISUAL_TYPE_MESSAGE_IDS
-                    enabled = props.uiState.fieldsEnabled
-                    onChange = {
-                        props.onReportSeriesChanged(
-                            props.selectedReportSeries.shallowCopy {
-                                reportSeriesYAxis = it?.value ?: 0
-                            }
-                        )
-                    }
-                }
-
-                UstadMessageIdDropDownField {
-                    value = props.selectedReportSeries.reportSeriesSubGroup
-                    label = strings[MessageID.xapi_options_subgroup]
-                    options = SubgroupConstants.SUB_GROUP_MESSAGE_IDS
-                    enabled = props.uiState.fieldsEnabled
-                    onChange = {
-                        props.onReportSeriesChanged(
-                            props.selectedReportSeries.shallowCopy {
-                                reportSeriesSubGroup = it?.value ?: 0
-                            }
-                        )
-                    }
-                }
-
-                Typography {
-                    +strings[MessageID.filter]
-                }
-
-                List {
-                    props.uiState.reportSeriesUiState.filterList.forEach { filter ->
-
-                        ListItem {
-                            ListItemText {
-                                primary = ReactNode(filter.person?.fullName() ?: "")
-                            }
-
-                            secondaryAction = IconButton.create {
-                                onClick = { props.onClickDeleteReportFilter(filter) }
-                                Delete {}
-                            }
-                        }
-                    }
-                }
-
-                Button {
-                    variant = ButtonVariant.text
-                    onClick = {
-                        props.onClickNewFilter(props.selectedReportSeries)
-                    }
-
-                    +strings[MessageID.filter]
-                    +Add.create()
-                }
-
-                Divider()
+    ListItem {
+        ListItemText {
+            primary = ReactNode(props.selectedReportSeries.reportSeriesName ?: "")
+        }
+        secondaryAction = IconButton.create(){
+            onClick = {
+                props.onClickRemoveSeries(props.selectedReportSeries)
             }
+            Close { }
         }
     }
+
+    ListItem {
+
+        secondaryAction = IconButton.create(){
+            onClick = {
+                props.onClickRemoveSeries(props.selectedReportSeries)
+            }
+            Close { }
+        }
+    }
+
+
+//    Container {
+//        maxWidth = "lg"
+//
+//        Stack {
+//            direction = responsive(StackDirection.column)
+//            spacing = responsive(10.px)
+//
+//            Stack {
+//                direction = responsive(StackDirection.row)
+//                justifyContent = JustifyContent.spaceAround
+//
+//                UstadTextEditField {
+//                    value = props.selectedReportSeries.reportSeriesName ?: ""
+//                    label = strings[MessageID.title]
+//                    enabled = props.uiState.fieldsEnabled
+//                    onChange = {
+//                        props.onReportSeriesChanged(
+//                            props.selectedReportSeries.shallowCopy {
+//                                reportSeriesName = it
+//                            })
+//                    }
+//                }
+//
+//                Button {
+//                    variant = ButtonVariant.text
+//                    onClick = {
+//                        props.onClickRemoveSeries(props.selectedReportSeries)
+//                    }
+//
+//                    + Close.create()
+//                }
+//            }
+//
+//            UstadMessageIdDropDownField {
+//                value = props.selectedReportSeries.reportSeriesYAxis
+//                label = strings[MessageID.xapi_options_visual_type]
+//                options = VisualTypeConstants.VISUAL_TYPE_MESSAGE_IDS
+//                enabled = props.uiState.fieldsEnabled
+//                onChange = {
+//                    props.onReportSeriesChanged(
+//                        props.selectedReportSeries.shallowCopy {
+//                            reportSeriesYAxis = it?.value ?: 0
+//                        }
+//                    )
+//                }
+//            }
+//
+//            UstadMessageIdDropDownField {
+//                value = props.selectedReportSeries.reportSeriesSubGroup
+//                label = strings[MessageID.xapi_options_subgroup]
+//                options = SubgroupConstants.SUB_GROUP_MESSAGE_IDS
+//                enabled = props.uiState.fieldsEnabled
+//                onChange = {
+//                    props.onReportSeriesChanged(
+//                        props.selectedReportSeries.shallowCopy {
+//                            reportSeriesSubGroup = it?.value ?: 0
+//                        }
+//                    )
+//                }
+//            }
+//
+//            Typography {
+//                +strings[MessageID.filter]
+//            }
+//
+//            List {
+//                props.uiState.reportSeriesUiState.filterList.forEach { filter ->
+//
+//                    ListItem {
+//                        ListItemText {
+//                            primary = ReactNode(filter.person?.fullName() ?: "")
+//                        }
+//
+//                        secondaryAction = IconButton.create {
+//                            onClick = { props.onClickDeleteReportFilter(filter) }
+//                            Delete {}
+//                        }
+//                    }
+//                }
+//            }
+//
+//            Button {
+//                variant = ButtonVariant.text
+//                onClick = {
+//                    props.onClickNewFilter(props.selectedReportSeries)
+//                }
+//
+//                +strings[MessageID.filter]
+//                +Add.create()
+//            }
+//
+//            Divider()
+//        }
+//    }
 }
 
