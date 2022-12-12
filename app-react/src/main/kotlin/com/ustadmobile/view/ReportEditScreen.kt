@@ -26,7 +26,7 @@ external interface ReportEditScreenProps : Props {
 
     var onReportChanged: (ReportWithSeriesWithFilters?) -> Unit
 
-    var onReportSeriesListChanged: (List<ReportSeries>?) -> Unit
+    var onChangedReportSeries: (ReportSeries?) -> Unit
 
     var onClickNewSeries: () -> Unit
 
@@ -35,6 +35,8 @@ external interface ReportEditScreenProps : Props {
     var onClickNewFilter: (ReportSeries) -> Unit
 
     var onClickDeleteReportFilter: (ReportFilterWithDisplayDetails) -> Unit
+
+    var reportSeries: ReportSeries
 
 }
 
@@ -139,20 +141,14 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
             }
 
             List{
-                props.uiState.reportSeriesUiState.reportSeriesList.forEach { reportSeries ->
-                    val reportSeriesMutableList = props.uiState.reportSeriesUiState.reportSeriesList
+                props.uiState.reportSeriesUiState.reportSeriesList.forEach { reportSeriesItem ->
                     ReportSeriesListItem {
-                        fieldsEnabled = props.uiState.fieldsEnabled
-                        reportSeriesUiState = props.uiState.reportSeriesUiState
-                        selectedReportSeries = reportSeries
+                        reportSeries = reportSeriesItem
+                        uiState = props.uiState
                         onClickRemoveSeries = props.onClickRemoveSeries
                         onClickNewFilter = props.onClickNewFilter
                         onClickDeleteReportFilter = props.onClickDeleteReportFilter
-                        onReportSeriesChanged = { changedReportSeries ->
-                            val index = reportSeriesMutableList.indexOf(reportSeries)
-                            reportSeriesMutableList.toMutableList()[index] = changedReportSeries
-                            props.onReportSeriesListChanged(reportSeriesMutableList)
-                        }
+                        onChangedReportSeries = props.onChangedReportSeries
                     }
                 }
             }
@@ -170,41 +166,18 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
     }
 }
 
-external interface ReportSeriesListItemProps : Props {
-
-    var fieldsEnabled: Boolean
-
-    var reportSeriesUiState: ReportSeriesUiState
-
-    var onClickRemoveSeries: (ReportSeries) -> Unit
-
-    var onClickNewFilter: (ReportSeries) -> Unit
-
-    var onClickDeleteReportFilter: (ReportFilterWithDisplayDetails) -> Unit
-
-    var selectedReportSeries: ReportSeries
-
-    var onReportSeriesChanged: (ReportSeries) -> Unit
-
-}
-
-private val ReportSeriesListItem = FC<ReportSeriesListItemProps> { props ->
+private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
 
     val strings = useStringsXml()
 
-    var seriesName by useState<String>(props.selectedReportSeries.reportSeriesName ?: "")
-    var seriesYAxis by useState<Int>(props.selectedReportSeries.reportSeriesYAxis)
-    var seriesSubGroup by useState<Int>(props.selectedReportSeries.reportSeriesSubGroup)
-
     ListItem {
         children = UstadTextEditField.create {
-            value = seriesName
+            value = props.reportSeries.reportSeriesName ?: ""
             label = strings[MessageID.title]
-            enabled = props.fieldsEnabled
+            enabled = props.uiState.fieldsEnabled
             onChange = {
-                seriesName = it
-                props.onReportSeriesChanged(
-                    props.selectedReportSeries.shallowCopy {
+                props.onChangedReportSeries(
+                    props.reportSeries.shallowCopy {
                         reportSeriesName = it
                     })
             }
@@ -212,7 +185,7 @@ private val ReportSeriesListItem = FC<ReportSeriesListItemProps> { props ->
 
         secondaryAction = IconButton.create(){
             onClick = {
-                props.onClickRemoveSeries(props.selectedReportSeries)
+                props.onClickRemoveSeries(props.reportSeries)
             }
             Close { }
         }
@@ -220,14 +193,13 @@ private val ReportSeriesListItem = FC<ReportSeriesListItemProps> { props ->
 
     ListItem {
         UstadMessageIdDropDownField {
-            value = seriesYAxis
+            value = props.reportSeries.reportSeriesYAxis
             label = strings[MessageID.xapi_options_visual_type]
             options = VisualTypeConstants.VISUAL_TYPE_MESSAGE_IDS
-            enabled = props.fieldsEnabled
+            enabled = props.uiState.fieldsEnabled
             onChange = {
-                seriesYAxis = it?.value ?: 0
-                props.onReportSeriesChanged(
-                    props.selectedReportSeries.shallowCopy {
+                props.onChangedReportSeries(
+                    props.reportSeries.shallowCopy {
                         reportSeriesYAxis = it?.value ?: 0
                     }
                 )
@@ -237,14 +209,13 @@ private val ReportSeriesListItem = FC<ReportSeriesListItemProps> { props ->
 
     ListItem {
         UstadMessageIdDropDownField {
-            value = seriesSubGroup
+            value = props.reportSeries.reportSeriesSubGroup
             label = strings[MessageID.xapi_options_subgroup]
             options = SubgroupConstants.SUB_GROUP_MESSAGE_IDS
-            enabled = props.fieldsEnabled
+            enabled = props.uiState.fieldsEnabled
             onChange = {
-                seriesSubGroup = it?.value ?: 0
-                props.onReportSeriesChanged(
-                    props.selectedReportSeries.shallowCopy {
+                props.onChangedReportSeries(
+                    props.reportSeries.shallowCopy {
                         reportSeriesSubGroup = it?.value ?: 0
                     }
                 )
@@ -259,7 +230,7 @@ private val ReportSeriesListItem = FC<ReportSeriesListItemProps> { props ->
     }
 
     List {
-        props.reportSeriesUiState.filterList.forEach { filter ->
+        props.uiState.reportSeriesUiState.filterList.forEach { filter ->
             ListItem {
                 ListItemText {
                     primary = ReactNode(filter.person?.fullName() ?: "")
@@ -274,7 +245,7 @@ private val ReportSeriesListItem = FC<ReportSeriesListItemProps> { props ->
 
     ListItem {
         onClick = {
-            props.onClickNewFilter(props.selectedReportSeries)
+            props.onClickNewFilter(props.reportSeries)
         }
         ListItemIcon {
             +Add.create()

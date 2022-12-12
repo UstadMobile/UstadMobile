@@ -371,7 +371,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
 private fun ReportEditScreen(
     uiState: ReportEditUiState = ReportEditUiState(),
     onReportChanged: (ReportWithSeriesWithFilters?) -> Unit = {},
-    onReportSeriesListChanged: (List<ReportSeries>?) -> Unit = {},
+    onChangedReportSeries: (ReportSeries?) -> Unit = {},
     onClickNewSeries: () -> Unit = {},
     onClickRemoveSeries: (ReportSeries) -> Unit = {},
     onClickNewFilter: (ReportSeries) -> Unit = {},
@@ -443,21 +443,13 @@ private fun ReportEditScreen(
             key = { reportSeries -> reportSeries.reportSeriesUid }
         ){ reportSeries ->
 
-            val reportSeriesMutableList by remember {
-                mutableStateOf(uiState.reportSeriesUiState.reportSeriesList)
-            }
-
             ReportSeriesListItem(
                 uiState = uiState,
                 reportSeries = reportSeries,
                 onClickRemoveSeries = onClickRemoveSeries,
                 onClickNewFilter = onClickNewFilter,
                 onClickDeleteReportFilter = onClickDeleteReportFilter,
-                onReportSeriesChanged = { changedReportSeries ->
-                    val index = reportSeriesMutableList.indexOf(reportSeries)
-                    reportSeriesMutableList.toMutableList()[index] = changedReportSeries
-                    onReportSeriesListChanged(reportSeriesMutableList)
-                },
+                onChangedReportSeries = onChangedReportSeries,
             )
         }
 
@@ -481,24 +473,20 @@ private fun ReportEditScreen(
 fun ReportSeriesListItem(
     uiState: ReportEditUiState,
     reportSeries: ReportSeries,
-    onReportSeriesChanged: (ReportSeries) -> Unit,
+    onChangedReportSeries: (ReportSeries) -> Unit,
     onClickRemoveSeries: (ReportSeries) -> Unit,
     onClickNewFilter: (ReportSeries) -> Unit,
     onClickDeleteReportFilter: (ReportFilterWithDisplayDetails) -> Unit,
 ){
-    var seriesName by remember { mutableStateOf(reportSeries.reportSeriesName ?: "") }
-    var seriesYAxis by remember { mutableStateOf(reportSeries.reportSeriesYAxis) }
-    var seriesSubGroup by remember { mutableStateOf(reportSeries.reportSeriesSubGroup) }
 
     ListItem(
         text = {
             UstadTextEditField(
-                value = seriesName,
+                value = reportSeries.reportSeriesName ?: "",
                 label = stringResource(id = R.string.title),
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {
-                    seriesName = it
-                    onReportSeriesChanged(reportSeries.shallowCopy{
+                    onChangedReportSeries(reportSeries.shallowCopy{
                         reportSeriesName = it
                     })
                 },
@@ -519,13 +507,12 @@ fun ReportSeriesListItem(
     ListItem(
         text = {
             UstadMessageIdOptionExposedDropDownMenuField(
-            value = seriesYAxis,
+            value = reportSeries.reportSeriesYAxis,
             label = stringResource(R.string.xapi_options_visual_type),
             options = VisualTypeConstants.VISUAL_TYPE_MESSAGE_IDS,
             enabled = uiState.fieldsEnabled,
             onOptionSelected = {
-                seriesYAxis = it.value
-                onReportSeriesChanged(reportSeries.shallowCopy{
+                onChangedReportSeries(reportSeries.shallowCopy{
                     reportSeriesYAxis = it.value
                 })
             },
@@ -535,13 +522,12 @@ fun ReportSeriesListItem(
     ListItem(
         text = {
             UstadMessageIdOptionExposedDropDownMenuField(
-            value = seriesSubGroup,
+            value = reportSeries.reportSeriesSubGroup,
             label = stringResource(R.string.xapi_options_subgroup),
             options = SubgroupConstants.SUB_GROUP_MESSAGE_IDS,
             enabled = uiState.fieldsEnabled,
             onOptionSelected = {
-                seriesSubGroup = it.value
-                onReportSeriesChanged(reportSeries.shallowCopy{
+                onChangedReportSeries(reportSeries.shallowCopy{
                     reportSeriesSubGroup = it.value
                 })
             },
