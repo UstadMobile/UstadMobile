@@ -52,6 +52,8 @@ fun useUstadScreens(): UstadScreens {
                 LanguageDetailPreview),
             UstadScreen(ReportFilterEditView.VIEW_NAME, name = "ReportFilterEdit Preview",
                 ReportFilterEditScreenPreview),
+            UstadScreen(ReportEditView.VIEW_NAME, name = "Report Edit Preview",
+                ReportEditScreenPreview),
         )
     }
 }

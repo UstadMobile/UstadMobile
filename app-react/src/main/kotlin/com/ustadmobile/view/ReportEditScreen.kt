@@ -3,7 +3,9 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.*
+import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.core.viewmodel.ReportEditUiState
+import com.ustadmobile.core.viewmodel.ReportSeriesUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyReportWithSeriesWithFilters
@@ -38,40 +40,46 @@ external interface ReportEditScreenProps : Props {
 
     var onClickDeleteReportFilter: (ReportFilterWithDisplayDetails) -> Unit
 
+    var selectedReportSeries: ReportSeries
+
+    var onReportSeriesChanged: (ReportSeries) -> Unit
+
 }
 
 val ReportEditScreenPreview = FC<Props> {
     ReportEditScreenComponent2 {
         uiState = ReportEditUiState(
-            reportSeriesList = listOf(
-                ReportSeries().apply {
-                    reportSeriesUid = 0
-                    reportSeriesName = "First Series"
-                },
-                ReportSeries().apply {
-                    reportSeriesUid = 1
-                    reportSeriesName = "Second Series"
-                },
-                ReportSeries().apply {
-                    reportSeriesUid = 2
-                    reportSeriesName = "Third Series"
-                }
-            ),
-            filterList = listOf(
-                ReportFilterWithDisplayDetails().apply {
-                    person = Person().apply {
-                        firstNames = "John"
-                        lastName = "Doe"
+            reportSeriesUiState = ReportSeriesUiState(
+                reportSeriesList = listOf(
+                    ReportSeries().apply {
+                        reportSeriesUid = 0
+                        reportSeriesName = "First Series"
+                    },
+                    ReportSeries().apply {
+                        reportSeriesUid = 1
+                        reportSeriesName = "Second Series"
+                    },
+                    ReportSeries().apply {
+                        reportSeriesUid = 2
+                        reportSeriesName = "Third Series"
                     }
-                },
-                ReportFilterWithDisplayDetails().apply {
-                    person = Person().apply {
-                        firstNames = "Ahmad"
-                        lastName = "Ahmadi"
+                ),
+                filterList = listOf(
+                    ReportFilterWithDisplayDetails().apply {
+                        person = Person().apply {
+                            firstNames = "John"
+                            lastName = "Doe"
+                        }
+                    },
+                    ReportFilterWithDisplayDetails().apply {
+                        person = Person().apply {
+                            firstNames = "Ahmad"
+                            lastName = "Ahmadi"
+                        }
                     }
-                }
+                ),
+                deleteButtonVisible = true
             ),
-            deleteButtonVisible = true
         )
     }
 }
@@ -146,7 +154,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         ListItem {
                             ReportSeriesListItem {
                                 uiState = props.uiState
-                                reportSeries = reportSeries
+                                selectedReportSeries = reportSeries
                                 onClickRemoveSeries = props.onClickRemoveSeries
                                 onClickNewFilter = props.onClickNewFilter
                                 onClickDeleteReportFilter = props.onClickDeleteReportFilter
@@ -189,79 +197,87 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
                 direction = responsive(StackDirection.row)
 
                 UstadTextEditField {
-                    value = reportSeries.reportSeriesName ?: ""
+                    value = props.selectedReportSeries.reportSeriesName ?: ""
                     label = strings[MessageID.title]
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
-                        props.onReportSeriesChanged(reportSeries.shallowCopy {
-                            reportSeriesName = it
-                        })
+                        props.onReportSeriesChanged(
+                            props.selectedReportSeries.shallowCopy {
+                                reportSeriesName = it
+                            })
                     }
                 }
 
-                Button{
+                Button {
                     variant = ButtonVariant.text
-                    onClick = { props.onClickRemoveSeries(reportSeries) }
+                    onClick = {
+                        props.onClickRemoveSeries(props.selectedReportSeries)
+                    }
 
-                    + Close.create()
+                    +Close.create()
                 }
 
 
                 UstadMessageIdDropDownField {
-                    value = reportSeries.reportSeriesYAxis
+                    value = props.selectedReportSeries.reportSeriesYAxis
                     label = strings[MessageID.xapi_options_visual_type]
                     options = VisualTypeConstants.VISUAL_TYPE_MESSAGE_IDS
                     enabled = props.uiState.fieldsEnabled
                     onChange = {
                         props.onReportSeriesChanged(
-                            props.reportSeries.shallowCopy {
+                            props.selectedReportSeries.shallowCopy {
                                 reportSeriesYAxis = it?.value ?: 0
                             }
-                    })
+                        )
+                    }
                 }
-            }
 
-            UstadMessageIdDropDownField {
-                value = reportSeries.reportSeriesSubGroup
-                label = strings[MessageID.xapi_options_subgroup]
-                options = SubgroupConstants.SUB_GROUP_MESSAGE_IDS
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onReportSeriesChanged(reportSeries.shallowCopy {
-                        reportSeriesSubGroup = it.value
-                    })
+                UstadMessageIdDropDownField {
+                    value = props.selectedReportSeries.reportSeriesSubGroup
+                    label = strings[MessageID.xapi_options_subgroup]
+                    options = SubgroupConstants.SUB_GROUP_MESSAGE_IDS
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onReportSeriesChanged(
+                            props.selectedReportSeries.shallowCopy {
+                                reportSeriesSubGroup = it?.value ?: 0
+                            }
+                        )
+                    }
                 }
-            }
 
-            Typography {
-                + strings[MessageID.filter]
-            }
+                Typography {
+                    +strings[MessageID.filter]
+                }
 
-            List {
-                props.uiState.reportSeriesUiState.filterList.forEach { filter ->
+                List {
+                    props.uiState.reportSeriesUiState.filterList.forEach { filter ->
 
-                    ListItem {
-                        ListItemText {
-                            primary = ReactNode(filter.person?.fullName() ?: "")
-                        }
+                        ListItem {
+                            ListItemText {
+                                primary = ReactNode(filter.person?.fullName() ?: "")
+                            }
 
-                        secondaryAction = IconButton.create {
-                            onClick = { props.onClickDeleteReportFilter(filter) }
-                            Delete {}
+                            secondaryAction = IconButton.create {
+                                onClick = { props.onClickDeleteReportFilter(filter) }
+                                Delete {}
+                            }
                         }
                     }
                 }
+
+                Button {
+                    variant = ButtonVariant.text
+                    onClick = {
+                        props.onClickNewFilter(props.selectedReportSeries)
+                    }
+
+                    +strings[MessageID.filter]
+                    +Add.create()
+                }
+
+                Divider()
             }
-
-            Button {
-                variant = ButtonVariant.text
-                onClick = { props.onClickNewFilter(reportSeries) }
-
-                + strings[MessageID.filter]
-                + Add.create()
-            }
-
-            Divider()
         }
     }
 }
