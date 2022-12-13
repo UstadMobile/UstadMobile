@@ -2,18 +2,18 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.model.BitmaskFlag
+import com.ustadmobile.lib.db.entities.BitmaskFlag
 import com.ustadmobile.core.viewmodel.ScopedGrantEditUiState
-import mui.icons.material.Delete
+import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import mui.material.*
-import mui.system.Stack
-import mui.system.StackDirection
-import mui.system.responsive
 import react.*
 
 external interface ScopedGrantEditScreenProps : Props {
 
     var uiState: ScopedGrantEditUiState
+
+    var onChangedBitmask: (BitmaskFlag?) -> Unit
 
 }
 
@@ -24,7 +24,8 @@ val ScopedGrantEditScreenComponent2 = FC<ScopedGrantEditScreenProps> { props ->
     Container {
 
         List{
-            props.uiState.bitmaskList.forEach { bitmask ->
+            props.uiState.bitmaskList
+                .forEach { bitmask ->
                 ListItem{
                     ListItemText {
                         primary = ReactNode(strings[bitmask.messageId])
@@ -32,8 +33,10 @@ val ScopedGrantEditScreenComponent2 = FC<ScopedGrantEditScreenProps> { props ->
 
                     secondaryAction  = Switch.create {
                         checked = bitmask.enabled
-                        onChange = { _, isChecked ->
-
+                        onChange = { _, isEnabled ->
+                            props.onChangedBitmask(bitmask.shallowCopy{
+                                enabled = isEnabled
+                            })
                         }
                     }
                 }
@@ -47,6 +50,10 @@ val ScopedGrantEditScreenPreview = FC<Props> {
     val uiStateVar : ScopedGrantEditUiState by useState {
         ScopedGrantEditUiState(
             bitmaskList = listOf(
+                BitmaskFlag(
+                    messageId = MessageID.incident_id,
+                    flagVal = 0
+                ),
                 BitmaskFlag(
                     messageId = MessageID.incident_id,
                     flagVal = 0

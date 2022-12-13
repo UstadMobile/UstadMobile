@@ -4,11 +4,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <import type="com.ustadmobile.core.model.BitmaskFlag"/>
+        <import type="com.ustadmobile.lib.db.entities.BitmaskFlag"/>
 
         <variable
             name="bitmaskFlag"
-            type="BitmaskFlag" />
+            type="com.ustadmobile.lib.db.entities.BitmaskFlag" />
 
 
     </data>

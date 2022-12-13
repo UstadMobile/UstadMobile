@@ -2,13 +2,11 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
-import androidx.compose.foundation.clickable
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,14 +15,14 @@ import com.toughra.ustadmobile.databinding.FragmentScopedGrantEditBinding
 import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.model.BitmaskFlag
+import com.ustadmobile.lib.db.entities.BitmaskFlag
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.viewmodel.ScopedGrantEditUiState
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ScopedGrant
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.compose.messageIdResource
-import com.ustadmobile.port.android.view.composable.UstadSwitchField
 
 
 interface ScopedGrantEditFragmentEventHandler {
@@ -106,7 +104,7 @@ class ScopedGrantEditFragment: UstadEditFragment<ScopedGrant>(), ScopedGrantEdit
 @Composable
 fun ScopedGrantEditScreen(
     uiState: ScopedGrantEditUiState = ScopedGrantEditUiState(),
-    onChangedBitmask: (List<BitmaskFlag>?) -> Unit = {},
+    onChangedBitmask: (BitmaskFlag?) -> Unit = {},
 ) {
     uiState.bitmaskList.forEach { bitmask ->
 
@@ -115,7 +113,11 @@ fun ScopedGrantEditScreen(
             trailing = {
                 Switch(
                     checked = bitmask.enabled,
-                    onCheckedChange = {}
+                    onCheckedChange = {
+                        onChangedBitmask(bitmask.shallowCopy{
+                            enabled = it
+                        })
+                    }
                 )
             }
         )

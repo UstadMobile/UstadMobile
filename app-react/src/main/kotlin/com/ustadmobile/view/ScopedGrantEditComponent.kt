@@ -3,7 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.model.BitmaskFlag
+import com.ustadmobile.lib.db.entities.BitmaskFlag
 import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.ObserverFnWrapper

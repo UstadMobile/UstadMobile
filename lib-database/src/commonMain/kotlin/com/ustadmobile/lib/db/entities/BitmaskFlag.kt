@@ -1,4 +1,4 @@
-package com.ustadmobile.core.model
+package com.ustadmobile.lib.db.entities
 
 import kotlinx.serialization.Serializable
 

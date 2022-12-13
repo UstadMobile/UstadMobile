@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.core.model.BitmaskFlag"/>
+        <import type="com.ustadmobile.lib.db.entities.BitmaskFlag"/>
         <import type="com.ustadmobile.core.util.ext.IntExtKt"/>
 
-        <variable name="bitmaskFlag" type="BitmaskFlag" />
+        <variable name="bitmaskFlag" type="com.ustadmobile.lib.db.entities.BitmaskFlag" />
     </data>
 
     <androidx.appcompat.widget.LinearLayoutCompat
