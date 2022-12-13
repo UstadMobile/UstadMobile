@@ -6,7 +6,7 @@ data class CourseTerminologyEditUiState(
 
     val titleError: String? = null,
 
-    val courseTerminologyList: List<CourseTerminology> = emptyList(),
+    val entity: CourseTerminology? = null,
 
     val fieldsEnabled: Boolean = true,
 

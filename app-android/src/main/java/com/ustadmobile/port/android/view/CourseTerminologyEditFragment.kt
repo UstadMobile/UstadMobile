@@ -127,13 +127,11 @@ private fun CourseTerminologyEditScreen(
             .padding(16.dp)
     )  {
 
-        items(
-            items = uiState.courseTerminologyList
-        ){ courseTerminology ->
+        item{
             ListItem(
                 text = {
                     UstadTextEditField(
-                        value = courseTerminology.ctTitle ?: "",
+                        value = uiState.entity?.ctTitle ?: "",
                         label = stringResource(id = R.string.name),
                         error = uiState.titleError,
                         enabled = uiState.fieldsEnabled,
