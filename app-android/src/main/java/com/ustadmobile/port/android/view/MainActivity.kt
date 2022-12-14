@@ -33,8 +33,6 @@ import com.toughra.ustadmobile.databinding.ActivityMainBinding
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -42,6 +40,7 @@ import com.ustadmobile.core.impl.nav.NavControllerAdapter
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.port.android.view.binding.imageForeignKeyPlaceholder
@@ -55,6 +54,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.*
+import com.ustadmobile.core.db.UmAppDatabase
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
@@ -78,8 +78,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     private val impl : UstadMobileSystemImpl by instance()
 
     private val accountManager: UstadAccountManager by instance()
-
-    private var mIsAdmin: Boolean? = null
 
     private var searchView: SearchView? = null
 
@@ -105,18 +103,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     override var loading: Boolean
         get() = false
         set(@Suppress("UNUSED_PARAMETER") value) {}
-
-    //Observe the active account to show/hide the settings based on whether or not the user is admin
-    private val mActiveUserObserver = Observer<UmAccount> {account ->
-        GlobalScope.launch(Dispatchers.Main) {
-            val db: UmAppDatabase = di.on(Endpoint(account.endpointUrl)).direct.instance(tag = TAG_DB)
-            val isNewUserAdmin = db.personDao.personIsAdmin(account.personUid)
-            if(isNewUserAdmin != mIsAdmin) {
-                mIsAdmin = isNewUserAdmin
-                invalidateOptionsMenu()
-            }
-        }
-    }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
@@ -164,7 +150,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
             AppBarConfiguration(mBinding.bottomNavView.menu))
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
-        accountManager.activeAccountLive.observe(this, mActiveUserObserver)
     }
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,
@@ -210,7 +195,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val navController = findNavController(R.id.activity_main_navhost_fragment)
         val currentFrag = navController.currentDestination?.id ?: 0
         val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
-        menu.findItem(R.id.menu_main_settings).isVisible = (mainScreenItemsVisible && mIsAdmin == true)
+        menu.findItem(R.id.menu_main_settings).isVisible = mainScreenItemsVisible
         menu.findItem(R.id.menu_share_offline).isVisible = mainScreenItemsVisible
 
         //Should be hidden when they are on the accounts page (only)
@@ -326,7 +311,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     private fun setUserProfile(menuItem: MenuItem) {
         val accountManager: UstadAccountManager by instance()
 
-        val profileImgView: ImageView = menuItem.actionView.findViewById(R.id.person_name_profilepic)
+        val profileImgView: ImageView = menuItem.actionView?.findViewById(R.id.person_name_profilepic) ?: return
         userProfileDrawable?.also { profileImgView.imageForeignKeyPlaceholder(it) }
         profileImgView.setImageForeignKeyAdapter(PersonDetailFragment.FOREIGNKEYADAPTER_PERSON)
         profileImgView.setImageForeignKey(accountManager.activeAccount.personUid)

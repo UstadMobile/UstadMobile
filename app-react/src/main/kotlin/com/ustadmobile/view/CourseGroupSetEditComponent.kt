@@ -8,7 +8,6 @@ import com.ustadmobile.core.view.CourseGroupSetEditView
 import com.ustadmobile.lib.db.entities.CourseGroupMemberPerson
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager.contentContainer
 import com.ustadmobile.util.StyleManager.defaultFullWidth
@@ -24,6 +23,10 @@ import com.ustadmobile.view.ext.umSpacer
 import kotlinx.browser.window
 import kotlinx.css.height
 import kotlinx.css.px
+import mui.material.ButtonColor
+import mui.material.ButtonVariant
+import mui.material.FormControlVariant
+import mui.material.Size
 import react.RBuilder
 import react.setState
 import styled.css
@@ -134,8 +137,8 @@ class CourseGroupSetEditComponent (mProps: UmProps): UstadEditComponent<CourseGr
 
                 umItem(GridSize.cells12, GridSize.cells3) {
                     umButton(getString(MessageID.assign_to_random_groups),
-                        size = ButtonSize.large,
-                        color = UMColor.secondary,
+                        size = Size.large,
+                        color = ButtonColor.secondary,
                         variant = ButtonVariant.contained,
                         onClick = {
                             mPresenter?.handleAssignRandomGroupsClicked()

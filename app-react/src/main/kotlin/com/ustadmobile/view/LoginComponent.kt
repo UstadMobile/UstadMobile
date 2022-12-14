@@ -4,7 +4,6 @@ import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.mui.components.*
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.FieldLabel
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.centerContainer
@@ -19,6 +18,8 @@ import com.ustadmobile.view.ext.umItem
 import kotlinx.css.height
 import kotlinx.css.marginTop
 import kotlinx.css.px
+import mui.material.*
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.dom.html.InputType
 import react.setState
@@ -162,7 +163,7 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                             umInputLabel("${passwordLabel.text}",
                                 id = passwordLabel.id,
                                 error = passwordLabel.error,
-                                variant = FormControlVariant.outlined,
+                                variant = InputLabelVariant.outlined,
                                 htmlFor = passwordLabel.id)
                             umOutlinedInput(
                                 id = passwordLabel.id,
@@ -179,7 +180,7 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                                 }) {
                                 attrs.endAdornment = umIconButton(
                                     if(!showPassword) "visibility" else "visibility_off",
-                                    edge = IconEdge.end,
+                                    edge = IconButtonEdge.end,
                                     onClick = {
                                     setState { showPassword = !showPassword }
                                 })
@@ -205,9 +206,9 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
 
                     umItem(GridSize.cells12) {
                         umButton(getString(MessageID.login),
-                            size = ButtonSize.large,
+                            size = Size.large,
                             disabled = inProgress,
-                            color = UMColor.secondary,
+                            color = ButtonColor.secondary,
                             id = "login-btn",
                             variant = ButtonVariant.contained,
                             onClick = {
@@ -224,9 +225,9 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                         umItem(GridSize.cells12) {
                             umButton(getString(MessageID.create_account),
                                 variant = ButtonVariant.outlined,
-                                color = UMColor.primary,
+                                color = ButtonColor.primary,
                                 disabled = inProgress,
-                                size = ButtonSize.large,
+                                size = Size.large,
                                 onClick = {
                                     mPresenter?.handleCreateAccount()
                                 }){
@@ -243,9 +244,9 @@ class LoginComponent(props: UmProps): UstadBaseComponent<UmProps,UmState>(props)
                         umItem(GridSize.cells12) {
                             umButton(getString(MessageID.connect_as_guest),
                                 variant = ButtonVariant.outlined,
-                                color = UMColor.primary,
+                                color = ButtonColor.primary,
                                 disabled = inProgress,
-                                size = ButtonSize.large,
+                                size = Size.large,
                                 onClick = {
                                     mPresenter?.handleConnectAsGuest()
                                 }){

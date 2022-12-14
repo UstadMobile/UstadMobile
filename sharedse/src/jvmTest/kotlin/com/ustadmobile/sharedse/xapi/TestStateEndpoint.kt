@@ -12,16 +12,19 @@ import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.writeToFile
-import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementSerializer
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil
 import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.json.*
+import io.ktor.serialization.gson.*
 import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.rules.TemporaryFolder
@@ -60,7 +63,9 @@ class TestStateEndpoint {
         val endpointUrl = Endpoint("http://localhost:8087/")
         okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp){
-            install(JsonFeature)
+            install(ContentNegotiation) {
+                gson()
+            }
             install(HttpTimeout)
             engine {
                 preconfigured = okHttpClient
@@ -89,7 +94,7 @@ class TestStateEndpoint {
         }
 
         gson = di.direct.instance()
-        repo = di.on(endpointUrl).direct.instance(tag = UmAppDatabase.TAG_DB)
+        repo = di.on(endpointUrl).direct.instance(tag = DoorTag.TAG_DB)
         endpoint = di.on(endpointUrl).direct.instance()
 
     }

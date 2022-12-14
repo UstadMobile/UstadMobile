@@ -34,21 +34,26 @@ sourceSets.main {
 
 dependencies {
     implementation "io.ktor:ktor-client-core:$version_ktor"
-    implementation "io.ktor:ktor-client-json:$version_ktor"
+    implementation "io.ktor:ktor-serialization-kotlinx-json:$version_ktor"
+    implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
     implementation "io.ktor:ktor-io:$version_ktor"
     implementation "com.soywiz.korlibs.klock:klock:$version_klock"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "io.ktor:ktor-server-netty:$version_ktor"
-    implementation "io.ktor:ktor-server-servlet:$version_ktor"
-    implementation "io.ktor:ktor-jackson:$version_ktor"
-    implementation "io.ktor:ktor-gson:$version_ktor"
+    implementation "io.ktor:ktor-server-cors:$version_ktor"
+    implementation "io.ktor:ktor-server-call-logging:$version_ktor"
+    implementation "io.ktor:ktor-server-content-negotiation:$version_ktor"
+    implementation "io.ktor:ktor-server-conditional-headers:$version_ktor"
+    implementation "io.ktor:ktor-server-status-pages:$version_ktor"
+
+    implementation "io.ktor:ktor-serialization-gson:$version_ktor"
     implementation "io.ktor:ktor-client-core:$version_ktor"
     implementation "io.ktor:ktor-client-okhttp:$version_ktor"
-    implementation "io.ktor:ktor-html-builder:$version_ktor"
+    implementation "io.ktor:ktor-server-html-builder:$version_ktor"
     implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
     implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
-    implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
+    implementation "io.github.bonigarcia:webdrivermanager:$version_web_driver"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
 
     implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
@@ -72,16 +77,14 @@ dependencies {
     implementation "net.sf.kxml:kxml2:$version_kxml"
 
     implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
-    implementation "io.ktor:ktor-websockets:$version_ktor"
+    implementation "io.ktor:ktor-server-websockets:$version_ktor"
 
 
     implementation project(":core")
     implementation project(":sharedse")
     implementation project(":lib-database")
-    implementation project(":lib-database-mpp")
-    implementation "com.github.UstadMobile.door:room-annotations:$version_door"
+    implementation "com.github.UstadMobile.door:door-annotations:$version_door"
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
-    implementation project(":lib-database-entities")
     implementation project(":lib-util")
     implementation project(":lib-content-scrapers")
 
@@ -107,7 +110,7 @@ dependencies {
     testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
 
     testImplementation "io.ktor:ktor-client-okhttp:$version_ktor"
-    testImplementation "io.ktor:ktor-client-gson:$version_ktor"
+    testImplementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
     testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"

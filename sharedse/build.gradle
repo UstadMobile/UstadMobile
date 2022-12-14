@@ -1,24 +1,11 @@
-buildscript {
-    repositories {
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
 
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
-        classpath "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$version_atomicfu"
-    }
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'org.jetbrains.kotlin.plugin.atomicfu'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'com.android.library'
+    id 'maven-publish'
 }
-
-apply plugin: "kotlin-multiplatform"
-apply plugin: "kotlinx-atomicfu"
-apply plugin: 'kotlinx-serialization'
-apply plugin: 'com.android.library'
-apply plugin: 'jacoco'
-apply plugin: "maven-publish"
 
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
@@ -38,7 +25,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion rootProject.ext.version_android_target_sdk
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -116,24 +103,21 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
-                implementation "io.ktor:ktor-gson:$version_ktor"
+                implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
                 implementation "io.github.aakira:napier:$version_napier"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
 
 
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
-                compileOnly project(':lib-database')
-                compileOnly project(':lib-database-entities')
-                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
+                implementation project(':lib-database')
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
             }
         }
 
         commonJvmMain {
             dependencies {
-                implementation project(":lib-database-entities")
-                compileOnly project(':lib-database')
-
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
@@ -143,7 +127,7 @@ kotlin {
                 implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
                 implementation "io.ktor:ktor-io-jvm:$version_ktor"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
@@ -159,13 +143,11 @@ kotlin {
             dependsOn commonJvmMain
 
             dependencies {
-                implementation project(":lib-database-android")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "androidx.lifecycle:lifecycle-livedata:$version_androidx_lifecycle"
                 implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
                 implementation "androidx.work:work-runtime:$version_android_workmanager"
-                implementation project(":lib-database-android")
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
 
@@ -175,7 +157,7 @@ kotlin {
 
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
@@ -201,7 +183,7 @@ kotlin {
 
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-serialization-gson:$version_ktor"
 
 
                 //Begin Android and JVM dependencies
@@ -221,9 +203,6 @@ kotlin {
 
         jvmTest {
             dependencies {
-                implementation project(":lib-database-mpp")
-                implementation project(":lib-database-entities")
-                implementation project(":lib-database")
                 implementation project(":lib-test-common")
 
                 implementation "io.github.aakira:napier:$version_napier"
@@ -245,7 +224,6 @@ kotlin {
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
                 api project(":sharedse")
-                api project(":lib-database-mpp")
                 api project(":app-ktor-server")
 
             }
@@ -286,46 +264,6 @@ tasks.whenTaskAdded { task ->
 }
 jvmTest.dependsOn(copyTestResources)
 
-jacoco {
-    toolVersion = "$version_jacoco_tool"
-}
-
-/**
- * Create a Jacocco task for reporting test coverage - as per:
- * https://medium.com/@aldychris/kotlin-multiplatform-for-ios-and-android-mobile-application-96a753e175f7
- */
-//TODO: Fix this so we can have a coverage report for jvmTest
-//project.afterEvaluate {
-//    def testTaskName = "jvmTest"
-//
-//    // Create gradle task
-//    task "jvmJacocoTestReport" (type:JacocoReport, dependsOn: "$testTaskName") {
-//        group = "Reporting"
-//        description = "Generate Jacoco coverage reports on the common module build."
-//
-//        def excludes = [
-//                '**/*Test*.*'
-//        ]
-//
-//        classDirectories = fileTree(
-//                dir: "${project.buildDir}/classes/kotlin/jvm/",
-//                excludes: excludes
-//        )
-//
-//        def coverageSourceDirs = [
-//                "src/commonMain/kotlin"
-//        ]
-//
-//        additionalSourceDirs = files(coverageSourceDirs)
-//        sourceDirectories = files(coverageSourceDirs)
-//        executionData = files("${project.buildDir}/jacoco/jvmTest.exec")
-//
-//        reports {
-//            xml.enabled = true
-//            html.enabled = true
-//        }
-//    }
-//}
 
 publishing {
     publications {

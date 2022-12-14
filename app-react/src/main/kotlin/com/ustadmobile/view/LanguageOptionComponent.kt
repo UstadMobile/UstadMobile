@@ -1,8 +1,8 @@
 package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.mui.components.FormControlVariant
 import com.ustadmobile.mui.components.spacingUnits
 import com.ustadmobile.mui.components.umFormControl
 import com.ustadmobile.mui.components.umTextFieldSelect
@@ -11,6 +11,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import kotlinx.browser.window
 import kotlinx.css.LinearDimension
+import mui.material.FormControlVariant
 import react.RBuilder
 import react.RComponent
 import react.setState
@@ -26,15 +27,15 @@ interface LanguageProps: UmProps {
 
 class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,UmState>(mProps){
 
-    private lateinit var languageOptions: List<Pair<String, String>>
+    private lateinit var languageOptions: List<UstadMobileSystemCommon.UiLanguage>
 
     private lateinit var selectedLanguage: Any
 
     override fun UmState.init(props: LanguageProps) {
         languageOptions = props.systemImpl.getAllUiLanguagesList(this)
         val selectedLocaleIndex = languageOptions.indexOfFirst {
-            it.first == props.systemImpl.getDisplayedLocale(this) }
-        selectedLanguage = languageOptions[selectedLocaleIndex].first
+            it.langCode == props.systemImpl.getDisplayedLocale(this) }
+        selectedLanguage = languageOptions[selectedLocaleIndex].langCode
     }
 
     override fun RBuilder.render() {
@@ -44,7 +45,7 @@ class  LanguageOptionComponent(mProps: LanguageProps): RComponent<LanguageProps,
             umTextFieldSelect(text,
                 props.systemImpl.getDisplayedLocale(this),
                 props.caption?:"",
-                values = languageOptions,
+                values = languageOptions.map { it.langCode to it.langDisplay },
                 variant = FormControlVariant.outlined,
                 onChange = {
                     handleOnLanguageChange(it)

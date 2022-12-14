@@ -1,9 +1,8 @@
-apply plugin: 'com.android.application'
-apply plugin: "kotlin-multiplatform"
-apply plugin: "jacoco"
 
-//See:
-// https://developer.android.com/studio/projects/android-library.html
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
 def keyStoreFile = System.getenv("KEYSTORE")
@@ -19,14 +18,23 @@ if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file(keyStoreFile)))
 }
 
-kotlin {
-    targets {
-        fromPreset(presets.android, 'android')
-    }
-}
-
-
 android {
+
+    //APK splitting would interfere with sideloading the app between different targets and the size
+    //reduction will be minimal
+    bundle {
+        language {
+            enableSplit = false
+        }
+
+        density {
+            enableSplit = false
+        }
+
+        abi {
+            enableSplit = false
+        }
+    }
 
     buildFeatures {
         dataBinding true
@@ -57,7 +65,7 @@ android {
         applicationId "${baseAppId}.launcher"
         resConfigs "en","tg","ru"
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.ext.ustadVersion
         multiDexEnabled true //required for all variants to use java library desugaring
@@ -77,10 +85,6 @@ android {
         }
     }
 
-    dexOptions {
-        jumboMode = true
-    }
-
     buildTypes {
         debug {
             testCoverageEnabled = true
@@ -96,6 +100,11 @@ android {
     lint {
         abortOnError false
     }
+
+    aaptOptions {
+        ignoreAssetsPattern "!*LiberationSans-Regular.ttf"
+    }
+
     namespace 'com.toughra.ustadmobile.launcher'
 }
 
@@ -119,6 +128,10 @@ configurations.all {
 tasks.whenTaskAdded { task ->
     if (task.name.startsWith("lint")) {
         task.enabled = false
+    }
+
+    if(task.name == "bundleRelease") {
+        build.dependsOn(task)
     }
 }
 
@@ -148,4 +161,3 @@ dependencies {
 
     testImplementation "junit:junit:$version_junit"
 }
-

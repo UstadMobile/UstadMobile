@@ -29,7 +29,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -58,7 +58,7 @@ class ContentEntryEdit2Presenter(
     context: Any,
     arguments: Map<String, String>,
     view: ContentEntryEdit2View,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     di: DI
 ) : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithBlockAndLanguage>(
     context,
@@ -113,8 +113,6 @@ class ContentEntryEdit2Presenter(
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
-
-    private val json: Json by instance()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -244,9 +242,9 @@ class ContentEntryEdit2Presenter(
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        savedState.putEntityAsJson(ARG_IMPORTED_METADATA, MetadataResult.serializer(),
+        savedState.putEntityAsJson(ARG_IMPORTED_METADATA, json, MetadataResult.serializer(),
             view.metadataResult)
-        savedState.putEntityAsJson(SAVED_STATE_CONTENTENTRY_PICTURE,
+        savedState.putEntityAsJson(SAVED_STATE_CONTENTENTRY_PICTURE, json,
             ContentEntryPicture.serializer(), view.contentEntryPicture)
     }
 
@@ -403,7 +401,8 @@ class ContentEntryEdit2Presenter(
                 val isNewEntry = entity.contentEntryUid == 0L
 
 
-                repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                entity.title = entity.title?.trim()
+                repo.withDoorTransactionAsync { txDb ->
 
                     if (entity.contentEntryUid == 0L) {
                         entity.contentOwner = accountManager.activeAccount.personUid
@@ -491,7 +490,7 @@ class ContentEntryEdit2Presenter(
 
                     } else {
                         try {
-                            httpClient.post<HttpStatement>() {
+                            httpClient.post {
                                 url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
                                         "/import/downloadLink"))
                                 parameter("parentUid", parentEntryUid)
@@ -502,9 +501,8 @@ class ContentEntryEdit2Presenter(
                                                 String.serializer()),
                                                 conversionParams))
                                 header("content-type", "application/json")
-                                body = entity
-                            }.execute()
-
+                                setBody(entity)
+                            }
                         } catch (e: Exception) {
                             view.showSnackBar("${
                                 systemImpl.getString(MessageID.error,

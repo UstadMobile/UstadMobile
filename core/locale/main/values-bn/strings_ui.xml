@@ -76,15 +76,7 @@
     <string name="file_not_found">ফাইল পাওয়া যায় নি</string>
     <string name="multiple_choice">বহু নির্বাচনী</string>
     <string name="preview">পূর্বরূপ</string>
-    <string name="content_type_multimedia">মাল্টিমিডিয়া</string>
-    <string name="content_type">বিষয়বস্তুর প্রকার</string>
-    <string name="content_type_fill_the_blanks">শুন্যস্তান পূরণ</string>
-    <string name="content_format_paragraph">অনুচ্ছেদ</string>
-    <string name="content_direction_rtl">বাম থেকে ডান</string>
-    <string name="content_font_8">৮pt</string>
-    <string name="content_font_12">১২pt</string>
     <string name="content_font_14">১৪pt</string>
-    <string name="content_font_18">১৮pt</string>
     <string name="app_name">উস্তাদ মোবাইল</string>
     <string name="login">প্রবেশ করুন</string>
     <string name="error">ভুল</string>
@@ -102,9 +94,6 @@
     <string name="confirm">নিশ্চিত করুন</string>
     <string name="cancel">বাতিল করুন</string>
     <string name="canceled">বাতিল হয়েছে</string>
-    <string name="content_font_24">২৪pt</string>
-    <string name="content_font_36">৩৬pt</string>
-    <string name="content_source_camera">ক্যামেরা থেকে</string>
     <string name="delete">মুছে দিন</string>
     <string name="deleted">মুছে ফেলা হয়েছে</string>
     <string name="new_tab">নতুন ট্যাবে প্রদর্শিত হচ্ছে</string>
@@ -129,50 +118,15 @@
     <string name="register">নিবন্ধন</string>
     <string name="phone_number">ফোন নম্বর</string>
     <string name="name">নাম</string>
-    <string name="content_prepare_file">ফাইল প্রস্তুত করা হচ্ছে ...</string>
     <string name="video">ভিডিও</string>
-    <string name="content_media_message">আপনি কোন মিডিয়া টাইপ ক্যাপচার করতে চান\?</string>
-    <string name="content_media_title">আমি আজ খুশি</string>
-    <string name="content_blank_page_title">খালি পৃষ্ঠা</string>
-    <string name="content_blank_doc_start_label">সম্পাদনা শুরু করতে।</string>
-    <string name="content_option_page">নতুন পাতা</string>
-    <string name="content_untitled_page">শিরোনামহীন পাতা</string>
-    <string name="content_untitled_document">শিরোনামহীন নথি</string>
     <string name="content_add_page">পাতা যোগ কর</string>
-    <string name="content_update_page_title">আপডেট পৃষ্ঠা</string>
-    <string name="content_action_page_remove">পৃষ্ঠা সরান</string>
-    <string name="content_editor_page_delete_failure_message">দুঃখিত আপনি এই পৃষ্ঠাটি মুছতে পারবেন না</string>
-    <string name="content_editor_directionality">দিকনির্দেশনা</string>
-    <string name="content_editor_menu_undo">পূর্বাবস্থায় ফেরা</string>
-    <string name="content_editor_menu_text_formatting">পাঠ্য বিন্যাস</string>
-    <string name="content_editor_menu_indent">ইনডেন্ট</string>
     <string name="content_editor_menu_outdent">আউটডেন্ট</string>
     <string name="location_permission_details">এই অ্যাপটি নিকটস্থ অন্যান্য ব্যবহারকারীদের খুঁজতে ব্লুটুথ এবং ওয়াইফাই স্ক্যানিং ব্যবহার করে। অ্যাপ্লিকেশনটি ইন্টারনেট অ্যাক্সেসের প্রয়োজন ছাড়াই দ্রুতগতিতে সামগ্রী ডাউনলোড করতে কাছের ব্যবহারকারীদের সাথে সংযোগ করতে পারে। এই স্ক্যানের ফলাফলগুলি আপনার অবস্থান নির্ধারণের জন্য ব্যবহার করা যেতে পারে, আপনাকে এই বৈশিষ্ট্যটি সক্ষম করার জন্য অবস্থানের অনুমতিটি দিতে হবে। এই অ্যাপ্লিকেশনটি এই স্ক্যানগুলির ফলাফল সংরক্ষণ করে না এবং কোনওভাবেই আপনার অবস্থান রেকর্ড করে না। এই অ্যাপ্লিকেশনটি ওপেন সোর্স কোড থেকে তৈরি যা github.com/UstadMobile/UstadMobile এ চেক করা যায়</string>
-    <string name="content_editor_menu_unorderd_list">আনর্ডারড তালিকা</string>
     <string name="download_continue_stacked_label">ডাউনলোড চালিয়ে যান</string>
-    <string name="content_editor_menu_orderd_list">আদেশের তালিকা</string>
-    <string name="content_editor_menu_strikesthrough">রেখান্বিত</string>
-    <string name="content_editor_menu_underline">নিম্নরেখা</string>
-    <string name="content_editor_menu_italic">ইটালিক</string>
-    <string name="content_editor_menu_bold">সাহসী</string>
-    <string name="content_editor_menu_fontsize">অক্ষরের আকার</string>
     <string name="download_continue_btn_label">চালিয়ে যান</string>
-    <string name="content_editor_menu_align_left">বাম</string>
-    <string name="content_editor_menu_align_right">ঠিক</string>
-    <string name="content_editor_menu_superscript">শীর্ষদেশে লিখনযুক্ত</string>
-    <string name="content_editor_menu_subscript">নিম্ন লিখিত</string>
-    <string name="content_editor_link_text">লিঙ্ক পাঠ্য</string>
     <string name="download_wifi_only">শুধুমাত্র ওয়াইফাই</string>
     <string name="download_calculating">গণনা করা হচ্ছে …</string>
-    <string name="content_editor_link_error">লিঙ্ক পাঠ্য বা url খালি থাকতে পারে না, আবার চেষ্টা করুন</string>
-    <string name="content_editor_link_insert">সন্নিবেশিত লিঙ্ক</string>
-    <string name="content_editor_link_remove">লিঙ্কটি সরান</string>
-    <string name="permission_camera_title">ক্যামেরা এবং ফাইল অনুমতি প্রয়োজন</string>
-    <string name="permission_camera_message">এই অ্যাপ্লিকেশনটিতে ফটো তোলা এবং ভিডিও রেকর্ড করতে উভয়ই ক্যামেরা এবং ফাইল অনুমতি দরকার</string>
-    <string name="content_editor_create_new_import">ফাইল আমদানি</string>
-    <string name="content_editor_create_new_import_link">লিঙ্ক আমদানি করুন</string>
     <string name="content_editor_create_new_category">নতুন ফোল্ডার</string>
-    <string name="content_editor_create_new_title">সামগ্রী যুক্ত করুন</string>
     <string name="content_creation_storage_option_title">স্টোরেজ বিকল্প</string>
     <string name="file_required_prompt">আমদানি করা ফাইলটি নির্বাচিত নয়, আবার চেষ্টা করুন</string>
     <string name="download_state_download"><b>ডাউনলোড করুন</b> মোট %1$s আইটেম,ফাইলগুলো আপনার ডিভাইসের মোট %2$s জায়গা ব্যবহার হবে।</string>
@@ -184,12 +138,8 @@
     <string name="download_state_downloading">আপনার ডিভাইস স্টোরেজে মোট %2$s ব্যবহার করা হবে এমন মোট %1$s টি আইটেম &lt;b&gt; ডাউনলোড করা হচ্ছে &lt;/ b&gt;।<b> ডাউনলোড করা হচ্ছে </b>।</string>
     <string name="content_entry_export_message">আপনি আপনার ডিভাইস স্টোরেজে %1$s রফতানি করতে চলেছেন। আপনি কি অবিরত করতে চান\?</string>
     <string name="bar_chart" value="100">বার চার্ট</string>
-    <string name="line_graph" value="101">লাইন গ্রাফ</string>
     <string name="content_entry_export_inprogress">রফতানি হচ্ছে</string>
     <string name="score" value="200">গড় স্কোর</string>
-    <string name="total_duration" value="201">মোট সময়কাল</string>
-    <string name="average_duration" value="202">গড় সময়কাল</string>
-    <string name="count_activity" value="203">ক্রিয়াকলাপের #</string>
     <string name="xapi_month" value="302">মাস</string>
     <string name="xapi_custom_date" value="303">কাস্টম তারিখ</string>
     <string name="xapi_content_entry" value="304">সামগ্রী প্রবেশ</string>
@@ -222,11 +172,6 @@
     <string name="enter_url">ইউআরএল দিন</string>
     <string name="download_summary_title">%1$s সক্রিয় ডাউনলোডসমূহ</string>
     <string name="download_cloud_availability">মেঘে উপলব্ধ</string>
-    <string name="content_insert_options">ভিতরে স্থাপন করা</string>
-    <string name="content_media_photo">ছবি</string>
-    <string name="content_update_document_title">নথি আপডেট করুন</string>
-    <string name="content_editor_menu_pages">পৃষ্ঠা</string>
-    <string name="content_editor_create_new_content">নতুন সামগ্রী তৈরি করুন</string>
     <string name="enter_register_code">রেজিস্ট্রেশন কোড লিখুন</string>
     <string name="xapi_week" value="301">সপ্তাহ</string>
     <string name="activity_import_link">লিঙ্ক আমদানি করুন</string>
@@ -378,13 +323,10 @@
     <string name="permission_attendance_update">উপস্থিতি আপডেট করুন</string>
     <string name="permission_activity_select">শ্রেণীর ক্রিয়াকলাপ দেখুন</string>
     <string name="permission_activity_insert">শ্রেণীর ক্রিয়াকলাপ নিন</string>
-    <string name="content_font_10">১০pt</string>
     <string name="permission_activity_update">শ্রেণীর ক্রিয়াকলাপ আপডেট করুন</string>
     <string name="permission_sel_question_select">এসইএল প্রশ্নগুলি দেখুন</string>
-    <string name="content_source_device">ডিভাইস থেকে</string>
     <string name="permission_sel_question_insert">এসইএল প্রশ্ন যুক্ত করুন</string>
     <string name="permission_sel_question_update">এসইএল প্রশ্নগুলি আপডেট করুন</string>
-    <string name="content_blank_doc_click_label">ক্লিক</string>
     <string name="permission_sel_select">এসইএল ফলাফল দেখুন</string>
     <string name="permission_sel_update">এসইএল ফলাফল আপডেট করুন</string>
     <string name="custom_fields">অস্ত্রোপচার</string>
@@ -394,7 +336,6 @@
     <string name="text">পাঠ্য</string>
     <string name="dropdown">নামিয়ে দিন</string>
     <string name="options">বিকল্পগুলি</string>
-    <string name="content_editor_menu_redo">আবার করুন</string>
     <string name="option_value">বিকল্প মান</string>
     <string name="errors">ভুল</string>
     <string name="shake_feedback">প্রতিক্রিয়ার জন্য ঝাঁকুনি</string>
@@ -403,12 +344,10 @@
     <string name="feedback_thanks">প্রতিক্রিয়ার জন্য ধন্যবাদ।</string>
     <string name="start_date">শুরুর তারিখ</string>
     <string name="end_date">শেষ তারিখ</string>
-    <string name="content_editor_menu_align_center">কেন্দ্র</string>
     <string name="save">সংরক্ষণ</string>
     <string name="change_password">পাসওয়ার্ড পরিবর্তন করুন</string>
     <string name="password_unchanged">পাসওয়ার্ড (অপরিবর্তিত)</string>
     <string name="timezone">সময় অঞ্চল</string>
-    <string name="content_editor_link_url">লিঙ্ক url</string>
     <string name="users_settings_desc">ব্যবহারকারীদের যুক্ত করুন, সরান, সংশোধন করুন বা তাদের পাসওয়ার্ড পুনরায় সেট করুন</string>
     <string name="add">যুক্ত করা</string>
     <string name="refresh">সতেজ করা</string>
@@ -448,8 +387,6 @@
     <string name="accounts">গণিতক</string>
     <string name="lets_get_started_label">চল শুরু করি</string>
     <string name="entry_details_license">লাইসেন্স:</string>
-    <string name="link">লিঙ্ক</string>
-    <string name="content_direction_ltr">বাম থেকে ডান</string>
     <string name="xapi_day" value="300">দিন</string>
     <string name="xapi_options_y_axes">ওয়াই-এক্সিস</string>
     <string name="xapi_minutes">মিনস</string>
@@ -461,7 +398,6 @@
     <string name="saturday">শনিবার</string>
     <string name="ascending">আরোহী</string>
     <string name="descending">অবতরণ</string>
-    <string name="roles_setting_desc">ভূমিকার জন্য দেওয়া অনুমতিগুলি পরিচালনা করুন</string>
     <string name="permission_clazz_update">ক্লাস আপডেট করুন</string>
     <string name="permission_clazz_add_teacher">ক্লাসে শিক্ষক যুক্ত করুন</string>
     <string name="current_password">বর্তমান পাসওয়ার্ড</string>
@@ -542,13 +478,7 @@
     <string name="return_only">ফিরে এবং শেষ</string>
     <string name="workspace">কর্মক্ষেত্র</string>
     <string name="organisation">সংস্থা %1$s</string>
-    <string name="use_public_library">পাবলিক লাইব্রেরি ব্যবহার করুন</string>
-    <string name="access_open_education">ব্যক্তিগতভাবে হাজার হাজার মুক্ত শিক্ষার সংস্থান অ্যাক্সেস করুন</string>
-    <string name="join_existing_workspace">বিদ্যমান প্রতিষ্ঠানের কর্মক্ষেত্রে যোগদান করুন</string>
-    <string name="existing_organisation">আপনার সংস্থা ইতিমধ্যে ওস্তাদ মোবাইল ব্যবহার করছে</string>
     <string name="locations_setting_desc">অবস্থানগুলি পরিচালনা করুন</string>
-    <string name="create_organisation">নতুন সংগঠনের কর্মক্ষেত্র তৈরি করুন</string>
-    <string name="create_workspace_organisation">ওস্তাদ মোবাইলে আপনার সংস্থার শিক্ষার্থী এবং শিক্ষকদের জন্য একটি নতুন কর্মক্ষেত্র তৈরি করুন</string>
     <string name="connect_as_guest">অতিথি হিসাবে সংযুক্ত হন</string>
     <string name="create_account">হিসাব তৈরি কর</string>
     <string name="member">সদস্য</string>
@@ -716,7 +646,6 @@
     <string name="error_start_date_before_clazz_date">ক্লাস শুরুর তারিখের আগে তালিকাভুক্তি শুরু হতে পারে না</string>
     <string name="error_start_date_before_previous_enrolment_date">নতুন তালিকাভুক্তি ব্যক্তির %1$s এর জন্য সর্বশেষ তালিকাভুক্তির পরে হওয়া উচিত</string>
     <string name="time_present">উপস্থিত</string>
-    <string name="sites_can_be_help_text">স্কুল, প্রকল্প এবং সংস্থাগুলি ইত্যাদির জন্য সাইটগুলি তৈরি করা যেতে পারে। প্রতিটি সাইটের নিজস্ব ব্যবহারকারী, প্রশাসক, সামগ্রী, শ্রেণি, স্কুল এবং আরও অনেক কিছু আছে।</string>
     <string name="select_leaving_reason">ছেড়ে যাওয়ার কারণ নির্বাচন করুন</string>
     <string name="add_leaving_reason">ছেড়ে যাওয়ার নতুন কারণ যুক্ত করুন</string>
     <string name="outcome">ফলাফল</string>
@@ -732,7 +661,6 @@
     <string name="leaving_reasons">ছাড়ার কারণ</string>
     <string name="view_profile">প্রোফাইল দেখুন</string>
     <string name="class_enrolment_outcome">শ্রেণি তালিকাভুক্তির ফলাফল</string>
-    <string name="connect_to_site">সাইটে সংযোগ করুন</string>
     <string name="terms_and_policies_text">শর্তাদি এবং নীতি পাঠ্য</string>
     <string name="edit_terms_and_policies">শর্তাদি এবং নীতিগুলি সম্পাদনা করুন</string>
     <string name="moved_x_entries">%1$s এন্ট্রি সরানো হয়েছে</string>

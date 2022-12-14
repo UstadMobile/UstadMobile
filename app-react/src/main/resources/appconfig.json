@@ -9,7 +9,7 @@
     "app.no_iframe_domans": "KhanAcademy",
     "app.register_allowed": "true",
     "app.ui_default_language": "en",
-    "first_dest": "ContentEntryListHome",
+    "first_dest": "CoursesHome",
     "app.guest_allowed": "true",
     "apiUrl": "https://app.omuzgormobile.tj/",
     "pbkdf2.iterations": "10000",

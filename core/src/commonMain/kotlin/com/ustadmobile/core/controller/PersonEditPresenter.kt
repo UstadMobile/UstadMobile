@@ -18,7 +18,7 @@ import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_MODE_MINOR
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -37,7 +37,7 @@ class PersonEditPresenter(
     arguments: Map<String, String>,
     view: PersonEditView,
     di: DI,
-    lifecycleOwner: DoorLifecycleOwner
+    lifecycleOwner: LifecycleOwner
 ) : UstadEditPresenter<PersonEditView, PersonWithAccount>(
     context,
     arguments,
@@ -134,8 +134,7 @@ class PersonEditPresenter(
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, PersonWithAccount.serializer(), entityVal)
     }
 
     private fun PersonEditView.hasErrors(): Boolean =
@@ -265,7 +264,7 @@ class PersonEditPresenter(
                 }
             } else {
                 //Create/Update person group
-                repo.withDoorTransactionAsync(UmAppDatabase::class) { txRepo ->
+                repo.withDoorTransactionAsync { txRepo ->
                     if(entity.personUid == 0L) {
                         val personWithGroup = txRepo.insertPersonAndGroup(entity)
                         entity.personGroupUid = personWithGroup.personGroupUid

@@ -62,6 +62,12 @@ abstract class UstadMobileSystemCommon {
 
     }
 
+
+    /**
+     * Represents a user interface language
+     */
+    data class UiLanguage(val langCode: String, val langDisplay: String)
+
     /**
      * The last destination that was called via the go method. This is used for testing purposes.
      */
@@ -97,7 +103,7 @@ abstract class UstadMobileSystemCommon {
      */
     fun getAppConfigDefaultFirstDest(context: Any): String {
         return getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context)
-            ?: ContentEntryList2View.VIEW_NAME_HOME
+            ?: ClazzList2View.VIEW_NAME_HOME
     }
 
     fun goToDeepLink(deepLink: String, accountManager: UstadAccountManager, context: Any) {
@@ -259,18 +265,6 @@ abstract class UstadMobileSystemCommon {
     abstract fun getString(messageCode: Int, context: Any): String
 
     /**
-     * Get list of all UI supported languages
-     */
-    @JsName("getAllUiLanguage")
-    @Deprecated("Use getAllUiLanguagesList instead")
-    open fun getAllUiLanguage(context: Any): Map<String, String> {
-        val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
-                "", context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
-        val languageList = languagesConfigVal.split(",")
-        return languageList.map { it to (LANGUAGE_NAMES[it] ?: it) }.toMap()
-    }
-
-    /**
      * Get a list of all languages available for the UI. This is a list of pairs in the form of
      * langcode, language display name. The first entry will always be empty constant which
      * tells the app to use the system default language.
@@ -278,14 +272,14 @@ abstract class UstadMobileSystemCommon {
      * @param context
      */
     @JsName("getAllUiLanguagesList")
-    open fun getAllUiLanguagesList(context: Any): List<Pair<String, String>> {
+    open fun getAllUiLanguagesList(context: Any): List<UiLanguage> {
         val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
                 "", context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
         val availableLangs = languagesConfigVal.split(",").sorted()
 
 
-        return listOf(LOCALE_USE_SYSTEM to getString(MessageID.use_device_language, context)) +
-                availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
+        return listOf(UiLanguage(LOCALE_USE_SYSTEM, getString(MessageID.use_device_language, context))) +
+                availableLangs.map { UiLanguage(it ,(LANGUAGE_NAMES[it] ?: it)) }
     }
 
     /**

@@ -1,13 +1,14 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.SchoolDao
+import com.ustadmobile.core.db.dao.SchoolDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -15,7 +16,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: SchoolListView,
-                          di: DI, lifecycleOwner: DoorLifecycleOwner)
+                          di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<SchoolListView, School>(context, arguments, view, di, lifecycleOwner),
         OnSortOptionSelected, OnSearchSubmitted{
 
@@ -47,7 +48,7 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     private fun updateListOnView() {
         view.list = repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationName(
                 searchText.toQueryLikeParam(), loggedInPersonUid, filterByPermission,
-                selectedSortOption?.flag ?: SchoolDao.SORT_NAME_ASC)
+                selectedSortOption?.flag ?: SchoolDaoCommon.SORT_NAME_ASC)
     }
 
     override fun handleClickEntry(entry: School) {
@@ -98,8 +99,8 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
         const val SCHOOL_RESULT_KEY = "School"
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.name, SchoolDao.SORT_NAME_ASC, true),
-                SortOrderOption(MessageID.name, SchoolDao.SORT_NAME_DESC, false)
+                SortOrderOption(MessageID.name, SchoolDaoCommon.SORT_NAME_ASC, true),
+                SortOrderOption(MessageID.name, SchoolDaoCommon.SORT_NAME_DESC, false)
         )
 
     }

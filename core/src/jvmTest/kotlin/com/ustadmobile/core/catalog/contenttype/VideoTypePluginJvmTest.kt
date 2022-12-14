@@ -6,12 +6,14 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.SysPathUtil
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.MapSerializer
@@ -63,6 +65,10 @@ class VideoTypePluginJvmTest {
             bind<File>(tag = DiTag.TAG_FILE_FFPROBE) with singleton {
                 SysPathUtil.findCommandInPath("ffprobe")
                     ?: throw IllegalStateException("ffprobe must be in path to run VideoTypePluginJvmTest")
+            }
+
+            bind<ContainerStorageManager>() with scoped(endpointScope).singleton {
+                ContainerStorageManager(listOf(tmpFolder.newFolder()))
             }
         }
 

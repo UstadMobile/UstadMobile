@@ -11,7 +11,7 @@ import com.ustadmobile.core.view.ClazzLogEditAttendanceView.Companion.ARG_NEW_CL
 import com.ustadmobile.core.view.ClazzLogEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -31,7 +31,7 @@ import kotlin.jvm.Volatile
 class ClazzLogEditAttendancePresenter(context: Any,
                           arguments: Map<String, String>, view: ClazzLogEditAttendanceView,
                           di: DI,
-                          lifecycleOwner: DoorLifecycleOwner)
+                          lifecycleOwner: LifecycleOwner)
     : UstadEditPresenter<ClazzLogEditAttendanceView, ClazzLog>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
@@ -40,7 +40,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
     private val attendanceRecordOneToManyJoinHelper = DefaultOneToManyJoinEditHelper(ClazzLogAttendanceRecord::clazzLogAttendanceRecordUid,
             "state_ClazzLogAttendanceRecord_list",
             ListSerializer(ClazzLogAttendanceRecordWithPerson.serializer()),
-            ListSerializer(ClazzLogAttendanceRecordWithPerson.serializer()), this,
+            ListSerializer(ClazzLogAttendanceRecordWithPerson.serializer()), this, di,
             ClazzLogAttendanceRecordWithPerson::class) { clazzLogAttendanceRecordUid = it }
 
     @Volatile
@@ -122,7 +122,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
             }
         }.sortedBy { "${it.person?.firstNames} ${it.person?.lastName}" }
 
-        attendanceRecordOneToManyJoinHelper.liveList.sendValue(allMembers)
+        attendanceRecordOneToManyJoinHelper.liveList.postValue(allMembers)
 
         if(view.clazzLogsList == null) {
             val clazzLogs = repo.clazzLogDao.findByClazzUidAsync(clazzLog.clazzLogClazzUid,
@@ -145,7 +145,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
             }
         } ?: return
 
-        attendanceRecordOneToManyJoinHelper.liveList.setVal(newList)
+        attendanceRecordOneToManyJoinHelper.liveList.setValue(newList)
     }
 
     fun handleSelectClazzLog(current: ClazzLog, next: ClazzLog) {
@@ -175,8 +175,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, ClazzLog.serializer(), entityVal)
     }
 
     /**

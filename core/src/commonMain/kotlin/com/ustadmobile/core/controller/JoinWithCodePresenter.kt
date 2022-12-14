@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -13,6 +12,7 @@ import com.ustadmobile.core.util.ext.enrolPersonIntoSchoolAtLocalTimezone
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.GlobalScope
@@ -26,7 +26,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
 
     val accountManager: UstadAccountManager by instance()
 
-    val dbRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
+    val dbRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
     val systemImpl: UstadMobileSystemImpl by instance()
 
@@ -77,6 +77,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
         view.loading = true
         presenterScope.launch {
             if(entityTableId == Clazz.TABLE_ID){
+                Napier.d { "attempting to join class with code ${code.trim()}"}
                 var clazzToJoin = dbRepo.clazzDao.findByClazzCode(code.trim())
                 if(clazzToJoin == null) {
                     try {
@@ -84,15 +85,17 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                         if(clazzToJoin != null)
                             dbRepo.clazzDao.insertAsync(clazzToJoin)
                     }catch(e: Exception) {
-                        Napier.w("Could not retrieve class using class code ${code.trim()} by http",
+                        Napier.e("Could not retrieve class using class code ${code.trim()} by http",
                             e)
                     }
                 }
 
+                Napier.d { "JoinWithCode: attempting to join course ${clazzToJoin?.clazzName}"}
                 val personToEnrol = dbRepo.takeIf { clazzToJoin != null }?.personDao
                         ?.findByUidAsync(accountManager.activeAccount.personUid)
                 try {
                     if(clazzToJoin  != null && personToEnrol != null) {
+                        Napier.d { "JoinWithCode: enroling into course "}
                         dbRepo.enrolPersonIntoClazzAtLocalTimezone(personToEnrol,
                             clazzToJoin.clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING)
                         val message = systemImpl.getString(MessageID.please_wait_for_approval, context)

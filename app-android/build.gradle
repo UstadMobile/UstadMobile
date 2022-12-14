@@ -1,35 +1,11 @@
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-        maven {
-            url "https://devserver3.ustadmobile.com/maven"
-        }
-        maven {
-            url 'https://jitpack.io/'
-        }
-    }
-
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
-    }
-}
-
 plugins {
-    id "com.ustadmobile.adbscreenrecorder"
     id 'maven-publish'
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.kapt'
 }
-
-apply plugin: 'com.android.library'
-apply plugin: "kotlin-android"
-
-//Jacoco on Android is persistently getting stuck - see https://github.com/arturdm/jacoco-android-gradle-plugin/issues/60.
-// Should be disabled until this is fixed or excluded unless we are specifically running tests for coverage.
-//apply plugin: "jacoco"
-apply plugin: 'kotlinx-serialization'
-apply plugin: "kotlin-kapt"
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
 def keyStorePropertiesExists = rootProject.file("keystore.properties").exists()
@@ -107,9 +83,6 @@ android {
         }
     }
 
-    dexOptions {
-        javaMaxHeapSize "2g"
-    }
 
     signingConfigs {
         release {
@@ -129,7 +102,7 @@ android {
         //When using variables the build analyzer reports that major tasks reran because of a
         // 'chnage' in the value of minSdkVersion, hence hardcoding them here.
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion rootProject.ext.version_android_target_sdk
 
         multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
@@ -164,22 +137,6 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8
     }
-}
-
-/*
- * Disable running tests of the vanilla build (this requires multidex, so we use vanillamultidex instead)
- */
-gradle.taskGraph.useFilter { task ->
-    if (task.name.equals("connectedVanillaDebugAndroidTest")
-            || task.name.equals("createVanillaDebugCoverageReport")
-            || task.name.equals("testVanillaDebugUnitTest")
-            || task.name.equals("testVanillaReleaseUnitTest")
-            || task.name.equals("processVanillaDebugAndroidTestManifest")
-            || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
-        return false
-    }
-
-    return true
 }
 
 task generateCoreStringToAndroidResMap {
@@ -276,8 +233,7 @@ dependencies {
     implementation project(':sharedse')
 
     implementation "com.github.UstadMobile.door:door-runtime:$version_door"
-    implementation project(':lib-database-android')
-    implementation project(":lib-database-entities")
+    implementation project(':lib-database')
     implementation project(':lib-util')
 
     implementation "io.github.aakira:napier:$version_napier"
@@ -355,8 +311,9 @@ dependencies {
 
 
     //KTOR
-    implementation "io.ktor:ktor-client-gson:$version_ktor"
+    implementation "io.ktor:ktor-serialization-gson:$version_ktor"
     implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+    implementation "io.ktor:ktor-client-content-negotiation:$version_ktor"
     implementation "io.ktor:ktor-client-cio:$version_ktor"
 
     //http server
@@ -391,6 +348,8 @@ dependencies {
 
     //Better Link Movement Method
     implementation "me.saket:better-link-movement-method:$version_better_link_movement"
+
+    implementation "com.dmitryborodin:pdfview-android:$version_pdfview_android"
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
@@ -465,7 +424,6 @@ dependencies {
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
-    androidTestImplementation "com.github.UstadMobile.AdbScreenRecorder:lib-client:$version_android_adbscreenrecorder"
 
     kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
 }

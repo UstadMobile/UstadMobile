@@ -19,6 +19,7 @@ import com.ustadmobile.core.view.SelectExtractFileView
 import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ErrorReport
 import io.github.aakira.napier.Napier
@@ -43,13 +44,14 @@ abstract class SelectExtractFilePresenterCommon(
     val accountManager: UstadAccountManager by instance()
 
 
-    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
 
     val systemImpl: UstadMobileSystemImpl by instance()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.acceptedMimeTypes =  arguments[SelectFileView.ARG_MIMETYPE_SELECTED].toString().split(";")
+        Napier.d{"HELLO HELLO HELLO"}
     }
 
     abstract suspend fun extractMetadata(uri: String, filename: String): MetadataResult
@@ -82,7 +84,7 @@ abstract class SelectExtractFilePresenterCommon(
                     else -> {
                         val args = mutableMapOf<String, String>()
                         args.putEntityAsJson(
-                            ContentEntryEdit2View.ARG_IMPORTED_METADATA,
+                            ContentEntryEdit2View.ARG_IMPORTED_METADATA, json,
                             MetadataResult.serializer(), metadata
                         )
                         args.putFromOtherMapIfPresent(arguments, UstadView.ARG_LEAF)
@@ -106,7 +108,7 @@ abstract class SelectExtractFilePresenterCommon(
                 view.loading = false
                 view.unSupportedFileError = systemImpl.getString(
                     MessageID.import_link_content_not_supported, context)
-                Napier.e("Error extracting metadata", e)
+                Napier.e("Error extracting metadata: "+ e.message, e)
                 repo.errorReportDao.logErrorReport(ErrorReport.SEVERITY_ERROR, e,
                     this@SelectExtractFilePresenterCommon)
             }

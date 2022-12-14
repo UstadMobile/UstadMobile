@@ -13,7 +13,7 @@ import com.ustadmobile.core.controller.SubmissionSummaryListener
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailStudentProgressOverviewListView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
 import com.ustadmobile.lib.db.entities.PersonGroupAssignmentSummary
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -108,7 +108,7 @@ class ClazzAssignmentDetailStudentProgressListOverviewFragment(): UstadListViewF
         t ->  progressSummaryAdapter?.assignmentProgressSummaryVal = t
     }
 
-    override var progressSummary: DoorLiveData<AssignmentProgressSummary?>? = null
+    override var progressSummary: LiveData<AssignmentProgressSummary?>? = null
         get() = field
         set(value) {
             field?.removeObserver(progressSummaryObserver)

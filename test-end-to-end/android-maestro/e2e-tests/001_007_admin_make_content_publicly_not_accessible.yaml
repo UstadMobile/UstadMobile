@@ -1,0 +1,24 @@
+appId: com.toughra.ustadmobile
+env:
+   TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
+---
+- clearState: com.toughra.ustadmobile
+
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+
+- runFlow:
+      file: "../common/add_content.yaml"
+      env:
+          TESTFILENAME: "H5p_Content.h5p"
+          TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
+- runFlow: "../common/enable_switch_to_content_not_publicly_accessible.yaml"
+- runFlow:
+    file: "../common/enable_guest_login.yaml"
+    env:
+      TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
+- runFlow: "../common/guest_login.yaml"
+- tapOn: "Library"
+- takeScreenshot: "results/${TESTCONTENTNAME}_finalresult"

@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getSize
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
@@ -67,6 +68,9 @@ class TestApacheIndexer {
             bind<VideoTypePluginJvm>() with scoped(ustadTestRule.endpointScope).singleton {
                 VideoTypePluginJvm(Any(), context, di)
             }
+            bind<PDFTypePluginJvm>() with scoped(ustadTestRule.endpointScope).singleton {
+                PDFTypePluginJvm(Any(), context, di)
+            }
             bind<ContentPluginManager>() with scoped(ustadTestRule.endpointScope).singleton {
                 ContentPluginManager(listOf(
                         EpubTypePluginCommonJvm(Any(), context, di)
@@ -82,7 +86,7 @@ class TestApacheIndexer {
         accountManager.activeEndpoint = Endpoint(mockWebServer.url("/").toString())
 
 
-        db = di.on(accountManager.activeEndpoint).direct.instance(tag = UmAppDatabase.TAG_DB)
+        db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
 
 
 

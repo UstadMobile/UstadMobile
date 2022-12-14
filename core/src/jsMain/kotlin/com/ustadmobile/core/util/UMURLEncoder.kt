@@ -5,10 +5,14 @@ package com.ustadmobile.core.util
  */
 external fun encodeURI(uri: String?): String
 
+external fun encodeURIComponent(uriComponent: String?): String
+
 /**
  * External JS function to decode URI
  */
 external fun decodeURI(uri: String?): String
+
+external fun decodeURIComponent(uriComponent: String?): String
 
 actual class UMURLEncoder {
 
@@ -17,14 +21,14 @@ actual class UMURLEncoder {
          * Encode url string
          */
         actual fun encodeUTF8(text: String): String {
-            return encodeURI(text)
+            return encodeURIComponent(text)
         }
 
         /**
          * Decode url string
          */
         actual fun decodeUTF8(text: String): String {
-            return decodeURI(text)
+            return decodeURIComponent(text)
         }
 
     }

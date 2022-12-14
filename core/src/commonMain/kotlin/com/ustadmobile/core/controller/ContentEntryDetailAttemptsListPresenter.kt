@@ -1,20 +1,21 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.StatementDao
+import com.ustadmobile.core.db.dao.StatementDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
 class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<String, String>,
                                               view: ContentEntryDetailAttemptsListView,
-                                              di: DI, lifecycleOwner: DoorLifecycleOwner)
+                                              di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<ContentEntryDetailAttemptsListView, PersonWithAttemptsSummary>(
         context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted,
         AttemptListListener {
@@ -50,7 +51,7 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
     private fun updateListOnView() {
         view.list = repo.statementDao.findPersonsWithContentEntryAttempts(contentEntryUid,
                 mLoggedInPersonUid, searchText.toQueryLikeParam(),
-                selectedSortOption?.flag ?: StatementDao.SORT_FIRST_NAME_ASC)
+                selectedSortOption?.flag ?: StatementDaoCommon.SORT_FIRST_NAME_ASC)
     }
 
     override fun onSearchSubmitted(text: String?) {
@@ -75,12 +76,12 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
     companion object {
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.first_name, StatementDao.SORT_FIRST_NAME_ASC, true),
-                SortOrderOption(MessageID.first_name, StatementDao.SORT_FIRST_NAME_DESC, false),
-                SortOrderOption(MessageID.last_name, StatementDao.SORT_LAST_NAME_ASC, true),
-                SortOrderOption(MessageID.last_name, StatementDao.SORT_LAST_NAME_DESC, false),
-                SortOrderOption(MessageID.last_active, StatementDao.SORT_LAST_ACTIVE_ASC, true),
-                SortOrderOption(MessageID.last_active, StatementDao.SORT_LAST_ACTIVE_DESC, false)
+                SortOrderOption(MessageID.first_name, StatementDaoCommon.SORT_FIRST_NAME_ASC, true),
+                SortOrderOption(MessageID.first_name, StatementDaoCommon.SORT_FIRST_NAME_DESC, false),
+                SortOrderOption(MessageID.last_name, StatementDaoCommon.SORT_LAST_NAME_ASC, true),
+                SortOrderOption(MessageID.last_name, StatementDaoCommon.SORT_LAST_NAME_DESC, false),
+                SortOrderOption(MessageID.last_active, StatementDaoCommon.SORT_LAST_ACTIVE_ASC, true),
+                SortOrderOption(MessageID.last_active, StatementDaoCommon.SORT_LAST_ACTIVE_DESC, false)
         )
 
     }

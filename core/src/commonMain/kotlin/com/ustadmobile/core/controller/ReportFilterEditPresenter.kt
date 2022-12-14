@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.core.view.ReportFilterEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.CompletableDeferred
@@ -26,7 +26,7 @@ class ReportFilterEditPresenter(
     arguments: Map<String, String>,
     view: ReportFilterEditView,
     di: DI,
-    lifecycleOwner: DoorLifecycleOwner
+    lifecycleOwner: LifecycleOwner
 ) : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
     private val fieldRequiredText = systemImpl.getString(MessageID.field_required_prompt, context)
 
@@ -82,7 +82,7 @@ class ReportFilterEditPresenter(
     private val uidAndLabelOneToManyHelper = DefaultOneToManyJoinEditHelper(
             UidAndLabel::uid, "state_uid_list",
             ListSerializer(UidAndLabel.serializer()),
-            ListSerializer(UidAndLabel.serializer()), this, UidAndLabel::class) { uid = it }
+            ListSerializer(UidAndLabel.serializer()), this, di, UidAndLabel::class) { uid = it }
 
     private fun handleAddOrEditUidAndLabel(entry: UidAndLabel) {
         GlobalScope.launch(doorMainDispatcher()) {
@@ -133,7 +133,7 @@ class ReportFilterEditPresenter(
                                         ?.map { it.toLong() }
                                         ?: listOf())
                     } ?: listOf()
-                    uidAndLabelOneToManyHelper.liveList.sendValue(entries)
+                    uidAndLabelOneToManyHelper.liveList.postValue(entries)
 
                 }
             }else if(entity.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON){
@@ -143,7 +143,7 @@ class ReportFilterEditPresenter(
                                 ?.map { it.toLong() }
                                 ?: listOf())
                     } ?: listOf()
-                    uidAndLabelOneToManyHelper.liveList.sendValue(reasons)
+                    uidAndLabelOneToManyHelper.liveList.postValue(reasons)
                 }
 
             }
@@ -234,7 +234,7 @@ class ReportFilterEditPresenter(
             entityVal.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
                     ?.joinToString { it.uid.toString() }
         }
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, ReportFilter.serializer(), entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, ReportFilter.serializer(), entityVal)
     }
 
 

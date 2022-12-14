@@ -7,7 +7,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.Chat
 import com.ustadmobile.lib.db.entities.ChatWithLatestMessageAndCount
 import com.ustadmobile.lib.db.entities.Person
@@ -16,7 +16,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class ChatListPresenter(context: Any, arguments: Map<String, String>, view: ChatListView,
-                        di: DI, lifecycleOwner: DoorLifecycleOwner)
+                        di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<ChatListView, Chat>(context, arguments, view, di, lifecycleOwner),
         OnSortOptionSelected, OnSearchSubmitted{
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.SchoolMemberDao
+import com.ustadmobile.core.db.dao.SchoolMemberDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
@@ -10,7 +11,7 @@ import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ROLE
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
@@ -22,7 +23,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
-                                view: SchoolMemberListView, di: DI, lifecycleOwner: DoorLifecycleOwner)
+                                view: SchoolMemberListView, di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<SchoolMemberListView, SchoolMember>(context, arguments, view, di, lifecycleOwner)
         , OnSortOptionSelected, OnSearchSubmitted {
 
@@ -146,10 +147,10 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
     companion object {
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.first_name, SchoolMemberDao.SORT_FIRST_NAME_ASC, true),
-                SortOrderOption(MessageID.first_name, SchoolMemberDao.SORT_FIRST_NAME_DESC, false),
-                SortOrderOption(MessageID.last_name, SchoolMemberDao.SORT_LAST_NAME_ASC, true),
-                SortOrderOption(MessageID.last_name, SchoolMemberDao.SORT_LAST_NAME_DESC, false)
+                SortOrderOption(MessageID.first_name, SchoolMemberDaoCommon.SORT_FIRST_NAME_ASC, true),
+                SortOrderOption(MessageID.first_name, SchoolMemberDaoCommon.SORT_FIRST_NAME_DESC, false),
+                SortOrderOption(MessageID.last_name, SchoolMemberDaoCommon.SORT_LAST_NAME_ASC, true),
+                SortOrderOption(MessageID.last_name, SchoolMemberDaoCommon.SORT_LAST_NAME_DESC, false)
         )
 
     }

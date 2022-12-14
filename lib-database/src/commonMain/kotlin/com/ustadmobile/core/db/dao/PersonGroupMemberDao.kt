@@ -1,14 +1,13 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 
 @Repository
-@Dao
-abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
+@DoorDao
+expect abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     /**
      * PersonGroupMember must replicate to:
@@ -216,7 +215,6 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     @Query("""
         UPDATE PersonGroupMember 
            SET groupMemberGroupUid = :newGroup,
-               groupMemberLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL},
                groupMemberLct = :changeTime
          WHERE groupMemberPersonUid = :personUid 
            AND groupMemberGroupUid = :oldGroup 
@@ -230,8 +228,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     @Query("""
         UPDATE PersonGroupMember 
-           SET groupMemberActive = :activeStatus, 
-               groupMemberLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0),
+           SET groupMemberActive = :activeStatus,
                groupMemberLct = :updateTime
         WHERE groupMemberPersonUid = :personUid 
           AND groupMemberGroupUid = :groupUid 

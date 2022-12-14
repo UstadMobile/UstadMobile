@@ -1,17 +1,15 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.door.DoorDataSourceFactory
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.lib.db.entities.*
 
-@Dao
+@DoorDao
 @Repository
-abstract class ChatDao: BaseDao<Chat>{
+expect abstract class ChatDao: BaseDao<Chat>{
 
     @Query("""
      REPLACE INTO chatReplicate(chatPk, chatDestination)
@@ -155,16 +153,33 @@ abstract class ChatDao: BaseDao<Chat>{
          WHERE :searchBit != '%'
            AND PersonGroupMember.groupMemberPersonUid = :personUid
            AND Person.personUid != :personUid
+        
            AND Person.personUid NOT IN
-               (SELECT p.personUid
-                  FROM ChatMember c
-                       LEFT JOIN Person p 
-                            ON p.personUid = c.chatMemberPersonUid)
+			   (
+				SELECT chatpeople.personUid 
+				  FROM ChatMember cmm
+					   LEFT JOIN Chat cc 
+							  ON cc.chatUid = cmm.chatMemberChatUid 
+			   
+				 LEFT JOIN Person chatpeople 
+                    ON chatpeople.personUid =
+                       (SELECT chatpeopleother.personUid
+                          FROM ChatMember cm
+                               LEFT JOIN Person chatpeopleother 
+                                    ON chatpeopleother.personUid = cm.chatMemberPersonUid
+                         WHERE cm.chatMemberChatUid = cc.chatUid
+                           AND cm.chatMemberPersonUid != :personUid
+                         LIMIT 1)
+						 
+				 WHERE cc.chatUid != 0 
+				   AND cmm.chatMemberPersonUid = :personUid
+				 )
+                            
            AND Person.firstNames||' '||Person.lastName LIKE :searchBit 
          ORDER BY latestMessageTimestamp DESC
     """)
     abstract fun findAllChatsForUser(searchBit: String, personUid: Long)
-        : DoorDataSourceFactory<Int, ChatWithLatestMessageAndCount>
+        : DataSourceFactory<Int, ChatWithLatestMessageAndCount>
 
 
     @Query("""

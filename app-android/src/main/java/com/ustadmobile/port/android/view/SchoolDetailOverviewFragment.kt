@@ -19,16 +19,21 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolOverviewBinding
 import com.toughra.ustadmobile.databinding.ItemClazzSimpleDetailBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.SchoolDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SchoolDetailOverviewView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import org.kodein.di.instance
+import org.kodein.di.on
+import com.ustadmobile.core.db.UmAppDatabase
 
 interface SchoolDetailOverviewEventListener {
     fun onClickSchoolCode(code: String?)
@@ -48,6 +53,10 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
 
     protected var currentLiveData: LiveData<PagedList<ClazzWithListDisplayDetails>>? = null
 
+    private val accountManager: UstadAccountManager by instance()
+
+    private val repo: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
+
     private val clazzObserver = Observer<List<ClazzWithListDisplayDetails>?>{
         t -> clazzRecyclerAdapter?.submitList(t)
     }
@@ -56,7 +65,7 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
         get() = field
         set(value) {
             currentLiveData?.removeObserver(this)
-            currentLiveData = value?.asRepositoryLiveData(ClazzDao)
+            currentLiveData = value?.asRepositoryLiveData(repo)
             currentLiveData?.observe(this, this)
         }
 

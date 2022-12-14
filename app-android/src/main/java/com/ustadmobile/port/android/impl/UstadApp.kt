@@ -17,8 +17,6 @@ import com.ustadmobile.core.contentjob.ContentJobManager
 import com.ustadmobile.core.contentjob.ContentJobManagerAndroid
 import com.ustadmobile.core.contentjob.ContentPluginManager
 import com.ustadmobile.core.db.*
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.AppConfig.KEY_PBKDF2_ITERATIONS
@@ -45,19 +43,16 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
-import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.contentformats.xapi.ContextDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementDeserializer
+import com.ustadmobile.core.contentformats.xapi.StatementSerializer
+import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -67,6 +62,7 @@ import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.net.URI
 import java.util.concurrent.Executors
+import com.ustadmobile.core.db.dao.commitLiveConnectivityStatus
 
 open class UstadApp : Application(), DIAware {
 
@@ -87,7 +83,7 @@ open class UstadApp : Application(), DIAware {
             systemImpl.getOrGenerateNodeIdAndAuth(contextPrefix = contextIdentifier, applicationContext)
         }
 
-        bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
+        bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             val attachmentsDir = File(applicationContext.filesDir.siteDataSubDir(this@singleton.context),
@@ -97,7 +93,7 @@ open class UstadApp : Application(), DIAware {
                 attachmentsDir, attachmentFilters)
                 .addSyncCallback(nodeIdAndAuth)
                 .addCallback(ContentJobItemTriggersCallback())
-                .addMigrations(*UmAppDatabase.migrationList(nodeIdAndAuth.nodeId).toTypedArray())
+                .addMigrations(*migrationList().toTypedArray())
                 .build()
                 .also {
                     val networkManager: NetworkManagerBle = di.direct.instance()
@@ -105,14 +101,13 @@ open class UstadApp : Application(), DIAware {
                 }
         }
 
-        bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
+        bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val nodeIdAndAuth: NodeIdAndAuth = instance()
-            val db = instance<UmAppDatabase>(tag = TAG_DB)
+            val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             db.asRepository(repositoryConfig(applicationContext,
                 "${context.url}UmAppDatabase/", nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
                     instance(), instance()
             ) {
-                
                 useReplicationSubscription = true
                 replicationSubscriptionInitListener = RepSubscriptionInitListener()
             }).also {
@@ -183,6 +178,10 @@ open class UstadApp : Application(), DIAware {
             VideoTypePluginAndroid(applicationContext, context, di)
         }
 
+        bind<PDFTypePlugin>() with scoped(EndpointScope.Default).singleton{
+            PDFPluginAndroid(applicationContext, context, di)
+        }
+
         bind<ContainerDownloadPlugin>() with scoped(EndpointScope.Default).singleton{
             ContainerDownloadPlugin(applicationContext, context, di)
         }
@@ -201,6 +200,7 @@ open class UstadApp : Application(), DIAware {
                     di.on(context).direct.instance<XapiTypePluginCommonJvm>(),
                     di.on(context).direct.instance<H5PTypePluginCommonJvm>(),
                     di.on(context).direct.instance<VideoTypePluginAndroid>(),
+                    di.on(context).direct.instance<PDFTypePlugin>(),
                     di.on(context).direct.instance<FolderIndexerPlugin>(),
                     di.on(context).direct.instance<ContainerDownloadPlugin>(),
                     di.on(context).direct.instance<DeleteContentEntryPlugin>(),
@@ -217,10 +217,6 @@ open class UstadApp : Application(), DIAware {
             builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
             builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
             builder.create()
-        }
-
-        bind<GsonSerializer>() with singleton {
-            GsonSerializer()
         }
 
         bind<XapiStatementEndpoint>() with scoped(EndpointScope.Default).singleton {

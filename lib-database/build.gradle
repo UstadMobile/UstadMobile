@@ -1,18 +1,15 @@
-/*
- * Note: If the Android plugin is enabled, since Gradle 5.4, the annotation processor will not run
- * with kapt (using project or files to locate the annotation processor).
- */
+
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'com.android.library'
+    id 'maven-publish'
+    id "com.google.devtools.ksp" version "$version_kotlin-$version_ksp"
+}
 
 
 group rootProject.group
 version rootProject.version
-
-
-apply plugin: "kotlin-multiplatform"
-apply plugin: 'kotlinx-serialization'
-apply plugin: "maven-publish"
-apply plugin: "jacoco"
-apply plugin: "kotlin-kapt"
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
@@ -20,7 +17,42 @@ targetCompatibility = '1.8'
 group rootProject.group
 version rootProject.version
 
+android {
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    sourceSets.main.manifest.srcFile('src/androidMain/AndroidManifest.xml')
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion rootProject.ext.version_android_target_sdk
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    sourceSets {
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
+    }
+
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
+
+    buildTypes {
+        release {
+            consumerProguardFiles 'proguard-rules.pro'
+        }
+    }
+}
+
+
 kotlin {
+    android {
+
+    }
 
     jvm {
         compilations.main.kotlinOptions {
@@ -46,34 +78,62 @@ kotlin {
     }
 
     sourceSets {
-        //This adds a common DAO. It must be in the source so the annotation processor can see
-        // parameter names etc.
-        doorDao {
-
-        }
-
         commonMain {
-            dependsOn doorDao
-
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation project(":lib-util")
-                implementation project(":lib-database-entities")
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+
                 implementation "com.github.UstadMobile.door:door-runtime:$version_door"
                 implementation "io.github.aakira:napier:$version_napier"
-                compileOnly "com.github.UstadMobile.door:room-annotations:$version_door"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                compileOnly "com.github.UstadMobile.door:door-annotations:$version_door"
  
             }
         }
 
+        commonJvmMain {
+            dependsOn commonMain
+        }
 
+
+        androidMain {
+            dependsOn commonJvmMain
+
+            dependencies {
+                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "androidx.room:room-ktx:$version_android_room"
+                implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
+                implementation "androidx.paging:paging-runtime:$version_androidx_paging"
+
+                implementation "com.google.code.gson:gson:$version_gson"
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+            }
+        }
+
+        androidTest {
+            dependencies {
+                implementation "androidx.room:room-testing:$version_android_room"
+                implementation "androidx.test:runner:$version_android_junit_runner"
+                implementation "junit:junit:$version_junit"
+            }
+        }
 
         jvmMain {
+            dependsOn commonJvmMain
+            kotlin.srcDir("build/generated/ksp/jvm/jvmMain/kotlin")
             dependencies {
-
+                implementation "io.ktor:ktor-server-core:$version_ktor"
+                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+                implementation "com.google.code.gson:gson:$version_gson"
             }
+        }
+
+        jsMain {
+            kotlin.srcDir("build/generated/ksp/js/jsMain/kotlin")
         }
 
     }
@@ -86,39 +146,18 @@ configurations {
     compileClasspath
 }
 
-
-kapt {
-    arguments {
-        arg("doordb_android_out", rootProject.file("lib-database-android/build/generated/source/door").absolutePath)
-        arg("doordb_jvm_out", rootProject.file("lib-database-mpp/build/generated/source/door").absolutePath)
-        arg("doordb_js_out", rootProject.file("lib-database-mpp/build/generated/source/door-js").absolutePath)
-        arg("doordb_ktor_out", rootProject.file("app-ktor-server/build/generated/source/door").absolutePath)
-        arg("doordb_source_path", project.file("src/commonMain/kotlin"))
-        arg("doordb_template_fixupdatetrigger_sqlite", project.file("build/migrationtemplates"))
-        arg("doordb_migrations_out", "$buildDir/generated/source/door-migrations")
-
-        arg("doordb_postgres_url", rootProject.ext.buildConfigProperties.getProperty("door.postgresUrl", ""))
-        arg("doordb_postgres_user", rootProject.ext.buildConfigProperties.getProperty("door.postgresUser", ""))
-        arg("doordb_postgres_password", rootProject.ext.buildConfigProperties.getProperty("door.postgresPass", ""))
-    }
+ksp {
+    arg("doordb_postgres_url", rootProject.ext.buildConfigProperties.getProperty("door.postgresUrl", ""))
+    arg("doordb_postgres_user", rootProject.ext.buildConfigProperties.getProperty("door.postgresUser", ""))
+    arg("doordb_postgres_password", rootProject.ext.buildConfigProperties.getProperty("door.postgresPass", ""))
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
-
 
 dependencies {
-    kapt "com.github.UstadMobile.door:door-compiler:$version_door"
-}
-
-def platformTypeAttr = Attribute.of("org.jetbrains.kotlin.platform.type", String)
-
-afterEvaluate {
-    configurations.all { configuration ->
-        // Workaround for kapt bug with MPP dependencies
-        // https://youtrack.jetbrains.com/issue/KT-31641
-        // https://youtrack.jetbrains.com/issue/KT-33206
-        if (name.contains('kapt')) {
-            attributes.attribute(platformTypeAttr, "jvm")
-        }
-    }
+    kspJvm "com.github.UstadMobile.door:door-compiler:$version_door"
+    kspJs "com.github.UstadMobile.door:door-compiler:$version_door"
+    kspAndroid "com.github.UstadMobile.door:door-compiler:$version_door"
+    kspAndroid "androidx.room:room-compiler:$version_android_room"
 }
 
 publishing {

@@ -4,13 +4,12 @@ import com.ustadmobile.core.controller.DiscussionPostDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.view.DiscussionPostDetailView
 import com.ustadmobile.core.view.EditButtonMode
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.DiscussionPostWithDetails
 import com.ustadmobile.lib.db.entities.MessageWithPerson
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.mui.ext.targetInputValue
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.chatDetailNewMessage
 import com.ustadmobile.util.StyleManager.contentContainer
@@ -20,10 +19,16 @@ import com.ustadmobile.util.StyleManager.messageSendButton
 import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.UmState
 import com.ustadmobile.util.Util
-import com.ustadmobile.util.ext.fromNow
-import com.ustadmobile.util.ext.toDate
-import com.ustadmobile.view.ext.*
+import com.ustadmobile.view.ext.renderConversationListItem
+import com.ustadmobile.view.ext.umGridContainer
+import com.ustadmobile.view.ext.umItem
+import com.ustadmobile.view.ext.umItemThumbnail
 import kotlinx.css.*
+import mui.material.AvatarVariant
+import mui.material.FabColor
+import mui.material.FabVariant
+import mui.material.Size
+import mui.material.styles.TypographyVariant
 import react.Props
 import react.RBuilder
 import react.setState
@@ -52,7 +57,7 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
             ustadComponentTitle = value
         }
 
-    override var replies: DoorDataSourceFactory<Int, MessageWithPerson>? = null
+    override var replies: DataSourceFactory<Int, MessageWithPerson>? = null
         get() = field
         set(value) {
             field = value
@@ -96,7 +101,7 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
             }
 
             umItem(GridSize.cells2,GridSize.cells1) {
-                umItemThumbnail("person", avatarVariant = AvatarVariant.circle)
+                umItemThumbnail("person", avatarVariant = AvatarVariant.circular)
             }
 
             umItem(GridSize.cells8, GridSize.cells9) {
@@ -108,13 +113,7 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
 
                 }
 
-                umTypography(entity?.discussionPostMessage,
-                    variant = TypographyVariant.body1) {
-                    css {
-                        +StyleManager.alignTextToStart
-                        marginTop = 1.spacingUnits
-                    }
-                }
+                linkifyReactTextView(entity?.discussionPostMessage, systemImpl, accountManager, this)
             }
 
             umItem {
@@ -128,6 +127,8 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
                         if(fromMe) getString(MessageID.you) else it.messagePerson?.fullName(),
                         it.messageText,
                         systemImpl,
+                        accountManager,
+                        this,
                         it.messageTimestamp
                     )
                 }
@@ -166,6 +167,7 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
                             fontSize = (1.3).em
                         }
                         attrs.asDynamic().inputProps = object: Props {
+                            override var key: String?= "${StyleManager.name}-chatInputMessageClass"
                             val className = "${StyleManager.name}-chatInputMessageClass"
                         }
                     }
@@ -175,9 +177,9 @@ class DiscussionPostDetailComponent(props: UmProps): UstadBaseComponent<UmProps,
                         css(messageSendButton)
                         umFab("send","",
                             id = "um-chat-send",
-                            variant = FabVariant.round,
-                            size = ButtonSize.large,
-                            color = UMColor.secondary,
+                            variant = FabVariant.circular,
+                            size = Size.large,
+                            color = FabColor.secondary,
                             onClick = {
                                 Util.stopEventPropagation(it)
                                 if(typedMessage.isNotEmpty()){

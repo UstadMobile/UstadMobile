@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="login">Авторизоваться</string>
+    <string name="login">Войти</string>
     <string name="register_incorrect_email">Неправильный адрес электронной почты</string>
     <string name="confirm_delete_message">Вы уверены, что хотите удалить эту запись со своего устройства\?</string>
     <string name="canceled">Отменено</string>
@@ -18,7 +18,7 @@
     <string name="select_language">Выбрать язык</string>
     <string name="queued">В очереди</string>
     <string name="three_letter_code">Трехбуквенный код (ISO 639–2)</string>
-    <string name="languages_description">Добавлять, удалять и изменять языки, используемые для категоризации образовательного контента и предпочтений пользователей.</string>
+    <string name="languages_description">Добавлять, удалять и изменять языки, используемые для категоризации образовательного контента и предпочтений пользователей</string>
     <string name="home">Дом</string>
     <string name="classes">Классы</string>
     <string name="save_as_template">Сохранить как шаблон</string>
@@ -47,8 +47,8 @@
 \n2. Убедитесь, что устройство видно.</string>
     <string name="preparing">Подготовка</string>
     <string name="field_required_prompt">Это поле обязательно к заполнению</string>
-    <string name="field_password_error_min">Пароль должен состоять не менее чем из 5 символов.</string>
-    <string name="filed_password_no_match">Пароль не совпадает, попробуйте еще раз</string>
+    <string name="field_password_error_min">Пароль должен состоять не менее чем из 5 символов</string>
+    <string name="filed_password_no_match">Пароли не совпадают. Попробуйте еще раз.</string>
     <string name="dialog_download_from_playstore_message">Доступ к совместному использованию образовательного контента в автономном режиме</string>
     <string name="also_available_in">Также доступно в</string>
     <string name="created_partnership">Создано в партнерстве с:</string>
@@ -56,7 +56,7 @@
     <string name="onboarding_offline_sharing">Поделиться оффлайн</string>
     <string name="location_permission_details">Это приложение использует Bluetooth и сканирование Wi-Fi, чтобы найти других пользователей поблизости. Затем приложение может подключаться к ближайшим пользователям, чтобы загружать контент на высокой скорости, не требуя доступа в Интернет. Поскольку эти результаты сканирования могут использоваться для определения вашего местоположения, вы должны предоставить разрешение на местоположение, чтобы включить эту функцию. Это приложение не сохраняет результаты этих сканирований и никоим образом не записывает ваше местоположение. Это приложение создано на основе открытого исходного кода, который можно проверить на github.com/UstadMobile/UstadMobile</string>
     <string name="download_continue_stacked_label">Продолжить скачивание</string>
-    <string name="download_wifi_only">Только WiFi</string>
+    <string name="download_wifi_only">Только через Wi-Fi</string>
     <string name="download_state_downloading"><b>Скачивание</b> всего %1$s элементов. Всего на вашем устройстве будет использовано %2$s.</string>
     <string name="download_storage_option_device">Используйте %1$s - %2$s бесплатно</string>
     <string name="content_creation_storage_option_title">Вариант хранения</string>
@@ -153,7 +153,7 @@
     <string name="confirm">Подтверждать</string>
     <string name="waiting">Ожидающий</string>
     <string name="cancel">Отмена</string>
-    <string name="done">Сделанный</string>
+    <string name="done">Выполнено</string>
     <string name="about">О</string>
     <string name="male">Мужчина</string>
     <string name="female">женский</string>
@@ -166,7 +166,7 @@
     <string name="add_gallery_description">Добавить видео или аудио из галереи устройства</string>
     <string name="lets_get_started_label">Давайте начнем</string>
     <string name="onboarding_no_internet_headline">Нет интернета\? Без проблем.</string>
-    <string name="onboarding_no_internet_subheadline">Загрузите обучающие видео, статьи и интерактивные упражнения для дальнейшего использования.</string>
+    <string name="onboarding_no_internet_subheadline">Всё работает офлайн</string>
     <string name="last_three_months_date_range">Последние три месяца</string>
     <string name="new_custom_date_range">Новый произвольный диапазон дат…</string>
     <string name="year">Год</string>
@@ -258,7 +258,7 @@
     <string name="import_link_big_size">Размер файла слишком велик</string>
     <string name="download_continue_btn_label">Продолжать</string>
     <string name="relative_date">Относительная дата</string>
-    <string name="update">Обновлять</string>
+    <string name="update">Обновить</string>
     <string name="profile">Профиль</string>
     <string name="dialog_download_from_playstore_ok">Скачать сейчас (бесплатно)</string>
     <string name="supported_link">Поддерживаемые типы ссылок: Google Диск (папка или файл) и простые ссылки HTTP</string>
@@ -658,7 +658,6 @@
     <string name="site">Сайт</string>
     <string name="site_link">Ссылка на сайт</string>
     <string name="please_enter_the_linK">Введите ссылку для вашего сайта, предоставленную вашим преподавателем или администратором:</string>
-    <string name="sites_can_be_help_text">Сайты могут быть созданы для школ, проектов, организаций и т. д. У каждого сайта могут быть свои собственные пользователи, администраторы, контент, классы, школы и т. д.</string>
     <string name="terms_and_policies_text">Текст условий и политик</string>
     <string name="edit_terms_and_policies">Изменить условия и правила</string>
     <string name="strings_not_allowed">В этом поле нельзя использовать специальные символы.</string>
@@ -725,7 +724,6 @@
     <string name="all_permissions">Все разрешения</string>
     <string name="folder">Папка</string>
     <string name="create_a_new_learning_env">Создайте новую среду обучения</string>
-    <string name="connect_to_site">Подключиться к сайту</string>
     <string name="subjects">Предметы</string>
     <string name="add_educational_content_to_new_learning_env">Добавьте собственный образовательный контент (электронные книги, видео, интерактивные упражнения и т. д.) или импортируйте его с других веб-сайтов, используя ссылку. Настройте школы, классы и группы. Затем предложите своим ученикам, преподавателям и сотрудникам получить к нему доступ: онлайн или оффлайн.</string>
     <string name="connect_to_an_existing_learning_environment">Подключитесь к существующей учебной среде</string>
@@ -800,4 +798,218 @@
     <string name="add_activity_literal">Добавить активность</string>
     <string name="frequency">Частота</string>
     <string name="reject">Отклонять</string>
+    <plurals name="number_of_attempts">
+        <item quantity="one">%d попытка</item>
+        <item quantity="few">%d попыток</item>
+        <item quantity="many">%d попыток</item>
+        <item quantity="other">%d попыток</item>
+    </plurals>
+    <string name="onboarding_stay_organized_subheading">Образовательный контент, задания, классы и посещаемость — все в одном месте</string>
+    <plurals name="duration_hours">
+        <item quantity="one">%d час(а)</item>
+        <item quantity="few">%d часов</item>
+        <item quantity="many">%d часов</item>
+        <item quantity="other">%d часов</item>
+    </plurals>
+    <string name="store_description_full">"Ustad Mobile — это приложение с открытым исходным кодом, которое позволяет пользователям получать доступ к широкому спектру открытых образовательных ресурсов онлайн или офлайн. Приложением и контентом можно обмениваться между устройствами в автономном режиме.
+\n
+\n  Ustad Mobile предлагает контент с открытой лицензией с некоторых ведущих сайтов Интернета с открытыми образовательными ресурсами (ООР):
+\n
+\n African Story Books
+\n ETakkatho
+\n Global Digital Library
+\n Khan Academy (including offline access to both videos and exercises)
+\n PHET
+\n Pratham Books
+\n Voice of America
+\n
+\n  Контент предоставляется по лицензии внешними поставщиками контента. Ustad Mobile, если прямо не указано иное, не поддерживается ни одним из таких поставщиков контента."</string>
+    <string name="unique_content_users_over_time">Уникальные пользователи контента по времени</string>
+    <string name="clazz_assignment">Задание</string>
+    <string name="number_of_active_users_over_time">Количество активных пользователей по времени</string>
+    <string name="group">Группа</string>
+    <string name="require_file_submission">Требовать отправки файла</string>
+    <string name="require_text_submission">Требовать отправки текста</string>
+    <string name="edit_assignment">Редактировать задание</string>
+    <string name="mark_penalty">Штрафные баллы</string>
+    <string name="connect">Соединиться</string>
+    <string name="mark_complete">Отметить как выполненное</string>
+    <string name="deleting_content">Удаление %1$s</string>
+    <string name="after_deadline_date_error">Должно быть после крайнего срока</string>
+    <string name="importing">Импорт %1$s</string>
+    <string name="number_of_students_completed_time">Количество учащихся, завершивших выбранный контент</string>
+    <string name="content_completion">Завершение контента</string>
+    <string name="content_usage_by_class">Использование контента по классу</string>
+    <string name="parent_consent_explanation">"Я подтверждаю, что являюсь родителем или законным опекуном следующего ребенка:
+\n
+\n  Имя: %1$s
+\n  Дата рождения: %2$s
+\n
+\nЕсли я даю согласие на то, чтобы мой ребенок использовал %3$s, сбор и обработка информации, позволяющую установить личность, будет осуществляться в соответствии с приведенной ниже политикой конфиденциальности и условиями.
+\n
+\nСогласие может быть отозвано в любое время с помощью ссылки, отправленной по электронной почте. Если вы решите не давать согласие, любые данные, предоставленные вашим ребенком, будут удалены в течение 24 часов."</string>
+    <string name="downloading_content">Загрузка %1$s</string>
+    <string name="maximum_points">Максимальное количество баллов</string>
+    <string name="added_to_class_content">%1$s добавлено в материалы класса</string>
+    <string name="your_account_needs_approved">Ваша учетная запись должна быть одобрена вашим родителем с помощью отправленной ссылки. Если вы являетесь родителем, вам необходимо войти в свою существующую учетную запись или создать новую учетную запись.</string>
+    <string name="parent">Родитель</string>
+    <string name="allowed_till_deadline">Разрешено до истечения срока</string>
+    <string name="upload">Загрузить</string>
+    <string name="saved">Сохранено</string>
+    <string name="submit_grade_and_mark_next">Выставить оценку и отметить следующее</string>
+    <string name="dont_show_before">Не отображать до</string>
+    <string name="course_module">Модуль курса</string>
+    <string name="class_timezone_set">Часовой пояс класса: %1$s</string>
+    <string name="assign_reviewers">Назначить проверяющих</string>
+    <string name="add_block">Добвить блок</string>
+    <string name="edit_block">Редактировать блок</string>
+    <string name="formatted_text_to_show_to_course_participants">Блок, который будет отображать форматированный текст</string>
+    <string name="visibility">Видимость</string>
+    <string name="visible_for_all">Виден для всех</string>
+    <string name="enrolment_policy">Правила зачисления</string>
+    <string name="select_terminology">Выберите терминологию</string>
+    <string name="update_grade_and_mark_next">Обновить оценку и отметить следующее</string>
+    <string name="add_new_groups">Добавить новые группы</string>
+    <string name="num_replies">%1$d ответов</string>
+    <string name="add_a_reply">Добавить ответ</string>
+    <string name="posts">Публикации</string>
+    <string name="course_code">Код курса</string>
+    <string name="add_group">Добавить группу</string>
+    <string name="unread">Не прочитано</string>
+    <string name="individual_submission">Индивидуальное представление</string>
+    <string name="unassigned">Неназначенный</string>
+    <string name="type_here">Введите здесь…</string>
+    <string name="update_grade">Обновить оценку</string>
+    <string name="waiting_for_connection">Ожидаение соединения</string>
+    <string name="onboarding_stay_organized_headline">Будьте в курсе событий</string>
+    <string name="new_assignment">Новое задание</string>
+    <string name="late_submission">Отправлено поздно</string>
+    <string name="late_submission_penalty">Штраф за позднюю подачу</string>
+    <string name="end_of_grace_period">Окончание отсрочки</string>
+    <string name="allow_class_comments">Разрешить комментарии участников</string>
+    <string name="points">Баллы</string>
+    <string name="minimum_score">Минимальный балл</string>
+    <string name="automatic">Автоматически</string>
+    <string name="student_marks_content">Участники оценивают себя сами</string>
+    <string name="completion_criteria">Критерии завершения</string>
+    <string name="late_penalty">(%1$s%% штраф за опоздание)</string>
+    <string name="add_folder">Добавить все из папки</string>
+    <string name="add_folder_description">Добавить весь поддерживаемый образовательный контент из папки</string>
+    <string name="content_already_added_to_class">%1$s уже было в материалах курса</string>
+    <string name="adult_account_required">Для открытия этой ссылки требуется учетная запись взрослого человека. Если вы являетесь родителем, вам необходимо войти в свою существующую учетную запись или создать новую учетную запись.</string>
+    <string name="blank_report">Пустой отчет</string>
+    <string name="attendance_over_time_by_class">Посещаемость с течением времени по классу</string>
+    <string name="percentage_of_students_attending_over_time">Процент учащихся, посещающих за время</string>
+    <string name="total_content_usage_duration_class">Общая продолжительность использования контента в подгруппах по классу</string>
+    <string name="content_usage_over_time">Использование контента с течением времени</string>
+    <string name="total_content_duration_gender">Общая продолжительность использования контента с течением времени (с разбивкой по полу)</string>
+    <string name="selected_file_summary">Выделено %1$s (%2$s)</string>
+    <string name="drag_and_drop_or_click_to_add_file">Перетащите файл сюда или нажмите</string>
+    <string name="extra_active_tab_warning">Мы не поддерживаем одновременное открытие нескольких вкладок, закройте эту вкладку.</string>
+    <string name="individual">Индивидуально</string>
+    <string name="maximum">Максимум</string>
+    <string name="size_limit">Лимит размера файла (МБ)</string>
+    <string name="limit">Лимит</string>
+    <string name="number_of_files">Максимальное количество файлов</string>
+    <string name="edit_after_submission">Редактирование после отправки</string>
+    <string name="allowed_till_grace">Разрешено до завершения отсрочки</string>
+    <string name="not_allowed">Не разрешено</string>
+    <string name="marked_by">Оценка выставлена</string>
+    <string name="peers">Сверстники</string>
+    <string name="file_type">Тип файла</string>
+    <string name="file_type_chosen">Тип:</string>
+    <string name="file_type_any">Любое</string>
+    <string name="file_document">Документы (pdf, docx, odt)</string>
+    <string name="file_image">Изображение</string>
+    <string name="max_number_of_files">Максимальное количество файлов: %1$s</string>
+    <string name="submit_grade">Выставить оценку</string>
+    <string name="graded">Оценка выставлена</string>
+    <string name="score_greater_than_zero">Должно быть больше 0</string>
+    <string name="words">Слова</string>
+    <string name="characters">Символы</string>
+    <string name="penalty_label">Если выполнено с опозданием, но до окончания отсрочки</string>
+    <string name="submissions">Представленные материалы</string>
+    <string name="add_text">Добавить текст</string>
+    <string name="course_blocks">Блоки курса</string>
+    <string name="module">Модуль</string>
+    <string name="add_course_block_content_desc">Добавляйте аудио, видео, электронные книги или интерактивный контент (H5P, xAPI и т.д.) из файлов или ссылок</string>
+    <string name="add_assignment_block_content_desc">Задание для участников курса</string>
+    <string name="discussion_board">Доска обсуждений</string>
+    <string name="add_discussion_board_desc">Организованное обсуждение с темами и разделами</string>
+    <string name="new_module">Новый модуль</string>
+    <string name="edit_module">Редактировать модуль</string>
+    <string name="indent">Отступ</string>
+    <string name="unindent">Удалить отступ</string>
+    <string name="institution">Учреждение</string>
+    <string name="student_enrolment_policy">Политика добавления участников</string>
+    <string name="teacher_enrolment_policy">Политика добавления учителей</string>
+    <string name="open_enrolment">Открытая регистрация</string>
+    <string name="enrolment_requests_must_be_approved">Заявка на регистрацию должна быть одобрена</string>
+    <string name="accept_enrolment_requests_automatically">Одобрять заявки на регистрацию автоматически</string>
+    <string name="hidden_enrolment_via_links_code_or_invitation">Скрытый (регистрация по ссылкам, коду или по приглашению)</string>
+    <string name="terminology">Терминология</string>
+    <string name="add_new_terminology">Добавить новую терминологию</string>
+    <string name="edit_terminology">Изменить терминологию</string>
+    <string name="your_words_for">Ваши слова для</string>
+    <string name="course_setup">Настройка курса</string>
+    <string name="number_of_groups">Количество групп</string>
+    <string name="assign_to_random_groups">Назначить случайным группам</string>
+    <string name="topics">Темы</string>
+    <string name="add_topic">Добавить тему</string>
+    <string name="messages">Сообщения</string>
+    <string name="message">Сообщение</string>
+    <string name="library">Библиотека</string>
+    <string name="courses">Курсы</string>
+    <string name="course">Курс</string>
+    <string name="reports_and_analytics">Отчеты и аналитика</string>
+    <string name="course_comments">Комментарии к курсу</string>
+    <string name="currently_enroled">В настоящее время зачислен</string>
+    <string name="past_enrolments">Прошлые зачисления</string>
+    <string name="standard">Стандарт</string>
+    <string name="group_number" formatted="false">Группа %1$s</string>
+    <string name="edit_group">Редактировать группу</string>
+    <string name="new_group_set">Новый набор групп</string>
+    <string name="edit_text">Редактировать текст</string>
+    <string name="add_module">Добавить модуль</string>
+    <string name="add_a_new_course">Добавить новый курс</string>
+    <string name="join_existing_course">Присоединиться к существующему курсу</string>
+    <string name="edit_course">Редактировать курс</string>
+    <string name="currently_enrolled">В настоящее время зачислены</string>
+    <string name="past_enrollments">Прошлые зачисления</string>
+    <string name="new_chat">Новый чат</string>
+    <string name="new_group">Новая группа</string>
+    <string name="chat">Чат</string>
+    <string name="you">Вы</string>
+    <string name="edit_topic">Редактировать тему</string>
+    <string name="post">Публикация</string>
+    <string name="error_too_long_text">Текст слишком длинный</string>
+    <string name="managed_enrolment">Управляемый – необходимо пригласить или одобрить</string>
+    <string name="text_file_submission_error">Необходимо использовать текст и/или представить файл</string>
+    <string name="submit_all_at_once_submission_policy">Должны быть отправлено всё сразу</string>
+    <string name="multiple_submission_allowed_submission_policy">Можно отправлять несколько раз</string>
+    <string name="submission_policy">Правила предоставления</string>
+    <string name="submission_already_made">Уже отправлено</string>
+    <string name="grade_out_of_range">Оценка должна быть от 0 до %1$s</string>
+    <string name="add_discussion">Добавить обсуждение</string>
+    <string name="edit_discussion">Редактировать обсуждение</string>
+    <string name="deadline_has_passed">Срок истек</string>
+    <string name="unassigned_error">Невозможно отправить: вы зачислены на курс, но не включены в группу</string>
+    <string name="enabled">Включено</string>
+    <string name="disabled">Выключено</string>
+    <string name="from_my_courses">Из моих курсов</string>
+    <string name="reviews_per_user_group">Количество отзывов на пользователя или группу</string>
+    <string name="assign_random_reviewers">Назначьте случайных проверяющих</string>
+    <string name="reviewer">Проверяющий #%1$s</string>
+    <plurals name="duration_minutes">
+        <item quantity="one">%d минут(а)</item>
+        <item quantity="few">%d минут</item>
+        <item quantity="many">%d минут</item>
+        <item quantity="other">%d минут</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">%d сек.</item>
+        <item quantity="few">%d секунд</item>
+        <item quantity="many">%d секунд</item>
+        <item quantity="other">%d секунд</item>
+    </plurals>
 </resources>

@@ -1,9 +1,10 @@
 
-apply plugin: "kotlin-multiplatform"
-apply plugin: 'com.android.library'
-apply plugin: 'maven-publish'
-apply plugin: 'kotlinx-serialization'
-
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'com.android.library'
+    id 'maven-publish'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+}
 
 group rootProject.group
 version rootProject.version
@@ -14,7 +15,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion rootProject.ext.version_android_target_sdk
     }
     packagingOptions {
         resources {

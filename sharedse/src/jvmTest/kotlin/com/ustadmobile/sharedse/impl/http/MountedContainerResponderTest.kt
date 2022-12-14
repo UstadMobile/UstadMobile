@@ -28,8 +28,8 @@ import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.json.*
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.runBlocking
@@ -102,9 +102,9 @@ class MountedContainerResponderTest {
         val httpClient = HttpClient()
 
         runBlocking {
-            httpClient.get<HttpStatement>("http://localhost:${routerHttpd.listeningPort}/endpoint/container/subfolder/test%20file2.png").execute {
-                Assert.assertEquals("Content status reported as 200", 200, it.status.value)
-            }
+            val response = httpClient.get("http://localhost:${routerHttpd.listeningPort}/endpoint/container/subfolder/test%20file2.png")
+            Assert.assertEquals("Content status reported as 200",
+                200, response.status.value)
         }
 
         httpClient.close()

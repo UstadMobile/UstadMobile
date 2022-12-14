@@ -3,7 +3,6 @@ package com.ustadmobile.view
 import com.ustadmobile.mui.components.GridSize
 import com.ustadmobile.mui.components.themeContext
 import com.ustadmobile.mui.components.umLinearProgress
-import com.ustadmobile.mui.theme.UMColor
 import com.ustadmobile.util.StyleManager
 import com.ustadmobile.util.StyleManager.alignEndItems
 import com.ustadmobile.util.StyleManager.partnersList
@@ -17,6 +16,7 @@ import com.ustadmobile.view.ext.umPartner
 import kotlinx.css.FlexDirection
 import kotlinx.css.LinearDimension
 import kotlinx.css.width
+import mui.material.LinearProgressColor
 import react.RBuilder
 import react.RComponent
 import styled.css
@@ -47,8 +47,8 @@ class SplashComponent (props: UmProps): RComponent<UmProps, UmState>(props) {
                         umItem(GridSize.cells12) {
                             css(StyleManager.alignCenterItems)
                             val color = when {
-                                ThemeManager.isDarkModeActive() -> UMColor.secondary
-                                else -> UMColor.primary
+                                ThemeManager.isDarkModeActive() -> LinearProgressColor.secondary
+                                else -> LinearProgressColor.primary
                             }
 
                             umLinearProgress(color = color) {

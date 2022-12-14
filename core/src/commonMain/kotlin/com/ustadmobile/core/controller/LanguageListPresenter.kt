@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.LanguageDao
+import com.ustadmobile.core.db.dao.LanguageDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
@@ -10,17 +11,18 @@ import com.ustadmobile.core.view.LanguageEditView
 import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.SelectionOption
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: LanguageListView,
-                            di: DI, lifecycleOwner: DoorLifecycleOwner)
+                            di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<LanguageListView, Language>(context, arguments, view, di, lifecycleOwner),
         OnSearchSubmitted, OnSortOptionSelected {
 
@@ -54,7 +56,7 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
 
     private fun getAndSetList() {
         view.list = repo.languageDao.findLanguagesAsSource(
-                selectedSortOption?.flag ?: LanguageDao.SORT_LANGNAME_ASC,
+                selectedSortOption?.flag ?: LanguageDaoCommon.SORT_LANGNAME_ASC,
                 searchText.toQueryLikeParam())
     }
 
@@ -95,15 +97,18 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
             when (option) {
                 SelectionOption.HIDE -> {
                     repo.languageDao.toggleVisibilityLanguage(true,
-                            selectedItem.map { it.langUid })
+                            selectedItem.map { it.langUid }, getSystemTimeInMillis())
                     view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context), {
 
                         GlobalScope.launch(doorMainDispatcher()){
                             repo.languageDao.toggleVisibilityLanguage(false,
-                                    selectedItem.map { it.langUid })
+                                    selectedItem.map { it.langUid }, getSystemTimeInMillis())
                         }
 
                     }, MessageID.undo)
+                }
+                else -> {
+                    // do nothing
                 }
             }
         }
@@ -111,12 +116,12 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
 
     companion object {
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.name, LanguageDao.SORT_LANGNAME_ASC, true),
-                SortOrderOption(MessageID.name, LanguageDao.SORT_LANGNAME_DESC, false),
-                SortOrderOption(MessageID.two_letter_code, LanguageDao.SORT_TWO_LETTER_ASC, true),
-                SortOrderOption(MessageID.two_letter_code, LanguageDao.SORT_TWO_LETTER_DESC, false),
-                SortOrderOption(MessageID.three_letter_code, LanguageDao.SORT_THREE_LETTER_ASC, true),
-                SortOrderOption(MessageID.three_letter_code, LanguageDao.SORT_THREE_LETTER_DESC, false))
+                SortOrderOption(MessageID.name, LanguageDaoCommon.SORT_LANGNAME_ASC, true),
+                SortOrderOption(MessageID.name, LanguageDaoCommon.SORT_LANGNAME_DESC, false),
+                SortOrderOption(MessageID.two_letter_code, LanguageDaoCommon.SORT_TWO_LETTER_ASC, true),
+                SortOrderOption(MessageID.two_letter_code, LanguageDaoCommon.SORT_TWO_LETTER_DESC, false),
+                SortOrderOption(MessageID.three_letter_code, LanguageDaoCommon.SORT_THREE_LETTER_ASC, true),
+                SortOrderOption(MessageID.three_letter_code, LanguageDaoCommon.SORT_THREE_LETTER_DESC, false))
 
         const val SAVEDSTATE_KEY_LANGUAGE = "Language"
     }

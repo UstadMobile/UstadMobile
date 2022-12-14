@@ -104,7 +104,7 @@ class ConcatenatedInputStreamExtTest {
                 AtomicLong(), md5s.toMutableList(), "concattest", di.direct.instance()
             )
             val downloadedEntries = destDir.getContentEntryJsonFilesFromDir(di.direct.instance())
-            destDb.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            destDb.withDoorTransactionAsync { txDb ->
                 txDb.containerEntryFileDao.insertListAsync(downloadedEntries)
                 txDb.linkExistingContainerEntries(container.containerUid, entriesToWrite)
             }
@@ -147,7 +147,7 @@ class ConcatenatedInputStreamExtTest {
                     )
 
                     val downloadedEntries = destDir.getContentEntryJsonFilesFromDir(di.direct.instance())
-                    destDb.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+                    destDb.withDoorTransactionAsync { txDb ->
                         txDb.containerEntryFileDao.insertListAsync(downloadedEntries)
                         txDb.linkExistingContainerEntries(container.containerUid, entriesToWrite)
                     }

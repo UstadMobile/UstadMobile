@@ -1,16 +1,16 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.core.db.JobStatus.NOT_QUEUED
 import com.ustadmobile.core.db.JobStatus.QUEUED
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_UNMETERED
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 
-@Dao
-abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
+@DoorDao
+expect abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
 
     @Query("SELECT * FROM ContainerImportJob WHERE cijSessionId = :sessionId")
     abstract fun findBySessionId(sessionId: String): ContainerImportJob?
@@ -27,7 +27,7 @@ abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
                       FROM ConnectivityStatus)
                    IN ($STATE_METERED, $STATE_UNMETERED))
              LIMIT 10""")
-    abstract fun findJobs(): DoorLiveData<List<ContainerImportJob>>
+    abstract fun findJobs(): LiveData<List<ContainerImportJob>>
 
     @Query("UPDATE ContainerImportJob SET cijJobStatus = $QUEUED WHERE cijUid = :uploadJobId AND cijJobStatus = $NOT_QUEUED")
     abstract suspend fun setStatusToQueueAsync(uploadJobId: Long)
@@ -51,7 +51,7 @@ abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
 
 
     @Query("SELECT * From  ContainerImportJob WHERE ContainerImportJob.cijUid = :importJobUid")
-    abstract fun getImportJobLiveData(importJobUid: Long): DoorLiveData<ContainerImportJob?>
+    abstract fun getImportJobLiveData(importJobUid: Long): LiveData<ContainerImportJob?>
 
     @Query("UPDATE ContainerImportJob SET cijSessionId = :sessionId WHERE cijUid = :importJobUid")
     abstract suspend fun updateSessionId(importJobUid: Long, sessionId: String)

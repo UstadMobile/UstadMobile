@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.WebChunkView
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -27,7 +28,8 @@ actual class WebChunkPresenter actual constructor(context: Any, arguments: Map<S
             return
         }
         val baseMountUrl = mountHandler.mountContainer(accountManager.activeAccount.endpointUrl,containerUid ?: 0)
-        val indexContent = httpClient.get<String>(UMFileUtil.joinPaths(baseMountUrl,"index.json"))
+        val indexContent: String = httpClient.get(
+            UMFileUtil.joinPaths(baseMountUrl,"index.json")).body()
         val indexLog:IndexLog = JSON.parse(indexContent)
         view.url = indexLog.entries?.get(0)?.url?:""
         view.loading = false

@@ -4,6 +4,7 @@ import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.SelectFileView
 import com.ustadmobile.core.view.UstadView
+import io.github.aakira.napier.Napier
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
@@ -18,6 +19,7 @@ class SelectFilePresenterCommon(
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.acceptedMimeTypes =  arguments[SelectFileView.ARG_MIMETYPE_SELECTED].toString().split(";")
+        Napier.d{"HELLO1 HELLO1 HELLO1"}
     }
 
     fun handleUriSelected(uri: String?){

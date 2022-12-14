@@ -1,15 +1,15 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.lib.db.entities.XObjectEntity
 import kotlin.js.JsName
 
-@Dao
+@DoorDao
 @Repository
-abstract class XObjectDao : BaseDao<XObjectEntity> {
+expect abstract class XObjectDao : BaseDao<XObjectEntity> {
 
     @Query("""
      REPLACE INTO XObjectEntityReplicate(xoePk, xoeDestination)

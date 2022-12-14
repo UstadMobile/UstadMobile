@@ -54,11 +54,9 @@
     <string name="pause_download">Pause download</string>
     <string name="new_password">نوی تېرنويى</string>
     <string name="phone">ټېلفون</string>
-    <string name="tablet">تبلټ</string>
     <string name="preparing">چمتو کول</string>
     <string name="field_required_prompt">دا برخه لازمه ده </string>
     <!-- Registration dialog feedback -->
-    <string name="field_password_min">لږ تر لږه ۵ توري</string>
     <string name="field_password_error_min">پټ نوم باید لږ تر لږه ۵ توري ولری</string>
     <string name="filed_password_no_match">پټ نوم سره ورته نه دی، بیا هڅه وکړئ</string>
     <!-- Update student details action button -->
@@ -76,7 +74,6 @@
     <string name="confirm_password">پټ نوم تائید کړئ</string>
     <string name="last_name">تخلص</string>
     <string name="first_name">اصلی نوم</string>
-    <string name="create_new_account">اوس نومکښنه کوی</string>
     <string name="other">بل</string>
     <string name="unset">برابر شوی ندی</string>
     <string name="send">استول</string>
@@ -106,7 +103,6 @@
     <string name="download_storage_option_device">٪ ډک - ٪ خالی</string>
     <string name="download_locally_availability">نژدې موجود دی</string>
     <string name="canceled">ړنګول</string>
-    <string name="clear_history">تاریخچه ړنګول</string>
     <string name="deleted">ړنګول/حذف کول</string>
     <string name="deleting">ړنګوی</string>
     <string name="share_application">د اپلیکیشن شریکول</string>
@@ -114,7 +110,6 @@
     <string name="location_permission_title">د موقعیت اجازې اړین دی</string>
     <string name="location_permission_message">دا اپلیکیشن د ځای موقعیت اجازې ته اړتیا لری ترڅو له نږدې کارونکو سره په لوړ سرعت نالیکی شریکول فعاله شی.</string>
     <string name="download_summary_title">٪ فعاله کښته کیدل</string>
-    <string name="download_cancel_all">د ټولو ړنګول</string>
     <string name="download_pause_download">ځنډ</string>
     <string name="download_entry_state_paused">ځنډ ورکړی شوی</string>
     <string name="get_app">اپلیکیشن لاسته راوړئ</string>
@@ -122,106 +117,40 @@
     <string name="insufficient_space">پ حافظه کې ناکافی اندازه ځای موجود دی</string>
     <string name="entry_details_author">لیکوال</string>
     <string name="entry_details_license">جواز:</string>
-    <string name="entry_details_description">تفصیل</string>
-    <string name="library_reading_level">د لوستلو کچه</string>
     <string name="file_not_found">دوتنه و نه موندل شو</string>
-    <string name="content_type_multimedia">ګڼرسنۍ</string>
     <string name="multiple_choice">ګڼ ځوابه</string>
-    <string name="content_type_link">پیوند</string>
-    <string name="content_type_fill_the_blanks">تښ ځایونه ډک کړئ</string>
-    <string name="content_format_text">متن</string>
-    <string name="content_format_paragraph">پاراګراف</string>
-    <string name="content_direction_ltr">له کیڼ څخه ښي خوا ته</string>
-    <string name="content_direction_rtl">له ښي څخه کیڼ خوا ته</string>
-    <string name="content_font_8">اندازه ۸</string>
     <string name="content_font_10">اندازه ۱۰</string>
-    <string name="content_font_12">اندازه ۱۲</string>
-    <string name="content_font_14">اندازه ۱۴</string>
-    <string name="content_font_18">اندازه ۱۸</string>
-    <string name="content_font_24">اندازه ۲۴</string>
-    <string name="content_font_36">اندازه ۳۶</string>
-    <string name="content_insert_options">ورننویستل</string>
-    <string name="content_source_device">له وزلې څخه</string>
     <string name="content_choose_file">دوتنه غوره کړئ</string>
-    <string name="content_prepare_file">دوتنه تیاروی...</string>
-    <string name="content_media_photo">انځور</string>
     <string name="video">ویډیو</string>
-    <string name="content_media_message">کوم ډول رسنۍ غواړئ چې واخلئ؟</string>
-    <string name="content_media_title">د رسنې ډول</string>
-    <string name="content_blank_doc_click_label">ټک</string>
-    <string name="content_blank_doc_start_label">د سمون د پیل لپاره.</string>
-    <string name="content_option_page">نوی مخ</string>
-    <string name="content_untitled_page">بی نومه مخ</string>
-    <string name="content_untitled_document">بی نومه لاسوند</string>
     <string name="content_add_page">د مخ زیاتول</string>
-    <string name="content_update_page_title">د مخ اوسمهال کول</string>
-    <string name="content_update_document_title">د لاسوند اوسمهالول</string>
     <string name="location_permission_details">دا اپلیکیشن د نورو نږدې کاروونکو د پیدا کولو لپاره له بلوټوت او وایفای څخه کار اخلی. دا اپلیکیشن بیا کولای شی له نږدی کاروونکو سره وصل شی او محتویات پرته له انټرنټ څخه په لوړ سرعت سره کښته کړی. د دې لپاره چې د دې سکن پایلی څخه ستاسو د موقعیت د مالومولو لپاره ګټه اخیستل کیدای شی، ځکه نو تاسو باید د ځای د موقعیت اجازه ورکړئ ترڅو دا بڼه فعاله شی. دا اپلیکیشن د دې سکن/پلټنې پایله له ځانه سره خوندی نه ساتی او په هیڅ وجه ستاسو د ځای موقعیت نه ثبتوی. دا اپلیکیشن له خلاص زیرمه کوډ (Open source code) څخه جوړه شوې ده چې په دې پته یې لیدلی شئ: github.com/UstadMobile/UstadMobile</string>
-    <string name="content_action_page_remove">د مخ له مینځه وړل</string>
-    <string name="content_editor_page_view_hint">سرلیک</string>
-    <string name="content_editor_menu_undo">ناکړ</string>
-    <string name="content_editor_menu_redo">بیاکړ</string>
-    <string name="content_editor_menu_text_formatting">د متن بڼه</string>
-    <string name="content_editor_directionality">نیغتیا</string>
-    <string name="content_editor_menu_pages">مخونه</string>
     <string name="content_editor_menu_unorderd_list">نامنظم لسټ</string>
-    <string name="content_editor_menu_italic">ریوند</string>
     <string name="download_state_download">
         <b>کښته کول</b> ټول %1$s توکي، چې ستاسو په وزله کې ټولټال %2$s ځای نیسی.</string>
-    <string name="content_editor_menu_fontsize">لیکنې کچ</string>
-    <string name="content_editor_menu_align_left">کیڼ</string>
-    <string name="content_editor_menu_align_right">ښی</string>
-    <string name="content_editor_menu_superscript">سترلیک</string>
-    <string name="content_editor_preview">مخلید</string>
-    <string name="content_editor_link_text">پیوند متن</string>
-    <string name="content_editor_link_url">Url پیوند</string>
     <string name="content_editor_link_error">پیوند متن او یا url باید تش نه وی، مهربانی وکړئ بیا هڅه وکړئ</string>
     <string name="download_state_downloading">
         <b>کښته کول</b> ټولټال %1$s توکي، چې ستاسو په وزله کې به %2$s ځای ونیسی.</string>
     <string name="download_cancel_label">د کښته کولو ړنګول</string>
-    <string name="content_editor_link_insert">پیوند دننه کړئ</string>
-    <string name="content_editor_link_remove">پیوند لیری کول</string>
-    <string name="permission_camera_title">د کامرې او دوتنې اجازې ته اړتیا شته</string>
-    <string name="permission_camera_message">دا اپلیکیشن د کامرې او دوتنې دواړو اجازې ته اړتیا لری چې عکسونه واخلي او ویډیو ثبت کړی</string>
-    <string name="content_editor_create_new_import">د فایل واردول</string>
-    <string name="content_editor_create_new_import_link">د پیوند/لینک واردول</string>
-    <string name="download_storage_permission_title">د دوتنې اجازې ته اړتیا شته</string>
     <string name="content_editor_create_new_category">نوی پوښه</string>
-    <string name="content_editor_edit_category">سمون</string>
-    <string name="content_editor_create_new_title">محتویات زیاتول</string>
-    <string name="content_editor_action_done">ترسره شو</string>
-    <string name="download_storage_permission_message">دا اپلیکیشن د حافظې کارډ اجازې ته اړتیا لری ترڅو محتویات پکښې کښته او ثبت کړی</string>
     <string name="licence">منښتلیک</string>
     <string name="publicly_accessible">محتویات علنی کول</string>
     <string name="download_cloud_availability">په کلاوډ کې موجود دی</string>
     <string name="file_required_prompt">دوتنه چې باید وارد شی، نه دی غوره شوی، بیا هڅه وکړئ</string>
     <string name="content_creation_folder_new_message">نوی پوښئ په بریا سره زیات شو</string>
-    <string name="content_editor_menu_subscript">فرعی لیک</string>
-    <string name="empty_state_recycle">هیڅ دوباره په جریان کې اچول شوي توکي نشته</string>
-    <string name="content_folder_image_message">د انځور د زیاتولو ملاتړ به په نږدې راتلونکی کې شونی وی</string>
     <string name="export">بهرول</string>
     <string name="content_entry_export_inprogress">بهرول</string>
     <string name="invalid_register_code">د نومکښنې ناسم کوډ</string>
     <string name="enter_register_code">د نومکښنې کوډ دننه کړئ</string>
     <string name="bar_chart" value="100">پټه ییز څرګندوی (بار چارټ)</string>
     <string name="content_creation_storage_option_title">د ذخیرې ځای غوراوی</string>
-    <string name="line_graph" value="101">پټې کښنیز (لاین ګراف)</string>
     <string name="score" value="200">منخنی نمره</string>
-    <string name="total_duration" value="201">ټولټال وخت</string>
-    <string name="average_duration" value="202">منخنی وخت</string>
-    <string name="count_activity" value="203">د فعالیتونو شمیر</string>
     <string name="xapi_day" value="300">ورځ</string>
     <string name="xapi_week" value="301">اوونۍ</string>
     <string name="xapi_month" value="302">میاشت</string>
     <string name="xapi_custom_date" value="303">دودیز نیټه</string>
     <string name="xapi_content_entry" value="304">د محتویاتو دننه کول</string>
-    <string name="empty_state_downloaded">هیڅ رالیښل شوی و نه موندل شو</string>
-    <string name="xapi_gender" value="306">جنس</string>
     <string name="xapi_clear">پاک</string>
     <string name="from">لخوا</string>
-    <string name="tocao">مقابل لوری</string>
-    <string name="date_range">نیټه برابرول</string>
-    <string name="select_locations">ځای غوره کړئ</string>
     <string name="xapi_options_general">عمومی</string>
     <string name="error_message_update_document">د لاسوند اوسمهالول ناکامه شوه</string>
     <string name="xapi_options_report_title">د رپورټ سرلیک</string>
@@ -235,60 +164,33 @@
     <string name="xapi_options_did">ترسره کړ</string>
     <string name="xapi_options_what">څه شی</string>
     <string name="xapi_options_where">چیرته</string>
-    <string name="activity_preview_xapi">مخلید</string>
-    <string name="add_to_dashboard">راپورځای ته ورزیاتول</string>
     <string name="activity_import_link">پیوند واردول</string>
     <string name="xapi_hours">ساعت</string>
     <string name="xapi_minutes">دقیقې</string>
     <string name="xapi_seconds">ثانیې</string>
-    <string name="xapi_person_header">کس</string>
     <string name="xapi_verb_header">څه کار ترسره کړ</string>
     <string name="xapi_result_header">پایله</string>
     <string name="supported_files">د ملاتړ وړ دوتني: <b> ایپب، ټینکان (XAPI)، زیپ</b>
     </string>
-    <string name="xapi_when_header">کله</string>
     <string name="xapi_score">نمرې</string>
-    <string name="import_link_video">سرلیک</string>
     <string name="import_title_not_entered">سرلیک دننه شوی نه دی</string>
-    <string name="import_link_invalid_url">ناسم Url</string>
     <string name="no_account">تاسو حساب/اکاونټ نلرئ؟</string>
     <string name="enter_url">Url دننه کړئ</string>
     <string name="import_link_content_not_supported">دمحتویاتو ملاتړ نشته</string>
     <string name="import_link_big_size">د دوتنې اندازه ډیره زیاته ده</string>
     <string name="import_link_error">په واردولو کې تیروتنه</string>
     <string name="content_entry_export_message">اوس تاسو ٪ د خپل وزلې په حافظه کې بهروئ. آیا غواړئ چې دې کار ته ادامه ورکړئ؟</string>
-    <string name="error_not_found_status">۴۰۴!</string>
-    <string name="error_not_found_tag">بخښنه غواړو، کوم مخ چې تاسو یې په لټه کې یاست، نه موندل کیږی.</string>
     <string name="offline_sharing_enable_bluetooth_prompt">نالیکه/آفلاین شریکول بلوټوټ ته اړتیا لری</string>
     <string name="offline_sharing_enable_wifi_promot">د نالیکی/آفلاین شریکولو لپاره باید وایفای روښانه وی</string>
     <string name="enable">وړ کول</string>
     <string name="more_information">ډیر مالومات</string>
-    <string name="less_information">لږمالومات</string>
     <string name="repo_loading_status_loading_cloud">له کلاوډ څخه باریږی</string>
     <string name="repo_loading_status_loading_mirror">له جوړه څخه باریږی</string>
-    <string name="repo_loading_status_loaded_empty">هیڅ محتویات و نه موندل شو</string>
     <string name="repo_loading_status_failed_noconnection">کومه اړیکه یا جوړه نشته</string>
     <string name="repo_loading_status_failed_connection_error">پیوستون تیروتنه</string>
-    <string name="xapi_location" value="305">ځای</string>
     <string name="xapi_options_when">څه وخت</string>
-    <string name="select_entries">شامل توکي غوره کړئ</string>
-    <string name="content_preview_title">مخلید...</string>
-    <string name="content_blank_page_title">خالی مخ</string>
-    <string name="content_editor_page_delete_failure_message">بخښنه غواړو، تاسو نشئ کولای دا مخ ړنګ کړئ</string>
-    <string name="content_editor_menu_indent">سرتشه</string>
-    <string name="content_editor_menu_outdent">سروتلی</string>
-    <string name="content_editor_menu_strikesthrough">کرښول</string>
     <string name="content_editor_menu_underline">لاندی کرښه</string>
-    <string name="content_editor_create_new_content">د نوی محتویات ایجادول</string>
-    <string name="empty_state_libraries">هیڅ پوښۍ و نه موندل شوه</string>
-    <string name="content_update_massage">اوسمهالول بریا سره ترسره شو</string>
-    <string name="xapi_today">نن</string>
     <string name="done">ترسره شو</string>
-    <string name="content_source_camera">له کامرې څخه</string>
-    <string name="content_editor_menu_orderd_list">منظم لسټ</string>
-    <string name="content_editor_menu_bold">بولډ</string>
-    <string name="content_editor_menu_align_center">منځول</string>
-    <string name="content_editor_create_new">نوی ور زیات کړئ</string>
     <string name="content_from_file">له دوتنې څخه</string>
     <string name="content_from_link">له پیوند څخه</string>
     <string name="content_creation_folder_update_message">پوښۍ په بریا سره اوسمهاله شوه</string>
@@ -298,46 +200,28 @@
     <string name="groups">ډلي</string>
     <string name="group_setting_desc">زیاتول، لیری کول او د ډلو بیا تنظیمول</string>
     <string name="add_person">د شخص زیاتول</string>
-    <string name="update_picture">د انځور اوسمهالول</string>
     <string name="birthday">د زیږیدو ورځ</string>
     <string name="first_names">لومړي نومونه</string>
     <string name="basic_details">بنسټیز تفصیلات</string>
     <string name="password_unchanged">پټ نوم (ندی بدل شوی)</string>
     <string name="permission_person_insert">د خلکو زیاتول</string>
-    <string name="location_title">د ځای د موقعیت سرلیک</string>
     <string name="custom_fields_desc">زیاتول، لیری کول او د دویزو ډګرو بیا تنظیمول</string>
     <string name="option_value">د غوراوی ارزښت</string>
     <string name="sort_by_name_desc">نوم (نزولی)</string>
     <string name="contents">محتویات</string>
-    <string name="home_address">د کور پته</string>
     <string name="locations">د ځایونو موقعیتونه</string>
     <string name="locations_setting_desc">د ځایونو د موقعیتونو مدیریت</string>
     <string name="add_group">د ډلې زیاتول</string>
-    <string name="group_name">د ډلې نوم</string>
-    <string name="add_people">د خلکو زیاتول</string>
-    <string name="enroll_new_group_member">د ډلې د نوی غړی ثبتول</string>
-    <string name="enroll_group_member">د شخص ثبتول</string>
-    <string name="add_location">د ځای موقعیت زیاتول</string>
-    <string name="parent_location">اصلی ځای موقعیت</string>
-    <string name="changed_by">بدلون ورکړ شوی په لاس د</string>
     <string name="custom_fields">دودیز ډګري</string>
     <string name="custom_field">دودیز ډګر</string>
-    <string name="add_field">ډګر زیاتول</string>
-    <string name="entity">شرکت</string>
-    <string name="field_name_english">د ډګر نوم (په انګلش)</string>
     <string name="field_type">د ډګر ډول</string>
     <string name="text">متن</string>
     <string name="dropdown">ډراپډون/ځړیدلی مینو</string>
     <string name="options">غوراوي</string>
-    <string name="add_modify_option">د غوراوي زیاتول/بیاجوړول</string>
-    <string name="default_value">اصلی ارزښت</string>
     <string name="change_password">د پټ نوم بدلول</string>
     <string name="current_password">اوسنی پټ نوم</string>
-    <string name="confirm_password_unchanged">د پټ نوم تأیدول (ندی بدل شوی)</string>
     <string name="add">زیاتول</string>
     <string name="users">کارن (کار اخیستونکي)</string>
-    <string name="new_person">نوی کس</string>
-    <string name="sub_locations">فرعی ځایونه/موقعیت</string>
     <string name="register_now">اوس نوم لیکنه وکړئ</string>
     <string name="group_activity">ډله
 \nفعالیت</string>
@@ -348,7 +232,6 @@
     <string name="processing">بهیر</string>
     <string name="uploading">د پورته کیدو په حالت کې</string>
     <string name="created_partnership">جوړه شوې په ملتیا د:</string>
-    <string name="content_type">د محتیواتو ډول</string>
     <string name="number_students_completed" value="206">د محتویاتو کارول - د زده کوونکو شمیر چې محتویات یې بشپړ کړي</string>
     <string name="percent_students_attended" value="211">حاضری - سلنه د زده کوونکو چې حاضر شوی</string>
     <string name="report">راپور</string>
@@ -358,7 +241,6 @@
     <string name="field_content_completion">د محتویاتو د بشپړ کولو حالت</string>
     <string name="accounts">ګڼون</string>
     <string name="lets_get_started_label">راځئ چې پیل یې کړو</string>
-    <string name="link">پیوند</string>
     <string name="choose_template">بیلگه غوره کول</string>
     <string name="save_as_template">د بیلگي په توګه ثبتول</string>
     <string name="audio">غږیز</string>
@@ -520,7 +402,6 @@
     <string name="not_recorded">ثبت نشو</string>
     <string name="roles">رول</string>
     <string name="edit_person">د شخص سمون</string>
-    <string name="roles_setting_desc">رول ته د ورکړ شوی اجازې اداره کول</string>
     <string name="role_assignment_setting_desc">یو کارن یا ډلې ته د رول ټاکل</string>
     <string name="audit_log_setting_desc">د حاسبی چارو خبرال لیدل او صادرول</string>
     <string name="permission_sel_question_select">د ټولنیز احساسی زده کړو پوښتنو لیدل</string>
@@ -755,7 +636,6 @@
     <string name="join_code_instructions">له خپل ښوونکی څخه کوډ وغواړئ، بیا یې لاندی ځای کې ولیکئ:</string>
     <string name="record_for_student">د زده کوونکی پرځای ثبتول</string>
     <string name="edit_site">د سایټ سمون</string>
-    <string name="sites_can_be_help_text">سایټونه د ښوونځیو، پروژو، او سازمانونو او داسی نورو لپاره جوړیدای شی. هر سایټ کولای شی د خپل کاروونکي، مدیران، محتویات، ښوونځي، ټولګي او داسی نور ولری.</string>
     <string name="copy_link">لینک کاپی کول</string>
     <string name="add_new_content">د نوی محتوا زیاتول</string>
     <string name="add_content">د محتوا زیاتول</string>
@@ -803,7 +683,6 @@
     <string name="site">سایټ</string>
     <string name="please_enter_the_linK">هیله ده د خپل د سایټ پیوند/لینک ولیکئ کوم چې ستاسو د ښوونکی یا مدیر لخوا درته درکړ شوی:</string>
     <string name="or">او یا</string>
-    <string name="connect_to_site">له سایټ سره نښلیدل</string>
     <string name="terms_and_policies_text">د شرایط او پالیسیو متن</string>
     <string name="edit_terms_and_policies">د شرایطو او پالیسیو سمون</string>
 </resources>

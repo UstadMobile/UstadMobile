@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.db.dao.PersonDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
@@ -11,7 +12,7 @@ import com.ustadmobile.core.view.PersonListView.Companion.ARG_EXCLUDE_PERSONUIDS
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.view.ScopedGrantEditView.Companion.ARG_GRANT_TO_GROUPUID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
@@ -21,7 +22,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class PersonListPresenter(context: Any, arguments: Map<String, String>, view: PersonListView,
-                          di: DI, lifecycleOwner: DoorLifecycleOwner)
+                          di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<PersonListView, Person>(context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
 
     private var filterExcludeMembersOfClazz: Long = 0
@@ -53,6 +54,9 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
+        //Not ideal, but if we are filtering to exclude members of a course, this means we are in add to course mode
+        view.inviteViaLinkVisibile  = (arguments[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L) != 0L
+
         return if(arguments[ARG_HIDE_PERSON_ADD] !== null){
             false
         }else {
@@ -169,10 +173,10 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     companion object {
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.first_name, PersonDao.SORT_FIRST_NAME_ASC, true),
-                SortOrderOption(MessageID.first_name, PersonDao.SORT_FIRST_NAME_DESC, false),
-                SortOrderOption(MessageID.last_name, PersonDao.SORT_LAST_NAME_ASC, true),
-                SortOrderOption(MessageID.last_name, PersonDao.SORT_LAST_NAME_DESC, false)
+                SortOrderOption(MessageID.first_name, PersonDaoCommon.SORT_FIRST_NAME_ASC, true),
+                SortOrderOption(MessageID.first_name, PersonDaoCommon.SORT_FIRST_NAME_DESC, false),
+                SortOrderOption(MessageID.last_name, PersonDaoCommon.SORT_LAST_NAME_ASC, true),
+                SortOrderOption(MessageID.last_name, PersonDaoCommon.SORT_LAST_NAME_DESC, false)
         )
 
         const val RESULT_PERSON_KEY = "Person"

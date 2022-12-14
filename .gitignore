@@ -222,6 +222,8 @@ tools/unused_strings.txt
 app-ktor-server/server.conf
 app-ktor-server/devmode.conf
 app-ktor-server/application.conf
+app-ktor-server/ustad-server.conf
+app-ktor-server/log
 
 #data directory for running the server
 app-ktor-server/data
@@ -235,6 +237,10 @@ app-react-e2e-test/src/test/resources/admin.txt
 
 #localconfig copied into web resources by Gradle
 app-react/src/main/resources/locales
+
+#location for tests screenshots
+test-end-to-end/android-maestro/results
+test-end-to-end/android-maestro/e2e-tests/results
 
 
 

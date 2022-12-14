@@ -9,11 +9,11 @@ import org.junit.Test
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.PersonParentJoinDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 
 
@@ -25,7 +25,9 @@ import com.ustadmobile.core.util.activeRepoInstance
 import kotlinx.coroutines.runBlocking
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.core.util.test.waitUntil
+import com.ustadmobile.door.lifecycle.DoorState
 import org.kodein.di.DI
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
@@ -50,7 +52,7 @@ class ParentalConsentManagementPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoPersonParentJoinDaoSpy: PersonParentJoinDao
 
@@ -63,9 +65,7 @@ class ParentalConsentManagementPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         di = DI {

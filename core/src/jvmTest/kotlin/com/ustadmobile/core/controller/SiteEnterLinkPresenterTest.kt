@@ -7,8 +7,10 @@ import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
 import com.ustadmobile.util.test.rules.bindPresenterCoroutineRule
 import io.ktor.client.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.json.*
+import io.ktor.serialization.gson.*
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -56,7 +58,9 @@ class SiteEnterLinkPresenterTest {
             bind<UstadMobileSystemImpl>() with singleton { impl }
             bind<HttpClient>() with singleton {
                 HttpClient() {
-                    install(JsonFeature)
+                    install(ContentNegotiation) {
+                        gson()
+                    }
                     install(HttpTimeout)
                 }
             }

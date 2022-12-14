@@ -1,16 +1,16 @@
 package com.ustadmobile.core.db.dao
 
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.lib.db.entities.UserSession
 
 @Repository
-@Dao
-abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
+@DoorDao
+expect abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
 
     @Query("""
      REPLACE INTO HolidayCalendarReplicate(hcPk, hcDestination)
@@ -74,17 +74,17 @@ abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
                AND CAST(holActive AS INTEGER) = 1) AS numEntries 
              FROM HolidayCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1 AND 
              umCalendarCategory = ${HolidayCalendar.CATEGORY_HOLIDAY}""")
-    abstract fun findAllHolidaysWithEntriesCount(): DoorDataSourceFactory<Int, HolidayCalendarWithNumEntries>
+    abstract fun findAllHolidaysWithEntriesCount(): DataSourceFactory<Int, HolidayCalendarWithNumEntries>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(list: List<HolidayCalendar>)
 
     @Query("SELECT * FROM HolidayCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1 AND umCalendarCategory = "
             + HolidayCalendar.CATEGORY_HOLIDAY)
-    abstract fun findAllHolidaysLiveData(): DoorLiveData<List<HolidayCalendar>>
+    abstract fun findAllHolidaysLiveData(): LiveData<List<HolidayCalendar>>
 
     @Query("SELECT * FROM HolidayCalendar WHERE umCalendarUid = :uid AND CAST(umCalendarActive AS INTEGER) = 1")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<HolidayCalendar?>
+    abstract fun findByUidLive(uid: Long): LiveData<HolidayCalendar?>
 
     @Update
     abstract suspend fun updateAsync(entity: HolidayCalendar):Int

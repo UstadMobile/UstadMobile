@@ -7,7 +7,6 @@ import com.ustadmobile.core.util.ext.countWords
 import com.ustadmobile.core.view.TextAssignmentEditView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
-import com.ustadmobile.mui.components.TypographyVariant
 import com.ustadmobile.mui.components.spacingUnits
 import com.ustadmobile.mui.components.umTypography
 import com.ustadmobile.util.StyleManager
@@ -15,6 +14,7 @@ import com.ustadmobile.util.UmProps
 import com.ustadmobile.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.view.ext.umItem
 import com.ustadmobile.view.ext.umSpacer
+import mui.material.styles.TypographyVariant
 import react.RBuilder
 import react.setState
 import styled.css

@@ -37,21 +37,7 @@
     <string name="download_state_downloaded"><b>ဒေါင်းလုပ်ပြီးစီးပါပြီ</b>စုစုပေါင်းပစ္စည်းများ၏ %1$s,သင်၏ကိရိယာသိုလှောင်မှု၏ %2$s ခန့်ကိုအသုံးပြုနေသည်။.</string>
     <string name="no_app_found">ဖိုင်ဖွင့်ရန်အက်ပလီကေးရှင်းမရှိပါ</string>
     <string name="multiple_choice">ရွေးချယ်မှုများစွာ</string>
-    <string name="content_type_fill_the_blanks">ကွက်လပ်ဖြည့်ပါ</string>
-    <string name="content_font_12">12မှတ်</string>
-    <string name="content_source_camera">ကင်မရာကိုမှသည်</string>
-    <string name="content_media_message">အဘယ်အရာကိုမီဒီယာအမျိုးအစားကိုသင်ဖမ်းမိဖို့လိုပါသနည်း\?</string>
-    <string name="content_option_page">နယူးစာမျက်နှ</string>
-    <string name="content_add_page">စာမျက်နှာပေါင်းထည့်ပါ</string>
-    <string name="content_update_document_title">ကျေးဇူးပြု၍ မှတ်တမ်းကိုတင်ပါ</string>
     <string name="content_editor_page_delete_failure_message">ဝမ်းနည်းပါတယ်, သင်ဒီစာမျက်နှာမဖျက်နိုင်ပါ</string>
-    <string name="content_editor_menu_text_formatting">စာသားပုံစံချခြင်း</string>
-    <string name="content_editor_menu_indent">ကုန်အမှာစာ</string>
-    <string name="content_editor_menu_strikesthrough">မှတဆင့်သပိတ်မှောက်</string>
-    <string name="content_editor_menu_align_center">စင်တာ</string>
-    <string name="content_editor_link_text">လင့်ခ်စာသား</string>
-    <string name="content_editor_link_error">လင့်စာသားသို့မဟုတ်ယူနီဖောင်းအရင်းအမြစ်တည်နေရာသည်အချည်းနှီးမဖြစ်နိုင်ပါ, ထပ်ကြိုးစားပါ</string>
-    <string name="permission_camera_title">ကင်မရာနှင့်ဖိုင်ခွင့်ပြုချက်လိုအပ်သည်</string>
     <string name="permission_camera_message">ဓာတ်ပုံနှင့်ဗီဒီယိုများရိုက်ကူးရန်အတွက်ဤအက်ပ်သည်ကင်မရာနှင့်ဖိုင်ခွင့်ပြုချက်နှစ်ခုလုံးလိုအပ်သည်</string>
     <string name="file_required_prompt">တင်သွင်းမည့်ဖိုင်ကိုမရွေးပါ၊ ထပ်မံကြိုးစားပါ</string>
     <string name="content_creation_folder_update_message">ဖိုလ်ဒါကိုအောင်အောင်မြင်မြင်မွမ်းမံခဲ့သည်</string>
@@ -106,7 +92,6 @@
     <string name="share_offline_dialog_message">သင်သည်ဤအက်ပလီကေးရှင်းကိုအော့ဖ်လိုင်းမျှဝေနိုင်သည်။ သင်မျှဝေလိုသည့်ကိရိယာပေါ်တွင် -
 \n၁။ ချိန်ညှိချက်များ&gt; ဘလူးတုသ် ချိန်ညှိချက်များကိုဖွင့်ပါ။.
 \n၂။ စက်ပစ္စည်းကိုမြင်နိုင်အောင်လုပ်ပါ။.</string>
-    <string name="content_editor_menu_redo">ဗားရှင်းပြီးနောက်ရွှေ့ပါ</string>
     <string name="loading">တင်နေသည်</string>
     <string name="deleting">ဖျက်သည်</string>
     <string name="processing">လုပ်ဆောင်နေသည်</string>
@@ -204,52 +189,13 @@
     <string name="entry_details_license">လိုင်စင်:</string>
     <string name="file_not_found">ဖိုင်ရှာမတွေ့ပါ</string>
     <string name="preview">တင်ကူးသိမြင်</string>
-    <string name="content_type_multimedia">မာလ်တီမီဒီယာ</string>
-    <string name="content_type">အကြောင်းအရာအမျိုးအစား</string>
-    <string name="link">ဆက်ဆံခြင်း</string>
-    <string name="content_format_paragraph">စာပိုဒ်</string>
-    <string name="content_direction_ltr">ဘယ်မှညာ</string>
-    <string name="content_direction_rtl">ညာဘက်မှလက်ဝဲသို့</string>
-    <string name="content_font_8">8 မှတ်</string>
     <string name="content_font_10">10မှတ်</string>
-    <string name="content_font_14">14မှတ်</string>
-    <string name="content_font_18">18မှတ်</string>
-    <string name="content_font_24">24မှတ်</string>
-    <string name="content_font_36">36မှတ်</string>
-    <string name="content_insert_options">ထည့်ပါ</string>
-    <string name="content_source_device">ကိရိယာမှ</string>
-    <string name="content_prepare_file">ဖိုင်ပြင်ဆင်နေသည် ...</string>
     <string name="content_media_photo">ဓာတ်ပုံ</string>
     <string name="video">ဗွီဒီယို</string>
-    <string name="content_media_title">မီဒီယာအမျိုးအစား</string>
-    <string name="content_blank_page_title">ဗလာစာရွက်</string>
-    <string name="content_blank_doc_click_label">ကလစ်</string>
-    <string name="content_blank_doc_start_label">စတင်တည်းဖြတ်ရန်။.</string>
-    <string name="content_untitled_page">ခေါင်းစဉ်မဲ့စာမျက်နှ</string>
-    <string name="content_untitled_document">ခေါင်းစဉ်မဲ့စာရွက်စာတမ်း</string>
-    <string name="content_update_page_title">စာမျက်နှာအသစ်မွမ်းမံခြင်း</string>
     <string name="content_action_page_remove">ဖယ်ရှားစာမျက်နှ</string>
-    <string name="content_editor_directionality">လမ်းညွှန်</string>
-    <string name="content_editor_menu_undo">ပြန်လုပ်ရ</string>
-    <string name="content_editor_menu_pages">စာမျက်နှာများ</string>
-    <string name="content_editor_menu_unorderd_list">နံပါတ်စဉ်မပါတဲ့စာရင်း</string>
-    <string name="content_editor_menu_orderd_list">မှာယူထားသောစာရင်း</string>
-    <string name="content_editor_menu_underline">လိုင်းအောက်</string>
-    <string name="content_editor_menu_italic">စာလုံးစောင်း</string>
     <string name="content_editor_menu_bold">ရဲရင့်သော</string>
-    <string name="content_editor_menu_fontsize">စာလုံးအရွယ်အစား</string>
-    <string name="content_editor_menu_align_left">လက်ဝဲ</string>
-    <string name="content_editor_menu_align_right">မှန်သေ</string>
-    <string name="content_editor_menu_superscript">စူပါဇာတ်ညွှန်း</string>
-    <string name="content_editor_menu_subscript">ခေါင်းစဉ်ခွဲ</string>
-    <string name="content_editor_link_url">ဆက်ဆံခြင်း ယူနီဖောင်းအရင်းအမြစ်တည်နေရာ</string>
-    <string name="content_editor_link_insert">ထည့်ပါ ဆက်ဆံခြင်း</string>
     <string name="content_editor_link_remove">ဖယ်ရှားလိုက်ပါ ဆက်ဆံခြင်း</string>
-    <string name="content_editor_create_new_import">သွင်းကုန်ဖိုင်</string>
-    <string name="content_editor_create_new_import_link">တင်သွင်း ဆက်ဆံခြင်း</string>
-    <string name="content_editor_create_new_content">အကြောင်းအရာအသစ်ဖန်တီးပါ</string>
     <string name="content_editor_create_new_category">ဖိုင်တွဲအသစ်</string>
-    <string name="content_editor_create_new_title">အကြောင်းအရာထည့်ပါ</string>
     <string name="content_creation_storage_option_title">သိုလှောင်မှုရွေးစရာ</string>
     <string name="content_creation_folder_new_message">ဖိုင်တွဲအသစ်ကိုအောင်မြင်စွာထည့်ပြီးပါပြီ</string>
     <string name="error_message_load_page">စာမျက်နှာဝန်ပျက်ကွက်</string>
@@ -370,7 +316,6 @@
     <string name="sel_question_set_to_use">SEL အသုံးပြုရန်မေးခွန်း</string>
     <string name="attendance_percentage">တက်ရောက်သူရာခိုင်နှုန်း:</string>
     <string name="group_setting_desc">အုပ်စုများထည့်ခြင်း၊ ဖယ်ရှားခြင်းသို့မဟုတ်ပြုပြင်ခြင်း</string>
-    <string name="roles_setting_desc">အခန်းကဏ္ဍအားပေးပြီးမှခွင့်ပြုချက်ကိုစီမံခန့်ခွဲ</string>
     <string name="role_assignment_setting_desc">အသုံးပြုသူသို့မဟုတ်အုပ်စုတစ်ခုသို့အခန်းကဏ္များကိုသတ်မှတ်ပါ</string>
     <string name="audit_log_setting_desc">ကြည့်ရန်နှင့်ပို့ကုန်စာရင်းစစ်မှတ်တမ်း</string>
     <string name="role_assignment">အခန်းက္ပတာဝန်ကျတဲ့နေရာ</string>
@@ -428,7 +373,6 @@
     <string name="record_for_student">ကျောင်းသားများအတွက်မှတ်တမ်း</string>
     <string name="record_attendance_for_most_recent_occurrence">လတ်တလောတည်ဆဲဖြစ်ပျက်မှုအဘို့စံချိန်တက်ရောက်သူ</string>
     <string name="please_enter_the_linK">ကျေးဇူးပြု၍ သင့်ဆရာ၊ ဆရာမမှစီမံခန့်ခွဲသူမှပေးသောသင်၏ဆိုဒ် အတွက် ဆက်ဆံခြင်း ကိုရိုက်ထည့်ပါ။:</string>
-    <string name="sites_can_be_help_text">ကျောင်းများ၊ စီမံကိန်းများနှင့်အဖွဲ့အစည်းများအတွက်ဆိုဒ်များကိုဖန်တီးနိုင်သည်။ ဆိုဒ် တစ်ခုစီတွင်၎င်း၏ကိုယ်ပိုင်သုံးစွဲသူများ၊ အုပ်ချုပ်သူများ၊ အကြောင်းအရာ၊ အတန်းများ၊ ကျောင်းများနှင့်အခြားအရာများရှိနိုင်သည်။.</string>
     <string name="store_description_full">Ustad Mobile သည်သုံးစွဲသူများအားအွန်လိုင်းသို့မဟုတ်အော့ဖ်လိုင်းရှိပွင့်လင်းသောပညာရေးဆိုင်ရာအရင်းအမြစ်များကို ၀ င်ရောက်နိုင်ရန် ပွင့်လင်းအရင်းအမြစ် လေှျာက်လွှာ တစ်ခုဖြစ်သည်။လေှျာက်လွှာ နှင့် ကေြနပ်သော နှစ်ခုလုံးကို devices များအကြား အော့ဖ်လိုင်း လုပ်နိုင်သည်။.
 \n 
 \nUstad Mobile သည်အင်တာနက်ပေါ်မှ ဦး ဆောင်ဖွင့်လှစ်သောပညာရေးဆိုင်ရာအရင်းအမြစ်များ (OER) ဆိုဒ်များမှလိုင်စင်ရပါဝင်သည့်အကြောင်းအရာများကိုဖော်ပြသည်။:
@@ -442,7 +386,6 @@
 \n အမေရိကန်အသံ၊
 \n 
 \nအကြောင်းအရာကိုပြင်ပအကြောင်းအရာပံ့ပိုးသူများကလိုင်စင်အောက်တွင်ပေးအပ်သည်။ Ustad Mobile သည်အတိအလင်းဖော်ပြခြင်းမရှိလျှင်၎င်းသည်မည်သည့်အကြောင်းအရာပံ့ပိုးသူမှမထောက်ခံပါ။.</string>
-    <string name="content_editor_menu_outdent">အပြင်ပန်း</string>
     <string name="field_content_progress">အကြောင်းအရာတိုးတက်နေသည်</string>
     <string name="field_attendance_percentage">တက်ရောက်သူရာခိုင်နှုန်း</string>
     <string name="condition_is">သည်</string>
@@ -734,7 +677,6 @@
     <string name="site">က်ဘ်ဆိုက်</string>
     <string name="site_link">ဆိုက်ကိုလင့်ခ်</string>
     <string name="or">သို့မဟုတ်</string>
-    <string name="connect_to_site">ဆိုဒ်သို့ဆက်သွယ်ပါ</string>
     <string name="terms_and_policies_text">စည်းမျဉ်းစည်းကမ်းများနှင့်မူဝါဒများစာသား</string>
     <string name="edit_terms_and_policies">စည်းကမ်းချက်များနှင့်မူဝါဒများကိုတည်းဖြတ်ပါ</string>
 </resources>

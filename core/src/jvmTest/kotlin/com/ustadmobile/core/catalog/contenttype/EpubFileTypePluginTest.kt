@@ -6,6 +6,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentjob.ContentJobProcessContext
 import com.ustadmobile.core.contentjob.DummyContentJobItemTransactionRunner
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.ContainerStorageManager
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.DoorTag
@@ -20,6 +21,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import java.io.File
 
 class EpubFileTypePluginTest {
 
@@ -38,13 +40,18 @@ class EpubFileTypePluginTest {
 
     private lateinit var db: UmAppDatabase
 
+    private lateinit var containerDir: File
+
     @Before
     fun setup(){
-
+        containerDir = tmpFolder.newFolder()
 
         endpointScope = EndpointScope()
         di = DI {
             import(ustadTestRule.diModule)
+            bind<ContainerStorageManager>() with scoped(endpointScope).singleton {
+                ContainerStorageManager(listOf(containerDir))
+            }
         }
 
         val accountManager: UstadAccountManager by di.instance()
@@ -89,10 +96,10 @@ class EpubFileTypePluginTest {
         val tempFolder = tmpFolder.newFolder("newFolder")
         val tempUri = DoorUri.parse(tempFolder.toURI().toString())
         val accountManager: UstadAccountManager by di.instance()
-        val repo: UmAppDatabase = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+        val repo: UmAppDatabase = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
+        val endpoint = accountManager.activeEndpoint
 
-
-        val epubPlugin = EpubTypePluginCommonJvm(Any(), accountManager.activeEndpoint, di)
+        val epubPlugin = EpubTypePluginCommonJvm(Any(), endpoint, di)
         runBlocking{
 
             val doorUri = DoorUri.parse(mockWebServer.url("/com/ustadmobile/core/contenttype/childrens-literature.epub").toString())

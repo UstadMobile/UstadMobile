@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.StateDao
 import com.ustadmobile.core.contentformats.xapi.Actor
 import com.ustadmobile.core.contentformats.xapi.State
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.deleteAndInsertNewStateContent
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.getAgent
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateState
@@ -18,12 +19,13 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.util.*
+import com.ustadmobile.door.ext.DoorTag
 
 class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiStateEndpoint {
 
-    private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+    private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
 
-    private val repo: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+    private val repo: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     private val gson: Gson by di.instance()
 
@@ -103,7 +105,8 @@ class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiS
 
         val agentEntity = getAgent(db.agentDao, db.personDao, agent)
 
-        repo.stateDao.setStateInActive(stateId, agentEntity.agentUid, activityId, registration, false)
+        repo.stateDao.setStateInActive(stateId, agentEntity.agentUid, activityId, registration,
+            false, getSystemTimeInMillis())
     }
 
 
@@ -113,7 +116,8 @@ class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiS
 
         val agentEntity = getAgent(db.agentDao, db.personDao, agent)
 
-        repo.stateDao.updateStateToInActive(agentEntity.agentUid, activityId, registration, false)
+        repo.stateDao.updateStateToInActive(agentEntity.agentUid, activityId, registration,
+            false, getSystemTimeInMillis())
     }
 
 }

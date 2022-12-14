@@ -1,8 +1,7 @@
 # Ustad Mobile
 
-Ustad Mobile enables learners to access and share content offline. It uses peer-to-peer offline
-networking (using Bluetooth Low Energy and WiFi Direct) to enable users to share content directly
-without any additional hardware.
+Ustad Mobile enables users to teach, learn, and share: online or offline. It is a learning
+management system (LMS) built from the ground up to work with or without connectivity.
 
 Supported content formats:
 * [EPUB content](http://idpf.org/epub): Anything you can do with HTML5 can be in EPUB (video,
@@ -20,7 +19,7 @@ See [app-ktor-server](app-ktor-server/) for instructions on building the server 
 
 ## Getting started building from source:
 
-* __Install latest Node-14x__ as per [Instructions on Node website](https://nodejs.org/en/download/).
+* __Install latest Node-18x__ as per [Instructions on Node website](https://nodejs.org/en/download/).
   Kotlin/JS depends on it to build
 
 * __Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
@@ -62,8 +61,8 @@ e.g. http://192.168.1.123:8087/ where 192.168.1.123 is the IP address of your de
 Contributions are welcome! If you're unsure about anything, please create an issue and label it as
 a question.
 
-* __Localization__ - Localization is powered by our Weblate server at [https://weblate.ustadmobile.com](https://weblate.ustadmobile.com).
- Please register on the weblate server [create an issue](https://github.com/UstadMobile/UstadMobile/issues/new) 
+* __Localization__ - Localization is done using on our [Weblate project](https://hosted.weblate.org/projects/ustad-mobile/).
+ Please register on Weblate and then [create an issue](https://github.com/UstadMobile/UstadMobile/issues/new) 
  with the subject "Localization - language name" and let us know what language you would like to 
  translate into. We can then give you permission to start translating!
 * __Feature requests__ - Let us know what features you would like to see. [Create an issue](https://github.com/UstadMobile/UstadMobile/issues/new)
@@ -88,12 +87,11 @@ Code is contained (mostly) in the following modules:
   app-android-launcher but can also be used as a library in other apps.
 * [app-react](app-react/): Contains the web version implemented using Kotlin/JS
 * [app-android-launcher/](app-android-launcher/): Standalone app launcher that uses app-android.
-* [lib-database](lib-database/): core Database and Data Access Object (DAO) classes. See this
-module's README for further details on the relationship between different database modules.
-* [lib-database-entities](lib-database-entities): Database entity objects
-* [lib-database-android](lib-database-android/) Android database
-implementation (a Room Persistence Framework database generated from lib-database).
+* [lib-database](lib-database/): contains the database, DAO, and entity classes.
 * [lib-util](lib-util/): Small utility functions
+* [test-end-to-end](test-end-to-end/) End-to-end tests that run the app and server.
+* [testserver-controller](testserver-controller/) An HTTP server that can control starting and 
+  stopping the main server, and manage adb screen recording. Used by end-to-end testing.
 
 To build debug / release versions for any given platform please see the README in the directory for that platform.
 

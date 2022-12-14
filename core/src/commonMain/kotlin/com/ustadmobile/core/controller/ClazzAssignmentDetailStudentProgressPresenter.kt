@@ -14,7 +14,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SUBMITER_UID
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.attachments.retrieveAttachment
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.door.ext.withDoorTransactionAsync
@@ -29,7 +29,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
     arguments: Map<String, String>,
     view: ClazzAssignmentDetailStudentProgressView,
     di: DI,
-    lifecycleOwner: DoorLifecycleOwner,
+    lifecycleOwner: LifecycleOwner,
     // to enter the private comment to student/group
     val newPrivateCommentListener: DefaultNewCommentItemListener =
         DefaultNewCommentItemListener(
@@ -174,7 +174,7 @@ class ClazzAssignmentDetailStudentProgressPresenter(
         val assignment = view.entity ?: return false
         presenterScope.launch {
 
-            repo.withDoorTransactionAsync(UmAppDatabase::class) { txDb ->
+            repo.withDoorTransactionAsync { txDb ->
                 val lastSubmission = txDb.courseAssignmentSubmissionDao.findLastSubmissionFromStudent(
                     selectedSubmitterUid, assignment.caUid) ?: return@withDoorTransactionAsync
 

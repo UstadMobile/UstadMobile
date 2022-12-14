@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.db.ext.getFirstValue
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.schedule.localMidnight
@@ -16,11 +17,12 @@ import com.ustadmobile.core.view.CourseGroupSetListView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.door.getFirstValue
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -30,12 +32,11 @@ import org.kodein.di.instance
 
 class ClazzAssignmentEditPresenter(context: Any,
                                    arguments: Map<String, String>, view: ClazzAssignmentEditView,
-                                   lifecycleOwner: DoorLifecycleOwner,
+                                   lifecycleOwner: LifecycleOwner,
                                    di: DI)
     : UstadEditPresenter<ClazzAssignmentEditView, CourseBlockWithEntity>(context, arguments, view, di, lifecycleOwner) {
 
-
-    private val json: Json by instance()
+    private val onLoadJsonComplete = CompletableDeferred<Boolean>()
 
     enum class TextLimitTypeOptions(val optionVal: Int, val messageId: Int){
         WORDS(ClazzAssignment.TEXT_WORD_LIMIT, MessageID.words),
@@ -98,10 +99,14 @@ class ClazzAssignmentEditPresenter(context: Any,
             SAVEDSTATE_KEY_SUBMISSION_TYPE,
             ListSerializer(CourseGroupSet.serializer()), CourseGroupSet::class) {
             val group = it.firstOrNull() ?: return@observeSavedStateResult
-            entity?.assignment?.caGroupUid = group.cgsUid
-            view.groupSet = group
-            view.entity = entity
-            requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
+            presenterScope.launch(doorMainDispatcher()) {
+                onLoadJsonComplete.await()
+
+                entity?.assignment?.caGroupUid = group.cgsUid
+                view.groupSet = group
+                view.entity = entity
+                requireSavedStateHandle()[SAVEDSTATE_KEY_SUBMISSION_TYPE] = null
+            }
         }
     }
 
@@ -133,7 +138,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             repo.courseAssignmentSubmissionDao
                 .checkNoSubmissionsMade(editEntity.assignment?.caUid ?: 0)
                 .observeWithLifecycleOwner(lifecycleOwner){
-                    view.groupSetEnabled = it == true
+                    view.groupSetEnabled = (it ?: true) == true
                 }
 
             clazzUid = editEntity.assignment?.caClazzUid ?: arguments[ARG_CLAZZUID]?.toLong() ?: 0
@@ -152,6 +157,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             val timeZone = clazzWithSchool.effectiveTimeZone()
             view.timeZone = timeZone
             loadEntityIntoDateTime(editEntity)
+            onLoadJsonComplete.complete(true)
         }
 
         return editEntity
@@ -163,7 +169,7 @@ class ClazzAssignmentEditPresenter(context: Any,
         if (entityVal != null) {
             saveDateTimeIntoEntity(entityVal)
         }
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, json, CourseBlockWithEntity.serializer(),
                 entityVal)
     }
 

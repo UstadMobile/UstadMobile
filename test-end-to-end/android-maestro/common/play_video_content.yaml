@@ -1,0 +1,10 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn:
+   text: "Play"
+- extendedWaitUntil:
+     notVisible:
+        text: "Pause"
+     timeout: 120000
+
+

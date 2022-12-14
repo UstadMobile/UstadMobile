@@ -1,14 +1,14 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.StateEntity
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
-abstract class StateDao : BaseDao<StateEntity> {
+expect abstract class StateDao : BaseDao<StateEntity> {
 
     @Query("""
      REPLACE INTO StateEntityReplicate(sePk, seDestination)
@@ -71,16 +71,34 @@ abstract class StateDao : BaseDao<StateEntity> {
     @SqliteOnly
     abstract fun findStateIdByAgentAndActivity(agentUid: Long, activityId: String, registration: String, since: String): List<StateEntity>
 
-    @Query("""UPDATE StateEntity SET isIsactive = :isActive,
-            stateLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
-            WHERE agentUid = :agentUid AND activityId = :activityId 
-            AND registration = :registration AND isIsactive""")
-    abstract fun updateStateToInActive(agentUid: Long, activityId: String, registration: String, isActive: Boolean)
+    @Query("""
+        UPDATE StateEntity 
+           SET isIsactive = :isActive,
+               stateLct = :updateTime
+         WHERE agentUid = :agentUid AND activityId = :activityId 
+           AND registration = :registration AND isIsactive
+    """)
+    abstract fun updateStateToInActive(
+        agentUid: Long,
+        activityId: String,
+        registration: String,
+        isActive: Boolean,
+        updateTime: Long,
+    )
 
-    @Query("""UPDATE StateEntity SET isIsactive = :isActive, 
-            stateLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0) 
-            WHERE stateId = :stateId AND agentUid = :agentUid 
-            AND activityId = :activityId AND registration = :registration 
-            AND isIsactive""")
-    abstract fun setStateInActive(stateId: String, agentUid: Long, activityId: String, registration: String, isActive: Boolean)
+    @Query("""
+        UPDATE StateEntity 
+          SET isIsactive = :isActive, 
+              stateLct = :updateTime
+        WHERE stateId = :stateId AND agentUid = :agentUid 
+          AND activityId = :activityId AND registration = :registration 
+          AND isIsactive""")
+    abstract fun setStateInActive(
+        stateId: String,
+        agentUid: Long,
+        activityId: String,
+        registration: String,
+        isActive: Boolean,
+        updateTime: Long,
+    )
 }

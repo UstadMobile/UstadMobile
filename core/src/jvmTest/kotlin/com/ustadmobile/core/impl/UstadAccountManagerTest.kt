@@ -27,8 +27,10 @@ import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.json.*
+import io.ktor.serialization.gson.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -142,17 +144,16 @@ class UstadAccountManagerTest {
                 Pbkdf2Params(iterations = 10000, keyLength = 512)
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, dbName)
+                DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite:build/tmp/$dbName.sqlite")
                     .addSyncCallback(nodeIdAndAuth)
                     .build()
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
             }
 
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository(
+            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
+                spy(instance<UmAppDatabase>(tag = DoorTag.TAG_DB).asRepository(
                     RepositoryConfig.repositoryConfig(
                         Any(), context.url, nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
                         instance(), instance()
@@ -168,7 +169,9 @@ class UstadAccountManagerTest {
 
             bind<HttpClient>() with singleton {
                 HttpClient(OkHttp) {
-                    install(JsonFeature)
+                    install(ContentNegotiation) {
+                        gson()
+                    }
                     install(HttpTimeout)
                 }
             }

@@ -1,8 +1,9 @@
 package com.ustadmobile.core.util
 
+import com.ustadmobile.core.controller.UstadEditPresenterJsonLoader
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.db.dao.OneToManyJoinDao
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.MutableLiveData
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import org.kodein.di.DI
@@ -18,25 +19,23 @@ import kotlin.reflect.KClass
  * false).
  */
 open class OneToManyJoinEditHelper<T : Any, K>(val pkGetter: (T) -> K,
-                                         val serializationKey: String,
-                                         val serializationStrategy: SerializationStrategy<List<T>>? = null,
-                                         val deserializationStrategy: DeserializationStrategy<List<T>>? = null,
-                                         val newPk: K,
-                                         editPresenter: UstadEditPresenter<*, *>,
-                                         val entityClass: KClass<T>,
-                                         val pkSetter: T.(K) -> Unit,
-                                         open protected val fakePkGenerator: () -> K): UstadEditPresenter.JsonLoadListener  {
+                                               val serializationKey: String,
+                                               val serializationStrategy: SerializationStrategy<List<T>>? = null,
+                                               val deserializationStrategy: DeserializationStrategy<List<T>>? = null,
+                                               val newPk: K,
+                                               editPresenter: UstadEditPresenterJsonLoader,
+                                               val di: DI,
+                                               val entityClass: KClass<T>,
+                                               val pkSetter: T.(K) -> Unit,
+                                               open protected val fakePkGenerator: () -> K): UstadEditPresenter.JsonLoadListener  {
 
-    val liveList: DoorMutableLiveData<List<T>> = DoorMutableLiveData(listOf())
+    val liveList: MutableLiveData<List<T>> = MutableLiveData(listOf())
 
     protected val pksToInsert = mutableListOf<K>()
 
     protected val pksToDeactivate = mutableListOf<K>()
 
-    private val di: DI
-
     init {
-        di = editPresenter.di
         editPresenter.addJsonLoadListener(this)
     }
 
@@ -52,18 +51,18 @@ open class OneToManyJoinEditHelper<T : Any, K>(val pkGetter: (T) -> K,
             pksToInsert += pkGetter(entity)
             val listVal = liveList.getValue() ?: return
             val newList = listVal + entity
-            liveList.setVal(newList)
+            liveList.setValue(newList)
         }else {
             val newList = currentList.toMutableList()
             newList[entityIndex] = entity
-            liveList.setVal(newList)
+            liveList.setValue(newList)
         }
     }
 
     fun onDeactivateEntity(entity: T) {
         val listVal = liveList.getValue()?.toMutableList() ?: return
         val pkToRemove = pkGetter(entity)
-        liveList.sendValue(listVal.filter { pkGetter(it) != pkToRemove} )
+        liveList.postValue(listVal.filter { pkGetter(it) != pkToRemove} )
         pksToDeactivate += pkToRemove
     }
 
@@ -90,13 +89,15 @@ open class OneToManyJoinEditHelper<T : Any, K>(val pkGetter: (T) -> K,
         val listJsonStr = savedState?.get(serializationKey) ?: return
         val deserializer = deserializationStrategy ?: return
         val listVal = safeParseList(di, deserializer, entityClass, listJsonStr)//Json.parse(deserializer, listJsonStr)
-        liveList.setVal(listVal)
+        liveList.setValue(listVal)
     }
 
     /**
-     * Commits the results of the editing to the database
+     * Commits the results of the editing to the database.
+     *
+     * Should not be used anymore directly. It cannot take care of deactivation.
      */
-    open suspend fun commitToDatabase(dao: OneToManyJoinDao<in T>, fkSetter: (T) -> Unit) {
+    protected open suspend fun commitToDatabase(dao: OneToManyJoinDao<in T>, fkSetter: (T) -> Unit) {
         dao.insertListAsync(entitiesToInsert.also { it.forEach {
             fkSetter(it)
             pkSetter(it, newPk)

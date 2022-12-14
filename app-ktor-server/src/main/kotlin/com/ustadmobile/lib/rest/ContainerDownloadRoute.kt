@@ -1,22 +1,23 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ContainerEntryFileCommon
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
 import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.hexStringToByteArray
+import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.util.RANGE_CONTENT_ACCEPT_RANGE_HEADER
 import com.ustadmobile.lib.util.RANGE_CONTENT_RANGE_HEADER
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
 import io.ktor.http.*
-import io.ktor.http.content.OutgoingContent
-import io.ktor.request.*
-import io.ktor.response.header
-import io.ktor.response.respond
-import io.ktor.response.respondFile
-import io.ktor.routing.*
+import io.ktor.http.content.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.toMap
 import io.ktor.utils.io.ByteWriteChannel
@@ -73,7 +74,7 @@ fun Route.ContainerDownload() {
         })
     }
 
-    post("${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/download") {
+    post("${ContainerEntryFileCommon.ENDPOINT_CONCATENATEDFILES2}/download") {
         serveConcatenatedResponse2()
     }
 
@@ -107,6 +108,38 @@ fun Route.ContainerDownload() {
             call.respondFile(File(filePath))
         }else {
             call.respond(HttpStatusCode.NotFound, "No such file: $entryFileUid")
+        }
+    }
+
+    get("pdf/{containerUid}"){
+        val db: UmAppDatabase by closestDI().on(call).instance(tag = DoorTag.TAG_DB)
+        val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
+        val entries = db.containerEntryDao.findByContainer(containerUid)
+        val containerEntryFile: ContainerEntryFile? = entries[0].containerEntryFile;
+        if(containerEntryFile?.cefPath != null){
+
+            val file = containerEntryFile.cefPath?.let { it1 -> File(it1) }
+
+            if(file != null) {
+                call.response.header("Content-Type", "application/pdf")
+                call.response.header(
+                    HttpHeaders.ContentDisposition,
+
+                    ContentDisposition.Inline.withParameter(
+                        ContentDisposition.Parameters.FileName,
+                        "$containerUid.pdf"
+                    )
+                        .toString()
+                )
+                call.respondBytes(file.readBytes(), ContentType.Application.Pdf)
+
+            }else{
+                call.respond(HttpStatusCode.NotFound,
+                    "No such file path for containerUid : $containerUid")
+            }
+
+        }else {
+            call.respond(HttpStatusCode.NotFound, "No such file for containerUid: $containerUid")
         }
     }
 

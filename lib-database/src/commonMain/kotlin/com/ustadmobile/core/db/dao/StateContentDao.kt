@@ -1,15 +1,14 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
+import com.ustadmobile.door.annotation.DoorDao
 import androidx.room.Query
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.StateContentEntity
 import com.ustadmobile.lib.db.entities.UserSession
 
-@Dao
+@DoorDao
 @Repository
-abstract class StateContentDao : BaseDao<StateContentEntity> {
+expect abstract class StateContentDao : BaseDao<StateContentEntity> {
 
     @Query("""
      REPLACE INTO StateContentEntityReplicate(scePk, sceDestination)
@@ -64,10 +63,14 @@ abstract class StateContentDao : BaseDao<StateContentEntity> {
     @Query("""
         UPDATE StateContentEntity 
            SET isIsactive = :isActive,  
-               stateContentLastChangedBy = ${SyncNode.SELECT_LOCAL_NODE_ID_SQL} 
+               stateContentLct = :updateTime
          WHERE stateContentUid = :stateUid
     """)
-    abstract fun setInActiveStateContentByKeyAndUid(isActive: Boolean, stateUid: Long)
+    abstract fun setInActiveStateContentByKeyAndUid(
+        isActive: Boolean,
+        stateUid: Long,
+        updateTime: Long,
+    )
 
 
 }

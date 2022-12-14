@@ -55,18 +55,18 @@ fun UmAppDatabase.insertCourseTerminology(di: DI){
         val terminologyList = mutableListOf<CourseTerminology>()
 
         languageOptions.forEach { pair ->
-            if(pair.first.isNullOrEmpty()) return@forEach
+            if(pair.langCode.isEmpty()) return@forEach
 
             terminologyList.add(CourseTerminology().apply {
-                ctUid = (pair.first[0].code shl(8)) + (pair.second[1].code).toLong()
-                ctTitle = impl.getString(pair.first,
+                ctUid = (pair.langCode[0].code shl(8)) + (pair.langDisplay[1].code).toLong()
+                ctTitle = impl.getString(pair.langCode,
                     com.ustadmobile.core.generated.locale.MessageID.standard,
-                    Any()) + " - " + pair.second
+                    Any()) + " - " + pair.langDisplay
 
                 ctTerminology = json.encodeToString(
                     MapSerializer(kotlin.String.serializer(), kotlin.String.serializer()),
                     com.ustadmobile.core.controller.TerminologyKeys.TERMINOLOGY_ENTRY_MESSAGE_ID
-                        .map { it.key to impl.getString(pair.first, it.value, Any()) }
+                        .map { it.key to impl.getString(pair.langCode, it.value, Any()) }
                         .toMap()
                 )
             })
@@ -81,7 +81,9 @@ fun UmAppDatabase.insertCourseTerminology(di: DI){
  */
 suspend fun UmAppDatabase.initAdminUser(
     endpoint: Endpoint,
-    di: DI
+    authManager: AuthManager,
+    di: DI,
+    defaultPassword: String? = null,
 ) {
     if(this !is DoorDatabaseRepository)
         throw IllegalStateException("initAdminUser must be called on repo!")
@@ -96,9 +98,9 @@ suspend fun UmAppDatabase.initAdminUser(
         adminPerson.personUid = insertPersonAndGroup(adminPerson).personUid
 
         //Remove lower case l, upper case I, and the number 1
-        val adminPass = randomString(10, "abcdefghijkmnpqrstuvxwyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")
+        val adminPass = defaultPassword
+            ?: randomString(10, "abcdefghijkmnpqrstuvxwyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")
 
-        val authManager: AuthManager = di.on(endpoint).direct.instance()
         authManager.setAuth(adminPerson.personUid, adminPass)
 
         val adminPassFile = File(passwordFilePath, "admin.txt")

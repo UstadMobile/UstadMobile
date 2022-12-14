@@ -1,20 +1,14 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
+import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 
-@Dao
-abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
+@DoorDao
+expect abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
 
-
-    @Transaction
-    open fun insertAndSetIds(containerEntryList: List<ContainerEntry>) {
-        for (entry in containerEntryList) {
-            entry.ceUid = insert(entry)
-        }
-    }
 
     @Insert
     abstract suspend fun insertListAsync(containerEntryList: List<ContainerEntry>)
@@ -60,7 +54,7 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
                       JOIN ContentJob 
                            ON ContentJobItem.cjiJobUid = ContentJob.cjUid
                      WHERE ContentJob.cjUid = :jobId)""")
-    abstract fun deleteContainerEntriesCreatedByJobs(jobId: Long)
+    abstract suspend fun deleteContainerEntriesCreatedByJobs(jobId: Long)
 
     @Query("""
         DELETE FROM ContainerEntry

@@ -5,7 +5,7 @@ import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
 import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.StatementDao
+import com.ustadmobile.core.db.dao.findEntriesByMd5SumsSafeAsync
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.localEndOfDay
@@ -15,7 +15,7 @@ import com.ustadmobile.core.util.graph.LabelValueFormatter
 import com.ustadmobile.core.util.graph.MessageIdFormatter
 import com.ustadmobile.core.util.graph.TimeFormatter
 import com.ustadmobile.core.util.graph.UidAndLabelFormatter
-import com.ustadmobile.door.DoorDataSourceFactory
+import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
@@ -26,13 +26,8 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ScopedGrant.Companion.FLAG_NO_DELETE
 import com.ustadmobile.lib.util.randomString
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-
-fun UmAppDatabase.runPreload() {
-    GlobalScope.launch { preload() }
-}
+import com.ustadmobile.core.db.dao.getResults
 
 /**
  * Insert a new class and
@@ -426,10 +421,10 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
 }
 
 fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters, loggedInPersonUid: Long):
-        List<DoorDataSourceFactory<Int, StatementEntityWithDisplayDetails>> {
+        List<DataSourceFactory<Int, StatementEntityWithDisplayDetails>> {
 
     val queries = report.generateSql(loggedInPersonUid, dbType())
-    val statementDataSourceList = mutableListOf<DoorDataSourceFactory<Int, StatementEntityWithDisplayDetails>>()
+    val statementDataSourceList = mutableListOf<DataSourceFactory<Int, StatementEntityWithDisplayDetails>>()
     queries.forEach {
         statementDataSourceList.add(statementDao.getListResults(SimpleDoorQuery(it.value.sqlListStr, it.value.queryParams)))
     }
@@ -442,7 +437,7 @@ data class ChartData(val seriesData: List<SeriesData>,
                      val yAxisValueFormatter: LabelValueFormatter?,
                      val xAxisValueFormatter: LabelValueFormatter?)
 
-data class SeriesData(val dataList: List<StatementDao.ReportData>,
+data class SeriesData(val dataList: List<StatementReportData>,
                       val subGroupFormatter: LabelValueFormatter?,
                       val series: ReportSeries)
 
@@ -538,7 +533,7 @@ data class ContainerEntryPartition(
  */
 suspend fun UmAppDatabase.partitionContainerEntriesWithMd5(
     containerEntryFiles: List<ContainerEntryWithMd5>
-): ContainerEntryPartition {
+): ContainerEntryPartition = withDoorTransactionAsync {
     val existingFiles = containerEntryFileDao.findEntriesByMd5SumsSafeAsync(containerEntryFiles
         .mapNotNull { it.cefMd5 }, maxQueryParamListSize)
     val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
@@ -546,7 +541,7 @@ suspend fun UmAppDatabase.partitionContainerEntriesWithMd5(
     val (entriesWithFile, entriesNeedDownloaded) = containerEntryFiles
         .partition { it.cefMd5 in existingMd5s }
 
-    return ContainerEntryPartition(entriesWithFile, entriesNeedDownloaded, existingFiles)
+    ContainerEntryPartition(entriesWithFile, entriesNeedDownloaded, existingFiles)
 }
 
 /**
@@ -651,7 +646,7 @@ suspend fun UmAppDatabase.validateAndUpdateContainerSize(
 ) : Long{
     var containerSize: Long = 0
     for(i in 0 until attempts) {
-        containerSize = withDoorTransactionAsync(UmAppDatabase::class) {
+        containerSize = withDoorTransactionAsync {
             val currentSize = containerDao.getContainerSizeByUid(containerUid)
             if(currentSize != 0L)
                 return@withDoorTransactionAsync currentSize

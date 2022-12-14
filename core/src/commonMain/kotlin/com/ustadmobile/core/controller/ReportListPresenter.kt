@@ -1,14 +1,16 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ReportDao
+import com.ustadmobile.core.db.dao.ReportDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
@@ -17,7 +19,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 class ReportListPresenter(context: Any, arguments: Map<String, String>, view: ReportListView,
-        di: DI, lifecycleOwner: DoorLifecycleOwner)
+        di: DI, lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<ReportListView, Report>(context, arguments, view, di, lifecycleOwner),
         OnSortOptionSelected, OnSearchSubmitted{
 
@@ -40,7 +42,7 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
 
     private fun updateListOnView() {
         view.list = repo.reportDao.findAllActiveReport(searchText.toQueryLikeParam(),
-        loggedInPersonUid, selectedSortOption?.flag ?: ReportDao.SORT_TITLE_ASC, false)
+        loggedInPersonUid, selectedSortOption?.flag ?: ReportDaoCommon.SORT_TITLE_ASC, false)
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {
@@ -90,15 +92,18 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
             when (option) {
                 SelectionOption.HIDE -> {
                     repo.reportDao.toggleVisibilityReportItems(true,
-                            selectedItem.map { it.reportUid })
+                            selectedItem.map { it.reportUid }, systemTimeInMillis())
                     view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context), {
 
                         GlobalScope.launch(doorMainDispatcher()){
                             repo.reportDao.toggleVisibilityReportItems(false,
-                                    selectedItem.map { it.reportUid })
+                                    selectedItem.map { it.reportUid }, systemTimeInMillis())
                         }
 
                     }, MessageID.undo)
+                }
+                else -> {
+                    // Do nothing
                 }
             }
         }
@@ -109,8 +114,8 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
         const val REPORT_RESULT_KEY = "Report"
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.title, ReportDao.SORT_TITLE_ASC, true),
-                SortOrderOption(MessageID.title, ReportDao.SORT_TITLE_DESC, false)
+                SortOrderOption(MessageID.title, ReportDaoCommon.SORT_TITLE_ASC, true),
+                SortOrderOption(MessageID.title, ReportDaoCommon.SORT_TITLE_DESC, false)
         )
 
     }

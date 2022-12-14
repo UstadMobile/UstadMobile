@@ -4,7 +4,7 @@ import com.ustadmobile.core.impl.NavigateForResultOptions
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.view.CourseTerminologyListView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.lib.db.entities.CourseTerminology
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.launch
@@ -16,7 +16,7 @@ class CourseTerminologyListPresenter(
     arguments: Map<String, String>,
     view: CourseTerminologyListView,
     di: DI,
-    lifecycleOwner: DoorLifecycleOwner)
+    lifecycleOwner: LifecycleOwner)
     : UstadListPresenter<CourseTerminologyListView, CourseTerminology>(
         context,
         arguments,

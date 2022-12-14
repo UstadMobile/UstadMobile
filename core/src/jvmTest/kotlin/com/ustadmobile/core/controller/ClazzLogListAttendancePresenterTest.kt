@@ -14,12 +14,10 @@ import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.asPerson
 import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.lifecycle.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
@@ -44,16 +42,14 @@ class ClazzLogListAttendancePresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var di: DI
 
     @Before
     fun setup(){
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
 
         di = DI {
@@ -132,10 +128,10 @@ class ClazzLogListAttendancePresenterTest {
                 mapOf(UstadView.ARG_CLAZZUID to testClazz.clazzUid.toString()), mockView, di,
                 mockLifecycleOwner)
         presenter.onCreate(null)
-        nullableArgumentCaptor<DoorMutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>>() {
+        nullableArgumentCaptor<MutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>>() {
             verify(mockView, timeout(5000)).graphData = capture()
             runBlocking {
-                waitForLiveData(firstValue as DoorLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>, 5000) {
+                waitForLiveData(firstValue as LiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>, 5000) {
                     it.percentageAttendedSeries.size == 5 && it.percentageLateSeries.size == 5
                 }
             }

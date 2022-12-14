@@ -7,7 +7,7 @@ import org.junit.Test
 import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.lifecycle.LifecycleOwner
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.*
@@ -16,7 +16,8 @@ import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.lifecycle.DoorState
+import com.ustadmobile.door.lifecycle.LifecycleObserver
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.ext.startLocalTestSessionBlocking
 import kotlinx.coroutines.runBlocking
@@ -35,7 +36,7 @@ class ClazzListPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+    private lateinit var mockLifecycleOwner: LifecycleOwner
 
     private lateinit var repoClazzDaoSpy: ClazzDao
 
@@ -44,9 +45,7 @@ class ClazzListPresenterTest {
     @Before
     fun setup() {
         mockView = mock { }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+        mockLifecycleOwner = mockLifecycleOwner(DoorState.RESUMED)
         context = Any()
         di = DI {
             import(ustadTestRule.diModule)
