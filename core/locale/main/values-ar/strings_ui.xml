@@ -4,14 +4,10 @@
     <string name="location_permission_title">مطلوب اذن للحصول على الموقع</string>
     <!--Content editor-->
     <string name="multiple_choice">متعدد الخيارات</string>
-    <string name="content_font_10">10</string>
     <string name="content_source_device">من الجهاز</string>
     <string name="video">فيديو</string>
-    <string name="content_untitled_document">ملف بدون عنوان</string>
     <string name="content_editor_menu_undo">تراجع</string>
-    <string name="content_editor_menu_strikesthrough">يتوسطه خط</string>
     <string name="content_editor_menu_superscript">مرتفع</string>
-    <string name="permission_camera_title">يلزم وجود إذن للكاميرا و الملف</string>
     <string name="content_editor_create_new_category">مجلد جديد</string>
     <string name="licence">رخصة</string>
     <string name="publicly_accessible">انشر المحتوى</string>
@@ -200,7 +196,6 @@
     <string name="average">المعدل</string>
     <string name="date">التاريخ</string>
     <string name="export">تصدير</string>
-    <string name="at_risk_students">الطلبة في مجال الخطر</string>
     <string name="show_student_numbers">عرض أرقام الطلبة</string>
     <string name="last_three_months">آخر ثلاث شهور</string>
     <string name="location">الموقع</string>
@@ -236,7 +231,6 @@
     <string name="last_month">الشهر الماضي</string>
     <string name="toC">الى</string>
     <string name="day">يوم</string>
-    <string name="may">مايو</string>
     <string name="saturday">السبت</string>
     <string name="friday">الجمعة</string>
     <string name="thursday">الخميس</string>
@@ -259,7 +253,6 @@
     <string name="add_person">أضف شخص</string>
     <string name="questions">أسئلة</string>
     <string name="question">سؤال</string>
-    <string name="sel">التعليم الإجتماعي والعاطفي SEL</string>
     <string name="student_image">صورة الطالب</string>
     <string name="clazz">فصل</string>
     <string name="edit">تعديل</string>
@@ -271,7 +264,6 @@
     <string name="mother">أم</string>
     <string name="father">أب</string>
     <string name="attendance_report">تقرير الحضور</string>
-    <string name="absent_selected">إختيار الغائبين</string>
     <string name="absent">غائب</string>
     <string name="present">حاضر</string>
     <string name="mark_all_absent">ضع علامة على جميع الغائبين</string>
@@ -317,7 +309,6 @@
     <string name="refresh">تحديث</string>
     <string name="add">إضافة</string>
     <string name="users_settings_desc">أضافة، وألغاء، وتعديل المستخدمين، أو أعادة تعيين كلمة السر الخاصة فيهم</string>
-    <string name="last_synced_at">اخر مزامنة</string>
     <string name="select_a_timezone">أختر وحدة زمنية</string>
     <string name="password_unchanged">كلمة السر (دون تغيير)</string>
     <string name="current_password">كلمة السر الحالية</string>
@@ -360,7 +351,6 @@
     <string name="permission_person_insert">أضف أشخاص</string>
     <string name="permission_person_select">عرض الأشخاص</string>
     <string name="person">شخص</string>
-    <string name="add_edit_location">أضافة و تعديل الوقع</string>
     <string name="assign_to">تعيين ل</string>
     <string name="scope_by">النطاق</string>
     <string name="role_assignment">تعيين دور</string>
@@ -382,7 +372,6 @@
     <string name="roles">أدوار</string>
     <string name="group_setting_desc">اضف، الغي او عدل على المجموعات</string>
     <string name="groups">مجموعات</string>
-    <string name="dropout_reason_move">نقل</string>
     <string name="not_recorded">غير مسجل</string>
     <string name="sync">مزامنة</string>
     <string name="over">عبر</string>
