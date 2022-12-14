@@ -1,7 +1,7 @@
 package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.controller.ScopedGrantEditPresenter
-import com.ustadmobile.lib.db.entities.BitmaskFlag
+import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ScopedGrant
 

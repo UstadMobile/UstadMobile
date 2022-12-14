@@ -14,7 +14,7 @@ import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.lib.db.entities.BitmaskFlag
+import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.model.BitmaskMessageId
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil

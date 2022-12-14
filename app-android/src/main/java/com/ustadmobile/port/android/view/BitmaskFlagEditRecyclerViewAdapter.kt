@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemBitmaskBinding
-import com.ustadmobile.lib.db.entities.BitmaskFlag
+import com.ustadmobile.core.model.BitmaskFlag
 
 class BitmaskViewHolder(val itemBinding: ItemBitmaskBinding): RecyclerView.ViewHolder(itemBinding.root)
 

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.lib.db.entities.BitmaskFlag
+import com.ustadmobile.core.model.BitmaskFlag
 
 /**
  * Given a list of BitmaskFlag objects, get the combined flag value (e.g. perform a binary or

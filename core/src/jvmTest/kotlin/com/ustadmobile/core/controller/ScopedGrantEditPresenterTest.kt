@@ -7,7 +7,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScopedGrantDao
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.lib.db.entities.BitmaskFlag
+import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.*

@@ -154,7 +154,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
 
         mDataBinding = FragmentClazzEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.featuresBitmaskFlags = BitmaskEditPresenter.FLAGS_AVAILABLE
+            it.featuresBitmaskFlags =BitmaskEditPresenter.FLAGS_AVAILABLE
             it.activityEventHandler = this
         }
 

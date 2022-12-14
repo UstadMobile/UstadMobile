@@ -12,7 +12,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentBitmaskEditBinding
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.lib.db.entities.BitmaskFlag
+import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap

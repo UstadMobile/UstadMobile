@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.lib.db.entities.BitmaskFlag
+import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.door.lifecycle.LiveData
 

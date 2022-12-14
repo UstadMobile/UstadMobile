@@ -15,13 +15,12 @@ import com.toughra.ustadmobile.databinding.FragmentScopedGrantEditBinding
 import com.ustadmobile.core.controller.ScopedGrantEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.lib.db.entities.BitmaskFlag
+import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScopedGrantEditView
 import com.ustadmobile.core.viewmodel.ScopedGrantEditUiState
 import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.lib.db.entities.ScopedGrant
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.compose.messageIdResource
 
 
@@ -114,9 +113,9 @@ fun ScopedGrantEditScreen(
                 Switch(
                     checked = bitmask.enabled,
                     onCheckedChange = {
-                        onChangedBitmask(bitmask.shallowCopy{
+                        onChangedBitmask(bitmask.copy(
                             enabled = it
-                        })
+                        ))
                     }
                 )
             }

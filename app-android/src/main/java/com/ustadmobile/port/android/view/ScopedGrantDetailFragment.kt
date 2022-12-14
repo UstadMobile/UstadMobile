@@ -14,7 +14,7 @@ import com.toughra.ustadmobile.databinding.FragmentScopedGrantDetailBinding
 import com.toughra.ustadmobile.databinding.ItemBitmaskflagBinding
 import com.ustadmobile.core.controller.ScopedGrantDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.lib.db.entities.BitmaskFlag
+import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.toBitmaskFlagList
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScopedGrantDetailView
