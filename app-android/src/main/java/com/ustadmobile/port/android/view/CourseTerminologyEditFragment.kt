@@ -4,17 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,12 +24,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.viewmodel.CourseTerminologyEditUiState
-import com.ustadmobile.core.viewmodel.LoginUiState
-import com.ustadmobile.core.viewmodel.PersonDetailUiState
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.PersonWithPersonParentJoin
-import com.ustadmobile.lib.db.entities.TerminologyEntry
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 
@@ -120,6 +110,8 @@ class CourseTerminologyEditFragment: UstadEditFragment<CourseTerminology>(), Cou
 @Composable
 private fun CourseTerminologyEditScreen(
     uiState: CourseTerminologyEditUiState = CourseTerminologyEditUiState(),
+    onTerminologyTermChanged: (TerminologyEntry?) -> Unit = {},
+    onCtTitleChanged: (String?) -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier
@@ -135,11 +127,30 @@ private fun CourseTerminologyEditScreen(
                         label = stringResource(id = R.string.name),
                         error = uiState.titleError,
                         enabled = uiState.fieldsEnabled,
-                        onValueChange = {
-                        },
+                        onValueChange = { onCtTitleChanged(it) },
                     )
                 },
                 secondaryText = { Text(stringResource(id = R.string.your_words_for)) }
+            )
+        }
+
+        items(
+            items = uiState.terminologyTermList,
+            key = {terminologyTerm -> terminologyTerm.id}
+        ){ terminologyTerm ->
+            ListItem(
+                text = {
+                    UstadTextEditField(
+                    value = terminologyTerm.term ?: "",
+                    label = stringResource(id = terminologyTerm.messageId),
+                    error = terminologyTerm.errorMessage,
+                    enabled = uiState.fieldsEnabled,
+                    onValueChange = {
+                        onTerminologyTermChanged(terminologyTerm.copy(
+                            term = it
+                        ))
+                    },)
+                },
             )
         }
     }
@@ -149,16 +160,22 @@ private fun CourseTerminologyEditScreen(
 @Preview
 fun CourseTerminologyEditScreenPreview() {
     val uiState = CourseTerminologyEditUiState(
-        courseTerminologyList = listOf(
-            CourseTerminology().apply {
-                ctTitle = "Course Terminology 1"
-            },
-            CourseTerminology().apply {
-                ctTitle = "Course Terminology 2"
-            },
-            CourseTerminology().apply {
-                ctTitle = "Course Terminology 3"
-            }
+        terminologyTermList = listOf(
+            TerminologyEntry(
+                id = "1",
+                term = "First",
+                messageId = R.string.message
+            ),
+            TerminologyEntry(
+                id = "2",
+                term = "Second",
+                messageId = R.string.message
+            ),
+            TerminologyEntry(
+                id = "3",
+                term = "Third",
+                messageId = R.string.message
+            )
         )
     )
     MdcTheme {

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.lib.db.entities.CourseTerminology
+import com.ustadmobile.lib.db.entities.TerminologyEntry
 
 data class CourseTerminologyEditUiState(
 
@@ -10,4 +11,5 @@ data class CourseTerminologyEditUiState(
 
     val fieldsEnabled: Boolean = true,
 
+    val terminologyTermList: List<TerminologyEntry> = emptyList()
 )
