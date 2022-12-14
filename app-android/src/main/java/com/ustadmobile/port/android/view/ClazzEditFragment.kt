@@ -471,9 +471,12 @@ private fun ClazzEditScreen(
                 courseBlock.cbType
 
             val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5F else 1F
+            val startPadding = (courseBlock.cbIndentLevel * 8).dp
 
             ListItem(
-                modifier = Modifier.alpha(courseBlockEditAlpha),
+                modifier = Modifier
+                    .padding(start = startPadding)
+                    .alpha(courseBlockEditAlpha),
                 icon = {
                     Row{
                         Icon(
@@ -491,7 +494,7 @@ private fun ClazzEditScreen(
                 trailing = {
                     PopUpMenu(
                         enabled = uiState.fieldsEnabled,
-                        selectedCourseBlock = courseBlock,
+                        entity = courseBlock,
                         onClickHideBlockPopupMenu = onClickHideBlockPopupMenu,
                         onClickIndentBlockPopupMenu = onClickIndentBlockPopupMenu,
                         onClickUnIndentBlockPopupMenu = onClickUnIndentBlockPopupMenu,
@@ -624,7 +627,7 @@ private fun ClazzEditScreen(
 @Composable
 fun PopUpMenu(
     enabled: Boolean,
-    selectedCourseBlock: CourseBlockWithEntity,
+    entity: CourseBlockWithEntity,
     onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
     onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
     onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
@@ -645,21 +648,23 @@ fun PopUpMenu(
             onDismissRequest = { expanded = false }
         ) {
             DropdownMenuItem(
-                onClick = { onClickHideBlockPopupMenu(selectedCourseBlock) }
+                onClick = { onClickHideBlockPopupMenu(entity) }
             ) {
                 Text(stringResource(id = R.string.hide))
             }
             DropdownMenuItem(
-                onClick = { onClickIndentBlockPopupMenu(selectedCourseBlock) }
+                onClick = { onClickIndentBlockPopupMenu(entity) }
             ) {
                 Text(stringResource(id = R.string.indent))
             }
-            DropdownMenuItem(
-                onClick = { onClickUnIndentBlockPopupMenu(selectedCourseBlock) }
-            ) {
-                Text(stringResource(id = R.string.unindent))
+            if (entity.cbIndentLevel > 0) {
+                DropdownMenuItem(
+                    onClick = { onClickUnIndentBlockPopupMenu(entity) }
+                ) {
+                    Text(stringResource(id = R.string.unindent))
+                }
             }
-            DropdownMenuItem(onClick = { onClickDeleteBlockPopupMenu(selectedCourseBlock) }) {
+            DropdownMenuItem(onClick = { onClickDeleteBlockPopupMenu(entity) }) {
                 Text(stringResource(id = R.string.delete))
             }
         }
@@ -685,10 +690,12 @@ fun ClazzEditScreenPreview() {
             CourseBlockWithEntity().apply {
                 cbTitle = "First"
                 cbHidden = true
+                cbIndentLevel = 2
             },
             CourseBlockWithEntity().apply {
                 cbTitle = "Second"
                 cbHidden = false
+                cbIndentLevel = 4
             },
             CourseBlockWithEntity().apply {
                 cbTitle = "Third"

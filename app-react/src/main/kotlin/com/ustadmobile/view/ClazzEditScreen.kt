@@ -8,18 +8,19 @@ import com.ustadmobile.core.viewmodel.ClazzEditUiState
 import com.ustadmobile.hooks.useFormattedDate
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.*
+import com.ustadmobile.mui.components.UstadDateEditField
+import com.ustadmobile.mui.components.UstadMessageIdDropDownField
+import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadSwitchField
 import csstype.number
-import kotlinx.css.whiteAlpha
+import csstype.px
 import kotlinx.js.jso
 import mui.icons.material.*
 import mui.material.*
 import mui.material.List
 import mui.material.Menu
 import mui.material.styles.TypographyVariant
-import mui.material.Stack
 import mui.system.responsive
 import mui.system.sx
 import react.*
@@ -283,8 +284,11 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
 
             ListItem{
                 val courseBlockEditAlpha: Double = if (courseBlock.cbHidden) 0.5 else 1.0
+                val startPadding = (courseBlock.cbIndentLevel * 8).px
+
                 sx {
                     opacity = number(courseBlockEditAlpha)
+                    paddingLeft = startPadding
                 }
 
                 val image = if(courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE)
@@ -305,11 +309,32 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
                 }
 
                 secondaryAction = PopUpMenu.create {
-                    uiState = props.uiState
+                    fieldsEnabled = props.uiState.fieldsEnabled
+                    onClickHideBlockPopupMenu = props.onClickHideBlockPopupMenu
+                    onClickIndentBlockPopupMenu = props.onClickIndentBlockPopupMenu
+                    onClickUnIndentBlockPopupMenu = props.onClickUnIndentBlockPopupMenu
+                    onClickDeleteBlockPopupMenu = props.onClickDeleteBlockPopupMenu
+                    entity = courseBlock
                 }
             }
         }
     }
+}
+
+external interface PopUpMenuProps : Props {
+
+    var fieldsEnabled: Boolean
+
+    var onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+
+    var onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+
+    var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+
+    var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+
+    var entity: CourseBlockWithEntity
+
 }
 
 private data class Point(
@@ -317,7 +342,7 @@ private data class Point(
     val y: Double = 10.0,
 )
 
-val PopUpMenu = FC<ClazzEditScreenProps> { props ->
+val PopUpMenu = FC<PopUpMenuProps> { props ->
 
     val strings = useStringsXml()
 
@@ -342,7 +367,7 @@ val PopUpMenu = FC<ClazzEditScreenProps> { props ->
     ReactHTML.div {
 
         IconButton{
-            disabled = !(props.uiState.fieldsEnabled)
+            disabled = !(props.fieldsEnabled)
             onClick = handleContextMenu
 
             + MoreVert.create()
@@ -376,12 +401,14 @@ val PopUpMenu = FC<ClazzEditScreenProps> { props ->
                 }
                 + strings[MessageID.indent]
             }
-            MenuItem {
-                onClick = {
-                    props.onClickUnIndentBlockPopupMenu
-                    point = null
+            if (props.entity.cbIndentLevel > 0) {
+                MenuItem {
+                    onClick = {
+                        props.onClickUnIndentBlockPopupMenu
+                        point = null
+                    }
+                    + strings[MessageID.unindent]
                 }
-                + strings[MessageID.unindent]
             }
             MenuItem {
                 onClick = {
@@ -413,10 +440,12 @@ val ClazzEditScreenPreview = FC<Props> {
                 CourseBlockWithEntity().apply {
                     cbTitle = "First"
                     cbHidden = true
+                    cbIndentLevel = 2
                 },
                 CourseBlockWithEntity().apply {
                     cbTitle = "Second"
                     cbHidden = false
+                    cbIndentLevel = 4
                 },
                 CourseBlockWithEntity().apply {
                     cbTitle = "Third"
