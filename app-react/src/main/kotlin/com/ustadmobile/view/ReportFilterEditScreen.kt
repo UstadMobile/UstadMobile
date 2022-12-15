@@ -15,8 +15,6 @@ import csstype.px
 import mui.icons.material.Add
 import mui.icons.material.Delete
 import mui.material.*
-import mui.system.Stack
-import mui.system.StackDirection
 import mui.system.responsive
 import react.FC
 import react.Props
@@ -79,31 +77,36 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                 }
             }
 
-            UstadMessageIdDropDownField {
-                value = props.uiState.reportFilter?.reportFilterCondition ?: 0
-                label = strings[MessageID.report_filter_edit_condition]
-                options = ConditionConstants.CONDITION_MESSAGE_IDS
-                error = props.uiState.conditionsError
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onReportFilterChanged(
-                        props.uiState.reportFilter?.shallowCopy {
-                            reportFilterCondition = it?.value ?: 0
-                    })
-                }
-            }
+            Stack {
+                direction = responsive(StackDirection.row)
+                spacing = responsive(10.px)
 
-            UstadMessageIdDropDownField {
-                value = props.uiState.reportFilter?.reportFilterDropDownValue ?: 0
-                label = strings[MessageID.report_filter_edit_values]
-                options = ContentCompletionStatusConstants.CONTENT_COMPLETION_STATUS_MESSAGE_IDS
-                error = props.uiState.valuesError
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onReportFilterChanged(
-                        props.uiState.reportFilter?.shallowCopy {
-                            reportFilterDropDownValue = it?.value ?: 0
-                    })
+                UstadMessageIdDropDownField {
+                    value = props.uiState.reportFilter?.reportFilterCondition ?: 0
+                    label = strings[MessageID.report_filter_edit_condition]
+                    options = ConditionConstants.CONDITION_MESSAGE_IDS
+                    error = props.uiState.conditionsError
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onReportFilterChanged(
+                            props.uiState.reportFilter?.shallowCopy {
+                                reportFilterCondition = it?.value ?: 0
+                            })
+                    }
+                }
+
+                UstadMessageIdDropDownField {
+                    value = props.uiState.reportFilter?.reportFilterDropDownValue ?: 0
+                    label = strings[MessageID.report_filter_edit_values]
+                    options = ContentCompletionStatusConstants.CONTENT_COMPLETION_STATUS_MESSAGE_IDS
+                    error = props.uiState.valuesError
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onReportFilterChanged(
+                            props.uiState.reportFilter?.shallowCopy {
+                                reportFilterDropDownValue = it?.value ?: 0
+                            })
+                    }
                 }
             }
 
@@ -123,35 +126,40 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                 }
             }
 
-            UstadTextEditField {
-                value = props.uiState.reportFilter?.reportFilterValueBetweenX ?: ""
-                label = strings[MessageID.from]
-                error = props.uiState.valuesError
-                enabled = props.uiState.fieldsEnabled
-                inputProps = {
-                    it.inputMode = InputMode.numeric
-                }
-                onChange = {
-                    props.onReportFilterChanged(
-                        props.uiState.reportFilter?.shallowCopy {
-                            reportFilterValueBetweenX = it
-                    })
-                }
-            }
+            Stack {
+                direction = responsive(StackDirection.row)
+                spacing = responsive(10.px)
 
-            UstadTextEditField {
-                value = props.uiState.reportFilter?.reportFilterValueBetweenY ?: ""
-                label = strings[MessageID.toC]
-                error = props.uiState.valuesError
-                enabled = props.uiState.fieldsEnabled
-                inputProps = {
-                    it.inputMode = InputMode.numeric
+                UstadTextEditField {
+                    value = props.uiState.reportFilter?.reportFilterValueBetweenX ?: ""
+                    label = strings[MessageID.from]
+                    error = props.uiState.valuesError
+                    enabled = props.uiState.fieldsEnabled
+                    inputProps = {
+                        it.inputMode = InputMode.numeric
+                    }
+                    onChange = {
+                        props.onReportFilterChanged(
+                            props.uiState.reportFilter?.shallowCopy {
+                                reportFilterValueBetweenX = it
+                            })
+                    }
                 }
-                onChange = {
-                    props.onReportFilterChanged(
-                        props.uiState.reportFilter?.shallowCopy {
-                            reportFilterValueBetweenY = it
-                    })
+
+                UstadTextEditField {
+                    value = props.uiState.reportFilter?.reportFilterValueBetweenY ?: ""
+                    label = strings[MessageID.toC]
+                    error = props.uiState.valuesError
+                    enabled = props.uiState.fieldsEnabled
+                    inputProps = {
+                        it.inputMode = InputMode.numeric
+                    }
+                    onChange = {
+                        props.onReportFilterChanged(
+                            props.uiState.reportFilter?.shallowCopy {
+                                reportFilterValueBetweenY = it
+                            })
+                    }
                 }
             }
 
@@ -185,7 +193,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                 }
 
                 ListItemText {
-                    primary = ReactNode(props.uiState.createNewFilter.uppercase())
+                    primary = ReactNode(props.uiState.createNewFilter)
                 }
             }
         }

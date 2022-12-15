@@ -327,45 +327,37 @@ private fun ReportFilterEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
+            Row {
+                UstadMessageIdOptionExposedDropDownMenuField(
+                    modifier = Modifier.weight(0.5F),
+                    value = uiState.reportFilter?.reportFilterCondition ?: 0,
+                    label = stringResource(R.string.report_filter_edit_condition),
+                    options = ConditionConstants.CONDITION_MESSAGE_IDS,
+                    error = uiState.conditionsError,
+                    enabled = uiState.fieldsEnabled,
+                    onOptionSelected = {
+                        onReportFilterChanged(uiState.reportFilter?.shallowCopy{
+                            reportFilterCondition = it.value
+                        })
+                    },
+                )
 
-        item {
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = uiState.reportFilter?.reportFilterCondition ?: 0,
-                label = stringResource(R.string.report_filter_edit_condition),
-                options = ConditionConstants.CONDITION_MESSAGE_IDS,
-                error = uiState.conditionsError,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = {
-                    onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                        reportFilterCondition = it.value
-                    })
-                },
-            )
-        }
+                 Spacer(modifier = Modifier.width(10.dp))
 
-       item {
-           Spacer(modifier = Modifier.height(10.dp))
-       }
-
-        item {
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = uiState.reportFilter?.reportFilterDropDownValue ?: 0,
-                label = stringResource(R.string.report_filter_edit_values),
-                options = ContentCompletionStatusConstants.CONTENT_COMPLETION_STATUS_MESSAGE_IDS,
-                error = uiState.valuesError,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = {
-                    onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                        reportFilterDropDownValue = it.value
-                    })
-                },
-            )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
+                UstadMessageIdOptionExposedDropDownMenuField(
+                    modifier = Modifier.weight(0.5F),
+                    value = uiState.reportFilter?.reportFilterDropDownValue ?: 0,
+                    label = stringResource(R.string.report_filter_edit_values),
+                    options = ContentCompletionStatusConstants.CONTENT_COMPLETION_STATUS_MESSAGE_IDS,
+                    error = uiState.valuesError,
+                    enabled = uiState.fieldsEnabled,
+                    onOptionSelected = {
+                        onReportFilterChanged(uiState.reportFilter?.shallowCopy{
+                            reportFilterDropDownValue = it.value
+                        })
+                    },
+                )
+            }
         }
 
         item {
@@ -384,41 +376,37 @@ private fun ReportFilterEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
+            Row {
+                UstadTextEditField(
+                    modifier = Modifier.weight(0.5F),
+                    value = uiState.reportFilter?.reportFilterValueBetweenX ?: "",
+                    label = stringResource(id = R.string.from),
+                    error = uiState.valuesError,
+                    enabled = uiState.fieldsEnabled,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    onValueChange = {
+                        onReportFilterChanged(uiState.reportFilter?.shallowCopy{
+                            reportFilterValueBetweenX = it
+                        })
+                    }
+                )
 
-        item {
-            UstadTextEditField(
-                value = uiState.reportFilter?.reportFilterValueBetweenX ?: "",
-                label = stringResource(id = R.string.from),
-                error = uiState.valuesError,
-                enabled = uiState.fieldsEnabled,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                onValueChange = {
-                    onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                        reportFilterValueBetweenX = it
-                    })
-                }
-            )
-        }
+                Spacer(modifier = Modifier.width(10.dp))
 
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
-            UstadTextEditField(
-                value = uiState.reportFilter?.reportFilterValueBetweenY ?: "",
-                label = stringResource(id = R.string.toC),
-                error = uiState.valuesError,
-                enabled = uiState.fieldsEnabled,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                onValueChange = {
-                    onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                        reportFilterValueBetweenY = it
-                    })
-                }
-            )
+                UstadTextEditField(
+                    modifier = Modifier.weight(0.5F),
+                    value = uiState.reportFilter?.reportFilterValueBetweenY ?: "",
+                    label = stringResource(id = R.string.toC),
+                    error = uiState.valuesError,
+                    enabled = uiState.fieldsEnabled,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    onValueChange = {
+                        onReportFilterChanged(uiState.reportFilter?.shallowCopy{
+                            reportFilterValueBetweenY = it
+                        })
+                    }
+                )
+            }
         }
 
         items(
@@ -446,7 +434,7 @@ private fun ReportFilterEditScreen(
                 modifier = Modifier.clickable {
                     onClickNewItemFilter()
                 },
-                text = { Text(uiState.createNewFilter.uppercase()) },
+                text = { Text(uiState.createNewFilter) },
                 icon = {
                     Icon(
                         imageVector = Icons.Filled.Add,
