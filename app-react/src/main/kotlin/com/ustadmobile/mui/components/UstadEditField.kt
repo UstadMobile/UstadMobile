@@ -22,7 +22,6 @@ import react.dom.aria.ariaLabel
 import react.dom.html.InputMode
 import react.dom.html.InputType
 import react.dom.onChange
-import kotlin.js.Date
 
 external interface UstadEditFieldProps: PropsWithChildren {
 
@@ -95,6 +94,7 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
     val strings = useStringsXml()
 
     TextField {
+        fullWidth = true
         label = ReactNode(props.label ?: "")
         value = props.value
         disabled = !(props.enabled ?: true)

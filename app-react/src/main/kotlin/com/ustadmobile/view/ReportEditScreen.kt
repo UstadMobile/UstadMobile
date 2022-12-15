@@ -2,10 +2,16 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.impl.locale.entityconstants.*
+import com.ustadmobile.core.impl.locale.entityconstants.DateRangeConstants
+import com.ustadmobile.core.impl.locale.entityconstants.SubgroupConstants
+import com.ustadmobile.core.impl.locale.entityconstants.VisualTypeConstants
+import com.ustadmobile.core.impl.locale.entityconstants.XAxisConstants
 import com.ustadmobile.core.viewmodel.ReportEditUiState
 import com.ustadmobile.core.viewmodel.ReportSeriesUiState
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.ReportFilterWithDisplayDetails
+import com.ustadmobile.lib.db.entities.ReportSeries
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyReportWithSeriesWithFilters
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
@@ -15,10 +21,11 @@ import mui.icons.material.Add
 import mui.icons.material.Close
 import mui.icons.material.Delete
 import mui.material.*
-import mui.material.Stack
-import mui.material.StackDirection
 import mui.system.responsive
-import react.*
+import react.FC
+import react.Props
+import react.ReactNode
+import react.create
 
 external interface ReportEditScreenProps : Props {
 
