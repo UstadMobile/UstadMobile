@@ -111,7 +111,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleViewHolder {
             val viewHolder = ScheduleViewHolder(ItemScheduleBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false))
+                LayoutInflater.from(parent.context), parent, false))
             viewHolder.binding.mPresenter = presenter
             viewHolder.binding.oneToManyJoinListener = oneToManyEditListener
             return viewHolder

@@ -54,7 +54,7 @@
 
         <variable
             name="featuresBitmaskFlags"
-            type="com.ustadmobile.core.model.BitmaskFlag" />
+            type="java.util.List&lt;BitmaskFlag&gt;" />
 
         <variable
             name="scheduleOneToManyListener"

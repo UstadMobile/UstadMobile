@@ -2,11 +2,14 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -105,21 +108,27 @@ fun ScopedGrantEditScreen(
     uiState: ScopedGrantEditUiState = ScopedGrantEditUiState(),
     onChangedBitmask: (BitmaskFlag?) -> Unit = {},
 ) {
-    uiState.bitmaskList.forEach { bitmask ->
 
-        ListItem(
-            text = { Text(messageIdResource(id = bitmask.messageId)) },
-            trailing = {
-                Switch(
-                    checked = bitmask.enabled,
-                    onCheckedChange = {
-                        onChangedBitmask(bitmask.copy(
-                            enabled = it
-                        ))
-                    }
-                )
-            }
-        )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        uiState.bitmaskList.forEach { bitmask ->
+
+            ListItem(
+                text = { Text(messageIdResource(id = bitmask.messageId)) },
+                trailing = {
+                    Switch(
+                        checked = bitmask.enabled,
+                        onCheckedChange = {
+                            onChangedBitmask(bitmask.copy(
+                                enabled = it
+                            ))
+                        }
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -130,6 +139,10 @@ fun ScopedGrantEditScreenPreview() {
         bitmaskList = listOf(
             BitmaskFlag(
                 messageId = MessageID.incident_id,
+                flagVal = 0
+            ),
+            BitmaskFlag(
+                messageId = MessageID.message,
                 flagVal = 0
             )
         )
