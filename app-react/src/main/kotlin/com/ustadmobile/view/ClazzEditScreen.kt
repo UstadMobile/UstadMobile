@@ -3,24 +3,32 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
 import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
+import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants.SCHEDULE_FREQUENCY_MESSAGE_ID_MAP
+import com.ustadmobile.lib.db.entities.Schedule.Companion.SCHEDULE_FREQUENCY_WEEKLY
+import com.ustadmobile.lib.db.entities.Schedule.Companion.DAY_MONDAY
+import com.ustadmobile.core.util.MS_PER_HOUR
+import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
-import com.ustadmobile.hooks.useFormattedDate
+import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadDateEditField
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.addOptionalSuffix
+import com.ustadmobile.view.components.UstadBlankIcon
+import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadSwitchField
 import csstype.number
+import csstype.pct
 import csstype.px
 import kotlinx.js.jso
 import mui.icons.material.*
 import mui.material.*
 import mui.material.List
 import mui.material.Menu
-import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.*
@@ -72,9 +80,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
         Stack {
             spacing = responsive(2)
 
-            Typography {
-                variant = TypographyVariant.h6
-
+            UstadEditHeader {
                 + strings[MessageID.basic_details]
             }
 
@@ -112,33 +118,47 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 onChange = {}
             }
 
-            UstadDateEditField {
-                timeInMillis = props.uiState.entity?.clazzStartTime ?: 0
-                label = strings[MessageID.start_date]
-                error = props.uiState.clazzStartDateError
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onClazzChanged(
-                        props.uiState.entity?.shallowCopy {
-                            clazzStartTime = it
-                        }
-                    )
+
+            Stack {
+                direction = responsive(StackDirection.row)
+                spacing = responsive(3)
+
+                sx {
+                    width = 100.pct
                 }
+
+                UstadDateEditField {
+                    timeInMillis = props.uiState.entity?.clazzStartTime ?: 0
+                    label = strings[MessageID.start_date]
+                    error = props.uiState.clazzStartDateError
+                    enabled = props.uiState.fieldsEnabled
+                    fullWidth = true
+                    onChange = {
+                        props.onClazzChanged(
+                            props.uiState.entity?.shallowCopy {
+                                clazzStartTime = it
+                            }
+                        )
+                    }
+                }
+
+                UstadDateEditField {
+                    timeInMillis = props.uiState.entity?.clazzEndTime ?: 0
+                    label = strings[MessageID.end_date].addOptionalSuffix(strings)
+                    error = props.uiState.clazzEndDateError
+                    enabled = props.uiState.fieldsEnabled
+                    fullWidth = true
+                    onChange = {
+                        props.onClazzChanged(
+                            props.uiState.entity?.shallowCopy {
+                                clazzEndTime = it
+                            }
+                        )
+                    }
+                }
+
             }
 
-            UstadDateEditField {
-                timeInMillis = props.uiState.entity?.clazzEndTime ?: 0
-                label = strings[MessageID.end_date].addOptionalSuffix(strings)
-                error = props.uiState.clazzEndDateError
-                enabled = props.uiState.fieldsEnabled
-                onChange = {
-                    props.onClazzChanged(
-                        props.uiState.entity?.shallowCopy {
-                            clazzEndTime = it
-                        }
-                    )
-                }
-            }
 
             UstadTextEditField {
                 value = props.uiState.entity?.clazzTimeZone ?: ""
@@ -147,43 +167,21 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 onClick = { props.onClickTimezone() }
             }
 
-            Typography {
+            UstadEditHeader {
                 + strings[MessageID.course_blocks]
             }
 
-            ListItem {
-                onClick = { props.onClickAddCourseBlock }
-                ListItemIcon {
-                    + Add.create()
-                }
-                ListItemText {
-                    primary = ReactNode(strings[MessageID.add_block])
-                }
-            }
-
             CourseBlockList {
-                uiState = props.uiState
-                onClickEditCourse = props.onClickEditCourse
+                +props
             }
 
-            Typography {
+            UstadEditHeader {
                 + strings[MessageID.schedule]
             }
 
-            ListItem {
-                onClick = { props.onClickAddSchedule }
-                ListItemIcon {
-                    + Add.create()
-                }
-                ListItemText {
-                    primary = ReactNode(strings[MessageID.add_a_schedule])
-                }
-            }
 
             ClazzSchedulesList {
-                uiState = props.uiState
-                onClickEditSchedule = props.onClickEditSchedule
-                onClickDeleteSchedule = props.onClickDeleteSchedule
+                +props
             }
 
 
@@ -195,7 +193,7 @@ val ClazzEditScreenComponent2 = FC<ClazzEditScreenProps> { props ->
                 onClick = props.onClickHolidayCalendar
             }
 
-            Typography {
+            UstadEditHeader {
                 + strings[MessageID.course_setup]
             }
 
@@ -235,31 +233,53 @@ val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
     val strings = useStringsXml()
 
     List{
+
+        ListItem {
+            ListItemButton {
+                onClick = {
+                    props.onClickAddSchedule()
+                }
+
+                ListItemIcon {
+                    + Add.create()
+                }
+
+                ListItemText {
+                    primary = ReactNode(strings[MessageID.add_a_schedule])
+                }
+            }
+
+        }
+
         props.uiState.clazzSchedules.forEach { schedule ->
-
-            val fromTimeFormatted = useFormattedDate(
-                timeInMillis = schedule.sceduleStartTime,
-                timezoneId = props.uiState.timeZone
+            val fromTimeFormatted = useFormattedTime(
+                timeInMillisSinceMidnight = schedule.sceduleStartTime.toInt(),
             )
 
-            val toTimeFormatted = useFormattedDate(
-                timeInMillis = schedule.scheduleEndTime,
-                timezoneId = props.uiState.timeZone
+            val toTimeFormatted = useFormattedTime(
+                timeInMillisSinceMidnight = schedule.scheduleEndTime.toInt(),
             )
-            val text = "${strings[schedule.scheduleFrequency]} " +
-                    " ${strings[(schedule.scheduleDay)]} " +
+
+            console.log("message id = ${SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[schedule.scheduleFrequency]}")
+            val text = "${strings[SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[schedule.scheduleFrequency] ?: 0]} " +
+                    " ${strings[ScheduleConstants.DAY_MESSAGE_ID_MAP[schedule.scheduleDay] ?: 0]  } " +
                     " $fromTimeFormatted - $toTimeFormatted "
 
             ListItem{
-                onClick = { props.onClickEditSchedule(schedule) }
-
-                ListItemText{
-                    primary = ReactNode(text)
-                }
-                
                 secondaryAction = IconButton.create {
                     onClick = { props.onClickDeleteSchedule(schedule) }
                     Delete {}
+                }
+
+                ListItemButton {
+                    onClick = { props.onClickEditSchedule(schedule) }
+                    ListItemIcon {
+                        UstadBlankIcon { }
+                    }
+
+                    ListItemText{
+                        primary = ReactNode(text)
+                    }
                 }
             }
         }
@@ -267,21 +287,32 @@ val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
 }
 
 private val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
-    ContentEntry.TYPE_EBOOK to Book.create(),
-    ContentEntry.TYPE_VIDEO to SmartDisplay.create(),
-    ContentEntry.TYPE_DOCUMENT to TextSnippet.create(),
-    ContentEntry.TYPE_ARTICLE to Article.create(),
-    ContentEntry.TYPE_COLLECTION to Collections.create(),
-    ContentEntry.TYPE_INTERACTIVE_EXERCISE to TouchApp.create(),
-    ContentEntry.TYPE_AUDIO to Audiotrack.create()
+    ContentEntry.TYPE_EBOOK to Book,
+    ContentEntry.TYPE_VIDEO to SmartDisplay,
+    ContentEntry.TYPE_DOCUMENT to TextSnippet,
+    ContentEntry.TYPE_ARTICLE to Article,
+    ContentEntry.TYPE_COLLECTION to Collections,
+    ContentEntry.TYPE_INTERACTIVE_EXERCISE to TouchApp,
+    ContentEntry.TYPE_AUDIO to Audiotrack,
 )
 
 private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
+    val strings = useStringsXml()
 
     List {
+        ListItem {
+            ListItemButton {
+                onClick = { props.onClickAddCourseBlock }
+                ListItemIcon {
+                    + Add.create()
+                }
+                ListItemText {
+                    primary = ReactNode(strings[MessageID.add_block])
+                }
+            }
+        }
 
         props.uiState.courseBlockList.forEach { courseBlock ->
-
             ListItem{
                 val courseBlockEditAlpha: Double = if (courseBlock.cbHidden) 0.5 else 1.0
                 val startPadding = (courseBlock.cbIndentLevel * 8).px
@@ -296,16 +327,18 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
                 else
                     courseBlock.cbType
 
-                onClick = { props.onClickEditCourse(courseBlock) }
+                ListItemButton {
+                    onClick = { props.onClickEditCourse(courseBlock) }
 
-                ListItemIcon {
-                    + mui.icons.material.Menu.create()
+                    ListItemIcon {
+                        + mui.icons.material.Menu.create()
 
-                    + (CONTENT_ENTRY_TYPE_ICON_MAP[image] ?: TextSnippet.create())
-                }
+                        + (CONTENT_ENTRY_TYPE_ICON_MAP[image]?.create() ?: TextSnippet.create())
+                    }
 
-                ListItemText {
-                    primary = ReactNode(courseBlock.cbTitle ?: "")
+                    ListItemText {
+                        primary = ReactNode(courseBlock.cbTitle ?: "")
+                    }
                 }
 
                 secondaryAction = PopUpMenu.create {
@@ -430,26 +463,33 @@ val ClazzEditScreenPreview = FC<Props> {
             },
             clazzSchedules = listOf(
                 Schedule().apply {
-                    sceduleStartTime = 0
-                    scheduleEndTime = 0
-                    scheduleFrequency = MessageID.yearly
-                    scheduleDay = MessageID.sunday
+                    sceduleStartTime = ((13 * MS_PER_HOUR) + (30 * MS_PER_MIN)).toLong()
+                    scheduleEndTime = ((15 * MS_PER_HOUR) + (30 * MS_PER_MIN)).toLong()
+                    scheduleFrequency = SCHEDULE_FREQUENCY_WEEKLY
+                    scheduleDay = DAY_MONDAY
                 }
             ),
             courseBlockList = listOf(
                 CourseBlockWithEntity().apply {
-                    cbTitle = "First"
+                    cbTitle = "Module"
                     cbHidden = true
-                    cbIndentLevel = 2
+                    cbType = CourseBlock.BLOCK_MODULE_TYPE
+                    cbIndentLevel = 0
                 },
                 CourseBlockWithEntity().apply {
-                    cbTitle = "Second"
+                    cbTitle = "Content"
                     cbHidden = false
-                    cbIndentLevel = 4
+                    cbType = CourseBlock.BLOCK_CONTENT_TYPE
+                    entry = ContentEntry().apply {
+                        contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+                    }
+                    cbIndentLevel = 1
                 },
                 CourseBlockWithEntity().apply {
-                    cbTitle = "Third"
+                    cbTitle = "Assignment"
+                    cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                     cbHidden = false
+                    cbIndentLevel = 1
                 },
             ),
             fieldsEnabled = true
