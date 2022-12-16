@@ -81,6 +81,11 @@ external interface UstadEditFieldProps: PropsWithChildren {
      * InputProps setter functions - can be used to add adornments, set the input type, etc.
      */
     var inputProps: ((InputBaseProps) -> Unit)?
+
+    /**
+     * Fullwidth property: passed through to the TextField
+     */
+    var fullWidth: Boolean
 }
 
 /**
@@ -100,6 +105,8 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
         disabled = !(props.enabled ?: true)
         error = errorText != null
         helperText = errorText?.let { ReactNode(it) }
+        fullWidth = props.fullWidth
+
         if(props.readOnly) {
             inputProps = jso {
                 readOnly = true
@@ -186,6 +193,8 @@ external interface UstadDateEditFieldProps : Props {
 
     var enabled: Boolean?
 
+    var fullWidth: Boolean
+
 }
 
 /**
@@ -226,6 +235,7 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
 
                     if(props.error != null) {
                         error = true
+                        fullWidth = props.fullWidth
                         helperText = props.error?.let { ReactNode(it) }
                     }
                 }
@@ -271,6 +281,8 @@ external interface MessageIDDropDownFieldProps: Props {
      *
      */
     var error: String?
+
+    var fullWidth: Boolean
 }
 
 external interface UstadDropDownFieldProps: Props {
@@ -330,6 +342,8 @@ external interface UstadDropDownFieldProps: Props {
      * and the error message will be shown below.
      */
     var error: String?
+
+    var fullWidth: Boolean
 }
 
 
@@ -348,6 +362,7 @@ val UstadDropDownField = FC<UstadDropDownFieldProps> { props ->
             labelId = "${props.id}_label"
             label = ReactNode(props.label)
             disabled = !(props.enabled ?: true)
+            fullWidth = props.fullWidth
             onChange = { event, _ ->
                 val selectedVal = ("" + event.target.value)
                 val selectedItem = props.options.firstOrNull { props.itemValue(it) ==  selectedVal }
@@ -378,6 +393,7 @@ val UstadMessageIdDropDownField = FC<MessageIDDropDownFieldProps> { props ->
         value = props.options.firstOrNull { it.value == props.value }
         label = props.label
         options = props.options
+        fullWidth = props.fullWidth
         itemLabel = { ReactNode(strings[(it as MessageIdOption2).messageId]) }
         itemValue = { (it as MessageIdOption2).value.toString() }
         onChange = {
