@@ -7,16 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,12 +32,9 @@ import com.ustadmobile.core.controller.FileSubmissionListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.locale.entityconstants.SubmissionConstants.SUBMISSION_POLICY_OPTIONS
-import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailOverviewUiState
-import com.ustadmobile.core.viewmodel.LoginUiState
-import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.paging.DataSourceFactory
 import com.ustadmobile.door.ext.asRepositoryLiveData
@@ -50,7 +42,6 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadDetailField
-import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
@@ -427,38 +418,49 @@ private fun ClazzAssignmentDetailOverviewScreen(
             .padding(16.dp)
     ) {
 
-        items(items = uiState.clazzAssignments, itemContent = { clazzAssignment ->
+        item {
+            if (!uiState.caDescriptionVisible) {
+                Text(uiState.entity?.caDescription ?: "")
+            }
+        }
+
+        item {
 
             val dateOfDeadLine = remember { DateFormat.getDateFormat(context)
-                .format(Date(clazzAssignment.block?.cbDeadlineDate ?: 0)).toString() }
+                .format(Date(uiState.entity?.block?.cbDeadlineDate ?: 0)).toString() }
 
-            val cbDeadlineDateVisible: Boolean = clazzAssignment.block?.cbDeadlineDate.isDateSet()
-
-            if (!clazzAssignment.caDescription.isNullOrBlank()) {
-                Text(clazzAssignment.caDescription ?: "")
-            }
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            if (cbDeadlineDateVisible){
+            if (uiState.cbDeadlineDateVisible){
                 UstadDetailField(
                     imageId = R.drawable.ic_event_available_black_24dp,
                     valueText = dateOfDeadLine,
                     labelText = stringResource(R.string.deadline)
                 )
             }
+        }
 
-            Spacer(modifier = Modifier.height(15.dp))
-
+        item {
             UstadDetailField(
                 imageId = R.drawable.ic_baseline_task_alt_24,
                 valueText = messageIdMapResource(
                     map = SUBMISSION_POLICY_OPTIONS,
-                    key = clazzAssignment.caSubmissionPolicy
+                    key = uiState.entity?.caSubmissionPolicy
+                        ?: ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED
                 ),
                 labelText = stringResource(R.string.submission_policy)
             )
-        })
+        }
+
+        item {
+            UstadDetailField(
+                imageId = R.drawable.ic_baseline_task_alt_24,
+                valueText = messageIdMapResource(
+                    map = SUBMISSION_POLICY_OPTIONS,
+                    key = uiState.entity?.caSubmissionPolicy
+                        ?: ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED
+                ),
+                labelText = stringResource(R.string.submission_policy)
+            )
+        }
     }
 }
 
@@ -466,14 +468,12 @@ private fun ClazzAssignmentDetailOverviewScreen(
 @Preview
 fun ClazzAssignmentDetailOverviewPreview() {
     val uiStateVal = ClazzAssignmentDetailOverviewUiState(
-        clazzAssignments = listOf(
-            ClazzAssignmentWithCourseBlock().apply {
-                caDescription = "Read the stories and describe the main characters."
-                block = CourseBlock().apply {
-                    cbDeadlineDate = 1668153441000
-                }
+        entity = ClazzAssignmentWithCourseBlock().apply {
+            caDescription = "Read the stories and describe the main characters."
+            block = CourseBlock().apply {
+                cbDeadlineDate = 1668153441000
             }
-        )
+        }
     )
     MdcTheme {
         ClazzAssignmentDetailOverviewScreen(uiStateVal)
