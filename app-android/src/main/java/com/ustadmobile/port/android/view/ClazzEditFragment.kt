@@ -332,6 +332,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
 private fun ClazzEditScreen(
     uiState: ClazzEditUiState = ClazzEditUiState(),
     onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
+    onMoveCourseBlock: (fromIndex: Int, toIndex: Int) -> Unit = {_, _ -> },
     onClickSchool: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
     onClickCourseBlock: (CourseBlock) -> Unit = {},
@@ -586,6 +587,79 @@ private fun ClazzEditScreen(
         }
 
         item {
+            UstadEditHeader(text = stringResource(id = R.string.schedule))
+        }
+
+        item {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickAddSchedule()
+                },
+                text = { Text(stringResource(id = R.string.add_a_schedule)) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "",
+                    )
+                }
+            )
+        }
+
+        items(
+            uiState.clazzSchedules
+        ){ schedule ->
+
+            val fromTimeFormatted = rememberFormattedTime(timeInMs = schedule.sceduleStartTime.toInt())
+            val toTimeFormatted = rememberFormattedTime(timeInMs = schedule.scheduleEndTime.toInt())
+            val text = "${messageIdResource(id = schedule.scheduleFrequency)} " +
+                    " ${messageIdResource(schedule.scheduleDay)} " +
+                    " $fromTimeFormatted - $toTimeFormatted "
+
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickEditSchedule(schedule)
+                },
+                icon = {
+                    Spacer(Modifier.width(24.dp))
+                },
+                text = { Text(text) },
+                trailing = {
+                    IconButton(
+                        onClick = { onClickDeleteSchedule(schedule) },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "",
+                        )
+                    }
+                }
+            )
+        }
+
+        item {
+            UstadTextEditField(
+                value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
+                label = stringResource(id = R.string.holiday_calendar),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {},
+                onClick = onClickHolidayCalendar
+            )
+        }
+
+        item {
+            UstadEditHeader(text = stringResource(id = R.string.course_setup))
+        }
+
+        item {
+            UstadSwitchField(
+                label = stringResource(id = R.string.attendance),
+                checked = uiState.clazzEditAttendanceChecked,
+                onChange = { onCheckedAttendance(it) },
+                enabled = uiState.fieldsEnabled
+            )
+        }
+
+        item {
             UstadMessageIdOptionExposedDropDownMenuField(
                 value = uiState.entity?.clazzEnrolmentPolicy ?: 0,
                 label = stringResource(R.string.enrolment_policy),
@@ -675,12 +749,14 @@ fun ClazzEditScreenPreview() {
         ),
         courseBlockList = listOf(
             CourseBlockWithEntity().apply {
+                cbUid = 1
                 cbTitle = "Module"
                 cbHidden = true
                 cbType = CourseBlock.BLOCK_MODULE_TYPE
                 cbIndentLevel = 0
             },
             CourseBlockWithEntity().apply {
+                cbUid = 2
                 cbTitle = "Content"
                 cbHidden = false
                 cbType = CourseBlock.BLOCK_CONTENT_TYPE
@@ -690,6 +766,7 @@ fun ClazzEditScreenPreview() {
                 cbIndentLevel = 1
             },
             CourseBlockWithEntity().apply {
+                cbUid = 3
                 cbTitle = "Assignment"
                 cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                 cbHidden = false

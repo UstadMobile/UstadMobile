@@ -454,6 +454,8 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
     }
 }
 
+//see https://codesandbox.io/s/material-ui-sortable-list-with-react-smooth-dnd-swrqx?file=/src/index.js
+// https://github.com/atlassian/react-beautiful-dnd
 val ClazzEditScreenPreview = FC<Props> {
 
     val uiStateVal : ClazzEditUiState by useState {

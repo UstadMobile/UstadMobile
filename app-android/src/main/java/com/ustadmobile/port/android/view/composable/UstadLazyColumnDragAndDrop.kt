@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
@@ -13,13 +14,9 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
-import androidx.compose.foundation.lazy.LazyListItemInfo
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.*
 import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -38,11 +36,89 @@ import androidx.compose.ui.zIndex
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import org.burnoutcrew.reorderable.ReorderableItem
+import org.burnoutcrew.reorderable.detectReorderAfterLongPress
+import org.burnoutcrew.reorderable.rememberReorderableLazyListState
+import org.burnoutcrew.reorderable.reorderable
+
+//Demo as per sample from
+// https://github.com/aclassen/ComposeReorderable
+@Composable
+@Preview
+fun VerticalReorderList() {
+    val data = remember { mutableStateOf(List(100) { "Item $it" }) }
+    val state = rememberReorderableLazyListState(onMove = { from, to ->
+        data.value = data.value.toMutableList().apply {
+            add(to.index, removeAt(from.index))
+        }
+    })
+    LazyColumn(
+        state = state.listState,
+        modifier = Modifier
+            .reorderable(state)
+            .detectReorderAfterLongPress(state)
+    ) {
+        items(data.value, { it }) { item ->
+            ReorderableItem(state, key = item) { isDragging ->
+                val elevation = animateDpAsState(if (isDragging) 16.dp else 0.dp)
+                Column(
+                    modifier = Modifier
+                        .shadow(elevation.value)
+                        .background(MaterialTheme.colors.surface)
+                ) {
+                    Text(item)
+                }
+            }
+        }
+    }
+}
 
 //As per https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/foundation/foundation/integration-tests/foundation-demos/src/main/java/androidx/compose/foundation/demos/LazyColumnDragAndDropDemo.kt
 
+@Preview
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun rememberDragDropState(
+fun LazyColumnDragAndDropDemo() {
+    var list by remember { mutableStateOf(List(50) { it }) }
+
+    val listState = rememberLazyListState()
+    val dragDropState = rememberDragDropState(listState) { fromIndex, toIndex ->
+        list = list.toMutableList().apply {
+            add(toIndex, removeAt(fromIndex))
+        }
+    }
+
+    LazyColumn(
+        modifier = Modifier.dragContainer(dragDropState),
+        state = listState,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+//        item {
+//            DraggableItem(
+//                dragDropState, 0
+//            ) {
+//                Card() {
+//                    Text("I dont move", Modifier.fillMaxWidth().padding(20.dp))
+//                }
+//            }
+//
+//        }
+
+        itemsIndexed(list, key = { _, item -> item }) { index, item ->
+            DraggableItem(dragDropState, index + 1) { isDragging ->
+                val elevation by animateDpAsState(if (isDragging) 4.dp else 1.dp)
+                Card(elevation = elevation) {
+                    Text("Item $item", Modifier.fillMaxWidth().padding(20.dp))
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun rememberDragDropState(
     lazyListState: LazyListState,
     onMove: (Int, Int) -> Unit
 ): DragDropState {
@@ -184,7 +260,7 @@ fun Modifier.dragContainer(dragDropState: DragDropState): Modifier {
 
 @ExperimentalFoundationApi
 @Composable
-private fun LazyItemScope.DraggableItem(
+fun LazyItemScope.DraggableItem(
     dragDropState: DragDropState,
     index: Int,
     modifier: Modifier = Modifier,
