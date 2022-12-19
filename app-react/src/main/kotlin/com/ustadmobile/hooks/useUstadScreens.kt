@@ -50,8 +50,14 @@ fun useUstadScreens(): UstadScreens {
                 SchoolEditScreenPreview),
             UstadScreen(LanguageDetailView.VIEW_NAME, name = "LanguageDetail Preview",
                 LanguageDetailPreview),
-
-            UstadScreen(CourseDiscussionEditView.VIEW_NAME, name = "Course Discussion Block Edit", CourseDiscussionBlockEditPreview),
+            UstadScreen(CourseDiscussionEditView.VIEW_NAME, name = "Course Discussion Block Edit",
+                CourseDiscussionBlockEditPreview),
+            UstadScreen(CourseDiscussionDetailView.VIEW_NAME, name = "Course Discussion Detail",
+                CourseDiscussionDetailPreview),
+            UstadScreen(DiscussionPostEditView.VIEW_NAME, name = "Course Discussion Post Edit",
+                DiscussionPostEditPreview),
+            UstadScreen(DiscussionPostDetailView.VIEW_NAME, name = "Course Discussion Post Detail",
+                DiscussionPostDetailPreview),
         )
     }
 }

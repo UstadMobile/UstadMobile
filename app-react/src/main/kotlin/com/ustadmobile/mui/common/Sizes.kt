@@ -8,6 +8,6 @@ object Sizes {
     }
 
     object Sidebar {
-        val Width = 135.px
+        val Width = 235.px
     }
 }
