@@ -143,6 +143,9 @@ ext {
     //As per https://github.com/material-components/material-components-android-compose-theme-adapter/releases
     version_compose_theme_adapter = "1.1.21"
 
+    //List reordering for compose: https://github.com/aclassen/ComposeReorderable
+    version_composereorderable = "0.9.6"
+
     version_androidx_legacy_support = "1.0.0"
     version_androidx_activity = "1.6.0"
     version_androidx_fragment = "1.5.3"

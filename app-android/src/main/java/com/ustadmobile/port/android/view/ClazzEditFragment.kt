@@ -1,18 +1,14 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -20,6 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,21 +35,18 @@ import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.locale.entityconstants.DayConstants
 import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
 import com.ustadmobile.core.util.OneToManyJoinEditListener
-import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.util.ext.editIconId
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
-import com.ustadmobile.core.viewmodel.PersonDetailUiState
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
-import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
-import com.ustadmobile.port.android.util.ext.MS_PER_MIN
+import com.ustadmobile.port.android.view.ClazzEditFragment.Companion.BLOCK_AND_ENTRY_ICON_MAP
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
@@ -195,63 +190,75 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
         courseBlockRecyclerView = rootView.findViewById(R.id.activity_clazz_edit_course_block_recyclerview)
 
         return rootView
+
+//        return ComposeView(requireContext()).apply {
+//            setViewCompositionStrategy(
+//                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+//            )
+//
+//            setContent {
+//                MdcTheme {
+//                    ClazzEditScreenPreview()
+//                }
+//            }
+//        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.add_a_new_course, R.string.edit_course)
-
-
-        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
-            requireActivity().activityResultRegistry,null, 1
-        ).also {
-            mDataBinding?.imageViewLifecycleObserver = it
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
-
-        mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
-            di, viewLifecycleOwner).withViewLifecycle()
-
-        mDataBinding?.scheduleOneToManyListener = mPresenter?.scheduleOneToManyJoinListener
-        mDataBinding?.mPresenter = mPresenter
-        scheduleRecyclerAdapter = ScheduleRecyclerAdapter(
-            mPresenter?.scheduleOneToManyJoinListener, mPresenter)
-
-        scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
-        scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
-
-        mDataBinding?.courseBlockOneToManyListener = mPresenter
-        courseBlockRecyclerAdapter = CourseBlockRecyclerAdapter(
-                mPresenter, mDataBinding?.activityClazzEditCourseBlockRecyclerview)
-
-        courseBlockRecyclerView?.adapter = courseBlockRecyclerAdapter
-        courseBlockRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
-        bottomSheetOptionList = listOf(
-                TitleDescBottomSheetOption(
-                        requireContext().getString(R.string.module),
-                        requireContext().getString(R.string.course_module),
-                        CourseBlock.BLOCK_MODULE_TYPE),
-                TitleDescBottomSheetOption(
-                        requireContext().getString(R.string.text),
-                        requireContext().getString(R.string.formatted_text_to_show_to_course_participants),
-                        CourseBlock.BLOCK_TEXT_TYPE),
-                TitleDescBottomSheetOption(
-                        requireContext().getString(R.string.content),
-                        requireContext().getString(R.string.add_course_block_content_desc),
-                        CourseBlock.BLOCK_CONTENT_TYPE),
-                TitleDescBottomSheetOption(
-                        requireContext().getString(R.string.assignments),
-                        requireContext().getString(R.string.add_assignment_block_content_desc),
-                        CourseBlock.BLOCK_ASSIGNMENT_TYPE),
-                TitleDescBottomSheetOption(
-                        requireContext().getString(R.string.discussion_board),
-                        requireContext().getString(R.string.add_discussion_board_desc),
-                        CourseBlock.BLOCK_DISCUSSION_TYPE),
-        )
-
-        mPresenter?.onCreate(backStackSavedState)
+//        setEditFragmentTitle(R.string.add_a_new_course, R.string.edit_course)
+//
+//
+//        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
+//            requireActivity().activityResultRegistry,null, 1
+//        ).also {
+//            mDataBinding?.imageViewLifecycleObserver = it
+//            viewLifecycleOwner.lifecycle.addObserver(it)
+//        }
+//
+//        mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
+//            di, viewLifecycleOwner).withViewLifecycle()
+//
+//        mDataBinding?.scheduleOneToManyListener = mPresenter?.scheduleOneToManyJoinListener
+//        mDataBinding?.mPresenter = mPresenter
+//        scheduleRecyclerAdapter = ScheduleRecyclerAdapter(
+//            mPresenter?.scheduleOneToManyJoinListener, mPresenter)
+//
+//        scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
+//        scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+//
+//
+//        mDataBinding?.courseBlockOneToManyListener = mPresenter
+//        courseBlockRecyclerAdapter = CourseBlockRecyclerAdapter(
+//                mPresenter, mDataBinding?.activityClazzEditCourseBlockRecyclerview)
+//
+//        courseBlockRecyclerView?.adapter = courseBlockRecyclerAdapter
+//        courseBlockRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+//
+//        bottomSheetOptionList = listOf(
+//                TitleDescBottomSheetOption(
+//                        requireContext().getString(R.string.module),
+//                        requireContext().getString(R.string.course_module),
+//                        CourseBlock.BLOCK_MODULE_TYPE),
+//                TitleDescBottomSheetOption(
+//                        requireContext().getString(R.string.text),
+//                        requireContext().getString(R.string.formatted_text_to_show_to_course_participants),
+//                        CourseBlock.BLOCK_TEXT_TYPE),
+//                TitleDescBottomSheetOption(
+//                        requireContext().getString(R.string.content),
+//                        requireContext().getString(R.string.add_course_block_content_desc),
+//                        CourseBlock.BLOCK_CONTENT_TYPE),
+//                TitleDescBottomSheetOption(
+//                        requireContext().getString(R.string.assignments),
+//                        requireContext().getString(R.string.add_assignment_block_content_desc),
+//                        CourseBlock.BLOCK_ASSIGNMENT_TYPE),
+//                TitleDescBottomSheetOption(
+//                        requireContext().getString(R.string.discussion_board),
+//                        requireContext().getString(R.string.add_discussion_board_desc),
+//                        CourseBlock.BLOCK_DISCUSSION_TYPE),
+//        )
+//
+//        mPresenter?.onCreate(backStackSavedState)
 
     }
 
@@ -302,7 +309,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
         )
 
         @JvmField
-        val BLOCK_WITH_ENTRY_MAP = BLOCK_ICON_MAP + ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP
+        val BLOCK_AND_ENTRY_ICON_MAP = BLOCK_ICON_MAP + ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP
 
 
         val DIFF_CALLBACK_SCHEDULE: DiffUtil.ItemCallback<Schedule> = object: DiffUtil.ItemCallback<Schedule>() {
@@ -319,23 +326,16 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
 
 }
 
-private val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
-    ContentEntry.TYPE_EBOOK to R.drawable.ic_book_black_24dp,
-    ContentEntry.TYPE_VIDEO to R.drawable.video_youtube,
-    ContentEntry.TYPE_DOCUMENT to R.drawable.text_doc_24px,
-    ContentEntry.TYPE_ARTICLE to R.drawable.article_24px,
-    ContentEntry.TYPE_COLLECTION to R.drawable.collections_24px,
-    ContentEntry.TYPE_INTERACTIVE_EXERCISE to R.drawable.ic_baseline_touch_app_24,
-    ContentEntry.TYPE_AUDIO to R.drawable.ic_audiotrack_24px
-)
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzEditScreen(
     uiState: ClazzEditUiState = ClazzEditUiState(),
     onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
+    onMoveCourseBlock: (fromIndex: Int, toIndex: Int) -> Unit = {_, _ -> },
     onClickSchool: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
+    onClickCourseBlock: (CourseBlock) -> Unit = {},
     onClickAddCourseBlock: () -> Unit = {},
     onClickAddSchedule: () -> Unit = {},
     onClickEditSchedule: (Schedule) -> Unit = {},
@@ -351,13 +351,10 @@ private fun ClazzEditScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
     )  {
 
         item {
-            Text(text = stringResource(id = R.string.basic_details),
-                style = Typography.h6
-            )
+            UstadEditHeader(text = stringResource(id = R.string.basic_details))
         }
 
         item {
@@ -401,37 +398,47 @@ private fun ClazzEditScreen(
         }
 
         item {
-            UstadDateEditTextField(
-                value = uiState.entity?.clazzStartTime ?: 0,
-                label = stringResource(id = R.string.start_date),
-                error = uiState.clazzStartDateError,
-                enabled = uiState.fieldsEnabled,
-                timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
-                onValueChange = {
-                    onClazzChanged(
-                        uiState.entity?.shallowCopy {
-                            clazzStartTime = it
-                        }
-                    )
-                }
-            )
-        }
+            Row {
+                UstadDateEditTextField(
+                    value = uiState.entity?.clazzStartTime ?: 0,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                    autoVerticalPadding = false,
+                    label = stringResource(id = R.string.start_date),
+                    error = uiState.clazzStartDateError,
+                    enabled = uiState.fieldsEnabled,
+                    timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
+                    onValueChange = {
+                        onClazzChanged(
+                            uiState.entity?.shallowCopy {
+                                clazzStartTime = it
+                            }
+                        )
+                    }
+                )
 
-        item {
-            UstadDateEditTextField(
-                value = uiState.entity?.clazzEndTime ?: 0,
-                label = stringResource(id = R.string.end_date).addOptionalSuffix(),
-                error = uiState.clazzEndDateError,
-                enabled = uiState.fieldsEnabled,
-                timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
-                onValueChange = {
-                    onClazzChanged(
-                        uiState.entity?.shallowCopy {
-                            clazzEndTime = it
-                        }
-                    )
-                }
-            )
+                UstadDateEditTextField(
+                    value = uiState.entity?.clazzEndTime ?: 0,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 16.dp, start = 8.dp, top = 8.dp, bottom = 8.dp),
+                    autoVerticalPadding = false,
+                    label = stringResource(id = R.string.end_date).addOptionalSuffix(),
+                    error = uiState.clazzEndDateError,
+                    enabled = uiState.fieldsEnabled,
+                    timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
+                    onValueChange = {
+                        onClazzChanged(
+                            uiState.entity?.shallowCopy {
+                                clazzEndTime = it
+                            }
+                        )
+                    }
+                )
+            }
+
+
         }
 
         item {
@@ -445,15 +452,17 @@ private fun ClazzEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-
-        item {
-            Text(text = stringResource(id = R.string.course_blocks))
+            UstadEditHeader(stringResource(R.string.course_blocks))
         }
 
         item {
             ListItem(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = null
+                    )
+                },
                 modifier = Modifier.clickable {
                     onClickAddCourseBlock()
                 },
@@ -465,17 +474,15 @@ private fun ClazzEditScreen(
             items = uiState.courseBlockList
         ) { courseBlock ->
 
-            val image = if(courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE)
-                courseBlock.entry?.contentTypeFlag
-            else
-                courseBlock.cbType
-
             val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5F else 1F
             val startPadding = (courseBlock.cbIndentLevel * 8).dp
 
             ListItem(
                 modifier = Modifier
                     .padding(start = startPadding)
+                    .clickable {
+                        onClickCourseBlock(courseBlock)
+                    }
                     .alpha(courseBlockEditAlpha),
                 icon = {
                     Row{
@@ -484,7 +491,9 @@ private fun ClazzEditScreen(
                             contentDescription = null
                         )
                         Icon(
-                            painterResource(id = CONTENT_ENTRY_TYPE_ICON_MAP[image] ?: R.drawable.text_doc_24px),
+                            painterResource(
+                                id = BLOCK_AND_ENTRY_ICON_MAP[courseBlock.editIconId]
+                                    ?: R.drawable.text_doc_24px),
                             contentDescription = null
                         )
                     }
@@ -505,11 +514,7 @@ private fun ClazzEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-
-        item {
-            Text(text = stringResource(id = R.string.schedule))
+            UstadEditHeader(text = stringResource(id = R.string.schedule))
         }
 
         item {
@@ -541,6 +546,9 @@ private fun ClazzEditScreen(
                 modifier = Modifier.clickable {
                     onClickEditSchedule(schedule)
                 },
+                icon = {
+                    Spacer(Modifier.width(24.dp))
+                },
                 text = { Text(text) },
                 trailing = {
                     IconButton(
@@ -556,7 +564,76 @@ private fun ClazzEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
+            UstadTextEditField(
+                value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
+                label = stringResource(id = R.string.holiday_calendar),
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {},
+                onClick = onClickHolidayCalendar
+            )
+        }
+
+        item {
+            UstadEditHeader(text = stringResource(id = R.string.course_setup))
+        }
+
+        item {
+            UstadSwitchField(
+                label = stringResource(id = R.string.attendance),
+                checked = uiState.clazzEditAttendanceChecked,
+                onChange = { onCheckedAttendance(it) },
+                enabled = uiState.fieldsEnabled
+            )
+        }
+
+        item {
+            UstadEditHeader(text = stringResource(id = R.string.schedule))
+        }
+
+        item {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickAddSchedule()
+                },
+                text = { Text(stringResource(id = R.string.add_a_schedule)) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "",
+                    )
+                }
+            )
+        }
+
+        items(
+            uiState.clazzSchedules
+        ){ schedule ->
+
+            val fromTimeFormatted = rememberFormattedTime(timeInMs = schedule.sceduleStartTime.toInt())
+            val toTimeFormatted = rememberFormattedTime(timeInMs = schedule.scheduleEndTime.toInt())
+            val text = "${messageIdResource(id = schedule.scheduleFrequency)} " +
+                    " ${messageIdResource(schedule.scheduleDay)} " +
+                    " $fromTimeFormatted - $toTimeFormatted "
+
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickEditSchedule(schedule)
+                },
+                icon = {
+                    Spacer(Modifier.width(24.dp))
+                },
+                text = { Text(text) },
+                trailing = {
+                    IconButton(
+                        onClick = { onClickDeleteSchedule(schedule) },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "",
+                        )
+                    }
+                }
+            )
         }
 
         item {
@@ -570,15 +647,7 @@ private fun ClazzEditScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
-            Text(text = stringResource(id = R.string.course_setup))
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
+            UstadEditHeader(text = stringResource(id = R.string.course_setup))
         }
 
         item {
@@ -588,10 +657,6 @@ private fun ClazzEditScreen(
                 onChange = { onCheckedAttendance(it) },
                 enabled = uiState.fieldsEnabled
             )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
         item {
@@ -606,10 +671,6 @@ private fun ClazzEditScreen(
                     })
                 }
             )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
         item {
@@ -688,22 +749,33 @@ fun ClazzEditScreenPreview() {
         ),
         courseBlockList = listOf(
             CourseBlockWithEntity().apply {
-                cbTitle = "First"
+                cbUid = 1
+                cbTitle = "Module"
                 cbHidden = true
-                cbIndentLevel = 2
+                cbType = CourseBlock.BLOCK_MODULE_TYPE
+                cbIndentLevel = 0
             },
             CourseBlockWithEntity().apply {
-                cbTitle = "Second"
+                cbUid = 2
+                cbTitle = "Content"
                 cbHidden = false
-                cbIndentLevel = 4
+                cbType = CourseBlock.BLOCK_CONTENT_TYPE
+                entry = ContentEntry().apply {
+                    contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+                }
+                cbIndentLevel = 1
             },
             CourseBlockWithEntity().apply {
-                cbTitle = "Third"
+                cbUid = 3
+                cbTitle = "Assignment"
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                 cbHidden = false
+                cbIndentLevel = 1
             },
         ),
     )
-    MdcTheme {
-        ClazzEditScreen(uiState)
-    }
+
+    ClazzEditScreen(uiState)
+
+
 }
