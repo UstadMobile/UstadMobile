@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -29,9 +30,10 @@ import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailOverview
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzAssignmentDetailOverviewPresenter
 import com.ustadmobile.core.controller.FileSubmissionListItemListener
+import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.locale.entityconstants.SubmissionConstants.SUBMISSION_POLICY_OPTIONS
+import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants.SUBMISSION_POLICY_OPTIONS
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzAssignmentDetailOverviewView
 import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailOverviewUiState
@@ -406,29 +408,34 @@ class ClazzAssignmentDetailOverviewFragment : UstadDetailFragment<ClazzAssignmen
 
 }
 
+val ASSIGNMENT_STATUS_MAP = mapOf(
+    CourseAssignmentSubmission.NOT_SUBMITTED to R.drawable.ic_done_white_24dp,
+    CourseAssignmentSubmission.SUBMITTED to R.drawable.ic_done_white_24dp,
+    CourseAssignmentSubmission.MARKED to R.drawable.ic_baseline_done_all_24
+)
+
 @Composable
 private fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState = ClazzAssignmentDetailOverviewUiState(),
 ) {
 
     val context = LocalContext.current
+    val dateOfDeadLine = remember { DateFormat.getDateFormat(context)
+        .format(Date(uiState.assignment?.block?.cbDeadlineDate ?: 0)).toString() }
 
     LazyColumn(
-        modifier = Modifier.fillMaxHeight()
+        modifier = Modifier
+            .fillMaxHeight()
             .padding(16.dp)
     ) {
 
         item {
             if (!uiState.caDescriptionVisible) {
-                Text(uiState.entity?.caDescription ?: "")
+                Text(uiState.assignment?.caDescription ?: "")
             }
         }
 
         item {
-
-            val dateOfDeadLine = remember { DateFormat.getDateFormat(context)
-                .format(Date(uiState.entity?.block?.cbDeadlineDate ?: 0)).toString() }
-
             if (uiState.cbDeadlineDateVisible){
                 UstadDetailField(
                     imageId = R.drawable.ic_event_available_black_24dp,
@@ -443,7 +450,7 @@ private fun ClazzAssignmentDetailOverviewScreen(
                 imageId = R.drawable.ic_baseline_task_alt_24,
                 valueText = messageIdMapResource(
                     map = SUBMISSION_POLICY_OPTIONS,
-                    key = uiState.entity?.caSubmissionPolicy
+                    key = uiState.assignment?.caSubmissionPolicy
                         ?: ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED
                 ),
                 labelText = stringResource(R.string.submission_policy)
@@ -451,15 +458,43 @@ private fun ClazzAssignmentDetailOverviewScreen(
         }
 
         item {
-            UstadDetailField(
-                imageId = R.drawable.ic_baseline_task_alt_24,
-                valueText = messageIdMapResource(
-                    map = SUBMISSION_POLICY_OPTIONS,
-                    key = uiState.entity?.caSubmissionPolicy
-                        ?: ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED
-                ),
-                labelText = stringResource(R.string.submission_policy)
-            )
+            if (uiState.submissionStatusVisible){
+                UstadDetailField(
+                    imageId = ASSIGNMENT_STATUS_MAP[uiState.assignmentStatus]
+                        ?: CourseAssignmentSubmission.MARKED,
+                    valueText = messageIdMapResource(
+                        map = SubmissionConstants.STATUS_MAP,
+                        key = uiState.assignmentStatus
+                    ),
+                    labelText = stringResource(R.string.status)
+                )
+            }
+        }
+
+        item {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (uiState.pointsVisible){
+                    UstadDetailField(
+                        modifier = Modifier.weight(0.3F),
+                        imageId = R.drawable.ic_baseline_emoji_events_24,
+                        valueText = "${uiState.assignmentMark?.camMark}/" +
+                                "${uiState.assignment?.block?.cbMaxPoints}" +
+                                " ${stringResource(R.string.points)}",
+                        labelText = messageIdMapResource(
+                            map = SubmissionConstants.STATUS_MAP,
+                            key = uiState.assignmentStatus
+                        ),
+                    )
+                }
+
+                if (uiState.penaltyVisible){
+                    Text(text = stringResource(id = R.string.late_penalty,
+                        uiState.assignment?.block?.cbLateSubmissionPenalty ?: 0))
+                }
+            }
+
         }
     }
 }
@@ -468,11 +503,17 @@ private fun ClazzAssignmentDetailOverviewScreen(
 @Preview
 fun ClazzAssignmentDetailOverviewPreview() {
     val uiStateVal = ClazzAssignmentDetailOverviewUiState(
-        entity = ClazzAssignmentWithCourseBlock().apply {
+        assignment = ClazzAssignmentWithCourseBlock().apply {
             caDescription = "Read the stories and describe the main characters."
             block = CourseBlock().apply {
                 cbDeadlineDate = 1668153441000
+                cbMaxPoints = 10
             }
+        },
+        pointsVisible = true,
+        assignmentMark = CourseAssignmentMark().apply {
+            camMark = 8F
+            camPenalty = 20
         }
     )
     MdcTheme {

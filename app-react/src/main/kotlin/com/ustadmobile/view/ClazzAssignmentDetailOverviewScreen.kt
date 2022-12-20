@@ -2,7 +2,7 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.impl.locale.entityconstants.SubmissionConstants
+import com.ustadmobile.core.impl.locale.entityconstants.SubmissionPolicyConstants
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.core.viewmodel.ClazzAssignmentDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithCourseBlock
@@ -60,7 +60,7 @@ val ClazzAssignmentDetailOverviewComponent2 = FC<ClazzAssignmentDetailOverviewPr
 
                     val caSubmissionPolicy = strings.mapLookup(
                         it.caSubmissionPolicy,
-                        SubmissionConstants.SUBMISSION_POLICY_OPTIONS
+                        SubmissionPolicyConstants.SUBMISSION_POLICY_OPTIONS
                     )
 
                     if (!it.caDescription.isNullOrBlank()) {
