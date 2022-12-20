@@ -4,10 +4,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
@@ -168,7 +165,10 @@ private fun ClazzListScreen(
     uiState: ClazzListUiState = ClazzListUiState(),
     onClickClazz: (Clazz) -> Unit = {},
 ) {
-    LazyColumn {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
 
         items(
             items = uiState.clazzList,
@@ -232,7 +232,7 @@ fun ClazzListItem(
                     imageVector = Icons.Filled.Badge,
                     contentDescription = "",
                 )
-//                        Text(clazz.clazzActiveEnrolment?.clazzEnrolmentRole ?: 0)
+//                Text(clazz.clazzActiveEnrolment)
             }
         },
     )
