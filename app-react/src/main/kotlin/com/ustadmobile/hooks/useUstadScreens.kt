@@ -50,6 +50,7 @@ fun useUstadScreens(): UstadScreens {
                 SchoolEditScreenPreview),
             UstadScreen(LanguageDetailView.VIEW_NAME, name = "LanguageDetail Preview",
                 LanguageDetailPreview),
+            UstadScreen(ContentEntryImportLinkView.VIEW_NAME, "ContentEntryImportLink Preview", ContentEntryImportLinkScreenPreview)
         )
     }
 }
