@@ -16,18 +16,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzEditBinding
 import com.toughra.ustadmobile.databinding.ItemScheduleBinding
@@ -43,7 +39,6 @@ import com.ustadmobile.core.viewmodel.ClazzEditUiState
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.view.ClazzEditFragment.Companion.BLOCK_AND_ENTRY_ICON_MAP
@@ -51,6 +46,7 @@ import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.composable.*
+import org.burnoutcrew.reorderable.*
 import java.util.*
 
 interface ClazzEditFragmentEventHandler {
@@ -332,7 +328,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
 private fun ClazzEditScreen(
     uiState: ClazzEditUiState = ClazzEditUiState(),
     onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
-    onMoveCourseBlock: (fromIndex: Int, toIndex: Int) -> Unit = {_, _ -> },
+    onMoveCourseBlock: (from: ItemPosition, to: ItemPosition) -> Unit = {_, _ -> },
     onClickSchool: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
     onClickCourseBlock: (CourseBlock) -> Unit = {},
@@ -348,169 +344,104 @@ private fun ClazzEditScreen(
     onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
     onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
 ) {
+
+    val reorderLazyListState = rememberReorderableLazyListState(
+        onMove = { from, to ->
+            onMoveCourseBlock(from, to)
+        },
+        onDragEnd = {start, end  ->
+            //validate the result
+        }
+    )
+
+
     LazyColumn(
+        state = reorderLazyListState.listState,
         modifier = Modifier
-            .fillMaxSize()
+            .reorderable(reorderLazyListState)
+            .detectReorderAfterLongPress(reorderLazyListState)
     )  {
-
         item {
-            UstadEditHeader(text = stringResource(id = R.string.basic_details))
-        }
-
-        item {
-            UstadTextEditField(
-                value = uiState.entity?.clazzName ?: "",
-                label = stringResource(id = R.string.name),
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onClazzChanged(
-                        uiState.entity?.shallowCopy {
-                            clazzName = it
-                        }
-                    )
-                }
-            )
-        }
-
-        item {
-            UstadTextEditField(
-                value = uiState.entity?.clazzDesc ?: "",
-                label = stringResource(id = R.string.description).addOptionalSuffix(),
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onClazzChanged(
-                        uiState.entity?.shallowCopy {
-                            clazzDesc = it
-                        }
-                    )
-                }
-            )
-        }
-
-        item {
-            UstadTextEditField(
-                value = uiState.entity?.school?.schoolName ?: "",
-                label = stringResource(id = R.string.institution),
-                enabled = uiState.fieldsEnabled,
-                onClick = onClickSchool,
-                onValueChange = {}
-            )
-        }
-
-        item {
-            Row {
-                UstadDateEditTextField(
-                    value = uiState.entity?.clazzStartTime ?: 0,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-                    autoVerticalPadding = false,
-                    label = stringResource(id = R.string.start_date),
-                    error = uiState.clazzStartDateError,
-                    enabled = uiState.fieldsEnabled,
-                    timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
-                    onValueChange = {
-                        onClazzChanged(
-                            uiState.entity?.shallowCopy {
-                                clazzStartTime = it
-                            }
-                        )
-                    }
+            ReorderableItem(reorderableState = reorderLazyListState, key = 1) {
+                ClazzEditBasicDetails(
+                    uiState = uiState,
+                    onClazzChanged= onClazzChanged,
+                    onClickSchool = onClickSchool,
+                    onClickTimezone = onClickTimezone,
                 )
+            }
+        }
 
-                UstadDateEditTextField(
-                    value = uiState.entity?.clazzEndTime ?: 0,
+        item {
+            ReorderableItem(reorderableState = reorderLazyListState, key = 2) {
+                UstadEditHeader(stringResource(R.string.course_blocks))
+            }
+
+        }
+
+        item {
+            ReorderableItem(reorderableState = reorderLazyListState, key = 3) {
+                ListItem(
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = null
+                        )
+                    },
+                    modifier = Modifier.clickable {
+                        onClickAddCourseBlock()
+                    },
+                    text = { Text(stringResource(id = R.string.add_block)) },
+                )
+            }
+
+        }
+
+        items (
+            items = uiState.courseBlockList,
+            key = { it.cbUid }
+        ) { courseBlock ->
+
+            val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5F else 1F
+            val startPadding = (courseBlock.cbIndentLevel * 8).dp
+            ReorderableItem(state = reorderLazyListState, key = courseBlock.cbUid) {
+                ListItem(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 16.dp, start = 8.dp, top = 8.dp, bottom = 8.dp),
-                    autoVerticalPadding = false,
-                    label = stringResource(id = R.string.end_date).addOptionalSuffix(),
-                    error = uiState.clazzEndDateError,
-                    enabled = uiState.fieldsEnabled,
-                    timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
-                    onValueChange = {
-                        onClazzChanged(
-                            uiState.entity?.shallowCopy {
-                                clazzEndTime = it
-                            }
+                        .clickable {
+                            onClickCourseBlock(courseBlock)
+                        }
+                        .alpha(courseBlockEditAlpha),
+                    icon = {
+                        Row{
+                            Icon(
+                                imageVector = Icons.Filled.Reorder,
+                                contentDescription = null,
+                                modifier = Modifier.detectReorder(reorderLazyListState)
+                            )
+                            Spacer(modifier = Modifier.width(startPadding))
+                            Icon(
+                                painterResource(
+                                    id = BLOCK_AND_ENTRY_ICON_MAP[courseBlock.editIconId]
+                                        ?: R.drawable.text_doc_24px),
+                                contentDescription = null
+                            )
+                        }
+                    },
+
+                    text = { Text(courseBlock.cbTitle ?: "") },
+                    trailing = {
+                        PopUpMenu(
+                            enabled = uiState.fieldsEnabled,
+                            entity = courseBlock,
+                            onClickHideBlockPopupMenu = onClickHideBlockPopupMenu,
+                            onClickIndentBlockPopupMenu = onClickIndentBlockPopupMenu,
+                            onClickUnIndentBlockPopupMenu = onClickUnIndentBlockPopupMenu,
+                            onClickDeleteBlockPopupMenu = onClickDeleteBlockPopupMenu,
                         )
                     }
                 )
             }
 
-
-        }
-
-        item {
-            UstadTextEditField(
-                value = uiState.entity?.clazzTimeZone ?: "",
-                label = stringResource(id = R.string.timezone),
-                enabled = uiState.fieldsEnabled,
-                onClick = { onClickTimezone() },
-                onValueChange = {}
-            )
-        }
-
-        item {
-            UstadEditHeader(stringResource(R.string.course_blocks))
-        }
-
-        item {
-            ListItem(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = null
-                    )
-                },
-                modifier = Modifier.clickable {
-                    onClickAddCourseBlock()
-                },
-                text = { Text(stringResource(id = R.string.add_block)) },
-            )
-        }
-
-        items (
-            items = uiState.courseBlockList
-        ) { courseBlock ->
-
-            val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5F else 1F
-            val startPadding = (courseBlock.cbIndentLevel * 8).dp
-
-            ListItem(
-                modifier = Modifier
-                    .padding(start = startPadding)
-                    .clickable {
-                        onClickCourseBlock(courseBlock)
-                    }
-                    .alpha(courseBlockEditAlpha),
-                icon = {
-                    Row{
-                        Icon(
-                            Icons.Filled.Menu,
-                            contentDescription = null
-                        )
-                        Icon(
-                            painterResource(
-                                id = BLOCK_AND_ENTRY_ICON_MAP[courseBlock.editIconId]
-                                    ?: R.drawable.text_doc_24px),
-                            contentDescription = null
-                        )
-                    }
-                },
-
-                text = { Text(courseBlock.cbTitle ?: "") },
-                trailing = {
-                    PopUpMenu(
-                        enabled = uiState.fieldsEnabled,
-                        entity = courseBlock,
-                        onClickHideBlockPopupMenu = onClickHideBlockPopupMenu,
-                        onClickIndentBlockPopupMenu = onClickIndentBlockPopupMenu,
-                        onClickUnIndentBlockPopupMenu = onClickUnIndentBlockPopupMenu,
-                        onClickDeleteBlockPopupMenu = onClickDeleteBlockPopupMenu,
-                    )
-                }
-            )
         }
 
         item {
@@ -586,78 +517,7 @@ private fun ClazzEditScreen(
             )
         }
 
-        item {
-            UstadEditHeader(text = stringResource(id = R.string.schedule))
-        }
 
-        item {
-            ListItem(
-                modifier = Modifier.clickable {
-                    onClickAddSchedule()
-                },
-                text = { Text(stringResource(id = R.string.add_a_schedule)) },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "",
-                    )
-                }
-            )
-        }
-
-        items(
-            uiState.clazzSchedules
-        ){ schedule ->
-
-            val fromTimeFormatted = rememberFormattedTime(timeInMs = schedule.sceduleStartTime.toInt())
-            val toTimeFormatted = rememberFormattedTime(timeInMs = schedule.scheduleEndTime.toInt())
-            val text = "${messageIdResource(id = schedule.scheduleFrequency)} " +
-                    " ${messageIdResource(schedule.scheduleDay)} " +
-                    " $fromTimeFormatted - $toTimeFormatted "
-
-            ListItem(
-                modifier = Modifier.clickable {
-                    onClickEditSchedule(schedule)
-                },
-                icon = {
-                    Spacer(Modifier.width(24.dp))
-                },
-                text = { Text(text) },
-                trailing = {
-                    IconButton(
-                        onClick = { onClickDeleteSchedule(schedule) },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = "",
-                        )
-                    }
-                }
-            )
-        }
-
-        item {
-            UstadTextEditField(
-                value = uiState.entity?.holidayCalendar?.umCalendarName ?: "",
-                label = stringResource(id = R.string.holiday_calendar),
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {},
-                onClick = onClickHolidayCalendar
-            )
-        }
-
-        item {
-            UstadEditHeader(text = stringResource(id = R.string.course_setup))
-        }
-
-        item {
-            UstadSwitchField(
-                label = stringResource(id = R.string.attendance),
-                checked = uiState.clazzEditAttendanceChecked,
-                onChange = { onCheckedAttendance(it) },
-                enabled = uiState.fieldsEnabled
-            )
-        }
 
         item {
             UstadMessageIdOptionExposedDropDownMenuField(
@@ -684,6 +544,104 @@ private fun ClazzEditScreen(
         }
     }
 }
+
+@Composable
+private fun ClazzEditBasicDetails(
+    uiState: ClazzEditUiState,
+    onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit = {},
+    onClickSchool: () -> Unit = {},
+    onClickTimezone: () -> Unit = {},
+) {
+    Column {
+        UstadEditHeader(text = stringResource(id = R.string.basic_details))
+
+        UstadTextEditField(
+            value = uiState.entity?.clazzName ?: "",
+            label = stringResource(id = R.string.name),
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onClazzChanged(
+                    uiState.entity?.shallowCopy {
+                        clazzName = it
+                    }
+                )
+            }
+        )
+
+
+        UstadTextEditField(
+            value = uiState.entity?.clazzDesc ?: "",
+            label = stringResource(id = R.string.description).addOptionalSuffix(),
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onClazzChanged(
+                    uiState.entity?.shallowCopy {
+                        clazzDesc = it
+                    }
+                )
+            }
+        )
+
+        UstadTextEditField(
+            value = uiState.entity?.school?.schoolName ?: "",
+            label = stringResource(id = R.string.institution),
+            enabled = uiState.fieldsEnabled,
+            onClick = onClickSchool,
+            onValueChange = {}
+        )
+
+
+        Row {
+            UstadDateEditTextField(
+                value = uiState.entity?.clazzStartTime ?: 0,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                autoVerticalPadding = false,
+                label = stringResource(id = R.string.start_date),
+                error = uiState.clazzStartDateError,
+                enabled = uiState.fieldsEnabled,
+                timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
+                onValueChange = {
+                    onClazzChanged(
+                        uiState.entity?.shallowCopy {
+                            clazzStartTime = it
+                        }
+                    )
+                }
+            )
+
+            UstadDateEditTextField(
+                value = uiState.entity?.clazzEndTime ?: 0,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 16.dp, start = 8.dp, top = 8.dp, bottom = 8.dp),
+                autoVerticalPadding = false,
+                label = stringResource(id = R.string.end_date).addOptionalSuffix(),
+                error = uiState.clazzEndDateError,
+                enabled = uiState.fieldsEnabled,
+                timeZoneId = uiState.entity?.clazzTimeZone ?: "UTC",
+                onValueChange = {
+                    onClazzChanged(
+                        uiState.entity?.shallowCopy {
+                            clazzEndTime = it
+                        }
+                    )
+                }
+            )
+        }
+
+        UstadTextEditField(
+            value = uiState.entity?.clazzTimeZone ?: "",
+            label = stringResource(id = R.string.timezone),
+            enabled = uiState.fieldsEnabled,
+            onClick = { onClickTimezone() },
+            onValueChange = {}
+        )
+
+    }
+}
+
 
 @Composable
 fun PopUpMenu(
@@ -735,47 +693,62 @@ fun PopUpMenu(
 @Composable
 @Preview
 fun ClazzEditScreenPreview() {
-    val uiState = ClazzEditUiState(
-        entity = ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
+    var uiState: ClazzEditUiState by remember {
+        mutableStateOf(ClazzEditUiState(
+            entity = ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
 
-        },
-        clazzSchedules = listOf(
-            Schedule().apply {
-                sceduleStartTime = 0
-                scheduleEndTime = 0
-                scheduleFrequency = MessageID.yearly
-                scheduleDay = MessageID.sunday
-            }
-        ),
-        courseBlockList = listOf(
-            CourseBlockWithEntity().apply {
-                cbUid = 1
-                cbTitle = "Module"
-                cbHidden = true
-                cbType = CourseBlock.BLOCK_MODULE_TYPE
-                cbIndentLevel = 0
             },
-            CourseBlockWithEntity().apply {
-                cbUid = 2
-                cbTitle = "Content"
-                cbHidden = false
-                cbType = CourseBlock.BLOCK_CONTENT_TYPE
-                entry = ContentEntry().apply {
-                    contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+            clazzSchedules = listOf(
+                Schedule().apply {
+                    sceduleStartTime = 0
+                    scheduleEndTime = 0
+                    scheduleFrequency = MessageID.yearly
+                    scheduleDay = MessageID.sunday
                 }
-                cbIndentLevel = 1
-            },
-            CourseBlockWithEntity().apply {
-                cbUid = 3
-                cbTitle = "Assignment"
-                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
-                cbHidden = false
-                cbIndentLevel = 1
-            },
-        ),
-    )
+            ),
+            courseBlockList = listOf(
+                CourseBlockWithEntity().apply {
+                    cbUid = 1000
+                    cbTitle = "Module"
+                    cbHidden = true
+                    cbType = CourseBlock.BLOCK_MODULE_TYPE
+                    cbIndentLevel = 0
+                },
+                CourseBlockWithEntity().apply {
+                    cbUid = 1001
+                    cbTitle = "Content"
+                    cbHidden = false
+                    cbType = CourseBlock.BLOCK_CONTENT_TYPE
+                    entry = ContentEntry().apply {
+                        contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+                    }
+                    cbIndentLevel = 1
+                },
+                CourseBlockWithEntity().apply {
+                    cbUid = 1002
+                    cbTitle = "Assignment"
+                    cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                    cbHidden = false
+                    cbIndentLevel = 1
+                },
+            ),
+        ))
+    }
 
-    ClazzEditScreen(uiState)
+
+    ClazzEditScreen(
+        uiState = uiState,
+        onMoveCourseBlock = { fromIndex, toIndex ->
+            uiState = uiState.copy(
+                //TODO: this needs to check for out of bounds
+
+                courseBlockList = uiState.courseBlockList.toMutableList().apply {
+                    Collections.swap(this, indexOfFirst { it.cbUid == toIndex.key },
+                        indexOfFirst { it.cbUid == fromIndex.key })
+                }.toList()
+            )
+        }
+    )
 
 
 }
