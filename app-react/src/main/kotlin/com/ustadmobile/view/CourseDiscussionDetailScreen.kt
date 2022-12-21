@@ -2,32 +2,23 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.viewmodel.CourseBlockEditUiState
-import com.ustadmobile.core.viewmodel.CourseDiscussionBlockEditUiState
 import com.ustadmobile.core.viewmodel.CourseDiscussionDetailUiState
-import com.ustadmobile.core.viewmodel.SiteEditUiState
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.UstadCourseBlockEdit
-import com.ustadmobile.mui.components.UstadDateTimeEditField
-import com.ustadmobile.mui.components.UstadDetailField
-import com.ustadmobile.mui.components.UstadTextEditField
-import com.ustadmobile.util.ext.addOptionalSuffix
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.components.UstadBlankIcon
-import com.ustadmobile.view.components.UstadSwitchField
 import csstype.px
 import kotlinx.html.currentTimeMillis
-import mui.icons.material.AccountCircle
-import mui.icons.material.Add
-import mui.icons.material.Delete
-import mui.icons.material.Visibility
+import mui.icons.material.*
 import mui.material.*
+import mui.material.List
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
 import react.create
+import react.useMemo
+import kotlin.js.Date
 
 external interface CourseDiscussionDetailProps: Props {
     var uiState: CourseDiscussionDetailUiState
@@ -39,6 +30,8 @@ external interface CourseDiscussionDetailProps: Props {
 val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props ->
 
     val strings = useStringsXml()
+
+
 
     Container {
 
@@ -68,18 +61,6 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
             direction = responsive(mui.material.StackDirection.column)
             spacing = responsive(10.px)
 
-//            UstadDetailField {
-//                valueText = props.uiState.courseDiscussion?.courseDiscussionTitle.toString()
-//                labelText = strings[MessageID.title]
-//
-//            }
-
-//            UstadDetailField {
-//                valueText = props.uiState.courseDiscussion?.courseDiscussionDesc.toString()
-//                labelText = strings[MessageID.description]
-//
-//
-//            }
 
 
 
@@ -97,6 +78,7 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
         }
 
         List {
+            //Add post:
             ListItem {
                 disablePadding = true
 
@@ -110,20 +92,21 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
                     }
 
                     ListItemText {
-                        +(strings[MessageID.posts])
+                        +(strings[MessageID.post])
                     }
                 }
             }
 
+            //Posts:
             props.uiState.posts.forEach { item ->
                 ListItem {
                     disablePadding = true
-                    secondaryAction = IconButton.create {
-                        onClick = {
-                            props.onDeleteClick(item)
-                        }
-                        Delete {}
-                    }
+//                    secondaryAction = IconButton.create {
+//                        onClick = {
+//                            props.onDeleteClick(item)
+//                        }
+//                        Delete {}
+//                    }
 
                     ListItemButton {
                         ListItemIcon {
@@ -133,9 +116,23 @@ val CourseDiscussionDetailComponent2 = FC<CourseDiscussionDetailProps> { props -
                         onClick = {
                             props.onClickPost(item)
                         }
-                        ListItemText {
-                            +(item.discussionPostTitle ?: "")
+
+                        val dateFormatted = useMemo(dependencies = arrayOf(item.postLatestMessageTimestamp)) {
+                            Date(item.postLatestMessageTimestamp ?: 0L).toLocaleDateString()
                         }
+
+                        UstadMessageField{
+                            icon = AccountCircle.create()
+                            thirdTextIcon = Message.create()
+                            secondText = item.discussionPostTitle?:""
+                            firstText = item.authorPersonFirstNames + " " + item.authorPersonLastName?: ""
+                            thirdText = item.postLatestMessage ?: ""
+                            fourthText = dateFormatted
+                            fifthText = item.postRepliesCount.toString() + " replies"
+                            secondaryActionContent = null
+
+                        }
+
                     }
                 }
             }
@@ -152,6 +149,7 @@ val CourseDiscussionDetailPreview = FC<Props> {
                 courseDiscussionDesc =
                     "This discussion group is for conversations and posts about Sales and Marketting course"
                 courseDiscussionActive = true
+
             },
             posts = listOf(
                 DiscussionPostWithDetails().apply {
@@ -162,6 +160,7 @@ val CourseDiscussionDetailPreview = FC<Props> {
                     authorPersonLastName = "Ismail"
                     postRepliesCount = 5
                     postLatestMessageTimestamp = currentTimeMillis()
+                    postLatestMessage = "Its very different, check section 43"
 
                 },
                 DiscussionPostWithDetails().apply {
@@ -172,6 +171,7 @@ val CourseDiscussionDetailPreview = FC<Props> {
                     authorPersonLastName = "Zaik"
                     postRepliesCount = 16
                     postLatestMessageTimestamp = currentTimeMillis()
+                    postLatestMessage = "Can we have an extra class on TSA?"
 
                 }
             ),

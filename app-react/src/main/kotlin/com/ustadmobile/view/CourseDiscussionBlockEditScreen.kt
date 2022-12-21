@@ -9,20 +9,25 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadCourseBlockEdit
 import com.ustadmobile.mui.components.UstadDateTimeEditField
+import com.ustadmobile.mui.components.UstadMessageField
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.UstadSwitchField
 import csstype.px
 import kotlinx.html.currentTimeMillis
+import mui.icons.material.AccountCircle
 import mui.icons.material.Add
 import mui.icons.material.Delete
+import mui.icons.material.Message
 import mui.material.*
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.create
+import react.useMemo
+import kotlin.js.Date
 
 external interface CourseDiscussionBlockEditProps: Props {
     var uiState: CourseDiscussionBlockEditUiState
@@ -126,9 +131,27 @@ val CourseDiscussionBlockEditComponent2 = FC<CourseDiscussionBlockEditProps> { p
                         onClick = {
                             props.onClickPost(item)
                         }
-                        ListItemText {
-                            +(item.discussionPostTitle ?: "")
+
+
+                        val dateFormatted = useMemo(dependencies = arrayOf(item.postLatestMessageTimestamp)) {
+                            Date(item.postLatestMessageTimestamp ?: 0L).toLocaleDateString()
                         }
+
+                        UstadMessageField{
+                            icon = AccountCircle.create()
+                            thirdTextIcon = Message.create()
+                            secondText = item.discussionPostTitle?:""
+                            firstText = item.authorPersonFirstNames + " " + item.authorPersonLastName?: ""
+                            thirdText = item.postLatestMessage ?: ""
+                            fourthText = dateFormatted
+                            fifthText = item.postRepliesCount.toString() + " replies"
+                            secondaryActionContent = null
+
+                        }
+
+//                        ListItemText {
+//                            +(item.discussionPostTitle ?: "")
+//                        }
                     }
                 }
             }

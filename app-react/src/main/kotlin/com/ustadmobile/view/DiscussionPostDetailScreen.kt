@@ -125,6 +125,7 @@ val DiscussionPostDetailComponent2 = FC<DiscussionPostDetailProps> { props ->
                             props.onClickMessage(item)
                         }
 
+
                         UstadDetailField {
                             valueText = thisAuthorName
                             labelText = item.messageText?:""
