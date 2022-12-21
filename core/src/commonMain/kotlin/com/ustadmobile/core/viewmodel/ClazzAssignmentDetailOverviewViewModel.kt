@@ -17,6 +17,12 @@ data class ClazzAssignmentDetailOverviewUiState(
 
     val assignmentMark: CourseAssignmentMark? = null,
 
+    val timeZone: String = "UTC",
+
+    var publicMode: Boolean = false,
+
+    val fieldsEnabled: Boolean = true,
+
 ) {
 
     val caDescriptionVisible: Boolean
@@ -26,7 +32,7 @@ data class ClazzAssignmentDetailOverviewUiState(
         get() = assignment?.block?.cbDeadlineDate.isDateSet()
 
     val submissionStatusVisible: Boolean
-        get() = assignmentStatus == CourseAssignmentSubmission.NOT_SUBMITTED
+        get() = assignmentStatus != CourseAssignmentSubmission.NOT_SUBMITTED
 
     val penaltyVisible: Boolean
         get() = pointsVisible && assignmentMark?.camPenalty != 0

@@ -5,6 +5,8 @@ import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
@@ -13,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,6 +47,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
@@ -414,9 +418,11 @@ val ASSIGNMENT_STATUS_MAP = mapOf(
     CourseAssignmentSubmission.MARKED to R.drawable.ic_baseline_done_all_24
 )
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzAssignmentDetailOverviewScreen(
     uiState: ClazzAssignmentDetailOverviewUiState = ClazzAssignmentDetailOverviewUiState(),
+    onOpenNewCommentSheet: (Boolean) -> Unit = {},
 ) {
 
     val context = LocalContext.current
@@ -439,7 +445,7 @@ private fun ClazzAssignmentDetailOverviewScreen(
             if (uiState.cbDeadlineDateVisible){
                 UstadDetailField(
                     imageId = R.drawable.ic_event_available_black_24dp,
-                    valueText = dateOfDeadLine,
+                    valueText = "$dateOfDeadLine ${uiState.timeZone}",
                     labelText = stringResource(R.string.deadline)
                 )
             }
@@ -448,12 +454,12 @@ private fun ClazzAssignmentDetailOverviewScreen(
         item {
             UstadDetailField(
                 imageId = R.drawable.ic_baseline_task_alt_24,
+                labelText = stringResource(R.string.submission_policy),
                 valueText = messageIdMapResource(
                     map = SUBMISSION_POLICY_OPTIONS,
                     key = uiState.assignment?.caSubmissionPolicy
                         ?: ClazzAssignment.SUBMISSION_POLICY_MULTIPLE_ALLOWED
-                ),
-                labelText = stringResource(R.string.submission_policy)
+                )
             )
         }
 
@@ -482,10 +488,7 @@ private fun ClazzAssignmentDetailOverviewScreen(
                         valueText = "${uiState.assignmentMark?.camMark}/" +
                                 "${uiState.assignment?.block?.cbMaxPoints}" +
                                 " ${stringResource(R.string.points)}",
-                        labelText = messageIdMapResource(
-                            map = SubmissionConstants.STATUS_MAP,
-                            key = uiState.assignmentStatus
-                        ),
+                        labelText = stringResource(id = R.string.xapi_result_header),
                     )
                 }
 
@@ -496,6 +499,44 @@ private fun ClazzAssignmentDetailOverviewScreen(
             }
 
         }
+
+        item {
+            Text(stringResource(id = R.string.submissions))
+        }
+
+        item {
+            Text(stringResource(id = R.string.class_comments))
+        }
+
+        item {
+            Text(stringResource(id = R.string.add_class_comment))
+        }
+
+        item {
+            ListItem(
+                text = {
+                    UstadTextEditField(
+                        value = "",
+                        label = stringResource(id = R.string.add_class_comment),
+                        readOnly = true,
+                        enabled = uiState.fieldsEnabled,
+                        onValueChange = {},
+                        onClick = { onOpenNewCommentSheet(uiState.publicMode) },
+                    )
+                },
+                icon = {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_person_black_24dp),
+                        contentDescription = "",
+                    )
+                }
+            )
+        }
+
+        item {
+            Text(stringResource(id = R.string.add_private_comment))
+        }
+
     }
 }
 
@@ -511,6 +552,7 @@ fun ClazzAssignmentDetailOverviewPreview() {
             }
         },
         pointsVisible = true,
+        assignmentStatus = CourseAssignmentSubmission.MARKED,
         assignmentMark = CourseAssignmentMark().apply {
             camMark = 8F
             camPenalty = 20
