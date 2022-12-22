@@ -345,15 +345,21 @@ private fun ClazzEditScreen(
     onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit = {},
 ) {
 
+    val courseBlockKeys : List<Long> by remember(uiState.courseBlockList) {
+        derivedStateOf { uiState.courseBlockList.map { it.cbUid } }
+    }
+
     val reorderLazyListState = rememberReorderableLazyListState(
         onMove = { from, to ->
             onMoveCourseBlock(from, to)
         },
-        onDragEnd = {start, end  ->
+        canDragOver = { draggedOver, dragging ->
+            draggedOver.key in courseBlockKeys
+        },
+        onDragEnd = { start, end  ->
             //validate the result
         }
     )
-
 
     LazyColumn(
         state = reorderLazyListState.listState,
@@ -403,12 +409,13 @@ private fun ClazzEditScreen(
         ) { courseBlock ->
 
             val courseBlockEditAlpha: Float = if (courseBlock.cbHidden) 0.5F else 1F
-            val startPadding = (courseBlock.cbIndentLevel * 8).dp
-            ReorderableItem(state = reorderLazyListState, key = courseBlock.cbUid) {
+            val startPadding = ((courseBlock.cbIndentLevel * 24) + 8).dp
+            ReorderableItem(state = reorderLazyListState, key = courseBlock.cbUid) { dragging ->
                 ListItem(
                     modifier = Modifier
                         .clickable {
-                            onClickCourseBlock(courseBlock)
+                            if(!dragging)
+                                onClickCourseBlock(courseBlock)
                         }
                         .alpha(courseBlockEditAlpha),
                     icon = {
@@ -740,11 +747,10 @@ fun ClazzEditScreenPreview() {
         uiState = uiState,
         onMoveCourseBlock = { fromIndex, toIndex ->
             uiState = uiState.copy(
-                //TODO: this needs to check for out of bounds
-
                 courseBlockList = uiState.courseBlockList.toMutableList().apply {
-                    Collections.swap(this, indexOfFirst { it.cbUid == toIndex.key },
-                        indexOfFirst { it.cbUid == fromIndex.key })
+                    val swapFromIndex = indexOfFirst { it.cbUid == fromIndex.key }
+                    val swapToIndex = indexOfFirst { it.cbUid == toIndex.key }
+                    Collections.swap(this, swapFromIndex, swapToIndex)
                 }.toList()
             )
         }
