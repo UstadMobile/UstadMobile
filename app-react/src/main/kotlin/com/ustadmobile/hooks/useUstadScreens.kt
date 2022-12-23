@@ -54,6 +54,7 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(ClazzEdit2View.VIEW_NAME, "Clazz Edit Preview",
                 ClazzEditScreenPreview),
             UstadScreen("EasySort", "Easy Sort", EasySortPreview),
+            UstadScreen(ErrorReportView.VIEW_NAME, name = "ErrorReport Preview", ErrorReportPreview)
             UstadScreen(ReportFilterEditView.VIEW_NAME, name = "ReportFilterEdit Preview",
                 ReportFilterEditScreenPreview),
         )
