@@ -49,7 +49,7 @@ class CourseTerminologyEditFragment: UstadEditFragment<CourseTerminology>(), Cou
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = CourseTerminologyEditPresenter(requireContext(), arguments.toStringMap(), this,
-            viewLifecycleOwner, di).withViewLifecycle()
+                viewLifecycleOwner, di).withViewLifecycle()
 
 
         return rootView

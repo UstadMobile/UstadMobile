@@ -35,8 +35,8 @@ interface ReportFilterEditFragmentEventHandler {
     fun onClickRemoveUidAndLabel(uidAndLabel: UidAndLabel)
 }
 class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilterEditView,
-    DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>,
-    ReportFilterEditFragmentEventHandler{
+        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>,
+        ReportFilterEditFragmentEventHandler{
 
     private var mBinding: FragmentReportFilterEditBinding? = null
 
@@ -69,23 +69,23 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
         set(value) {
             field = value
             mBinding?.fragmentReportFilterEditDialogValuesNumberTextinputlayout?.visibility =
-                if(value == ReportFilterEditPresenter.FilterValueType.INTEGER)
-                    View.VISIBLE else View.GONE
+                    if(value == ReportFilterEditPresenter.FilterValueType.INTEGER)
+                        View.VISIBLE else View.GONE
             mBinding?.fragmentReportFilterEditDialogValuesDropdownTextinputlayout?.visibility =
-                if(value == ReportFilterEditPresenter.FilterValueType.DROPDOWN)
-                    View.VISIBLE else View.GONE
+                    if(value == ReportFilterEditPresenter.FilterValueType.DROPDOWN)
+                        View.VISIBLE else View.GONE
             mBinding?.itemFilterRv?.visibility =
-                if(value == ReportFilterEditPresenter.FilterValueType.LIST)
-                    View.VISIBLE else View.GONE
+                    if(value == ReportFilterEditPresenter.FilterValueType.LIST)
+                        View.VISIBLE else View.GONE
             mBinding?.itemFilterCreateNew?.itemCreatenewLayout?.visibility =
-                if(value == ReportFilterEditPresenter.FilterValueType.LIST)
-                    View.VISIBLE else View.GONE
+            if(value == ReportFilterEditPresenter.FilterValueType.LIST)
+                View.VISIBLE else View.GONE
             mBinding?.fragmentReportFilterEditDialogValuesBetweenXTextinputlayout?.visibility =
-                if(value == ReportFilterEditPresenter.FilterValueType.BETWEEN)
-                    View.VISIBLE else View.GONE
+                    if(value == ReportFilterEditPresenter.FilterValueType.BETWEEN)
+                        View.VISIBLE else View.GONE
             mBinding?.fragmentReportFilterEditDialogValuesBetweenYTextinputlayout?.visibility =
-                if(value == ReportFilterEditPresenter.FilterValueType.BETWEEN)
-                    View.VISIBLE else View.GONE
+                    if(value == ReportFilterEditPresenter.FilterValueType.BETWEEN)
+                        View.VISIBLE else View.GONE
         }
 
     override var fieldErrorText: String? = null
@@ -94,7 +94,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             field = value
             mBinding?.fieldErrorText = value
             mBinding?.fragmentReportFilterEditDialogFieldTextinputlayout
-                ?.isErrorEnabled = value != null
+                    ?.isErrorEnabled = value != null
         }
     override var conditionsErrorText: String? = null
         get() = field
@@ -102,7 +102,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             field = value
             mBinding?.conditionsErrorText = value
             mBinding?.fragmentReportFilterEditDialogConditionTextinputlayout
-                ?.isErrorEnabled = value != null
+                    ?.isErrorEnabled = value != null
         }
     override var valuesErrorText: String? = null
         get() = field
@@ -111,13 +111,13 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             mBinding?.valuesErrorText = value
             val errorEnabled = value != null
             mBinding?.fragmentReportFilterEditDialogValuesBetweenXTextinputlayout
-                ?.isErrorEnabled = errorEnabled
+                    ?.isErrorEnabled = errorEnabled
             mBinding?.fragmentReportFilterEditDialogValuesBetweenYTextinputlayout
-                ?.isErrorEnabled = errorEnabled
+                    ?.isErrorEnabled = errorEnabled
             mBinding?.fragmentReportFilterEditDialogValuesNumberTextinputlayout
-                ?.isErrorEnabled = errorEnabled
+                    ?.isErrorEnabled = errorEnabled
             mBinding?.fragmentReportFilterEditDialogValuesDropdownTextinputlayout
-                ?.isErrorEnabled = errorEnabled
+                    ?.isErrorEnabled = errorEnabled
         }
 
     override var uidAndLabelList: LiveData<List<UidAndLabel>>? = null
@@ -162,7 +162,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UidAndLabelFilterItemViewHolder {
             val viewHolder = UidAndLabelFilterItemViewHolder(ItemUidlabelFilterListBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false))
+                    LayoutInflater.from(parent.context), parent, false))
             viewHolder.binding.mPresenter = presenter
             viewHolder.binding.eventHandler = activityEventHandler
             return viewHolder
@@ -176,7 +176,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
     private var uidAndLabelFilterItemRecyclerAdapter: UidAndLabelFilterRecyclerAdapter? = null
 
     private val uidAndLabelFilterItemObserver = Observer<List<UidAndLabel>?> {
-            t -> uidAndLabelFilterItemRecyclerAdapter?.submitList(t)
+        t -> uidAndLabelFilterItemRecyclerAdapter?.submitList(t)
     }
 
 
@@ -193,7 +193,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
         }
 
         mPresenter = ReportFilterEditPresenter(requireContext(), arguments.toStringMap(), this,
-            di, viewLifecycleOwner).withViewLifecycle()
+                di, viewLifecycleOwner).withViewLifecycle()
 
         return rootView
     }
