@@ -22,6 +22,7 @@ import org.w3c.dom.AddEventListenerOptions
 import react.FC
 import react.Props
 import react.create
+import react.dom.aria.ariaLabel
 import react.dom.aria.ariaValueText
 import react.dom.html.ReactHTML.img
 
@@ -45,8 +46,8 @@ val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
             spacing = responsive(10.px)
 
             img{
-                src = "${"img/undraw_access_denied_re_awnf.svg"}?fit=crop&auto=format"
-                alt = "illustration connect"
+                src = "img/undraw_access_denied_re_awnf.svg"
+                alt = ""
                 height = 300.0
             }
 
@@ -90,7 +91,7 @@ val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
                     direction = responsive(StackDirection.row)
 
                     IconButton{
-
+                        ariaLabel = strings[MessageID.copy_code]
                         onClick = {
                             props.onCopyIconClick()
                         }
@@ -99,7 +100,7 @@ val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
                     }
 
                     IconButton{
-
+                        ariaLabel = strings[MessageID.share]
                         onClick = {
                             props.onShareIconClick()
                         }
@@ -117,18 +118,14 @@ val ErrorReportComponent2 = FC<ErrorReportProps> { props ->
 
 
                 Typography {
-                    + strings[MessageID.error_code]
-                    variant = TypographyVariant.body1
-                }
-
-                Typography {
-                    + props.uiState.errorReport?.errorCode.toString()
+                    + strings[MessageID.error_code].replace("%1\$s",
+                        props.uiState.errorReport?.errorCode.toString())
                     variant = TypographyVariant.body1
                 }
             }
 
             Typography {
-                + "6x7 is the question when you think about it"
+                + props.uiState.errorReport?.message.toString()
                 variant = TypographyVariant.body2
             }
         }
@@ -142,6 +139,7 @@ val ErrorReportPreview = FC<Props> {
             errorReport = ErrorReport().apply {
                 errorCode = 1234
                 errUid = 1234123112
+                message = "6x7 is the question when you think about it"
             }
         )
     }

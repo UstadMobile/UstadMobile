@@ -176,7 +176,7 @@ fun ErrorReportScreen(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_outline_file_copy_24),
-                        contentDescription = null
+                        contentDescription = stringResource(R.string.copy_code)
                     )
                 }
                 IconButton(
@@ -186,7 +186,7 @@ fun ErrorReportScreen(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_share_24),
-                        contentDescription = null
+                        contentDescription = stringResource(R.string.share)
                     )
                 }
             }
@@ -194,27 +194,20 @@ fun ErrorReportScreen(
 
         Divider(thickness = 1.dp)
 
-        Row(
+        Text(
+            text = stringResource(id = R.string.error_code,
+                uiState.errorReport?.errorCode ?: ""),
+            style = Typography.body1,
             modifier = Modifier
-                .padding(16.dp)
                 .fillMaxWidth()
-        ){
-            Text(
-                text = stringResource(id = R.string.error_code),
-                style = Typography.body1
-            )
-
-            Text(
-                text = uiState.errorReport?.errorCode.toString(),
-                style = Typography.body1
-            )
-        }
+                .padding(horizontal = 16.dp),
+        )
 
         Text(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            text = "6x7 is the question when you think about it",
+            text = uiState.errorReport?.message ?: "",
             style = Typography.body2
         )
 
@@ -229,6 +222,7 @@ fun ErrorReportPreview(){
             errorReport = ErrorReport().apply {
                 errorCode = 1234
                 errUid = 1234123112
+                message = "6x7 is the question when you think about it"
             }
         )
     )
