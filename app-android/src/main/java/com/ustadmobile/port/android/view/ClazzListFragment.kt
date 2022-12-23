@@ -26,8 +26,8 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDetails>(),
-    ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener,
-    BottomSheetOptionSelectedListener{
+        ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener,
+        BottomSheetOptionSelectedListener{
 
     private var mPresenter: ClazzListPresenter? = null
 
@@ -42,7 +42,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
         mPresenter = ClazzListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-            this, di, viewLifecycleOwner).withViewLifecycle()
+                this, di, viewLifecycleOwner).withViewLifecycle()
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
             requireContext().getString(R.string.add_a_new_class),  onClickSort = this,
             sortOrderOption = mPresenter?.sortOptions?.get(0),
@@ -61,7 +61,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
         fabManager?.onClickListener = {
             val optionList = if(newClazzListOptionVisible) {
                 listOf(BottomSheetOption(R.drawable.ic_add_black_24dp,
-                    requireContext().getString(R.string.add_a_new_course), NEW_CLAZZ))
+                        requireContext().getString(R.string.add_a_new_course), NEW_CLAZZ))
             }else {
                 listOf()
             } + listOf(BottomSheetOption(R.drawable.ic_login_24px,
@@ -100,7 +100,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
         if(v?.id == R.id.item_createnew_layout) {
             var args = bundleOf()
             val filterExcludeMembersOfSchool =
-                arguments?.get(PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL)?.toString()?.toLong()?:0L
+                    arguments?.get(PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL)?.toString()?.toLong()?:0L
             if(filterExcludeMembersOfSchool != 0L){
                 args = bundleOf(UstadView.ARG_SCHOOL_UID to filterExcludeMembersOfSchool.toString())
             }
