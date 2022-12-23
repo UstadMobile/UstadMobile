@@ -1,0 +1,37 @@
+appId: com.toughra.ustadmobile
+---
+- clearState: com.toughra.ustadmobile
+
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+
+- runFlow:
+    file: "../common/course_with_members.yaml"
+- tapOn: "Courses"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: "Edit"
+- tapOn: "Description (Optional)"
+- inputText: "Test edit"
+- tapOn: "SAVE"
+- runFlow:
+    file: "../common/member_login.yaml"
+    env:
+      FIRSTNAME: "Anu"
+- tapOn: "Courses"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: "Edit"
+- tapOn: "Institution (Optional)"
+- inputText: "Test edit course"
+- tapOn: "SAVE"
+- runFlow:
+    file: "../common/member_login.yaml"
+    env:
+      FIRSTNAME: "Sruthy"
+- tapOn: "Courses"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- assertNotVisible: "Edit"
