@@ -1,10 +1,13 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.hooks.useFormattedDate
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
+import com.ustadmobile.view.components.UstadBlankIcon
 import csstype.*
 import mui.icons.material.AccountCircle
-import mui.icons.material.CheckBoxOutlineBlank
+import mui.icons.material.CalendarToday
 import mui.icons.material.Visibility
 import mui.material.*
 import mui.material.styles.TypographyVariant
@@ -68,11 +71,7 @@ val UstadDetailField = FC<UstadDetailFieldProps> { props ->
                 if(props.icon != null) {
                     +props.icon
                 }else {
-                    CheckBoxOutlineBlank {
-                        sx {
-                            opacity = number(0.0)
-                        }
-                    }
+                    UstadBlankIcon { }
                 }
             }
         }
@@ -172,6 +171,12 @@ val UstadDetailFieldPreview = FC<Props> {
                 labelText = "Clickable with icon and secondary action"
                 icon = AccountCircle.create()
                 onClick = {}
+            }
+
+            UstadDetailField {
+                valueText = useFormattedDate(systemTimeInMillis(), "Asia/Dubai")
+                labelText = "Date"
+                icon = CalendarToday.create()
             }
         }
     }

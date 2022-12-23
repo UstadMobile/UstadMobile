@@ -87,3 +87,16 @@ fun Date.toTimeOfDayInMs(): Int {
     val dateTime = toKotlinInstant().toLocalDateTime(TimeZone.currentSystemDefault())
     return (dateTime.hour * MS_PER_HOUR) + (dateTime.minute * MS_PER_MIN) + (dateTime.second * 1000)
 }
+
+/**
+ * Wrapper for the setHours function that (for whatever reason) is not currently included in the
+ * wrapper
+ */
+fun Date.setHours(
+    hours: Int,
+    minutes: Int,
+    seconds: Int,
+) {
+    asDynamic().setHours(hours, minutes, seconds)
+}
+

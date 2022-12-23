@@ -19,9 +19,9 @@ import mui.system.responsive
 import muix.pickers.*
 import react.*
 import react.dom.aria.ariaLabel
+import react.dom.html.InputMode
 import react.dom.html.InputType
 import react.dom.onChange
-import kotlin.js.Date
 
 external interface UstadEditFieldProps: PropsWithChildren {
 
@@ -69,6 +69,22 @@ external interface UstadEditFieldProps: PropsWithChildren {
      *  https://codesandbox.io/s/rect-material-ui-textfield-readonly-st5of?from-embed=&file=/src/index.js:232-249
      */
     var readOnly: Boolean
+
+    /**
+     * Sets a suffix string at the end e.g. a unit of measurement e.g. "points", "%", etc. Displayed
+     * at the end of the TextField as an adornment.
+     */
+    var suffixText: String?
+
+    /**
+     * InputProps setter functions - can be used to add adornments, set the input type, etc.
+     */
+    var inputProps: ((InputBaseProps) -> Unit)?
+
+    /**
+     * Fullwidth property: passed through to the TextField
+     */
+    var fullWidth: Boolean
 }
 
 /**
@@ -88,6 +104,8 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
         disabled = !(props.enabled ?: true)
         error = errorText != null
         helperText = errorText?.let { ReactNode(it) }
+        fullWidth = props.fullWidth
+
         if(props.readOnly) {
             inputProps = jso {
                 readOnly = true
@@ -106,15 +124,18 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
             props.onChange(currentVal?.toString() ?: "")
         }
 
+
         if(props.password) {
-            type = if(passwordVisible) {
+            type = if (passwordVisible) {
                 InputType.text
-            }else {
+            } else {
                 InputType.password
             }
+        }
 
-            //As per MUI showcase
-            asDynamic().InputProps = jso<InputBaseProps> {
+        //As per MUI showcase
+        asDynamic().InputProps = jso<InputBaseProps> {
+            if(props.password) {
                 endAdornment = InputAdornment.create {
                     position = InputAdornmentPosition.end
                     IconButton {
@@ -130,6 +151,15 @@ val UstadTextEditField = FC<UstadEditFieldProps> { props ->
                         }
                     }
                 }
+            }else if(props.suffixText != null) {
+                endAdornment = InputAdornment.create {
+                    position = InputAdornmentPosition.end
+                    +(props.suffixText ?: "")
+                }
+            }
+
+            props.inputProps?.also { inputPropsFn ->
+                inputPropsFn(this)
             }
         }
     }
@@ -162,6 +192,8 @@ external interface UstadDateEditFieldProps : Props {
 
     var enabled: Boolean?
 
+    var fullWidth: Boolean
+
 }
 
 /**
@@ -181,11 +213,6 @@ fun Long.isSetDate(): Boolean {
     return this > 0L && this < JS_DATE_MAX
 }
 
-fun Long.asDate(): Date? {
-    return if(isSetDate()) Date(this) else null
-}
-
-
 val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
     val dateVal = useTimeInOtherTimeZoneAsJsDate(props.timeInMillis, props.timeZoneId)
 
@@ -204,6 +231,8 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
             renderInput = { params ->
                 TextField.create {
                     +params
+
+                    fullWidth = props.fullWidth
 
                     if(props.error != null) {
                         error = true
@@ -252,6 +281,8 @@ external interface MessageIDDropDownFieldProps: Props {
      *
      */
     var error: String?
+
+    var fullWidth: Boolean
 }
 
 external interface UstadDropDownFieldProps: Props {
@@ -311,6 +342,8 @@ external interface UstadDropDownFieldProps: Props {
      * and the error message will be shown below.
      */
     var error: String?
+
+    var fullWidth: Boolean
 }
 
 
@@ -329,6 +362,7 @@ val UstadDropDownField = FC<UstadDropDownFieldProps> { props ->
             labelId = "${props.id}_label"
             label = ReactNode(props.label)
             disabled = !(props.enabled ?: true)
+            fullWidth = props.fullWidth
             onChange = { event, _ ->
                 val selectedVal = ("" + event.target.value)
                 val selectedItem = props.options.firstOrNull { props.itemValue(it) ==  selectedVal }
@@ -359,6 +393,7 @@ val UstadMessageIdDropDownField = FC<MessageIDDropDownFieldProps> { props ->
         value = props.options.firstOrNull { it.value == props.value }
         label = props.label
         options = props.options
+        fullWidth = props.fullWidth
         itemLabel = { ReactNode(strings[(it as MessageIdOption2).messageId]) }
         itemValue = { (it as MessageIdOption2).value.toString() }
         onChange = {
@@ -456,6 +491,20 @@ val UstadEditFieldPreviews = FC<Props> {
                 switchChecked = it
             }
         }
+
+        var maxScore by useState { 42 }
+        UstadTextEditField {
+            label = "Maximum score"
+            value = maxScore.toString()
+            onChange = { newString ->
+                maxScore = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
+            }
+            inputProps = {
+                it.inputMode = InputMode.numeric
+            }
+            suffixText = "Points"
+        }
+
     }
 }
 
