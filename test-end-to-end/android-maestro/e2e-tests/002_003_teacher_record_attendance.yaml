@@ -1,0 +1,78 @@
+appId: com.toughra.ustadmobile
+---
+- clearState: com.toughra.ustadmobile
+
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "TestCourse"
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "TestCourse"
+      TEACHERFIRSTNAME: "Anu"
+      TEACHERLASTNAME: "Madhav"
+      GENDER: "Female"
+- runFlow:
+    file: "../common/add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "TestCourse"
+      STUDENTFIRSTNAME: "Justin"
+      STUDENTLASTNAME: "Joe"
+      GENDER: "Male"
+- runFlow:
+    file: "../common/add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "TestCourse"
+      STUDENTFIRSTNAME: "Caroline"
+      STUDENTLASTNAME: "Jacob"
+      GENDER: "Female"
+- runFlow:
+    file: "../common/add_new_people.yaml"
+    env:
+      FIRSTNAME: "Mathew"
+      LASTNAME: "Kuriean"
+      GENDER: "Male"
+- runFlow:
+    file: "../common/add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Mathew"
+      LASTNAME: "Kuriean"
+      MEMBER: "student"
+- runFlow:
+    file: "../common/add_new_people.yaml"
+    env:
+      FIRSTNAME: "Santhosh"
+      LASTNAME: "George"
+      GENDER: "Male"
+- runFlow:
+    file: "../common/add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Santhosh"
+      LASTNAME: "George"
+      MEMBER: "student"
+- runFlow:
+    file: "../common/add_new_people.yaml"
+    env:
+      FIRSTNAME: "Maria"
+      LASTNAME: "Jacob"
+      GENDER: "Female"
+- runFlow:
+    file: "../common/add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Maria"
+      LASTNAME: "Jacob"
+      MEMBER: "student"
+- runFlow:
+    file: "../common/member_login.yaml"
+    env:
+      TEACHERFIRSTNAME: "Anu"
+- runFlow:
+    file: "../common/record_attendance.yaml"
+- runFlow:
+    file: "../common/edit_recorded_attendance.yaml"

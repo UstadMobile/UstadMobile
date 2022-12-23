@@ -4,25 +4,27 @@ appId: com.toughra.ustadmobile
 - tapOn:
       id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
 - tapOn: "MEMBERS"
-- tapOn: "Add a teacher"
+- tapOn: "Add a student"
 - tapOn: "Add a new person"
 - tapOn: "First names"
-- inputText: ${TEACHERFIRSTNAME}
+- inputText: ${STUDENTFIRSTNAME}
 - tapOn: "Last name"
-- inputText: ${TEACHERLASTNAME}
+- inputText: ${STUDENTLASTNAME}
 - tapOn: "Gender"
 - tapOn: ${GENDER}
 - tapOn: "SAVE"
 - tapOn: "SAVE"
-- takeScreenshot: "results/${TESTCOURSENAME}-AddedTeacher"
-- tapOn: "${TEACHERFIRSTNAME} ${TEACHERLASTNAME}"
+- swipe:
+        start: 100,400
+        end: 100,100
+- tapOn: "${STUDENTFIRSTNAME} ${STUDENTLASTNAME}"
+- scroll
 - tapOn: "VIEW PROFILE"
 - tapOn: "CREATE ACCOUNT"
 - tapOn: "Username"
-- inputText: ${TEACHERFIRSTNAME}
+- inputText: ${STUDENTFIRSTNAME}
 - tapOn: "New password"
 - inputText: "test"
 - tapOn: "Confirm password"
 - inputText: "test"
 - tapOn: "SAVE"
-- takeScreenshot: "results/${TESTCOURSENAME}-TeacherAccountCreated"

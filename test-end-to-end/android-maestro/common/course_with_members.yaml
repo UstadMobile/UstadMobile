@@ -1,0 +1,87 @@
+appId: com.toughra.ustadmobile
+---
+- runFlow:
+    file: "./add_course.yaml"
+    env:
+      TESTCOURSENAME: "Permission Test"
+- runFlow:
+    file: "./add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "Permission Test"
+      TEACHERFIRSTNAME: "Anu"
+      TEACHERLASTNAME: "Madhav"
+      GENDER: "Female"
+- runFlow:
+    file: "./add_new_people.yaml"
+    env:
+      FIRSTNAME: "Lal"
+      LASTNAME: "Alex"
+      GENDER: "Male"
+- runFlow:
+    file: "./add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Lal"
+      LASTNAME: "Alex"
+      MEMBER: "teacher"
+- runFlow:
+    file: "./add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "Permission Test"
+      STUDENTFIRSTNAME: "Justin"
+      STUDENTLASTNAME: "Joe"
+      GENDER: "Male"
+- runFlow:
+    file: "./add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "Permission Test"
+      STUDENTFIRSTNAME: "Caroline"
+      STUDENTLASTNAME: "Jacob"
+      GENDER: "Female"
+- runFlow:
+    file: "./add_new_people.yaml"
+    env:
+      FIRSTNAME: "Mathew"
+      LASTNAME: "Kuriean"
+      GENDER: "Male"
+- runFlow:
+    file: "./add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Mathew"
+      LASTNAME: "Kuriean"
+      MEMBER: "student"
+- runFlow:
+    file: "./add_new_people.yaml"
+    env:
+      FIRSTNAME: "Santhosh"
+      LASTNAME: "George"
+      GENDER: "Male"
+- runFlow:
+    file: "./add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Santhosh"
+      LASTNAME: "George"
+      MEMBER: "student"
+- runFlow:
+    file: "./add_new_people.yaml"
+    env:
+      FIRSTNAME: "Maria"
+      LASTNAME: "Jacob"
+      GENDER: "Female"
+- runFlow:
+    file: "./add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Maria"
+      LASTNAME: "Jacob"
+      MEMBER: "student"
+- runFlow:
+    file: "./add_new_people.yaml"
+    env:
+      FIRSTNAME: "Sruthy"
+      LASTNAME: "K"
+      GENDER: "Female"
+- runFlow:
+    file: "./add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Sruthy"
+      LASTNAME: "K"
+      MEMBER: "student"
