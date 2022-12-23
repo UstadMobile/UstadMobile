@@ -3,27 +3,7 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Badge
-import androidx.compose.material.icons.filled.Lens
-import androidx.compose.material.icons.filled.Message
-import androidx.compose.material.icons.filled.People
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzListPresenter
@@ -36,7 +16,6 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.viewmodel.ClazzListUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
@@ -47,8 +26,8 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDetails>(),
-        ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener,
-        BottomSheetOptionSelectedListener{
+    ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener,
+    BottomSheetOptionSelectedListener{
 
     private var mPresenter: ClazzListPresenter? = null
 
@@ -63,7 +42,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_REPO)
         mPresenter = ClazzListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, di, viewLifecycleOwner).withViewLifecycle()
+            this, di, viewLifecycleOwner).withViewLifecycle()
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
             requireContext().getString(R.string.add_a_new_class),  onClickSort = this,
             sortOrderOption = mPresenter?.sortOptions?.get(0),
@@ -82,7 +61,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
         fabManager?.onClickListener = {
             val optionList = if(newClazzListOptionVisible) {
                 listOf(BottomSheetOption(R.drawable.ic_add_black_24dp,
-                        requireContext().getString(R.string.add_a_new_course), NEW_CLAZZ))
+                    requireContext().getString(R.string.add_a_new_course), NEW_CLAZZ))
             }else {
                 listOf()
             } + listOf(BottomSheetOption(R.drawable.ic_login_24px,
@@ -121,7 +100,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
         if(v?.id == R.id.item_createnew_layout) {
             var args = bundleOf()
             val filterExcludeMembersOfSchool =
-                    arguments?.get(PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL)?.toString()?.toLong()?:0L
+                arguments?.get(PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL)?.toString()?.toLong()?:0L
             if(filterExcludeMembersOfSchool != 0L){
                 args = bundleOf(UstadView.ARG_SCHOOL_UID to filterExcludeMembersOfSchool.toString())
             }
@@ -161,108 +140,4 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
     }
 
 
-}
-
-@Composable
-private fun ClazzListScreen(
-    uiState: ClazzListUiState = ClazzListUiState(),
-    onClickClazz: (Clazz) -> Unit = {},
-) {
-    LazyColumn {
-
-        items(
-            items = uiState.clazzList,
-            key = { clazz -> clazz.clazzUid }
-        ){ clazz ->
-
-            ClazzListItem(
-                clazz = clazz,
-                onClickClazz = onClickClazz
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun ClazzListItem(
-    clazz: ClazzWithListDisplayDetails,
-    onClickClazz: (Clazz) -> Unit
-){
-    ListItem(
-        modifier = Modifier.clickable {
-            onClickClazz(clazz)
-        },
-        text = { Text(clazz.clazzName ?: "") },
-        secondaryText = {
-            Column {
-                Text(clazz.clazzDesc ?: "")
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Lens,
-                        contentDescription = "",
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.x_percent_attended,
-                            clazz.attendanceAverage * 100
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Icon(
-                        imageVector = Icons.Filled.People,
-                        contentDescription = "",
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.x_teachers_y_students,
-                            clazz.numTeachers, clazz.numStudents,
-                        )
-                    )
-                }
-            }
-        },
-        trailing = {
-            Row {
-                Icon(
-                    imageVector = Icons.Filled.Badge,
-                    contentDescription = "",
-                )
-//                        Text(clazz.clazzActiveEnrolment?.clazzEnrolmentRole ?: 0)
-            }
-        },
-    )
-}
-
-@Composable
-@Preview
-fun ClazzListScreenPreview() {
-    val uiStateVal = ClazzListUiState(
-        clazzList = listOf(
-            ClazzWithListDisplayDetails().apply {
-                clazzUid = 1
-                clazzName = "Class Name"
-                clazzDesc = "Class Description"
-                attendanceAverage = 0.3F
-                numTeachers = 3
-                numStudents = 2
-            },
-            ClazzWithListDisplayDetails().apply {
-                clazzUid = 2
-                clazzName = "Class Name"
-                clazzDesc = "Class Description"
-                attendanceAverage = 0.3F
-                numTeachers = 3
-                numStudents = 2
-            }
-        )
-    )
-
-    MdcTheme {
-        ClazzListScreen(uiStateVal)
-    }
 }
