@@ -21,9 +21,13 @@ import com.ustadmobile.util.ext.addOptionalSuffix
 import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadSwitchField
+import com.ustadmobile.wrappers.reacteasysort.LockAxis
+import com.ustadmobile.wrappers.reacteasysort.SortableItem
+import com.ustadmobile.wrappers.reacteasysort.SortableList
 import csstype.number
 import csstype.pct
 import csstype.px
+import dom.html.HTMLDivElement
 import kotlinx.js.jso
 import mui.icons.material.*
 import mui.material.*
@@ -32,15 +36,21 @@ import mui.material.Menu
 import mui.system.responsive
 import mui.system.sx
 import react.*
+import react.dom.aria.ariaLabel
 import react.dom.events.MouseEvent
 import react.dom.events.MouseEventHandler
 import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML.div
+
+private val COURSE_BLOCK_DRAG_CLASS = "dragging_course_block"
 
 external interface ClazzEditScreenProps : Props {
 
     var uiState: ClazzEditUiState
 
     var onClazzChanged: (ClazzWithHolidayCalendarAndSchoolAndTerminology?) -> Unit
+
+    var onCourseBlockMoved: (from: Int, to: Int) -> Unit
 
     var onClickSchool: () -> Unit
 
@@ -260,7 +270,6 @@ val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
                 timeInMillisSinceMidnight = schedule.scheduleEndTime.toInt(),
             )
 
-            console.log("message id = ${SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[schedule.scheduleFrequency]}")
             val text = "${strings[SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[schedule.scheduleFrequency] ?: 0]} " +
                     " ${strings[ScheduleConstants.DAY_MESSAGE_ID_MAP[schedule.scheduleDay] ?: 0]  } " +
                     " $fromTimeFormatted - $toTimeFormatted "
@@ -268,7 +277,8 @@ val ClazzSchedulesList = FC<ClazzEditScreenProps> { props ->
             ListItem{
                 secondaryAction = IconButton.create {
                     onClick = { props.onClickDeleteSchedule(schedule) }
-                    Delete {}
+                    ariaLabel = strings[MessageID.delete]
+                    Delete { }
                 }
 
                 ListItemButton {
@@ -300,6 +310,7 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
     val strings = useStringsXml()
 
     List {
+
         ListItem {
             ListItemButton {
                 onClick = { props.onClickAddCourseBlock }
@@ -312,42 +323,63 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
             }
         }
 
-        props.uiState.courseBlockList.forEach { courseBlock ->
-            ListItem{
-                val courseBlockEditAlpha: Double = if (courseBlock.cbHidden) 0.5 else 1.0
-                val startPadding = (courseBlock.cbIndentLevel * 8).px
+        SortableList {
+            draggedItemClassName = COURSE_BLOCK_DRAG_CLASS
+            lockAxis = LockAxis.y
 
-                sx {
-                    opacity = number(courseBlockEditAlpha)
-                    paddingLeft = startPadding
-                }
+            onSortEnd = { oldIndex, newIndex ->
+                props.onCourseBlockMoved(oldIndex, newIndex)
+            }
 
-                val image = if(courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE)
-                    courseBlock.entry?.contentTypeFlag
-                else
-                    courseBlock.cbType
+            props.uiState.courseBlockList.forEach { courseBlock ->
+                SortableItem {
+                    children = div.create {
+                        val divRef : MutableRefObject<HTMLDivElement> = useRef(null)
 
-                ListItemButton {
-                    onClick = { props.onClickEditCourse(courseBlock) }
+                        ListItem{
+                            val courseBlockEditAlpha: Double = if (courseBlock.cbHidden) 0.5 else 1.0
+                            val startPadding = (courseBlock.cbIndentLevel * 24).px
 
-                    ListItemIcon {
-                        + mui.icons.material.Menu.create()
+                            val image = if(courseBlock.cbType == CourseBlock.BLOCK_CONTENT_TYPE)
+                                courseBlock.entry?.contentTypeFlag
+                            else
+                                courseBlock.cbType
 
-                        + (CONTENT_ENTRY_TYPE_ICON_MAP[image]?.create() ?: TextSnippet.create())
+                            ListItemButton {
+                                sx {
+                                    opacity = number(courseBlockEditAlpha)
+                                }
+
+                                onClick = {
+                                    //Avoid triggering the onClick listener if the dragging is in process
+                                    //This might not be needed
+                                    if(divRef.current?.classList?.contains(COURSE_BLOCK_DRAG_CLASS) != true) {
+                                        props.onClickEditCourse(courseBlock)
+                                    }
+                                }
+
+                                ListItemIcon {
+                                    sx {
+                                        paddingLeft = startPadding
+                                    }
+                                    + (CONTENT_ENTRY_TYPE_ICON_MAP[image]?.create() ?: TextSnippet.create())
+                                }
+
+                                ListItemText {
+                                    primary = ReactNode(courseBlock.cbTitle ?: "")
+                                }
+                            }
+
+                            secondaryAction = PopUpMenu.create {
+                                fieldsEnabled = props.uiState.fieldsEnabled
+                                onClickHideBlockPopupMenu = props.onClickHideBlockPopupMenu
+                                onClickIndentBlockPopupMenu = props.onClickIndentBlockPopupMenu
+                                onClickUnIndentBlockPopupMenu = props.onClickUnIndentBlockPopupMenu
+                                onClickDeleteBlockPopupMenu = props.onClickDeleteBlockPopupMenu
+                                uiState = props.uiState.courseBlockStateFor(courseBlock)
+                            }
+                        }
                     }
-
-                    ListItemText {
-                        primary = ReactNode(courseBlock.cbTitle ?: "")
-                    }
-                }
-
-                secondaryAction = PopUpMenu.create {
-                    fieldsEnabled = props.uiState.fieldsEnabled
-                    onClickHideBlockPopupMenu = props.onClickHideBlockPopupMenu
-                    onClickIndentBlockPopupMenu = props.onClickIndentBlockPopupMenu
-                    onClickUnIndentBlockPopupMenu = props.onClickUnIndentBlockPopupMenu
-                    onClickDeleteBlockPopupMenu = props.onClickDeleteBlockPopupMenu
-                    entity = courseBlock
                 }
             }
         }
@@ -360,13 +392,15 @@ external interface PopUpMenuProps : Props {
 
     var onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
+    var onClickUnHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
+
     var onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
     var onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
     var onClickDeleteBlockPopupMenu: (CourseBlockWithEntity?) -> Unit
 
-    var entity: CourseBlockWithEntity
+    var uiState: ClazzEditUiState.CourseBlockUiState
 
 }
 
@@ -402,6 +436,7 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
         IconButton{
             disabled = !(props.fieldsEnabled)
             onClick = handleContextMenu
+            ariaLabel = strings[MessageID.more_options]
 
             + MoreVert.create()
         }
@@ -420,32 +455,49 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
                 undefined
             }
 
-            MenuItem {
-                onClick = {
-                    props.onClickHideBlockPopupMenu
-                    point = null
-                }
-                + strings[MessageID.hide]
-            }
-            MenuItem {
-                onClick = {
-                    props.onClickIndentBlockPopupMenu
-                    point = null
-                }
-                + strings[MessageID.indent]
-            }
-            if (props.entity.cbIndentLevel > 0) {
+            if(props.uiState.showHide) {
                 MenuItem {
                     onClick = {
-                        props.onClickUnIndentBlockPopupMenu
+                        props.onClickHideBlockPopupMenu(props.uiState.courseBlock)
+                        point = null
+                    }
+                    + strings[MessageID.hide]
+                }
+            }
+
+            if(props.uiState.showUnhide) {
+                MenuItem {
+                    onClick = {
+                        props.onClickUnHideBlockPopupMenu(props.uiState.courseBlock)
+                        point = null
+                    }
+                    + strings[MessageID.unhide]
+                }
+            }
+
+            if(props.uiState.showIndent) {
+                MenuItem {
+                    onClick = {
+                        props.onClickIndentBlockPopupMenu(props.uiState.courseBlock)
+                        point = null
+                    }
+                    + strings[MessageID.indent]
+                }
+            }
+
+            if (props.uiState.showUnindent) {
+                MenuItem {
+                    onClick = {
+                        props.onClickUnIndentBlockPopupMenu(props.uiState.courseBlock)
                         point = null
                     }
                     + strings[MessageID.unindent]
                 }
             }
+
             MenuItem {
                 onClick = {
-                    props.onClickDeleteBlockPopupMenu
+                    props.onClickDeleteBlockPopupMenu(props.uiState.courseBlock)
                     point = null
                 }
                 + strings[MessageID.delete]
@@ -454,11 +506,9 @@ val PopUpMenu = FC<PopUpMenuProps> { props ->
     }
 }
 
-//see https://codesandbox.io/s/material-ui-sortable-list-with-react-smooth-dnd-swrqx?file=/src/index.js
-// https://github.com/atlassian/react-beautiful-dnd
 val ClazzEditScreenPreview = FC<Props> {
 
-    val uiStateVal : ClazzEditUiState by useState {
+    var uiStateVar : ClazzEditUiState by useState {
         ClazzEditUiState(
             entity = ClazzWithHolidayCalendarAndSchoolAndTerminology().apply {
 
@@ -499,6 +549,15 @@ val ClazzEditScreenPreview = FC<Props> {
     }
 
     ClazzEditScreenComponent2 {
-        uiState = uiStateVal
+        uiState = uiStateVar
+
+        onCourseBlockMoved = {fromIndex, toIndex ->
+            uiStateVar = uiStateVar.copy(
+                courseBlockList = uiStateVar.courseBlockList.toMutableList().apply {
+                    add(toIndex, removeAt(fromIndex))
+                }.toList()
+            )
+        }
     }
+
 }

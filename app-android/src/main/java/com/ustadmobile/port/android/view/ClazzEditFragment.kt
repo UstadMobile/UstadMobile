@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -34,6 +35,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.EnrolmentPolicyConstants
 import com.ustadmobile.core.util.OneToManyJoinEditListener
 import com.ustadmobile.core.util.ext.editIconId
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.viewmodel.ClazzEditUiState
 import com.ustadmobile.door.lifecycle.MutableLiveData
@@ -202,59 +204,59 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchoolA
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        setEditFragmentTitle(R.string.add_a_new_course, R.string.edit_course)
-//
-//
-//        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
-//            requireActivity().activityResultRegistry,null, 1
-//        ).also {
-//            mDataBinding?.imageViewLifecycleObserver = it
-//            viewLifecycleOwner.lifecycle.addObserver(it)
-//        }
-//
-//        mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
-//            di, viewLifecycleOwner).withViewLifecycle()
-//
-//        mDataBinding?.scheduleOneToManyListener = mPresenter?.scheduleOneToManyJoinListener
-//        mDataBinding?.mPresenter = mPresenter
-//        scheduleRecyclerAdapter = ScheduleRecyclerAdapter(
-//            mPresenter?.scheduleOneToManyJoinListener, mPresenter)
-//
-//        scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
-//        scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-//
-//
-//        mDataBinding?.courseBlockOneToManyListener = mPresenter
-//        courseBlockRecyclerAdapter = CourseBlockRecyclerAdapter(
-//                mPresenter, mDataBinding?.activityClazzEditCourseBlockRecyclerview)
-//
-//        courseBlockRecyclerView?.adapter = courseBlockRecyclerAdapter
-//        courseBlockRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-//
-//        bottomSheetOptionList = listOf(
-//                TitleDescBottomSheetOption(
-//                        requireContext().getString(R.string.module),
-//                        requireContext().getString(R.string.course_module),
-//                        CourseBlock.BLOCK_MODULE_TYPE),
-//                TitleDescBottomSheetOption(
-//                        requireContext().getString(R.string.text),
-//                        requireContext().getString(R.string.formatted_text_to_show_to_course_participants),
-//                        CourseBlock.BLOCK_TEXT_TYPE),
-//                TitleDescBottomSheetOption(
-//                        requireContext().getString(R.string.content),
-//                        requireContext().getString(R.string.add_course_block_content_desc),
-//                        CourseBlock.BLOCK_CONTENT_TYPE),
-//                TitleDescBottomSheetOption(
-//                        requireContext().getString(R.string.assignments),
-//                        requireContext().getString(R.string.add_assignment_block_content_desc),
-//                        CourseBlock.BLOCK_ASSIGNMENT_TYPE),
-//                TitleDescBottomSheetOption(
-//                        requireContext().getString(R.string.discussion_board),
-//                        requireContext().getString(R.string.add_discussion_board_desc),
-//                        CourseBlock.BLOCK_DISCUSSION_TYPE),
-//        )
-//
-//        mPresenter?.onCreate(backStackSavedState)
+        setEditFragmentTitle(R.string.add_a_new_course, R.string.edit_course)
+
+
+        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
+            requireActivity().activityResultRegistry,null, 1
+        ).also {
+            mDataBinding?.imageViewLifecycleObserver = it
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
+
+        mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
+            di, viewLifecycleOwner).withViewLifecycle()
+
+        mDataBinding?.scheduleOneToManyListener = mPresenter?.scheduleOneToManyJoinListener
+        mDataBinding?.mPresenter = mPresenter
+        scheduleRecyclerAdapter = ScheduleRecyclerAdapter(
+            mPresenter?.scheduleOneToManyJoinListener, mPresenter)
+
+        scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
+        scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+
+
+        mDataBinding?.courseBlockOneToManyListener = mPresenter
+        courseBlockRecyclerAdapter = CourseBlockRecyclerAdapter(
+                mPresenter, mDataBinding?.activityClazzEditCourseBlockRecyclerview)
+
+        courseBlockRecyclerView?.adapter = courseBlockRecyclerAdapter
+        courseBlockRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+
+        bottomSheetOptionList = listOf(
+                TitleDescBottomSheetOption(
+                        requireContext().getString(R.string.module),
+                        requireContext().getString(R.string.course_module),
+                        CourseBlock.BLOCK_MODULE_TYPE),
+                TitleDescBottomSheetOption(
+                        requireContext().getString(R.string.text),
+                        requireContext().getString(R.string.formatted_text_to_show_to_course_participants),
+                        CourseBlock.BLOCK_TEXT_TYPE),
+                TitleDescBottomSheetOption(
+                        requireContext().getString(R.string.content),
+                        requireContext().getString(R.string.add_course_block_content_desc),
+                        CourseBlock.BLOCK_CONTENT_TYPE),
+                TitleDescBottomSheetOption(
+                        requireContext().getString(R.string.assignments),
+                        requireContext().getString(R.string.add_assignment_block_content_desc),
+                        CourseBlock.BLOCK_ASSIGNMENT_TYPE),
+                TitleDescBottomSheetOption(
+                        requireContext().getString(R.string.discussion_board),
+                        requireContext().getString(R.string.add_discussion_board_desc),
+                        CourseBlock.BLOCK_DISCUSSION_TYPE),
+        )
+
+        mPresenter?.onCreate(backStackSavedState)
 
     }
 
@@ -415,7 +417,7 @@ private fun ClazzEditScreen(
                     modifier = Modifier
                         .clickable {
                             if(!dragging)
-                                onClickCourseBlock(courseBlock)
+                                onClickCourseBlock(courseBlock)sch
                         }
                         .alpha(courseBlockEditAlpha),
                     icon = {
@@ -439,7 +441,7 @@ private fun ClazzEditScreen(
                     trailing = {
                         PopUpMenu(
                             enabled = uiState.fieldsEnabled,
-                            entity = courseBlock,
+                            uiState = uiState.courseBlockStateFor(courseBlock),
                             onClickHideBlockPopupMenu = onClickHideBlockPopupMenu,
                             onClickIndentBlockPopupMenu = onClickIndentBlockPopupMenu,
                             onClickUnIndentBlockPopupMenu = onClickUnIndentBlockPopupMenu,
@@ -494,7 +496,7 @@ private fun ClazzEditScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = "",
+                            contentDescription = stringResource(R.string.delete),
                         )
                     }
                 }
@@ -651,9 +653,9 @@ private fun ClazzEditBasicDetails(
 
 
 @Composable
-fun PopUpMenu(
+private fun PopUpMenu(
     enabled: Boolean,
-    entity: CourseBlockWithEntity,
+    uiState: ClazzEditUiState.CourseBlockUiState,
     onClickHideBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
     onClickIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
     onClickUnIndentBlockPopupMenu: (CourseBlockWithEntity?) -> Unit,
@@ -667,30 +669,47 @@ fun PopUpMenu(
             onClick = { expanded = true },
             enabled = enabled
         ) {
-            Icon(Icons.Default.MoreVert, contentDescription = "Localized description")
+            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options))
         }
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            DropdownMenuItem(
-                onClick = { onClickHideBlockPopupMenu(entity) }
-            ) {
-                Text(stringResource(id = R.string.hide))
-            }
-            DropdownMenuItem(
-                onClick = { onClickIndentBlockPopupMenu(entity) }
-            ) {
-                Text(stringResource(id = R.string.indent))
-            }
-            if (entity.cbIndentLevel > 0) {
+            if(uiState.showHide) {
                 DropdownMenuItem(
-                    onClick = { onClickUnIndentBlockPopupMenu(entity) }
+                    onClick = { onClickHideBlockPopupMenu(uiState.courseBlock) }
                 ) {
-                    Text(stringResource(id = R.string.unindent))
+                    Text(stringResource(id = R.string.hide))
                 }
             }
-            DropdownMenuItem(onClick = { onClickDeleteBlockPopupMenu(entity) }) {
+
+            if(uiState.showUnhide) {
+                DropdownMenuItem(
+                    onClick = { onClickHideBlockPopupMenu(uiState.courseBlock) }
+                ) {
+                    Text(stringResource(id = R.string.unhide))
+                }
+            }
+
+            if(uiState.showIndent) {
+                DropdownMenuItem(
+                    onClick = { onClickIndentBlockPopupMenu(uiState.courseBlock) }
+                ) {
+                    Text(stringResource(id = R.string.indent))
+                }
+            }
+
+            if(uiState.showUnindent) {
+                if (uiState.showUnindent) {
+                    DropdownMenuItem(
+                        onClick = { onClickUnIndentBlockPopupMenu(uiState.courseBlock) }
+                    ) {
+                        Text(stringResource(id = R.string.unindent))
+                    }
+                }
+            }
+
+            DropdownMenuItem(onClick = { onClickDeleteBlockPopupMenu(uiState.courseBlock) }) {
                 Text(stringResource(id = R.string.delete))
             }
         }

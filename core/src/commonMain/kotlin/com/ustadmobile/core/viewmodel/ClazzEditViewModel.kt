@@ -1,9 +1,6 @@
 package com.ustadmobile.core.viewmodel
 
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchoolAndTerminology
-import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
-import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.*
 
 data class ClazzEditUiState(
 
@@ -23,8 +20,35 @@ data class ClazzEditUiState(
 
 ) {
 
+    class CourseBlockUiState internal constructor(
+        val courseBlock: CourseBlockWithEntity
+    ) {
+        val showIndent: Boolean
+            get() = courseBlock.cbType != CourseBlock.BLOCK_MODULE_TYPE && courseBlock.cbIndentLevel < BLOCK_MAX_INDENT
+
+        val showUnindent: Boolean
+            get() = courseBlock.cbIndentLevel > 0
+
+        val showHide: Boolean
+            get() = !courseBlock.cbHidden
+
+        val showUnhide: Boolean
+            get() = courseBlock.cbHidden
+    }
+
+
     val clazzEditAttendanceChecked: Boolean
         get() = entity?.clazzFeatures == Clazz.CLAZZ_FEATURE_ATTENDANCE
                 && Clazz.CLAZZ_FEATURE_ATTENDANCE == Clazz.CLAZZ_FEATURE_ATTENDANCE
+
+    fun courseBlockStateFor(couresBlockWithEntity: CourseBlockWithEntity): CourseBlockUiState {
+        return CourseBlockUiState(couresBlockWithEntity)
+    }
+
+    companion object {
+
+        const val BLOCK_MAX_INDENT = 3
+
+    }
 
 }
