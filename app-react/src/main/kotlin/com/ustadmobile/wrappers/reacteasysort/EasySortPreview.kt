@@ -2,7 +2,6 @@ package com.ustadmobile.wrappers.reacteasysort
 
 import react.FC
 import react.Props
-import react.create
 import react.dom.html.ReactHTML.div
 import react.useState
 
@@ -24,7 +23,7 @@ val EasySortPreview = FC<Props> {
 
         itemList.forEach { itemStr ->
             SortableItem {
-                children = div.create {
+                div {
                     +itemStr
                 }
             }

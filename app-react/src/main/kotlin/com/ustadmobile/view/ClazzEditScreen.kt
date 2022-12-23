@@ -333,7 +333,7 @@ private val CourseBlockList = FC<ClazzEditScreenProps> { props ->
 
             props.uiState.courseBlockList.forEach { courseBlock ->
                 SortableItem {
-                    children = div.create {
+                    div {
                         val divRef : MutableRefObject<HTMLDivElement> = useRef(null)
 
                         ListItem{
