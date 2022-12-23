@@ -50,6 +50,11 @@ fun useUstadScreens(): UstadScreens {
                 SchoolEditScreenPreview),
             UstadScreen(LanguageDetailView.VIEW_NAME, name = "LanguageDetail Preview",
                 LanguageDetailPreview),
+            UstadScreen(ClazzEdit2View.VIEW_NAME, "Clazz Edit Preview",
+                ClazzEditScreenPreview),
+            UstadScreen("EasySort", "Easy Sort", EasySortPreview),
+            UstadScreen(ReportFilterEditView.VIEW_NAME, name = "ReportFilterEdit Preview",
+                ReportFilterEditScreenPreview),
             UstadScreen(ReportFilterEditView.VIEW_NAME, name = "ReportFilterEdit Preview",
                 ReportFilterEditScreenPreview),
         )
