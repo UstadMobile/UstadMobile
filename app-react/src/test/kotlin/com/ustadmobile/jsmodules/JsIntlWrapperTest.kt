@@ -1,5 +1,6 @@
 package com.ustadmobile.jsmodules
 
+import com.ustadmobile.wrappers.intl.Intl
 import kotlin.js.Date
 import kotlin.test.Test
 

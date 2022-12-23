@@ -1,7 +1,7 @@
 package com.ustadmobile.hooks
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.jsmodules.Intl
+import com.ustadmobile.wrappers.intl.Intl
 import com.ustadmobile.util.ext.toJsDateFromOtherTimeZoneToSystemTimeZone
 import react.useMemo
 

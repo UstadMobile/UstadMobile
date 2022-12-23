@@ -3,8 +3,8 @@ package com.ustadmobile.hooks
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
-import com.ustadmobile.jsmodules.Intl
-import com.ustadmobile.jsmodules.IntlDateTimeNumericProp
+import com.ustadmobile.wrappers.intl.Intl
+import com.ustadmobile.wrappers.intl.IntlDateTimeNumericProp
 import com.ustadmobile.util.ext.setHours
 import kotlinx.js.jso
 import react.useMemo

@@ -7,6 +7,7 @@ import com.ustadmobile.mui.components.UstadCourseBlockEditPreview
 import com.ustadmobile.mui.components.UstadDetailFieldPreview
 import com.ustadmobile.mui.components.UstadEditFieldPreviews
 import com.ustadmobile.view.*
+import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
 
 fun useUstadScreens(): UstadScreens {
@@ -52,6 +53,7 @@ fun useUstadScreens(): UstadScreens {
                 LanguageDetailPreview),
             UstadScreen(ClazzEdit2View.VIEW_NAME, "Clazz Edit Preview",
                 ClazzEditScreenPreview),
+            UstadScreen("EasySort", "Easy Sort", EasySortPreview),
         )
     }
 }
