@@ -53,7 +53,7 @@
             app:tint="?colorOnIconTint"
             app:courseBlockIndent="@{block.cbIndentLevel}"
             app:imageLookupKey="@{block.cbType == CourseBlock.BLOCK_CONTENT_TYPE ? block.entry.contentTypeFlag : block.cbType}"
-            app:imageLookupMap="@{ClazzEditFragment.BLOCK_AND_ENTRY_ICON_MAP}"
+            app:imageLookupMap="@{ClazzEditFragment.BLOCK_WITH_ENTRY_MAP}"
             app:layout_constraintStart_toEndOf="@id/item_course_block_reorder"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

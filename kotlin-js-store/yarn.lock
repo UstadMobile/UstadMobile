@@ -4710,10 +4710,10 @@ react-dom@^18.2.0:
     loose-envify "^1.1.0"
     scheduler "^0.23.0"
 
-react-easy-sort@^1.5.1:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/react-easy-sort/-/react-easy-sort-1.5.1.tgz#9a9ddcaae7571a5ef8baed480b6d8faf5d21ca3b"
-  integrity sha512-VKwFO2pHJgz75zEZkxoZYSr0jvQfbS2BUqCQPR3hCRxUfLl9M7xTrXK4rZeFlA+83RxOQCZnzrqtuX0sbtKKlQ==
+react-easy-sort@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/react-easy-sort/-/react-easy-sort-1.4.1.tgz#3dfab78ca0d0013f08b4ecbf641749308014dcfd"
+  integrity sha512-YG2xDUx/3oqg03vl/72kVxitQl7YOgGPwHTOPgiwsw66JeYHqCpvrkIKCiEL9zz94VlWu3oLdn+bew8lEyyzng==
   dependencies:
     array-move "^3.0.1"
     tslib "2.0.1"

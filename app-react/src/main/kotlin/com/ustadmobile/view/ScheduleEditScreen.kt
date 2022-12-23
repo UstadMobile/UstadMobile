@@ -3,7 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
+import com.ustadmobile.core.impl.locale.entityconstants.DayConstants
 import com.ustadmobile.core.viewmodel.ScheduleEditUiState
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -36,7 +36,7 @@ val ScheduleEditComponent2 = FC <ScheduleEditScreenProps> { props ->
 
             UstadMessageIdDropDownField {
                 value = props.uiState.entity?.scheduleDay ?: 0
-                options = ScheduleConstants.DAY_MESSAGE_IDS
+                options = DayConstants.DAY_MESSAGE_IDS
                 label = strings[MessageID.day]
                 enabled = props.uiState.fieldsEnabled
                 onChange = {

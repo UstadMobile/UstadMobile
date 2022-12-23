@@ -18,13 +18,16 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentScheduleEditBinding
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.locale.entityconstants.ScheduleConstants
+import com.ustadmobile.core.impl.locale.entityconstants.DayConstants
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.viewmodel.ScheduleEditUiState
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
+import com.ustadmobile.port.android.util.ext.MS_PER_MIN
+import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTimeEditTextField
 
@@ -117,7 +120,7 @@ private fun ScheduleEditScreen(
         UstadMessageIdOptionExposedDropDownMenuField(
             value = uiState.entity?.scheduleDay ?: 0,
             label = stringResource(R.string.day),
-            options = ScheduleConstants.DAY_MESSAGE_IDS,
+            options = DayConstants.DAY_MESSAGE_IDS,
             onOptionSelected = {
                 onScheduleChanged(uiState.entity?.shallowCopy{
                     scheduleDay = it.value

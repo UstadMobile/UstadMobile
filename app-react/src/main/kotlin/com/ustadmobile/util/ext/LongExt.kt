@@ -3,10 +3,6 @@ package com.ustadmobile.util.ext
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.moment
-import com.ustadmobile.mui.components.isSetDate
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toJSDate
 import kotlin.js.Date
 
 /**
@@ -53,25 +49,4 @@ fun Long?.formatDateRange(endDate: Long?): String {
     val date = endDate.toDate()?.standardFormat() ?: ""
     val joiner = if(date.isEmpty()) "" else " - "
     return this.toDate()?.standardFormat() + joiner + date
-}
-
-/**
- * Where receiver represents a specific date/time in a specific from time zone (e.g.
- * 10am 2/Dec/2022 Europe/Berlin), convert this to a JSDate object that is for the same date
- * and time of day in the system default timezone (e.g.  10am 2/Dec/2022 Asia/Dubai where Asia/Dubai
- * is the system timezone).
- *
- */
-internal fun Long.toJsDateFromOtherTimeZoneToSystemTimeZone(
-    fromTimeZoneId: String
-): Date? {
-    return if(isSetDate()) {
-        Instant.fromEpochMilliseconds(this)
-            .toSameDateTimeInOtherTimeZone(
-                fromTimeZone = TimeZone.of(fromTimeZoneId),
-                toTimeZone = TimeZone.currentSystemDefault()
-            ).toJSDate()
-    }else {
-        null
-    }
 }

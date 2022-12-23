@@ -22,6 +22,7 @@ import react.dom.aria.ariaLabel
 import react.dom.html.InputMode
 import react.dom.html.InputType
 import react.dom.onChange
+import kotlin.js.Date
 
 external interface UstadEditFieldProps: PropsWithChildren {
 
@@ -232,10 +233,9 @@ val UstadDateEditField = FC<UstadDateEditFieldProps> { props ->
                 TextField.create {
                     +params
 
-                    fullWidth = props.fullWidth
-
                     if(props.error != null) {
                         error = true
+                        fullWidth = props.fullWidth
                         helperText = props.error?.let { ReactNode(it) }
                     }
                 }

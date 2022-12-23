@@ -7,7 +7,6 @@ import com.ustadmobile.mui.components.UstadCourseBlockEditPreview
 import com.ustadmobile.mui.components.UstadDetailFieldPreview
 import com.ustadmobile.mui.components.UstadEditFieldPreviews
 import com.ustadmobile.view.*
-import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
 
 fun useUstadScreens(): UstadScreens {
@@ -37,10 +36,6 @@ fun useUstadScreens(): UstadScreens {
                 ClazzEnrolmentEditScreenPreview),
             UstadScreen(SiteTermsDetailView.VIEW_NAME, "SiteTermsDetail Preview",
                 SiteTermsDetailScreenPreview),
-            UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
-                InviteViaLinkPreview),
-            UstadScreen(ContentEntryDetailOverviewView.VIEW_NAME, "ContentEntryDetailOverview Preview",
-                ContentEntryDetailOverviewScreenPreview),
             UstadScreen(RegisterMinorWaitForParentView.VIEW_NAME, "RegisterMinorWaitForParent Preview",
                 RegisterMinorWaitForParentPreview),
             UstadScreen(ScheduleEditView.VIEW_NAME, "ScheduleEdit Preview",
@@ -55,9 +50,8 @@ fun useUstadScreens(): UstadScreens {
                 SchoolEditScreenPreview),
             UstadScreen(LanguageDetailView.VIEW_NAME, name = "LanguageDetail Preview",
                 LanguageDetailPreview),
-            UstadScreen(ClazzEdit2View.VIEW_NAME, "Clazz Edit Preview",
-                ClazzEditScreenPreview),
-            UstadScreen("EasySort", "Easy Sort", EasySortPreview),
+            UstadScreen(ReportFilterEditView.VIEW_NAME, name = "ReportFilterEdit Preview",
+                ReportFilterEditScreenPreview),
         )
     }
 }

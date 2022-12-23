@@ -1,8 +1,7 @@
 package com.ustadmobile.hooks
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.wrappers.intl.Intl
-import com.ustadmobile.util.ext.toJsDateFromOtherTimeZoneToSystemTimeZone
+import com.ustadmobile.jsmodules.Intl
 import react.useMemo
 
 /**
@@ -15,7 +14,7 @@ import react.useMemo
  */
 fun useFormattedDate(timeInMillis: Long, timezoneId: String) : String{
     return useMemo(dependencies = arrayOf(timeInMillis, timezoneId)) {
-        val dateOffsetForTimezone = timeInMillis.toJsDateFromOtherTimeZoneToSystemTimeZone(timezoneId)
+        val dateOffsetForTimezone = useTimeInOtherTimeZoneAsJsDate(timeInMillis, timezoneId)
         try {
             dateOffsetForTimezone?.let {
                 Intl.Companion.DateTimeFormat(UstadMobileSystemImpl.displayedLocale).format(it)

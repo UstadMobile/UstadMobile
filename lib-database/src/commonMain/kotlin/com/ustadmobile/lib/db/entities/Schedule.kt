@@ -51,13 +51,13 @@ class Schedule {
     var scheduleEndTime: Long = 0
 
     //What day for this frequency
-    var scheduleDay: Int = Schedule.DAY_MONDAY
+    var scheduleDay: Int = 0
 
     //What month for this frequency
     var scheduleMonth: Int = 0
 
     // Frequency - Once, Daily, Every Week, Every Month, Every Year
-    var scheduleFrequency: Int = Schedule.SCHEDULE_FREQUENCY_WEEKLY
+    var scheduleFrequency: Int = 0
 
     //The Calendar this will be set to.
     var umCalendarUid: Long = 0

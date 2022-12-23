@@ -11,11 +11,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
-
 
 /**
  * Main field layout for detail fields in DetailViews
@@ -24,29 +22,6 @@ import com.toughra.ustadmobile.R
 fun UstadDetailField(
     valueText: String,
     labelText: String,
-    modifier: Modifier = Modifier,
-    imageId: Int = 0,
-    onClick: (() -> Unit)? = null,
-    secondaryActionContent: (@Composable () -> Unit)? = null,
-    autoPadding: Boolean = true,
-) {
-    UstadDetailField(
-        valueText = AnnotatedString(valueText),
-        labelText = AnnotatedString(labelText),
-        modifier = modifier,
-        imageId = imageId,
-        onClick = onClick,
-        secondaryActionContent = secondaryActionContent,
-        autoPadding = autoPadding,
-    )
-}
-/**
- * Main field layout for detail fields in DetailViews
- */
-@Composable
-fun UstadDetailField(
-    valueText: AnnotatedString,
-    labelText: AnnotatedString,
     modifier: Modifier = Modifier,
     imageId: Int = 0,
     onClick: (() -> Unit)? = null,
@@ -86,8 +61,8 @@ fun UstadDetailField(
 private fun DetailFieldContent(
     modifier: Modifier = Modifier,
     imageId: Int = 0,
-    valueText: AnnotatedString,
-    labelText: AnnotatedString,
+    valueText: String,
+    labelText: String,
     secondaryActionContent: (@Composable () -> Unit)? = null,
 ) {
     Row(modifier){
