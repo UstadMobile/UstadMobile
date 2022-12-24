@@ -417,7 +417,7 @@ private fun ClazzEditScreen(
                     modifier = Modifier
                         .clickable {
                             if(!dragging)
-                                onClickCourseBlock(courseBlock)sch
+                                onClickCourseBlock(courseBlock)
                         }
                         .alpha(courseBlockEditAlpha),
                     icon = {
