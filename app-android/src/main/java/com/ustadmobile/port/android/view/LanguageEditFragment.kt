@@ -101,7 +101,7 @@ fun LanguageEditScreen(
     ){
 
         UstadTextEditField(
-            value = stringResource(id = R.string.name),
+            value = uiState.language?.name ?: "",
             label = stringResource(id = R.string.name),
             error = uiState.languageNameError,
             enabled = uiState.fieldsEnabled,
@@ -115,7 +115,7 @@ fun LanguageEditScreen(
         UstadTextEditField(
             modifier = Modifier
                 .padding(top = 15.dp),
-            value = stringResource(id = R.string.two_letter_code),
+            value = uiState.language?.iso_639_1_standard ?: "",
             label = stringResource(id = R.string.two_letter_code),
             error = uiState.twoLettersCodeError,
             enabled = uiState.fieldsEnabled,
@@ -127,7 +127,7 @@ fun LanguageEditScreen(
         )
 
         UstadTextEditField(
-            value = stringResource(id = R.string.three_letter_code),
+            value = uiState.language?.iso_639_2_standard ?: "",
             label = stringResource(id = R.string.three_letter_code),
             error = uiState.threeLettersCodeError,
             enabled = uiState.fieldsEnabled,
