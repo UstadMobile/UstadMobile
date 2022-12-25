@@ -18,13 +18,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.HolidayCalendarDetailUIState
+import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
+import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 
 @Composable
 fun HolidayCalendarDetailScreen(
     uiState: HolidayCalendarDetailUIState,
-    onItemClick: (HolidayCalendar) -> Unit = {}
+    onItemClick: (Holiday) -> Unit = {}
 ){
     Column(
         modifier = Modifier
@@ -38,14 +40,22 @@ fun HolidayCalendarDetailScreen(
             labelText = stringResource(id = R.string.name)
         )
 
-        uiState.calendarList?.forEach {
+        uiState.holidayList.forEach { holiday ->
+
+            val holidayStart = rememberFormattedDate(holiday.holStartTime, "UTC")
+            val holidayEnd = rememberFormattedDate(holiday.holEndTime, "UTC")
+
             ListItem (
                 modifier = Modifier
                     .clickable {
-                        onItemClick(it)
+                        onItemClick(holiday)
                     },
 
-                text = { Text(it.umCalendarName ?: "") }
+                text = { Text(holiday.holName ?: "") },
+                
+                secondaryText = {
+                    Text(text = "$holidayStart - $holidayEnd")
+                }
             )
         }
 
@@ -60,9 +70,11 @@ fun HolidayCalendarDetailPreview(){
             holidayCalendar = HolidayCalendar().apply {
                 umCalendarName = "my calendar"
             },
-            calendarList = listOf(
-                HolidayCalendar().apply {
-                    umCalendarName = "first"
+            holidayList = listOf(
+                Holiday().apply {
+                    holName = "Eid"
+                    holStartTime = 1352958816
+                    holEndTime = 1352958818
                 }
             )
         )
