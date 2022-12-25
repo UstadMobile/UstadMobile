@@ -1,15 +1,15 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
+import android.media.Session2Command.Result.RESULT_SUCCESS
 import android.os.Bundle
 import android.view.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.*
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.accompanist.flowlayout.FlowRow
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.composethemeadapter.MdcTheme
@@ -44,6 +45,7 @@ import com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
@@ -51,6 +53,7 @@ import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_UNSET
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
 import org.kodein.di.direct
@@ -378,7 +381,6 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ContentEntryDetailOverviewScreen(
     uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
@@ -387,10 +389,11 @@ private fun ContentEntryDetailOverviewScreen(
     onClickMarkComplete: () -> Unit = {},
     onClickDelete: () -> Unit = {},
     onClickManageDownload: () -> Unit = {},
-    onClickTranslation: () -> Unit = {},
+    onClickTranslation: (ContentEntryRelatedEntryJoinWithLanguage) -> Unit = {},
     onClickContentJobItem: () -> Unit = {},
 ) {
     LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
@@ -420,10 +423,6 @@ private fun ContentEntryDetailOverviewScreen(
             }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
         if (uiState.contentEntryButtons?.showOpenButton == true){
             item {
                 Button(
@@ -443,17 +442,14 @@ private fun ContentEntryDetailOverviewScreen(
         }
 
         items(
-            uiState.activeContentJobItems.size
-        ){
+            items = uiState.activeContentJobItems,
+            key = { contentJob -> contentJob.cjiUid }
+        ){ contentJobItem ->
             ContentJobListItem(
                 uiState = uiState,
                 onClickContentJobItem = onClickContentJobItem,
-                index = it
+                contentJob = contentJobItem
             )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
         if (uiState.locallyAvailable) {
@@ -463,15 +459,7 @@ private fun ContentEntryDetailOverviewScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
             Divider(thickness = 1.dp)
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
         item {
@@ -484,39 +472,11 @@ private fun ContentEntryDetailOverviewScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
-            Text(text = "Locally Available")
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
-            Divider(thickness = 1.dp)
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
             Text(text = uiState.contentEntry?.description ?: "")
         }
 
         item {
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        item {
             Divider(thickness = 1.dp)
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
         if (uiState.translationVisibile){
@@ -524,15 +484,16 @@ private fun ContentEntryDetailOverviewScreen(
                 Text(text = stringResource(id = R.string.also_available_in))
             }
 
-            items(
-                uiState.availableTranslations.size
-            ){
-                ListItem(
-                    modifier = Modifier.clickable {
-                        onClickTranslation()
-                    },
-                    text = { Text(uiState.availableTranslations[it].language?.name ?: "") },
-                )
+            item {
+                FlowRow(
+                    Modifier.padding(8.dp)
+                ) {
+                    uiState.availableTranslations.forEach { translation ->
+                        TextButton(onClick = { onClickTranslation(translation) }) {
+                            Text(text = translation.language?.name ?: "")
+                        }
+                    }
+                }
             }
         }
     }
@@ -575,27 +536,20 @@ fun LeftColumn(
             contentScale = ContentScale.Crop
         )
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        BadgedBox(badge = { Badge {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_content_complete),
+                contentDescription = "Favorite"
+            )
+        } }) {
             if (uiState.scoreProgressVisible){
                 LinearProgressIndicator(
-                    progress = 0.6F,
+                    progress = (uiState.scoreProgress?.progress ?: 0)
+                        .toFloat()/10.0F,
                     modifier = Modifier
                         .height(4.dp)
-                        .weight(0.6F),
-                    backgroundColor = contentColorFor(
-                        backgroundColor = colorResource(id = R.color.primaryColor)
-                    )
                 )
             }
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Image(painter = painterResource(id = R.drawable.ic_content_complete),
-                contentDescription = "",
-                modifier = Modifier.size(18.dp)
-            )
         }
     }
 }
@@ -641,7 +595,9 @@ fun RightColumn(
         ){
 
             if (uiState.fileSizeVisible){
-                Text(text = uiState.contentEntry?.container?.fileSize.toString())
+                Text(text = UMFileUtil.formatFileSize(
+                    uiState.contentEntry?.container?.fileSize ?: 0
+                ))
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -657,12 +613,14 @@ fun RightColumn(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Text("(" +
-                    (uiState.scoreProgress?.resultScore ?: "") +
-                    "/" +
-                    (uiState.scoreProgress?.resultMax ?: "") +
-                    ")"
-            )
+            if (uiState.scoreResultVisible){
+                Text("(" +
+                        (uiState.scoreProgress?.resultScore ?: "") +
+                        "/" +
+                        (uiState.scoreProgress?.resultMax ?: "") +
+                        ")"
+                )
+            }
         }
     }
 }
@@ -672,7 +630,7 @@ fun RightColumn(
 fun ContentJobListItem(
     uiState: ContentEntryDetailOverviewUiState,
     onClickContentJobItem: () -> Unit,
-    index: Int
+    contentJob: ContentJobItemProgress
 ){
     ListItem(
         modifier = Modifier.clickable {
@@ -682,13 +640,13 @@ fun ContentJobListItem(
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(uiState.activeContentJobItems[index].progressTitle ?: "")
-                Text(uiState.activeContentJobItems[index].progress.toString()+" %")
+                Text(contentJob.progressTitle ?: "")
+                Text(contentJob.progress.toString()+" %")
             }
         },
         secondaryText = {
             LinearProgressIndicator(
-                progress = (uiState.activeContentJobItems[index].progress/100.0).toFloat(),
+                progress = (contentJob.progress/100.0).toFloat(),
                 modifier = Modifier
                     .height(4.dp),
             )
@@ -774,25 +732,102 @@ fun ContentEntryDetailOverviewScreenPreview() {
         availableTranslations = listOf(
             ContentEntryRelatedEntryJoinWithLanguage().apply {
                 language = Language().apply {
+                    langUid = 0
                     name = "Persian"
                 }
             },
             ContentEntryRelatedEntryJoinWithLanguage().apply {
                 language = Language().apply {
+                    langUid = 1
                     name = "English"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    langUid = 2
+                    name = "Korean"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    langUid = 3
+                    name = "Tamil"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    langUid = 4
+                    name = "Turkish"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    langUid = 5
+                    name = "Telugu"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    langUid = 6
+                    name = "Marathi"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    langUid = 7
+                    name = "Vietnamese"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    langUid = 8
+                    name = "Japanese"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    langUid = 9
+                    name = "Russian"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    langUid = 10
+                    name = "Portuguese"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    langUid = 11
+                    name = "Bengali"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    langUid = 12
+                    name = "Spanish"
+                }
+            },
+            ContentEntryRelatedEntryJoinWithLanguage().apply {
+                language = Language().apply {
+                    langUid = 13
+                    name = "Hindi"
                 }
             }
         ),
         activeContentJobItems = listOf(
             ContentJobItemProgress().apply {
+                cjiUid = 0
                 progressTitle = "First"
                 progress = 30
             },
             ContentJobItemProgress().apply {
+                cjiUid = 1
                 progressTitle = "Second"
                 progress = 10
             },
             ContentJobItemProgress().apply {
+                cjiUid = 2
                 progressTitle = "Third"
                 progress = 70
             }

@@ -3,19 +3,24 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.common.justifyContent
+import com.ustadmobile.mui.common.md
+import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadQuickActionButton
-import csstype.*
-import mui.material.List
+import csstype.AlignItems
+import csstype.JustifyContent
+import csstype.TextAlign
+import csstype.px
 import mui.icons.material.*
 import mui.material.*
+import mui.material.List
 import mui.material.styles.TypographyVariant
 import mui.system.Container
-import mui.material.Stack
-import mui.material.StackDirection
-import mui.system.*
+import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
 import react.create
@@ -88,12 +93,6 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
             }
 
             Typography{
-                + "Locally Available"
-            }
-
-            Divider { orientation = Orientation.horizontal }
-
-            Typography{
                 + (props.uiState.contentEntry?.description ?: "")
             }
 
@@ -104,13 +103,27 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                     + strings[MessageID.also_available_in]
                 }
 
-                List{
-                    props.uiState.availableTranslations.forEach {
-                        ListItem{
-                            Button {
-                                onClick = { props.onClickTranslation }
+                Grid {
+                    direction = responsive(GridDirection.row)
+                    container = true
 
-                                + (it.language?.name ?: "")
+                    props.uiState.availableTranslations.forEach {
+                        Grid {
+                            item = true
+                            xs = 2
+                            md = 1
+
+                            Box {
+                                sx {
+                                    padding = 8.px
+                                    textAlign = TextAlign.center
+                                }
+
+                                Button {
+                                    onClick = { props.onClickTranslation }
+
+                                    + (it.language?.name ?: "")
+                                }
                             }
                         }
                     }
@@ -225,7 +238,9 @@ private val RightColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
 
             if (props.uiState.fileSizeVisible){
                 Typography{
-                    + props.uiState.contentEntry?.container?.fileSize.toString()
+                    + UMFileUtil.formatFileSize(
+                        props.uiState.contentEntry?.container?.fileSize ?: 0
+                    )
                 }
             }
 
@@ -242,9 +257,11 @@ private val RightColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
             }
 
 
-            Typography {
-                + ("(" + (props.uiState.scoreProgress?.resultScore ?: "") +
-                        "/" + (props.uiState.scoreProgress?.resultMax ?: "") + ")")
+            if (props.uiState.scoreResultVisible){
+                Typography {
+                    + ("(" + (props.uiState.scoreProgress?.resultScore ?: "") +
+                            "/" + (props.uiState.scoreProgress?.resultMax ?: "") + ")")
+                }
             }
         }
     }
@@ -374,6 +391,66 @@ val ContentEntryDetailOverviewScreenPreview = FC<Props> {
                 ContentEntryRelatedEntryJoinWithLanguage().apply {
                     language = Language().apply {
                         name = "English"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Korean"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Tamil"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Turkish"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Telugu"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Marathi"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Vietnamese"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Japanese"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Russian"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Portuguese"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Bengali"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Spanish"
+                    }
+                },
+                ContentEntryRelatedEntryJoinWithLanguage().apply {
+                    language = Language().apply {
+                        name = "Hindi"
                     }
                 }
             ),

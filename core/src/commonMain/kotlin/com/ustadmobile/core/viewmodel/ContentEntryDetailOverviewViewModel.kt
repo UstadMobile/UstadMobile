@@ -38,4 +38,7 @@ data class ContentEntryDetailOverviewUiState(
         get() = contentEntry?.container?.fileSize != null
                 && contentEntry.container?.fileSize != 0L
 
+    val scoreResultVisible: Boolean
+        get() = scoreProgress != null
+
 }

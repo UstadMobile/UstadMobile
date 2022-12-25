@@ -236,7 +236,6 @@ ext {
     version_react_linkify = "^1.0.0-alpha"
     version_linkify_js = "^3.0.5"
     version_linkify_react = "^3.0.4"
-
 }
 
 /*
