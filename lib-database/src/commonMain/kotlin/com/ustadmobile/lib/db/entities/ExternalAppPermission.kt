@@ -10,6 +10,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
  * This may be extended by a 1:many join to scopes in the future.
  */
 @Entity
+@kotlinx.serialization.Serializable
 data class ExternalAppPermission(
 
     @PrimaryKey(autoGenerate = true)

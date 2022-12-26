@@ -148,6 +148,7 @@ ext {
     version_androidx_recyclerview = "1.2.1"
     version_android_multidex = "2.0.1"
     version_android_workmanager = "2.7.1"
+    version_android_datastore = "1.0.0"
     version_androidx_paging = "2.1.2"
     version_android_constraint_layout = "2.1.4"
     version_android_flexbox = "3.0.0"

@@ -274,6 +274,9 @@ dependencies {
     //Crash reporting
     implementation "ch.acra:acra-http:$version_android_acra"
 
+    //DataStore
+    implementation "androidx.datastore:datastore-preferences:$version_android_datastore"
+
     implementation "com.linkedin.android.litr:litr:$version_android_litr"
 
 

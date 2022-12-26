@@ -4,6 +4,8 @@ import android.accounts.AccountManager
 import android.content.Context
 import android.util.Log
 import androidx.core.os.bundleOf
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManagerAndroid
 import com.ustadmobile.core.controller.UstadBaseController
@@ -19,6 +21,12 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.ExternalAppPermission
+import com.ustadmobile.port.android.authenticator.UstadAccountAuthenticator.Companion.KEY_PREFIX_EAPUID
+import com.ustadmobile.port.android.authenticator.pendingRequestsDataStore
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.serialization.decodeFromString
 
 class GrantAppPermissionPresenter(
     context: Any,
@@ -41,15 +49,29 @@ class GrantAppPermissionPresenter(
 
     fun onClickApprove() {
         presenterScope.launch {
+            val dataStore = (context as Context).pendingRequestsDataStore
             val db: UmAppDatabase = on(ustadAccountManager.activeEndpoint).direct.instance(
                 tag = DoorTag.TAG_DB)
-            val extAccessPermission = db.externalAppPermissionDao.getExternalAccessPermissionByUid(
-                eapUid)
+            val prefKey = stringPreferencesKey("$KEY_PREFIX_EAPUID$eapUid")
+
+            val extAccessPermission = dataStore.data.map { preferences ->
+                preferences[prefKey]?.let {
+                    json.decodeFromString<ExternalAppPermission>(it)
+                }
+            }.first()
+
             val authToken = extAccessPermission?.eapAuthToken
             if(extAccessPermission != null && authToken != null) {
                 val activeAccountName = ustadAccountManager.activeSession?.toAndroidAccount()?.name ?: "ERR"
-                db.externalAppPermissionDao.grantPermission(eapUid, systemTimeInMillis(),
-                    Long.MAX_VALUE)
+                extAccessPermission.eapPersonUid = ustadAccountManager.activeSession?.person?.personUid ?: 0
+                extAccessPermission.eapStartTime = systemTimeInMillis()
+                extAccessPermission.eapExpireTime = Long.MAX_VALUE
+
+                dataStore.edit { preferences ->
+                    preferences.remove(prefKey)
+                }
+
+                db.externalAppPermissionDao.insertAsync(extAccessPermission)
                 val activity = (context as Context).getActivityContext()
                 (activity as MainActivity).setAccountAuthenticatorResult(bundleOf(
                     AccountManager.KEY_AUTHTOKEN to authToken,

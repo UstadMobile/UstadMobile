@@ -8,6 +8,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.os.bundleOf
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManagerAndroid
 import com.ustadmobile.core.account.UstadAccountManagerAndroid.Companion.USERDATA_KEY_ENDPOINT
@@ -28,6 +33,16 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ExternalAppPermission
 import kotlinx.coroutines.*
 import java.util.UUID
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlin.random.Random
+
+/**
+ * Pending requests (e.g. those that have not yet been approved) are stored in the DataStore. We
+ * don't always know what endpoint they are for, so we can't put them in the database immediately
+ */
+internal val Context.pendingRequestsDataStore:
+    DataStore<Preferences> by preferencesDataStore(name = "authenticator_pending_requests")
 
 // As per https://developer.android.com/training/id-auth/custom_auth
 // see https://developer.android.com/reference/kotlin/android/accounts/AbstractAccountAuthenticator
@@ -41,6 +56,8 @@ class UstadAccountAuthenticator(
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
+    private val json: Json by di.instance()
+
     override fun editProperties(p0: AccountAuthenticatorResponse?, p1: String?): Bundle? {
         return null
     }
@@ -50,20 +67,30 @@ class UstadAccountAuthenticator(
         accountType: String?,
         authTokenType: String?,
         requiredFeatures: Array<out String>?,
-        options: Bundle?
-    ): Bundle {
+        options: Bundle
+    ): Bundle? {
+        val callerUid = options.getInt(AccountManager.KEY_CALLER_UID)
+        coroutineScope.launch {
+            val eapUid = Random.nextLong(0, Long.MAX_VALUE)
 
+            val externalAppPermission = ExternalAppPermission(
+                eapCallerUid = callerUid,
+                eapAuthToken = UUID.randomUUID().toString(),
+            )
 
-        val intent = Intent(context, MainActivity::class.java).apply {
-            //TODO: HERE put intent info needed to start the login screen for this flow.
+            context.pendingRequestsDataStore.edit {  prefs ->
+                prefs[stringPreferencesKey("$KEY_PREFIX_EAPUID$eapUid")] = json.encodeToString(
+                    externalAppPermission)
+            }
+
+            val intent = Intent(context, MainActivity::class.java).apply {
+                putExtra(UstadView.ARG_OPEN_LINK,
+                    "${GrantAppPermissionView.VIEW_NAME}?$ARG_PERMISSION_UID=$eapUid")
+            }
+            response.onResult(bundleOf(AccountManager.KEY_INTENT to intent))
         }
 
-        val reply = Bundle().apply {
-            putParcelable(AccountManager.KEY_INTENT, intent)
-        }
-
-        return reply
-
+        return null
     }
 
     override fun confirmCredentials(
@@ -102,13 +129,17 @@ class UstadAccountAuthenticator(
             }else {
                 //Get application name
                 // see https://stackoverflow.com/questions/11229219/android-how-to-get-application-name-not-package-name
+                val eapUid = Random.nextInt(0, Int.MAX_VALUE)
                 val externalAppPermission = ExternalAppPermission(
                     eapPersonUid = personUid,
                     eapCallerUid = callerUid,
                     eapAuthToken = UUID.randomUUID().toString(),
                     eapAndroidAccountName = account.name,
-                ).apply {
-                    eapUid = db.externalAppPermissionDao.insertAsync(this).toInt()
+                    eapUid = eapUid
+                )
+                context.pendingRequestsDataStore.edit {
+                    it[stringPreferencesKey("eap_$eapUid")] = json.encodeToString(
+                        externalAppPermission)
                 }
 
                 val authIntent = Intent(context, MainActivity::class.java).apply {
@@ -151,4 +182,9 @@ class UstadAccountAuthenticator(
     }
 
 
+    companion object {
+
+        const val KEY_PREFIX_EAPUID = "eap_"
+
+    }
 }
