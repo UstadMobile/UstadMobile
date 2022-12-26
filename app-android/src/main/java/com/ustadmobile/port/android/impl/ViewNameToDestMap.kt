@@ -157,6 +157,7 @@ class ViewNameToDestMap: DestinationProvider {
                 hideBottomNavigation = true),
             ScopedGrantListView.VIEW_NAME to UstadDestination(R.id.scoped_grant_list_dest),
             ScopedGrantDetailView.VIEW_NAME to UstadDestination(R.id.scoped_grant_detail_dest),
+            GrantAppPermissionView.VIEW_NAME to UstadDestination(R.id.grant_app_permission_dest),
     )
 
     override val navControllerViewId: Int

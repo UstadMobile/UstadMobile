@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.RedirectView.Companion.TAG_REDIRECTED
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_OPEN_LINK
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import io.github.aakira.napier.Napier
@@ -34,7 +35,8 @@ class RedirectPresenter(
                 Napier.d { "Redirect: Go to deep link: $deepLink" }
                 presenterScope.launch {
                     ustadNavController?.navigateToLink(deepLink, accountManager, {  },
-                        forceAccountSelection = true)
+                        forceAccountSelection = true,
+                        accountName = arguments[UstadView.ARG_ACCOUNT_NAME])
                 }
             }
 

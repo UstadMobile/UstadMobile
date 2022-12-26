@@ -9,7 +9,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LINK_ENDPOINT_VIEWNAME_DIVIDER
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
@@ -43,7 +42,7 @@ suspend fun UstadNavController.navigateToLink(
     goOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions.Default,
     forceAccountSelection: Boolean = false,
     userCanSelectServer: Boolean = true,
-    presetAccount: String? = null,
+    accountName: String? = null,
 ) {
     var endpointUrl: String? = null
     var viewUri: String? = null
@@ -68,15 +67,22 @@ suspend fun UstadNavController.navigateToLink(
         0L
     }
 
-
     when {
         //when the link is not an ustad link, open in browser
         viewUri == null -> {
             browserLinkOpener.onOpenLink(link)
         }
 
-        presetAccount != null -> {
-
+        //When the account has already been selected and the endpoint url is known.
+        accountName != null && endpointUrl != null -> {
+            val session = accountManager.activeSessionsList { filterUrl -> filterUrl == endpointUrl }
+                .firstOrNull {
+                    it.person.username == accountName.substringBefore("@")
+                }
+            if(session != null) {
+                accountManager.activeSession = session
+                navigateToViewUri(viewUri, goOptions)
+            }
         }
 
         //when the active account is already on the given endpoint, or there is no endpoint

@@ -147,6 +147,9 @@ expect abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?
 
+    @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
+    abstract suspend fun findByUsernameAsync(username: String): Person?
+
     @Query("""
         SELECT Person.*
           FROM Person

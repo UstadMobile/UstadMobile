@@ -10,7 +10,8 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManagerAndroid
-import com.ustadmobile.core.account.UstadAccountManagerAndroid.Companion.KEY_ENDPOINT
+import com.ustadmobile.core.account.UstadAccountManagerAndroid.Companion.USERDATA_KEY_ENDPOINT
+import com.ustadmobile.core.account.UstadAccountManagerAndroid.Companion.USERDATA_KEY_PERSONUID
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.android.view.MainActivity
 import org.kodein.di.DI
@@ -19,12 +20,18 @@ import org.kodein.di.android.closestDI
 import org.kodein.di.instance
 import org.kodein.di.on
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.view.GrantAppPermissionView
+import com.ustadmobile.core.view.GrantAppPermissionView.Companion.ARG_PERMISSION_UID
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.ExternalAppPermission
 import kotlinx.coroutines.*
+import java.util.UUID
 
 // As per https://developer.android.com/training/id-auth/custom_auth
-//see https://developer.android.com/reference/kotlin/android/accounts/AbstractAccountAuthenticator
+// see https://developer.android.com/reference/kotlin/android/accounts/AbstractAccountAuthenticator
+// Useful source: https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/accounts/AccountAuthenticatorActivity.java
 // Also helpful: http://blog.udinic.com/2013/04/24/write-your-own-android-authenticator/
 class UstadAccountAuthenticator(
     private val context: Context
@@ -73,37 +80,50 @@ class UstadAccountAuthenticator(
         authTokenType: String,
         options: Bundle
     ): Bundle? {
-        val endpointUrl = options.getString(KEY_ENDPOINT)
-        val auth = options.getString(AccountManager.KEY_AUTHTOKEN)
+        val endpointUrl = AccountManager.get(context).getUserData(account, USERDATA_KEY_ENDPOINT)
+        val personUid = AccountManager.get(context).getUserData(account, USERDATA_KEY_PERSONUID).toLong()
 
-        if(endpointUrl != null && auth != null) {
-            val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_DB)
-            coroutineScope.launch {
-                if(db.authTokenDao.validateToken(auth)) {
-                    response.onResult(
-                        bundleOf(
-                            AccountManager.KEY_AUTHTOKEN to auth,
-                            AccountManager.KEY_ACCOUNT_TYPE to UstadAccountManagerAndroid.ACCOUNT_TYPE,
-                            AccountManager.KEY_ACCOUNT_NAME to account.name,
-                        )
+        //check the caller - if permissions have already been granted for this caller, then return
+        // a token. Otherwise, return an intent tha tit will have to launch
+        val callerUid = options.getInt(AccountManager.KEY_CALLER_UID)
+        val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_DB)
+
+        coroutineScope.launch {
+            val grantedToken = db.externalAppPermissionDao.getGrantedAuthToken(
+                callerUid, personUid, systemTimeInMillis())
+            if(grantedToken != null) {
+                response.onResult(
+                    bundleOf(
+                        AccountManager.KEY_AUTHTOKEN to grantedToken,
+                        AccountManager.KEY_ACCOUNT_TYPE to UstadAccountManagerAndroid.ACCOUNT_TYPE,
+                        AccountManager.KEY_ACCOUNT_NAME to account.name,
                     )
-                }else {
-                    response.onError(403, "Invalid token")
+                )
+            }else {
+                //Get application name
+                // see https://stackoverflow.com/questions/11229219/android-how-to-get-application-name-not-package-name
+                val externalAppPermission = ExternalAppPermission(
+                    eapPersonUid = personUid,
+                    eapCallerUid = callerUid,
+                    eapAuthToken = UUID.randomUUID().toString(),
+                    eapAndroidAccountName = account.name,
+                ).apply {
+                    eapUid = db.externalAppPermissionDao.insertAsync(this).toInt()
                 }
-            }
-        }else {
-            //Get application name
-            // see https://stackoverflow.com/questions/11229219/android-how-to-get-application-name-not-package-name
-            val authIntent = Intent(context, MainActivity::class.java).apply {
-                putExtra(UstadView.ARG_OPEN_LINK, GrantAppPermissionView.VIEW_NAME)
-                putExtra(UstadView.ARG_ACCOUNT_NAME, account.name)
-                putExtra(UstadView.ARG_ACCOUNT_ENDPOINT,
-                    AccountManager.get(context).getUserData(account, KEY_ENDPOINT))
-            }
 
-            response.onResult(Bundle().apply {
-                putParcelable(AccountManager.KEY_INTENT, authIntent)
-            })
+                val authIntent = Intent(context, MainActivity::class.java).apply {
+                    putExtra(
+                        UstadView.ARG_OPEN_LINK, UstadUrlComponents(endpointUrl,
+                        GrantAppPermissionView.VIEW_NAME,
+                            "$ARG_PERMISSION_UID=${externalAppPermission.eapUid}").fullUrl())
+                    putExtra(UstadView.ARG_ACCOUNT_NAME, account.name)
+                    putExtra(UstadView.ARG_ACCOUNT_ENDPOINT, endpointUrl)
+                }
+
+                response.onResult(Bundle().apply {
+                    putParcelable(AccountManager.KEY_INTENT, authIntent)
+                })
+            }
         }
 
         return null

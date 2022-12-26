@@ -1,11 +1,11 @@
 package com.ustadmobile.core.account
 
-import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.Context
 import android.os.Build
 import androidx.core.os.bundleOf
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.toAndroidAccount
 import com.ustadmobile.lib.db.entities.Person
 import org.kodein.di.DI
 
@@ -17,13 +17,7 @@ class UstadAccountManagerAndroid(
 
     private val androidContext = appContext
 
-    fun UserSessionWithPersonAndEndpoint.toAndroidAccount() : Account{
-        val displayUrl = endpoint.url
-            .removePrefix("http://")
-            .removePrefix("https://")
-            .removeSuffix("/")
-        return Account("${this.person.username}@$displayUrl", ACCOUNT_TYPE)
-    }
+
 
     override suspend fun addSession(
         person: Person,
@@ -32,9 +26,13 @@ class UstadAccountManagerAndroid(
     ): UserSessionWithPersonAndEndpoint {
         val sessionCreated = super.addSession(person, endpointUrl, password)
         val androidAccountManager = AccountManager.get(androidContext)
+        val userData = bundleOf(
+            USERDATA_KEY_ENDPOINT to endpointUrl,
+            USERDATA_KEY_PERSONUID to person.personUid.toString(),
+        )
         val accountedAdded = androidAccountManager.addAccountExplicitly(sessionCreated.toAndroidAccount(),
             sessionCreated.userSession.usAuth ?: throw IllegalArgumentException("No usersession auth!"),
-            bundleOf(KEY_ENDPOINT to endpointUrl))
+            userData)
         if(!accountedAdded) {
             throw IllegalStateException("Could not add account to AccountManager!")
         }
@@ -63,7 +61,13 @@ class UstadAccountManagerAndroid(
 
         const val OPTIONS_KEY_AUTH = "auth"
 
-        const val KEY_ENDPOINT = "endpointUrl"
+        /**
+         * When an account is stored in the AccountManager, this key will provides the endpoint
+         * server url
+         */
+        const val USERDATA_KEY_ENDPOINT = "endpointUrl"
+
+        const val USERDATA_KEY_PERSONUID = "personUid"
 
         //getaccount return keys etc. here
         const val KEY_OPT = "opt"

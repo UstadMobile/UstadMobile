@@ -50,6 +50,10 @@ class RedirectFragment : UstadBaseFragment(), RedirectView {
                 intentMap[UstadView.ARG_OPEN_LINK] = it
             }
 
+            intent.getStringExtra(UstadView.ARG_ACCOUNT_NAME)?.also {
+                intentMap[UstadView.ARG_ACCOUNT_NAME] = it
+            }
+
 
             mPresenter = RedirectPresenter(requireContext(),
                 arguments.toStringMap() + requireActivity().intent.extras.toStringMap() + intentMap,

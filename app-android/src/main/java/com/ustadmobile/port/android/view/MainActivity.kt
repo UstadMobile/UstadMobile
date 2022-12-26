@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view
 
+import android.accounts.AccountAuthenticatorResponse
 import android.accounts.AccountManager
+import android.app.Activity
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -16,7 +18,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -32,7 +33,6 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.AppConfig
@@ -40,8 +40,6 @@ import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.NavControllerAdapter
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.port.android.view.binding.imageForeignKeyPlaceholder
 import com.ustadmobile.port.android.view.binding.setImageForeignKey
@@ -50,13 +48,9 @@ import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.*
 import org.kodein.di.DIAware
-import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.on
 import java.io.*
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.BrowserLinkOpener
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.*
 
@@ -95,6 +89,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private lateinit var ustadNavController: UstadNavController
 
+    private var mAccountAuthenticatorResponse: AccountAuthenticatorResponse? = null
+
     private val userProfileDrawable: Drawable? by lazy(LazyThreadSafetyMode.NONE) {
         ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_24dp)?.also {
             it.setTint(ContextCompat.getColor(this, R.color.onPrimaryColor))
@@ -115,14 +111,33 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        val uri = intent?.data?.toString()
+        val uri = intent?.data?.toString() ?: intent?.getStringExtra(UstadView.ARG_OPEN_LINK)
+        val argAccountName = intent?.getStringExtra(UstadView.ARG_ACCOUNT_NAME)
 
         if(uri != null){
             lifecycleScope.launchWhenResumed {
                 ustadNavController.navigateToLink(uri, accountManager, browserLinkOpener,
-                    forceAccountSelection = true)
+                    forceAccountSelection = true,
+                    accountName = argAccountName)
             }
         }
+    }
+
+    /**
+     * Set the result and finish as per docs:
+     *
+     *  https://developer.android.com/reference/android/accounts/AbstractAccountAuthenticator
+     *  "The activity needs to return the final result when it is complete so the Intent should
+     *  contain the AccountAuthenticatorResponse as"...
+     */
+    fun setAccountAuthenticatorResult(result: Bundle) {
+        mAccountAuthenticatorResponse?.onResult(result)
+        setResult(Activity.RESULT_OK, Intent().also {
+            it.putExtras(result)
+            it.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE,
+                mAccountAuthenticatorResponse)
+        })
+        finish()
     }
 
 
@@ -162,6 +177,14 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
             AppBarConfiguration(mBinding.bottomNavView.menu))
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
+
+        val response: AccountAuthenticatorResponse? = intent.getParcelableExtra(
+            AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
+        if(response != null) {
+            response.onRequestContinued()
+            mAccountAuthenticatorResponse = response
+        }
+
     }
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,

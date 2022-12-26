@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+    </data>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/this_app_will_receive"
+            />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/grant_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_20dp"
+            android:backgroundTint="?colorSecondary"
+            android:padding="@dimen/dimen_20dp"
+            android:text="@string/accept"
+            android:textColor="?colorOnSecondary"
+             />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/create_account"
+            style="@style/UmTheme.Widget.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:contentDescription="@string/download"
+            android:text="@string/cancel" />
+
+
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</layout>

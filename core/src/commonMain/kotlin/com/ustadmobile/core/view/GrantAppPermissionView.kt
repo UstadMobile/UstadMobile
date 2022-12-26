@@ -1,15 +1,14 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
-
 interface GrantAppPermissionView: UstadView {
 
 
-    fun onGranted(session: UserSessionWithPersonAndEndpoint)
 
     companion object {
 
         const val VIEW_NAME = "GrantAppPermission"
+
+        const val ARG_PERMISSION_UID = "eapUid"
 
         const val ARG_GRANT_PERMISSION_CALLER_UID = "callerUid"
 

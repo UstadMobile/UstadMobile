@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 108,
-    "identityHash": "4b9fe42ad6f51ff4f816048c6fe71214",
+    "identityHash": "c1a65683139c27317f3f1c57aecf2da6",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -11039,37 +11039,55 @@
         "foreignKeys": []
       },
       {
-        "tableName": "AuthToken",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`atUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `atAuth` TEXT, `atIssuedTime` INTEGER NOT NULL, `atExpiration` INTEGER NOT NULL)",
+        "tableName": "ExternalAppPermission",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eapUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `eapPersonUid` INTEGER NOT NULL, `eapCallerUid` INTEGER NOT NULL, `eapStartTime` INTEGER NOT NULL, `eapExpireTime` INTEGER NOT NULL, `eapAuthToken` TEXT, `eapAndroidAccountName` TEXT)",
         "fields": [
           {
-            "fieldPath": "atUid",
-            "columnName": "atUid",
+            "fieldPath": "eapUid",
+            "columnName": "eapUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "atAuth",
-            "columnName": "atAuth",
+            "fieldPath": "eapPersonUid",
+            "columnName": "eapPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eapCallerUid",
+            "columnName": "eapCallerUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eapStartTime",
+            "columnName": "eapStartTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eapExpireTime",
+            "columnName": "eapExpireTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eapAuthToken",
+            "columnName": "eapAuthToken",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "atIssuedTime",
-            "columnName": "atIssuedTime",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "atExpiration",
-            "columnName": "atExpiration",
-            "affinity": "INTEGER",
-            "notNull": true
+            "fieldPath": "eapAndroidAccountName",
+            "columnName": "eapAndroidAccountName",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
           "columnNames": [
-            "atUid"
+            "eapUid"
           ],
           "autoGenerate": true
         },
@@ -11080,7 +11098,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4b9fe42ad6f51ff4f816048c6fe71214')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c1a65683139c27317f3f1c57aecf2da6')"
     ]
   }
 }

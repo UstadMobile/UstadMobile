@@ -445,4 +445,8 @@
         android:name="com.ustadmobile.port.android.view.ScopedGrantDetailFragment"/>
 
 
+    <fragment
+        android:id="@+id/grant_app_permission_dest"
+        android:name="com.ustadmobile.port.android.view.GrantAppPermissionFragment"/>
+
 </navigation>
