@@ -52,6 +52,8 @@ fun useUstadScreens(): UstadScreens {
                 LanguageDetailPreview),
             UstadScreen(ReportFilterEditView.VIEW_NAME, name = "ReportFilterEdit Preview",
                 ReportFilterEditScreenPreview),
+            UstadScreen(ClazzList2View.VIEW_NAME, name = "Clazz List Preview",
+                ClazzListScreenPreview),
         )
     }
 }

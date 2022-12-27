@@ -26,7 +26,9 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toStringMap
@@ -36,7 +38,9 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ClazzListUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
+import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import org.kodein.di.direct
@@ -189,6 +193,11 @@ fun ClazzListItem(
     clazz: ClazzWithListDisplayDetails,
     onClickClazz: (Clazz) -> Unit
 ){
+
+    val role = (RoleConstants.ROLE_MESSAGE_IDS.find {
+        it.value == clazz.clazzActiveEnrolment?.clazzEnrolmentRole
+    }?.messageId ?: MessageID.student)
+
     ListItem(
         modifier = Modifier.clickable {
             onClickClazz(clazz)
@@ -227,12 +236,15 @@ fun ClazzListItem(
             }
         },
         trailing = {
-            Row {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
                     imageVector = Icons.Filled.Badge,
                     contentDescription = "",
                 )
-//                Text(clazz.clazzActiveEnrolment)
+                Text(messageIdResource(id = role))
             }
         },
     )
