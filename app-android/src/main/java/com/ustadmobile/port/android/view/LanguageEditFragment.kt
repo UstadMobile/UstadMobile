@@ -25,7 +25,6 @@ import com.ustadmobile.core.viewmodel.LanguageEditUiState
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 class LanguageEditFragment: UstadEditFragment<Language>(), LanguageEditView {
@@ -37,7 +36,7 @@ class LanguageEditFragment: UstadEditFragment<Language>(), LanguageEditView {
     override val mEditPresenter: UstadEditPresenter<*, Language>?
         get() = mPresenter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val rootView: View
         mBinding = FragmentLanguageEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
@@ -113,8 +112,6 @@ fun LanguageEditScreen(
         )
 
         UstadTextEditField(
-            modifier = Modifier
-                .padding(top = 15.dp),
             value = uiState.language?.iso_639_1_standard ?: "",
             label = stringResource(id = R.string.two_letter_code),
             error = uiState.twoLettersCodeError,
