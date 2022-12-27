@@ -6,7 +6,13 @@ appId: com.toughra.ustadmobile
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
+# test created by  ** Pooja **
+#  this test tests that :
+  # admin able to add a course and edit that course
+  # teacher should be able to edit a course
+  # student should not be able to edit a course
 
+# 1) admin able to add a course and edit that course
 - runFlow:
     file: "../common/course_with_members.yaml"
 - tapOn: "Courses"
@@ -16,21 +22,22 @@ appId: com.toughra.ustadmobile
 - tapOn: "Description (Optional)"
 - inputText: "Test edit"
 - tapOn: "SAVE"
+# 2) teacher should be able to edit a course
 - runFlow:
     file: "../common/member_login.yaml"
     env:
-      FIRSTNAME: "Anu"
+      PERSONNAME: "Anu"
 - tapOn: "Courses"
 - tapOn:
     id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- assertVisible: "Edit"
 - tapOn: "Edit"
-- tapOn: "Institution (Optional)"
-- inputText: "Test edit course"
 - tapOn: "SAVE"
+# 3) student should not be able to edit a course
 - runFlow:
     file: "../common/member_login.yaml"
     env:
-      FIRSTNAME: "Sruthy"
+      PERSONNAME: "Sruthy"
 - tapOn: "Courses"
 - tapOn:
     id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
