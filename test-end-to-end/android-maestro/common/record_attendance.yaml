@@ -1,0 +1,14 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: "Courses"
+- tapOn:
+      id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: "ATTENDANCE"
+- tapOn: "Record attendance"
+- tapOn: "Add a new occurrence"
+- tapOn: "Done"
+- tapOn: "Mark all present"
+- tapOn:
+    text: "Partial"
+    index: 1
+- tapOn: "Save"

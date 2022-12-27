@@ -15,4 +15,10 @@ appId: com.toughra.ustadmobile
     file: "../common/add_new_teacher_inside_course.yaml"
     env:
       TESTCOURSENAME: "TestCourse"
-- runFlow: "../common/teacher_login.yaml"
+      TEACHERFIRSTNAME: "Anu"
+      TEACHERLASTNAME: "Madhav"
+      GENDER: "Female"
+- runFlow:
+    file: "../common/member_login.yaml"
+    env:
+      PERSONNAME: "Anu"

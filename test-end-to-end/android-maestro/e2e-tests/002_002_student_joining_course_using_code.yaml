@@ -1,0 +1,27 @@
+appId: com.toughra.ustadmobile
+---
+- clearState: com.toughra.ustadmobile
+
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+- runFlow:
+    file: "../common/course_with_members.yaml"
+- runFlow:
+    file: "../common/member_login.yaml"
+    env:
+      PERSONNAME: "Alex"
+- runFlow: "../common/student_send_course_join_request_using_code.yaml"
+- runFlow:
+    file: "../common/admin_login.yaml"
+    env:
+      USERNAME: "admin"
+      PASSWORD: "testpass"
+- runFlow: "../common/accepting_course_join_request.yaml"
+- runFlow:
+    file: "../common/member_login.yaml"
+    env:
+      PERSONNAME: "Alex"
+- tapOn: "Courses"
+- takeScreenshot: "results/StudentAbleToViewCourse"

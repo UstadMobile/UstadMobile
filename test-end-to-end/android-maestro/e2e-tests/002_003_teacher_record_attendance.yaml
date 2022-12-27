@@ -1,0 +1,18 @@
+appId: com.toughra.ustadmobile
+---
+- clearState: com.toughra.ustadmobile
+
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+- runFlow:
+    file: "../common/course_with_members.yaml"
+- runFlow:
+    file: "../common/member_login.yaml"
+    env:
+      PERSONNAME: "Anu"
+- runFlow:
+    file: "../common/record_attendance.yaml"
+- runFlow:
+    file: "../common/edit_recorded_attendance.yaml"

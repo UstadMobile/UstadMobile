@@ -1,0 +1,10 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: "Courses"
+- tapOn:
+      id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: "MEMBERS"
+- tapOn: "Add a ${MEMBER}"
+- scroll
+- tapOn: "${FIRSTNAME} ${LASTNAME}"
+- tapOn: "SAVE"
