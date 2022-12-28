@@ -327,7 +327,9 @@ private fun ReportFilterEditScreen(
         }
 
         item {
-            Row {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
                 UstadMessageIdOptionExposedDropDownMenuField(
                     modifier = Modifier.weight(0.5F),
                     value = uiState.reportFilter?.reportFilterCondition ?: 0,
@@ -341,8 +343,6 @@ private fun ReportFilterEditScreen(
                         })
                     },
                 )
-
-                Spacer(modifier = Modifier.width(10.dp))
 
                 UstadMessageIdOptionExposedDropDownMenuField(
                     modifier = Modifier.weight(0.5F),
@@ -379,7 +379,9 @@ private fun ReportFilterEditScreen(
 
         if (uiState.reportFilterBetweenValueVisible){
             item {
-                Row {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
                     UstadTextEditField(
                         modifier = Modifier.weight(0.5F),
                         value = uiState.reportFilter?.reportFilterValueBetweenX ?: "",
@@ -393,8 +395,6 @@ private fun ReportFilterEditScreen(
                             })
                         }
                     )
-
-                    Spacer(modifier = Modifier.width(10.dp))
 
                     UstadTextEditField(
                         modifier = Modifier.weight(0.5F),
@@ -412,28 +412,30 @@ private fun ReportFilterEditScreen(
                 }
             }
         }
-
+        
+        item {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickNewItemFilter()
+                },
+                text = { Text(uiState.createNewFilter) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "",
+                    )
+                }
+            )
+        }
+        
         if (uiState.reportFilterUidAndLabelListVisible){
             items(
                 items = uiState.uidAndLabelList
             ){ uidAndLabel ->
 
                 ListItem(
-                    modifier = Modifier.clickable {
-                        onClickNewItemFilter()
-                    },
-                    text = { Text(uiState.createNewFilter) },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = "",
-                        )
-                    }
-                )
-
-                ListItem(
                     modifier = Modifier.clickable { onClickEditFilter(uidAndLabel) },
-                    icon = {},
+                    icon = { Spacer(modifier = Modifier.size(24.dp)) },
                     text = { Text(uidAndLabel.labelName ?: "") },
                     trailing = {
                         IconButton(onClick = { onClickRemoveFilter(uidAndLabel) }) {

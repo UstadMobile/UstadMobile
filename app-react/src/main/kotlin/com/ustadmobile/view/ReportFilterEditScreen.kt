@@ -171,24 +171,26 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                  }
              }
 
-            if (props.uiState.reportFilterUidAndLabelListVisible){
-                List{
 
-                    ListItem {
 
-                        onClick = {
-                            props.onClickNewItemFilter()
-                        }
+            List{
 
-                        ListItemIcon {
-                            + Add.create()
-                        }
+                ListItem {
 
-                        ListItemText {
-                            primary = ReactNode(props.uiState.createNewFilter)
-                        }
+                    onClick = {
+                        props.onClickNewItemFilter()
                     }
 
+                    ListItemIcon {
+                        + Add.create()
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(props.uiState.createNewFilter)
+                    }
+                }
+
+                if (props.uiState.reportFilterUidAndLabelListVisible){
                     props.uiState.uidAndLabelList.forEach { uidAndLabel ->
 
                         ListItem{
