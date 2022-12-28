@@ -36,7 +36,8 @@ fun HolidayCalendarDetailScreen(
 
         UstadDetailField(
             valueText = uiState.holidayCalendar?.umCalendarName ?: "",
-            labelText = stringResource(id = R.string.name)
+            labelText = stringResource(id = R.string.name),
+            imageId = R.drawable.ic_calendar_today_24px_,
         )
 
         uiState.holidayList.forEach { holiday ->

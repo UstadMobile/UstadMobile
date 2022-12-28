@@ -8,12 +8,10 @@ import com.ustadmobile.hooks.useFormattedDate
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.mui.components.UstadDetailField
+import mui.icons.material.CalendarToday
 import mui.material.*
 import mui.system.responsive
-import react.FC
-import react.Props
-import react.ReactNode
-import react.useMemo
+import react.*
 import kotlin.js.Date
 
 external interface HolidayCalendarDetailProps: Props{
@@ -32,6 +30,7 @@ val HolidayCalendarDetailComponent2 = FC<HolidayCalendarDetailProps> { props ->
             UstadDetailField{
                 labelText = strings[MessageID.name]
                 valueText = props.uiState.holidayCalendar?.umCalendarName ?: ""
+                icon = CalendarToday.create()
             }
 
             List{
