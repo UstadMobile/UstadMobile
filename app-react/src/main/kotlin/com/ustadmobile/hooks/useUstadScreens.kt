@@ -1,6 +1,7 @@
 package com.ustadmobile.hooks
 
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.ClazzAssignmentEditUiState
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.UstadCourseBlockEditPreview
@@ -56,6 +57,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("EasySort", "Easy Sort", EasySortPreview),
             UstadScreen(ErrorReportView.VIEW_NAME, name = "ErrorReport Preview", ErrorReportPreview),
             UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
+            UstadScreen(ClazzAssignmentEditView.VIEW_NAME,
+                "ClazzAssignmentEdit Preview",
+                        ClazzAssignmentEditScreenPreview),
         )
     }
 }
