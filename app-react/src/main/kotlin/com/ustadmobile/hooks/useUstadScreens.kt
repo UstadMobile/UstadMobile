@@ -56,6 +56,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("EasySort", "Easy Sort", EasySortPreview),
             UstadScreen(ErrorReportView.VIEW_NAME, name = "ErrorReport Preview", ErrorReportPreview),
             UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
+            UstadScreen(ReportEditView.VIEW_NAME,
+                "Report Edit Preview",
+                ReportEditScreenPreview),
         )
     }
 }
