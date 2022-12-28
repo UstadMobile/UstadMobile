@@ -4,20 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -133,25 +130,23 @@ class ScopedGrantDetailFragment: UstadDetailFragment<ScopedGrantWithName>(
 @Composable
 fun ScopedGrantDetailScreen(
     uiState: ScopedGrantDetailUiState,
-    onItemClick: (BitmaskFlag) -> Unit = {}
 ){
 
-    Column (
-        modifier = Modifier
-            .fillMaxSize()
-    ){
-        uiState.bitmaskList.forEach { bitmask ->
+    LazyColumn {
+        items(
+            items = uiState.bitmaskList,
+            key = { it.flagVal }
+        ) { bitmask ->
             ListItem(
-                modifier = Modifier.clickable {
-                    onItemClick(bitmask)
-                },
                 text = {
                     Text(messageIdResource(id = bitmask.messageId))
                 },
                 trailing = {
                     Icon(
                         imageVector = if (bitmask.enabled) Icons.Filled.Check else Icons.Filled.Close,
-                        contentDescription = null
+                        contentDescription = stringResource(
+                            if(bitmask.enabled) R.string.enabled else R.string.disabled
+                        )
                     )
                 }
             )
@@ -167,13 +162,13 @@ fun ScopedGrantDetailScreenPreview(){
         uiState = ScopedGrantDetailUiState(
             bitmaskList = listOf(
                 BitmaskFlag(
-                    messageId = MessageID.incident_id,
-                    flagVal = 0,
+                    messageId = MessageID.permission_person_update,
+                    flagVal = 1,
                     enabled = true
                 ),
                 BitmaskFlag(
-                    messageId = MessageID.message,
-                    flagVal = 0,
+                    messageId = MessageID.permission_person_insert,
+                    flagVal = 2,
                     enabled = false
                 )
             )

@@ -10,6 +10,7 @@ import mui.material.*
 import react.FC
 import react.Props
 import react.ReactNode
+import react.dom.aria.ariaLabel
 
 external interface ScopedGrantDetailProps: Props {
     var uiState: ScopedGrantDetailUiState
@@ -25,6 +26,12 @@ val ScopedGrantDetailComponent2 = FC<ScopedGrantDetailProps> { props ->
             ListItem{
                 ListItemSecondaryAction {
                     Icon {
+                        ariaLabel = if(bitmask.enabled) {
+                            strings[MessageID.enabled]
+                        }else {
+                            strings[MessageID.disabled]
+                        }
+
                         if (bitmask.enabled) Check() else Close()
                     }
                 }
