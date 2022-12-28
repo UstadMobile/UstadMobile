@@ -50,8 +50,9 @@
             name="presenter"
             type="PersonDetailPresenter" />
 
-        <variable name="dateTimeMode"
-            type="Integer"/>
+        <variable
+            name="dateTimeMode"
+            type="Integer" />
 
         <variable
             name="timeZoneId"
@@ -72,7 +73,7 @@
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/fragment_person_detail_picture_imageview"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dimen_256dp"
+                android:layout_height="256dp"
                 android:scaleType="centerCrop"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -87,7 +88,7 @@
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
                 app:constraint_referenced_ids="fragment_person_detail_picture_imageview"
-                tools:layout_editor_absoluteY="@dimen/layout_dimen_256dp" />
+                tools:layout_editor_absoluteY="256dp" />
 
 
             <HorizontalScrollView
@@ -620,7 +621,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/roles_and_permissions_heading_textview"
                 tools:itemCount="2"
-                tools:listitem="@layout/item_entity_role_list"
+                tools:listitem="@layout/item_clazz_enrolment_with_clazz_detail"
                 tools:visibility="visible" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

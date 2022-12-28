@@ -30,8 +30,6 @@
  */
 
 package com.ustadmobile.core.impl
-import com.ustadmobile.door.DoorUri
-import kotlin.jvm.JvmStatic
 
 
 /**
@@ -65,11 +63,16 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
     override fun getString(messageCode: Int, context: Any): String
 
     /**
+     *
+     */
+    override fun getString(messageCode: Int): String
+
+    /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)
      *
      * @return System locale
      */
-    override fun getSystemLocale(context: Any): String
+    override fun getSystemLocale(): String
 
     /**
      * Get a preference for the app
@@ -77,7 +80,7 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
      * @param key preference key as a string
      * @return value of that preference
      */
-    override fun getAppPref(key: String, context: Any): String?
+    override fun getAppPref(key: String): String?
 
     /**
      * Return absolute path of the application setup file. Asynchronous.
@@ -93,7 +96,7 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
      * @param key preference that is being set
      * @param value value to be set
      */
-    override fun setAppPref(key: String, value: String?, context: Any)
+    override fun setAppPref(key: String, value: String?)
 
 
     /**
@@ -124,7 +127,7 @@ expect open class UstadMobileSystemImpl: UstadMobileSystemCommon {
      *
      * @return The value of the key if found, if not, the default value provided
      */
-    override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
+    override fun getAppConfigString(key: String, defaultVal: String?): String?
 
     /**
      * Open the given link in a browser and/or tab depending on the platform

@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Person.Companion.FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT1
 import com.ustadmobile.lib.db.entities.Person.Companion.JOIN_FROM_PERSONGROUPMEMBER_TO_PERSON_VIA_SCOPEDGRANT_PT2
+import kotlinx.coroutines.flow.Flow
 
 
 @DoorDao
@@ -118,8 +119,6 @@ expect abstract class PersonDao : BaseDao<Person> {
      * @param accountPersonUid the personUid of the person who wants to perform the operation
      * @param personUid the personUid of the person object in the database to perform the operation on
      * @param permission permission to check for
-     * @param checkPermissionForSelf if 0 then don't check for permission when accountPersonUid == personUid
-     * (e.g. where give the person permission over their own entity automatically).
      */
     @Query("""
         SELECT EXISTS(
@@ -139,6 +138,25 @@ expect abstract class PersonDao : BaseDao<Person> {
         personUid: Long,
         permission: Long
     ): Boolean
+
+    @Query("""
+        SELECT EXISTS(
+                SELECT 1
+                  FROM Person
+                  JOIN ScopedGrant
+                       ON $FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
+                  JOIN PersonGroupMember 
+                       ON ScopedGrant.sgGroupUid = PersonGroupMember.groupMemberGroupUid
+                 WHERE Person.personUid = :personUid
+                   AND (ScopedGrant.sgPermissions & :permission) > 0
+                   AND PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+                 LIMIT 1)
+    """)
+    abstract fun personHasPermissionFlow(
+        accountPersonUid: Long,
+        personUid: Long,
+        permission: Long
+    ): Flow<Boolean>
 
     @Query("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0)")
     @PostgresQuery("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), FALSE)")
@@ -167,6 +185,9 @@ expect abstract class PersonDao : BaseDao<Person> {
 
     @Query("SELECT * FROM Person WHERE personUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Person?
+
+    @Query("SELECT * FROM Person WHERE personUid = :uid")
+    abstract fun findByUidAsFlow(uid: Long): Flow<Person?>
 
 
     @Update
@@ -203,6 +224,25 @@ expect abstract class PersonDao : BaseDao<Person> {
         """)
     @QueryLiveTables(["Person", "PersonParentJoin"])
     abstract fun findByUidWithDisplayDetailsLive(personUid: Long, activeUserPersonUid: Long): LiveData<PersonWithPersonParentJoin?>
+
+
+    @Query("""
+        SELECT Person.*, PersonParentJoin.* 
+          FROM Person
+     LEFT JOIN PersonParentJoin on ppjUid = (
+                SELECT ppjUid 
+                  FROM PersonParentJoin
+                 WHERE ppjMinorPersonUid = :personUid 
+                       AND ppjParentPersonUid = :activeUserPersonUid 
+                LIMIT 1)     
+         WHERE Person.personUid = :personUid
+        """)
+    @QueryLiveTables(["Person", "PersonParentJoin"])
+    abstract fun findByUidWithDisplayDetailsFlow(
+        personUid: Long,
+        activeUserPersonUid: Long
+    ): Flow<PersonWithPersonParentJoin?>
+
 
     @Insert
     abstract fun insertAuditLog(entity: AuditLog): Long

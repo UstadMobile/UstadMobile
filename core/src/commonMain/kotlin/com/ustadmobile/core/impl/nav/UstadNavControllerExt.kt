@@ -18,7 +18,7 @@ fun UstadNavController.navigateToErrorScreen(exception: Exception, di: DI, conte
 
     val systemImpl: UstadMobileSystemImpl = di.direct.instance()
     val stackTraceKey = "trace_${systemTimeInMillis()}"
-    systemImpl.setAppPref(stackTraceKey, exception.stackTraceToString(), context)
+    systemImpl.setAppPref(stackTraceKey, exception.stackTraceToString())
 
     val presenterUri = currentBackStackEntry?.let {
         "${it.viewName}?${it.arguments.toQueryString()}"

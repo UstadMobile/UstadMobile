@@ -3,7 +3,7 @@ package com.ustadmobile.lib.rest
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.di.commonJvmDiModule
+import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.HttpClient
@@ -43,7 +43,7 @@ class TestSiteRoute {
     fun setup() {
         endpointScope = EndpointScope()
         serverDi = DI {
-            import(commonJvmDiModule)
+            import(CommonJvmDiModule)
 
             import(commonTestKtorDiModule(endpointScope, temporaryFolder))
 

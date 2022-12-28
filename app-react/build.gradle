@@ -45,6 +45,10 @@ kotlin {
 }
 
 dependencies {
+    implementation project(":core")
+    implementation project(":lib-util")
+    implementation project(":lib-database")
+
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react"
@@ -54,11 +58,11 @@ dependencies {
     implementation "org.jetbrains.kotlin-wrappers:kotlin-redux"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-react-redux"
     implementation "org.jetbrains.kotlin-wrappers:kotlin-mui"
-    implementation project(":core")
-    implementation project(":lib-util")
-    implementation project(":lib-database")
-    implementation npm("@emotion/react", "$version_npm_emotion")
-    implementation npm("@emotion/styled", "$version_npm_emotion")
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-mui-icons"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-emotion"
+    implementation "org.jetbrains.kotlinx:kotlinx-datetime:$version_kotlinx_datetime"
+    implementation npm("@js-joda/timezone", "$version_npm_joda_timezone")
+
     implementation npm("moment","$version_npm_moment")
     implementation npm("moment-timezone","$version_npm_moment_timezone")
     implementation npm("@date-io/moment","$version_npm_mement_io")

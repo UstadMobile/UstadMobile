@@ -66,7 +66,7 @@ class PersonEditPresenterTest  {
 
         mockView = mock{}
         impl = mock {
-            on { getString(any(), any()) }.thenAnswer {
+            on { getString(any<Int>(), any()) }.thenAnswer {
                 it.arguments[0].toString()
             }
         }

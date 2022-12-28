@@ -7,6 +7,29 @@ via [kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers).
 Install [Node 18x](https://nodejs.org/en/download/) on your machine since Kotlin/JS depends on it
 to build.
 
+## MUI React/JS UI Development
+
+Run the app-react module via Gradle:
+
+```
+./gradlew app-react:browserDevelopmentRun --continuous 
+```
+You can stop it by using Ctrl+C.
+
+This will build the project and open a new browser window. The project will automatically recompile
+when any source files are changed. You can refresh the project once it has recompiled to see the
+changes. The browser might auto refresh.
+
+To add a new screen:
+
+1. Create a new Kotlin File in app-react source in the package com.ustadmobile.view . The file should
+be named ScreeNameScreen e.g. PersonDetailScreen, PersonEditScreen, PersonListScreen etc.
+2. Add a functional component and props. You can follow the example in PersonDetailScreen. The props  
+should contain the UiState class and all event handlers.
+3. Add the screen to useUstadScreens ( in com.ustadmobile.hooks ). This will add the screen to the
+navigation bar on the left. You can now view the screen in the browser.
+
+
 ## Development
 
 Build, configure and then run the http server [app-ktor-server](app-ktor-server/README.md).

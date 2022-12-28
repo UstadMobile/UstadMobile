@@ -121,7 +121,7 @@ private fun guardRoute(
         val accessibleViews = listOf(Login2View.VIEW_NAME, PersonEditView.VIEW_NAME_REGISTER,
             RedirectView.VIEW_NAME, RegisterAgeRedirectView.VIEW_NAME, SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS,
             RegisterMinorWaitForParentView.VIEW_NAME)
-        val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY, this)
+        val activeSession = systemImpl.getAppPref(ACCOUNTS_ACTIVE_SESSION_PREFKEY)
 
         /**
          * If there is no active session, and the user is not accessing login, registration,
@@ -1061,7 +1061,7 @@ fun RBuilder.renderConversationListItem(
 
                 linkifyReactMessage(message, left, LinkifyOptions(), systemImpl, accountManager, context)
 
-                umTypography(messageTime.toDate()?.fromNow(systemImpl.getDisplayedLocale(this)),
+                umTypography(messageTime.toDate()?.fromNow(systemImpl.getDisplayedLocale()),
                     variant = TypographyVariant.body2){
                     css{
                         fontSize = (0.9).em

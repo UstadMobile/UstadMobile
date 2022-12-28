@@ -1,103 +1,112 @@
-/*
-    This file is part of Ustad Mobile.
-
-    Ustad Mobile Copyright (C) 2011-2014 UstadMobile Inc.
-
-    Ustad Mobile is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version with the following additional terms:
-
-    All names, links, and logos of Ustad Mobile and Toughra Technologies FZ
-    LLC must be kept as they are in the original distribution.  If any new
-    screens are added you must include the Ustad Mobile logo as it has been
-    used in the original distribution.  You may not create any new
-    functionality whose purpose is to diminish or remove the Ustad Mobile
-    Logo.  You must leave the Ustad Mobile logo as the logo for the
-    application to be used with any launcher (e.g. the mobile app launcher).
-
-    If you want a commercial license to remove the above restriction you must
-    contact us.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    Ustad Mobile is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
- */
-
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.view.Window
-import android.view.WindowManager
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
-import com.ustadmobile.core.view.SplashScreenView
-import kotlinx.coroutines.GlobalScope
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.ui.theme.ui.theme.UstadMobileTheme
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
+import org.kodein.di.direct
 import org.kodein.di.instance
 
+class SplashScreenActivity : ComponentActivity() {
 
-class SplashScreenActivity : AppCompatActivity(), SplashScreenView, DIAware  {
-
-    override val di: DI by closestDI()
-
-    private val systemImpl: UstadMobileSystemImpl by instance()
-
-    override var loading: Boolean = false
-        get() = false
-        set(value) {
-            //TODO: set this on the main activity
-            field = value
-        }
-
-    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {}
+    val di: DI by closestDI()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        //add translucent effect on toolbar - full screen
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            requestWindowFeature(Window.FEATURE_NO_TITLE);
-            window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-            window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        }
-
         super.onCreate(savedInstanceState)
 
-        //setTheme(R.style.UmTheme_App_Splash)
-        setContentView(R.layout.activity_splash_screen)
-
-        GlobalScope.launch {
-            delay(DEFAULT_DELAY)
-            val activityClass = if(systemImpl.getAppPref(OnBoardingView.PREF_TAG, "false",
-                            this@SplashScreenActivity).toBoolean()) {
+        lifecycleScope.launchWhenCreated {
+            delay(2000L)
+            val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+            val activityClass = if(systemImpl.getAppPref(OnBoardingView.PREF_TAG, "false").toBoolean()) {
                 MainActivity::class.java
             }else {
                 OnBoardingActivity::class.java
             }
-
-            startActivity(Intent(this@SplashScreenActivity, activityClass))
+            var intent = Intent(this@SplashScreenActivity, activityClass)
+            startActivity(intent)
+            finish()
+        }
+        setContent {
+            UstadMobileTheme {
+                SplashScreen()
+            }
         }
     }
+}
 
-    companion object {
+@Composable
+private fun SplashScreen(){
+    Column(
+        verticalArrangement = Arrangement.SpaceEvenly,
+        modifier = Modifier.fillMaxSize()
+            .background(Color.White),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
 
-        const val DEFAULT_DELAY = 2000L
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(110.dp))
 
+            Text(text = "Ustad Mobile",
+                style = Typography.h1,
+                color = Color.Gray
+            )
+        }
+
+        Image(
+            painter = painterResource(id = R.drawable.expo2020_logo),
+            contentDescription = null,
+            modifier = Modifier
+                .size(100.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+
+            Text(text = stringResource(R.string.created_partnership),
+                style = Typography.body1,
+                color = Color.DarkGray)
+
+            Image(
+                painter = painterResource(id = R.drawable.ic_irc),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(90.dp))
+        }
     }
+}
 
+@Composable
+@Preview
+private fun SplashScreenPreview(){
+    SplashScreen()
 }

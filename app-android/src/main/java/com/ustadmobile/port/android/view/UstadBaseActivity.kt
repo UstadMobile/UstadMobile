@@ -6,7 +6,6 @@ import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.os.IBinder
 import android.view.View
 import android.webkit.WebView
 import android.widget.ProgressBar
@@ -132,7 +131,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadView, ShakeDetector
             WebView.setWebContentsDebuggingEnabled(true)
         }
         super.onCreate(savedInstanceState)
-        localeOnCreate = systemImpl.getDisplayedLocale(this)
+        localeOnCreate = systemImpl.getDisplayedLocale()
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         shakeDetector = ShakeDetector(this)

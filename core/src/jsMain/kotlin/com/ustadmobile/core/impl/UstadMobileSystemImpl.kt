@@ -26,33 +26,13 @@ import org.w3c.dom.HTMLAnchorElement
  *        if the display locale is not English.
  */
 actual open class UstadMobileSystemImpl(
-    private val xppFactory: XmlPullParserFactory,
     private val navController: UstadNavController,
-    defaultStringsXmlStr: String,
-    displayLocaleStringsXmlStr: String?
+    private val defaultStringsXml: StringsXml,
+    private val displayLocaleStringsXml: StringsXml?
 ): UstadMobileSystemCommon() {
 
     private val messageIdMapFlipped: Map<String, Int> by lazy {
         MessageIdMap.idMap.entries.associate { (k, v) -> v to k }
-    }
-
-    private val defaultStringsXml: StringsXml
-
-    private val displayLocaleStringsXml: StringsXml?
-
-    init {
-        val defaultXpp = xppFactory.newPullParser()
-        defaultXpp.setInputString(defaultStringsXmlStr)
-        defaultStringsXml = StringsXml(defaultXpp, xppFactory, messageIdMapFlipped, "en")
-
-        displayLocaleStringsXml = if(displayLocaleStringsXmlStr != null) {
-            val foreignXpp = xppFactory.newPullParser()
-            foreignXpp.setInputString(displayLocaleStringsXmlStr)
-            StringsXml(foreignXpp, xppFactory, messageIdMapFlipped,
-                displayedLocale, defaultStringsXml)
-        }else {
-            null
-        }
     }
 
     /**
@@ -62,13 +42,16 @@ actual open class UstadMobileSystemImpl(
         return (displayLocaleStringsXml ?: defaultStringsXml)[messageCode]
     }
 
+    actual override fun getString(messageCode: Int): String {
+        return (displayLocaleStringsXml ?: defaultStringsXml)[messageCode]
+    }
 
     /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)
      *
      * @return System locale
      */
-    actual override fun getSystemLocale(context: Any): String {
+    actual override fun getSystemLocale(): String {
         return systemLocale
     }
 
@@ -79,7 +62,7 @@ actual open class UstadMobileSystemImpl(
      * @return value of that preference
      */
 
-    actual override fun getAppPref(key: String, context: Any): String? {
+    actual override fun getAppPref(key: String): String? {
         return localStorage.getItem(key)
     }
 
@@ -98,7 +81,7 @@ actual open class UstadMobileSystemImpl(
      * @param key preference that is being set
      * @param value value to be set
      */
-    actual override fun setAppPref(key: String, value: String?, context: Any) {
+    actual override fun setAppPref(key: String, value: String?) {
         if(value == null){
             localStorage.removeItem(key)
         }else{
@@ -135,7 +118,7 @@ actual open class UstadMobileSystemImpl(
      *
      * @return The value of the key if found, if not, the default value provided
      */
-    actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String? {
+    actual override fun getAppConfigString(key: String, defaultVal: String?): String? {
         val value =  localStorage.getItem(key)
         return  value ?: defaultVal
     }

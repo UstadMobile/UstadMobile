@@ -165,7 +165,7 @@ class Login2PresenterTest {
 
     @Test
     fun givenCreateAccountIsVisible_whenClicked_shouldOpenAccountCreationSection(){
-        whenever(impl.getAppConfigString(any(), any(), any())).thenReturn  ("true")
+        whenever(impl.getAppConfigString(any(), any())).thenReturn  ("true")
         val presenter = Login2Presenter(context, createParams(registration = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleCreateAccount()

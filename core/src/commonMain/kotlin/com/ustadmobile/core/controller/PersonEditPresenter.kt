@@ -10,7 +10,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UmPlatformUtil
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
@@ -78,11 +77,12 @@ class PersonEditPresenter(
         serverUrl = if (arguments.containsKey(UstadView.ARG_SERVER_URL)) {
             arguments.getValue(UstadView.ARG_SERVER_URL)
         } else {
-            impl.getAppConfigString(AppConfig.KEY_API_URL, "http://localhost", context) ?: ""
+            impl.getAppConfigString(AppConfig.KEY_API_URL, "http://localhost") ?: ""
         }
 
         nextDestination = arguments[UstadView.ARG_NEXT] ?: impl.getAppConfigString(
-            AppConfig.KEY_FIRST_DEST, ContentEntryList2View.VIEW_NAME, context)
+            AppConfig.KEY_FIRST_DEST, ContentEntryList2View.VIEW_NAME
+        )
                 ?: ContentEntryList2View.VIEW_NAME
 
         view.registrationMode = registrationModeFlags

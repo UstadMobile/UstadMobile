@@ -1,3 +1,6 @@
+/*
+
+ Now moved to App.kt as per the Kotlin MUI showcase
 
 import com.ustadmobile.core.db.ContentJobItemTriggersCallback
 import com.ustadmobile.core.db.UmAppDatabase
@@ -165,3 +168,4 @@ class IndexComponent (props: IndexProps): RComponent<IndexProps, UmState>(props)
         }
     }
 }
+*/

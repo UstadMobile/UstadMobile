@@ -128,7 +128,7 @@ class DiscussionTopicDetailComponent(mProps: UmProps): UstadDetailComponent<Disc
                     item.authorPersonFirstNames+" " + item.authorPersonLastName,
                     item.discussionPostMessage,
                     item.postLatestMessage,
-                    item.postLatestMessageTimestamp.toDate()?.fromNow(systemImpl.getDisplayedLocale(this)),
+                    item.postLatestMessageTimestamp.toDate()?.fromNow(systemImpl.getDisplayedLocale()),
                     item.postRepliesCount,
                     systemImpl
                 )

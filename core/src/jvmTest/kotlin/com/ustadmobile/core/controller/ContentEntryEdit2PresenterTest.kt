@@ -85,7 +85,7 @@ class ContentEntryEdit2PresenterTest {
             }
         }
         systemImpl = mock {
-            on { getString(any(), any()) }.thenAnswer { errorMessage }
+            on { getString(any<Int>(), any()) }.thenAnswer { errorMessage }
         }
 
 
@@ -109,7 +109,7 @@ class ContentEntryEdit2PresenterTest {
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
 
-        whenever(systemImpl.getString(any(), any())).thenReturn(errorMessage)
+        whenever(systemImpl.getString(any<Int>(), any())).thenReturn(errorMessage)
 
         val repo: UmAppDatabase by di.activeRepoInstance()
         mockEntryDao = spy(repo.contentEntryDao)

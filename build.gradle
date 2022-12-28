@@ -71,7 +71,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 232
 
-    version_door = "0.0.63c"
+    version_door = "0.0.63l"
     version_retriever = "0.0.1e"
     version_xmlpullparserkmp = '0.0.20'
 
@@ -84,6 +84,8 @@ ext {
     version_ktor = "2.1.2"
     version_coroutines = "1.6.3"
     version_atomicfu = "0.18.4"
+    version_kotlinx_datetime = "0.4.0"
+
 
     version_junit = "4.13"
     version_nanohttpd = "2.3.1"
@@ -135,6 +137,15 @@ ext {
 
     version_android_material = "1.6.1"
     version_androidx_appcompat = "1.5.1"
+    version_compose_material = "1.3.0"
+    version_compose_accompanist = "0.27.0"
+
+    //As per https://github.com/material-components/material-components-android-compose-theme-adapter/releases
+    version_compose_theme_adapter = "1.1.21"
+
+    //List reordering for compose: https://github.com/aclassen/ComposeReorderable
+    version_composereorderable = "0.9.6"
+
     version_androidx_legacy_support = "1.0.0"
     version_androidx_activity = "1.6.0"
     version_androidx_fragment = "1.5.3"
@@ -164,7 +175,7 @@ ext {
     version_android_facebook_login = "4.37.0"
     version_android_twitter_login = "3.3.0"
     version_android_seismic = "1.0.3"
-    version_android_navigation = "2.5.2"
+    version_android_navigation = "2.5.3"
     version_play_core = "1.10.3"
     version_android_leakcanary = "2.9.1"
     version_android_play_services_safetynet = "17.0.0"
@@ -186,13 +197,21 @@ ext {
     version_better_link_movement="2.2.0"
 
     /*Kotlin react web app*/
-    kotlinWrappersVersion = "1.0.0-pre.408"
-    version_kotlin_extensions = "1.0.1-pre.408"
+    kotlinWrappersVersion = "1.0.0-pre.421"
+
+    //Kotlin multiplatform does not support BOM until Kotlin 1.8 - so need to specify wrappers used in core :(
+    // https://youtrack.jetbrains.com/issue/KT-40489
+    version_kotlin_react = "18.2.0-pre.421"
+    version_kotlin_react_router = "6.3.0-pre.421"
+    version_kotlin_extensions = "1.0.1-pre.421"
 
     version_npm_moment = "^2.29.4"
     version_npm_moment_timezone = "^0.5.34"
     version_npm_mement_io = "^2.14.0"
     version_npm_mui_lab = "5.0.0-alpha.89"
+
+    //Should be as specified by kotlinx datetime lib https://github.com/Kotlin/kotlinx-datetime#note-about-time-zones-in-js
+    version_npm_joda_timezone = "2.3.0"
 
     // These should be EXACTLY the same version as MUI kotlin wrapper.
     version_npm_mui_styles = "5.10.2"
@@ -204,7 +223,7 @@ ext {
     version_npm_timezones = "^1.6.1"
     version_npm_buffer = "^6.0.3"
     version_npm_asmcrypto = "2.3.2"
-    version_npm_emotion = "11.6.0"
+    version_npm_emotion = "11.10.5"
     version_npm_google_charts = "^3.0.15"
     version_npm_html_to_image = "^1.9.0"
     version_npm_date_fns = "2.29.1"
@@ -213,7 +232,7 @@ ext {
     version_npm_draft_js = "^0.11.7"
     version_npm_draft_js_html_export = "^1.4.1"
     version_npm_striptags = "^3.2.0"
-    version_npm_react_easy_sort = "^1.4.1"
+    version_npm_react_easy_sort = "^1.5.1"
     version_react_linkify = "^1.0.0-alpha"
     version_linkify_js = "^3.0.5"
     version_linkify_react = "^3.0.4"

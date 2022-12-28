@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.rest
 
-import com.google.gson.Gson
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
 import io.ktor.server.application.*
@@ -8,13 +7,12 @@ import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import org.junit.Test
-import com.ustadmobile.core.impl.di.commonJvmDiModule
+import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ParentalConsentManagementView
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.*
 import com.ustadmobile.door.util.systemTimeInMillis
-import kotlinx.serialization.json.Json
 import org.mockito.kotlin.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.rest.ext.insertDefaultSite
@@ -23,7 +21,6 @@ import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.http.content.*
 import io.ktor.serialization.gson.*
 import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.coroutines.runBlocking
@@ -31,12 +28,9 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
-import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.config.*
 import io.ktor.server.plugins.callloging.*
-import io.ktor.server.response.*
 import org.slf4j.event.Level
 
 
@@ -60,7 +54,7 @@ class PersonAuthRegisterRouteTest {
         Napier.base(DebugAntilog())
 
         serverDi = DI {
-            import(commonJvmDiModule)
+            import(CommonJvmDiModule)
 
             import(commonTestKtorDiModule(endpointScope, temporaryFolder))
 
