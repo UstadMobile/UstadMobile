@@ -479,9 +479,9 @@ fun ClazzAssignmentEditScreenPreview() {
                 cbMaxPoints = 78
                 cbCompletionCriteria = 14
             },
-            minScoreVisible = true,
             gracePeriodVisible = true,
         ),
+        minScoreVisible = true,
     )
     MdcTheme {
         ClazzAssignmentEditScreen(uiStateVal)
