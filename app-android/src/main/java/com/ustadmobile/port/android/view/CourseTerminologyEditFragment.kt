@@ -4,17 +4,28 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentCourseTerminologyOverviewBinding
 import com.ustadmobile.core.controller.CourseTerminologyEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CourseTerminologyEditView
-import com.ustadmobile.lib.db.entities.CourseTerminology
-import com.ustadmobile.lib.db.entities.TerminologyEntry
+import com.ustadmobile.core.viewmodel.CourseTerminologyEditUiState
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 
 class CourseTerminologyEditFragment: UstadEditFragment<CourseTerminology>(), CourseTerminologyEditView {
@@ -93,4 +104,81 @@ class CourseTerminologyEditFragment: UstadEditFragment<CourseTerminology>(), Cou
             terminologyEntryAdapter?.submitList(value)
             terminologyEntryAdapter?.notifyDataSetChanged()
         }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun CourseTerminologyEditScreen(
+    uiState: CourseTerminologyEditUiState = CourseTerminologyEditUiState(),
+    onTerminologyTermChanged: (TerminologyEntry?) -> Unit = {},
+    onCtTitleChanged: (String?) -> Unit = {}
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    )  {
+
+        item{
+            ListItem(
+                text = {
+                    UstadTextEditField(
+                        value = uiState.entity?.ctTitle ?: "",
+                        label = stringResource(id = R.string.name),
+                        error = uiState.titleError,
+                        enabled = uiState.fieldsEnabled,
+                        onValueChange = { onCtTitleChanged(it) },
+                    )
+                },
+                secondaryText = { Text(stringResource(id = R.string.your_words_for)) }
+            )
+        }
+
+        items(
+            items = uiState.terminologyTermList,
+            key = {terminologyTerm -> terminologyTerm.id}
+        ){ terminologyTerm ->
+            ListItem(
+                text = {
+                    UstadTextEditField(
+                        value = terminologyTerm.term ?: "",
+                        label = stringResource(id = terminologyTerm.messageId),
+                        error = terminologyTerm.errorMessage,
+                        enabled = uiState.fieldsEnabled,
+                        onValueChange = {
+                            onTerminologyTermChanged(terminologyTerm.copy(
+                                term = it
+                            ))
+                        },)
+                },
+            )
+        }
+    }
+}
+
+@Composable
+@Preview
+fun CourseTerminologyEditScreenPreview() {
+    val uiState = CourseTerminologyEditUiState(
+        terminologyTermList = listOf(
+            TerminologyEntry(
+                id = "1",
+                term = "First",
+                messageId = R.string.message
+            ),
+            TerminologyEntry(
+                id = "2",
+                term = "Second",
+                messageId = R.string.message
+            ),
+            TerminologyEntry(
+                id = "3",
+                term = "Third",
+                messageId = R.string.message
+            )
+        )
+    )
+    MdcTheme {
+        CourseTerminologyEditScreen(uiState)
+    }
 }
