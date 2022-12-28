@@ -432,11 +432,9 @@ private fun ReportFilterEditScreen(
                 )
 
                 ListItem(
-                    text = {
-                        TextButton(onClick = { onClickEditFilter(uidAndLabel)  }) {
-                            Text(uidAndLabel.labelName ?: "")
-                        }
-                    },
+                    modifier = Modifier.clickable { onClickEditFilter(uidAndLabel) },
+                    icon = {},
+                    text = { Text(uidAndLabel.labelName ?: "") },
                     trailing = {
                         IconButton(onClick = { onClickRemoveFilter(uidAndLabel) }) {
                             Icon(
