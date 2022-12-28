@@ -62,6 +62,8 @@ fun useUstadScreens(): UstadScreens {
                 ScopedGrantDetailScreenPreview),
             UstadScreen(ContentEntryImportLinkView.VIEW_NAME, "ContentEntryImportLink Preview",
                 ContentEntryImportLinkScreenPreview),
+            UstadScreen(HolidayCalendarDetailView.VIEW_NAME, "HolidayCalendarDetail Preview",
+                HolidayCalendarDetailPreview),
         )
     }
 }
