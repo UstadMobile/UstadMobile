@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,8 +42,10 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryDetailOverviewView
@@ -52,6 +53,7 @@ import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
 import org.kodein.di.direct
@@ -489,32 +491,26 @@ private fun ContentEntryDetailOverviewScreen(
 fun ContentDetails(
     uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
 ){
-    Row {
+    Row(
 
-        Box(
-            modifier = Modifier.weight(0.3F)
-        ) {
-            LeftColumn(
-                uiState = uiState
-            )
-        }
+    ) {
 
-        Spacer(modifier = Modifier.width(10.dp))
+        ContentDetailLeftColumn(uiState = uiState)
 
-        Box(
-            modifier = Modifier.weight(0.7F)
-        ) {
-            RightColumn(
-                uiState = uiState
-            )
-        }
+        ContentDetailRightColumn(uiState = uiState)
     }
 }
 
 @Composable
-fun LeftColumn(
+fun ContentDetailLeftColumn(
     uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
 ){
+
+    val image = if (uiState.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CHECK)
+        R.drawable.ic_content_complete
+    else
+        R.drawable.ic_content_fail
+
     Column{
         Image(painter = painterResource(id = R.drawable.book_24px),
             contentDescription = "",
@@ -522,18 +518,21 @@ fun LeftColumn(
             contentScale = ContentScale.Crop
         )
 
-        BadgedBox(badge = { Badge {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_content_complete),
-                contentDescription = "Favorite"
-            )
-        } }) {
+        BadgedBox(badge = {
+            if (uiState.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE){
+                Icon(
+                    painter = painterResource(id = image),
+                    contentDescription = ""
+                )
+            }
+        }) {
             if (uiState.scoreProgressVisible){
                 LinearProgressIndicator(
                     progress = ((uiState.scoreProgress?.progress ?: 0)/100.0)
                         .toFloat(),
                     modifier = Modifier
                         .height(4.dp)
+                        .width(50.dp)
                 )
             }
         }
@@ -541,7 +540,7 @@ fun LeftColumn(
 }
 
 @Composable
-fun RightColumn(
+fun ContentDetailRightColumn(
     uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
 ){
     Column(
@@ -706,6 +705,7 @@ fun ContentEntryDetailOverviewScreenPreview() {
             /*@FloatRange(from = 0.0, to = 1.0)*/
             progress = 4
 
+            success = RESULT_SUCCESS
             resultScore = 4
             resultMax = 40
         },

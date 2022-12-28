@@ -120,6 +120,7 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                                 }
 
                                 Button {
+                                    variant = ButtonVariant.text
                                     onClick = { props.onClickTranslation }
 
                                     + (it.language?.name ?: "")
