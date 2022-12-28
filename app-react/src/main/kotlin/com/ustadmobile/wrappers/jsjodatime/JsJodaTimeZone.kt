@@ -1,4 +1,4 @@
-package com.ustadmobile.jsmodules
+package com.ustadmobile.wrappers.jsjodatime
 
 @JsModule("@js-joda/timezone")
 @JsNonModule
