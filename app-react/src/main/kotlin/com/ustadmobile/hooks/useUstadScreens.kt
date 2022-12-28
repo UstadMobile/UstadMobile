@@ -56,7 +56,14 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("EasySort", "Easy Sort", EasySortPreview),
             UstadScreen(ErrorReportView.VIEW_NAME, name = "ErrorReport Preview", ErrorReportPreview),
             UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
-            UstadScreen(HolidayCalendarDetailView.VIEW_NAME, "HolidayCalendarDetail Preview", HolidayCalendarDetailPreview)
+            UstadScreen(ReportFilterEditView.VIEW_NAME,
+                "ReportFilterEdit Preview", ReportFilterEditScreenPreview),
+            UstadScreen(ScopedGrantDetailView.VIEW_NAME, "ScopedGrantDetail Preview",
+                ScopedGrantDetailScreenPreview),
+            UstadScreen(ContentEntryImportLinkView.VIEW_NAME, "ContentEntryImportLink Preview",
+                ContentEntryImportLinkScreenPreview),
+            UstadScreen(HolidayCalendarDetailView.VIEW_NAME, "HolidayCalendarDetail Preview",
+                HolidayCalendarDetailPreview),
         )
     }
 }
