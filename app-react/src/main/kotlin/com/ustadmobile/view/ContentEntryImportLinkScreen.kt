@@ -66,7 +66,7 @@ val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> {props ->
 val ContentEntryImportLinkScreenPreview = FC<Props> {
     ContentEntryImportLinkComponent2{
         uiState = ContentEntryImportLinkUiState(
-            url = "this is a link for example"
+            url = "site.com/dir"
         )
     }
 }

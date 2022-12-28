@@ -31,7 +31,6 @@ import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.viewmodel.ContentEntryImportLinkUiState
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
-import io.ktor.http.*
 
 class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLinkView {
 
@@ -165,7 +164,7 @@ fun ContentEntryImportLinkScreen(
 fun ContentEntryImportLinkScreenPreview(){
     ContentEntryImportLinkScreen(
         uiState = ContentEntryImportLinkUiState(
-            url = "this is link for example"
+            url = "site.com/link"
         )
     )
 }
