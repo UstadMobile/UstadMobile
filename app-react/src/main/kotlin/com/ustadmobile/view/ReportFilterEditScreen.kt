@@ -20,6 +20,7 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.dom.aria.ariaLabel
 import react.dom.html.InputMode
 
 external interface ReportFilterEditScreenProps : Props {
@@ -110,92 +111,100 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                 }
             }
 
-            UstadTextEditField {
-                value = props.uiState.reportFilter?.reportFilterValue ?: ""
-                label = strings[MessageID.report_filter_edit_values]
-                error = props.uiState.valuesError
-                enabled = props.uiState.fieldsEnabled
-                inputProps = {
-                    it.inputMode = InputMode.numeric
-                }
-                onChange = {
-                    props.onReportFilterChanged(
-                        props.uiState.reportFilter?.shallowCopy {
-                            reportFilterValue = it
-                        })
-                }
-            }
-
-            Stack {
-                direction = responsive(StackDirection.row)
-                spacing = responsive(10.px)
-
+            if (props.uiState.reportFilterValueVisible){
                 UstadTextEditField {
-                    value = props.uiState.reportFilter?.reportFilterValueBetweenX ?: ""
-                    label = strings[MessageID.from]
+                    value = props.uiState.reportFilter?.reportFilterValue ?: ""
+                    label = strings[MessageID.report_filter_edit_values]
                     error = props.uiState.valuesError
                     enabled = props.uiState.fieldsEnabled
-                    fullWidth = true
                     inputProps = {
                         it.inputMode = InputMode.numeric
                     }
                     onChange = {
                         props.onReportFilterChanged(
                             props.uiState.reportFilter?.shallowCopy {
-                                reportFilterValueBetweenX = it
-                            })
-                    }
-                }
-
-                UstadTextEditField {
-                    value = props.uiState.reportFilter?.reportFilterValueBetweenY ?: ""
-                    label = strings[MessageID.toC]
-                    error = props.uiState.valuesError
-                    enabled = props.uiState.fieldsEnabled
-                    fullWidth = true
-                    inputProps = {
-                        it.inputMode = InputMode.numeric
-                    }
-                    onChange = {
-                        props.onReportFilterChanged(
-                            props.uiState.reportFilter?.shallowCopy {
-                                reportFilterValueBetweenY = it
+                                reportFilterValue = it
                             })
                     }
                 }
             }
 
-            List{
-                props.uiState.uidAndLabelList.forEach { uidAndLabel ->
-                    ListItem{
-                        ListItemText {
-                            primary = ReactNode(uidAndLabel.labelName ?: "")
+             if (props.uiState.reportFilterBetweenValueVisible){
+                 Stack {
+                     direction = responsive(StackDirection.row)
+                     spacing = responsive(10.px)
+
+                     UstadTextEditField {
+                         value = props.uiState.reportFilter?.reportFilterValueBetweenX ?: ""
+                         label = strings[MessageID.from]
+                         error = props.uiState.valuesError
+                         enabled = props.uiState.fieldsEnabled
+                         fullWidth = true
+                         inputProps = {
+                             it.inputMode = InputMode.numeric
+                         }
+                         onChange = {
+                             props.onReportFilterChanged(
+                                 props.uiState.reportFilter?.shallowCopy {
+                                     reportFilterValueBetweenX = it
+                                 })
+                         }
+                     }
+
+                     UstadTextEditField {
+                         value = props.uiState.reportFilter?.reportFilterValueBetweenY ?: ""
+                         label = strings[MessageID.toC]
+                         error = props.uiState.valuesError
+                         enabled = props.uiState.fieldsEnabled
+                         fullWidth = true
+                         inputProps = {
+                             it.inputMode = InputMode.numeric
+                         }
+                         onChange = {
+                             props.onReportFilterChanged(
+                                 props.uiState.reportFilter?.shallowCopy {
+                                     reportFilterValueBetweenY = it
+                                 })
+                         }
+                     }
+                 }
+             }
+
+            if (props.uiState.reportFilterUidAndLabelListVisible){
+                List{
+                    props.uiState.uidAndLabelList.forEach { uidAndLabel ->
+
+                        ListItem {
+
                             onClick = {
-                                props.onClickEditFilter(uidAndLabel)
+                                props.onClickNewItemFilter()
+                            }
+
+                            ListItemIcon {
+                                + Add.create()
+                            }
+
+                            ListItemText {
+                                primary = ReactNode(props.uiState.createNewFilter)
                             }
                         }
-                        secondaryAction = IconButton.create {
-                            Delete {}
-                            onClick = {
-                                props.onClickRemoveFilter(uidAndLabel)
+
+                        ListItem{
+                            ListItemText {
+                                primary = ReactNode(uidAndLabel.labelName ?: "")
+                                onClick = {
+                                    props.onClickEditFilter(uidAndLabel)
+                                }
+                            }
+                            secondaryAction = IconButton.create {
+                                ariaLabel = strings[MessageID.delete]
+                                Delete {}
+                                onClick = {
+                                    props.onClickRemoveFilter(uidAndLabel)
+                                }
                             }
                         }
                     }
-                }
-            }
-
-            ListItem {
-
-                onClick = {
-                    props.onClickNewItemFilter()
-                }
-
-                ListItemIcon {
-                    + Add.create()
-                }
-
-                ListItemText {
-                    primary = ReactNode(props.uiState.createNewFilter)
                 }
             }
         }

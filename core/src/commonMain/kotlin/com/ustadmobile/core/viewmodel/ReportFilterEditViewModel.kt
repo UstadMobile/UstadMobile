@@ -17,6 +17,12 @@ data class ReportFilterEditUiState(
 
     var uidAndLabelList: List<UidAndLabel> = emptyList(),
 
-    val createNewFilter: String = ""
+    val createNewFilter: String = "",
+
+    val reportFilterValueVisible: Boolean = true,
+
+    val reportFilterBetweenValueVisible: Boolean = true,
+
+    val reportFilterUidAndLabelListVisible: Boolean = true
 
 )

@@ -360,89 +360,95 @@ private fun ReportFilterEditScreen(
             }
         }
 
-        item {
-            UstadTextEditField(
-                value = uiState.reportFilter?.reportFilterValue ?: "",
-                label = stringResource(id = R.string.report_filter_edit_values),
-                error = uiState.valuesError,
-                enabled = uiState.fieldsEnabled,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                onValueChange = {
-                    onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                        reportFilterValue = it
-                    })
-                }
-            )
-        }
-
-        item {
-            Row {
+        if (uiState.reportFilterValueVisible){
+            item {
                 UstadTextEditField(
-                    modifier = Modifier.weight(0.5F),
-                    value = uiState.reportFilter?.reportFilterValueBetweenX ?: "",
-                    label = stringResource(id = R.string.from),
+                    value = uiState.reportFilter?.reportFilterValue ?: "",
+                    label = stringResource(id = R.string.report_filter_edit_values),
                     error = uiState.valuesError,
                     enabled = uiState.fieldsEnabled,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = {
                         onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                            reportFilterValueBetweenX = it
-                        })
-                    }
-                )
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                UstadTextEditField(
-                    modifier = Modifier.weight(0.5F),
-                    value = uiState.reportFilter?.reportFilterValueBetweenY ?: "",
-                    label = stringResource(id = R.string.toC),
-                    error = uiState.valuesError,
-                    enabled = uiState.fieldsEnabled,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    onValueChange = {
-                        onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                            reportFilterValueBetweenY = it
+                            reportFilterValue = it
                         })
                     }
                 )
             }
         }
 
-        items(
-            items = uiState.uidAndLabelList
-        ){ uidAndLabel ->
-            ListItem(
-                text = {
-                    TextButton(onClick = { onClickEditFilter(uidAndLabel)  }) {
-                        Text(uidAndLabel.labelName ?: "")
-                    }
-                },
-                trailing = {
-                    IconButton(onClick = { onClickRemoveFilter(uidAndLabel) }) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(id = R.string.delete),
-                        )
-                    }
-                }
-            )
-        }
+        if (uiState.reportFilterBetweenValueVisible){
+            item {
+                Row {
+                    UstadTextEditField(
+                        modifier = Modifier.weight(0.5F),
+                        value = uiState.reportFilter?.reportFilterValueBetweenX ?: "",
+                        label = stringResource(id = R.string.from),
+                        error = uiState.valuesError,
+                        enabled = uiState.fieldsEnabled,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        onValueChange = {
+                            onReportFilterChanged(uiState.reportFilter?.shallowCopy{
+                                reportFilterValueBetweenX = it
+                            })
+                        }
+                    )
 
-        item {
-            ListItem(
-                modifier = Modifier.clickable {
-                    onClickNewItemFilter()
-                },
-                text = { Text(uiState.createNewFilter) },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = stringResource(id = R.string.add),
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    UstadTextEditField(
+                        modifier = Modifier.weight(0.5F),
+                        value = uiState.reportFilter?.reportFilterValueBetweenY ?: "",
+                        label = stringResource(id = R.string.toC),
+                        error = uiState.valuesError,
+                        enabled = uiState.fieldsEnabled,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        onValueChange = {
+                            onReportFilterChanged(uiState.reportFilter?.shallowCopy{
+                                reportFilterValueBetweenY = it
+                            })
+                        }
                     )
                 }
-            )
+            }
         }
+
+        if (uiState.reportFilterUidAndLabelListVisible){
+            items(
+                items = uiState.uidAndLabelList
+            ){ uidAndLabel ->
+
+                ListItem(
+                    modifier = Modifier.clickable {
+                        onClickNewItemFilter()
+                    },
+                    text = { Text(uiState.createNewFilter) },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "",
+                        )
+                    }
+                )
+
+                ListItem(
+                    text = {
+                        TextButton(onClick = { onClickEditFilter(uidAndLabel)  }) {
+                            Text(uidAndLabel.labelName ?: "")
+                        }
+                    },
+                    trailing = {
+                        IconButton(onClick = { onClickRemoveFilter(uidAndLabel) }) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = stringResource(id = R.string.delete),
+                            )
+                        }
+                    }
+                )
+            }
+        }
+
     }
 }
 
@@ -458,7 +464,8 @@ fun ReportFilterEditScreenPreview() {
                 labelName = "Second Filter"
             }
         ),
-        createNewFilter = "Create new filter"
+        createNewFilter = "Create new filter",
+        reportFilterValueVisible = true
     )
     MdcTheme {
         ReportFilterEditScreen(uiStateVal)
