@@ -39,3 +39,7 @@ fun ContentEntryStatementScoreProgress.calculateScoreWithPenalty(): Int{
 fun ContentEntryStatementScoreProgress.calculateScoreWithWeight(): Int{
     return ((resultScaled / resultWeight) * (totalCompletedContent / totalContent.toFloat())).toInt()
 }
+
+fun ContentEntryStatementScoreProgress.progressBadge(): Int {
+
+}

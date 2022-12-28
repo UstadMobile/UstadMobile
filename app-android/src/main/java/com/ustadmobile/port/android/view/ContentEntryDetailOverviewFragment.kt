@@ -409,14 +409,8 @@ private fun ContentEntryDetailOverviewScreen(
                     onClick = onClickDownload,
                     modifier = Modifier
                         .fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = colorResource(id = R.color.primaryColor)
-                    )
                 ) {
-                    Text(stringResource(R.string.download).uppercase(),
-                        color = contentColorFor(
-                            colorResource(id = R.color.primaryColor))
-                    )
+                    Text(stringResource(R.string.download).uppercase())
                 }
             }
         }
@@ -427,14 +421,8 @@ private fun ContentEntryDetailOverviewScreen(
                     onClick = onClickOpen,
                     modifier = Modifier
                         .fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = colorResource(id = R.color.primaryColor)
-                    )
                 ) {
-                    Text(stringResource(R.string.open).uppercase(),
-                        color = contentColorFor(
-                            colorResource(id = R.color.primaryColor))
-                    )
+                    Text(stringResource(R.string.open).uppercase())
                 }
             }
         }
@@ -542,8 +530,8 @@ fun LeftColumn(
         } }) {
             if (uiState.scoreProgressVisible){
                 LinearProgressIndicator(
-                    progress = (uiState.scoreProgress?.progress ?: 0)
-                        .toFloat()/10.0F,
+                    progress = ((uiState.scoreProgress?.progress ?: 0)/100.0)
+                        .toFloat(),
                     modifier = Modifier
                         .height(4.dp)
                 )
