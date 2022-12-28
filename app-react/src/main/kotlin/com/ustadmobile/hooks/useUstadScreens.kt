@@ -57,9 +57,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(ErrorReportView.VIEW_NAME, name = "ErrorReport Preview", ErrorReportPreview),
             UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
             UstadScreen(ReportFilterEditView.VIEW_NAME,
-                "ReportFilterEdit Preview",
-                ReportFilterEditScreenPreview
-            ),
+                "ReportFilterEdit Preview", ReportFilterEditScreenPreview),
+            UstadScreen(ScopedGrantDetailView.VIEW_NAME, "ScopedGrantDetail Preview",
+                ScopedGrantDetailScreenPreview),
         )
     }
 }
