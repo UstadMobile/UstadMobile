@@ -58,6 +58,8 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
             UstadScreen(ReportFilterEditView.VIEW_NAME,
                 "ReportFilterEdit Preview", ReportFilterEditScreenPreview),
+            UstadScreen(ScopedGrantDetailView.VIEW_NAME, "ScopedGrantDetail Preview",
+                ScopedGrantDetailScreenPreview),
             UstadScreen(ContentEntryImportLinkView.VIEW_NAME, "ContentEntryImportLink Preview",
                 ContentEntryImportLinkScreenPreview),
         )
