@@ -4,6 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.HolidayCalendarDetailUIState
+import com.ustadmobile.hooks.useFormattedDate
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.mui.components.UstadDetailField
@@ -11,6 +12,7 @@ import mui.material.*
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 import react.useMemo
 import kotlin.js.Date
 
@@ -38,25 +40,16 @@ val HolidayCalendarDetailComponent2 = FC<HolidayCalendarDetailProps> { props ->
 
                         disablePadding = true
 
-                        val holidayStart = useMemo(item.holStartTime) {
-                            Date(item.holStartTime).toLocaleDateString()
-                        }
-                        val holidayEnd = useMemo(item.holEndTime) {
-                            Date(item.holEndTime).toLocaleDateString()
-                        }
+                        val holidayStart = useFormattedDate(item.holStartTime, "UTC")
+                        val holidayEnd = useFormattedDate(item.holEndTime, "UTC")
 
                         ListItemButton {
                             onClick = {
                                 props.onItemClick(item)
                             }
                             ListItemText {
-                                + (item.holName ?: "")
-                            }
-
-                            ListItemSecondaryAction {
-                                ListItemText {
-                                    + ("$holidayStart - $holidayEnd")
-                                }
+                                primary = ReactNode(item.holName ?: "")
+                                secondary = ReactNode("$holidayStart - $holidayEnd")
                             }
                         }
                     }
