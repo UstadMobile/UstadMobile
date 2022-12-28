@@ -6,12 +6,24 @@ appId: com.toughra.ustadmobile
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
+#-------Launch App---------------#
+- runFlow: "../common/get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#-------Admin Login---------------#
 - runFlow:
-    file: "../common/course_with_members.yaml"
+    file: "../common/user_login.yaml"
+#---------Add Course with members------------------#
 - runFlow:
-    file: "../common/member_login.yaml"
+    file: "../common/create_course_with_members.yaml"
+#---------Launch App & Teacher Login------------------#
+- runFlow: "../common/get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
     env:
-      PERSONNAME: "Anu"
+      USERNAME: "Anu"
+      PASSWORD: "test"
+#---------Teacher record attendance------------------#
 - runFlow:
     file: "../common/record_attendance.yaml"
 - runFlow:

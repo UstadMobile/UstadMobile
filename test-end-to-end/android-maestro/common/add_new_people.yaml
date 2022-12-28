@@ -14,7 +14,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "Username"
 - inputText: ${FIRSTNAME}
 - tapOn: "New password"
-- inputText: "test"
+- inputText: ${PASSWORD}
 - tapOn: "Confirm password"
-- inputText: "test"
+- inputText: ${PASSWORD}
 - tapOn: "SAVE"

@@ -1,12 +1,5 @@
 appId: com.toughra.ustadmobile
 ---
-- clearState: com.toughra.ustadmobile
-- launchApp
-- hideKeyboard
-- tapOn: "GET STARTED"
-- inputText: ${ENDPOINT}
-- hideKeyboard
-- tapOn: "NEXT"
 - tapOn: "Username"
 - inputText: ${USERNAME}
 - tapOn: "Password"

@@ -10,4 +10,3 @@ appId: com.toughra.ustadmobile
     notVisible:
       id: "com.toughra.ustadmobile:id/accept_icon"
     timeout: 10000
-- takeScreenshot: "results/StudentGotAdded"

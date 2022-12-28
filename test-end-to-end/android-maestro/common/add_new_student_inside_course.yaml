@@ -14,17 +14,17 @@ appId: com.toughra.ustadmobile
 - tapOn: ${GENDER}
 - tapOn: "SAVE"
 - tapOn: "SAVE"
+# There is a known issue on maestro. Scroll functionality is not working for specific emulator using in jenkins
 - swipe:
         start: 100,400
         end: 100,100
 - tapOn: "${STUDENTFIRSTNAME} ${STUDENTLASTNAME}"
-- scroll
 - tapOn: "VIEW PROFILE"
 - tapOn: "CREATE ACCOUNT"
 - tapOn: "Username"
 - inputText: ${STUDENTFIRSTNAME}
 - tapOn: "New password"
-- inputText: "test"
+- inputText: ${PASSWORD}
 - tapOn: "Confirm password"
 - inputText: "test"
 - tapOn: "SAVE"

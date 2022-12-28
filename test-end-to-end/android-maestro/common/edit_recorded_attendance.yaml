@@ -5,7 +5,7 @@ appId: com.toughra.ustadmobile
       id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
 - tapOn: "ATTENDANCE"
 - tapOn:
-    point: "58%,81%"
+      id: "com.toughra.ustadmobile:id/mtrl_calendar_day_selector_frame"
 - tapOn: "Mark all present"
 - tapOn:
         text: "Absent"

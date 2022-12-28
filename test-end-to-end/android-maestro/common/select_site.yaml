@@ -1,0 +1,6 @@
+appId: com.toughra.ustadmobile
+---
+- inputText: ${ENDPOINT}
+- hideKeyboard
+- tapOn: "NEXT"
+

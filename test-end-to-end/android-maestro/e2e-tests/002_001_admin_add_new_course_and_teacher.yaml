@@ -1,24 +1,37 @@
 appId: com.toughra.ustadmobile
 ---
 - clearState: com.toughra.ustadmobile
-
+#---------Start server ---------#
 - runFlow:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
-
+#-------Launch App---------------#
+- runFlow: "../common/get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#-------Admin Login---------------#
+- runFlow:
+    file: "../common/user_login.yaml"
+#---------Add Course------------------#
 - runFlow:
     file: "../common/add_course.yaml"
     env:
-      TESTCOURSENAME: "TestCourse"
+      TESTCOURSENAME: "Test Course"
+#---------Add a teacher inside course------------------#
 - runFlow:
     file: "../common/add_new_teacher_inside_course.yaml"
     env:
-      TESTCOURSENAME: "TestCourse"
+      TESTCOURSENAME: "Test Course"
       TEACHERFIRSTNAME: "Anu"
       TEACHERLASTNAME: "Madhav"
       GENDER: "Female"
+      PASSWORD: "test"
+#---------Launch App & Teacher Login------------------#
+- runFlow: "../common/get_started.yaml"
+- runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/member_login.yaml"
+    file: "../common/user_login.yaml"
     env:
-      PERSONNAME: "Anu"
+      USERNAME: "Anu"
+      PASSWORD: "test"
+- tapOn: "courses"

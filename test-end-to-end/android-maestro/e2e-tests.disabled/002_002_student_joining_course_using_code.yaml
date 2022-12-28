@@ -6,22 +6,33 @@ appId: com.toughra.ustadmobile
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
+#-------Launch App---------------#
+- runFlow: "../common/get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#-------Admin Login---------------#
 - runFlow:
-    file: "../common/course_with_members.yaml"
+    file: "../common/user_login.yaml"
+#---------Add Course with members------------------#
 - runFlow:
-    file: "../common/member_login.yaml"
+    file: "../common/create_course_with_members.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
     env:
-      PERSONNAME: "Alex"
+      USERNAME: "Alex"
+      PASSWORD: "test"
 - runFlow: "../common/student_send_course_join_request_using_code.yaml"
 - runFlow:
-    file: "../common/admin_login.yaml"
+    file: "../common/user_login.yaml"
     env:
       USERNAME: "admin"
       PASSWORD: "testpass"
 - runFlow: "../common/accepting_course_join_request.yaml"
+#---------Launch App & Student Login------------------#
+- runFlow: "../common/get_started.yaml"
+- runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/member_login.yaml"
+    file: "../common/user_login.yaml"
     env:
-      PERSONNAME: "Alex"
+      USERNAME: "Alex"
+      PASSWORD: "test"
 - tapOn: "Courses"
-- takeScreenshot: "results/StudentAbleToViewCourse"

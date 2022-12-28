@@ -3,26 +3,29 @@ appId: com.toughra.ustadmobile
 - runFlow:
     file: "./add_course.yaml"
     env:
-      TESTCOURSENAME: "Permission Test"
+      TESTCOURSENAME: "New Course"
 - runFlow:
     file: "./add_new_teacher_inside_course.yaml"
     env:
-      TESTCOURSENAME: "Permission Test"
+      TESTCOURSENAME: "New Course"
       TEACHERFIRSTNAME: "Anu"
       TEACHERLASTNAME: "Madhav"
       GENDER: "Female"
+      PASSWORD: "test"
 - runFlow:
     file: "./add_new_people.yaml"
     env:
       FIRSTNAME: "Lal"
       LASTNAME: "Alex"
       GENDER: "Male"
+      PASSWORD: "test"
 - runFlow:
     file: "./add_member_inside_course.yaml"
     env:
       FIRSTNAME: "Lal"
       LASTNAME: "Alex"
       MEMBER: "teacher"
+      PASSWORD: "test"
 - runFlow:
     file: "./add_new_student_inside_course.yaml"
     env:
@@ -30,6 +33,7 @@ appId: com.toughra.ustadmobile
       STUDENTFIRSTNAME: "Justin"
       STUDENTLASTNAME: "Joe"
       GENDER: "Male"
+      PASSWORD: "test"
 - runFlow:
     file: "./add_new_student_inside_course.yaml"
     env:
@@ -37,12 +41,14 @@ appId: com.toughra.ustadmobile
       STUDENTFIRSTNAME: "Caroline"
       STUDENTLASTNAME: "Jacob"
       GENDER: "Female"
+      PASSWORD: "test"
 - runFlow:
     file: "./add_new_people.yaml"
     env:
       FIRSTNAME: "Mathew"
       LASTNAME: "Kuriean"
       GENDER: "Male"
+      PASSWORD: "test"
 - runFlow:
     file: "./add_member_inside_course.yaml"
     env:
@@ -55,6 +61,7 @@ appId: com.toughra.ustadmobile
       FIRSTNAME: "Santhosh"
       LASTNAME: "George"
       GENDER: "Male"
+      PASSWORD: "test"
 - runFlow:
     file: "./add_member_inside_course.yaml"
     env:
@@ -67,6 +74,7 @@ appId: com.toughra.ustadmobile
       FIRSTNAME: "Maria"
       LASTNAME: "Jacob"
       GENDER: "Female"
+      PASSWORD: "test"
 - runFlow:
     file: "./add_member_inside_course.yaml"
     env:
@@ -79,6 +87,7 @@ appId: com.toughra.ustadmobile
       FIRSTNAME: "Sruthy"
       LASTNAME: "K"
       GENDER: "Female"
+      PASSWORD: "test"
 - runFlow:
     file: "./add_member_inside_course.yaml"
     env:
