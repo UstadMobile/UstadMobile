@@ -97,7 +97,7 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
                             onChange = {
                                 selectedOption = it as? DropDownOption
                                 props.onCgmChange(member.cgm.shallowCopy{
-                                    cgmGroupNumber = it as Int
+                                    cgmGroupNumber = (it as DropDownOption).value as Int
                                 })
                             }
                         }
