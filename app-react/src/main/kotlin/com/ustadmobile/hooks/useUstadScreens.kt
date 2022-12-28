@@ -50,6 +50,7 @@ fun useUstadScreens(): UstadScreens {
                 SchoolEditScreenPreview),
             UstadScreen(LanguageDetailView.VIEW_NAME, name = "LanguageDetail Preview",
                 LanguageDetailPreview),
+            UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview", CourseGroupSetEditScreenPreview)
         )
     }
 }
