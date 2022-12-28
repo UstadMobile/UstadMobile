@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.UidAndLabel
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.view.components.UstadBlankIcon
 import csstype.px
 import mui.icons.material.Add
 import mui.icons.material.Delete
@@ -191,6 +192,11 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                     props.uiState.uidAndLabelList.forEach { uidAndLabel ->
 
                         ListItem{
+
+                            ListItemIcon{
+                                + UstadBlankIcon.create()
+                            }
+
                             ListItemText {
                                 primary = ReactNode(uidAndLabel.labelName ?: "")
                                 onClick = {
