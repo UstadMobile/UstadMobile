@@ -42,6 +42,7 @@ import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
@@ -175,8 +176,8 @@ fun HolidayCalendarEditScreen(
     uiState: HolidayCalendarEditUiState,
     onHolidayCalendarChange: (HolidayCalendar?) -> Unit = {},
     onClickAddItem: () -> Unit = {},
-    onDeleteItemClick: (HolidayCalendar) -> Unit = {},
-    onItemClick: (HolidayCalendar) -> Unit = {}
+    onDeleteItemClick: (Holiday) -> Unit = {},
+    onItemClick: (Holiday?) -> Unit = {}
 ){
     Column (
         modifier = Modifier
@@ -209,16 +210,23 @@ fun HolidayCalendarEditScreen(
             text = { Text(stringResource(id = R.string.add_a_holiday)) }
         )
 
-        uiState.calendarList?.forEach { item ->
+        uiState.holidayList?.forEach { holiday ->
+
+            val holidayStart = rememberFormattedDate(timeInMillis = holiday.holStartTime, timeZoneId = "UTC")
+            val holidayEnd = rememberFormattedDate(timeInMillis = holiday.holEndTime, timeZoneId = "UTC")
+
             ListItem(
                 modifier = Modifier
                     .clickable {
-                        onItemClick(item)
+                        onItemClick(holiday)
                     },
-                text = { Text(text = item.umCalendarName ?: "") },
+                text = { Text(text = holiday.holName ?: "") },
+                secondaryText = {
+                    Text(text = "$holidayStart - $holidayEnd")
+                },
                 trailing = {
                     IconButton(onClick = {
-                        onDeleteItemClick(item)
+                        onDeleteItemClick(holiday)
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
@@ -240,9 +248,11 @@ fun HolidayCalendarEditPreview(){
             holidayCalendar = HolidayCalendar().apply {
                 umCalendarName = "my cal"
             },
-            calendarList = listOf(
-                HolidayCalendar().apply {
-                    umCalendarName = "first"
+            holidayList = listOf(
+                Holiday().apply {
+                    holName = "Eid"
+                    holStartTime = 1352958816
+                    holEndTime = 1352958818
                 }
             )
         )

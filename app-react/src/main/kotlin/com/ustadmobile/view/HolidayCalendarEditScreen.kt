@@ -3,6 +3,8 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.HolidayCalendarEditUiState
+import com.ustadmobile.hooks.useFormattedDate
+import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadTextEditField
@@ -14,14 +16,15 @@ import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import react.FC
 import react.Props
+import react.ReactNode
 import react.create
 
 external interface HolidayCalendarEditProps: Props {
     var uiState: HolidayCalendarEditUiState
     var onAddItemClick: () -> Unit
     var onHolidayCalendarChange: (HolidayCalendar?) -> Unit
-    var onDeleteItemClick: (HolidayCalendar?) -> Unit
-    var onItemClick: (HolidayCalendar) -> Unit
+    var onDeleteItemClick: (Holiday?) -> Unit
+    var onItemClick: (Holiday) -> Unit
 }
 
 val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
@@ -57,7 +60,7 @@ val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
                     }
 
                     ListItemText{
-                        + (strings[MessageID.add_a_holiday])
+                        primary = ReactNode((strings[MessageID.add_a_holiday]))
                     }
 
                     onClick = {
@@ -67,25 +70,29 @@ val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
             }
 
             List{
-                props.uiState.calendarList?.forEach { item ->
+                props.uiState.holidayList?.forEach { holiday ->
                     ListItem {
 
                         disablePadding = true
 
+                        val holidayStart = useFormattedDate(holiday.holStartTime, "UTC")
+                        val holidayEnd = useFormattedDate(holiday.holStartEnd, "UTC")
+
                         ListItemButton{
 
                             onClick = {
-                                props.onItemClick(item)
+                                props.onItemClick(holiday)
                             }
 
                             ListItemText{
-                                + (item.umCalendarName ?: "")
+                                primary = ReactNode((holiday.holName ?: ""))
+                                secondary = ReactNode("$holidayStart - $holidayEnd")
                             }
                         }
 
                         secondaryAction = IconButton.create {
                             onClick = {
-                                props.onDeleteItemClick(item)
+                                props.onDeleteItemClick(holiday)
                             }
                             Delete{}
                         }
@@ -104,9 +111,11 @@ val HolidayCalendarEditPreview = FC<Props> {
             holidayCalendar = HolidayCalendar().apply {
                 umCalendarName = "my cal"
             },
-            calendarList = listOf(
-                HolidayCalendar().apply {
-                    umCalendarName = "first"
+            holidayList = listOf(
+                Holiday().apply {
+                    holName = "Eid"
+                    holStartTime = 1352958816
+                    holEndTime = 1352958818
                 }
             )
         )
