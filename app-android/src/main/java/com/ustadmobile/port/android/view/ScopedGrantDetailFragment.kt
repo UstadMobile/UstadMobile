@@ -9,8 +9,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -142,6 +147,12 @@ fun ScopedGrantDetailScreen(
                 },
                 text = {
                     Text(messageIdResource(id = bitmask.messageId))
+                },
+                trailing = {
+                    Icon(
+                        imageVector = if (bitmask.enabled) Icons.Filled.Check else Icons.Filled.Close,
+                        contentDescription = null
+                    )
                 }
             )
         }
@@ -157,11 +168,13 @@ fun ScopedGrantDetailScreenPreview(){
             bitmaskList = listOf(
                 BitmaskFlag(
                     messageId = MessageID.incident_id,
-                    flagVal = 0
+                    flagVal = 0,
+                    enabled = true
                 ),
                 BitmaskFlag(
                     messageId = MessageID.message,
-                    flagVal = 0
+                    flagVal = 0,
+                    enabled = false
                 )
             )
         )
