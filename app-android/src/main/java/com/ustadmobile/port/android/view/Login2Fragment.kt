@@ -11,11 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,8 +30,6 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
     private var mBinding: FragmentLogin2Binding? = null
 
     private var mPresenter: Login2Presenter? = null
-
-    private val uiState = LoginUiState()
 
     override var isEmptyPassword: Boolean = false
         set(value) {
@@ -108,22 +102,25 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val rootView: View
         mBinding = FragmentLogin2Binding.inflate(inflater, container, false).also {
+            rootView = it.root
             it.buttonEnabled = true
             it.fieldsEnabled = true
         }
 
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(
-                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
-            )
-
-            setContent {
-                MdcTheme {
-                    LoginScreen(uiState)
-                }
-            }
-        }
+        return rootView
+//        return ComposeView(requireContext()).apply {
+//            setViewCompositionStrategy(
+//                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+//            )
+//
+//            setContent {
+//                MdcTheme {
+//                    LoginScreen(uiState)
+//                }
+//            }
+//        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
