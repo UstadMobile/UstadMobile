@@ -1,9 +1,7 @@
 package com.ustadmobile.core.viewmodel
 
-import io.ktor.http.*
-
 data class ContentEntryImportLinkUiState(
-    var url: Url? = null,
+    var url: String? = null,
     val linkError: String? = null,
     val fieldsEnabled: Boolean = true
 )

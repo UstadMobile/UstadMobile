@@ -109,22 +109,24 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
 fun ContentEntryImportLinkScreen(
     uiState: ContentEntryImportLinkUiState,
     onClickNext: () -> Unit = {},
-    onUrlChange: (Url?) -> Unit = {}
+    onUrlChange: (String?) -> Unit = {}
 ){
     Column (
         modifier = Modifier
-            .padding(8.dp)
+            .padding(vertical = 8.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
 
         UstadTextEditField(
+            modifier = Modifier
+                .padding(horizontal = 8.dp),
             value = uiState.url.toString(),
             label = stringResource(id = R.string.enter_url),
             error = uiState.linkError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
-                onUrlChange(Url(it))
+                onUrlChange(it)
             }
         )
 
@@ -139,7 +141,7 @@ fun ContentEntryImportLinkScreen(
             onClick = onClickNext,
             enabled = uiState.fieldsEnabled,
             modifier = Modifier
-                .padding(top = 26.dp)
+                .padding(vertical = 26.dp, horizontal = 8.dp)
                 .fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = colorResource(id = R.color.secondaryColor)
@@ -163,7 +165,7 @@ fun ContentEntryImportLinkScreen(
 fun ContentEntryImportLinkScreenPreview(){
     ContentEntryImportLinkScreen(
         uiState = ContentEntryImportLinkUiState(
-            url = Url("this is a link")
+            url = "this is link for example"
         )
     )
 }

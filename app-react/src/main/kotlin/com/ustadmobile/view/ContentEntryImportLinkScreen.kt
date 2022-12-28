@@ -17,7 +17,7 @@ import react.Props
 external interface ContentEntryImportLinkProps: Props {
     var uiState: ContentEntryImportLinkUiState
     var onClickNext: () -> Unit
-    var onUrlChange: (Url?) -> Unit
+    var onUrlChange: (String?) -> Unit
 }
 
 val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> {props ->
@@ -37,7 +37,7 @@ val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> {props ->
                 error = props.uiState.linkError
                 enabled = props.uiState.fieldsEnabled
                 onChange = {
-                    props.onUrlChange(Url(it))
+                    props.onUrlChange(it)
                 }
             }
 
@@ -66,7 +66,7 @@ val ContentEntryImportLinkComponent2 = FC<ContentEntryImportLinkProps> {props ->
 val ContentEntryImportLinkScreenPreview = FC<Props> {
     ContentEntryImportLinkComponent2{
         uiState = ContentEntryImportLinkUiState(
-            url = Url("this is a url")
+            url = "this is a link for example"
         )
     }
 }
