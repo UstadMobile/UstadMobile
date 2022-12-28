@@ -33,6 +33,7 @@ object RouteManager {
         UstadDestination(view = PersonEditView.VIEW_NAME_REGISTER, component = PersonEditComponent::class, showNavigation = false),
         UstadDestination(view = XapiPackageContentView.VIEW_NAME, component = XapiPackageContentComponent::class),
         UstadDestination(view = VideoContentView.VIEW_NAME, component = VideoContentComponent::class),
+        UstadDestination(view = PDFContentView.VIEW_NAME, component = PDFContentComponent::class),
         UstadDestination(view = TimeZoneListView.VIEW_NAME, component = TimeZoneListComponent::class, showSearch = true),
         UstadDestination(view = HolidayCalendarListView.VIEW_NAME, component = HolidayCalendarListComponent::class, showSearch = true),
         UstadDestination(view = HolidayCalendarEditView.VIEW_NAME, component = HolidayCalendarEditComponent::class),
