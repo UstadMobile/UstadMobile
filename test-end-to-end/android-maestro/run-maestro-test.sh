@@ -109,8 +109,7 @@ fi
 maestro test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL \
-         $OUTPUTARGS \
-         $TESTARG
+         $OUTPUTARGS $TESTARG
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
 
