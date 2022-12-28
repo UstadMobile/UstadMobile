@@ -430,7 +430,8 @@ private fun ReportFilterEditScreen(
         
         if (uiState.reportFilterUidAndLabelListVisible){
             items(
-                items = uiState.uidAndLabelList
+                items = uiState.uidAndLabelList,
+                key = { it.uid }
             ){ uidAndLabel ->
 
                 ListItem(
@@ -458,9 +459,11 @@ fun ReportFilterEditScreenPreview() {
     val uiStateVal = ReportFilterEditUiState(
         uidAndLabelList = listOf(
             UidAndLabel().apply {
+                uid = 1
                 labelName = "First Filter"
             },
             UidAndLabel().apply {
+                uid = 2
                 labelName = "Second Filter"
             }
         ),
