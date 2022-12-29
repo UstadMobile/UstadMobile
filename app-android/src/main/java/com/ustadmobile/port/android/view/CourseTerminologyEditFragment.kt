@@ -108,7 +108,6 @@ class CourseTerminologyEditFragment: UstadEditFragment<CourseTerminology>(), Cou
         }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun CourseTerminologyEditScreen(
     uiState: CourseTerminologyEditUiState = CourseTerminologyEditUiState(),
@@ -142,20 +141,17 @@ private fun CourseTerminologyEditScreen(
             items = uiState.terminologyTermList,
             key = {terminologyTerm -> terminologyTerm.id}
         ){ terminologyTerm ->
-            ListItem(
-                text = {
-                    UstadTextEditField(
-                        value = terminologyTerm.term ?: "",
-                        label = messageIdResource(id = terminologyTerm.messageId),
-                        error = terminologyTerm.errorMessage,
-                        enabled = uiState.fieldsEnabled,
-                        onValueChange = {
-                            onTerminologyTermChanged(terminologyTerm.copy(
-                                term = it
-                            ))
-                        },)
-                },
-            )
+
+            UstadTextEditField(
+                value = terminologyTerm.term ?: "",
+                label = messageIdResource(id = terminologyTerm.messageId),
+                error = terminologyTerm.errorMessage,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onTerminologyTermChanged(terminologyTerm.copy(
+                        term = it
+                    ))
+                },)
         }
     }
 }
