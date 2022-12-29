@@ -151,11 +151,13 @@ fun CourseGroupSetEditScreen(
 ){
     Column(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(vertical = 8.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.Start
     ) {
         UstadTextEditField(
+            modifier = Modifier
+                .padding(horizontal = 8.dp),
             value = uiState.courseGroupSet?.cgsName ?: "",
             label = stringResource(id = R.string.title),
             error = uiState.courseTitleError,
@@ -168,6 +170,8 @@ fun CourseGroupSetEditScreen(
         )
 
         UstadTextEditField(
+            modifier = Modifier
+                .padding(horizontal = 8.dp),
             value = uiState.courseGroupSet?.cgsTotalGroups.toString(),
             label = stringResource(id = R.string.number_of_groups),
             error = uiState.numOfGroupsError,
@@ -183,6 +187,7 @@ fun CourseGroupSetEditScreen(
             onClick = onClickAssign,
             enabled = uiState.fieldsEnabled,
             modifier = Modifier
+                .padding(8.dp)
                 .fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = colorResource(id = R.color.secondaryColor)
@@ -196,6 +201,8 @@ fun CourseGroupSetEditScreen(
 
         uiState.membersList.forEach { member ->
             ListItem (
+                modifier = Modifier
+                    .padding(horizontal = 8.dp),
                 text = {
                     Text(text = member.name)
                 },
