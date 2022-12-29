@@ -122,9 +122,9 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                         + People.create()
 
                         Typography {
-                            + (strings[MessageID.x_teachers_y_students]
-                                .replace("%1\$d", props.clazzItem.numTeachers)
-                                .replace("%2\$s", props.clazzItem.numStudents) ?: "")
+                            + strings[MessageID.x_teachers_y_students]
+                                .replace("%1\$d", props.clazzItem.numTeachers.toString())
+                                .replace("%2\$d", props.clazzItem.numStudents.toString())
                         }
                     }
                 }
