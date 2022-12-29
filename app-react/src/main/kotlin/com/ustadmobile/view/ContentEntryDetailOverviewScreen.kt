@@ -1,21 +1,23 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadQuickActionButton
-import csstype.AlignItems
-import csstype.JustifyContent
-import csstype.TextAlign
-import csstype.px
+import csstype.*
+import csstype.Padding
+import csstype.PlaceContent.Companion.end
 import mui.icons.material.*
 import mui.material.*
+import mui.material.Badge
 import mui.material.List
 import mui.material.styles.TypographyVariant
 import mui.system.Container
@@ -40,7 +42,7 @@ external interface ContentEntryDetailOverviewScreenProps : Props {
 
     var onClickManageDownload: () -> Unit
 
-    var onClickTranslation: () -> Unit
+    var onClickTranslation: (ContentEntryRelatedEntryJoinWithLanguage) -> Unit
 
     var onClickContentJobItem: () -> Unit
 }
@@ -107,7 +109,7 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
                     direction = responsive(GridDirection.row)
                     container = true
 
-                    props.uiState.availableTranslations.forEach {
+                    props.uiState.availableTranslations.forEach { translation ->
                         Grid {
                             item = true
                             xs = 2
@@ -121,9 +123,9 @@ val ContentEntryDetailOverviewComponent2 = FC<ContentEntryDetailOverviewScreenPr
 
                                 Button {
                                     variant = ButtonVariant.text
-                                    onClick = { props.onClickTranslation }
+                                    onClick = { props.onClickTranslation(translation) }
 
-                                    + (it.language?.name ?: "")
+                                    + (translation.language?.name ?: "")
                                 }
                             }
                         }
@@ -138,19 +140,26 @@ private val ContentDetails = FC<ContentEntryDetailOverviewScreenProps> { props -
 
     Stack {
         direction = responsive(StackDirection.row)
-        spacing = responsive(10.px)
+        spacing = responsive(20.px)
 
-        LeftColumn {
+        ContentDetailLeftColumn {
             uiState = props.uiState
         }
 
-        RightColumn {
+        ContentDetailRightColumn {
             uiState = props.uiState
         }
     }
 }
 
-private val LeftColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
+private val ContentDetailLeftColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
+
+    var badgeIcon = CheckCircle.create()
+    var badgeColor = IconColor.success
+    if (props.uiState.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CROSS) {
+        badgeIcon = Cancel.create()
+        badgeColor = IconColor.error
+    }
 
     Stack {
         direction = responsive(StackDirection.column)
@@ -163,12 +172,13 @@ private val LeftColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
             }
         }
 
-        Stack {
-            direction = responsive(StackDirection.row)
-            spacing = responsive(10.px)
+        Badge {
 
-            sx {
-                alignItems = AlignItems.center
+            if (props.uiState.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE) {
+                badgeContent = Icon.create {
+                    + badgeIcon
+                    color = badgeColor
+                }
             }
 
             if (props.uiState.scoreProgressVisible){
@@ -176,20 +186,15 @@ private val LeftColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
                     value = props.uiState.scoreProgress?.progress
                     variant = LinearProgressVariant.determinate
                     sx {
-                        width = 110.px
+                        width = 95.px
                     }
                 }
-            }
-
-            Icon {
-                + CheckCircle.create()
-                color = IconColor.success
             }
         }
     }
 }
 
-private val RightColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
+private val ContentDetailRightColumn = FC <ContentEntryDetailOverviewScreenProps> { props ->
 
     val strings: StringsXml = useStringsXml()
 
@@ -374,6 +379,7 @@ val ContentEntryDetailOverviewScreenPreview = FC<Props> {
                 /*@FloatRange(from = 0.0, to = 1.0)*/
                 progress = 4
 
+                success = StatementEntity.RESULT_SUCCESS
                 resultScore = 4
                 resultMax = 40
             },

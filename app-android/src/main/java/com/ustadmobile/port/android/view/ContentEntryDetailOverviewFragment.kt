@@ -60,6 +60,7 @@ import com.ustadmobile.core.viewmodel.ContentEntryDetailOverviewUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_FAILURE
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
@@ -499,7 +500,7 @@ fun ContentDetails(
     uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
 ){
     Row(
-        horizontalArrangement = Arrangement.spacedBy(15.dp)
+        horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
 
         ContentDetailLeftColumn(uiState = uiState)
@@ -718,7 +719,7 @@ fun ContentEntryDetailOverviewScreenPreview() {
             /*@FloatRange(from = 0.0, to = 1.0)*/
             progress = 4
 
-            success = RESULT_SUCCESS
+            success = RESULT_FAILURE
             resultScore = 4
             resultMax = 40
         },
