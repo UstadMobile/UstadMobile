@@ -6,8 +6,6 @@ import com.ustadmobile.core.impl.locale.StringsXml
 import com.ustadmobile.core.viewmodel.CourseTerminologyEditUiState
 import com.ustadmobile.lib.db.entities.TerminologyEntry
 import com.ustadmobile.mui.components.UstadTextEditField
-import mui.material.List
-import mui.material.ListItem
 import mui.system.Container
 import mui.system.Stack
 import mui.system.StackDirection
@@ -49,24 +47,19 @@ val CourseTerminologyEditScreenComponent2 = FC <CourseTerminologyEditScreenProps
 
             + strings[MessageID.your_words_for]
 
-            List {
-                props.uiState.terminologyTermList.forEach { terminologyTerm ->
-                    ListItem {
-
-                        UstadTextEditField {
-                            fullWidth = true
-                            value = terminologyTerm.term ?: ""
-                            label = strings[terminologyTerm.messageId]
-                            error = terminologyTerm.errorMessage
-                            enabled = props.uiState.fieldsEnabled
-                            onChange = {
-                                props.onTerminologyTermChanged(
-                                    terminologyTerm.copy(
-                                        term = it
-                                    )
-                                )
-                            }
-                        }
+            props.uiState.terminologyTermList.forEach { terminologyTerm ->
+                UstadTextEditField {
+                    fullWidth = true
+                    value = terminologyTerm.term ?: ""
+                    label = strings[terminologyTerm.messageId]
+                    error = terminologyTerm.errorMessage
+                    enabled = props.uiState.fieldsEnabled
+                    onChange = {
+                        props.onTerminologyTermChanged(
+                            terminologyTerm.copy(
+                                term = it
+                            )
+                        )
                     }
                 }
             }
