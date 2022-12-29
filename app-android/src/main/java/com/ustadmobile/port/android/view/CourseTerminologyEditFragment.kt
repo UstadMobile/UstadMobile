@@ -21,10 +21,12 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentCourseTerminologyOverviewBinding
 import com.ustadmobile.core.controller.CourseTerminologyEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CourseTerminologyEditView
 import com.ustadmobile.core.viewmodel.CourseTerminologyEditUiState
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 
@@ -120,17 +122,19 @@ private fun CourseTerminologyEditScreen(
     )  {
 
         item{
-            ListItem(
-                text = {
-                    UstadTextEditField(
-                        value = uiState.entity?.ctTitle ?: "",
-                        label = stringResource(id = R.string.name),
-                        error = uiState.titleError,
-                        enabled = uiState.fieldsEnabled,
-                        onValueChange = { onCtTitleChanged(it) },
-                    )
-                },
-                secondaryText = { Text(stringResource(id = R.string.your_words_for)) }
+            UstadTextEditField(
+                value = uiState.entity?.ctTitle ?: "",
+                label = stringResource(id = R.string.name),
+                error = uiState.titleError,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = { onCtTitleChanged(it) },
+            )
+        }
+
+        item {
+            Text(
+                modifier = Modifier.padding(start = 20.dp),
+                text = stringResource(id = R.string.your_words_for)
             )
         }
 
@@ -142,7 +146,7 @@ private fun CourseTerminologyEditScreen(
                 text = {
                     UstadTextEditField(
                         value = terminologyTerm.term ?: "",
-                        label = stringResource(id = terminologyTerm.messageId),
+                        label = messageIdResource(id = terminologyTerm.messageId),
                         error = terminologyTerm.errorMessage,
                         enabled = uiState.fieldsEnabled,
                         onValueChange = {
@@ -164,17 +168,17 @@ fun CourseTerminologyEditScreenPreview() {
             TerminologyEntry(
                 id = "1",
                 term = "First",
-                messageId = R.string.message
+                messageId = MessageID.teacher
             ),
             TerminologyEntry(
                 id = "2",
                 term = "Second",
-                messageId = R.string.message
+                messageId = MessageID.student
             ),
             TerminologyEntry(
                 id = "3",
                 term = "Third",
-                messageId = R.string.message
+                messageId = MessageID.add_a_teacher
             )
         )
     )

@@ -82,17 +82,17 @@ val CourseTerminologyEditScreenPreview = FC<Props> {
                 TerminologyEntry(
                     id = "1",
                     term = "First",
-                    messageId = MessageID.message
+                    messageId = MessageID.teacher
                 ),
                 TerminologyEntry(
                     id = "2",
                     term = "Second",
-                    messageId = MessageID.message
+                    messageId = MessageID.student
                 ),
                 TerminologyEntry(
                     id = "3",
                     term = "Third",
-                    messageId = MessageID.message
+                    messageId = MessageID.add_a_teacher
                 )
             )
         )
