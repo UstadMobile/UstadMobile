@@ -1,7 +1,9 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
+import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.ContentEntryListUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
@@ -17,6 +19,7 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import mui.material.Badge
 
 external interface ContentEntryListScreenProps : Props {
 
@@ -58,15 +61,6 @@ val ContentEntryListScreenPreview = FC<Props> {
     }
 }
 
-private val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
-    ContentEntry.TYPE_EBOOK to Book,
-    ContentEntry.TYPE_VIDEO to SmartDisplay,
-    ContentEntry.TYPE_DOCUMENT to TextSnippet,
-    ContentEntry.TYPE_ARTICLE to Article,
-    ContentEntry.TYPE_COLLECTION to Collections,
-    ContentEntry.TYPE_INTERACTIVE_EXERCISE to TouchApp,
-    ContentEntry.TYPE_AUDIO to Audiotrack,
-)
 
 private val ContentEntryListScreenComponent2 = FC<ContentEntryListScreenProps> { props ->
     Container {
@@ -86,9 +80,11 @@ private val ContentEntryListScreenComponent2 = FC<ContentEntryListScreenProps> {
                                 opacity = number(props.uiState.containerAlpha(contentEntry))
                             }
 
-                            LeadingContent {
-                                uiState = props.uiState
-                                contentEntryItem = contentEntry
+                            ListItemIcon {
+                                LeadingContent {
+                                    uiState = props.uiState
+                                    contentEntryItem = contentEntry
+                                }
                             }
 
                             ListItemText {
@@ -128,47 +124,45 @@ val LeadingContent = FC<LeadingContentProps> { props ->
     else
         Folder
 
-    ListItemIcon {
-        Stack {
-            direction = responsive(StackDirection.column)
-            justifyContent = JustifyContent.center
+    var badgeIcon = CheckCircle.create()
+    var badgeColor = IconColor.success
+    if (props.contentEntryItem.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CROSS) {
+        badgeIcon = Cancel.create()
+        badgeColor = IconColor.error
+    }
 
-            thumbnail {
-                sx {
-                    border = Border(1.px, csstype.LineStyle.solid)
-                    borderRadius = 27.5.px
-                    width = 55.px
-                    height = 55.px
-                    padding = 10.px
+    Stack {
+        direction = responsive(StackDirection.column)
+        justifyContent = JustifyContent.center
+
+        thumbnail {
+            sx {
+                border = Border(1.px, csstype.LineStyle.solid)
+                borderRadius = 27.5.px
+                width = 55.px
+                height = 55.px
+                padding = 10.px
+            }
+        }
+
+        Badge {
+            sx {
+                width = 55.px
+            }
+            if (props.contentEntryItem.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE) {
+                badgeContent = Icon.create {
+                    + badgeIcon
+                    color = badgeColor
                 }
             }
 
-
-            Stack {
-                direction = responsive(StackDirection.row)
-                spacing = responsive(10.px)
-
-                sx {
-                    alignItems = AlignItems.center
-                }
-
-
-                Box {
+            if (props.uiState.progressVisible(props.contentEntryItem)){
+                LinearProgress {
+                    value = props.contentEntryItem.scoreProgress?.progress
+                    variant = LinearProgressVariant.determinate
                     sx {
-                        width = 80.px
+                        width = 45.px
                     }
-
-                    if (props.uiState.progressVisible(props.contentEntryItem)){
-                        LinearProgress {
-                            value = 0.5
-                            variant = LinearProgressVariant.determinate
-                        }
-                    }
-                }
-
-                Icon {
-                    + CheckCircle.create()
-                    color = IconColor.success
                 }
             }
         }
