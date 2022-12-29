@@ -4,7 +4,15 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.viewmodel.ScopedGrantEditUiState
+import com.ustadmobile.mui.common.justifyContent
+import csstype.Color
+import csstype.JustifyContent
+import csstype.MaxWidth
+import csstype.px
 import mui.material.*
+import mui.system.Spacing
+import mui.system.responsive
+import mui.system.sx
 import react.*
 
 external interface ScopedGrantEditScreenProps : Props {
@@ -25,16 +33,19 @@ val ScopedGrantEditScreenComponent2 = FC<ScopedGrantEditScreenProps> { props ->
             props.uiState.bitmaskList
                 .forEach { bitmask ->
                     ListItem{
-                        ListItemText {
-                            primary = ReactNode(strings[bitmask.messageId])
-                        }
-
-                        secondaryAction  = Switch.create {
-                            checked = bitmask.enabled
-                            onChange = { _, isEnabled ->
+                        ListItemButton {
+                            onClick = {
                                 props.onChangedBitmask(bitmask.copy(
-                                    enabled = isEnabled
+                                    enabled = !bitmask.enabled
                                 ))
+                            }
+
+                            ListItemText {
+                                primary = ReactNode(strings[bitmask.messageId])
+                            }
+
+                            Switch {
+                                checked = bitmask.enabled
                             }
                         }
                     }

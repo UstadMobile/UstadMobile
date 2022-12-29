@@ -4,12 +4,14 @@ import android.os.Bundle
 import android.view.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -116,15 +118,18 @@ fun ScopedGrantEditScreen(
         uiState.bitmaskList.forEach { bitmask ->
 
             ListItem(
+                modifier = Modifier.toggleable(
+                    role = Role.Switch,
+                    value = bitmask.enabled,
+                    onValueChange = {
+                        onChangedBitmask(bitmask.copy(enabled = it))
+                    }
+                ),
                 text = { Text(messageIdResource(id = bitmask.messageId)) },
-                trailing = {
+                trailing =  {
                     Switch(
+                        onCheckedChange = {},
                         checked = bitmask.enabled,
-                        onCheckedChange = {
-                            onChangedBitmask(bitmask.copy(
-                                enabled = it
-                            ))
-                        }
                     )
                 }
             )
