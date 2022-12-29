@@ -179,7 +179,7 @@ fun HolidayCalendarEditScreen(
 ){
     Column (
         modifier = Modifier
-            .padding(8.dp)
+            .padding(vertical = 8.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
