@@ -69,6 +69,9 @@ fun useUstadScreens(): UstadScreens {
                 ContentEntryDetailOverviewScreenPreview),
             UstadScreen(HolidayCalendarEditView.VIEW_NAME, "HolidayCalendarEdit Preview",
                 HolidayCalendarEditPreview),
+            UstadScreen(ContentEntryList2View.VIEW_NAME, "ContentEntryList Preview",
+                ContentEntryListScreenPreview)
+            ),
         )
     }
 }
