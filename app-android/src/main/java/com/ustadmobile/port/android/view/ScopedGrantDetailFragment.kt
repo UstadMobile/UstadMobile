@@ -4,6 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,11 +26,14 @@ import com.toughra.ustadmobile.databinding.FragmentScopedGrantDetailBinding
 import com.toughra.ustadmobile.databinding.ItemBitmaskflagBinding
 import com.ustadmobile.core.controller.ScopedGrantDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.toBitmaskFlagList
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScopedGrantDetailView
+import com.ustadmobile.core.viewmodel.ScopedGrantDetailUiState
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
+import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
 
@@ -109,4 +124,54 @@ class ScopedGrantDetailFragment: UstadDetailFragment<ScopedGrantWithName>(
         }
 
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ScopedGrantDetailScreen(
+    uiState: ScopedGrantDetailUiState,
+){
+
+    LazyColumn {
+        items(
+            items = uiState.bitmaskList,
+            key = { it.flagVal }
+        ) { bitmask ->
+            ListItem(
+                text = {
+                    Text(messageIdResource(id = bitmask.messageId))
+                },
+                trailing = {
+                    Icon(
+                        imageVector = if (bitmask.enabled) Icons.Filled.Check else Icons.Filled.Close,
+                        contentDescription = stringResource(
+                            if(bitmask.enabled) R.string.enabled else R.string.disabled
+                        )
+                    )
+                }
+            )
+        }
+    }
+
+}
+
+@Composable
+@Preview
+fun ScopedGrantDetailScreenPreview(){
+    ScopedGrantDetailScreen(
+        uiState = ScopedGrantDetailUiState(
+            bitmaskList = listOf(
+                BitmaskFlag(
+                    messageId = MessageID.permission_person_update,
+                    flagVal = 1,
+                    enabled = true
+                ),
+                BitmaskFlag(
+                    messageId = MessageID.permission_person_insert,
+                    flagVal = 2,
+                    enabled = false
+                )
+            )
+        )
+    )
 }

@@ -6,12 +6,31 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Text
+import androidx.compose.material.contentColorFor
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentEntryImportLinkBinding
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.viewmodel.ContentEntryImportLinkUiState
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLinkView {
 
@@ -83,4 +102,69 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
     }
 
 
+}
+
+@Composable
+fun ContentEntryImportLinkScreen(
+    uiState: ContentEntryImportLinkUiState,
+    onClickNext: () -> Unit = {},
+    onUrlChange: (String?) -> Unit = {}
+){
+    Column (
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+
+        UstadTextEditField(
+            modifier = Modifier
+                .padding(horizontal = 8.dp),
+            value = uiState.url.toString(),
+            label = stringResource(id = R.string.enter_url),
+            error = uiState.linkError,
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onUrlChange(it)
+            }
+        )
+
+        Text(
+            stringResource(R.string.supported_link),
+            style = Typography.body2,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+        )
+
+        Button(
+            onClick = onClickNext,
+            enabled = uiState.fieldsEnabled,
+            modifier = Modifier
+                .padding(vertical = 26.dp, horizontal = 8.dp)
+                .fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = colorResource(id = R.color.secondaryColor)
+            )
+        ) {
+            Text(
+                stringResource(R.string.next).uppercase(),
+                color = contentColorFor(
+                    colorResource(id = R.color.secondaryColor)
+                ),
+                modifier = Modifier
+                    .padding(8.dp)
+            )
+        }
+
+    }
+}
+
+@Composable
+@Preview
+fun ContentEntryImportLinkScreenPreview(){
+    ContentEntryImportLinkScreen(
+        uiState = ContentEntryImportLinkUiState(
+            url = "site.com/link"
+        )
+    )
 }
