@@ -13,6 +13,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyReportWithSeriesWithFilters
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.view.components.UstadBlankIcon
 import csstype.px
 import mui.icons.material.Add
 import mui.icons.material.Close
@@ -245,8 +246,6 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
         }
     }
 
-
-
     List {
 
         ListItem {
@@ -269,9 +268,21 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
 
         props.uiState.reportSeriesUiState.filterList.forEach { filter ->
             ListItem {
+
+                ListItemIcon{
+                    UstadBlankIcon()
+                }
+
                 ListItemText {
                     primary = ReactNode(filter.person?.fullName() ?: "")
+                    secondary = Divider.create {
+                        orientation = Orientation.horizontal
+                        sx {
+                            height = 1.px
+                        }
+                    }
                 }
+
                 secondaryAction = IconButton.create {
                     onClick = { props.onClickDeleteReportFilter(filter) }
                     Delete {}
@@ -280,11 +291,7 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
         }
     }
 
-    Divider {
-            orientation = Orientation.horizontal
-             sx {
-                 height = 1.px
-             }
-        }
-
+    ListItem {
+        divider = true
+    }
 }
