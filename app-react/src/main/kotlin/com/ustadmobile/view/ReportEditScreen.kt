@@ -19,6 +19,7 @@ import mui.icons.material.Close
 import mui.icons.material.Delete
 import mui.material.*
 import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
@@ -159,11 +160,11 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
 
             ListItem {
                 onClick = { props.onClickNewSeries() }
-                ListItemText{
-                    primary = ReactNode(strings[MessageID.xapi_options_series])
-                }
                 ListItemIcon {
                     + Add.create()
+                }
+                ListItemText{
+                    primary = ReactNode(strings[MessageID.xapi_options_series])
                 }
             }
         }
@@ -244,13 +245,28 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
         }
     }
 
-    ListItem {
-        ListItemText {
-            primary = ReactNode(strings[MessageID.filter])
-        }
-    }
+
 
     List {
+
+        ListItem {
+            ListItemText {
+                primary = ReactNode(strings[MessageID.filter])
+            }
+        }
+
+        ListItem {
+            onClick = {
+                props.onClickNewFilter(props.reportSeries)
+            }
+            ListItemIcon {
+                +Add.create()
+            }
+            ListItemText {
+                primary = ReactNode(strings[MessageID.filter])
+            }
+        }
+
         props.uiState.reportSeriesUiState.filterList.forEach { filter ->
             ListItem {
                 ListItemText {
@@ -264,21 +280,11 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
         }
     }
 
-    ListItem {
-        onClick = {
-            props.onClickNewFilter(props.reportSeries)
-        }
-        ListItemIcon {
-            +Add.create()
-        }
-        ListItemText {
-            primary = ReactNode(strings[MessageID.filter])
-        }
-    }
-
-    ListItem {
-        children = Divider.create {
+    Divider {
             orientation = Orientation.horizontal
+             sx {
+                 height = 1.px
+             }
         }
-    }
+
 }

@@ -561,6 +561,18 @@ fun ReportSeriesListItem(
         }
     )
 
+    ListItem(
+        modifier = Modifier.clickable { onClickNewFilter(reportSeries) },
+        text = { Text(text = stringResource(id = R.string.filter)) },
+        icon = {
+            Icon(
+                Icons.Filled.Add,
+                contentDescription = null,
+            )
+        }
+    )
+
+
     uiState.reportSeriesUiState.filterList
         .forEach { filter ->
 
@@ -578,17 +590,6 @@ fun ReportSeriesListItem(
                 }
             )
         }
-
-    ListItem(
-        modifier = Modifier.clickable { onClickNewFilter(reportSeries) },
-        text = { Text(text = stringResource(id = R.string.filter)) },
-        icon = {
-            Icon(
-                Icons.Filled.Add,
-                contentDescription = null,
-            )
-        }
-    )
 
     Spacer(modifier = Modifier.height(15.dp))
 
