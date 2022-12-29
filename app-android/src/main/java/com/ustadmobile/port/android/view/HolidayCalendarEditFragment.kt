@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -216,6 +218,9 @@ fun HolidayCalendarEditScreen(
                     .clickable {
                         onItemClick(holiday)
                     },
+                icon = {
+                    Spacer(modifier = Modifier.width(24.dp))
+                },
                 text = { Text(text = holiday.holName ?: "") },
                 secondaryText = {
                     Text(text = "$holidayStart - $holidayEnd")

@@ -8,6 +8,7 @@ import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.UstadTextEditField
+import com.ustadmobile.view.components.UstadBlankIcon
 import kotlinx.css.px
 import mui.icons.material.Add
 import mui.icons.material.Delete
@@ -82,6 +83,10 @@ val HolidayCalendarEditComponent2 = FC<HolidayCalendarEditProps> { props ->
 
                             onClick = {
                                 props.onItemClick(holiday)
+                            }
+
+                            ListItemIcon{
+                                UstadBlankIcon()
                             }
 
                             ListItemText{
