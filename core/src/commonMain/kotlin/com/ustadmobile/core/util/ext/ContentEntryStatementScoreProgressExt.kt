@@ -50,7 +50,7 @@ fun ContentEntryStatementScoreProgress.progressBadge(): Int {
         ProgressConstants.BADGE_CROSS
 
     else if(success == RESULT_UNSET && contentComplete)
-        ProgressConstants.BADGE_NONE
+        ProgressConstants.BADGE_CHECK
 
     else
         ProgressConstants.BADGE_NONE
