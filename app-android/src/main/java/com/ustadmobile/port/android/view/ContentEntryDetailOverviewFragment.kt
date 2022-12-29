@@ -3,15 +3,22 @@ package com.ustadmobile.port.android.view
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.outlined.Book
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -492,7 +499,7 @@ fun ContentDetails(
     uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
 ){
     Row(
-
+        horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
 
         ContentDetailLeftColumn(uiState = uiState)
@@ -506,22 +513,28 @@ fun ContentDetailLeftColumn(
     uiState: ContentEntryDetailOverviewUiState = ContentEntryDetailOverviewUiState(),
 ){
 
-    val image = if (uiState.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CHECK)
+    val badge = if (uiState.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CHECK)
         R.drawable.ic_content_complete
     else
         R.drawable.ic_content_fail
 
-    Column{
+    Column(
+        modifier = Modifier.width(80.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
         Image(painter = painterResource(id = R.drawable.book_24px),
             contentDescription = "",
-            modifier = Modifier.size(110.dp),
+            modifier = Modifier.height(90.dp),
             contentScale = ContentScale.Crop
         )
 
         BadgedBox(badge = {
             if (uiState.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE){
-                Icon(
-                    painter = painterResource(id = image),
+                Image(
+                    modifier = Modifier
+                        .size(20.dp),
+                    painter = painterResource(id = badge),
                     contentDescription = ""
                 )
             }
@@ -532,7 +545,7 @@ fun ContentDetailLeftColumn(
                         .toFloat(),
                     modifier = Modifier
                         .height(4.dp)
-                        .width(50.dp)
+                        .padding(end = 10.dp)
                 )
             }
         }
