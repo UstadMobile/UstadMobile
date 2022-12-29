@@ -2,8 +2,8 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
@@ -110,13 +110,11 @@ fun ScopedGrantEditScreen(
     uiState: ScopedGrantEditUiState = ScopedGrantEditUiState(),
     onChangedBitmask: (BitmaskFlag?) -> Unit = {},
 ) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        uiState.bitmaskList.forEach { bitmask ->
-
+    LazyColumn {
+        items(
+            items = uiState.bitmaskList,
+            key = { it.flagVal }
+        ) { bitmask ->
             ListItem(
                 modifier = Modifier.toggleable(
                     role = Role.Switch,
@@ -143,12 +141,13 @@ fun ScopedGrantEditScreenPreview() {
     val uiState = ScopedGrantEditUiState(
         bitmaskList = listOf(
             BitmaskFlag(
-                messageId = MessageID.incident_id,
-                flagVal = 0
+                messageId = MessageID.permission_person_insert,
+                flagVal = 1,
+                enabled = true,
             ),
             BitmaskFlag(
-                messageId = MessageID.message,
-                flagVal = 0
+                messageId = MessageID.permission_person_update,
+                flagVal = 2
             )
         )
     )
