@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -27,11 +28,6 @@ class GrantAppPermissionFragment: UstadBaseFragment(), GrantAppPermissionView {
         mBinding = FragmentGrantAppPermissionBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.grantButton.setOnClickListener {
-                (requireActivity() as MainActivity)?.setAccountAuthenticatorResult(bundleOf(
-
-                ))
-
-
                 mPresenter?.onClickApprove()
             }
         }
@@ -46,6 +42,7 @@ class GrantAppPermissionFragment: UstadBaseFragment(), GrantAppPermissionView {
 
     override fun onDestroyView() {
         mBinding = null
+        mPresenter = null
         super.onDestroyView()
     }
 

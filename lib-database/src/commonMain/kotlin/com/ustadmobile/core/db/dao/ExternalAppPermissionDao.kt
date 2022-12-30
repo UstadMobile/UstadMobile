@@ -32,16 +32,4 @@ expect abstract class ExternalAppPermissionDao {
     """)
     abstract suspend fun getExternalAccessPermissionByUid(eapUid: Int): ExternalAppPermission?
 
-    @Query("""
-        UPDATE ExternalAppPermission
-           SET eapStartTime = :startTime,
-               eapExpireTime = :expireTime
-         WHERE eapUid = :eapUid
-    """)
-    abstract suspend fun grantPermission(
-        eapUid: Int,
-        startTime: Long,
-        expireTime: Long,
-    )
-
 }

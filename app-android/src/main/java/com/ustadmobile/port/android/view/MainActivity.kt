@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -130,13 +131,18 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
      *  "The activity needs to return the final result when it is complete so the Intent should
      *  contain the AccountAuthenticatorResponse as"...
      */
-    fun setAccountAuthenticatorResult(result: Bundle) {
+    fun setAccountAuthenticatorResult(
+        resultCode: Int,
+        result: Bundle,
+        resultData: Intent? = null,
+    ) {
         mAccountAuthenticatorResponse?.onResult(result)
-        setResult(Activity.RESULT_OK, Intent().also {
-            it.putExtras(result)
-            it.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE,
-                mAccountAuthenticatorResponse)
-        })
+        if(resultData == null) {
+            setResult(resultCode)
+        }else {
+            setResult(resultCode, resultData)
+        }
+
         finish()
     }
 

@@ -38,8 +38,9 @@ import kotlinx.serialization.json.Json
 import kotlin.random.Random
 
 /**
- * Pending requests (e.g. those that have not yet been approved) are stored in the DataStore. We
- * don't always know what endpoint they are for, so we can't put them in the database immediately
+ * Storage of pending requests for approval. This is where we have issued an intent for the user to
+ * approve or deny, but we don't (yet) have approval. In the case of using add account, we don't
+ * know what endpoint is being used, so we can't put in the database.
  */
 internal val Context.pendingRequestsDataStore:
     DataStore<Preferences> by preferencesDataStore(name = "authenticator_pending_requests")
@@ -68,10 +69,11 @@ class UstadAccountAuthenticator(
         authTokenType: String?,
         requiredFeatures: Array<out String>?,
         options: Bundle
-    ): Bundle? {
+    ): Bundle {
         val callerUid = options.getInt(AccountManager.KEY_CALLER_UID)
-        coroutineScope.launch {
-            val eapUid = Random.nextLong(0, Long.MAX_VALUE)
+
+        return runBlocking {
+            val eapUid = Random.nextInt(0, Int.MAX_VALUE)
 
             val externalAppPermission = ExternalAppPermission(
                 eapCallerUid = callerUid,
@@ -85,12 +87,13 @@ class UstadAccountAuthenticator(
 
             val intent = Intent(context, MainActivity::class.java).apply {
                 putExtra(UstadView.ARG_OPEN_LINK,
-                    "${GrantAppPermissionView.VIEW_NAME}?$ARG_PERMISSION_UID=$eapUid")
+                    "${GrantAppPermissionView.VIEW_NAME}?$ARG_PERMISSION_UID=$eapUid" +
+                        "&${GrantAppPermissionView.ARG_RETURN_NAME}=true")
             }
-            response.onResult(bundleOf(AccountManager.KEY_INTENT to intent))
+            Bundle().apply {
+                putParcelable(AccountManager.KEY_INTENT, intent)
+            }
         }
-
-        return null
     }
 
     override fun confirmCredentials(

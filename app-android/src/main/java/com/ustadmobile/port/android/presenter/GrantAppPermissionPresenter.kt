@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.presenter
 
 import android.accounts.AccountManager
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.core.os.bundleOf
 import androidx.datastore.preferences.core.edit
@@ -41,9 +43,12 @@ class GrantAppPermissionPresenter(
 
     private var eapUid = 0
 
+    private var returnAccountName: Boolean = false
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         eapUid = arguments[GrantAppPermissionView.ARG_PERMISSION_UID]?.toInt() ?: -1
+        returnAccountName = arguments[GrantAppPermissionView.ARG_RETURN_NAME]?.toBoolean() ?: false
         Log.d("ExternalAppPermission", "EAPUID = $eapUid")
     }
 
@@ -73,11 +78,24 @@ class GrantAppPermissionPresenter(
 
                 db.externalAppPermissionDao.insertAsync(extAccessPermission)
                 val activity = (context as Context).getActivityContext()
-                (activity as MainActivity).setAccountAuthenticatorResult(bundleOf(
-                    AccountManager.KEY_AUTHTOKEN to authToken,
+
+                val resultDataIntent = if(returnAccountName) {
+                    Intent().apply {
+                        putExtra(AccountManager.KEY_ACCOUNT_NAME, activeAccountName)
+                        putExtra(AccountManager.KEY_ACCOUNT_TYPE,
+                            UstadAccountManagerAndroid.ACCOUNT_TYPE)
+                    }
+                }else {
+                    null
+                }
+
+                val resultBundle = bundleOf(
                     AccountManager.KEY_ACCOUNT_TYPE to UstadAccountManagerAndroid.ACCOUNT_TYPE,
                     AccountManager.KEY_ACCOUNT_NAME to activeAccountName,
-                ))
+                )
+
+                (activity as MainActivity).setAccountAuthenticatorResult(
+                    Activity.RESULT_OK, resultBundle, resultDataIntent)
             }else {
                 view.showSnackBar("ERROR")
             }
