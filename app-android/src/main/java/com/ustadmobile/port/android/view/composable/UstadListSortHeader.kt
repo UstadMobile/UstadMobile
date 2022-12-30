@@ -14,12 +14,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.ustadmobile.core.db.dao.ClazzDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.viewmodel.UstadListSortHeaderUiState
+import com.ustadmobile.core.viewmodel.SortHeaderUiState
 import com.ustadmobile.port.android.util.compose.messageIdResource
 
 @Composable
 fun UstadListSortHeader(
-    uiState: UstadListSortHeaderUiState,
+    uiState: SortHeaderUiState,
     onClickSort: () -> Unit = {}
 ){
 
@@ -49,7 +49,7 @@ fun UstadListSortHeader(
 @Composable
 @Preview
 private fun UstadListSortHeaderPreview() {
-    val uiState = UstadListSortHeaderUiState(
+    val uiState = SortHeaderUiState(
         sortOption = SortOrderOption(
             MessageID.name,
             ClazzDaoCommon.SORT_CLAZZNAME_ASC,

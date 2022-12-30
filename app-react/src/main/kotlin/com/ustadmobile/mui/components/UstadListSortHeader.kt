@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.dao.ClazzDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.viewmodel.UstadListSortHeaderUiState
+import com.ustadmobile.core.viewmodel.SortHeaderUiState
 import mui.icons.material.ArrowDownward
 import mui.icons.material.ArrowUpward
 import mui.material.*
@@ -14,7 +14,7 @@ import react.create
 
 external interface UstadListSortHeaderProps : Props {
 
-    var uiState: UstadListSortHeaderUiState
+    var uiState: SortHeaderUiState
 
     var onClickSort: Unit
 
@@ -29,7 +29,8 @@ val UstadListSortHeader = FC<UstadListSortHeaderProps> { props ->
     else
         ArrowUpward.create()
 
-    Stack {
+    ButtonBase {
+
         onClick = { props.onClickSort }
 
         Typography {
@@ -46,7 +47,7 @@ val UstadListSortHeader = FC<UstadListSortHeaderProps> { props ->
 val UstadListSortHeaderPreview = FC<Props> {
 
     UstadListSortHeader {
-        uiState = UstadListSortHeaderUiState(
+        uiState = SortHeaderUiState(
             sortOption = SortOrderOption(
                 MessageID.name,
                 ClazzDaoCommon.SORT_CLAZZNAME_ASC,
