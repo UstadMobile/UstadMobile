@@ -29,9 +29,11 @@ fun UstadListSortHeader(
         Icons.Default.ArrowUpward
 
     Surface(
-        modifier = Modifier.clickable {
-            onClickSort()
-        }
+        modifier = Modifier
+            .clickable(
+                uiState.fieldsEnabled,
+                onClick = { onClickSort() }
+            )
     ) {
         Row {
 

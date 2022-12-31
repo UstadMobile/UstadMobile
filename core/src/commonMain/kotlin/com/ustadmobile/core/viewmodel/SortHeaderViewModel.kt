@@ -6,4 +6,6 @@ data class SortHeaderUiState (
 
     val sortOption: SortOrderOption? = null,
 
+    val fieldsEnabled: Boolean = true,
+
 )

@@ -30,6 +30,7 @@ val UstadListSortHeader = FC<UstadListSortHeaderProps> { props ->
         ArrowUpward.create()
 
     ButtonBase {
+        disabled = !props.uiState.fieldsEnabled
 
         onClick = { props.onClickSort }
 
