@@ -8,6 +8,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -18,6 +29,7 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.core.account.UstadAccountManager
@@ -28,13 +40,16 @@ import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzDetailOverviewView
+import com.ustadmobile.core.viewmodel.ClazzDetailOverviewUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
-import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity
-import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.util.compose.messageIdResource
+import com.ustadmobile.port.android.util.compose.rememberFormattedTime
+import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
+import com.ustadmobile.port.android.util.ext.MS_PER_MIN
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
+import com.ustadmobile.port.android.view.composable.UstadDetailField
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -432,4 +447,128 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         }
     }
 
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ClazzDetailOverviewScreen(
+    uiState: ClazzDetailOverviewUiState = ClazzDetailOverviewUiState(),
+    onClickClassCode: (String) -> Unit = {},
+) {
+    val numMembers = stringResource(R.string.x_teachers_y_students,
+        uiState.clazz?.numTeachers ?: 0,
+        uiState.clazz?.numStudents ?: 0)
+
+    val clazzStartTime = rememberFormattedTime(
+        timeInMs = (uiState.clazz?.clazzStartTime ?: 0).toInt()
+    )
+
+    val clazzEndTime = rememberFormattedTime(
+        timeInMs = (uiState.clazz?.clazzEndTime ?: 0).toInt()
+    )
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
+    ){
+
+        item {
+            Text(text = uiState.clazz?.clazzDesc ?: "")
+        }
+
+        item {
+            UstadDetailField(
+                imageId = R.drawable.ic_group_black_24dp,
+                valueText = numMembers,
+                labelText = stringResource(R.string.members)
+            )
+        }
+
+        item {
+            UstadDetailField(
+                imageId = R.drawable.ic_login_24px,
+                valueText = numMembers,
+                labelText = stringResource(R.string.class_code),
+                onClick = {
+                    onClickClassCode(uiState.clazz?.clazzCode ?: "")
+                }
+            )
+        }
+
+        item {
+            if (uiState.clazzSchoolUidVisible){
+                Row {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_school_black_24dp),
+                        contentDescription = null)
+
+                    Text(uiState.clazz?.clazzSchool?.schoolName ?: "")
+                }
+            }
+        }
+
+        item {
+            if (uiState.clazzDateVisible){
+                Row {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_event_black_24dp),
+                        contentDescription = null)
+
+                    Text("$clazzStartTime - $clazzEndTime")
+                }
+            }
+        }
+
+        item {
+            if (uiState.clazzHolidayCalendarVisible){
+                Row {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_event_black_24dp),
+                        contentDescription = null)
+
+                    Text(uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: "")
+                }
+            }
+        }
+
+        items(
+            items = uiState.scheduleList,
+            key = { schedule -> schedule.scheduleUid }
+        ){ schedule ->
+
+            val fromTimeFormatted = rememberFormattedTime(timeInMs = schedule.sceduleStartTime.toInt())
+            val toTimeFormatted = rememberFormattedTime(timeInMs = schedule.scheduleEndTime.toInt())
+            val text = "${messageIdResource(id = schedule.scheduleFrequency)} " +
+                    " ${messageIdResource(schedule.scheduleDay)} " +
+                    " $fromTimeFormatted - $toTimeFormatted "
+
+            ListItem(
+                text = { Text(text) },
+            )
+        }
+    }
+}
+
+@Composable
+@Preview
+fun ClazzDetailOverviewScreenPreview() {
+    val uiState = ClazzDetailOverviewUiState(
+        clazz = ClazzWithDisplayDetails().apply {
+            clazzDesc = "Description"
+            clazzCode = "abc123"
+            clazzSchoolUid = 1
+            clazzStartTime = ((14 * MS_PER_HOUR) + (30 * MS_PER_MIN)).toLong()
+            clazzEndTime = System.currentTimeMillis()
+            clazzSchool = School().apply {
+                schoolName = "School Name"
+            }
+            clazzHolidayCalendar = HolidayCalendar().apply {
+                umCalendarName = "Holiday Calendar"
+            }
+        },
+    )
+    MdcTheme {
+        ClazzDetailOverviewScreen(uiState)
+    }
 }

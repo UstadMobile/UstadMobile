@@ -73,6 +73,8 @@ fun useUstadScreens(): UstadScreens {
                 "ScopedGrantEdit Preview", ScopedGrantEditScreenPreview),
             UstadScreen(CourseTerminologyEditView.VIEW_NAME,
                 "CourseTerminologyEdit Preview", CourseTerminologyEditScreenPreview),
+            UstadScreen(ClazzDetailOverviewView.VIEW_NAME,
+                "ClazzDetailOverview Preview", ClazzDetailOverviewScreenPreview),
         )
     }
 }
