@@ -1,0 +1,53 @@
+appId: com.toughra.ustadmobile
+
+---
+- clearState: com.toughra.ustadmobile
+
+- evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
+- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+- launchApp
+- hideKeyboard
+- tapOn: "GET STARTED"
+- inputText: ${ENDPOINT}
+- hideKeyboard
+- tapOn: "NEXT"
+- tapOn: "Username"
+- inputText: ${USERNAME}
+- tapOn: "Password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: "LOGIN"
+- tapOn: "Library"
+- tapOn: "CONTENT"
+- tapOn: "Add file"
+- runFlow:
+    when:
+      notVisible: "Downloads"
+    file: redirect_to_downloads.yaml
+- tapOn: ${TESTFILENAME}
+- tapOn:
+    id: "com.toughra.ustadmobile:id/entry_title_text"
+- longPressOn:
+   id: "com.toughra.ustadmobile:id/entry_title_text"
+- runFlow:
+    when:
+      visible: "Select all"
+    file: redirect_to_select.yaml
+- runFlow:
+    when:
+      visible:
+        text: "More options"
+    file: moreOptions.yaml
+- eraseText
+- inputText: ${TESTCONTENTNAME}
+- hideKeyboard
+- tapOn: "SAVE"
+- runFlow:
+    when:
+      visible: "Allow Ustad Mobile to send you notifications?"
+    file: dismiss_notification.yaml
+- tapOn:
+    text: ${TESTCONTENTNAME}
+- extendedWaitUntil:
+    visible: "Delete"
+    timeout: 600000

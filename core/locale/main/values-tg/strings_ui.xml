@@ -124,8 +124,6 @@
 \n  Овози Амрико 
 \n  
 \n Мундариҷа аз ҷониби провайдерҳои мундариҷаи беруна тибқи иҷозатнома пешниҳод карда мешавад. Устод Мобайл, агар ба таври возеҳ дарҷ нагардида бошад, аз ҷониби ягон провайдери мундариҷа тасдиқ карда намешавад.</string>
-    <string name="content_action_page_remove">Саҳифаро нест кунед</string>
-    <string name="content_editor_menu_align_center">Марказ</string>
     <string name="content_editor_create_new_category">Папкаи нав</string>
     <string name="content_from_file">Аз файл</string>
     <string name="content_from_link">Аз пайванд</string>
@@ -362,7 +360,6 @@
     <string name="download_storage_option_device">Истифодаи %1$s - %2$s озод</string>
     <string name="insufficient_space">Ҷойи кофии нигоҳдории мундариҷа мавҷуд нест</string>
     <string name="no_app_found">Ягон барнома барои кушодани файл ёфт нашуд</string>
-    <string name="content_entry_label_title">Унвон</string>
     <string name="error_message_update_document">Ҳуҷҷатро навсозӣ карда натавонист</string>
     <string name="content_editor_save_error">Ҳангоми захирасозӣ ба хатогӣ роҳ дода шуд, бори дигар кӯшиш кунед</string>
     <string name="enter_register_code">Рамзи бақайдгириро ворид кунед</string>
@@ -1007,4 +1004,6 @@
     <string name="assign_random_reviewers">Баррасиҳои тасодуфиро таъин кунед. Назначьте случайных рецензентов.</string>
     <string name="reviewer">Баррасикунанда #%1$s. Рецензент #%1$s.</string>
     <string name="unassigned_error">Пешниҳод карда наметавонед: шумо дар курс номнавис шудаед, аммо ба гурӯҳе таъин нашудаед Невозможно отправить: вы зачислены на курс, но не назначены в группу</string>
+    <string name="pdf">PDF</string>
+    <string name="app_language">Забони барнома</string>
 </resources>

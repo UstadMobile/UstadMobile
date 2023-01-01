@@ -121,13 +121,10 @@
     <string name="entry_details_author">نویسنده</string>
     <string name="file_not_found">پرونده یافت نشد</string>
     <string name="multiple_choice">چند گزینه‌ای</string>
-    <string name="content_font_10">اندازه متن 10</string>
     <string name="confirm">تأیید کردن</string>
     <string name="entry_details_license">مجوز:</string>
     <string name="video">ویدیو</string>
-    <string name="content_update_document_title">بهنگام سازی مدرک</string>
     <string name="content_editor_menu_italic">کج</string>
-    <string name="content_editor_link_insert">پیوند را درج نمائید</string>
     <string name="content_from_file">از پرونده</string>
     <string name="licence">مجوز</string>
     <string name="content_creation_storage_option_title">گزینۀ ذخیره‌گاه</string>
@@ -184,10 +181,8 @@
     <string name="publicly_accessible">در دسترس عمومی</string>
     <string name="error_message_load_page">بارگذاری صفحه نامؤفق بود</string>
     <string name="xapi_options_when">چه وقت</string>
-    <string name="content_editor_menu_align_center">مرکز</string>
     <string name="content_from_link">از پیوند</string>
     <string name="supported_files">پرونده‌های مورد پشتیبانی: <b> ویدیو، صوت، EPUB، زاپی، فشرده شده، H5P </b></string>
-    <string name="content_editor_create_new_import">وارد ساختن فایل</string>
     <string name="done">تمام</string>
     <string name="content_editor_create_new_category">دوسیه جدید</string>
     <string name="dropdown">کشویی</string>

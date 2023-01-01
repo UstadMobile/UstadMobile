@@ -26,7 +26,6 @@ import com.ustadmobile.lib.rest.ext.*
 import com.ustadmobile.lib.rest.messaging.MailProperties
 import com.ustadmobile.lib.util.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import io.ktor.server.application.*
 import io.ktor.serialization.gson.*
@@ -51,7 +50,7 @@ import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.db.ext.preload
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
-import com.ustadmobile.core.util.SysPathUtil
+import com.ustadmobile.lib.util.SysPathUtil
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.server.http.content.*
