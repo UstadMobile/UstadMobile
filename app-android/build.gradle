@@ -349,6 +349,8 @@ dependencies {
     //Better Link Movement Method
     implementation "me.saket:better-link-movement-method:$version_better_link_movement"
 
+    implementation "com.dmitryborodin:pdfview-android:$version_pdfview_android"
+
     //PanicKit (PanicButton) integration
     implementation "info.guardianproject.panic:panic:$version_android_panickit"
 

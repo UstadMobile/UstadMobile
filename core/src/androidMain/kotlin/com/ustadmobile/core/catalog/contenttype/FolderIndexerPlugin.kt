@@ -42,6 +42,7 @@ class FolderIndexerPlugin(
             di.on(endpoint).direct.instance<EpubTypePluginCommonJvm>(),
             di.on(endpoint).direct.instance<XapiTypePluginCommonJvm>(),
             di.on(endpoint).direct.instance<H5PTypePluginCommonJvm>(),
+            di.on(endpoint).direct.instance<PDFTypePlugin>(),
             di.on(endpoint).direct.instance<VideoTypePluginAndroid>()))
 
     override suspend fun extractMetadata(uri: DoorUri, process: ContentJobProcessContext): MetadataResult? {

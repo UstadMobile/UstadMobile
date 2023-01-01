@@ -1,0 +1,20 @@
+appId: com.toughra.ustadmobile
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+
+- runFlow:
+    file: "../common/add_content.yaml"
+    env:
+      TESTFILENAME: Epub_Content.epub
+      TESTCONTENTNAME: AddContentEpubTest
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+
+- runFlow:
+    file: "../common/login_download_and_open_content.yaml"
+    env:
+      TESTCONTENTNAME: AddContentEpubTest

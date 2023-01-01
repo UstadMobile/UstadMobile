@@ -294,6 +294,10 @@
         android:id="@+id/video_content"
         android:name="com.ustadmobile.port.android.view.VideoContentFragment"
         android:label="" />
+    <fragment
+        android:id="@+id/pdf_content"
+        android:name="com.ustadmobile.port.android.view.PDFContentFragment"
+        android:label="" />
 
     <fragment
         android:id="@+id/site_enterlink_dest"

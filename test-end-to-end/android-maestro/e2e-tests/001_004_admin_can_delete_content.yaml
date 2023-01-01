@@ -1,0 +1,18 @@
+appId: com.toughra.ustadmobile
+---
+- clearState: com.toughra.ustadmobile
+
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+
+- runFlow:
+      file: "../common/add_content.yaml"
+      env:
+          TESTFILENAME: "H5p_Content.h5p"
+          TESTCONTENTNAME: "ContentDeleteDownloadTest"
+- runFlow:
+      file: "../common/delete_and_download_content.yaml"
+      env:
+          TESTCONTENTNAME: "ContentDeleteDownloadTest"

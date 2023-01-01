@@ -1,0 +1,12 @@
+appId: com.toughra.ustadmobile
+---
+- launchApp
+- tapOn:
+    id: "com.toughra.ustadmobile:id/menu_main_settings"
+- tapOn: "Site"
+- tapOn: "Edit"
+- tapOn: "Guest login enabled"
+- tapOn: "SAVE"
+- takeScreenshot: "results/${TESTCONTENTNAME}-Guestloginenabled"
+
+
