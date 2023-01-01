@@ -482,75 +482,67 @@ fun ReportSeriesListItem(
     onClickDeleteReportFilter: (ReportFilterWithDisplayDetails) -> Unit,
 ){
 
-    ListItem(
-        text = {
-            UstadTextEditField(
-                value = reportSeries.reportSeriesName ?: "",
-                label = stringResource(id = R.string.title),
-                enabled = uiState.fieldsEnabled,
-                onValueChange = {
-                    onChangedReportSeries(reportSeries.shallowCopy{
-                        reportSeriesName = it
-                    })
-                },
+    Row(
+        modifier = Modifier.padding(end = 10.dp)
+    ){
+        UstadTextEditField(
+            modifier = Modifier.weight(0.9F),
+            value = reportSeries.reportSeriesName ?: "",
+            label = stringResource(id = R.string.title),
+            enabled = uiState.fieldsEnabled,
+            onValueChange = {
+                onChangedReportSeries(reportSeries.shallowCopy{
+                    reportSeriesName = it
+                })
+            },
+        )
+
+        IconButton(
+            modifier = Modifier.weight(0.1F)
+                .padding(end = 5.dp),
+            onClick = { onClickRemoveSeries(reportSeries) },
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = "",
             )
+        }
+    }
+
+    UstadMessageIdOptionExposedDropDownMenuField(
+        value = reportSeries.reportSeriesYAxis,
+        label = stringResource(R.string.xapi_options_y_axes),
+        options = YAxisConstants.Y_AXIS_MESSAGE_IDS,
+        enabled = uiState.fieldsEnabled,
+        onOptionSelected = {
+            onChangedReportSeries(reportSeries.shallowCopy{
+                reportSeriesYAxis = it.value
+            })
         },
-        trailing = {
-            IconButton(
-                onClick = { onClickRemoveSeries(reportSeries) },
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = "",
-                )
-            }
-        }
     )
 
-    ListItem(
-        text = {
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = reportSeries.reportSeriesYAxis,
-                label = stringResource(R.string.xapi_options_y_axes),
-                options = YAxisConstants.Y_AXIS_MESSAGE_IDS,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = {
-                    onChangedReportSeries(reportSeries.shallowCopy{
-                        reportSeriesYAxis = it.value
-                    })
-                },
-            ) },
+    UstadMessageIdOptionExposedDropDownMenuField(
+        value = reportSeries.reportSeriesVisualType,
+        label = stringResource(R.string.xapi_options_visual_type),
+        options = VisualTypeConstants.VISUAL_TYPE_MESSAGE_IDS,
+        enabled = uiState.fieldsEnabled,
+        onOptionSelected = {
+            onChangedReportSeries(reportSeries.shallowCopy{
+                reportSeriesVisualType = it.value
+            })
+        },
     )
 
-    ListItem(
-        text = {
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = reportSeries.reportSeriesVisualType,
-                label = stringResource(R.string.xapi_options_visual_type),
-                options = VisualTypeConstants.VISUAL_TYPE_MESSAGE_IDS,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = {
-                    onChangedReportSeries(reportSeries.shallowCopy{
-                        reportSeriesVisualType = it.value
-                    })
-                },
-            ) },
-    )
-
-    ListItem(
-        text = {
-            UstadMessageIdOptionExposedDropDownMenuField(
-                value = reportSeries.reportSeriesSubGroup,
-                label = stringResource(R.string.xapi_options_subgroup),
-                options = SubgroupConstants.SUB_GROUP_MESSAGE_IDS,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = {
-                    onChangedReportSeries(reportSeries.shallowCopy{
-                        reportSeriesSubGroup = it.value
-                    })
-                },
-            )
-        }
+    UstadMessageIdOptionExposedDropDownMenuField(
+        value = reportSeries.reportSeriesSubGroup,
+        label = stringResource(R.string.xapi_options_subgroup),
+        options = SubgroupConstants.SUB_GROUP_MESSAGE_IDS,
+        enabled = uiState.fieldsEnabled,
+        onOptionSelected = {
+            onChangedReportSeries(reportSeries.shallowCopy{
+                reportSeriesSubGroup = it.value
+            })
+        },
     )
 
     Spacer(modifier = Modifier.height(10.dp))
@@ -577,6 +569,7 @@ fun ReportSeriesListItem(
         .forEach { filter ->
 
             ListItem(
+                icon = { Spacer(Modifier.width(24.dp)) },
                 text = { Text(filter.person?.fullName() ?: "") },
                 trailing = {
                     IconButton(
@@ -591,11 +584,11 @@ fun ReportSeriesListItem(
             )
         }
 
-    Spacer(modifier = Modifier.height(15.dp))
-
-    ListItem {
-        Divider()
-    }
+    Divider(
+        modifier = Modifier.padding(
+            horizontal = 10.dp
+        )
+    )
 }
 
 @Composable

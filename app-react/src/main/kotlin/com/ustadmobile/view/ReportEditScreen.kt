@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.ext.shallowCopyReportWithSeriesWithFilter
 import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.view.components.UstadBlankIcon
+import csstype.Margin
 import csstype.px
 import mui.icons.material.Add
 import mui.icons.material.Close
@@ -291,7 +292,9 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
         }
     }
 
-    ListItem {
-        divider = true
+    Divider {
+        sx {
+            margin = Margin(top=0.px, bottom = 40.px, horizontal = 15.px)
+        }
     }
 }
