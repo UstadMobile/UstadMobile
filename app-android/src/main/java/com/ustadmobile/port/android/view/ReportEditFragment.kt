@@ -582,11 +582,21 @@ fun ReportSeriesListItem(
                     }
                 }
             )
+
+            Divider(
+                modifier = Modifier.padding(
+                    start = 64.dp,
+                    end = 20.dp
+                )
+            )
         }
 
     Divider(
         modifier = Modifier.padding(
-            horizontal = 10.dp
+            start = 20.dp,
+            end = 20.dp,
+            bottom = 40.dp,
+            top = 20.dp
         )
     )
 }
