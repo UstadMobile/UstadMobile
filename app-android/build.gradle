@@ -351,6 +351,9 @@ dependencies {
 
     implementation "com.dmitryborodin:pdfview-android:$version_pdfview_android"
 
+    //PanicKit (PanicButton) integration
+    implementation "info.guardianproject.panic:panic:$version_android_panickit"
+
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
     testImplementation "androidx.test:core:$version_android_junit_runner"
