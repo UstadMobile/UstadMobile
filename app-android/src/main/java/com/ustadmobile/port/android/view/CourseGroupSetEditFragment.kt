@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -36,10 +38,7 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CourseGroupSetEditView
 import com.ustadmobile.core.viewmodel.CourseGroupSetEditUiState
-import com.ustadmobile.lib.db.entities.CourseGroupMember
-import com.ustadmobile.lib.db.entities.CourseGroupMemberPerson
-import com.ustadmobile.lib.db.entities.CourseGroupSet
-import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
@@ -149,57 +148,61 @@ fun CourseGroupSetEditScreen(
     onClickAssign: () -> Unit = {},
     onCgmChange: (CourseGroupMember?) -> Unit = {}
 ){
-    Column(
+    LazyColumn(
         modifier = Modifier
             .padding(vertical = 8.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.Start
     ) {
-        UstadTextEditField(
-            modifier = Modifier
-                .padding(horizontal = 8.dp),
-            value = uiState.courseGroupSet?.cgsName ?: "",
-            label = stringResource(id = R.string.title),
-            error = uiState.courseTitleError,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onCourseGroupSetChange(uiState.courseGroupSet?.shallowCopy{
-                    cgsName = it
-                })
-            }
-        )
-
-        UstadTextEditField(
-            modifier = Modifier
-                .padding(horizontal = 8.dp),
-            value = uiState.courseGroupSet?.cgsTotalGroups.toString(),
-            label = stringResource(id = R.string.number_of_groups),
-            error = uiState.numOfGroupsError,
-            enabled = uiState.fieldsEnabled,
-            onValueChange = {
-                onCourseGroupSetChange(uiState.courseGroupSet?.shallowCopy{
-                    cgsTotalGroups = it.toInt()
-                })
-            }
-        )
-
-        Button(
-            onClick = onClickAssign,
-            enabled = uiState.fieldsEnabled,
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = colorResource(id = R.color.secondaryColor)
-            )
-        ) {
-            Text(stringResource(R.string.assign_to_random_groups).uppercase(),
+        item {
+            UstadTextEditField(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp),
+                value = uiState.courseGroupSet?.cgsName ?: "",
+                label = stringResource(id = R.string.title),
+                error = uiState.courseTitleError,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onCourseGroupSetChange(uiState.courseGroupSet?.shallowCopy{
+                        cgsName = it
+                    })
+                }
             )
         }
 
-        val groups =  (1 ..(uiState.courseGroupSet?.cgsTotalGroups ?: 1)).map { "Group $it" }
+        item {
+            UstadTextEditField(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp),
+                value = uiState.courseGroupSet?.cgsTotalGroups.toString(),
+                label = stringResource(id = R.string.number_of_groups),
+                error = uiState.numOfGroupsError,
+                enabled = uiState.fieldsEnabled,
+                onValueChange = {
+                    onCourseGroupSetChange(uiState.courseGroupSet?.shallowCopy{
+                        cgsTotalGroups = it.toInt()
+                    })
+                }
+            )
+        }
 
-        uiState.membersList.forEach { member ->
+        item {
+            Button(
+                onClick = onClickAssign,
+                enabled = uiState.fieldsEnabled,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.secondaryColor)
+                )
+            ) {
+                Text(stringResource(R.string.assign_to_random_groups).uppercase(),
+                )
+            }
+        }
+
+        val groups = (1..(uiState.courseGroupSet?.cgsTotalGroups ?: 1)).toList()
+
+        items(uiState.membersList, itemContent = { member ->
             ListItem (
                 modifier = Modifier
                     .padding(horizontal = 8.dp),
@@ -213,22 +216,22 @@ fun CourseGroupSetEditScreen(
                     )
                 },
                 trailing = {
-                    UstadExposedDropDownMenuField<String>(
-                        value = "Group " + member.cgm.cgmGroupNumber,
+                    UstadExposedDropDownMenuField<Int>(
+                        value = member.cgm.cgmGroupNumber,
                         label = "",
                         options = groups,
                         onOptionSelected = {
                             onCgmChange(member.cgm.shallowCopy{
-                                cgmGroupNumber = it.toInt()
+                                cgmGroupNumber = it
                             })
                         },
-                        itemText =  { it },
+                        itemText =  { "${stringResource(id = R.string.group)} $it" },
                         modifier = Modifier
                             .width(120.dp)
                     )
                 }
             )
-        }
+        })
 
     }
 }
@@ -243,25 +246,25 @@ fun CourseGroupSetEditScreenPreview(){
                 cgsTotalGroups = 6
             },
             membersList = listOf(
-                com.ustadmobile.core.viewmodel.CourseGroupMemberPerson(
+                CourseGroupMemberAndName(
                     cgm = CourseGroupMember().apply {
                         cgmGroupNumber = 1
                     },
                     name = "Bart Simpson"
                 ),
-                com.ustadmobile.core.viewmodel.CourseGroupMemberPerson(
+                CourseGroupMemberAndName(
                     cgm = CourseGroupMember().apply {
                         cgmGroupNumber = 2
                     },
                     name = "Shelly Mackleberry"
                 ),
-                com.ustadmobile.core.viewmodel.CourseGroupMemberPerson(
+                CourseGroupMemberAndName(
                     cgm = CourseGroupMember().apply {
                         cgmGroupNumber = 2
                     },
                     name = "Tracy Mackleberry"
                 ),
-                com.ustadmobile.core.viewmodel.CourseGroupMemberPerson(
+                CourseGroupMemberAndName(
                     cgm = CourseGroupMember().apply {
                         cgmGroupNumber = 1
                     },
