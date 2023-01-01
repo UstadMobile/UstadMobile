@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSettingsBinding
@@ -17,6 +18,8 @@ import org.kodein.di.instance
 interface SettingsFragmentEventListener {
 
     fun onClickAppLanguage()
+
+    fun onClickPanicButton()
 
 }
 
@@ -83,6 +86,10 @@ class SettingsFragment : UstadBaseFragment(), SettingsView, SettingsFragmentEven
                 activity?.recreate()
             }
             .show()
+    }
+
+    override fun onClickPanicButton() {
+        findNavController().navigate(R.id.panic_button_settings_dest)
     }
 
     override fun onDestroyView() {

@@ -6,6 +6,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
+import com.ustadmobile.port.android.view.PanicButtonSettingsView
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -157,6 +158,7 @@ class ViewNameToDestMap: DestinationProvider {
                 hideBottomNavigation = true),
             ScopedGrantListView.VIEW_NAME to UstadDestination(R.id.scoped_grant_list_dest),
             ScopedGrantDetailView.VIEW_NAME to UstadDestination(R.id.scoped_grant_detail_dest),
+            PanicButtonSettingsView.VIEW_NAME to UstadDestination(R.id.panic_button_settings_dest),
     )
 
     override val navControllerViewId: Int
