@@ -79,6 +79,8 @@ fun useUstadScreens(): UstadScreens {
                 "UstadListFilterChipsHeaderPreview Preview", UstadListFilterChipsHeaderPreview),
             UstadScreen("UstadListSortHeader",
                 "UstadListSortHeader", UstadListSortHeaderPreview),
+            UstadScreen(ClazzLogEditView.VIEW_NAME, "ClazzLogEdit Preview",
+                ClazzLogEditScreenPreview),
         )
     }
 }
