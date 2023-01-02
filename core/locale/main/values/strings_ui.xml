@@ -1533,8 +1533,13 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <string name="pdf">PDF</string>
 
     <!--
-    Settings that allow the user to specify what action to take (e.g. delete data, uninstall app, etc)
-    in case of emergency.
+    A Panic Button App is an external app (such as Ripple) that allows the user to delete or hide
+    sensitive data in an emergency situation (for example if they think their phone is about to be
+    stolen, searched, etc). The user has a simple panic button that can trigger multiple apps to take
+    emergency action (such as hiding, deleting data, etc).
+
+    Ustad Mobile will listen for a Panic Button trigger from such an app, and allows the user to
+    specify if they want to take certain actions (e.g. delete data from device, hide app, etc).
     -->
     <string name="panic_button_app">Panic button app</string>
 
@@ -1552,12 +1557,23 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!--
     Explanation of how the Ustad Mobile app can work with a panic button app. %1$s will be replaced
     with the name of the app e.g. Ustad Mobile.
+
+    A Panic Button App is an external app (such as Ripple) that allows the user to delete or hide
+    sensitive data in an emergency situation (for example if they think their phone is about to be
+    stolen, searched, etc). The user has a simple panic button that can trigger multiple apps to take
+    emergency action (such as hiding, deleting data, etc).
     -->
     <string name="panic_button_explanation">%1$s can automatically exit, clear data stored on this device, and hide itself when triggered by any panic button app that supports the PanicKit standard (such as Ripple). Tap to download Ripple.</string>
 
     <!--
-    Explanation of how the Ustad Mobile app can uatomatically hide itself. $1$s will be replaced with
-    the name of the app e.g. Ustad Mobile. %2$s will be replaced with the unhide code.
+    Explanation of how the Ustad Mobile app can uatomatically hide itself when triggered by a panic
+    button app. $1$s will be replaced with the name of the app e.g. Ustad Mobile.
+    %2$s will be replaced with the unhide code.
+
+    A Panic Button App is an external app (such as Ripple) that allows the user to delete or hide
+    sensitive data in an emergency situation (for example if they think their phone is about to be
+    stolen, searched, etc). The user has a simple panic button that can trigger multiple apps to take
+    emergency action (such as hiding, deleting data, etc).
     -->
     <string name="hide_app_explanation">Unhide code: %2$s\nIf hide app is enabled, then %1$s will be hidden and replaced with a fake notepad app when the panic button is triggered. You will need to type unhide code above ( %2$s ) into the fake notepad app to unhide %1$s.</string>
 </resources>
