@@ -91,7 +91,6 @@
     <string name="video">भिडियो</string>
     <string name="download_continue_stacked_label">डाउनलोडलाई निरन्तरता दिऔं</string>
     <string name="download_continue_btn_label">निरन्तरता दिऔं</string>
-    <string name="content_editor_link_insert">लिंक इन्सर्ट गरौं</string>
     <string name="content_editor_create_new_category">नयाँ फोल्डर</string>
     <string name="download_state_downloading">जम्मा %1$s आइटमहरू &lt;b&gt;डाउनलोड हुँदैछ&lt;/b&gt;, जसले तपाईंको डिभाइस स्टोरेजको जम्मा %2$s प्रयोग गर्दैछन्।</string>
     <string name="content_editor_save_error">सेभ गर्दा त्रुटि देखियो, फेरि कोशिस गरौं</string>

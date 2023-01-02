@@ -37,7 +37,6 @@
     <string name="download_state_downloaded"><b>ဒေါင်းလုပ်ပြီးစီးပါပြီ</b>စုစုပေါင်းပစ္စည်းများ၏ %1$s,သင်၏ကိရိယာသိုလှောင်မှု၏ %2$s ခန့်ကိုအသုံးပြုနေသည်။.</string>
     <string name="no_app_found">ဖိုင်ဖွင့်ရန်အက်ပလီကေးရှင်းမရှိပါ</string>
     <string name="multiple_choice">ရွေးချယ်မှုများစွာ</string>
-    <string name="permission_camera_message">ဓာတ်ပုံနှင့်ဗီဒီယိုများရိုက်ကူးရန်အတွက်ဤအက်ပ်သည်ကင်မရာနှင့်ဖိုင်ခွင့်ပြုချက်နှစ်ခုလုံးလိုအပ်သည်</string>
     <string name="file_required_prompt">တင်သွင်းမည့်ဖိုင်ကိုမရွေးပါ၊ ထပ်မံကြိုးစားပါ</string>
     <string name="content_creation_folder_update_message">ဖိုလ်ဒါကိုအောင်အောင်မြင်မြင်မွမ်းမံခဲ့သည်</string>
     <string name="supported_files">ထောက်ပံ့သည့်ဖိုင်များ - <b>ဗီဒီယို၊ အသံ၊ အီးစဦးခ၊ XAPI၊ ဇစ်၊ ဇ5ဇ </b></string>
@@ -188,9 +187,7 @@
     <string name="entry_details_license">လိုင်စင်:</string>
     <string name="file_not_found">ဖိုင်ရှာမတွေ့ပါ</string>
     <string name="preview">တင်ကူးသိမြင်</string>
-    <string name="content_media_photo">ဓာတ်ပုံ</string>
     <string name="video">ဗွီဒီယို</string>
-    <string name="content_editor_menu_bold">ရဲရင့်သော</string>
     <string name="content_editor_create_new_category">ဖိုင်တွဲအသစ်</string>
     <string name="content_creation_storage_option_title">သိုလှောင်မှုရွေးစရာ</string>
     <string name="content_creation_folder_new_message">ဖိုင်တွဲအသစ်ကိုအောင်မြင်စွာထည့်ပြီးပါပြီ</string>

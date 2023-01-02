@@ -119,7 +119,6 @@
     <string name="entry_details_license">جواز:</string>
     <string name="file_not_found">دوتنه و نه موندل شو</string>
     <string name="multiple_choice">ګڼ ځوابه</string>
-    <string name="content_choose_file">دوتنه غوره کړئ</string>
     <string name="video">ویډیو</string>
     <string name="location_permission_details">دا اپلیکیشن د نورو نږدې کاروونکو د پیدا کولو لپاره له بلوټوت او وایفای څخه کار اخلی. دا اپلیکیشن بیا کولای شی له نږدی کاروونکو سره وصل شی او محتویات پرته له انټرنټ څخه په لوړ سرعت سره کښته کړی. د دې لپاره چې د دې سکن پایلی څخه ستاسو د موقعیت د مالومولو لپاره ګټه اخیستل کیدای شی، ځکه نو تاسو باید د ځای د موقعیت اجازه ورکړئ ترڅو دا بڼه فعاله شی. دا اپلیکیشن د دې سکن/پلټنې پایله له ځانه سره خوندی نه ساتی او په هیڅ وجه ستاسو د ځای موقعیت نه ثبتوی. دا اپلیکیشن له خلاص زیرمه کوډ (Open source code) څخه جوړه شوې ده چې په دې پته یې لیدلی شئ: github.com/UstadMobile/UstadMobile</string>
     <string name="download_state_download">
