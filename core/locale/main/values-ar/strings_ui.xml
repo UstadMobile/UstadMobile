@@ -5,7 +5,6 @@
     <!--Content editor-->
     <string name="multiple_choice">متعدد الخيارات</string>
     <string name="video">فيديو</string>
-    <string name="content_editor_menu_superscript">مرتفع</string>
     <string name="content_editor_create_new_category">مجلد جديد</string>
     <string name="licence">رخصة</string>
     <string name="publicly_accessible">انشر المحتوى</string>
