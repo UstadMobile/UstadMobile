@@ -81,6 +81,8 @@ fun useUstadScreens(): UstadScreens {
                 "UstadListSortHeader", UstadListSortHeaderPreview),
             UstadScreen(ClazzLogEditView.VIEW_NAME, "ClazzLogEdit Preview",
                 ClazzLogEditScreenPreview),
+            UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview",
+                CourseGroupSetEditScreenPreview),
         )
     }
 }
