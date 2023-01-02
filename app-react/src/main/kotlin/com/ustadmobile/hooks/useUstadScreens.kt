@@ -6,6 +6,8 @@ import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.UstadCourseBlockEditPreview
 import com.ustadmobile.mui.components.UstadDetailFieldPreview
 import com.ustadmobile.mui.components.UstadEditFieldPreviews
+import com.ustadmobile.mui.components.UstadListFilterChipsHeaderPreview
+import com.ustadmobile.mui.components.UstadListSortHeaderPreview
 import com.ustadmobile.view.*
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
@@ -56,8 +58,28 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen("EasySort", "Easy Sort", EasySortPreview),
             UstadScreen(ErrorReportView.VIEW_NAME, name = "ErrorReport Preview", ErrorReportPreview),
             UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
-            UstadScreen(ClazzLogEditView.VIEW_NAME,
-                "ClazzLogEdit Preview",
+            UstadScreen(ReportFilterEditView.VIEW_NAME,
+                "ReportFilterEdit Preview", ReportFilterEditScreenPreview),
+            UstadScreen(ScopedGrantDetailView.VIEW_NAME, "ScopedGrantDetail Preview",
+                ScopedGrantDetailScreenPreview),
+            UstadScreen(ContentEntryImportLinkView.VIEW_NAME, "ContentEntryImportLink Preview",
+                ContentEntryImportLinkScreenPreview),
+            UstadScreen(HolidayCalendarDetailView.VIEW_NAME, "HolidayCalendarDetail Preview",
+                HolidayCalendarDetailPreview),
+            UstadScreen(ContentEntryDetailOverviewView.VIEW_NAME,
+                "ContentEntryDetailOverview Preview",
+                ContentEntryDetailOverviewScreenPreview),
+            UstadScreen(HolidayCalendarEditView.VIEW_NAME, "HolidayCalendarEdit Preview",
+                HolidayCalendarEditPreview),
+            UstadScreen(ScopedGrantEditView.VIEW_NAME,
+                "ScopedGrantEdit Preview", ScopedGrantEditScreenPreview),
+            UstadScreen(CourseTerminologyEditView.VIEW_NAME,
+                "CourseTerminologyEdit Preview", CourseTerminologyEditScreenPreview),
+            UstadScreen("UstadListFilterChipsHeader",
+                "UstadListFilterChipsHeaderPreview Preview", UstadListFilterChipsHeaderPreview),
+            UstadScreen("UstadListSortHeader",
+                "UstadListSortHeader", UstadListSortHeaderPreview),
+            UstadScreen(ClazzLogEditView.VIEW_NAME, "ClazzLogEdit Preview",
                 ClazzLogEditScreenPreview),
         )
     }
