@@ -1940,5 +1940,13 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     -->
     <string name="app_language">App language</string>
 
+    <!--
+    Describes the three vertical dots ( ⋮ ) that users click on to get a popup menu. This is not
+    displayed in the app directly. It is only used when users activate text-to-speech to read out
+    what is on screen (e.g. for users with eyesight issues who cannot see the screen normally).
+    -->
+    <string name="more_options">More options</string>
+
+
 
 </resources>

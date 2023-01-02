@@ -310,6 +310,8 @@ dependencies {
     implementation "com.google.android.material:compose-theme-adapter:$version_compose_theme_adapter"
     implementation "com.google.accompanist:accompanist-pager:$version_compose_accompanist"
     implementation "com.google.accompanist:accompanist-pager-indicators:$version_compose_accompanist"
+    implementation "org.burnoutcrew.composereorderable:reorderable:$version_composereorderable"
+    implementation "com.google.accompanist:accompanist-flowlayout:$version_compose_accompanist"
 
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"
