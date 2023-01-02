@@ -338,7 +338,6 @@
 \n2. Боварӣ ҳосил кунед, ки дастгоҳ намоён аст.</string>
     <string name="dialog_download_from_playstore_cancel">Дар сомона бимонед</string>
     <string name="onboarding_no_internet_subheadline">Ҳама чиз офлайн кор мекунад</string>
-    <string name="location_permission_title">Иҷозати дарёфти макон лозим аст</string>
     <string name="location_permission_message">Ин барнома иҷозати ҷойгиршавиро тақозо мекунад, то мубодилаи фаврӣ бо корбарони наздик фаъол карда шавад.</string>
     <string name="xapi_custom_date" value="303">Санаи фармоишӣ</string>
     <string name="xapi_options_visual_type">Намуди визуализатсия</string>
@@ -355,7 +354,6 @@
     <string name="content">Мазмун</string>
     <string name="student_progress">Пешрафти хонанда</string>
     <string name="use_device_language">Забони дастгоҳ</string>
-    <string name="location_permission_details">Барномаи мазкур Bluetooth ва WiFi-ро барои ёфтани корбарони дигар дар наздикӣ истифода мебарад. Он гоҳ барнома метавонад бо корбарони наздик бо суръати баланд боркаш кардани мундариҷаро бидуни дархости дастрасӣ ба Интернет имконият диҳад. Азбаски ин амалро барои муайян кардани макони шумо истифода бурдан мумкин аст, шумо бояд барои муайян кардани ҷойгиршавӣ иҷозат диҳед. Ин барнома натиҷаҳои ин амал ва макони шуморо бо ягон роҳ сабт намекунад. Ин барнома аз рамзи кушодаасос сохта шудааст, ки онро дар github.com/UstadMobile/UstadMobile санҷидан мумкин аст</string>
     <string name="download_state_downloaded"><b>Бор гардид </b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s-и захирагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="download_storage_option_device">Истифодаи %1$s - %2$s озод</string>
     <string name="insufficient_space">Ҷойи кофии нигоҳдории мундариҷа мавҷуд нест</string>
@@ -530,7 +528,6 @@
     <string name="select_group_members">Аъзоёни гурӯҳро интихоб намоед</string>
     <string name="add_a_new_language">Забони навро илова намоед</string>
     <string name="add_a_student">Хонандаро илова намоед</string>
-    <string name="underRegistrationAgeError">Бақайдгирии мустақили кӯдакони то 13-сола манъ аст. Лутфан аз омӯзгори худ хоҳиш кунед, ки шуморо сабти ном кунад.</string>
     <string name="create_a_new_report">Гузориши навро омода намоед</string>
     <string name="edit_report">Таҳрири гузориш</string>
     <string name="add_a_new_verb">Феъли навро илова намоед</string>

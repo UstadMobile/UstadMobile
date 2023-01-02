@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">‫أستاد موبايل‬</string>
-    <string name="location_permission_title">مطلوب اذن للحصول على الموقع</string>
     <!--Content editor-->
     <string name="multiple_choice">متعدد الخيارات</string>
     <string name="video">فيديو</string>
@@ -14,7 +13,6 @@
     <string name="content_creation_folder_update_message">تم تحديث المستند بنجاح</string>
     <string name="error_message_load_page">فشل تحميل الصفحة</string>
     <string name="error_message_update_document">فشل تحديث المستند</string>
-    <string name="location_permission_message">التطبيق يلزم اذن للحصول على الموقع حتى تتمكن من تحميل المحتوى و مشاركته مع الاخرين من حولك دون اتصال. لن نقوم بحفظ او قراءة الموقع، بل سنقوم باستخدام المسح عن طريق البلوتوث للبحث عن الاجهزة القريبة.</string>
     <string name="download_storage_option_device">التخزين على ذاكرة الهاتف %1$s جيجابيت متوفر
 التخزين على بطاقة ذاكرة %2$s جيجابيت متوفر</string>
     <string name="content_from_file">من الملف</string>
@@ -111,8 +109,6 @@
     <string name="onboarding_offline_sharing_subheading">وفر الوقت والبيانات مع مشاركة فائقة السرعة دون اتصال بالإنترنت</string>
     <string name="download_summary_title">%1$s تنزيل نشط</string>
     <string name="update">تحديث</string>
-    <string name="location_permission_details">التطبيق يستخدم المسح عن طريق البلوتوث و ال WiFi لايجاد مستخدمين قريبين. التطبيق سوق يقوم بوصل المستخدمين القرب لتنزيل المحتوى بسرعة عالية دون الحاجة لانترنت. يجب عليك اعطاء اذن الموقع لانه يعتمد على نتائج المسح. هذا التطبيق لا يحفظ نتائج المسح و الموقع.
-\nهذا التطبيق مبني على خاصية المصدر المفتوح، التي ممكن الأطلاع عليها هنا github.com/UstadMobile/UstadMobile</string>
     <string name="download_continue_stacked_label">استمر بالتنزيل</string>
     <string name="download_continue_btn_label">استمرار</string>
     <string name="download_calculating">يتم الحساب…</string>
@@ -577,7 +573,6 @@
     <string name="add_a_new_verb">اضف فعل جديد</string>
     <string name="edit_report">تعديل التقرير</string>
     <string name="create_a_new_report">انشاء تقرير جديد</string>
-    <string name="underRegistrationAgeError">التسجيل الذاتي للاطفال تحت التلاتة عشر سنة غير مسموح. الرجاء الطلب من المعلمة للتسجيل.</string>
     <string name="add_a_student">اضف طالب</string>
     <string name="add_a_new_language">اضف لغة جديدة</string>
     <string name="select_group_members">اختر اعضاء المجموعة</string>

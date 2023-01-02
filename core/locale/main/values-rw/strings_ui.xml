@@ -62,7 +62,6 @@
     <string name="onboarding_no_internet_subheadline">Buri kintu gikora nta interineti</string>
     <string name="reports">Raporo</string>
     <string name="onboarding_offline_sharing_subheading">Bika igihe n\'amakuru ukoresheje uburyo bwihuta budasaba murandasi</string>
-    <string name="location_permission_title">Uburenganzira bwo kugaragaza aho uherereye burakenewe</string>
     <string name="xapi_options_report_title">Umutwe wa raporo</string>
     <string name="xapi_options_data_set">Amakuru akenewe</string>
     <string name="xapi_options_series">Uruhererekane</string>
@@ -788,7 +787,6 @@
     <string name="hide">Hisha</string>
     <string name="move">Imura</string>
     <string name="attempts">Incuro byageragejwe</string>
-    <string name="underRegistrationAgeError">Birabujijwe ko abana bari munsi y\'imyaka 13 biyandikisha kuri iyigahunda. Nimusabe mwarimu wanyu abandike.</string>
     <string name="download_pause_download">Hagarika</string>
     <string name="action_hidden">Ibihishwe</string>
     <string name="average_usage_time_per_user">Ikoresha ry\'ibikubiye mu nyigisho- Impuzandengo y\'igihe gikoreshwa nukoresha porogaramu ari umwe</string>
@@ -833,7 +831,6 @@
     <string name="number_of_active_users_over_time">Umubare w\'igihe kirenze kukigenwe \"ababa bari gukoresha porogaramu\" bamara</string>
     <string name="parent">Umubyeyi</string>
     <string name="we_sent_a_message_to_your_parent">Twoherereje ubutumwa ababyeyi bawe ( %1$s ) Kugira bemeze ukwiyandikisha kwawe. Ushobora kwinjira ukoresheje izina rikoreshwa n\'ijambobanga uza gushyiraho nyuma yuko ababyeyi bawe babyemeje.</string>
-    <string name="location_permission_message">Iyi gahunda ikenera uburenganzira bwo kugaragaza aho uherereye kugira ngo byongere umuvuduko w\'ihanahanamakuru ridakoresheje murandasi.</string>
     <string name="location_permission_details">Iyi gahunda ikoresha inziramugozi mugushakisha ubu buryo begeranye. iyi gahundanda yahuza abayikoresha begeranye gukuraho inyigisho byihuze badafite murandasi. Iyi Gahunda ntabwo ibika amakuru n\'icyerekezo cyaho uherereye. Iyi hahunda yubatwese nuburyo bushobora gusesengurwa binyuze kuri iri huza.github.com/UstadMobile/UstadMobile</string>
     <string name="error_message_update_document">Gushyiraho inyandiko nshya ntibyakunze</string>
     <string name="content_entry_export_message">Ugiye kohereza%1$s kububiko bw\'igikoresho cyawe. Urashaka gukomeza\?</string>

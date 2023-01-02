@@ -374,10 +374,8 @@
     <string name="permission_clazz_insert">Ajouter des classes</string>
     <string name="permission_attendance_select">Voir la présence</string>
     <string name="users_settings_desc">Ajoutez, supprimez et modifiez des utilisateurs ou réinitialisez leur mot de passe</string>
-    <string name="underRegistrationAgeError">L\'auto-inscription des enfants de moins de 13 ans n\'est pas autorisée. Veuillez demander à votre enseignant de vous inscrire.</string>
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Désolé, cet appareil ne prend pas en charge l\'envoi de fichiers via Bluetooth.</string>
     <string name="lets_get_started_label">Commençons</string>
-    <string name="location_permission_title">Autorisation de localisation requise</string>
     <string name="add_link_description">Ajouter du contenu éducatif en utilisant un lien web, puis l\'utiliser hors ligne</string>
     <string name="add_gallery_description">Ajouter une vidéo ou un fichier audio depuis la galerie de l\'appareil</string>
     <string name="add_file_description">Ajouter du contenu éducatif en utilisant les formats pris en charge, par exemple PDF, xAPI, H5P, EPUB</string>

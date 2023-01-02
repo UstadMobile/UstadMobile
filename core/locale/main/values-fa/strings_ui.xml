@@ -80,7 +80,6 @@
     <string name="no_video_file_found">پرونده ویدیویی یافت نشد</string>
     <string name="error_this_device_doesnt_support_bluetooth_sharing">ببخشید، این دستگاه از ارسال فایل از طریق بلوتوت حمایت نمیکند.</string>
     <string name="share_offline_zip_checkbox_label">ارسال در پرونده فشرده شده</string>
-    <string name="location_permission_details">این اپلیکیشن با استفاده بلوتوت و وایفای، کاربران دیگر را در نزدیکی تان پیدا میکند. سپس، این اپلیکیشن با کاربران نزدیک وصل میگردد تا محتویات را با سرعت بالا بدون دسترسی به انترنت دانلود نماید. به دلیل اینکه نتایج این اسکن برای موقعیت‌یابی شما بکار برده می‌شود، ضروری هست تا شما به موقعیت‌یابی اجازه بدهید تا این ویژگی فعال گردد. این اپلیکیشن نتیجه این اسکن‌ها را ذخیره نمیکند و موقعیت شما را نیز به هیچ وجه ثبت نمیکند. این اپلیکیشن از کود منبع باز ساخته شده که در آدرس ذیل آنرا دیده میتوانید: github.com/ustadmobile/ustadmobile</string>
     <string name="field_password_error_min">رمز عبور باید حد اقل 5 حرف باشد</string>
     <string name="filed_password_no_match">رمز عبور یکسان نیست، دوباره کوشش نمائید</string>
     <string name="profile">نمایه</string>
@@ -99,7 +98,6 @@
     <string name="download_continue_btn_label">ادامه</string>
     <string name="update">بروزرسانی</string>
     <string name="also_available_in">همچنان موجود است در</string>
-    <string name="location_permission_title">اجازه موقعیت‌یابی نیاز است</string>
     <string name="location_permission_message">این اپلیکیشن به موقعیت‌یابی نیاز دارد تا اشتراک‌گذاری آفلاین با سرعت بالا با کاربران نزدیک فعال گردد.</string>
     <string name="download_wifi_only">تنها وای‌فای</string>
     <string name="download_calculating">در حال شمارش…</string>
@@ -666,7 +664,6 @@
     <string name="change_implemented_if_any">تغییر اجرا شده (در صورتیکه موجود باشد)</string>
     <string name="ebook">کتاب الکترونیکی</string>
     <string name="compress">فشرده سازی</string>
-    <string name="underRegistrationAgeError">ثبت نام خودکار اطفال زیر سن 13 سال مجاز نیست. لطفاً از استاد خود بخواهید که شما را ثبت نام نماید.</string>
     <string name="edit_leaving_reason">ویرایش دلیل نتیجه ثبت نام</string>
     <string name="license_type_cc_0">مجوز CC0</string>
     <string name="add_link_description">اضافه نمودن محتوی با استفاده از پیوند ویب، سپس استفاده آن بشکل آفلاین</string>

@@ -36,7 +36,6 @@
     <string name="unhide">Показать</string>
     <string name="compress">Компресс</string>
     <string name="attempts">Попытки</string>
-    <string name="underRegistrationAgeError">Самостоятельная регистрация детей до 13 лет не допускается. Попросите учителя зарегистрировать вас.</string>
     <string name="add_link_description">Добавьте образовательный контент с помощью веб-ссылки, а затем используйте его в автономном режиме</string>
     <string name="xapi_hours">Часы</string>
     <string name="add_file_description">Добавьте образовательный контент, используя поддерживаемые форматы, например PDF, xAPI, H5P, EPUB</string>
@@ -54,7 +53,6 @@
     <string name="created_partnership">Создано в партнерстве с:</string>
     <string name="onboarding_get_started_label">Начать</string>
     <string name="onboarding_offline_sharing">Поделиться оффлайн</string>
-    <string name="location_permission_details">Это приложение использует Bluetooth и сканирование Wi-Fi, чтобы найти других пользователей поблизости. Затем приложение может подключаться к ближайшим пользователям, чтобы загружать контент на высокой скорости, не требуя доступа в Интернет. Поскольку эти результаты сканирования могут использоваться для определения вашего местоположения, вы должны предоставить разрешение на местоположение, чтобы включить эту функцию. Это приложение не сохраняет результаты этих сканирований и никоим образом не записывает ваше местоположение. Это приложение создано на основе открытого исходного кода, который можно проверить на github.com/UstadMobile/UstadMobile</string>
     <string name="download_continue_stacked_label">Продолжить скачивание</string>
     <string name="download_wifi_only">Только через Wi-Fi</string>
     <string name="download_state_downloading"><b>Скачивание</b> всего %1$s элементов. Всего на вашем устройстве будет использовано %2$s.</string>
@@ -173,7 +171,6 @@
     <string name="exams">Экзамены</string>
     <string name="reports">Отчеты</string>
     <string name="onboarding_offline_sharing_subheading">Делитесь контентом на высокой скорости с любым другим пользователем поблизости.</string>
-    <string name="location_permission_title">Требуется разрешение на местоположение</string>
     <string name="location_permission_message">Этому приложению требуется разрешение на местоположение, чтобы обеспечить высокоскоростной автономный обмен с ближайшими пользователями.</string>
     <string name="xapi_options_report_title">Заголовок отчета</string>
     <string name="xapi_options_visual_type">Тип визуализации</string>
