@@ -4,7 +4,6 @@ import com.ustadmobile.core.db.dao.ClazzDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.viewmodel.FilterChipsHeaderUiState
 import csstype.Margin
 import csstype.px
 import mui.material.*
@@ -15,9 +14,13 @@ import react.ReactNode
 
 external interface UstadListFilterChipsHeaderProps: Props {
 
-    var uiState: FilterChipsHeaderUiState
-
     var onClickFilterChip: (MessageIdOption2) -> Unit
+
+    var filterOptions: List<MessageIdOption2>
+
+    var selectedChipId: Int
+
+    var enabled: Boolean?
 
 }
 
@@ -25,11 +28,15 @@ val UstadListFilterChipsHeader = FC<UstadListFilterChipsHeaderProps> { props ->
 
     val strings = useStringsXml()
 
-    List {
-
-        props.uiState.filterOptions.forEach { filterOption ->
+    Box {
+        props.filterOptions.forEach { filterOption ->
             Chip {
-                clickable = props.uiState.fieldsEnabled
+                disabled = (props.enabled == false)
+                variant = if(filterOption.value == props.selectedChipId) {
+                    ChipVariant.filled
+                }else {
+                    ChipVariant.outlined
+                }
 
                 sx {
                     margin = Margin(horizontal = 5.px, vertical = 0.px)
@@ -46,12 +53,14 @@ val UstadListFilterChipsHeader = FC<UstadListFilterChipsHeaderProps> { props ->
 
 val UstadListFilterChipsHeaderPreview = FC<Props> {
     UstadListFilterChipsHeader {
-        uiState = FilterChipsHeaderUiState(
-            filterOptions = listOf(
-                MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-                MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
-                MessageIdOption2(MessageID.all, 0)
-            )
+        onClickFilterChip = { }
+        filterOptions = listOf(
+            MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
+            MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
+            MessageIdOption2(MessageID.all, 0)
         )
+        selectedChipId = ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
+
+
     }
 }
