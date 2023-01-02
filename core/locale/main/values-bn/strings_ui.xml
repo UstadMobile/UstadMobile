@@ -118,7 +118,6 @@
     <string name="phone_number">ফোন নম্বর</string>
     <string name="name">নাম</string>
     <string name="video">ভিডিও</string>
-    <string name="content_editor_menu_outdent">আউটডেন্ট</string>
     <string name="location_permission_details">এই অ্যাপটি নিকটস্থ অন্যান্য ব্যবহারকারীদের খুঁজতে ব্লুটুথ এবং ওয়াইফাই স্ক্যানিং ব্যবহার করে। অ্যাপ্লিকেশনটি ইন্টারনেট অ্যাক্সেসের প্রয়োজন ছাড়াই দ্রুতগতিতে সামগ্রী ডাউনলোড করতে কাছের ব্যবহারকারীদের সাথে সংযোগ করতে পারে। এই স্ক্যানের ফলাফলগুলি আপনার অবস্থান নির্ধারণের জন্য ব্যবহার করা যেতে পারে, আপনাকে এই বৈশিষ্ট্যটি সক্ষম করার জন্য অবস্থানের অনুমতিটি দিতে হবে। এই অ্যাপ্লিকেশনটি এই স্ক্যানগুলির ফলাফল সংরক্ষণ করে না এবং কোনওভাবেই আপনার অবস্থান রেকর্ড করে না। এই অ্যাপ্লিকেশনটি ওপেন সোর্স কোড থেকে তৈরি যা github.com/UstadMobile/UstadMobile এ চেক করা যায়</string>
     <string name="download_continue_stacked_label">ডাউনলোড চালিয়ে যান</string>
     <string name="download_continue_btn_label">চালিয়ে যান</string>

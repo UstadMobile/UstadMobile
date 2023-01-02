@@ -4,9 +4,7 @@
     <string name="location_permission_title">مطلوب اذن للحصول على الموقع</string>
     <!--Content editor-->
     <string name="multiple_choice">متعدد الخيارات</string>
-    <string name="content_source_device">من الجهاز</string>
     <string name="video">فيديو</string>
-    <string name="content_editor_menu_undo">تراجع</string>
     <string name="content_editor_menu_superscript">مرتفع</string>
     <string name="content_editor_create_new_category">مجلد جديد</string>
     <string name="licence">رخصة</string>
@@ -196,7 +194,6 @@
     <string name="average">المعدل</string>
     <string name="date">التاريخ</string>
     <string name="export">تصدير</string>
-    <string name="show_student_numbers">عرض أرقام الطلبة</string>
     <string name="last_three_months">آخر ثلاث شهور</string>
     <string name="location">الموقع</string>
     <string name="time_period">الفترة الزمنية</string>
@@ -309,7 +306,6 @@
     <string name="refresh">تحديث</string>
     <string name="add">إضافة</string>
     <string name="users_settings_desc">أضافة، وألغاء، وتعديل المستخدمين، أو أعادة تعيين كلمة السر الخاصة فيهم</string>
-    <string name="select_a_timezone">أختر وحدة زمنية</string>
     <string name="password_unchanged">كلمة السر (دون تغيير)</string>
     <string name="current_password">كلمة السر الحالية</string>
     <string name="change_password">تغيير كلمة السر</string>
