@@ -4,24 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.ConcatAdapter
@@ -31,17 +27,13 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentCourseGroupSetEditBinding
 import com.ustadmobile.core.controller.CourseGroupSetEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CourseGroupSetEditView
 import com.ustadmobile.core.viewmodel.CourseGroupSetEditUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.composable.UstadExposedDropDownMenuField
-import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 
@@ -176,9 +168,10 @@ fun CourseGroupSetEditScreen(
                 label = stringResource(id = R.string.number_of_groups),
                 error = uiState.numOfGroupsError,
                 enabled = uiState.fieldsEnabled,
-                onValueChange = {
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                onValueChange = { newString ->
                     onCourseGroupSetChange(uiState.courseGroupSet?.shallowCopy{
-                        cgsTotalGroups = it.toInt()
+                        cgsTotalGroups = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                     })
                 }
             )
@@ -195,8 +188,7 @@ fun CourseGroupSetEditScreen(
                     backgroundColor = colorResource(id = R.color.secondaryColor)
                 )
             ) {
-                Text(stringResource(R.string.assign_to_random_groups).uppercase(),
-                )
+                Text(stringResource(R.string.assign_to_random_groups).uppercase())
             }
         }
 

@@ -2,24 +2,22 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
-import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.CourseGroupSetEditUiState
 import com.ustadmobile.lib.db.entities.CourseGroupMember
+import com.ustadmobile.lib.db.entities.CourseGroupMemberAndName
 import com.ustadmobile.lib.db.entities.CourseGroupSet
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.DropDownOption
-import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadDropDownField
 import com.ustadmobile.mui.components.UstadTextEditField
-import com.ustadmobile.view.components.UstadBlankIcon
 import csstype.px
-import mui.icons.material.AccountBalanceRounded
 import mui.icons.material.AccountCircle
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx
-import popper.core.Modifier
-import react.*
+import react.FC
+import react.Props
+import react.ReactNode
 
 external interface CourseGroupSetEditProps: Props{
     var uiState: CourseGroupSetEditUiState
@@ -58,10 +56,10 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
                 label = strings[MessageID.number_of_groups]
                 error = props.uiState.numOfGroupsError
                 enabled = props.uiState.fieldsEnabled
-                onChange = {
+                onChange = { newString ->
                     props.onCourseGroupSetChange(
                         props.uiState.courseGroupSet?.shallowCopy {
-                            cgsTotalGroups = it.toInt()
+                            cgsTotalGroups = newString.filter { it.isDigit() }.toIntOrNull() ?: 0
                         }
                     )
                 }
@@ -74,45 +72,50 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
                 + strings[MessageID.assign_to_random_groups]
             }
 
-            val groups =  (1 ..(props.uiState.courseGroupSet?.cgsTotalGroups ?: 1)).map { DropDownOption("Group $it", "$it") }
+            val groups =  (1 ..(props.uiState.courseGroupSet?.cgsTotalGroups ?: 1)).map {
+                DropDownOption("${strings[MessageID.group]} $it", "$it")
+            }
 
-            props.uiState.membersList.forEach { member ->
-                ListItem{
-                    disablePadding = true
-
-                    ListItemSecondaryAction {
-
+            List {
+                props.uiState.membersList.forEach { member ->
+                    ListItem{
                         sx {
-                            width = 150.px
+                            paddingTop = 16.px
+                            paddingBottom = 16.px
                         }
 
-                        var selectedOption: DropDownOption? by useState { DropDownOption("Group ${member.cgm.cgmGroupNumber}", "${member.cgm.cgmGroupNumber}") }
 
-                        UstadDropDownField {
-                            value = selectedOption
-                            label = ""
-                            options = groups
-                            itemLabel = { ReactNode((it as? DropDownOption)?.label ?: "") }
-                            itemValue = { (it as? DropDownOption)?.value ?: "" }
-                            onChange = {
-                                selectedOption = it as? DropDownOption
-                                props.onCgmChange(member.cgm.shallowCopy{
-                                    cgmGroupNumber = (it as DropDownOption).value as Int
-                                })
+                        ListItemIcon {
+                            AccountCircle()
+                        }
+
+                        ListItemText {
+                            + (member.name)
+                        }
+
+                        ListItemSecondaryAction {
+
+                            sx {
+                                width = 150.px
+                            }
+
+                            UstadDropDownField {
+                                value = groups.firstOrNull { it.value == member.cgm.cgmGroupNumber.toString() }
+                                label = ""
+                                options = groups
+                                itemLabel = { ReactNode((it as? DropDownOption)?.label ?: "") }
+                                itemValue = { (it as? DropDownOption)?.value ?: "" }
+                                onChange = {
+                                    props.onCgmChange(member.cgm.shallowCopy{
+                                        cgmGroupNumber = (it as DropDownOption).value.toInt()
+                                    })
+                                }
                             }
                         }
                     }
-
-                    ListItemIcon {
-                        AccountCircle()
-                    }
-
-                    ListItemText {
-                        + (member.name)
-                    }
-
                 }
             }
+
 
         }
     }
@@ -121,31 +124,34 @@ val CourseGroupSetEditComponent2 = FC<CourseGroupSetEditProps> { props ->
 
 val CourseGroupSetEditScreenPreview = FC<Props>{
     CourseGroupSetEditComponent2{
+        onCgmChange = {
+
+        }
         uiState = CourseGroupSetEditUiState(
             courseGroupSet = CourseGroupSet().apply {
                 cgsName = "ttl"
                 cgsTotalGroups = 6
             },
             membersList = listOf(
-                com.ustadmobile.core.viewmodel.CourseGroupMemberPerson(
+                CourseGroupMemberAndName(
                     cgm = CourseGroupMember().apply {
                         cgmGroupNumber = 1
                     },
                     name = "Bart Simpson"
                 ),
-                com.ustadmobile.core.viewmodel.CourseGroupMemberPerson(
+                CourseGroupMemberAndName(
                     cgm = CourseGroupMember().apply {
                         cgmGroupNumber = 2
                     },
                     name = "Shelly Mackleberry"
                 ),
-                com.ustadmobile.core.viewmodel.CourseGroupMemberPerson(
+                CourseGroupMemberAndName(
                     cgm = CourseGroupMember().apply {
                         cgmGroupNumber = 2
                     },
                     name = "Tracy Mackleberry"
                 ),
-                com.ustadmobile.core.viewmodel.CourseGroupMemberPerson(
+                CourseGroupMemberAndName(
                     cgm = CourseGroupMember().apply {
                         cgmGroupNumber = 1
                     },
