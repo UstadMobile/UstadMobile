@@ -5,6 +5,8 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Html
+import android.text.SpannedString
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,7 +38,9 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.RateLimitedLiveData
+import com.ustadmobile.core.util.ext.editIconId
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzDetailOverviewView
@@ -454,6 +458,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 private fun ClazzDetailOverviewScreen(
     uiState: ClazzDetailOverviewUiState = ClazzDetailOverviewUiState(),
     onClickClassCode: (String) -> Unit = {},
+    onClickCourseBlock: (CourseBlockWithCompleteEntity) -> Unit = {},
 ) {
     val numMembers = stringResource(R.string.x_teachers_y_students,
         uiState.clazz?.numTeachers ?: 0,
@@ -486,50 +491,54 @@ private fun ClazzDetailOverviewScreen(
         }
 
         item {
-            UstadDetailField(
-                imageId = R.drawable.ic_login_24px,
-                valueText = numMembers,
-                labelText = stringResource(R.string.class_code),
-                onClick = {
-                    onClickClassCode(uiState.clazz?.clazzCode ?: "")
-                }
-            )
+            if (uiState.clazzCodeVisible) {
+                UstadDetailField(
+                    imageId = R.drawable.ic_login_24px,
+                    valueText = numMembers,
+                    labelText = stringResource(R.string.class_code),
+                    onClick = {
+                        onClickClassCode(uiState.clazz?.clazzCode ?: "")
+                    }
+                )
+            }
         }
 
         item {
             if (uiState.clazzSchoolUidVisible){
-                Row {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_school_black_24dp),
-                        contentDescription = null)
-
-                    Text(uiState.clazz?.clazzSchool?.schoolName ?: "")
-                }
+                TextImageRow(
+                    imageId = R.drawable.ic_school_black_24dp,
+                    text = uiState.clazz?.clazzSchool?.schoolName ?: ""
+                )
             }
         }
 
         item {
             if (uiState.clazzDateVisible){
-                Row {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_event_black_24dp),
-                        contentDescription = null)
-
-                    Text("$clazzStartTime - $clazzEndTime")
-                }
+                TextImageRow(
+                    imageId = R.drawable.ic_event_black_24dp,
+                    text = "$clazzStartTime - $clazzEndTime"
+                )
             }
         }
 
         item {
             if (uiState.clazzHolidayCalendarVisible){
-                Row {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_event_black_24dp),
-                        contentDescription = null)
-
-                    Text(uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: "")
-                }
+                TextImageRow(
+                    imageId = R.drawable.ic_event_black_24dp,
+                    text = uiState.clazz?.clazzHolidayCalendar?.umCalendarName ?: ""
+                )
             }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(15.dp))
+        }
+
+        item {
+            Text(
+                modifier = Modifier.padding(start = 40.dp),
+                text = stringResource(id = R.string.schedule)
+            )
         }
 
         items(
@@ -544,8 +553,78 @@ private fun ClazzDetailOverviewScreen(
                     " $fromTimeFormatted - $toTimeFormatted "
 
             ListItem(
+                icon = { Spacer(modifier = Modifier.width(24.dp)) },
                 text = { Text(text) },
             )
+        }
+    }
+}
+
+@Composable
+fun TextImageRow(
+    imageId: Int,
+    text: String,
+){
+    Row(
+        modifier = Modifier.padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Spacer(modifier = Modifier.width(24.dp))
+
+        Image(
+            painter = painterResource(id = imageId),
+            contentDescription = null)
+
+        Text(text)
+    }
+}
+
+val BLOCK_ICON_MAP = mapOf(
+    CourseBlock.BLOCK_MODULE_TYPE to R.drawable.ic_baseline_folder_open_24,
+    CourseBlock.BLOCK_ASSIGNMENT_TYPE to R.drawable.baseline_assignment_turned_in_24,
+    CourseBlock.BLOCK_CONTENT_TYPE to R.drawable.video_youtube,
+    CourseBlock.BLOCK_TEXT_TYPE to R.drawable.ic_baseline_title_24,
+    CourseBlock.BLOCK_DISCUSSION_TYPE to R.drawable.ic_baseline_forum_24
+)
+
+@Composable
+fun CourseBlockListItem(
+    courseBlock: CourseBlockWithCompleteEntity,
+    uiState: ClazzDetailOverviewUiState,
+    onClickItem: (CourseBlockWithCompleteEntity) -> Unit = {}
+){
+    when(courseBlock.cbType){
+        CourseBlock.BLOCK_MODULE_TYPE -> {
+        }
+        CourseBlock.BLOCK_TEXT_TYPE -> {
+
+            val startPadding = ((courseBlock.cbIndentLevel * 24) + 8).dp
+            val cbDescription = if(uiState.cbDescriptionVisible(courseBlock))
+                Html.fromHtml(courseBlock.cbDescription)
+            else
+                SpannedString.valueOf("")
+
+            UstadDetailField(
+                modifier = Modifier.padding(start = startPadding),
+                valueText = courseBlock.cbTitle ?: "",
+                labelText = courseBlock.cbDescription ?: "",
+                imageId = BLOCK_ICON_MAP[courseBlock.cbType]
+                    ?: R.drawable.text_doc_24px,
+                onClick = { onClickItem(courseBlock) }
+            )
+        }
+        CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
+
+        }
+        CourseBlock.BLOCK_CONTENT_TYPE -> {
+            if(courseBlock.entry != null) {
+
+            }else{
+
+            }
+        }
+
+        CourseBlock.BLOCK_DISCUSSION_TYPE -> {
         }
     }
 }
@@ -567,6 +646,28 @@ fun ClazzDetailOverviewScreenPreview() {
                 umCalendarName = "Holiday Calendar"
             }
         },
+        scheduleList = listOf(
+            Schedule().apply {
+                scheduleUid = 1
+                sceduleStartTime = 0
+                scheduleEndTime = 0
+                scheduleFrequency = MessageID.yearly
+                scheduleDay = MessageID.sunday
+            },
+            Schedule().apply {
+                scheduleUid = 2
+                sceduleStartTime = 0
+                scheduleEndTime = 0
+                scheduleFrequency = MessageID.yearly
+                scheduleDay = MessageID.sunday
+            }
+        ),
+        courseBlockList = listOf(
+            CourseBlockWithCompleteEntity().apply {
+                cbTitle = "Module"
+            }
+        ),
+        clazzCodeVisible = true
     )
     MdcTheme {
         ClazzDetailOverviewScreen(uiState)

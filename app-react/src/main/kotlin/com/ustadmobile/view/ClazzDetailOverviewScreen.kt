@@ -12,14 +12,17 @@ import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.view.components.UstadBlankIcon
+import csstype.Padding
 import csstype.px
 import mui.icons.material.*
 import mui.material.*
-import mui.system.Stack
-import mui.system.StackDirection
+import mui.material.Stack
+import mui.material.List
+import mui.material.StackDirection
 import mui.system.responsive
+import mui.system.sx
 import react.*
-import react.dom.aria.ariaLabel
 
 external interface ClazzDetailOverviewProps : Props {
 
@@ -62,12 +65,14 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                 labelText = strings[MessageID.members]
             }
 
-            UstadDetailField {
-                icon = Login.create()
-                valueText = numMembers
-                labelText = strings[MessageID.class_code]
-                onClick = {
-                    props.onClickClassCode(props.uiState.clazz?.clazzCode ?: "")
+            if (props.uiState.clazzCodeVisible) {
+                UstadDetailField {
+                    icon = Login.create()
+                    valueText = props.uiState.clazz?.clazzCode ?: ""
+                    labelText = strings[MessageID.class_code]
+                    onClick = {
+                        props.onClickClassCode(props.uiState.clazz?.clazzCode ?: "")
+                    }
                 }
             }
 
@@ -92,22 +97,47 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                 }
             }
 
-            props.uiState.scheduleList.forEach { schedule ->
-                val fromTimeFormatted = useFormattedTime(
-                    timeInMillisSinceMidnight = schedule.sceduleStartTime.toInt(),
-                )
+            List {
+                Typography {
+                    sx {
+                        padding = Padding(
+                            top = 0.px,
+                            bottom = 0.px,
+                            left = 44.px,
+                            right = 0.px
+                        )
+                    }
+                    + strings[MessageID.schedule]
+                }
 
-                val toTimeFormatted = useFormattedTime(
-                    timeInMillisSinceMidnight = schedule.scheduleEndTime.toInt(),
-                )
+                props.uiState.scheduleList.forEach { schedule ->
+                    val fromTimeFormatted = useFormattedTime(
+                        timeInMillisSinceMidnight = schedule.sceduleStartTime.toInt(),
+                    )
 
-                val text = "${strings[ScheduleConstants.SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[schedule.scheduleFrequency] ?: 0]} " +
-                        " ${strings[ScheduleConstants.DAY_MESSAGE_ID_MAP[schedule.scheduleDay] ?: 0]  } " +
-                        " $fromTimeFormatted - $toTimeFormatted "
+                    val toTimeFormatted = useFormattedTime(
+                        timeInMillisSinceMidnight = schedule.scheduleEndTime.toInt(),
+                    )
 
-                ListItem{
-                    ListItemText{
-                        primary = ReactNode(text)
+                    val text = "${strings[ScheduleConstants.SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[schedule.scheduleFrequency] ?: 0]} " +
+                            " ${strings[ScheduleConstants.DAY_MESSAGE_ID_MAP[schedule.scheduleDay] ?: 0]  } " +
+                            " $fromTimeFormatted - $toTimeFormatted "
+
+                    ListItem{
+                        sx {
+                            padding = Padding(
+                                top = 0.px,
+                                bottom = 0.px,
+                                left = 52.px,
+                                right = 0.px
+                            )
+                        }
+
+                        UstadBlankIcon()
+
+                        ListItemText{
+                            primary = ReactNode(text)
+                        }
                     }
                 }
             }
@@ -127,6 +157,15 @@ private val TextImageRow = FC<TextImageRowProps> { props ->
 
     Stack {
         direction = responsive(StackDirection.row)
+        spacing = responsive(10.px)
+        sx {
+            padding = Padding(
+                top = 10.px,
+                bottom = 10.px,
+                left = 38.px,
+                right = 0.px
+            )
+        }
 
         Icon{
             + props.icon.create()
@@ -163,7 +202,8 @@ val ClazzDetailOverviewScreenPreview = FC<Props> {
                     sceduleStartTime = 0
                     scheduleEndTime = 0
                 }
-            )
+            ),
+            clazzCodeVisible = true
         )
     }
 }
