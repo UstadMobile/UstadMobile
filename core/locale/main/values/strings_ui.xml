@@ -121,7 +121,6 @@
     <string name="and">and</string>
     <string name="added">Added</string>
     <string name="attempts">Attempts</string>
-    <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
     <string name="add_link_description">Add educational content using web link, then use it offline</string>
     <string name="add_gallery_description">Add video or audio from the device gallery</string>
     <string name="add_file_description">Add educational content using supported formats e.g. PDF, xAPI, H5P, EPUB</string>
@@ -154,15 +153,6 @@
     <string name="onboarding_offline_sharing_subheading">Save time and data with superfast offline sharing</string>
     <string name="onboarding_stay_organized_headline">Stay organized</string>
     <string name="onboarding_stay_organized_subheading">Education content, assignments, classes, and attendance all in one place</string>
-    <string name="location_permission_title">Location permission required</string>
-    <string name="location_permission_message">This app requires the location permission to enable high-speed offline sharing with nearby users.</string>
-    <string name="location_permission_details">This app uses Bluetooth and WiFi scanning to find other users nearby. The app can then connect to
-        nearby users to download content at high-speed without requiring Internet access.
-        Because these scan results could be used to determine your location, you must grant the
-        location permission to enable this feature.
-        This app does not save the results of these scans and does not record your location in any way.
-        This app is built from open source code which can be checked at
-        github.com/UstadMobile/UstadMobile</string>
     <string name="download_continue_stacked_label">Continue download</string>
     <string name="download_continue_btn_label">Continue</string>
     <string name="download_wifi_only">Wi-Fi only</string>
