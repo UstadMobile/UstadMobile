@@ -6,6 +6,7 @@ import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.UstadCourseBlockEditPreview
 import com.ustadmobile.mui.components.UstadDetailFieldPreview
 import com.ustadmobile.mui.components.UstadEditFieldPreviews
+import com.ustadmobile.mui.components.UstadListFilterChipsHeaderPreview
 import com.ustadmobile.view.*
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
@@ -73,6 +74,9 @@ fun useUstadScreens(): UstadScreens {
                 "ScopedGrantEdit Preview", ScopedGrantEditScreenPreview),
             UstadScreen(CourseTerminologyEditView.VIEW_NAME,
                 "CourseTerminologyEdit Preview", CourseTerminologyEditScreenPreview),
+            UstadScreen("UstadListFilterChipsHeader",
+                "UstadListFilterChipsHeaderPreview Preview",
+                UstadListFilterChipsHeaderPreview),
         )
     }
 }
