@@ -1,9 +1,31 @@
 appId: com.toughra.ustadmobile
 ---
+# in this test admin create a course and add members to the course -2 teachers and 6 students
+  # Member list
+  # -----name - username/password
+
+  # teachers :
+  # --0-- Anu Madhav - Anu/test
+  # --1-- Lal Alex - Lal/test
+
+  # students :
+  # --0-- Justin Joe      - Justin/test
+  # --1-- Caroline Jacob  - Caroline/test
+  # --2-- Mathew Kuriean  - Mathew/test
+  # --3-- Santhosh George - Santhosh/test
+  # --4-- Maria Jacob     - Maria/test
+  # --5-- Sruthy K        - Sruthy/test
+
+# test parameters needs to provide for this test :
+# 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+# 2) TEST : provide the test name, it should be a string
+
+# add new course
 - runFlow:
     file: "./add_course.yaml"
     env:
-      TESTCOURSENAME: "New Course"
+      TESTCOURSENAME: "New Test Course"
+# add new teacher using flow - add_new_teacher_inside_course ----------- Anu Madhav - Anu/test
 - runFlow:
     file: "./add_new_teacher_inside_course.yaml"
     env:
@@ -12,6 +34,7 @@ appId: com.toughra.ustadmobile
       TEACHERLASTNAME: "Madhav"
       GENDER: "Female"
       PASSWORD: "test"
+# add new teacher using flows - add_new_people & add_member_inside_course ---------- Lal Alex - Lal/test
 - runFlow:
     file: "./add_new_people.yaml"
     env:
@@ -26,6 +49,7 @@ appId: com.toughra.ustadmobile
       LASTNAME: "Alex"
       MEMBER: "teacher"
       PASSWORD: "test"
+# add new student using flow - add_new_student_inside_course ----------- Justin Joe  - Justin/test
 - runFlow:
     file: "./add_new_student_inside_course.yaml"
     env:
@@ -34,6 +58,7 @@ appId: com.toughra.ustadmobile
       STUDENTLASTNAME: "Joe"
       GENDER: "Male"
       PASSWORD: "test"
+# add new student using flow - add_new_student_inside_course --------- Caroline Jacob  - Caroline/test
 - runFlow:
     file: "./add_new_student_inside_course.yaml"
     env:
@@ -42,6 +67,7 @@ appId: com.toughra.ustadmobile
       STUDENTLASTNAME: "Jacob"
       GENDER: "Female"
       PASSWORD: "test"
+# add new student  using flows - add_new_people & add_member_inside_course ------- Mathew Kuriean  - Mathew/test
 - runFlow:
     file: "./add_new_people.yaml"
     env:
@@ -55,6 +81,7 @@ appId: com.toughra.ustadmobile
       FIRSTNAME: "Mathew"
       LASTNAME: "Kuriean"
       MEMBER: "student"
+# add new student  using flows - add_new_people & add_member_inside_course ------- Santhosh George - Santhosh/test
 - runFlow:
     file: "./add_new_people.yaml"
     env:
@@ -68,6 +95,7 @@ appId: com.toughra.ustadmobile
       FIRSTNAME: "Santhosh"
       LASTNAME: "George"
       MEMBER: "student"
+# add new student  using flows - add_new_people & add_member_inside_course ------- Maria Jacob - Maria/test
 - runFlow:
     file: "./add_new_people.yaml"
     env:
@@ -81,6 +109,7 @@ appId: com.toughra.ustadmobile
       FIRSTNAME: "Maria"
       LASTNAME: "Jacob"
       MEMBER: "student"
+# add new student  using flows - add_new_people & add_member_inside_course ------- Sruthy K - Sruthy/test
 - runFlow:
     file: "./add_new_people.yaml"
     env:
@@ -94,3 +123,4 @@ appId: com.toughra.ustadmobile
       FIRSTNAME: "Sruthy"
       LASTNAME: "K"
       MEMBER: "student"
+- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/member_list_of_new_test_course"

@@ -1,5 +1,12 @@
 appId: com.toughra.ustadmobile
 ---
+# this test add member to course
+  # person account is already existing / created in app
+# Test parameters needs to provide for this test :
+ # 1) MEMBER : student / teacher
+ # 2) FIRSTNAME : FIRSTNAME of member
+ # 3) LASTNAME : LASTNAME of member
+
 - tapOn: "Courses"
 - tapOn:
       id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"

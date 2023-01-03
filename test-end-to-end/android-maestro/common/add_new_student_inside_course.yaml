@@ -1,5 +1,15 @@
 appId: com.toughra.ustadmobile
 ---
+# This test add a new teacher and create account on the course page
+# test data required :
+# 1) TESTCOURSENAME: provide course name of string type
+# 2) STUDENTFIRSTNAME: provide STUDENT's first name of string type
+# 3) STUDENTLASTNAME: provide STUDENT's last name of string type
+# 4) GENDER: provide STUDENT's gender of string type
+# 5) PASSWORD: provide STUDENT's account password of string type
+# 6) TEST : provide the test name, it should be a string
+# 7) TESTRESULTSDIR : provides the path to store test results
+
 - tapOn: "Courses"
 - tapOn:
       id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
@@ -14,12 +24,14 @@ appId: com.toughra.ustadmobile
 - tapOn: ${GENDER}
 - tapOn: "SAVE"
 - tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/added_new_student"
 # There is a known issue on maestro. Scroll functionality is not working for specific emulator using in jenkins
 - swipe:
         start: 100,400
         end: 100,100
 - tapOn: "${STUDENTFIRSTNAME} ${STUDENTLASTNAME}"
 - tapOn: "VIEW PROFILE"
+  # add account
 - tapOn: "CREATE ACCOUNT"
 - tapOn: "Username"
 - inputText: ${STUDENTFIRSTNAME}
@@ -28,3 +40,4 @@ appId: com.toughra.ustadmobile
 - tapOn: "Confirm password"
 - inputText: "test"
 - tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/added_account_for_new_student"

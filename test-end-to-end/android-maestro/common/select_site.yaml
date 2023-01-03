@@ -1,5 +1,6 @@
 appId: com.toughra.ustadmobile
 ---
+# this flow enter site link
 - inputText: ${ENDPOINT}
 - hideKeyboard
 - tapOn: "NEXT"

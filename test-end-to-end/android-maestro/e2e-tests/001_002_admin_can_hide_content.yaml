@@ -1,17 +1,21 @@
 appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: ${TESTRESULTSDIR}
+  TEST: ${TEST}
 ---
 - clearState: com.toughra.ustadmobile
-
+#---------Start test-controller-server ---------#
 - runFlow:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
-
+#---------add content to library ---------#
 - runFlow:
     file: "../common/add_content.yaml"
     env:
       TESTFILENAME: "Epub_Content.epub"
       TESTCONTENTNAME: "HideContentTest"
+#---------hide content in library ---------#
 - runFlow:
     file: "../common/hide_content.yaml"
     env:

@@ -1,24 +1,39 @@
 appId: com.toughra.ustadmobile
 env:
-   TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
+ TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
+ TESTRESULTSDIR: ${TESTRESULTSDIR}
+ TEST: ${TEST}
 ---
 - clearState: com.toughra.ustadmobile
-
+#---------Start test-controller-server ---------#
 - runFlow:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
-
+#---------add content to library ---------#
 - runFlow:
       file: "../common/add_content.yaml"
       env:
           TESTFILENAME: "H5p_Content.h5p"
           TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
-- runFlow: "../common/enable_switch_to_content_not_publicly_accessible.yaml"
+          TESTRESULTSDIR: ${TESTRESULTSDIR}
+          TESTARG: ${TEST}
+#---------switch off the publicly_accessible switch---------#
+- runFlow:
+     file: "../common/enable_switch_to_content_not_publicly_accessible.yaml"
+     env:
+       TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
+       TESTRESULTSDIR: ${TESTRESULTSDIR}
+       TESTARG: ${TEST}
+#---------guest login button is enabling by admin---------#
 - runFlow:
     file: "../common/enable_guest_login.yaml"
     env:
       TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
+      TESTRESULTSDIR: ${TESTRESULTSDIR}
+      TESTARG: ${TEST}
+#---------guest login ---------#
 - runFlow: "../common/guest_login.yaml"
 - tapOn: "Library"
-- takeScreenshot: "results/${TESTCONTENTNAME}_finalresult"
+#---------guest should not able to see the content on library---------#
+- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/guest_view"

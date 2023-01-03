@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a:c' --long 'serial1:,username:,password:,endpoint:,test:,apk:,console-output' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e:t:a:c:r' --long 'serial1:,username:,password:,endpoint:,test:,apk:,console-output:,result:' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -14,9 +14,10 @@ WORKDIR=$(pwd)
 TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
 TESTAPK=$SCRIPTDIR/../../app-android-launcher/build/outputs/apk/release/app-android-launcher-release.apk
+TESTRESULTSDIR=$SCRIPTDIR/build/results/$TEST
 CONTROLSERVER=""
 USECONSOLEOUTPUT=0
-
+echo $SCRIPTDIR
 while true; do
         case "$1" in
              '-s'|'--serial1')
@@ -56,8 +57,15 @@ while true; do
                      USECONSOLEOUTPUT=1
                      shift 1
                      continue
-               ;;
-               '--')
+                ;;
+                '-r'|'--result')
+                     echo "result"
+                    TESTRESULTSDIR=$2
+                    shift 2
+                    continue
+                ;;
+                '--')
+
                         shift
                         break
                 ;;
@@ -81,6 +89,10 @@ fi
 
 if [ ! -e $SCRIPTDIR/results ]; then
   mkdir $SCRIPTDIR/results
+fi
+
+if [ ! -e $SCRIPTDIR/build/results ]; then
+  mkdir $SCRIPTDIR/build/results
 fi
 
 # Start control server
@@ -108,8 +120,8 @@ fi
 
 maestro test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-         -e TESTSERIAL=$TESTSERIAL \
-         $OUTPUTARGS $TESTARG
+         -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS \
+         $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
 

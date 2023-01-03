@@ -1,12 +1,13 @@
 appId: com.toughra.ustadmobile
 ---
+# this flow switch off the publicly_accessible switch - on the content edit screen
 - tapOn: "EDIT"
 - swipe:
       start: 100,400
       end: 100,100
-- takeScreenshot: "results/Publiclyaccessible-on"
+- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/Publiclyaccessible-on"
 - tapOn: "Publicly accessible"
-- takeScreenshot: "results/Publiclyaccessible-off"
+- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/Publiclyaccessible-off"
 - tapOn: "SAVE"
 - back
 

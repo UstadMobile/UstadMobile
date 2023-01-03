@@ -1,5 +1,15 @@
 appId: com.toughra.ustadmobile
 ---
+# This test add a new teacher and create account on the course page
+# test data required :
+ # 1) TESTCOURSENAME: provide course name of string type
+ # 2) TEACHERFIRSTNAME: provide teacher's first name of string type
+ # 3) TEACHERLASTNAME: provide teacher's last name of string type
+ # 4) GENDER: provide teacher's gender of string type
+ # 5) PASSWORD: provide teacher's account password of string type
+ # 6) TEST : provide the test name, it should be a string
+ # 7) TESTRESULTSDIR : provides the path to store test results
+
 - tapOn: "Courses"
 - tapOn:
       id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
@@ -14,9 +24,10 @@ appId: com.toughra.ustadmobile
 - tapOn: ${GENDER}
 - tapOn: "SAVE"
 - tapOn: "SAVE"
-- takeScreenshot: "results/${TESTCOURSENAME}-AddedTeacher"
+- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/added_new_teacher"
 - tapOn: "${TEACHERFIRSTNAME} ${TEACHERLASTNAME}"
 - tapOn: "VIEW PROFILE"
+  # add account
 - tapOn: "CREATE ACCOUNT"
 - tapOn: "Username"
 - inputText: ${TEACHERFIRSTNAME}
@@ -25,4 +36,4 @@ appId: com.toughra.ustadmobile
 - tapOn: "Confirm password"
 - inputText: ${PASSWORD}
 - tapOn: "SAVE"
-- takeScreenshot: "results/${TESTCOURSENAME}-TeacherAccountCreated"
+- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/added_account_for_new_teacher"

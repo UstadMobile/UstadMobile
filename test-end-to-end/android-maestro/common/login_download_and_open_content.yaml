@@ -1,18 +1,17 @@
 appId: com.toughra.ustadmobile
 ---
-- clearState: com.toughra.ustadmobile
-- launchApp
-- hideKeyboard
-- tapOn: "GET STARTED"
-- inputText: ${ENDPOINT}
-- hideKeyboard
-- tapOn: "NEXT"
-- tapOn: "Username"
-- inputText: ${USERNAME}
-- tapOn: "Password"
-- inputText: ${PASSWORD}
-- hideKeyboard
-- tapOn: "LOGIN"
+# This test tests the Library page of app downloading and opening content
+ # Test parameters needs to provide for this test :
+  # 1) TEST : provide the test name, it should be a string
+  # 2) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+
+#clear state and launch app
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#admin login
+- runFlow:
+    file: "../common/user_login.yaml"
+#Download and open content
 - tapOn: "Library"
 - extendedWaitUntil:
     visible: ${TESTCONTENTNAME}
@@ -30,9 +29,9 @@ appId: com.toughra.ustadmobile
           visible:
             text: "Play"
       file: play_video_content.yaml
-- takeScreenshot: "results/${TESTCONTENTNAME}"
+- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/content_download_and_open"
 - back
 - tapOn: "ATTEMPTS"
-- takeScreenshot: "results/${TESTCONTENTNAME}AttemptsScreen"
+
 
 

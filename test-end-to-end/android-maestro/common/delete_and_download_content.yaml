@@ -1,11 +1,17 @@
 appId: com.toughra.ustadmobile
 ---
+# this test tests that is it possible to delete and re-download a content in library
+ # Test parameters needs to provide for this test :
+  # 1) TESTFILENAME : provide the content name inside the 'test-files/content' folder
+  # 2) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+  # 3) TEST : provide the test name, it should be a string
+
 - tapOn: "DELETE"
 - tapOn: "DELETE"
 - extendedWaitUntil:
     visible: "DOWNLOAD"
     timeout: 10000
-- takeScreenshot: "results/${TESTCONTENTNAME}AfterDeletetion"
+- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/after_deleting_content"
 - tapOn: "DOWNLOAD"
 - tapOn: "DOWNLOAD"
 - extendedWaitUntil:
@@ -13,4 +19,4 @@ appId: com.toughra.ustadmobile
     timeout: 10000
 - tapOn: "OPEN"
 - scroll
-- takeScreenshot: "results/${TESTCONTENTNAME}contentscreen"
+- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/re-download_content_screen"
