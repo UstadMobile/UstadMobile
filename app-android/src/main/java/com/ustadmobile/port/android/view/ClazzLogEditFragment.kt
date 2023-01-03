@@ -2,17 +2,24 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzLogEditBinding
 import com.ustadmobile.core.controller.ClazzLogEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzLogEditView
+import com.ustadmobile.core.viewmodel.ClazzLogEditUiState
 import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.port.android.util.ext.*
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
+import com.ustadmobile.port.android.view.composable.UstadDateTimeEditTextField
 
 
 interface ClazzLogEditFragmentEventHandler {
@@ -94,4 +101,31 @@ class ClazzLogEditFragment: UstadEditFragment<ClazzLog>(), ClazzLogEditView, Cla
             field = value
             mBinding?.fieldsEnabled = value
         }
+}
+
+@Composable
+private fun ClazzLogEditScreen(
+    uiState: ClazzLogEditUiState = ClazzLogEditUiState(),
+    onChangeClazzLog: (ClazzLog?) -> Unit = {},
+) {
+    UstadDateTimeEditTextField(
+        value = uiState.clazzLog?.logDate ?: 0L,
+        dateLabel = stringResource(id = R.string.date),
+        timeLabel = stringResource(R.string.time),
+        timeZoneId = uiState.timeZone,
+        modifier = Modifier.fillMaxWidth(),
+        onValueChange = {
+            onChangeClazzLog(uiState.clazzLog?.shallowCopy {
+                logDate = it
+            })
+        },
+    )
+}
+
+@Composable
+@Preview
+fun ClazzLogEditScreenPreview() {
+    MdcTheme {
+        ClazzLogEditScreen()
+    }
 }

@@ -6,6 +6,8 @@ import com.ustadmobile.entities.UstadScreens
 import com.ustadmobile.mui.components.UstadCourseBlockEditPreview
 import com.ustadmobile.mui.components.UstadDetailFieldPreview
 import com.ustadmobile.mui.components.UstadEditFieldPreviews
+import com.ustadmobile.mui.components.UstadListFilterChipsHeaderPreview
+import com.ustadmobile.mui.components.UstadListSortHeaderPreview
 import com.ustadmobile.view.*
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
@@ -64,6 +66,23 @@ fun useUstadScreens(): UstadScreens {
                 ContentEntryImportLinkScreenPreview),
             UstadScreen(HolidayCalendarDetailView.VIEW_NAME, "HolidayCalendarDetail Preview",
                 HolidayCalendarDetailPreview),
+            UstadScreen(ContentEntryDetailOverviewView.VIEW_NAME,
+                "ContentEntryDetailOverview Preview",
+                ContentEntryDetailOverviewScreenPreview),
+            UstadScreen(HolidayCalendarEditView.VIEW_NAME, "HolidayCalendarEdit Preview",
+                HolidayCalendarEditPreview),
+            UstadScreen(ScopedGrantEditView.VIEW_NAME,
+                "ScopedGrantEdit Preview", ScopedGrantEditScreenPreview),
+            UstadScreen(CourseTerminologyEditView.VIEW_NAME,
+                "CourseTerminologyEdit Preview", CourseTerminologyEditScreenPreview),
+            UstadScreen("UstadListFilterChipsHeader",
+                "UstadListFilterChipsHeaderPreview Preview", UstadListFilterChipsHeaderPreview),
+            UstadScreen("UstadListSortHeader",
+                "UstadListSortHeader", UstadListSortHeaderPreview),
+            UstadScreen(ClazzLogEditView.VIEW_NAME, "ClazzLogEdit Preview",
+                ClazzLogEditScreenPreview),
+            UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview",
+                CourseGroupSetEditScreenPreview),
             UstadScreen(ClazzList2View.VIEW_NAME, "Clazz List Preview",
                 ClazzListScreenPreview
             ),
