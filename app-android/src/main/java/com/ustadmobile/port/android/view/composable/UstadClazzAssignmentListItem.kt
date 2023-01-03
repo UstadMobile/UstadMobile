@@ -21,7 +21,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.controller.SubmissionConstants
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.viewmodel.ClazzAssignmentUiState
 import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
@@ -45,18 +44,18 @@ fun UstadClazzAssignmentListItem(
         icon = {
             Row {
                 Spacer(modifier = Modifier
-                    .paddingCourseBlockIndent(uiState.block?.cbIndentLevel))
+                    .paddingCourseBlockIndent(uiState.block.cbIndentLevel))
                 Icon(
                     Icons.Default.AssignmentTurnedIn,
                     contentDescription = "",
                 )
             }
         },
-        text = { Text(uiState.assignment?.caTitle ?: "") },
+        text = { Text(uiState.assignment.caTitle ?: "") },
         secondaryText = {
             Column{
                 if (uiState.cbDescriptionVisible){
-                    Text(text = uiState.block?.cbDescription ?: "")
+                    Text(text = uiState.block.cbDescription ?: "")
                 }
 
                 DateAndPointRow(uiState = uiState)
@@ -67,7 +66,7 @@ fun UstadClazzAssignmentListItem(
                     if (uiState.submissionStatusIconVisible){
                         Icon(
                             painter = painterResource(
-                                id = ASSIGNMENT_STATUS_MAP[uiState.assignment?.fileSubmissionStatus]
+                                id = ASSIGNMENT_STATUS_MAP[uiState.assignment.fileSubmissionStatus]
                                     ?: R.drawable.ic_baseline_done_all_24),
                             contentDescription = "")
                     }
@@ -75,8 +74,7 @@ fun UstadClazzAssignmentListItem(
                     if (uiState.submissionStatusVisible){
                         Text(text = messageIdMapResource(
                             map = SubmissionConstants.STATUS_MAP,
-                            key = uiState.assignment?.fileSubmissionStatus
-                                ?: MessageID.marked_cap)
+                            key = uiState.assignment.fileSubmissionStatus)
                         )
                     }
                 }
@@ -91,7 +89,7 @@ fun DateAndPointRow(
 ){
 
     val dateTime = rememberFormattedDate(
-        timeInMillis = uiState.block?.cbDeadlineDate ?: 0,
+        timeInMillis = uiState.block.cbDeadlineDate,
         timeZoneId = uiState.timeZone)
 
     Row{
@@ -110,15 +108,15 @@ fun DateAndPointRow(
         if (uiState.assignmentMarkVisible){
             Text(buildAnnotatedString {
                 append(
-                    "${uiState.assignment?.mark?.camMark ?: 0}/" +
-                            "${uiState.block?.cbMaxPoints ?: 0 } " +
+                    "${uiState.assignment.mark?.camMark ?: 0}/" +
+                            "${uiState.block.cbMaxPoints} " +
                             stringResource(id = R.string.points)
                 )
                 withStyle(style = SpanStyle(color = Color.Red)) {
                     if (uiState.assignmentPenaltyVisible){
                         append(stringResource(
                             id = R.string.late_penalty,
-                            uiState.block?.cbLateSubmissionPenalty ?: 0
+                            uiState.block.cbLateSubmissionPenalty
                         ))
                     }
                 }

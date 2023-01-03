@@ -8,10 +8,9 @@ import com.ustadmobile.hooks.useFormattedDate
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
 import com.ustadmobile.view.ASSIGNMENT_STATUS_MAP
-import csstype.px
+import csstype.*
 import mui.icons.material.AssignmentTurnedIn
 import mui.icons.material.CalendarToday
-import mui.icons.material.DoneAll
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx
@@ -37,19 +36,24 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
 
             ListItemIcon {
                 sx {
-                    padding?.paddingCourseBlockIndent(
-                        props.uiState.block?.cbIndentLevel
+                    padding = paddingCourseBlockIndent(
+                        props.uiState.block.cbIndentLevel
                     )
                 }
+
                 + AssignmentTurnedIn.create()
             }
 
+            Box {
+                sx{ width = 10.px }
+            }
+
             ListItemText {
-                primary = ReactNode(props.uiState.assignment?.caTitle ?: "")
+                primary = ReactNode(props.uiState.assignment.caTitle ?: "")
                 secondary = Stack.create {
                     if (props.uiState.cbDescriptionVisible){
                         Typography{
-                            + (props.uiState.block?.cbDescription ?: "")
+                            + (props.uiState.block.cbDescription ?: "")
                         }
                     }
 
@@ -65,7 +69,7 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
                         if (props.uiState.submissionStatusIconVisible){
                             Icon{
                                 + ASSIGNMENT_STATUS_MAP[
-                                        props.uiState.assignment?.fileSubmissionStatus
+                                        props.uiState.assignment.fileSubmissionStatus
                                 ]
                             }
                         }
@@ -73,8 +77,8 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
                         if (props.uiState.submissionStatusVisible){
                             Typography {
                                + (strings.mapLookup(
-                                    props.uiState.assignment?.fileSubmissionStatus
-                                        ?: MessageID.marked_cap, SubmissionConstants.STATUS_MAP
+                                   props.uiState.assignment.fileSubmissionStatus,
+                                   SubmissionConstants.STATUS_MAP
                                 ) ?: "")
                             }
                         }
@@ -97,7 +101,7 @@ val DateAndPointRow = FC<DateAndPointRowProps> { props ->
 
     val strings = useStringsXml()
     val dateTime = useFormattedDate(
-        timeInMillis = props.uiState.block?.cbDeadlineDate ?: 0,
+        timeInMillis = props.uiState.block.cbDeadlineDate,
         timezoneId = props.uiState.timeZone)
 
     Stack {
@@ -124,14 +128,14 @@ val DateAndPointRow = FC<DateAndPointRowProps> { props ->
         if (props.uiState.assignmentMarkVisible){
             Stack {
                 Typography {
-                    + ("${props.uiState.assignment?.mark?.camMark ?: 0}/" +
-                            "${props.uiState.block?.cbMaxPoints ?: 0 } " +
+                    + ("${props.uiState.assignment.mark?.camMark ?: 0}/" +
+                            "${props.uiState.block.cbMaxPoints} " +
                             strings[MessageID.points])
                 }
                 if (props.uiState.assignmentPenaltyVisible){
                     strings[MessageID.late_penalty]
                         .replace("%1\$d",
-                            (props.uiState.block?.cbLateSubmissionPenalty ?: 0).toString()
+                            (props.uiState.block.cbLateSubmissionPenalty).toString()
                         )
                 }
             }
@@ -161,7 +165,7 @@ val UstadClazzAssignmentListItemPreview = FC<Props> {
                     cbDescription = "Description"
                     cbDeadlineDate = 1672707505000
                     cbMaxPoints = 100
-                    cbIndentLevel = 2
+                    cbIndentLevel = 1
                 }
             )
         }
