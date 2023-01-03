@@ -9,8 +9,8 @@ fun Padding.paddingCourseBlockIndent(
 ): Padding {
     return Padding(
         left = ((indentLevel ?: 0) * 24).px,
-        right = 10.px,
-        bottom = 10.px,
-        top = 10.px
+        right = 0.px,
+        bottom = 0.px,
+        top = 0.px
     )
 }
