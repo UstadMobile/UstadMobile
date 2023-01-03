@@ -353,6 +353,16 @@ class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMo
 
     companion object{
 
+        val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
+            ContentEntry.TYPE_EBOOK to R.drawable.ic_book_black_24dp,
+            ContentEntry.TYPE_VIDEO to R.drawable.video_youtube,
+            ContentEntry.TYPE_DOCUMENT to R.drawable.text_doc_24px,
+            ContentEntry.TYPE_ARTICLE to R.drawable.article_24px,
+            ContentEntry.TYPE_COLLECTION to R.drawable.collections_24px,
+            ContentEntry.TYPE_INTERACTIVE_EXERCISE to R.drawable.ic_baseline_touch_app_24,
+            ContentEntry.TYPE_AUDIO to R.drawable.ic_audiotrack_24px
+        )
+
         val DIFF_CALLBACK_CONTENT_JOB_PROGRESS: DiffUtil.ItemCallback<ContentJobItemProgress> =
                 object: DiffUtil.ItemCallback<ContentJobItemProgress>(){
                     override fun areItemsTheSame(
