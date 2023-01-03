@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.clickable
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.*
 import androidx.viewpager2.widget.ViewPager2
@@ -22,6 +23,37 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 import java.lang.Integer.max
 import java.lang.Integer.min
 import java.util.*
+import com.ustadmobile.core.viewmodel.ClazzLogEditAttendanceUiState
+import com.google.android.material.composethemeadapter.MdcTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.CheckBox
+import androidx.compose.material.icons.outlined.LibraryAddCheck
+import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.google.accompanist.pager.*
+import com.ustadmobile.core.impl.locale.entityconstants.*
+import com.ustadmobile.core.util.ext.personFullName
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 
 interface ClazzLogEditAttendanceFragmentEventHandler {
 
@@ -325,4 +357,220 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
 
     }
 
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ClazzLogEditAttendanceScreen(
+    uiState: ClazzLogEditAttendanceUiState = ClazzLogEditAttendanceUiState(),
+    onClickMarkAllPresent: (Int) -> Unit = {},
+    onClickMarkAllAbsent: (Int) -> Unit = {},
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+    )  {
+
+        item {
+            PagerView (
+                list = uiState.clazzLogsList,
+                timeZone = uiState.timeZone
+            )
+        }
+
+        item {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickMarkAllPresent(ClazzLogAttendanceRecord.STATUS_ATTENDED)
+                },
+                text = { Text(stringResource(id = R.string.mark_all_present)) },
+                icon = {
+                    Icon(
+                        Icons.Outlined.LibraryAddCheck,
+                        contentDescription = ""
+                    )
+                }
+            )
+        }
+
+        item {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickMarkAllAbsent(ClazzLogAttendanceRecord.STATUS_ABSENT)
+                },
+                text = { Text(stringResource(id = R.string.mark_all_absent)) },
+                icon = {
+                    Icon(
+                        Icons.Outlined.CheckBox,
+                        contentDescription = ""
+                    )
+                }
+            )
+        }
+
+        items(
+            items = uiState.clazzLogAttendanceRecordList,
+            key = {clazzLog -> clazzLog.clazzLogAttendanceRecordUid}
+        ){ clazzLogAttendance ->
+            ClazzLogItemView(clazzLogAttendance = clazzLogAttendance)
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
+private fun PagerView(
+    list: List<ClazzLog>,
+    timeZone: String
+) {
+
+    var currentClazzLog: Int by remember { mutableStateOf(0) }
+    var state = rememberPagerState(currentClazzLog)
+
+    Row (
+        horizontalArrangement = Arrangement.SpaceBetween
+    ){
+
+        IconButton(
+            onClick = {
+                if (currentClazzLog != 0){
+                    currentClazzLog -= 1
+                    state = PagerState(currentClazzLog)
+                }
+            },
+            modifier = Modifier.weight(1F)
+        ) {
+            Icon(
+                Icons.Default.ArrowBack,
+                contentDescription = "")
+        }
+
+        HorizontalPager(
+            modifier = Modifier.weight(8F),
+            state = state,
+            count = list.size
+        ) { index ->
+
+            val dateFormatted = rememberFormattedDateTime(
+                timeInMillis = list[index].logDate,
+                timeZoneId = timeZone
+            )
+
+            Text(dateFormatted)
+        }
+
+        IconButton(
+            onClick = {
+                if (currentClazzLog < list.size){
+                    currentClazzLog += 1
+                    state = PagerState(currentClazzLog)
+                }
+            },
+            modifier = Modifier.weight(1F)
+        ) {
+            Icon(
+                Icons.Default.ArrowForward,
+                contentDescription = "")
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ClazzLogItemView(
+    clazzLogAttendance: ClazzLogAttendanceRecordWithPerson
+) {
+
+    ListItem(
+        text = {
+            Text(text = clazzLogAttendance.person?.personFullName() ?: "",)
+        },
+        icon = {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_person_black_24dp),
+                contentDescription = ""
+            )
+        },
+        trailing = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(0.dp)
+            ){
+                IconToggleButton(
+                    checked = false,
+                    onCheckedChange = {}
+                ) {
+                    Icon(
+                        Icons.Default.Done,
+                        contentDescription = ""
+                    )
+                }
+
+                IconToggleButton(
+                    checked = false,
+                    onCheckedChange = {}
+                ) {
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = ""
+                    )
+                }
+
+                IconToggleButton(
+                    checked = false,
+                    onCheckedChange = {},
+                    modifier = Modifier.width(20.dp)
+                ) {
+                    Icon(
+                        Icons.Default.AccessTime,
+                        contentDescription = ""
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+@Preview
+fun ClazzLogEditAttendanceScreenPreview() {
+    val uiState = ClazzLogEditAttendanceUiState(
+        clazzLogAttendanceRecordList = listOf(
+            ClazzLogAttendanceRecordWithPerson().apply {
+                clazzLogAttendanceRecordUid = 0
+                attendanceStatus = ClazzLogAttendanceRecord.STATUS_ATTENDED
+                person = Person().apply {
+                    firstNames = "Student Name"
+                }
+            },
+            ClazzLogAttendanceRecordWithPerson().apply {
+                clazzLogAttendanceRecordUid = 1
+                attendanceStatus = ClazzLogAttendanceRecord.STATUS_ATTENDED
+                person = Person().apply {
+                    firstNames = "Student Name"
+                }
+            },
+            ClazzLogAttendanceRecordWithPerson().apply {
+                clazzLogAttendanceRecordUid = 2
+                attendanceStatus = ClazzLogAttendanceRecord.STATUS_ABSENT
+                person = Person().apply {
+                    firstNames = "Student Name"
+                }
+            }
+        ),
+        clazzLogsList = listOf(
+            ClazzLog().apply {
+                logDate = 1671629979000
+            },
+            ClazzLog().apply {
+                logDate = 1671975579000
+            },
+            ClazzLog().apply {
+                logDate = 1671975579000
+            }
+        )
+    )
+    MdcTheme {
+        ClazzLogEditAttendanceScreen(uiState)
+    }
 }
