@@ -11,7 +11,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Lens
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.People
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,10 +25,12 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ClazzDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
 import com.ustadmobile.core.util.IdOption
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzList2View
@@ -38,9 +39,10 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ClazzListUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.port.android.util.compose.messageIdResource
+import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
+import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import org.kodein.di.direct
@@ -168,11 +170,31 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
 private fun ClazzListScreen(
     uiState: ClazzListUiState = ClazzListUiState(),
     onClickClazz: (Clazz) -> Unit = {},
+    onClickSort: () -> Unit = {},
+    onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
+
+        item {
+            UstadListSortHeader(
+                activeSortOrderOption = uiState.activeSortOrderOption,
+                enabled = uiState.fieldsEnabled,
+                onClickSort = onClickSort
+            )
+        }
+
+        item {
+            UstadListFilterChipsHeader(
+                filterOptions = uiState.filterOptions,
+                selectedChipId = uiState.selectedChipId,
+                enabled = uiState.fieldsEnabled,
+                onClickFilterChip = onClickFilterChip,
+            )
+        }
 
         items(
             items = uiState.clazzList,
@@ -271,6 +293,11 @@ fun ClazzListScreenPreview() {
                 numTeachers = 3
                 numStudents = 2
             }
+        ),
+        filterOptions = listOf(
+            MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
+            MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
+            MessageIdOption2(MessageID.all, 0),
         )
     )
 

@@ -1,12 +1,16 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.db.dao.ClazzDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzListUiState
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.mui.common.justifyContent
+import com.ustadmobile.mui.components.UstadListFilterChipsHeader
+import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.util.ext.format
 import csstype.JustifyContent
 import csstype.px
@@ -26,10 +30,14 @@ external interface ClazzListScreenProps : Props {
 
     var onClickClazz: (Clazz?) -> Unit
 
+    var onClickSort: () -> Unit
+
+    var onClickFilterChip: (MessageIdOption2?) -> Unit
+
 }
 
 val ClazzListScreenPreview = FC<Props> {
-    val strings = useStringsXml()
+
     ClazzListScreenComponent2 {
         uiState = ClazzListUiState(
             clazzList = listOf(
@@ -49,6 +57,11 @@ val ClazzListScreenPreview = FC<Props> {
                     numTeachers = 3
                     numStudents = 2
                 }
+            ),
+            filterOptions = listOf(
+                MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
+                MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
+                MessageIdOption2(MessageID.all, 0),
             )
         )
     }
@@ -60,7 +73,20 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
         maxWidth = "lg"
 
         Stack {
-            spacing = responsive(20.px)
+
+            UstadListSortHeader {
+                activeSortOrderOption = props.uiState.activeSortOrderOption
+                enabled = props.uiState.fieldsEnabled
+                onClickSort = props.onClickSort
+            }
+
+            UstadListFilterChipsHeader{
+                filterOptions = props.uiState.filterOptions
+                selectedChipId = props.uiState.selectedChipId
+                enabled = props.uiState.fieldsEnabled
+                onClickFilterChip = props.onClickFilterChip
+            }
+
             List{
                 props.uiState.clazzList.forEach { clazz ->
                     ClazzListItem {
