@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity
 
 data class ContentEntryListItemUiState(
 
@@ -14,6 +15,9 @@ data class ContentEntryListItemUiState(
     val isPickerMode: Boolean = false,
 
     val selectFolderVisible: Boolean = false,
+
+    val courseBlock: CourseBlockWithCompleteEntity = CourseBlockWithCompleteEntity()
+
 ) {
 
     val containerAlpha: Double

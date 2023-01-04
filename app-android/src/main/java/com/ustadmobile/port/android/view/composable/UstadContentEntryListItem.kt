@@ -38,6 +38,7 @@ private fun UstadContentEntryListItem(
     ListItem(
         modifier = Modifier
             .alpha((uiState.containerAlpha).toFloat())
+            .paddingCourseBlockIndent(uiState.contentEntry.)
             .clickable {
                 onClickContentEntry(uiState.contentEntry)
             },
@@ -86,21 +87,12 @@ fun LeadingContent(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.End
     ){
-        Box(modifier = Modifier
-            .size(35.dp)
-            .align(Alignment.CenterHorizontally)
-            .border(
-                BorderStroke(1.dp, MaterialTheme.colors.onSurface), CircleShape
-            ),
-            contentAlignment = Alignment.Center
-        ){
-            Icon(
-                thumbnail,
-                contentDescription = "",
-                modifier = Modifier
-                    .padding(4.dp),
-            )
-        }
+        Icon(
+            thumbnail,
+            contentDescription = "",
+            modifier = Modifier
+                .padding(4.dp),
+        )
 
         BadgedBox(badge = {
             if (contentEntry.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE){
