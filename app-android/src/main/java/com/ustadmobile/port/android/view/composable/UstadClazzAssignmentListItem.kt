@@ -28,6 +28,7 @@ import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
+import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.ASSIGNMENT_STATUS_MAP
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -38,18 +39,17 @@ fun UstadClazzAssignmentListItem(
 ){
 
     ListItem(
-        modifier = Modifier.clickable {
-            onClickAssignment(uiState.assignment)
-        },
+        modifier = Modifier
+            .paddingCourseBlockIndent(uiState.block.cbIndentLevel)
+            .clickable {
+                onClickAssignment(uiState.assignment)
+            },
+
         icon = {
-            Row {
-                Spacer(modifier = Modifier
-                    .paddingCourseBlockIndent(uiState.block.cbIndentLevel))
-                Icon(
-                    Icons.Default.AssignmentTurnedIn,
-                    contentDescription = "",
-                )
-            }
+            Icon(
+                Icons.Default.AssignmentTurnedIn,
+                contentDescription = ""
+            )
         },
         text = { Text(uiState.assignment.caTitle ?: "") },
         secondaryText = {
@@ -78,6 +78,22 @@ fun UstadClazzAssignmentListItem(
                         )
                     }
                 }
+                
+                if (uiState.progressTextVisible){
+                    Text(text = stringResource(
+                        id = R.string.three_num_items_with_name_with_comma,
+
+                        uiState.assignment.progressSummary
+                            ?.calculateNotSubmittedStudents() ?: 0,
+                        stringResource(R.string.not_submitted_cap),
+
+                        uiState.assignment.progressSummary?.submittedStudents ?: 0,
+                        stringResource(R.string.submitted_cap),
+
+                        uiState.assignment.progressSummary?.markedStudents ?: 0,
+                        stringResource(R.string.marked)
+                    ))
+                }
             }
         }
     )
@@ -88,7 +104,7 @@ fun DateAndPointRow(
     uiState: ClazzAssignmentUiState,
 ){
 
-    val dateTime = rememberFormattedDate(
+    val dateTime = rememberFormattedDateTime(
         timeInMillis = uiState.block.cbDeadlineDate,
         timeZoneId = uiState.timeZone)
 
@@ -103,24 +119,12 @@ fun DateAndPointRow(
             Text(text = dateTime)
         }
 
-        Spacer(modifier = Modifier.width(5.dp))
+        Spacer(modifier = Modifier.width(10.dp))
 
         if (uiState.assignmentMarkVisible){
-            Text(buildAnnotatedString {
-                append(
-                    "${uiState.assignment.mark?.camMark ?: 0}/" +
-                            "${uiState.block.cbMaxPoints} " +
-                            stringResource(id = R.string.points)
-                )
-                withStyle(style = SpanStyle(color = Color.Red)) {
-                    if (uiState.assignmentPenaltyVisible){
-                        append(stringResource(
-                            id = R.string.late_penalty,
-                            uiState.block.cbLateSubmissionPenalty
-                        ))
-                    }
-                }
-            })
+            Text("${uiState.assignment.mark?.camMark ?: 0}/" +
+                    "${uiState.block.cbMaxPoints} " +
+                    stringResource(id = R.string.points))
         }
     }
 }
@@ -136,7 +140,7 @@ private fun UstadClazzAssignmentListItemPreview() {
                 camMark = 20F
             }
             progressSummary = AssignmentProgressSummary().apply {
-                hasMetricsPermission = false
+                hasMetricsPermission = true
             }
             fileSubmissionStatus = 2
         },
@@ -144,6 +148,7 @@ private fun UstadClazzAssignmentListItemPreview() {
             cbDescription = "Description"
             cbDeadlineDate = 1672707505000
             cbMaxPoints = 100
+            cbIndentLevel = 1
         }
     )
     UstadClazzAssignmentListItem(uiState)

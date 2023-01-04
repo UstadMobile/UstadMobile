@@ -23,11 +23,6 @@ data class ClazzAssignmentUiState(
     val assignmentMarkVisible: Boolean
         get() = assignment.mark != null
 
-    val assignmentPenaltyVisible: Boolean
-        get() = assignment.mark != null &&
-                assignment.mark?.camPenalty != null &&
-                assignment.mark?.camPenalty != 0
-
     val submissionStatusIconVisible: Boolean
         get() = assignment.progressSummary?.hasMetricsPermission != null &&
                 assignment.progressSummary?.hasMetricsPermission == false ||
@@ -36,6 +31,10 @@ data class ClazzAssignmentUiState(
     val submissionStatusVisible: Boolean
         get() = assignment.progressSummary?.hasMetricsPermission != null &&
                 assignment.progressSummary?.hasMetricsPermission == false
+
+    val progressTextVisible: Boolean
+        get() = assignment.progressSummary?.hasMetricsPermission != null &&
+                assignment.progressSummary?.hasMetricsPermission == true
 
 
 }

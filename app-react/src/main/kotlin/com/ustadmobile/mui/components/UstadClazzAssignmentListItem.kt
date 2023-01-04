@@ -28,19 +28,18 @@ external interface UstadClazzAssignmentListItemProps: Props {
 }
 
 val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props ->
-
     val strings = useStringsXml()
     ListItem{
         ListItemButton{
             onClick = { props.onClickAssignment(props.uiState.assignment) }
 
-            ListItemIcon {
-                sx {
-                    padding = paddingCourseBlockIndent(
-                        props.uiState.block.cbIndentLevel
-                    )
-                }
+            sx {
+                padding = paddingCourseBlockIndent(
+                    props.uiState.block.cbIndentLevel
+                )
+            }
 
+            ListItemIcon {
                 + AssignmentTurnedIn.create()
             }
 
@@ -50,54 +49,15 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
 
             ListItemText {
                 primary = ReactNode(props.uiState.assignment.caTitle ?: "")
-                secondary = Stack.create {
-                    if (props.uiState.cbDescriptionVisible){
-                        Typography{
-                            + (props.uiState.block.cbDescription ?: "")
-                        }
-                    }
-
-                    DateAndPointRow {
-                        uiState = props.uiState
-                        onClickAssignment = props.onClickAssignment
-                    }
-
-                    Stack {
-                        direction = responsive(StackDirection.row)
-                        spacing = responsive(10.px)
-
-                        if (props.uiState.submissionStatusIconVisible){
-                            Icon{
-                                + ASSIGNMENT_STATUS_MAP[
-                                        props.uiState.assignment.fileSubmissionStatus
-                                ]
-                            }
-                        }
-
-                        if (props.uiState.submissionStatusVisible){
-                            Typography {
-                               + (strings.mapLookup(
-                                   props.uiState.assignment.fileSubmissionStatus,
-                                   SubmissionConstants.STATUS_MAP
-                                ) ?: "")
-                            }
-                        }
-                    }
+                secondary = SecondaryContent.create{
+                    uiState = props.uiState
                 }
             }
         }
     }
 }
 
-external interface DateAndPointRowProps: Props {
-
-    var uiState: ClazzAssignmentUiState
-
-    var onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit
-
-}
-
-val DateAndPointRow = FC<DateAndPointRowProps> { props ->
+val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
 
     val strings = useStringsXml()
     val dateTime = useFormattedDate(
@@ -132,12 +92,70 @@ val DateAndPointRow = FC<DateAndPointRowProps> { props ->
                             "${props.uiState.block.cbMaxPoints} " +
                             strings[MessageID.points])
                 }
-                if (props.uiState.assignmentPenaltyVisible){
-                    strings[MessageID.late_penalty]
-                        .replace("%1\$d",
-                            (props.uiState.block.cbLateSubmissionPenalty).toString()
-                        )
+            }
+        }
+    }
+}
+
+
+val SecondaryContent = FC<UstadClazzAssignmentListItemProps> { props ->
+
+    val strings = useStringsXml()
+
+    Stack {
+        if (props.uiState.cbDescriptionVisible){
+            Typography{
+                + (props.uiState.block.cbDescription ?: "")
+            }
+        }
+
+        DateAndPointRow {
+            uiState = props.uiState
+        }
+
+        Stack {
+            direction = responsive(StackDirection.row)
+            spacing = responsive(10.px)
+
+            if (props.uiState.submissionStatusIconVisible){
+                Icon{
+                    + ASSIGNMENT_STATUS_MAP[
+                            props.uiState.assignment.fileSubmissionStatus
+                    ]
                 }
+            }
+
+            if (props.uiState.submissionStatusVisible){
+                Typography {
+                    + (strings.mapLookup(
+                        props.uiState.assignment.fileSubmissionStatus,
+                        SubmissionConstants.STATUS_MAP
+                    ) ?: "")
+                }
+            }
+        }
+
+        if (props.uiState.progressTextVisible){
+            Typography {
+                + (strings[MessageID.three_num_items_with_name_with_comma]
+
+                    .replace("%1\$d",
+                        (props.uiState.assignment.progressSummary
+                            ?.calculateNotSubmittedStudents() ?: 0).toString())
+
+                    .replace("%2\$s", strings[MessageID.not_submitted_cap])
+
+                    .replace("%3\$d",
+                        (props.uiState.assignment.progressSummary
+                            ?.submittedStudents ?: 0).toString())
+
+                    .replace("%4\$s", strings[MessageID.submitted_cap])
+
+                    .replace("%5\$d",
+                        (props.uiState.assignment.progressSummary
+                            ?.markedStudents ?: 0).toString())
+
+                    .replace("%6\$s", strings[MessageID.marked]))
             }
         }
     }
@@ -157,7 +175,7 @@ val UstadClazzAssignmentListItemPreview = FC<Props> {
                         camMark = 20F
                     }
                     progressSummary = AssignmentProgressSummary().apply {
-                        hasMetricsPermission = false
+                        hasMetricsPermission = true
                     }
                     fileSubmissionStatus = 2
                 },
