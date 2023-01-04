@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -604,6 +605,7 @@ val BLOCK_ICON_MAP = mapOf(
     CourseBlock.BLOCK_DISCUSSION_TYPE to R.drawable.ic_baseline_forum_24
 )
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CourseBlockListItem(
     courseBlock: CourseBlockWithCompleteEntity,
@@ -618,12 +620,17 @@ fun CourseBlockListItem(
             else
                 Icons.Default.KeyboardArrowDown
 
-            UstadDetailField(
-                valueText = courseBlock.cbTitle ?: "",
-                labelText = courseBlock.cbDescription ?: "",
-                imageId = ClazzEditFragment.BLOCK_ICON_MAP[courseBlock.cbType]
-                    ?: R.drawable.ic_baseline_folder_open_24,
-                secondaryActionContent = {
+            ListItem(
+                text = { Text(courseBlock.cbTitle ?: "") },
+                secondaryText = { Text(courseBlock.cbDescription ?: "") },
+                icon = {
+                    Icon(
+                        painter = painterResource(
+                            id = ClazzEditFragment.BLOCK_ICON_MAP[courseBlock.cbType]
+                                ?: R.drawable.ic_baseline_folder_open_24),
+                        contentDescription = "")
+                },
+                trailing = {
                     Icon(trailingIcon, contentDescription = "")
                 }
             )
@@ -636,13 +643,19 @@ fun CourseBlockListItem(
             else
                 SpannedString.valueOf("")
 
-            UstadDetailField(
-                modifier = Modifier.padding(start = startPadding),
-                valueText = courseBlock.cbTitle ?: "",
-                labelText = courseBlock.cbDescription ?: "",
-                imageId = BLOCK_ICON_MAP[courseBlock.cbType]
-                    ?: R.drawable.text_doc_24px,
-                onClick = { onClickItem(courseBlock) }
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickItem(courseBlock)
+                },
+                text = { Text(courseBlock.cbTitle ?: "") },
+                secondaryText = { Text(courseBlock.cbDescription ?: "") },
+                icon = {
+                    Icon(
+                        painter = painterResource(
+                            id = BLOCK_ICON_MAP[courseBlock.cbType]
+                                ?: R.drawable.text_doc_24px),
+                        contentDescription = "")
+                }
             )
         }
         CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {

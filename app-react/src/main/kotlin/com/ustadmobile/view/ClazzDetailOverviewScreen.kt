@@ -206,11 +206,15 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
             else
                 KeyboardArrowDown.create()
 
-            UstadDetailField {
-                valueText = props.courseBlock.cbTitle ?: ""
-                labelText = props.courseBlock.cbDescription ?: ""
-                icon = Book.create()
-                secondaryActionContent = Icon.create {
+            ListItem {
+                ListItemIcon {
+                    + Book.create()
+                }
+                ListItemText{
+                    primary = ReactNode(props.courseBlock.cbTitle ?: "")
+                    secondary = ReactNode(props.courseBlock.cbDescription ?: "")
+                }
+                secondaryAction = Icon.create {
                     + trailingIcon
                 }
             }
@@ -222,11 +226,14 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
 //            else
 //                SpannedString.valueOf("")
 
-            UstadDetailField{
-                valueText = props.courseBlock.cbTitle ?: ""
-                labelText = props.courseBlock.cbDescription ?: ""
-                icon = Book.create()
-                onClick = { props.onClickItem(props.courseBlock) }
+            ListItem {
+                ListItemIcon {
+                    + Book.create()
+                }
+                ListItemText{
+                    primary = ReactNode(props.courseBlock.cbTitle ?: "")
+                    secondary = ReactNode(props.courseBlock.cbDescription ?: "")
+                }
             }
         }
         CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
