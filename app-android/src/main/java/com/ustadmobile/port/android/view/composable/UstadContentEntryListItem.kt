@@ -44,7 +44,7 @@ private fun UstadContentEntryListItem(
     ListItem(
         modifier = Modifier
             .alpha((uiState.containerAlpha).toFloat())
-            .paddingCourseBlockIndent(uiState.courseBlock.cbIndentLevel)
+            .paddingCourseBlockIndent(uiState.cbIndentLevel)
             .clickable {
                 onClickContentEntry(uiState.contentEntry)
             },
@@ -215,9 +215,7 @@ private fun ContentEntryListScreenPreview() {
                 title = "Content Title"
                 description = "Content Description"
             },
-        courseBlock = CourseBlockWithCompleteEntity().apply {
-            cbIndentLevel = 1
-        }
+        cbIndentLevel = 1
     )
     MdcTheme {
         UstadContentEntryListItem(uiStateVal)

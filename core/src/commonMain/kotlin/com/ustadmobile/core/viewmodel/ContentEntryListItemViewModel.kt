@@ -16,7 +16,7 @@ data class ContentEntryListItemUiState(
 
     val selectFolderVisible: Boolean = false,
 
-    val courseBlock: CourseBlockWithCompleteEntity = CourseBlockWithCompleteEntity()
+    val cbIndentLevel: Int = 0
 
 ) {
 
@@ -35,8 +35,5 @@ data class ContentEntryListItemUiState(
     val scoreResultText: String
         get() = "(" + (contentEntry.scoreProgress?.resultScore ?: 0) + "/" +
                 (contentEntry.scoreProgress?.resultMax ?: 0) + ")"
-
-    val selectButtonVisible: Boolean
-        get() = isPickerMode  && (contentEntry.leaf || selectFolderVisible)
 
 }

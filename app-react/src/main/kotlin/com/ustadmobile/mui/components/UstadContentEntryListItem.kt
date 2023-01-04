@@ -8,7 +8,9 @@ import com.ustadmobile.core.viewmodel.ContentEntryListItemUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.lib.db.entities.StatementEntity
 import com.ustadmobile.mui.common.justifyContent
+import com.ustadmobile.mui.ext.paddingCourseBlockIndent
 import com.ustadmobile.view.CONTENT_ENTRY_TYPE_ICON_MAP
 import csstype.*
 import mui.icons.material.*
@@ -38,6 +40,7 @@ private val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { pro
             onClick = { props.onClickContentEntry(props.uiState.contentEntry) }
 
             sx {
+                padding = paddingCourseBlockIndent(props.uiState.cbIndentLevel)
                 opacity = number(props.uiState.containerAlpha)
             }
 
@@ -85,11 +88,11 @@ val LeadingContent = FC<LeadingContentProps> { props ->
     else
         Folder
 
-    var badgeIcon = CheckCircle.create()
-    var badgeColor = IconColor.success
+    var badgeIcon = CheckCircle
+    var badgeColor = SvgIconColor.success
     if (props.contentEntryItem.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CROSS) {
-        badgeIcon = Cancel.create()
-        badgeColor = IconColor.error
+        badgeIcon = Cancel
+        badgeColor = SvgIconColor.error
     }
 
     Stack {
@@ -99,21 +102,19 @@ val LeadingContent = FC<LeadingContentProps> { props ->
 
         thumbnail {
             sx {
-                border = Border(1.px, csstype.LineStyle.solid)
-                borderRadius = 27.5.px
                 width = 55.px
                 height = 55.px
-                padding = 10.px
             }
         }
 
         Badge {
-            sx {
-                width = 55.px
-            }
+
             if (props.contentEntryItem.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE) {
-                badgeContent = Icon.create {
-                    + badgeIcon
+                badgeContent = badgeIcon.create {
+                    sx {
+                        width = 18.px
+                        height = 18.px
+                    }
                     color = badgeColor
                 }
             }
@@ -149,8 +150,10 @@ val SecondaryContent = FC<SecondaryContentProps> { props ->
         justifyContent = JustifyContent.start
 
 
-        Typography {
-            + (props.contentEntryItem.title ?: "")
+        if (props.uiState.descriptionVisible){
+            Typography {
+                + (props.contentEntryItem.description ?: "")
+            }
         }
 
         Stack {
@@ -223,16 +226,18 @@ val UstadContentEntryListItemPreview = FC<Props> {
             contentEntry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer()
                 .apply {
                     contentEntryUid = 1
-                    leaf = false
+                    leaf = true
                     ceInactive = true
                     scoreProgress = ContentEntryStatementScoreProgress().apply {
                         progress = 10
                         penalty = 20
+                        success = StatementEntity.RESULT_SUCCESS
                     }
                     contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
-                    title = "Content Title 1"
-                    description = "Content Description 1"
-                }
+                    title = "Content Title"
+                    description = "Content Description"
+                },
+            cbIndentLevel = 6
         )
     }
 }
