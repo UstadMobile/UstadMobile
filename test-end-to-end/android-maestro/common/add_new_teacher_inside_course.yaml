@@ -7,8 +7,7 @@ appId: com.toughra.ustadmobile
  # 3) TEACHERLASTNAME: provide teacher's last name of string type
  # 4) GENDER: provide teacher's gender of string type
  # 5) PASSWORD: provide teacher's account password of string type
- # 6) TEST : provide the test name, it should be a string
- # 7) TESTRESULTSDIR : provides the path to store test results
+ # 6) TESTRESULTSDIR : provides the path to store test results
 
 - tapOn: "Courses"
 - tapOn:
@@ -24,7 +23,6 @@ appId: com.toughra.ustadmobile
 - tapOn: ${GENDER}
 - tapOn: "SAVE"
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/added_new_teacher"
 - tapOn: "${TEACHERFIRSTNAME} ${TEACHERLASTNAME}"
 - tapOn: "VIEW PROFILE"
   # add account
@@ -36,4 +34,4 @@ appId: com.toughra.ustadmobile
 - tapOn: "Confirm password"
 - inputText: ${PASSWORD}
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/added_account_for_new_teacher"
+- takeScreenshot: "${TESTRESULTSDIR}/added_account_for_new_teacher-${TEACHERFIRSTNAME} ${TEACHERLASTNAME}"

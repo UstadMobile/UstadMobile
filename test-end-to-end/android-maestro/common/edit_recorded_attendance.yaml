@@ -4,7 +4,6 @@ appId: com.toughra.ustadmobile
 # this record 2nd and 5th student in list as absent, 3rd student as late and others as present
 # test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
-# 2) TEST : provide the test name, it should be a string
 - tapOn: "Courses"
 - tapOn:
       id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
@@ -21,5 +20,5 @@ appId: com.toughra.ustadmobile
 - tapOn:
     text: "Absent"
     index: 4
-- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/edited_attendance"
+- takeScreenshot: "${TESTRESULTSDIR}/edited_attendance"
 - tapOn: "Save"

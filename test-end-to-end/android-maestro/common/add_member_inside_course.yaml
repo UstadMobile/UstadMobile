@@ -6,6 +6,7 @@ appId: com.toughra.ustadmobile
  # 1) MEMBER : student / teacher
  # 2) FIRSTNAME : FIRSTNAME of member
  # 3) LASTNAME : LASTNAME of member
+ # 4) TESTRESULTSDIR : provides the path to store test results
 
 - tapOn: "Courses"
 - tapOn:
@@ -15,3 +16,4 @@ appId: com.toughra.ustadmobile
 - scroll
 - tapOn: "${FIRSTNAME} ${LASTNAME}"
 - tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/added-${MEMBER}-${FIRSTNAME} ${LASTNAME}"

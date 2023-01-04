@@ -14,7 +14,7 @@ WORKDIR=$(pwd)
 TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
 TESTAPK=$SCRIPTDIR/../../app-android-launcher/build/outputs/apk/release/app-android-launcher-release.apk
-TESTRESULTSDIR=$SCRIPTDIR/build/results/$TEST
+TESTRESULTSDIR=$SCRIPTDIR/build/results
 CONTROLSERVER=""
 USECONSOLEOUTPUT=0
 echo $SCRIPTDIR

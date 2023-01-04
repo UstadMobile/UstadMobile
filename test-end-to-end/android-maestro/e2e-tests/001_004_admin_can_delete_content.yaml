@@ -1,7 +1,6 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: ${TESTRESULTSDIR}
-  TEST: ${TEST}
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_004_admin_can_delete_content"
 ---
 - clearState: com.toughra.ustadmobile
 #---------Start test-controller-server ---------#

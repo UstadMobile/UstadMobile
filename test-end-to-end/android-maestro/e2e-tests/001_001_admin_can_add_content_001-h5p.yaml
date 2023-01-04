@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_001-h5p"
 ---
 - clearState: com.toughra.ustadmobile
 

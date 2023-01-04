@@ -8,7 +8,6 @@ appId: com.toughra.ustadmobile
  # 3) CONTROLSERVER: ${CONTROLSERVER} : provides the test-control-server address
  # 4) TESTSERIAL: ${TESTSERIAL} : provides the device serial number
  # 5) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
- # 6) TEST : provide the test name, it should be a string
 
 # clear the app
 - clearState: com.toughra.ustadmobile
@@ -60,4 +59,4 @@ appId: com.toughra.ustadmobile
 - extendedWaitUntil:
     visible: "Delete"
     timeout: 600000
-- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/content_add_to_library"
+- takeScreenshot: "${TESTRESULTSDIR}/content_add_to_library"

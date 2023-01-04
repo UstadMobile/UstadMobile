@@ -7,12 +7,12 @@ appId: com.toughra.ustadmobile
  # 2) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
 
 - back
-- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/screen_before_hiding_content"
+- takeScreenshot: "${TESTRESULTSDIR}/screen_before_hiding_content"
 - longPressOn:
     text: "${TESTCONTENTNAME}"
 - tapOn:
     text: "Hide"
-- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/screen_after_hiding_content"
+- takeScreenshot: "${TESTRESULTSDIR}/screen_after_hiding_content"
 # login to make sure the content is hidden
 #clear state and launch app
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -21,4 +21,4 @@ appId: com.toughra.ustadmobile
 - runFlow:
       file: "../common/user_login.yaml"
 - tapOn: "Library"
-- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/screen_after_hiding_content_test"
+- takeScreenshot: "${TESTRESULTSDIR}/screen_after_hiding_content_test"

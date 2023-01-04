@@ -1,8 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
  TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
- TESTRESULTSDIR: ${TESTRESULTSDIR}
- TEST: ${TEST}
+ TESTRESULTSDIR: "${TESTRESULTSDIR}/001_007_admin_make_content_publicly_not_accessible"
 ---
 - clearState: com.toughra.ustadmobile
 #---------Start test-controller-server ---------#

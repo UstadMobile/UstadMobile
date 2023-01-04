@@ -18,7 +18,7 @@ appId: com.toughra.ustadmobile
 
 # test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
-# 2) TEST : provide the test name, it should be a string
+
 
 # add new course
 - runFlow:
@@ -123,4 +123,4 @@ appId: com.toughra.ustadmobile
       FIRSTNAME: "Sruthy"
       LASTNAME: "K"
       MEMBER: "student"
-- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/member_list_of_new_test_course"
+- takeScreenshot: "${TESTRESULTSDIR}/member_list_of_new_test_course"
