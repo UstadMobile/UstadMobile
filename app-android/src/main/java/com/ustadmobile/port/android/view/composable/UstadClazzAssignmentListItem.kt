@@ -11,13 +11,9 @@ import androidx.compose.material.icons.filled.AssignmentTurnedIn
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.toughra.ustadmobile.R
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.controller.SubmissionConstants
@@ -27,7 +23,6 @@ import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.lib.db.entities.CourseAssignmentMark
 import com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
-import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.ASSIGNMENT_STATUS_MAP
 
