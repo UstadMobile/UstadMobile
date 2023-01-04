@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.ClazzAssignmentUiState
 import com.ustadmobile.hooks.useFormattedDate
+import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
 import com.ustadmobile.view.ASSIGNMENT_STATUS_MAP
@@ -65,7 +66,7 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
 val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
 
     val strings = useStringsXml()
-    val dateTime = useFormattedDate(
+    val dateTime = useFormattedDateAndTime(
         timeInMillis = props.uiState.block.cbDeadlineDate,
         timezoneId = props.uiState.timeZone)
 
@@ -87,7 +88,7 @@ val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
         }
 
         Box{
-            sx{ width = 5.px }
+            sx{ width = 20.px }
         }
 
         if (props.uiState.assignmentMarkVisible){
