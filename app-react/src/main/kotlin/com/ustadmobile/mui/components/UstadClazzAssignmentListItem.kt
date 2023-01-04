@@ -4,7 +4,6 @@ import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.ClazzAssignmentUiState
-import com.ustadmobile.hooks.useFormattedDate
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.ext.paddingCourseBlockIndent
@@ -88,7 +87,7 @@ val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
         }
 
         Box{
-            sx{ width = 20.px }
+            sx{ width = 15.px }
         }
 
         if (props.uiState.assignmentMarkVisible){
