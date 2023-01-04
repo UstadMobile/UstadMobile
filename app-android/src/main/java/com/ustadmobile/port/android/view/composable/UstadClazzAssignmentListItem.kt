@@ -43,7 +43,8 @@ fun UstadClazzAssignmentListItem(
         icon = {
             Icon(
                 Icons.Default.AssignmentTurnedIn,
-                contentDescription = ""
+                contentDescription = "",
+                modifier = Modifier.size(40.dp)
             )
         },
         text = { Text(uiState.assignment.caTitle ?: "") },
@@ -137,7 +138,7 @@ private fun UstadClazzAssignmentListItemPreview() {
             progressSummary = AssignmentProgressSummary().apply {
                 hasMetricsPermission = true
             }
-            fileSubmissionStatus = 2
+            fileSubmissionStatus = 1
         },
         block = CourseBlockWithCompleteEntity().apply {
             cbDescription = "Description"

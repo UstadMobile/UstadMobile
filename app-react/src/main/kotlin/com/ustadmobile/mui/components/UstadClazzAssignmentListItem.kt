@@ -40,7 +40,12 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
             }
 
             ListItemIcon {
-                + AssignmentTurnedIn.create()
+                AssignmentTurnedIn {
+                    sx {
+                        width = 40.px
+                        height = 40.px
+                    }
+                }
             }
 
             Box {
