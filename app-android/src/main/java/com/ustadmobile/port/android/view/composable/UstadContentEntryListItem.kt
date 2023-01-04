@@ -12,10 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction.Companion.Done
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.work.ListenableWorker.Result.Failure
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.entityconstants.ProgressConstants
@@ -31,14 +35,20 @@ import com.ustadmobile.port.android.view.ContentEntryDetailOverviewFragment.Comp
 @Composable
 private fun UstadContentEntryListItem(
     uiState: ContentEntryListItemUiState = ContentEntryListItemUiState(),
-    onClickContentEntry: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit = {},
-    onClickDownloadContentEntry: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit = {},
+
+    onClickContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    ) -> Unit = {},
+
+    onClickDownloadContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    ) -> Unit = {},
 ) {
 
     ListItem(
         modifier = Modifier
             .alpha((uiState.containerAlpha).toFloat())
-            .paddingCourseBlockIndent(uiState.contentEntry.)
+            .paddingCourseBlockIndent(uiState.courseBlock.cbIndentLevel)
             .clickable {
                 onClickContentEntry(uiState.contentEntry)
             },
@@ -77,13 +87,14 @@ fun LeadingContent(
     else
         Icons.Default.Folder
 
-    val badge = if (contentEntry.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CHECK)
-        R.drawable.ic_content_complete
-    else
-        R.drawable.ic_content_fail
+    var badgeColor = colorResource(R.color.errorColor)
+    var badge = Icons.Default.Cancel
+    if (contentEntry.scoreProgress?.progressBadge() == ProgressConstants.BADGE_CHECK) {
+        badge = Icons.Default.CheckCircle
+        badgeColor = colorResource(R.color.successColor)
+    }
 
     Column(
-        modifier = Modifier.width(45.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.End
     ){
@@ -91,27 +102,35 @@ fun LeadingContent(
             thumbnail,
             contentDescription = "",
             modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .size(45.dp)
                 .padding(4.dp),
         )
 
         BadgedBox(badge = {
             if (contentEntry.scoreProgress?.progressBadge() != ProgressConstants.BADGE_NONE){
-                Image(
-                    modifier = Modifier
-                        .size(25.dp),
-                    painter = painterResource(id = badge),
-                    contentDescription = ""
+                Icon(
+                    badge,
+                    contentDescription = "",
+                    modifier = Modifier.size(15.dp),
+                    tint = badgeColor
                 )
             }
         }) {
             if (uiState.progressVisible){
-                LinearProgressIndicator(
-                    progress = ((contentEntry.scoreProgress?.progress ?: 0)/100.0)
-                        .toFloat(),
+                Box(
                     modifier = Modifier
-                        .height(4.dp)
-                        .padding(end = 5.dp)
-                )
+                        .width(45.dp)
+                        .height(15.dp)
+                        .padding(end = 10.dp)
+                ) {
+                    LinearProgressIndicator(
+                        progress = ((contentEntry.scoreProgress?.progress ?: 0)/100.0)
+                            .toFloat(),
+                        modifier = Modifier
+                            .height(4.dp)
+                    )
+                }
             }
         }
     }
@@ -122,10 +141,12 @@ private fun SecondaryContent(
     contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
     uiState: ContentEntryListItemUiState
 ){
-    Column {
-        Text((contentEntry.description ?: ""))
-
-        Spacer(modifier = Modifier.height(5.dp))
+    Column(
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        if (uiState.descriptionVisible){
+            Text((contentEntry.description ?: ""))
+        }
 
         Row {
 
@@ -178,7 +199,6 @@ fun SecondaryAction(
             contentDescription = ""
         )
     }
-
 }
 
 @Composable
@@ -188,7 +208,7 @@ private fun ContentEntryListScreenPreview() {
         contentEntry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer()
             .apply {
                 contentEntryUid = 1
-                leaf = false
+                leaf = true
                 ceInactive = true
                 scoreProgress = ContentEntryStatementScoreProgress().apply {
                     progress = 10
@@ -196,9 +216,12 @@ private fun ContentEntryListScreenPreview() {
                     success = RESULT_SUCCESS
                 }
                 contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
-                title = "Content Title 1"
-                description = "Content Description 1"
+                title = "Content Title"
+                description = "Content Description"
             },
+        courseBlock = CourseBlockWithCompleteEntity().apply {
+            cbIndentLevel = 1
+        }
     )
     MdcTheme {
         UstadContentEntryListItem(uiStateVal)
