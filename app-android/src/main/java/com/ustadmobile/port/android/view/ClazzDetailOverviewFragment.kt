@@ -15,6 +15,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -557,6 +562,18 @@ private fun ClazzDetailOverviewScreen(
                 text = { Text(text) },
             )
         }
+
+        items(
+            items = uiState.courseBlockList,
+            key = { courseBlock -> courseBlock.cbUid }
+        ){ courseBlock ->
+
+            CourseBlockListItem(
+                courseBlock = courseBlock,
+                uiState = uiState,
+                onClickItem = onClickCourseBlock
+            )
+        }
     }
 }
 
@@ -594,7 +611,22 @@ fun CourseBlockListItem(
     onClickItem: (CourseBlockWithCompleteEntity) -> Unit = {}
 ){
     when(courseBlock.cbType){
-        CourseBlock.BLOCK_MODULE_TYPE -> {
+        CourseBlock.BLOCK_MODULE_TYPE, CourseBlock.BLOCK_DISCUSSION_TYPE  -> {
+
+            val trailingIcon = if(courseBlock.expanded)
+                Icons.Default.KeyboardArrowUp
+            else
+                Icons.Default.KeyboardArrowDown
+
+            UstadDetailField(
+                valueText = courseBlock.cbTitle ?: "",
+                labelText = courseBlock.cbDescription ?: "",
+                imageId = ClazzEditFragment.BLOCK_ICON_MAP[courseBlock.cbType]
+                    ?: R.drawable.ic_baseline_folder_open_24,
+                secondaryActionContent = {
+                    Icon(trailingIcon, contentDescription = "")
+                }
+            )
         }
         CourseBlock.BLOCK_TEXT_TYPE -> {
 
@@ -622,9 +654,6 @@ fun CourseBlockListItem(
             }else{
 
             }
-        }
-
-        CourseBlock.BLOCK_DISCUSSION_TYPE -> {
         }
     }
 }
@@ -664,7 +693,15 @@ fun ClazzDetailOverviewScreenPreview() {
         ),
         courseBlockList = listOf(
             CourseBlockWithCompleteEntity().apply {
-                cbTitle = "Module"
+                cbUid = 3
+                cbTitle = "Module 1"
+                cbDescription = "Description 1"
+                cbType = CourseBlock.BLOCK_MODULE_TYPE
+            },
+            CourseBlockWithCompleteEntity().apply {
+                cbUid = 4
+                cbTitle = "Module 2"
+                cbType = CourseBlock.BLOCK_MODULE_TYPE
             }
         ),
         clazzCodeVisible = true

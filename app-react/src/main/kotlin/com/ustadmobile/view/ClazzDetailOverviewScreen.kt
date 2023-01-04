@@ -7,11 +7,8 @@ import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.viewmodel.ClazzDetailOverviewUiState
 import com.ustadmobile.hooks.useFormattedTime
-import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
-import com.ustadmobile.lib.db.entities.HolidayCalendar
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.mui.components.UstadDetailField
-import com.ustadmobile.lib.db.entities.School
-import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.view.components.UstadBlankIcon
 import csstype.Padding
 import csstype.px
@@ -29,6 +26,8 @@ external interface ClazzDetailOverviewProps : Props {
     var uiState: ClazzDetailOverviewUiState
 
     var onClickClassCode: (String) -> Unit
+
+    var onClickCourseBlock: (CourseBlockWithCompleteEntity) -> Unit
 
 }
 
@@ -141,6 +140,16 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                     }
                 }
             }
+
+            List {
+                props.uiState.courseBlockList.forEach { courseBlockItem ->
+                    CourseBlockListItem {
+                        courseBlock = courseBlockItem
+                        uiState = props.uiState
+                        onClickItem = props.onClickCourseBlock
+                    }
+                }
+            }
         }
     }
 }
@@ -177,6 +186,62 @@ private val TextImageRow = FC<TextImageRowProps> { props ->
     }
 }
 
+external interface CourseBlockListItemProps : Props {
+
+    var courseBlock: CourseBlockWithCompleteEntity
+
+    var uiState: ClazzDetailOverviewUiState
+
+    var onClickItem: (CourseBlockWithCompleteEntity) -> Unit
+
+}
+
+private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
+
+    when(props.courseBlock.cbType){
+        CourseBlock.BLOCK_MODULE_TYPE, CourseBlock.BLOCK_DISCUSSION_TYPE  -> {
+
+            val trailingIcon = if(props.courseBlock.expanded)
+                KeyboardArrowUp.create()
+            else
+                KeyboardArrowDown.create()
+
+            UstadDetailField {
+                valueText = props.courseBlock.cbTitle ?: ""
+                labelText = props.courseBlock.cbDescription ?: ""
+                icon = Book.create()
+                secondaryActionContent = Icon.create {
+                    + trailingIcon
+                }
+            }
+        }
+        CourseBlock.BLOCK_TEXT_TYPE -> {
+
+//            val cbDescription = if(props.uiState.cbDescriptionVisible(props.courseBlock))
+//                Html.fromHtml(courseBlock.cbDescription)
+//            else
+//                SpannedString.valueOf("")
+
+            UstadDetailField{
+                valueText = props.courseBlock.cbTitle ?: ""
+                labelText = props.courseBlock.cbDescription ?: ""
+                icon = Book.create()
+                onClick = { props.onClickItem(props.courseBlock) }
+            }
+        }
+        CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
+
+        }
+        CourseBlock.BLOCK_CONTENT_TYPE -> {
+            if(props.courseBlock.entry != null) {
+
+            }else{
+
+            }
+        }
+    }
+}
+
 val ClazzDetailOverviewScreenPreview = FC<Props> {
     ClazzDetailOverviewComponent2 {
         uiState = ClazzDetailOverviewUiState(
@@ -201,6 +266,19 @@ val ClazzDetailOverviewScreenPreview = FC<Props> {
                 Schedule().apply {
                     sceduleStartTime = 0
                     scheduleEndTime = 0
+                }
+            ),
+            courseBlockList = listOf(
+                CourseBlockWithCompleteEntity().apply {
+                    cbUid = 3
+                    cbTitle = "Module 1"
+                    cbDescription = "Description 1"
+                    cbType = CourseBlock.BLOCK_MODULE_TYPE
+                },
+                CourseBlockWithCompleteEntity().apply {
+                    cbUid = 4
+                    cbTitle = "Module 2"
+                    cbType = CourseBlock.BLOCK_MODULE_TYPE
                 }
             ),
             clazzCodeVisible = true
