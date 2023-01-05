@@ -88,7 +88,7 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
         Stack {
 
             PagerView{
-                uiState = props.uiState
+                timeZone = props.uiState.timeZone
                 clazzLog = props.uiState.clazzLogsList
             }
 
@@ -117,9 +117,9 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
             }
 
             List{
-                props.uiState.clazzLogAttendanceRecordList.forEach { clazzLog ->
+                props.uiState.clazzLogAttendanceRecordList.forEach { clazzLogAttendance ->
                     ClazzLogItemView {
-                        clazzLogAttendance = clazzLog
+                        clazzLog = clazzLogAttendance
                     }
                 }
             }
@@ -131,7 +131,7 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
 
 external interface PagerViewProps : Props {
 
-    var uiState: ClazzLogEditAttendanceUiState
+    var timeZone: String
 
     var onClickPreviousClazzLog: () -> Unit
 
@@ -145,7 +145,7 @@ private val PagerView = FC<PagerViewProps> { props ->
 
     val dateTime = useFormattedDateAndTime(
         props.clazzLog[0].logDate,
-        props.uiState.timeZone
+        props.timeZone
     )
 
     Grid {
@@ -197,10 +197,11 @@ private val PagerView = FC<PagerViewProps> { props ->
 
 external interface ClazzLogItemViewProps : Props {
 
-    var clazzLogAttendance: ClazzLogAttendanceRecordWithPerson
+    var clazzLog: ClazzLogAttendanceRecordWithPerson
 
     var onChangedAttendanceStatus: (Int) -> Unit
 
+    var fieldsEnabled: Boolean
 }
 
 private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
@@ -213,26 +214,32 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
 
         ListItemText {
             primary = ReactNode(
-                props.clazzLogAttendance.person?.personFullName() ?: ""
+                props.clazzLog.person?.personFullName() ?: ""
             )
         }
 
         secondaryAction = ButtonGroup.create {
 
-            Button {
-                variant = ButtonVariant.outlined
+            ToggleButton {
+                disabled = !props.fieldsEnabled
+                selected = (props.clazzLog.attendanceStatus
+                        == ClazzLogAttendanceRecord.STATUS_ATTENDED)
 
                 + Done.create()
             }
 
-            Button {
-                variant = ButtonVariant.outlined
+            ToggleButton {
+                disabled = !props.fieldsEnabled
+                selected = (props.clazzLog.attendanceStatus
+                == ClazzLogAttendanceRecord.STATUS_ABSENT)
 
                 + Close.create()
             }
 
-            Button {
-                variant = ButtonVariant.outlined
+            ToggleButton {
+                disabled = !props.fieldsEnabled
+                selected = (props.clazzLog.attendanceStatus
+                        == ClazzLogAttendanceRecord.STATUS_PARTIAL)
 
                 + AccessTime.create()
             }

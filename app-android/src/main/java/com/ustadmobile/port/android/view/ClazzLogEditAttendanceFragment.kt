@@ -416,6 +416,7 @@ private fun ClazzLogEditAttendanceScreen(
         ){ clazzLogAttendance ->
             ClazzLogItemView(
                 clazzLog = clazzLogAttendance,
+                fieldsEnabled = uiState.fieldsEnabled,
                 onChangedAttendanceStatus = onChangedAttendanceStatus
             )
         }
@@ -484,6 +485,7 @@ private fun PagerView(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzLogItemView(
+    fieldsEnabled: Boolean,
     clazzLog: ClazzLogAttendanceRecordWithPerson,
     onChangedAttendanceStatus: (Int) -> Unit,
 ) {
@@ -505,6 +507,7 @@ private fun ClazzLogItemView(
                 IconToggleButton(
                     checked = clazzLog.attendanceStatus
                             == ClazzLogAttendanceRecord.STATUS_ATTENDED,
+                    enabled = fieldsEnabled,
                     onCheckedChange = {
                         onChangedAttendanceStatus(
                             ClazzLogAttendanceRecord.STATUS_ATTENDED
@@ -520,6 +523,7 @@ private fun ClazzLogItemView(
                 IconToggleButton(
                     checked = clazzLog.attendanceStatus
                             == ClazzLogAttendanceRecord.STATUS_ABSENT,
+                    enabled = fieldsEnabled,
                     onCheckedChange = {
                         onChangedAttendanceStatus(
                             ClazzLogAttendanceRecord.STATUS_ABSENT
@@ -535,6 +539,7 @@ private fun ClazzLogItemView(
                 IconToggleButton(
                     checked = clazzLog.attendanceStatus
                             == ClazzLogAttendanceRecord.STATUS_PARTIAL,
+                    enabled = fieldsEnabled,
                     onCheckedChange = {
                         onChangedAttendanceStatus(
                             ClazzLogAttendanceRecord.STATUS_PARTIAL
