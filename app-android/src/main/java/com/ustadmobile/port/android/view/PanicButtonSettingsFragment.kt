@@ -63,11 +63,11 @@ class PanicButtonSettingsFragment: UstadBaseFragment(), PanicButtonSettingsView,
             it.eventListener = this
 
             it.panicButtonSettingsExitAppCheckbox.isChecked = systemImpl.getAppPref(
-                PanicButtonSettingsPresenter.PREF_LOCK_AND_EXIT, requireContext())?.toBoolean() ?: false
+                PanicButtonSettingsPresenter.PREF_LOCK_AND_EXIT)?.toBoolean() ?: false
             it.panicButtonSettingsClearAppDataCheckbox.isChecked = systemImpl.getAppPref(
-                PanicButtonSettingsPresenter.PREF_CLEAR_APP_DATA, requireContext())?.toBoolean() ?: false
+                PanicButtonSettingsPresenter.PREF_CLEAR_APP_DATA)?.toBoolean() ?: false
             it.panicButtonSettingsUninstallCheckbox.isChecked = systemImpl.getAppPref(
-                PanicButtonSettingsPresenter.PREF_UNINSTALL_THIS_APP, requireContext())?.toBoolean() ?: false
+                PanicButtonSettingsPresenter.PREF_UNINSTALL_THIS_APP)?.toBoolean() ?: false
         }
 
         return rootView

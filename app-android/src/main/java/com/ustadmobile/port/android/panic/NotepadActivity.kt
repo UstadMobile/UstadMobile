@@ -20,7 +20,7 @@ class NotepadActivity : AppCompatActivity(), DIAware{
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val unhideCode = HidingManager().getUnhideCode(systemImpl, this)
+        val unhideCode = HidingManager().getUnhideCode(systemImpl)
 
         setContentView(R.layout.activity_panic_responder)
         findViewById<EditText>(R.id.activity_notepad_edittext).addTextChangedListener(

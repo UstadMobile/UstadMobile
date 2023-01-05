@@ -26,19 +26,19 @@ class PanicResponderActivity: AppCompatActivity(), DIAware {
         super.onCreate(savedInstanceState)
 
         if (PanicResponder.receivedTriggerFromConnectedApp(this)) {
-            if (systemImpl.getAppPref(PREF_UNINSTALL_THIS_APP, this)?.toBoolean() == true) {
+            if (systemImpl.getAppPref(PREF_UNINSTALL_THIS_APP)?.toBoolean() == true) {
                 HidingManager().hide(this)
             }
 
-            if (systemImpl.getAppPref(PREF_CLEAR_APP_DATA, this)?.toBoolean() == true) {
+            if (systemImpl.getAppPref(PREF_CLEAR_APP_DATA)?.toBoolean() == true) {
                 PanicResponder.deleteAllAppData(this)
             }
 
-            if (systemImpl.getAppPref(PREF_LOCK_AND_EXIT, this)?.toBoolean() == true) {
+            if (systemImpl.getAppPref(PREF_LOCK_AND_EXIT)?.toBoolean() == true) {
                 ExitActivity.exitAndRemoveFromRecentApps(this)
             }
         } else if (PanicResponder.shouldUseDefaultResponseToTrigger(this)) {
-            if (systemImpl.getAppPref(PREF_LOCK_AND_EXIT, this)?.toBoolean() == true) {
+            if (systemImpl.getAppPref(PREF_LOCK_AND_EXIT)?.toBoolean() == true) {
                 ExitActivity.exitAndRemoveFromRecentApps(this)
             }
         }

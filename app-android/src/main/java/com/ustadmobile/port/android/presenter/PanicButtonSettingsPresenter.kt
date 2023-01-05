@@ -48,7 +48,7 @@ class PanicButtonSettingsPresenter(
             PanicTriggerApp(it.activityInfo.packageName,
                 it.activityInfo.loadLabel(packageManager).toString(), it.loadIcon(packageManager))
         }
-        view.unhideCode = HidingManager().getUnhideCode(systemImpl, context as Context)
+        view.unhideCode = HidingManager().getUnhideCode(systemImpl)
         view.panicTriggerAppList = triggerList
         view.selectedTriggerApp = triggerList.firstOrNull {
             it.packageName  == selectedTriggerPackageName
@@ -66,15 +66,15 @@ class PanicButtonSettingsPresenter(
     }
 
     fun onChangeLockAndExit(enabled: Boolean) {
-        systemImpl.setAppPref(PREF_LOCK_AND_EXIT, enabled.toString(), context)
+        systemImpl.setAppPref(PREF_LOCK_AND_EXIT, enabled.toString())
     }
 
     fun onChangeClearAppData(enabled: Boolean) {
-        systemImpl.setAppPref(PREF_CLEAR_APP_DATA, enabled.toString(), context)
+        systemImpl.setAppPref(PREF_CLEAR_APP_DATA, enabled.toString())
     }
 
     fun onChangeUninstallThisApp(enabled: Boolean) {
-        systemImpl.setAppPref(PREF_UNINSTALL_THIS_APP, enabled.toString(), context)
+        systemImpl.setAppPref(PREF_UNINSTALL_THIS_APP, enabled.toString())
     }
 
     companion object {

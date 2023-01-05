@@ -23,21 +23,21 @@ class HidingManager {
             ComponentName(this, NotepadActivity::class.java)
 
 
-    fun storeUnhideCode(systemImpl: UstadMobileSystemImpl, context: Context, overwrite: Boolean = false) {
-        val currentKey = systemImpl.getAppPref(PREFKEY_RESTORE_CODE, context)
+    fun storeUnhideCode(systemImpl: UstadMobileSystemImpl, overwrite: Boolean = false) {
+        val currentKey = systemImpl.getAppPref(PREFKEY_RESTORE_CODE)
         if(currentKey == null || overwrite) {
             val key = Random.nextInt(0, 99999)
-            systemImpl.setAppPref(PREFKEY_RESTORE_CODE, key.toString(), context)
+            systemImpl.setAppPref(PREFKEY_RESTORE_CODE, key.toString())
         }
     }
 
-    fun getUnhideCode(systemImpl: UstadMobileSystemImpl, context: Context) : String{
-        val currentKey = systemImpl.getAppPref(PREFKEY_RESTORE_CODE, context)
+    fun getUnhideCode(systemImpl: UstadMobileSystemImpl) : String{
+        val currentKey = systemImpl.getAppPref(PREFKEY_RESTORE_CODE)
         if(currentKey == null) {
-            storeUnhideCode(systemImpl, context)
+            storeUnhideCode(systemImpl)
         }
 
-        return systemImpl.getAppPref(PREFKEY_RESTORE_CODE, context)
+        return systemImpl.getAppPref(PREFKEY_RESTORE_CODE)
             ?: throw IllegalStateException("Key must have been stored by now!")
     }
 
