@@ -27,8 +27,11 @@ external interface ClazzDetailOverviewProps : Props {
 
     var onClickClassCode: (String) -> Unit
 
-    var onClickCourseBlock: (CourseBlockWithCompleteEntity) -> Unit
+    var onClickCourseDiscussion: (CourseDiscussion?) -> Unit
 
+    var onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit
+
+    var onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit
 }
 
 val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
@@ -143,11 +146,14 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
 
             List {
                 props.uiState.courseBlockList.forEach { courseBlockItem ->
+
                     CourseBlockListItem {
                         courseBlock = courseBlockItem
-                        uiState = props.uiState
-                        onClickItem = props.onClickCourseBlock
+                        onClickCourseDiscussion = props.onClickCourseDiscussion
+                        onClickCourseExpandCollapse = props.onClickCourseExpandCollapse
+                        onClickTextBlock = props.onClickTextBlock
                     }
+
                 }
             }
         }
@@ -190,16 +196,18 @@ external interface CourseBlockListItemProps : Props {
 
     var courseBlock: CourseBlockWithCompleteEntity
 
-    var uiState: ClazzDetailOverviewUiState
+    var onClickCourseDiscussion: (CourseDiscussion?) -> Unit
 
-    var onClickItem: (CourseBlockWithCompleteEntity) -> Unit
+    var onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit
+
+    var onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit
 
 }
 
 private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
 
     when(props.courseBlock.cbType){
-        CourseBlock.BLOCK_MODULE_TYPE, CourseBlock.BLOCK_DISCUSSION_TYPE  -> {
+        CourseBlock.BLOCK_MODULE_TYPE  -> {
 
             val trailingIcon = if(props.courseBlock.expanded)
                 KeyboardArrowUp.create()
@@ -207,32 +215,59 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                 KeyboardArrowDown.create()
 
             ListItem {
-                ListItemIcon {
-                    + Book.create()
+                ListItemButton {
+                   onClick = {
+                       props.onClickCourseExpandCollapse(props.courseBlock)
+                   }
+
+                    ListItemIcon {
+
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(props.courseBlock.cbTitle ?: "")
+                        secondary = ReactNode(props.courseBlock.cbDescription ?: "")
+                    }
                 }
-                ListItemText{
-                    primary = ReactNode(props.courseBlock.cbTitle ?: "")
-                    secondary = ReactNode(props.courseBlock.cbDescription ?: "")
-                }
+
                 secondaryAction = Icon.create {
                     + trailingIcon
                 }
             }
         }
-        CourseBlock.BLOCK_TEXT_TYPE -> {
-
-//            val cbDescription = if(props.uiState.cbDescriptionVisible(props.courseBlock))
-//                Html.fromHtml(courseBlock.cbDescription)
-//            else
-//                SpannedString.valueOf("")
-
+        CourseBlock.BLOCK_DISCUSSION_TYPE -> {
             ListItem {
-                ListItemIcon {
-                    + Book.create()
+                ListItemButton {
+                    onClick = {
+                        props.onClickCourseDiscussion(props.courseBlock.courseDiscussion)
+                    }
+
+                    ListItemIcon {
+
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(props.courseBlock.cbTitle ?: "")
+                        secondary = ReactNode(props.courseBlock.cbDescription ?: "")
+                    }
                 }
-                ListItemText{
-                    primary = ReactNode(props.courseBlock.cbTitle ?: "")
-                    secondary = ReactNode(props.courseBlock.cbDescription ?: "")
+            }
+        }
+        CourseBlock.BLOCK_TEXT_TYPE -> {
+            ListItem {
+                ListItemButton {
+                    onClick = {
+                        props.onClickTextBlock(props.courseBlock)
+                    }
+
+                    ListItemIcon {
+
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(props.courseBlock.cbTitle ?: "")
+//                        secondary = { Html(courseBlock.cbDescription) },
+                    }
                 }
             }
         }

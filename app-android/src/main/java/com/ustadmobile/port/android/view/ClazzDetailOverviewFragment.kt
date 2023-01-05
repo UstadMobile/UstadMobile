@@ -4,12 +4,15 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.text.SpannedString
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,8 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
@@ -27,6 +28,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.text.HtmlCompat
+import androidx.core.text.parseAsHtml
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -46,7 +50,6 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.RateLimitedLiveData
-import com.ustadmobile.core.util.ext.editIconId
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzDetailOverviewView
@@ -58,6 +61,7 @@ import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
 import com.ustadmobile.port.android.util.ext.MS_PER_MIN
+import com.ustadmobile.port.android.view.ClazzDetailOverviewFragment.Companion.BLOCK_ICON_MAP
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import org.kodein.di.DI
@@ -398,6 +402,14 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
     companion object {
 
+        val BLOCK_ICON_MAP = mapOf(
+            CourseBlock.BLOCK_MODULE_TYPE to R.drawable.ic_baseline_folder_open_24,
+            CourseBlock.BLOCK_ASSIGNMENT_TYPE to R.drawable.baseline_assignment_turned_in_24,
+            CourseBlock.BLOCK_CONTENT_TYPE to R.drawable.video_youtube,
+            CourseBlock.BLOCK_TEXT_TYPE to R.drawable.ic_baseline_title_24,
+            CourseBlock.BLOCK_DISCUSSION_TYPE to R.drawable.ic_baseline_forum_24
+        )
+
         val SCHEDULE_DIFF_UTIL = object: DiffUtil.ItemCallback<Schedule>() {
             override fun areItemsTheSame(oldItem: Schedule, newItem: Schedule): Boolean {
                 return oldItem.scheduleUid == newItem.scheduleUid
@@ -464,7 +476,9 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 private fun ClazzDetailOverviewScreen(
     uiState: ClazzDetailOverviewUiState = ClazzDetailOverviewUiState(),
     onClickClassCode: (String) -> Unit = {},
-    onClickCourseBlock: (CourseBlockWithCompleteEntity) -> Unit = {},
+    onClickCourseDiscussion: (CourseDiscussion?) -> Unit = {},
+    onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit = {},
+    onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit = {},
 ) {
     val numMembers = stringResource(R.string.x_teachers_y_students,
         uiState.clazz?.numTeachers ?: 0,
@@ -490,6 +504,7 @@ private fun ClazzDetailOverviewScreen(
 
         item {
             UstadDetailField(
+                modifier = Modifier.fillMaxWidth(),
                 imageId = R.drawable.ic_group_black_24dp,
                 valueText = numMembers,
                 labelText = stringResource(R.string.members)
@@ -499,6 +514,8 @@ private fun ClazzDetailOverviewScreen(
         item {
             if (uiState.clazzCodeVisible) {
                 UstadDetailField(
+
+                    modifier = Modifier.fillMaxWidth().padding(0.dp),
                     imageId = R.drawable.ic_login_24px,
                     valueText = numMembers,
                     labelText = stringResource(R.string.class_code),
@@ -537,7 +554,7 @@ private fun ClazzDetailOverviewScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
 
         item {
@@ -549,7 +566,7 @@ private fun ClazzDetailOverviewScreen(
 
         items(
             items = uiState.scheduleList,
-            key = { schedule -> schedule.scheduleUid }
+            key = { Pair(1, it.scheduleUid) }
         ){ schedule ->
 
             val fromTimeFormatted = rememberFormattedTime(timeInMs = schedule.sceduleStartTime.toInt())
@@ -564,15 +581,21 @@ private fun ClazzDetailOverviewScreen(
             )
         }
 
+        item {
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+
         items(
             items = uiState.courseBlockList,
-            key = { courseBlock -> courseBlock.cbUid }
+            key = { Pair(2, it.cbUid) }
         ){ courseBlock ->
 
             CourseBlockListItem(
                 courseBlock = courseBlock,
                 uiState = uiState,
-                onClickItem = onClickCourseBlock
+                onClickCourseDiscussion = onClickCourseDiscussion,
+                onClickCourseExpandCollapse = onClickCourseExpandCollapse,
+                onClickTextBlock = onClickTextBlock
             )
         }
     }
@@ -597,37 +620,33 @@ fun TextImageRow(
     }
 }
 
-val BLOCK_ICON_MAP = mapOf(
-    CourseBlock.BLOCK_MODULE_TYPE to R.drawable.ic_baseline_folder_open_24,
-    CourseBlock.BLOCK_ASSIGNMENT_TYPE to R.drawable.baseline_assignment_turned_in_24,
-    CourseBlock.BLOCK_CONTENT_TYPE to R.drawable.video_youtube,
-    CourseBlock.BLOCK_TEXT_TYPE to R.drawable.ic_baseline_title_24,
-    CourseBlock.BLOCK_DISCUSSION_TYPE to R.drawable.ic_baseline_forum_24
-)
-
+@RequiresApi(Build.VERSION_CODES.N)
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CourseBlockListItem(
     courseBlock: CourseBlockWithCompleteEntity,
-    uiState: ClazzDetailOverviewUiState,
-    onClickItem: (CourseBlockWithCompleteEntity) -> Unit = {}
+    onClickCourseDiscussion: (CourseDiscussion?) -> Unit = {},
+    onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit = {},
+    onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit = {},
 ){
+
     when(courseBlock.cbType){
-        CourseBlock.BLOCK_MODULE_TYPE, CourseBlock.BLOCK_DISCUSSION_TYPE  -> {
+        CourseBlock.BLOCK_MODULE_TYPE  -> {
 
             val trailingIcon = if(courseBlock.expanded)
                 Icons.Default.KeyboardArrowUp
             else
                 Icons.Default.KeyboardArrowDown
-
             ListItem(
+                modifier = Modifier.padding(start = 40.dp)
+                    .clickable {
+                        onClickCourseExpandCollapse(courseBlock)
+                    },
                 text = { Text(courseBlock.cbTitle ?: "") },
                 secondaryText = { Text(courseBlock.cbDescription ?: "") },
                 icon = {
                     Icon(
-                        painter = painterResource(
-                            id = ClazzEditFragment.BLOCK_ICON_MAP[courseBlock.cbType]
-                                ?: R.drawable.ic_baseline_folder_open_24),
+                        painter = painterResource(id = R.drawable.ic_baseline_folder_open_24),
                         contentDescription = "")
                 },
                 trailing = {
@@ -635,25 +654,31 @@ fun CourseBlockListItem(
                 }
             )
         }
-        CourseBlock.BLOCK_TEXT_TYPE -> {
-
-            val startPadding = ((courseBlock.cbIndentLevel * 24) + 8).dp
-            val cbDescription = if(uiState.cbDescriptionVisible(courseBlock))
-                Html.fromHtml(courseBlock.cbDescription)
-            else
-                SpannedString.valueOf("")
-
+        CourseBlock.BLOCK_DISCUSSION_TYPE -> {
             ListItem(
-                modifier = Modifier.clickable {
-                    onClickItem(courseBlock)
-                },
+                modifier = Modifier.padding(start = 40.dp)
+                    .clickable {
+                        onClickCourseDiscussion(courseBlock.courseDiscussion)
+                    },
                 text = { Text(courseBlock.cbTitle ?: "") },
                 secondaryText = { Text(courseBlock.cbDescription ?: "") },
                 icon = {
                     Icon(
-                        painter = painterResource(
-                            id = BLOCK_ICON_MAP[courseBlock.cbType]
-                                ?: R.drawable.text_doc_24px),
+                        painter = painterResource(id = R.drawable.ic_baseline_forum_24),
+                        contentDescription = "")
+                }
+            )
+        }
+        CourseBlock.BLOCK_TEXT_TYPE -> {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickTextBlock(courseBlock)
+                },
+                text = { Text(courseBlock.cbTitle ?: "") },
+                secondaryText = { Html(courseBlock.cbDescription) },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_title_24),
                         contentDescription = "")
                 }
             )
@@ -669,6 +694,20 @@ fun CourseBlockListItem(
             }
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.N)
+@Composable
+fun Html(text: String?) {
+    val cbDescription = if(text != null)
+        Html.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY)
+    else
+        SpannedString.valueOf("")
+    AndroidView(factory = { context ->
+        TextView(context).apply {
+            setText(HtmlCompat.fromHtml(text ?: "", HtmlCompat.FROM_HTML_MODE_LEGACY))
+        }
+    })
 }
 
 @Composable
@@ -706,15 +745,24 @@ fun ClazzDetailOverviewScreenPreview() {
         ),
         courseBlockList = listOf(
             CourseBlockWithCompleteEntity().apply {
-                cbUid = 3
-                cbTitle = "Module 1"
-                cbDescription = "Description 1"
+                cbUid = 1
+                cbTitle = "Module"
+                cbDescription = "Description"
                 cbType = CourseBlock.BLOCK_MODULE_TYPE
             },
             CourseBlockWithCompleteEntity().apply {
-                cbUid = 4
-                cbTitle = "Module 2"
-                cbType = CourseBlock.BLOCK_MODULE_TYPE
+                cbUid = 2
+                cbTitle = "Main discussion board"
+                cbType = CourseBlock.BLOCK_DISCUSSION_TYPE
+            },
+            CourseBlockWithCompleteEntity().apply {
+                cbUid = 3
+                cbTitle = "Text Block Module"
+                cbDescription = "<pre>\n" +
+                        "            GeeksforGeeks\n" +
+                        "                         A Computer   Science Portal   For Geeks\n" +
+                        "        </pre>"
+                cbType = CourseBlock.BLOCK_TEXT_TYPE
             }
         ),
         clazzCodeVisible = true
