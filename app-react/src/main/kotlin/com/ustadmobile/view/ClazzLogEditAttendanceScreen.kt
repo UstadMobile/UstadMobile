@@ -92,31 +92,36 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
                 clazzLog = props.uiState.clazzLogsList
             }
 
-            ListItemButton {
-                onClick = {props
-                    .onClickMarkAllPresent(ClazzLogAttendanceRecord.STATUS_ATTENDED)
-                }
-
-                + LibraryAddCheckOutlined.create()
-
-                ListItemText {
-                    primary = ReactNode(strings[MessageID.mark_all_absent])
-                }
-            }
-
-            ListItemButton {
-                onClick = {props
-                    .onClickMarkAllAbsent(ClazzLogAttendanceRecord.STATUS_ABSENT)
-                }
-
-                + CheckBoxOutlined.create()
-
-                ListItemText {
-                    primary = ReactNode(strings[MessageID.mark_all_absent])
-                }
-            }
-
             List{
+
+                ListItem {
+                    ListItemButton {
+                        onClick = {props
+                            .onClickMarkAllPresent(ClazzLogAttendanceRecord.STATUS_ATTENDED)
+                        }
+
+                        + LibraryAddCheckOutlined.create()
+
+                        ListItemText {
+                            primary = ReactNode(strings[MessageID.mark_all_absent])
+                        }
+                    }
+                }
+
+                ListItem {
+                    ListItemButton {
+                        onClick = {props
+                            .onClickMarkAllAbsent(ClazzLogAttendanceRecord.STATUS_ABSENT)
+                        }
+
+                        + CheckBoxOutlined.create()
+
+                        ListItemText {
+                            primary = ReactNode(strings[MessageID.mark_all_absent])
+                        }
+                    }
+                }
+
                 props.uiState.clazzLogAttendanceRecordList.forEach { clazzLogAttendance ->
 
                     ClazzLogItemView {
