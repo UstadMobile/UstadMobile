@@ -1,22 +1,30 @@
 appId: com.toughra.ustadmobile
 
 ---
-- clearState: com.toughra.ustadmobile
+# This test tests the Library page of app adding content
+# Test parameters needs to provide for this test :
+ # 1) TESTFILENAME : provide the content name inside the 'test-files/content' folder
+ # 2) TESTCONTENTNAME : provide the content title, it should be a string
+ # 3) CONTROLSERVER: ${CONTROLSERVER} : provides the test-control-server address
+ # 4) TESTSERIAL: ${TESTSERIAL} : provides the device serial number
+ # 5) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
 
+# clear the app
+- clearState: com.toughra.ustadmobile
+# clear the downloads
 - evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
+# push the test file to the downloads
 - evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+# get started
 - launchApp
 - hideKeyboard
 - tapOn: "GET STARTED"
-- inputText: ${ENDPOINT}
-- hideKeyboard
-- tapOn: "NEXT"
-- tapOn: "Username"
-- inputText: ${USERNAME}
-- tapOn: "Password"
-- inputText: ${PASSWORD}
-- hideKeyboard
-- tapOn: "LOGIN"
+# select site
+- runFlow: "./select_site.yaml"
+# admin login
+- runFlow:
+    file: "./user_login.yaml"
+# adding content to library
 - tapOn: "Library"
 - tapOn: "CONTENT"
 - tapOn: "Add file"
@@ -51,3 +59,4 @@ appId: com.toughra.ustadmobile
 - extendedWaitUntil:
     visible: "Delete"
     timeout: 600000
+- takeScreenshot: "${TESTRESULTSDIR}/content_add_to_library"

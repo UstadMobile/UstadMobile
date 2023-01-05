@@ -1,8 +1,5 @@
 appId: com.toughra.ustadmobile
 ---
-- clearState: com.toughra.ustadmobile
-- launchApp
-- hideKeyboard
 - tapOn: "GET STARTED"
 - inputText: ${ENDPOINT}
 - hideKeyboard
@@ -13,3 +10,11 @@ appId: com.toughra.ustadmobile
 - inputText: ${PASSWORD}
 - hideKeyboard
 - tapOn: "LOGIN"
+- tapOn: "COURSE"
+- tapOn: "Add a new course"
+- tapOn: "Name"
+- inputText: ${TESTCOURSENAME}
+- hideKeyboard
+- tapOn: "SAVE"
+
+

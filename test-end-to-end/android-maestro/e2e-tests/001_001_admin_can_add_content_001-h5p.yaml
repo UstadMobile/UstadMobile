@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_001-h5p"
 ---
 - clearState: com.toughra.ustadmobile
 
@@ -6,7 +8,6 @@ appId: com.toughra.ustadmobile
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
-
 - runFlow:
     file: "../common/add_content.yaml"
     env:

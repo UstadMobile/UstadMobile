@@ -1,3 +1,4 @@
 appId: com.toughra.ustadmobile
 ---
+# This test runs startserver.js file. Test server controller- http://localhost:8075/ starts.
 - runScript: startserver.js

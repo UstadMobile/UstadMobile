@@ -1,10 +1,9 @@
 appId: com.toughra.ustadmobile
 ---
-- clearState: com.toughra.ustadmobile
-- launchApp
-- hideKeyboard
-- tapOn: "GET STARTED"
-- inputText: ${ENDPOINT}
-- hideKeyboard
-- tapOn: "NEXT"
+# user able to login as a guest using this flow
+
+# launch app
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+# press on guest login button
 - tapOn: "Connect as Guest"

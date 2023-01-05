@@ -1,17 +1,20 @@
 appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_004_admin_can_delete_content"
 ---
 - clearState: com.toughra.ustadmobile
-
+#---------Start test-controller-server ---------#
 - runFlow:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
-
+#---------add a content to the library ---------#
 - runFlow:
       file: "../common/add_content.yaml"
       env:
           TESTFILENAME: "H5p_Content.h5p"
           TESTCONTENTNAME: "ContentDeleteDownloadTest"
+#---------------------delete and re-download a content in library-------#
 - runFlow:
       file: "../common/delete_and_download_content.yaml"
       env:
