@@ -54,6 +54,7 @@ import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import kotlinx.coroutines.selects.select
 
 interface ClazzLogEditAttendanceFragmentEventHandler {
 
@@ -365,6 +366,7 @@ private fun ClazzLogEditAttendanceScreen(
     uiState: ClazzLogEditAttendanceUiState = ClazzLogEditAttendanceUiState(),
     onClickMarkAllPresent: (Int) -> Unit = {},
     onClickMarkAllAbsent: (Int) -> Unit = {},
+    onChangedAttendanceStatus: (Int) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier
@@ -412,7 +414,10 @@ private fun ClazzLogEditAttendanceScreen(
             items = uiState.clazzLogAttendanceRecordList,
             key = {clazzLog -> clazzLog.clazzLogAttendanceRecordUid}
         ){ clazzLogAttendance ->
-            ClazzLogItemView(clazzLogAttendance = clazzLogAttendance)
+            ClazzLogItemView(
+                clazzLog = clazzLogAttendance,
+                onChangedAttendanceStatus = onChangedAttendanceStatus
+            )
         }
     }
 }
@@ -479,12 +484,13 @@ private fun PagerView(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzLogItemView(
-    clazzLogAttendance: ClazzLogAttendanceRecordWithPerson
+    clazzLog: ClazzLogAttendanceRecordWithPerson,
+    onChangedAttendanceStatus: (Int) -> Unit,
 ) {
 
     ListItem(
         text = {
-            Text(text = clazzLogAttendance.person?.personFullName() ?: "",)
+            Text(text = clazzLog.person?.personFullName() ?: "",)
         },
         icon = {
             Icon(
@@ -497,8 +503,13 @@ private fun ClazzLogItemView(
                 horizontalArrangement = Arrangement.spacedBy(0.dp)
             ){
                 IconToggleButton(
-                    checked = false,
-                    onCheckedChange = {}
+                    checked = clazzLog.attendanceStatus
+                            == ClazzLogAttendanceRecord.STATUS_ATTENDED,
+                    onCheckedChange = {
+                        onChangedAttendanceStatus(
+                            ClazzLogAttendanceRecord.STATUS_ATTENDED
+                        )
+                    },
                 ) {
                     Icon(
                         Icons.Default.Done,
@@ -507,8 +518,13 @@ private fun ClazzLogItemView(
                 }
 
                 IconToggleButton(
-                    checked = false,
-                    onCheckedChange = {}
+                    checked = clazzLog.attendanceStatus
+                            == ClazzLogAttendanceRecord.STATUS_ABSENT,
+                    onCheckedChange = {
+                        onChangedAttendanceStatus(
+                            ClazzLogAttendanceRecord.STATUS_ABSENT
+                        )
+                    }
                 ) {
                     Icon(
                         Icons.Default.Close,
@@ -517,8 +533,13 @@ private fun ClazzLogItemView(
                 }
 
                 IconToggleButton(
-                    checked = false,
-                    onCheckedChange = {},
+                    checked = clazzLog.attendanceStatus
+                            == ClazzLogAttendanceRecord.STATUS_PARTIAL,
+                    onCheckedChange = {
+                        onChangedAttendanceStatus(
+                            ClazzLogAttendanceRecord.STATUS_PARTIAL
+                        )
+                    },
                     modifier = Modifier.width(20.dp)
                 ) {
                     Icon(

@@ -4,15 +4,18 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.viewmodel.ClazzLogEditAttendanceUiState
+import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useTimeInOtherTimeZoneAsJsDate
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.mui.common.xs
+import csstype.TextAlign
 import mui.icons.material.*
 import mui.material.*
 import mui.material.List
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
@@ -29,6 +32,8 @@ external interface ClazzLogEditAttendanceScreenProps : Props {
     var onClickPreviousClazzLog: () -> Unit
 
     var onClickNextClazzLog: () -> Unit
+
+    var onChangedAttendanceStatus: (Int) -> Unit
 
 }
 
@@ -128,14 +133,20 @@ external interface PagerViewProps : Props {
 
     var uiState: ClazzLogEditAttendanceUiState
 
+    var onClickPreviousClazzLog: () -> Unit
+
+    var onClickNextClazzLog: () -> Unit
+
     var clazzLog: List<ClazzLog>
 
 }
 
 private val PagerView = FC<PagerViewProps> { props ->
 
-    val dateTime = useTimeInOtherTimeZoneAsJsDate(props.clazzLog[0].logDate,
-        props.uiState.timeZone)
+    val dateTime = useFormattedDateAndTime(
+        props.clazzLog[0].logDate,
+        props.uiState.timeZone
+    )
 
     Grid {
         container = true
@@ -146,7 +157,9 @@ private val PagerView = FC<PagerViewProps> { props ->
 
             Button {
                 variant = ButtonVariant.text
-                onClick = {  }
+                onClick = {
+                    props.onClickPreviousClazzLog()
+                }
 
                 + ArrowBack.create()
             }
@@ -157,8 +170,10 @@ private val PagerView = FC<PagerViewProps> { props ->
             xs = 10
 
             Typography {
-                + ("${(dateTime?.toDateString() ?: "")} " +
-                        (dateTime?.toTimeString() ?: ""))
+                sx {
+                    textAlign = TextAlign.center
+                }
+                + dateTime
             }
         }
 
@@ -168,7 +183,9 @@ private val PagerView = FC<PagerViewProps> { props ->
 
             Button {
                 variant = ButtonVariant.text
-                onClick = {  }
+                onClick = {
+                    props.onClickNextClazzLog()
+                }
 
                 + ArrowForward.create()
             }
@@ -181,6 +198,8 @@ private val PagerView = FC<PagerViewProps> { props ->
 external interface ClazzLogItemViewProps : Props {
 
     var clazzLogAttendance: ClazzLogAttendanceRecordWithPerson
+
+    var onChangedAttendanceStatus: (Int) -> Unit
 
 }
 
