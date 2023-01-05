@@ -118,9 +118,13 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
 
             List{
                 props.uiState.clazzLogAttendanceRecordList.forEach { clazzLogAttendance ->
+
                     ClazzLogItemView {
                         clazzLog = clazzLogAttendance
+                        onChangedAttendanceStatus = props.onChangedAttendanceStatus
+                        fieldsEnabled = props.uiState.fieldsEnabled
                     }
+
                 }
             }
         }
@@ -225,6 +229,10 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
                 selected = (props.clazzLog.attendanceStatus
                         == ClazzLogAttendanceRecord.STATUS_ATTENDED)
 
+                onChange = { _,_ ->
+                    props.onChangedAttendanceStatus(ClazzLogAttendanceRecord.STATUS_ATTENDED)
+                }
+
                 + Done.create()
             }
 
@@ -233,6 +241,10 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
                 selected = (props.clazzLog.attendanceStatus
                 == ClazzLogAttendanceRecord.STATUS_ABSENT)
 
+                onChange = { _,_ ->
+                    props.onChangedAttendanceStatus(ClazzLogAttendanceRecord.STATUS_ABSENT)
+                }
+
                 + Close.create()
             }
 
@@ -240,6 +252,10 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
                 disabled = !props.fieldsEnabled
                 selected = (props.clazzLog.attendanceStatus
                         == ClazzLogAttendanceRecord.STATUS_PARTIAL)
+
+                onChange = { _,_ ->
+                    props.onChangedAttendanceStatus(ClazzLogAttendanceRecord.STATUS_PARTIAL)
+                }
 
                 + AccessTime.create()
             }

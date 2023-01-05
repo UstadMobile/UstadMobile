@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.LibraryAddCheck
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -435,7 +436,8 @@ private fun PagerView(
     var state = rememberPagerState(currentClazzLog)
 
     Row (
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ){
 
         IconButton(
@@ -545,7 +547,6 @@ private fun ClazzLogItemView(
                             ClazzLogAttendanceRecord.STATUS_PARTIAL
                         )
                     },
-                    modifier = Modifier.width(20.dp)
                 ) {
                     Icon(
                         Icons.Default.AccessTime,
