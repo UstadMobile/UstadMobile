@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
+import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity
 
 data class ClazzAssignmentUiState(
@@ -26,7 +27,7 @@ data class ClazzAssignmentUiState(
     val submissionStatusIconVisible: Boolean
         get() = assignment.progressSummary?.hasMetricsPermission != null &&
                 assignment.progressSummary?.hasMetricsPermission == false ||
-                assignment.fileSubmissionStatus != 0
+                assignment.fileSubmissionStatus != CourseAssignmentSubmission.NOT_SUBMITTED
 
     val submissionStatusVisible: Boolean
         get() = assignment.progressSummary?.hasMetricsPermission != null &&

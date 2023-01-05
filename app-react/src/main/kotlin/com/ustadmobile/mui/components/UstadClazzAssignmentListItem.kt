@@ -28,7 +28,7 @@ external interface UstadClazzAssignmentListItemProps: Props {
 }
 
 val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props ->
-    val strings = useStringsXml()
+
     ListItem{
         ListItemButton{
             onClick = { props.onClickAssignment(props.uiState.assignment) }
@@ -182,7 +182,7 @@ val UstadClazzAssignmentListItemPreview = FC<Props> {
                     progressSummary = AssignmentProgressSummary().apply {
                         hasMetricsPermission = true
                     }
-                    fileSubmissionStatus = 2
+                    fileSubmissionStatus = CourseAssignmentSubmission.MARKED
                 },
                 block = CourseBlockWithCompleteEntity().apply {
                     cbDescription = "Description"

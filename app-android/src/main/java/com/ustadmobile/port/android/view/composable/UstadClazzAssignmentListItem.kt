@@ -18,10 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.controller.SubmissionConstants
 import com.ustadmobile.core.viewmodel.ClazzAssignmentUiState
-import com.ustadmobile.lib.db.entities.AssignmentProgressSummary
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
-import com.ustadmobile.lib.db.entities.CourseAssignmentMark
-import com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.ASSIGNMENT_STATUS_MAP
@@ -138,7 +135,7 @@ private fun UstadClazzAssignmentListItemPreview() {
             progressSummary = AssignmentProgressSummary().apply {
                 hasMetricsPermission = true
             }
-            fileSubmissionStatus = 1
+            fileSubmissionStatus = CourseAssignmentSubmission.MARKED
         },
         block = CourseBlockWithCompleteEntity().apply {
             cbDescription = "Description"
