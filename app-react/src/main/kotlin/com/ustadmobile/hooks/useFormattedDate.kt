@@ -25,3 +25,26 @@ fun useFormattedDate(timeInMillis: Long, timezoneId: String) : String{
         }
     }
 }
+
+/**
+ * Format a start and end date e.g. "01/Jan/20 - 15/Jan/20". Usefor for enrolments, class end dates,
+ * etc.
+ *
+ * @param startTimeInMillis the start date
+ * @param endTimeInMillis the end date
+ * @param timezoneId the timezone to use to calculate the dates
+ */
+fun useFormattedDateRange(
+    startTimeInMillis: Long,
+    endTimeInMillis: Long,
+    timezoneId: String,
+    joiner: (String, String) -> String = {start, end -> "$start - $end"}
+): String {
+    val startDate = useFormattedDate(startTimeInMillis, timezoneId)
+    val endDate = useFormattedDate(endTimeInMillis, timezoneId)
+    return useMemo(
+        dependencies = arrayOf(startTimeInMillis, endTimeInMillis, timezoneId)
+    ) {
+        joiner(startDate, endDate)
+    }
+}

@@ -151,7 +151,8 @@ class ContentEntryDetailOverviewPresenter(
         presenterScope.launch(doorMainDispatcher()) {
             try {
                 entity?.contentEntryUid?.also {
-                    contentEntryOpener.openEntry(context, it, isPlatformDownloadEnabled, false,
+                    contentEntryOpener.openEntry(
+                        context, it, isPlatformDownloadEnabled, false,
                             arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false, clazzUid = clazzUid)
                 }
             } catch (e: Exception) {

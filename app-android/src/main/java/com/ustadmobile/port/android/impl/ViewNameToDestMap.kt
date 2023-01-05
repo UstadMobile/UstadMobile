@@ -6,6 +6,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadDestination
 import com.ustadmobile.core.view.*
+import com.ustadmobile.port.android.view.PanicButtonSettingsView
 
 @Keep
 class ViewNameToDestMap: DestinationProvider {
@@ -86,6 +87,8 @@ class ViewNameToDestMap: DestinationProvider {
             SelectFolderView.VIEW_NAME to UstadDestination(R.id.select_folder_view),
             ContentEntryImportLinkView.VIEW_NAME to UstadDestination(R.id.import_link_view),
             VideoContentView.VIEW_NAME to UstadDestination(R.id.video_content),
+            PDFContentView.VIEW_NAME to UstadDestination(R.id.pdf_content,
+                    hideBottomNavigation = true, actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             WebChunkView.VIEW_NAME to UstadDestination(R.id.webchunk_view,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
             // If ActionBarScrollBehavior is collapsing/scroll, then the WebView for Xapi content
@@ -157,6 +160,7 @@ class ViewNameToDestMap: DestinationProvider {
                 hideBottomNavigation = true),
             ScopedGrantListView.VIEW_NAME to UstadDestination(R.id.scoped_grant_list_dest),
             ScopedGrantDetailView.VIEW_NAME to UstadDestination(R.id.scoped_grant_detail_dest),
+            PanicButtonSettingsView.VIEW_NAME to UstadDestination(R.id.panic_button_settings_dest),
     )
 
     override val navControllerViewId: Int
