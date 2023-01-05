@@ -1,0 +1,84 @@
+appId: com.toughra.ustadmobile
+---
+#this flow add blocks-MODULE, Text and performs actions like : indent, unindent,hide unhide and delete
+# test data required :
+# 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+
+# edit the course to add blocks
+- tapOn: "Edit"
+- swipe:
+    start: 100,400
+    end: 100,100
+# add module ------ 1
+- tapOn: "Add block"
+- tapOn: "Module"
+- tapOn: "Title"
+- inputText: "MODULE 1"
+- tapOn: "Don't show before (Optional)"
+- tapOn: "OK"
+- takeScreenshot: "${TESTRESULTSDIR}/added_module_block"
+- tapOn: "SAVE"
+#add text block ------ 1
+- tapOn: "Add block"
+- tapOn: "Text"
+- tapOn: "Title"
+- inputText: "Syllabus List"
+- tapOn: "Don't show before (Optional)"
+- tapOn: "OK"
+- tapOn:
+      id: "com.toughra.ustadmobile:id/editor"
+- inputText: " This is the list of syllabus for Sem - 1"
+- pressKey: Enter
+- inputText: "English"
+- tapOn: "List"
+- tapOn: "Ordered List"
+- pressKey: Enter
+- inputText: "Maths"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/added_text block"
+# hide the block- module
+- tapOn:
+      text: "Edit"
+      index: 0
+- tapOn: "Hide"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/Module_block_is_hidden"
+- tapOn: "Edit"
+- swipe:
+      start: 100,400
+      end: 100,100
+# unhide the module
+- tapOn:
+      text: "Edit"
+      index: 0
+- tapOn: "Unhide"
+# indent the text block ----- 1
+- tapOn:
+      text: "Edit"
+      index: 1
+- tapOn: "Indent"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/module_block_unhide"
+- takeScreenshot: "${TESTRESULTSDIR}/text_block_indented"
+# unindent text block ----- 1
+- tapOn: "Edit"
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn:
+    text: "Edit"
+    index: 1
+- tapOn: "Unindent"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/text_block_unindented"
+# Delete text block --- 1
+- tapOn: "Edit"
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn:
+    text: "Edit"
+    index: 1
+- tapOn: "Delete"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/text_block_deleted"

@@ -1,0 +1,43 @@
+appId: com.toughra.ustadmobile
+---
+#this flow add blocks-MODULE, Text and performs actions like : indent, unindent,hide unhide and delete
+# test data required :
+# 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+
+# edit the course to add blocks
+- tapOn: "Edit"
+- swipe:
+    start: 100,400
+    end: 100,100
+# add module ------ 1
+- tapOn: "Add block"
+- tapOn: "Module"
+- tapOn: "Title"
+- inputText: "SEM 1"
+- tapOn: "Don't show before (Optional)"
+- tapOn: "OK"
+- tapOn: "SAVE"
+#add text block ------ 1
+- tapOn: "Add block"
+- tapOn: "Text"
+- tapOn: "Title"
+- inputText: "Syllabus List"
+- tapOn: "Don't show before (Optional)"
+- tapOn: "OK"
+- tapOn:
+      id: "com.toughra.ustadmobile:id/editor"
+- inputText: " This is the list of syllabus for Sem 1"
+- pressKey: Enter
+- inputText: "English"
+- tapOn: "List"
+- tapOn: "Ordered List"
+- pressKey: Enter
+- inputText: "Maths"
+- tapOn: "SAVE"
+# indent the text block ----- 1
+- tapOn:
+      text: "Edit"
+      index: 1
+- tapOn: "Indent"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/block_structure"
