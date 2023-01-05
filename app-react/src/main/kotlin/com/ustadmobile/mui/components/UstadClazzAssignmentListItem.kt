@@ -180,9 +180,9 @@ val UstadClazzAssignmentListItemPreview = FC<Props> {
                         camMark = 20F
                     }
                     progressSummary = AssignmentProgressSummary().apply {
-                        hasMetricsPermission = true
+                        hasMetricsPermission = false
                     }
-                    fileSubmissionStatus = CourseAssignmentSubmission.MARKED
+                    fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
                 },
                 block = CourseBlockWithCompleteEntity().apply {
                     cbDescription = "Description"
