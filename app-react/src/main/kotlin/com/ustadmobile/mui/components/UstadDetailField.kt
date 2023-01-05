@@ -2,6 +2,7 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.hooks.useFormattedDate
+import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.view.components.UstadBlankIcon
@@ -138,12 +139,13 @@ val UstadDetailFieldPreview = FC<Props> {
     Container {
         maxWidth = "lg"
 
+        val currentDateTime = useFormattedDateAndTime(systemTimeInMillis(), "Asia/Dubai")
         Stack {
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
             UstadDetailField {
-                valueText = "Demo value"
+                valueText = currentDateTime
                 labelText = "With icon and secondary action"
                 icon = AccountCircle.create()
                 secondaryActionContent = IconButton.create {
