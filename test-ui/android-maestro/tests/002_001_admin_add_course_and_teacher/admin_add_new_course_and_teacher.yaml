@@ -1,5 +1,0 @@
-appId: com.toughra.ustadmobile
----
-- runFlow: "../common/add_course.yaml"
-- runFlow: "../common/add_new_teacher_inside_course.yaml"
-- runFlow: "../common/teacher_login.yaml"

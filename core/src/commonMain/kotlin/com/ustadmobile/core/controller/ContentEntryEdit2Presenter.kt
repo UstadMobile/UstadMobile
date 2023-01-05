@@ -401,6 +401,7 @@ class ContentEntryEdit2Presenter(
                 val isNewEntry = entity.contentEntryUid == 0L
 
 
+                entity.title = entity.title?.trim()
                 repo.withDoorTransactionAsync { txDb ->
 
                     if (entity.contentEntryUid == 0L) {

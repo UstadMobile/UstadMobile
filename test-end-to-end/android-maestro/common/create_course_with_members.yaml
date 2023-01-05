@@ -1,0 +1,126 @@
+appId: com.toughra.ustadmobile
+---
+# in this test admin create a course and add members to the course -2 teachers and 6 students
+  # Member list
+  # -----name - username/password
+
+  # teachers :
+  # --0-- Anu Madhav - Anu/test
+  # --1-- Lal Alex - Lal/test
+
+  # students :
+  # --0-- Justin Joe      - Justin/test
+  # --1-- Caroline Jacob  - Caroline/test
+  # --2-- Mathew Kuriean  - Mathew/test
+  # --3-- Santhosh George - Santhosh/test
+  # --4-- Maria Jacob     - Maria/test
+  # --5-- Sruthy K        - Sruthy/test
+
+# test parameters needs to provide for this test :
+# 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+
+
+# add new course
+- runFlow:
+    file: "./add_course.yaml"
+    env:
+      TESTCOURSENAME: "New Test Course"
+# add new teacher using flow - add_new_teacher_inside_course ----------- Anu Madhav - Anu/test
+- runFlow:
+    file: "./add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "New Course"
+      TEACHERFIRSTNAME: "Anu"
+      TEACHERLASTNAME: "Madhav"
+      GENDER: "Female"
+      PASSWORD: "test"
+# add new teacher using flows - add_new_people & add_member_inside_course ---------- Lal Alex - Lal/test
+- runFlow:
+    file: "./add_new_people.yaml"
+    env:
+      FIRSTNAME: "Lal"
+      LASTNAME: "Alex"
+      GENDER: "Male"
+      PASSWORD: "test"
+- runFlow:
+    file: "./add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Lal"
+      LASTNAME: "Alex"
+      MEMBER: "teacher"
+      PASSWORD: "test"
+# add new student using flow - add_new_student_inside_course ----------- Justin Joe  - Justin/test
+- runFlow:
+    file: "./add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "Permission Test"
+      STUDENTFIRSTNAME: "Justin"
+      STUDENTLASTNAME: "Joe"
+      GENDER: "Male"
+      PASSWORD: "test"
+# add new student using flow - add_new_student_inside_course --------- Caroline Jacob  - Caroline/test
+- runFlow:
+    file: "./add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: "Permission Test"
+      STUDENTFIRSTNAME: "Caroline"
+      STUDENTLASTNAME: "Jacob"
+      GENDER: "Female"
+      PASSWORD: "test"
+# add new student  using flows - add_new_people & add_member_inside_course ------- Mathew Kuriean  - Mathew/test
+- runFlow:
+    file: "./add_new_people.yaml"
+    env:
+      FIRSTNAME: "Mathew"
+      LASTNAME: "Kuriean"
+      GENDER: "Male"
+      PASSWORD: "test"
+- runFlow:
+    file: "./add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Mathew"
+      LASTNAME: "Kuriean"
+      MEMBER: "student"
+# add new student  using flows - add_new_people & add_member_inside_course ------- Santhosh George - Santhosh/test
+- runFlow:
+    file: "./add_new_people.yaml"
+    env:
+      FIRSTNAME: "Santhosh"
+      LASTNAME: "George"
+      GENDER: "Male"
+      PASSWORD: "test"
+- runFlow:
+    file: "./add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Santhosh"
+      LASTNAME: "George"
+      MEMBER: "student"
+# add new student  using flows - add_new_people & add_member_inside_course ------- Maria Jacob - Maria/test
+- runFlow:
+    file: "./add_new_people.yaml"
+    env:
+      FIRSTNAME: "Maria"
+      LASTNAME: "Jacob"
+      GENDER: "Female"
+      PASSWORD: "test"
+- runFlow:
+    file: "./add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Maria"
+      LASTNAME: "Jacob"
+      MEMBER: "student"
+# add new student  using flows - add_new_people & add_member_inside_course ------- Sruthy K - Sruthy/test
+- runFlow:
+    file: "./add_new_people.yaml"
+    env:
+      FIRSTNAME: "Sruthy"
+      LASTNAME: "K"
+      GENDER: "Female"
+      PASSWORD: "test"
+- runFlow:
+    file: "./add_member_inside_course.yaml"
+    env:
+      FIRSTNAME: "Sruthy"
+      LASTNAME: "K"
+      MEMBER: "student"
+- takeScreenshot: "${TESTRESULTSDIR}/member_list_of_new_test_course"
