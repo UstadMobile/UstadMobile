@@ -5,6 +5,7 @@ appId: com.toughra.ustadmobile
      # 1) TESTCOURSENAME: provide course name of string type
      # 2) TEST : provide the test name, it should be a string
      # 3) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+- tapOn: "COURSES"
 - tapOn: "COURSE"
 - tapOn: "Add a new course"
 - tapOn: "Name"
