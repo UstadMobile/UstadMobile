@@ -11,7 +11,6 @@ import android.text.SpannedString
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -28,9 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
-import androidx.core.text.parseAsHtml
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -61,7 +58,6 @@ import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
 import com.ustadmobile.port.android.util.ext.MS_PER_MIN
-import com.ustadmobile.port.android.view.ClazzDetailOverviewFragment.Companion.BLOCK_ICON_MAP
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import org.kodein.di.DI
@@ -592,7 +588,6 @@ private fun ClazzDetailOverviewScreen(
 
             CourseBlockListItem(
                 courseBlock = courseBlock,
-                uiState = uiState,
                 onClickCourseDiscussion = onClickCourseDiscussion,
                 onClickCourseExpandCollapse = onClickCourseExpandCollapse,
                 onClickTextBlock = onClickTextBlock
@@ -620,7 +615,6 @@ fun TextImageRow(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.N)
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CourseBlockListItem(
@@ -670,12 +664,17 @@ fun CourseBlockListItem(
             )
         }
         CourseBlock.BLOCK_TEXT_TYPE -> {
+//            val cbDescription = if(courseBlock.cbDescription != null)
+//                Html.fromHtml(courseBlock.cbDescription, HtmlCompat.FROM_HTML_MODE_LEGACY)
+//            else
+//                SpannedString.valueOf("")
+
             ListItem(
                 modifier = Modifier.clickable {
                     onClickTextBlock(courseBlock)
                 },
                 text = { Text(courseBlock.cbTitle ?: "") },
-                secondaryText = { Html(courseBlock.cbDescription) },
+                secondaryText = {  },
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_title_24),
@@ -694,20 +693,6 @@ fun CourseBlockListItem(
             }
         }
     }
-}
-
-@RequiresApi(Build.VERSION_CODES.N)
-@Composable
-fun Html(text: String?) {
-    val cbDescription = if(text != null)
-        Html.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY)
-    else
-        SpannedString.valueOf("")
-    AndroidView(factory = { context ->
-        TextView(context).apply {
-            setText(HtmlCompat.fromHtml(text ?: "", HtmlCompat.FROM_HTML_MODE_LEGACY))
-        }
-    })
 }
 
 @Composable
