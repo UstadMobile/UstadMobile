@@ -4,6 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -12,8 +24,10 @@ import com.ustadmobile.core.controller.HolidayCalendarListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.HolidayCalendarListView
+import com.ustadmobile.core.viewmodel.HolidayCalendarListUiState
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
+import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -104,4 +118,56 @@ class HolidayCalendarListFragment()
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun HolidayCalendarListScreen(
+    uiState: HolidayCalendarListUiState
+){
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ){
+        items(
+            uiState.holidayCalendarList,
+            key = {it.umCalendarUid}
+        ){ holidayCalendar ->
+            ListItem(
+                text = {
+                    Text(text = holidayCalendar.umCalendarName ?: "")
+                },
+                secondaryText = {
+                    Text(text = stringResource(id = R.string.num_holidays, holidayCalendar.numEntries))
+                }
+            )
+        }
+    }
+}
+
+@Composable
+@Preview
+fun HolidayCalendarListScreenPreview(){
+    HolidayCalendarListScreen(
+        uiState = HolidayCalendarListUiState(
+            holidayCalendarList = listOf(
+                HolidayCalendarWithNumEntries().apply {
+                    umCalendarName = "hol name 1"
+                    umCalendarUid = 898787
+                    numEntries = 4
+                },
+                HolidayCalendarWithNumEntries().apply {
+                    umCalendarName = "hol name 2"
+                    umCalendarUid = 8
+                    numEntries = 3
+                },
+                HolidayCalendarWithNumEntries().apply {
+                    umCalendarName = "hol name 3"
+                    umCalendarUid = 80
+                    numEntries = 2
+                }
+            )
+        )
+    )
 }
