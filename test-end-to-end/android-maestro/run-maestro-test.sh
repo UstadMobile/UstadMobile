@@ -95,6 +95,17 @@ if [ ! -e $SCRIPTDIR/build/results ]; then
   mkdir $SCRIPTDIR/build/results
 fi
 
+if [ ! -e $SCRIPTDIR/build/common-app2 ]; then
+  mkdir -p $SCRIPTDIR/build/common-app2
+fi
+
+for COMMONFLOWFILE in $(ls $SCRIPTDIR/common); do
+    FILEBASENAME=$(basename $COMMONFLOWFILE)
+    sed 's/com.toughra.ustadmobile/com.toughra.ustadmobile2/g' $SCRIPTDIR/common/$FILEBASENAME > \
+      $SCRIPTDIR/build/common-app2/$FILEBASENAME
+
+done
+
 # Start control server
 $SCRIPTDIR/../../testserver-controller/start.sh
 
