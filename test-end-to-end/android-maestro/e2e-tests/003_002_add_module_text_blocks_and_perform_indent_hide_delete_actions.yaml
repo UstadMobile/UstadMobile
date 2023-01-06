@@ -1,0 +1,27 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#admin login
+- runFlow:
+    file: "../common/user_login.yaml"
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course Block Test"
+#--- add module and text block, test actions-hide/unhide/indent/unindent/delete ----#
+- runFlow:
+    file: "../common/add_module_and_text_course_block.yaml"
+    env:
+      MODULETITLE: "SEMESTER 1"
+      TEXTTITLE: "PRIMARY COLOURS"
+      TEXT: "RED,BLUE,GREEN"
+
+

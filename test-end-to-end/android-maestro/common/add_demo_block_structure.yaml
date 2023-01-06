@@ -1,0 +1,29 @@
+appId: com.toughra.ustadmobile
+---
+#this flow add blocks-MODULE, Text and performs actions like : indent, unindent,hide unhide and delete
+# test data required :
+# 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+
+# edit the course to add blocks
+- tapOn: "Edit"
+- swipe:
+    start: 100,400
+    end: 100,100
+# add module ------ 1
+- runFlow:
+    file: "./add_module_block.yaml"
+    env:
+      MODULETITLE: ${MODULETITLE}
+#add text block ------ 1
+- runFlow:
+    file: "./add_text_block.yaml"
+    env:
+      TEXTTITLE: ${TEXTTITLE}
+      TEXT: ${TEXT}
+# indent the text block ----- 1
+- tapOn:
+      text: "Edit"
+      index: 1
+- tapOn: "Indent"
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/block_structure"

@@ -1,0 +1,57 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_006_course_view_and_modules_can_expand_collapse"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+#-------Launch App---------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#-------Admin Login---------------#
+- runFlow:
+    file: "../common/user_login.yaml"
+#---------add course ---------#
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Course view Test"
+#----add student to the course----#
+- runFlow:
+    file: "../common/add_new_student_inside_course.yaml"
+    env:
+      STUDENTFIRSTNAME: "Muhammed"
+      STUDENTLASTNAME: "Khan"
+      GENDER: "Male"
+      PASSWORD: "test"
+- back
+- back
+- tapOn: "OVERVIEW"
+#---- add block structure---#
+- runFlow:
+    file: "../common/add_demo_block_structure.yaml"
+    env:
+      MODULETITLE: "SEMESTER 1"
+      TEXTTITLE: "PRIMARY COLOURS"
+      TEXT: "RED,BLUE,GREEN"
+#---------Launch App & student Login------------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "Muhammed"
+      PASSWORD: "test"
+- tapOn: "courses"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+#--- collapse the Module ---#
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_course_block_download"
+- takeScreenshot: "${TESTRESULTSDIR}/able_to_collapse_module"
+#--- expand the Module ---#
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_course_block_download"
+- takeScreenshot: "${TESTRESULTSDIR}/able_to_expand_module"

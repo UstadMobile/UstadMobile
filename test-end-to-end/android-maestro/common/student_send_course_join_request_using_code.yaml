@@ -11,4 +11,4 @@ appId: com.toughra.ustadmobile
 - longPressOn: "Class code"
 - tapOn: "Paste"
 - tapOn: "Join Class"
-- takeScreenshot: "${TESTRESULTSDIR}/pending_student"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/pending_student"

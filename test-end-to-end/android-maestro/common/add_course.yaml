@@ -11,5 +11,5 @@ appId: com.toughra.ustadmobile
 - inputText: ${TESTCOURSENAME}
 - hideKeyboard
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/add_course"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/add_course"
 

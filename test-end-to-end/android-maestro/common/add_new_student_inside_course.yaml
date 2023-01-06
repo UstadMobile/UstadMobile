@@ -38,4 +38,4 @@ appId: com.toughra.ustadmobile
 - tapOn: "Confirm password"
 - inputText: "test"
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/added_account_for_new_student-${STUDENTFIRSTNAME} ${STUDENTLASTNAME}"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_account_for_new_student-${STUDENTFIRSTNAME} ${STUDENTLASTNAME}"

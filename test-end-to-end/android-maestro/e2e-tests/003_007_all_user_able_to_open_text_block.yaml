@@ -1,0 +1,94 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_007_all_user_able_to_open_text_block"
+  TEXTTITLE: "PRIMARY COLOURS"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+#-------Launch App---------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#-------Admin Login---------------#
+- runFlow:
+    file: "../common/user_login.yaml"
+#---------add course ---------#
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Text Block Test"
+#----add teacher to the course----#
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TEACHERFIRSTNAME: "Julie"
+      TEACHERLASTNAME: "Susan"
+      GENDER: "Female"
+      PASSWORD: "test"
+#----add student to the course----#
+- runFlow:
+    file: "../common/add_new_student_inside_course.yaml"
+    env:
+      STUDENTFIRSTNAME: "Muhammed"
+      STUDENTLASTNAME: "Khan"
+      GENDER: "Male"
+      PASSWORD: "test"
+#--- add epub content already added by admin in library to course block----#
+- back
+- back
+- tapOn: "OVERVIEW"
+#---- add block ---#
+- runFlow:
+    file: "../common/add_demo_block_structure.yaml"
+    env:
+      MODULETITLE: "SEMESTER 1"
+      TEXTTITLE: "PRIMARY COLOURS"
+      TEXT: "RED,BLUE,GREEN"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_block_line1_text"
+    index: 1
+- extendedWaitUntil:
+    visible: ${TEXTTITLE}
+    timeout: 1000
+#--text block by admin view ----#
+- takeScreenshot: "${TESTRESULTSDIR}/text_block_admin_view"
+#---------Launch App & Student Login------------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "Muhammed"
+      PASSWORD: "test"
+- tapOn: "courses"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+#--- open text block by student---#
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_block_line1_text"
+    index: 1
+- extendedWaitUntil:
+    visible: ${TEXTTITLE}
+    timeout: 1000
+- takeScreenshot: "${TESTRESULTSDIR}/text_block_student_view"
+#---------Launch App & Teacher Login------------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "Julie"
+      PASSWORD: "test"
+- tapOn: "courses"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+#--- open text block by teacher ---#
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_block_line1_text"
+    index: 1
+- extendedWaitUntil:
+    visible: ${TEXTTITLE}
+    timeout: 1000
+- takeScreenshot: "${TESTRESULTSDIR}/text_block_teacher_view"

@@ -59,4 +59,4 @@ appId: com.toughra.ustadmobile
 - extendedWaitUntil:
     visible: "Delete"
     timeout: 600000
-- takeScreenshot: "${TESTRESULTSDIR}/content_add_to_library"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
