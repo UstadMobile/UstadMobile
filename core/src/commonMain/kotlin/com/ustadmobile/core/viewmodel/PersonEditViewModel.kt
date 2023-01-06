@@ -75,7 +75,7 @@ class PersonEditViewModel(
 
         val currentUserUid = accountManager.activeSession?.userSession?.usPersonUid ?: 0
 
-        val entityUid: Long = savedStateHandle.get<String>(UstadView.ARG_ENTITY_UID)!!.toLong()
+        val entityUid: Long = savedStateHandle.get(UstadView.ARG_ENTITY_UID)!!.toLong()
 
         viewModelScope.launch {
             val person = db.personDao.findPersonAccountByUid(entityUid)

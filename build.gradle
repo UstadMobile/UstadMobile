@@ -87,6 +87,7 @@ ext {
     version_kotlinx_datetime = "0.4.0"
 
 
+    version_turbine = "0.12.1"
     version_junit = "4.13"
     version_nanohttpd = "2.3.1"
     version_kxml = "2.3.0"

@@ -10,7 +10,6 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
 import org.junit.Assert
 import org.junit.Test
@@ -19,13 +18,10 @@ import org.mockito.kotlin.*
 
 class SiteEnterLinkViewModelTest {
 
-    private lateinit var mockWebServer: MockWebServer
-
     @Test
-    fun givenValidLinkEntered_whenOnClickNextCalled_thenShouldNavigateToNextScreen() = testViewModel(
+    fun givenValidLinkEntered_whenOnClickNextCalled_thenShouldNavigateToNextScreen() = testViewModel<SiteEnterLinkViewModel>(
         makeViewModel = { SiteEnterLinkViewModel(di, savedStateHandle) }
     ) {
-        mockWebServer = MockWebServer()
         mockWebServer.start()
         val json: Json = di.direct.instance()
 
@@ -60,7 +56,7 @@ class SiteEnterLinkViewModelTest {
     }
 
     @Test
-    fun givenInvalidLinkEntered_whenOnClickNextCalled_thenShouldShowError() = testViewModel(
+    fun givenInvalidLinkEntered_whenOnClickNextCalled_thenShouldShowError() = testViewModel<SiteEnterLinkViewModel>(
         makeViewModel = { SiteEnterLinkViewModel(di, savedStateHandle) }
     ) {
         val siteLink = "invalid"

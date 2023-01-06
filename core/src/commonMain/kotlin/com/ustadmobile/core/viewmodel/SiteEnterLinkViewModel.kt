@@ -61,7 +61,7 @@ class SiteEnterLinkViewModel(
                     ARG_SITE to json.encodeToString(site),
                 )
                 ARGS_TO_PASS_THROUGH.forEach { argName ->
-                    savedStateHandle.get<String>(argName)?.also { argValue ->
+                    savedStateHandle.get(argName)?.also { argValue ->
                         args[argName] = argValue
                     }
                 }

@@ -1,15 +1,24 @@
 package com.ustadmobile.core.test.viewmodeltest
 
 import com.ustadmobile.core.viewmodel.ViewModel
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import org.kodein.di.DI
 
 fun <T: ViewModel> testViewModel(
-    makeViewModel: ViewModelFactoryParams.() -> T,
-    block: ViewModelTestBuilder<T>.() -> Unit
+    makeViewModel: ViewModelFactoryParams<T>.() -> T,
+    extendDi: (DI.MainBuilder.() -> Unit)? = null,
+    timeOut: Long = 5000,
+    block: suspend ViewModelTestBuilder<T>.() -> Unit
 ) {
-    val viewModelTestBuilder = ViewModelTestBuilder(makeViewModel)
+    val viewModelTestBuilder = ViewModelTestBuilder(makeViewModel, extendDi)
     try {
-        block(viewModelTestBuilder)
+        runBlocking {
+            withTimeout(timeOut) {
+                block(viewModelTestBuilder)
+            }
+        }
     }finally {
-        viewModelTestBuilder.viewModel.close()
+        viewModelTestBuilder.cleanup()
     }
 }

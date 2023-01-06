@@ -26,7 +26,7 @@ fun <T: Any> UstadNavController.awaitResult(timeout: Long,
                                             resultViewName: String,
                                             resultKey: String) : List<T> {
     verify(this, timeout(timeout)).popBackStack(eq(resultViewName), eq(false))
-    val resultStr = currentBackStackEntry?.savedStateHandle?.get<String>(resultKey)
+    val resultStr = currentBackStackEntry?.savedStateHandle?.get(resultKey)
         ?: throw IllegalStateException("awaitResult: looking for $resultKey key on $resultViewName, " +
                 "no current back stack entry or result is null")
 
