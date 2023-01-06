@@ -151,7 +151,7 @@ class LoginViewModel(
      */
     private fun goToNextDestAfterLoginOrGuestSelected() {
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-            clearStack = true)
+            popUpToViewName = UstadView.ROOT_DEST, popUpToInclusive = false)
         Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
 
         val viewName = nextDestination.substringBefore('?')
