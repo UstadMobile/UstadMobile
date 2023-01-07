@@ -5,16 +5,18 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.viewmodel.ClazzLogEditAttendanceUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
-import com.ustadmobile.hooks.useTimeInOtherTimeZoneAsJsDate
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.common.xs
 import csstype.TextAlign
+import csstype.px
 import mui.icons.material.*
 import mui.material.*
-import mui.material.List
+import mui.material.StackDirection
+import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
@@ -33,7 +35,7 @@ external interface ClazzLogEditAttendanceScreenProps : Props {
 
     var onClickNextClazzLog: () -> Unit
 
-    var onChangedAttendanceStatus: (Int) -> Unit
+    var onClazzLogAttendanceChanged: (ClazzLogAttendanceRecordWithPerson) -> Unit
 
 }
 
@@ -86,6 +88,8 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
         maxWidth = "lg"
 
         Stack {
+            direction = responsive(StackDirection.column)
+            spacing = responsive(10.px)
 
             PagerView{
                 timeZone = props.uiState.timeZone
@@ -126,7 +130,7 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
 
                     ClazzLogItemView {
                         clazzLog = clazzLogAttendance
-                        onChangedAttendanceStatus = props.onChangedAttendanceStatus
+                        onClazzLogAttendanceChanged = props.onClazzLogAttendanceChanged
                         fieldsEnabled = props.uiState.fieldsEnabled
                     }
 
@@ -208,17 +212,30 @@ external interface ClazzLogItemViewProps : Props {
 
     var clazzLog: ClazzLogAttendanceRecordWithPerson
 
-    var onChangedAttendanceStatus: (Int) -> Unit
+    var onClazzLogAttendanceChanged: (ClazzLogAttendanceRecordWithPerson) -> Unit
 
     var fieldsEnabled: Boolean
 }
 
 private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
 
+    val iconList = listOf(
+        Done.create(),
+        Close.create(),
+        AccessTime.create()
+    )
+    val statusList = listOf(
+        ClazzLogAttendanceRecord.STATUS_ATTENDED,
+        ClazzLogAttendanceRecord.STATUS_ABSENT,
+        ClazzLogAttendanceRecord.STATUS_PARTIAL
+    )
+
     ListItem{
 
         ListItemIcon {
-            + mui.icons.material.Person.create()
+            Icon {
+                + mui.icons.material.Person.create()
+            }
         }
 
         ListItemText {
@@ -229,41 +246,23 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
 
         secondaryAction = ButtonGroup.create {
 
-            ToggleButton {
-                disabled = !props.fieldsEnabled
-                selected = (props.clazzLog.attendanceStatus
-                        == ClazzLogAttendanceRecord.STATUS_ATTENDED)
+            iconList.forEachIndexed() { index ,icon ->
+                ToggleButton {
+                    disabled = !props.fieldsEnabled
+                    selected = (props.clazzLog.attendanceStatus == statusList[index])
 
-                onChange = { _,_ ->
-                    props.onChangedAttendanceStatus(ClazzLogAttendanceRecord.STATUS_ATTENDED)
+                    onChange = { _,_ ->
+                        props.onClazzLogAttendanceChanged(
+                            props.clazzLog.shallowCopy {
+                                attendanceStatus = statusList[index]
+                            }
+                        )
+                    }
+
+                    + Close.create()
                 }
-
-                + Done.create()
             }
 
-            ToggleButton {
-                disabled = !props.fieldsEnabled
-                selected = (props.clazzLog.attendanceStatus
-                == ClazzLogAttendanceRecord.STATUS_ABSENT)
-
-                onChange = { _,_ ->
-                    props.onChangedAttendanceStatus(ClazzLogAttendanceRecord.STATUS_ABSENT)
-                }
-
-                + Close.create()
-            }
-
-            ToggleButton {
-                disabled = !props.fieldsEnabled
-                selected = (props.clazzLog.attendanceStatus
-                        == ClazzLogAttendanceRecord.STATUS_PARTIAL)
-
-                onChange = { _,_ ->
-                    props.onChangedAttendanceStatus(ClazzLogAttendanceRecord.STATUS_PARTIAL)
-                }
-
-                + AccessTime.create()
-            }
         }
     }
 }
