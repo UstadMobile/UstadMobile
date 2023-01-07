@@ -15,6 +15,7 @@ import csstype.TextAlign
 import csstype.px
 import mui.icons.material.*
 import mui.material.*
+import mui.material.List
 import mui.material.StackDirection
 import mui.system.responsive
 import mui.system.sx
@@ -96,7 +97,7 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
                 clazzLog = props.uiState.clazzLogsList
             }
 
-            List{
+            List {
 
                 ListItem {
                     ListItemButton {
