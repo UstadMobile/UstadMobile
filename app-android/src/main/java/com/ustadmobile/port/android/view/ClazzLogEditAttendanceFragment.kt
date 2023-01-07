@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.annotation.SuppressLint
-import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -41,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -48,7 +48,6 @@ import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.LibraryAddCheck
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -59,9 +58,7 @@ import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
-import kotlinx.coroutines.selects.select
 
 interface ClazzLogEditAttendanceFragmentEventHandler {
 
@@ -525,9 +522,12 @@ private fun ClazzLogItemView(
             ){
                 (iconList).forEachIndexed() { index, icon ->
                     IconToggleButton(
-                        modifier = Modifier.border(
-                            BorderStroke(2.dp,
-                                MaterialTheme.colors.onSurface)),
+                        modifier = Modifier
+                            .border(
+                            BorderStroke(
+                                2.dp,
+                                color = MaterialTheme.colors.onSurface),
+                            shape = RoundedCornerShape(15)),
                         checked = clazzLog.attendanceStatus == statusList[index],
                         enabled = fieldsEnabled,
                         onCheckedChange = {

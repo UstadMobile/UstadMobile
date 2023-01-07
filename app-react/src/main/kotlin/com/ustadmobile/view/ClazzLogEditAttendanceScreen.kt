@@ -233,16 +233,20 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
 
     ListItem{
 
-        ListItemIcon {
-            Icon {
-                + mui.icons.material.Person.create()
-            }
-        }
+        ListItemButton {
 
-        ListItemText {
-            primary = ReactNode(
-                props.clazzLog.person?.personFullName() ?: ""
-            )
+            ListItemIcon {
+                Icon {
+                    + mui.icons.material.Person.create()
+                }
+            }
+
+            ListItemText {
+                primary = ReactNode(
+                    props.clazzLog.person?.personFullName() ?: ""
+                )
+            }
+
         }
 
         secondaryAction = ButtonGroup.create {
@@ -260,7 +264,7 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
                         )
                     }
 
-                    + Close.create()
+                    + icon
                 }
             }
 
