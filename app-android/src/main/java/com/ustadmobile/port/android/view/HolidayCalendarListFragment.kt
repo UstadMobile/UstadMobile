@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -123,7 +124,8 @@ class HolidayCalendarListFragment()
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HolidayCalendarListScreen(
-    uiState: HolidayCalendarListUiState
+    uiState: HolidayCalendarListUiState,
+    onListItemClick: (HolidayCalendarWithNumEntries) -> Unit = {}
 ){
     LazyColumn(
         modifier = Modifier
@@ -135,6 +137,10 @@ fun HolidayCalendarListScreen(
             key = {it.umCalendarUid}
         ){ holidayCalendar ->
             ListItem(
+                modifier = Modifier
+                    .clickable{
+                        onListItemClick(holidayCalendar)
+                    },
                 text = {
                     Text(text = holidayCalendar.umCalendarName ?: "")
                 },

@@ -15,6 +15,7 @@ import react.ReactNode
 
 external interface HolidayCalendarListProps: Props{
     var uiState: HolidayCalendarListUiState
+    var onListItemClick: (HolidayCalendarWithNumEntries) -> Unit
 }
 
 val HolidayCalendarListComponent2 = FC<HolidayCalendarListProps> { props ->
@@ -31,6 +32,10 @@ val HolidayCalendarListComponent2 = FC<HolidayCalendarListProps> { props ->
             props.uiState.holidayCalendarList.forEach {  holidayCalendar ->
                 ListItem {
                     disablePadding = true
+
+                    onClick = {
+                        props.onListItemClick(holidayCalendar)
+                    }
 
                     ListItemText{
                         primary = ReactNode(holidayCalendar.umCalendarName ?: "")
