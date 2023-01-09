@@ -1,0 +1,15 @@
+appId: com.toughra.ustadmobile
+---
+# this test add a new course to the courses page
+# test data required :
+     # 1) TESTCOURSENAME: provide course name of string type
+     # 2) TEST : provide the test name, it should be a string
+     # 3) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+- tapOn: "COURSE"
+- tapOn: "Add a new course"
+- tapOn: "Name"
+- inputText: ${TESTCOURSENAME}
+- hideKeyboard
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/add_course"
+

@@ -1,0 +1,70 @@
+# End-to-end tests
+
+End-to-end tests that start a blank new server/app and test functionality end-to-end.
+
+* [android-maestro](android-maestro/) Android end-to-end tests build using [Maestro](https://maestro.mobile.dev)
+
+## Tests
+
+### 1 : Content 
+
+1.1 Admin can add H5P, video, and EPUB both from the device and by using a link. In case of adding 
+from a link, then test downloading (can be using the same device) after import finishes. In case of 
+adding from device, test downloading from another device.
+
+1.2 Admin can hide content. After hiding on admin device, the content is hidden on other device.
+
+1.3 Admin can move content. After moving, content is shown as moved on other device. 
+
+1.4 Content can be deleted. After deletion, it can be downloaded again and opened as before. (Android only)
+
+1.5 Content download can be canceled. After cancellation, the download stops and it can be downloaded again. (Android only)
+
+1.6 If a download is started on WiFi and WiFi is stopped midway, the download will stop and then resume when WiFi is resumed. (Android only)
+
+1.7 Content that is set to not publicly available is not visible for guest users, but is visible for logged in users.
+
+### 2: Course creation, enrolment, attendance
+
+2.1 Admin can create a new course, add a new teacher, and create an account for that teacher.
+
+2.2 Teacher can login. Students can join class using class code or link. **Failing as of 5/Jan/23**
+
+2.3 Teacher can record attendance. Teacher can edit attendance after recordings
+
+### 3: Course block editing
+
+3.1 Admin or teacher can edit the course. Other users cannot edit
+
+3.2 Admin or teacher can add module and text blocks. Blocks can be reordered and hidden, indented, unindented
+
+3.3 Admin or teacher can add a content block and link existing content
+
+3.4 Admin or teacher can add a content block and upload new content via link
+
+3.5 Admin or teacher can add a content block and upload new content via file upload
+
+3.6 All users on course should be able to view the course blocks as they were added. Modules can expand/collapse.
+
+3.7 All users on course should be able to open text blocks to see all text.
+
+### 4: Assignments
+
+4.1 Teacher can create assignment, student can submit assignment (text and attachment), teacher can view submission and grade it. Student will see their mark when it is graded.
+
+4.2 Teachers and students can add course comments which are visible for all who can view the assignment.
+
+4.3 Teachers and students can submit and view private comments. Student can submit a private comment, teacher can see the private comment, and reply to it. 
+
+4.4 If assignment is set that only one submission is allowed, when the students make a submission, they will not be able to make any further submission.
+
+4.5 If assignment is set to allow multiple submissions, student can make another submission after the first submission. Teacher can see the revised submission and give a new grade. The student can see the updated grade.
+
+4.6 Teacher can create assignment as per 4.1 by groups. When another group member logs in, the group member will see the same submission and comments.
+
+4.7 Teacher and students can sumit and view private comments. Students who are in the same group see the same set of comments. Comments are private within the group.
+
+4.8 If group assignment is set that only one submission is allowed, when the students make a submission, they will not be able to make any further submission (including as another member of the group)
+
+4.9 If assignment is set to allow multiple submissions, student can make another submission after the first submission. Teacher can see the revised submission and give a new grade. The student can see the updated grade (including as another member of the group).
+
