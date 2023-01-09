@@ -121,7 +121,6 @@
     <string name="and">and</string>
     <string name="added">Added</string>
     <string name="attempts">Attempts</string>
-    <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
     <string name="add_link_description">Add educational content using web link, then use it offline</string>
     <string name="add_gallery_description">Add video or audio from the device gallery</string>
     <string name="add_file_description">Add educational content using supported formats e.g. PDF, xAPI, H5P, EPUB</string>
@@ -154,15 +153,6 @@
     <string name="onboarding_offline_sharing_subheading">Save time and data with superfast offline sharing</string>
     <string name="onboarding_stay_organized_headline">Stay organized</string>
     <string name="onboarding_stay_organized_subheading">Education content, assignments, classes, and attendance all in one place</string>
-    <string name="location_permission_title">Location permission required</string>
-    <string name="location_permission_message">This app requires the location permission to enable high-speed offline sharing with nearby users.</string>
-    <string name="location_permission_details">This app uses Bluetooth and WiFi scanning to find other users nearby. The app can then connect to
-        nearby users to download content at high-speed without requiring Internet access.
-        Because these scan results could be used to determine your location, you must grant the
-        location permission to enable this feature.
-        This app does not save the results of these scans and does not record your location in any way.
-        This app is built from open source code which can be checked at
-        github.com/UstadMobile/UstadMobile</string>
     <string name="download_continue_stacked_label">Continue download</string>
     <string name="download_continue_btn_label">Continue</string>
     <string name="download_wifi_only">Wi-Fi only</string>
@@ -1531,4 +1521,33 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
 
     <!-- PDF e.g. a PDF file. -->
     <string name="pdf">PDF</string>
+
+    <!--
+    Settings that allow the user to specify what action to take (e.g. delete data, uninstall app, etc)
+    in case of emergency.
+    -->
+    <string name="panic_button_app">Panic button app</string>
+
+    <!--
+    Explanation shown underneath panic button settings
+    -->
+    <string name="actions_to_be_taken_in_case_of_emergency">Actions to be taken in case of emergency</string>
+
+    <string name="exit_app">Exit app</string>
+
+    <string name="delete_app_data_from_device">Delete app data from device</string>
+
+    <string name="hide_app">Hide app</string>
+
+    <!--
+    Explanation of how the Ustad Mobile app can work with a panic button app. %1$s will be replaced
+    with the name of the app e.g. Ustad Mobile.
+    -->
+    <string name="panic_button_explanation">%1$s can automatically exit, clear data stored on this device, and hide itself when triggered by any panic button app that supports the PanicKit standard (such as Ripple). Tap to download Ripple.</string>
+
+    <!--
+    Explanation of how the Ustad Mobile app can uatomatically hide itself. $1$s will be replaced with
+    the name of the app e.g. Ustad Mobile. %2$s will be replaced with the unhide code.
+    -->
+    <string name="hide_app_explanation">Unhide code: %2$s\nIf hide app is enabled, then %1$s will be hidden and replaced with a fake notepad app when the panic button is triggered. You will need to type unhide code above ( %2$s ) into the fake notepad app to unhide %1$s.</string>
 </resources>

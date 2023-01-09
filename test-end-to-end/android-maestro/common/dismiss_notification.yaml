@@ -1,5 +1,6 @@
 appId: com.toughra.ustadmobile
 ---
+# this flow dismiss notification pop-up
 - tapOn:
    id:  "com.android.permissioncontroller:id/permission_deny_button"
    #text: "Don't allow"

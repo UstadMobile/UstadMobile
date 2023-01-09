@@ -1,3 +1,4 @@
 appId: com.toughra.ustadmobile
 ---
+# this flow clicks on select all button to select the text
 - tapOn: "Select all"

@@ -18,6 +18,11 @@ if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file(keyStoreFile)))
 }
 
+def applicationIdSuffix = ""
+if(findProperty("applicationIdSuffix") != null) {
+    applicationIdSuffix = getProperty("applicationIdSuffix")
+}
+
 android {
 
     //APK splitting would interfere with sideloading the app between different targets and the size
@@ -62,7 +67,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "${baseAppId}"
+        applicationId "${baseAppId}${applicationIdSuffix}"
         resConfigs 'en', 'fa', 'ps', 'ar', 'tg', 'bn', 'ne', 'my', 'ru', 'tl'
         minSdkVersion 21
         targetSdkVersion rootProject.ext.version_android_target_sdk
