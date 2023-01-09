@@ -18,7 +18,7 @@ env:
       TESTCOURSENAME: "Test Course Block Test"
 #--- add module and text block, test actions-hide/unhide/indent/unindent/delete ----#
 - runFlow:
-    file: "../common/add_module_and_text_course_block.yaml"
+    file: "../common/block_indent_hide_delete.yaml"
     env:
       MODULETITLE: "SEMESTER 1"
       TEXTTITLE: "PRIMARY COLOURS"
