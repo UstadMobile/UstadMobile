@@ -1950,6 +1950,6 @@ Consent can be revoked anytime by using the link that was emailed. If you choose
     <!--
     Lists number of holidays in a HolidayCalendar. $1%s will be replaced with the number of holidays
     in a given calendar -->
-    <string name="num_holidays">1%s holidays</string>
+    <string name="num_holidays">%1$s holidays</string>
 
 </resources>
