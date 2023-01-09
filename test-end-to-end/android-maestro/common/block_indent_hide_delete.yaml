@@ -6,7 +6,7 @@ appId: com.toughra.ustadmobile
 # 2) MODULETITLE: provide module name of string type
 # 3) TEXTTITLE: provide text title of string type
 # 4) TEXT: provide text to enter inside text box of string type
--
+
 # edit the course to add blocks
 - tapOn: "Edit"
 - swipe:
@@ -16,7 +16,7 @@ appId: com.toughra.ustadmobile
 - runFlow:
     file: "./add_module_block.yaml"
     env:
-      MODULETITLE: ${MODULETITLE}
+     MODULETITLE: ${MODULETITLE}
 #add text block ------ 1
 - runFlow:
     file: "./add_text_block.yaml"

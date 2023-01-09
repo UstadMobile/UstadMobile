@@ -15,7 +15,7 @@ env:
 - runFlow:
     file: "../common/add_course.yaml"
     env:
-      TESTCOURSENAME: "Test Course Block Test"
+     TESTCOURSENAME: "Test Course Block Test"
 #--- add module and text block, test actions-hide/unhide/indent/unindent/delete ----#
 - runFlow:
     file: "../common/block_indent_hide_delete.yaml"
