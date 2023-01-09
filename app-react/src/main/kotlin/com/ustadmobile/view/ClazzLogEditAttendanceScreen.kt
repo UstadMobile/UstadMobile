@@ -105,7 +105,9 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
                             .onClickMarkAllPresent(ClazzLogAttendanceRecord.STATUS_ATTENDED)
                         }
 
-                        + LibraryAddCheckOutlined.create()
+                        ListItemIcon {
+                            + LibraryAddCheckOutlined.create()
+                        }
 
                         ListItemText {
                             primary = ReactNode(strings[MessageID.mark_all_absent])
@@ -119,7 +121,9 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
                             .onClickMarkAllAbsent(ClazzLogAttendanceRecord.STATUS_ABSENT)
                         }
 
-                        + CheckBoxOutlined.create()
+                        ListItemIcon {
+                            + CheckBoxOutlined.create()
+                        }
 
                         ListItemText {
                             primary = ReactNode(strings[MessageID.mark_all_absent])
