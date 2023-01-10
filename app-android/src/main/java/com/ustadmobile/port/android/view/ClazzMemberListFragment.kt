@@ -2,6 +2,18 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Message
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -11,6 +23,7 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemClazzmemberListItemBinding
 import com.toughra.ustadmobile.databinding.ItemClazzmemberPendingListItemBinding
@@ -30,10 +43,12 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SAVE_TO_DB
+import com.ustadmobile.core.viewmodel.ClazzMemberListUiState
+import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
@@ -264,5 +279,26 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
                 return oldItem == newItem
             }
         }
+    }
+}
+
+@Composable
+private fun ClazzMemberListScreen(
+    uiState: ClazzMemberListUiState = ClazzMemberListUiState(),
+) {
+    LazyColumn {
+
+    }
+}
+
+@Composable
+@Preview
+fun ClazzMemberListScreenPreview() {
+    val uiStateVal = ClazzMemberListUiState(
+
+    )
+
+    MdcTheme {
+        ClazzMemberListScreen(uiStateVal)
     }
 }
