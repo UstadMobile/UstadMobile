@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.*
@@ -40,7 +38,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -48,7 +45,7 @@ import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.LibraryAddCheck
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
@@ -57,7 +54,6 @@ import com.google.accompanist.pager.*
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 
 interface ClazzLogEditAttendanceFragmentEventHandler {
@@ -517,29 +513,18 @@ private fun ClazzLogItemView(
             )
         },
         trailing = {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(0.dp)
-            ){
-                (iconList).forEachIndexed() { index, icon ->
-                    IconToggleButton(
-                        modifier = Modifier
-                            .border(
-                            BorderStroke(
-                                2.dp,
-                                color = MaterialTheme.colors.onSurface),
-                            shape = RoundedCornerShape(15)),
-                        checked = clazzLog.attendanceStatus == statusList[index],
-                        enabled = fieldsEnabled,
-                        onCheckedChange = {
-                            onClazzLogAttendanceChanged(clazzLog.shallowCopy{
-                                attendanceStatus = statusList[index]
-                            })
-                        },
-                    ) {
-                        Icon(icon, contentDescription = "")
-                    }
-                }
-            }
+            AndroidView(factory = {  context ->
+                val view = LayoutInflater.from(context).inflate(
+                    R.layout.item_clazz_log_attendance_status_toggle_buttons,
+                    null, false
+                )
+//                val textView = view.findViewById<TextView>(R.id.text)
+
+                // do whatever you want...
+                view // return the view
+            },
+                update = {}
+            )
         }
     )
 }
