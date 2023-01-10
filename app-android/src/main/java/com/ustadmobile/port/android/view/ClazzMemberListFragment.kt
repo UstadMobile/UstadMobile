@@ -3,18 +3,18 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.*
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Message
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Lens
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -30,25 +30,19 @@ import com.toughra.ustadmobile.databinding.ItemClazzmemberPendingListItemBinding
 import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.TerminologyKeys
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.db.dao.ClazzDaoCommon
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toListFilterOptions
-import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzMemberListView
-import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
-import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
-import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
-import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SAVE_TO_DB
 import com.ustadmobile.core.viewmodel.ClazzMemberListUiState
-import com.ustadmobile.core.viewmodel.SchoolDetailOverviewUiState
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
-import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
+import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
@@ -282,12 +276,97 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzMemberListScreen(
     uiState: ClazzMemberListUiState = ClazzMemberListUiState(),
+    onClickEntry: (PersonWithClazzEnrolmentDetails) -> Unit = {},
 ) {
-    LazyColumn {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
 
+        item {
+            UstadListFilterChipsHeader(
+                filterOptions = listOf(
+                    MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
+                    MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
+                    MessageIdOption2(MessageID.all, 0),
+                ),
+                selectedChipId = ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
+            )
+        }
+
+        item {
+            Row{
+                Text(text = stringResource(id = R.string.sort_by))
+
+                UstadListSortHeader(
+                    SortOrderOption(
+                        MessageID.name,
+                        ClazzDaoCommon.SORT_CLAZZNAME_ASC,
+                        true
+                    )
+                )
+            }
+        }
+
+        item {
+            Text(text = stringResource(id = R.string.teachers_literal))
+        }
+
+        items(
+            items = uiState.studentList,
+            key = { Pair(1, it.personUid) }
+        ){ entry ->
+            ListItem (
+                modifier = Modifier.clickable {
+                    onClickEntry(entry)
+                    },
+                text = {
+                    Text(text = "${entry.firstNames} ${entry.lastName}")
+                },
+                secondaryText = {
+                    Row {
+                        Icon(Icons.Filled.Lens, contentDescription = "")
+                        Text(stringResource(id = R.string.x_percent_attended, entry.attendance))
+                    }
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = null
+                    )
+                }
+            )
+        }
+
+        item {
+            Text(stringResource(id = R.string.pending_requests))
+        }
+
+        items(
+            items = uiState.studentList,
+            key = { Pair(1, it.personUid) }
+        ){ entry ->
+            ListItem (
+                text = {
+                    Text(text = "${entry.firstNames} ${entry.lastName}")
+                },
+                secondaryText = {
+                    Row {
+                        Icon(Icons.Filled.Lens, contentDescription = "")
+                        Text(stringResource(id = R.string.x_percent_attended, entry.attendance))
+                    }
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = null
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -295,7 +374,26 @@ private fun ClazzMemberListScreen(
 @Preview
 fun ClazzMemberListScreenPreview() {
     val uiStateVal = ClazzMemberListUiState(
-
+        studentList = listOf(
+            PersonWithClazzEnrolmentDetails().apply {
+                personUid = 1
+                firstNames = "Student 1"
+                lastName = "Name"
+                attendance = 20F
+            },
+            PersonWithClazzEnrolmentDetails().apply {
+                personUid = 2
+                firstNames = "Student 2"
+                lastName = "Name"
+                attendance = 80F
+            },
+            PersonWithClazzEnrolmentDetails().apply {
+                personUid = 3
+                firstNames = "Student 3"
+                lastName = "Name"
+                attendance = 40F
+            }
+        )
     )
 
     MdcTheme {

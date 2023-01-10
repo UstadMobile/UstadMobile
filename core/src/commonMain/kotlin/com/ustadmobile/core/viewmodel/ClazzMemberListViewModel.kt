@@ -1,5 +1,6 @@
 package com.ustadmobile.core.viewmodel
 
+import com.ustadmobile.lib.db.entities.CourseBlockWithEntity
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 
 data class ClazzMemberListUiState(
@@ -14,4 +15,8 @@ data class ClazzMemberListUiState(
 
     val termMap: Map<String, String> = emptyMap()
 
-)
+) {
+    fun courseBlockStateFor(couresBlockWithEntity: CourseBlockWithEntity): ClazzEditUiState.CourseBlockUiState {
+        return ClazzEditUiState.CourseBlockUiState(couresBlockWithEntity)
+    }
+}
