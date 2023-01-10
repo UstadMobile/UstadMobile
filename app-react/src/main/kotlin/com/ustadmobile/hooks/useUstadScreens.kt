@@ -83,6 +83,7 @@ fun useUstadScreens(): UstadScreens {
                 ClazzLogEditScreenPreview),
             UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview",
                 CourseGroupSetEditScreenPreview),
+            UstadScreen(LanguageListView.VIEW_NAME, "LanguageList Preview", LanguageListScreenPreview)
         )
     }
 }
