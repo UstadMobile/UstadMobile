@@ -7,6 +7,8 @@ import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ConcatAdapter
@@ -17,6 +19,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzLogListAttendanceChartheaderBinding
@@ -27,6 +30,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
+import com.ustadmobile.core.viewmodel.ClazzLogListAttendanceUiState
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -311,5 +315,20 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
                 return oldItem == newItem
             }
         }
+    }
+}
+
+@Composable
+private fun ClazzLogListAttendanceScreen(
+    uiState: ClazzLogListAttendanceUiState = ClazzLogListAttendanceUiState()
+) {
+
+}
+
+@Composable
+@Preview
+fun ClazzLogListAttendanceScreenPreview() {
+    MdcTheme {
+        ClazzLogListAttendanceScreen()
     }
 }
