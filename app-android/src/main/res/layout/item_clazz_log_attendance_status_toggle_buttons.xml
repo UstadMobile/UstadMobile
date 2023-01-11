@@ -8,21 +8,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <Button
-            android:id="@+id/button1"
+            android:id="@+id/present_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:iconTint="?colorOnIconTint"
             app:icon="@drawable/ic_done_white_24dp"
             style="@style/UmTheme.Widget.OutlinedButton.IconOnly" />
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/absent_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:iconTint="?colorOnIconTint"
             app:icon="@drawable/ic_close_black_24dp"
             style="@style/UmTheme.Widget.OutlinedButton.IconOnly"/>
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/late_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:iconTint="?colorOnIconTint"
             app:icon="@drawable/ic_delay"
             style="@style/UmTheme.Widget.OutlinedButton.IconOnly"/>
     </com.google.android.material.button.MaterialButtonToggleGroup>

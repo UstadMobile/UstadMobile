@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.compose.foundation.clickable
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.*
@@ -45,15 +46,19 @@ import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.LibraryAddCheck
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.accompanist.pager.*
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.ustadmobile.core.impl.locale.entityconstants.*
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 
 interface ClazzLogEditAttendanceFragmentEventHandler {
@@ -491,17 +496,6 @@ private fun ClazzLogItemView(
     onClazzLogAttendanceChanged: (ClazzLogAttendanceRecordWithPerson) -> Unit
 ) {
 
-    val iconList = listOf(
-        Icons.Default.Done,
-        Icons.Default.Close,
-        Icons.Default.AccessTime
-    )
-    val statusList = listOf(
-        ClazzLogAttendanceRecord.STATUS_ATTENDED,
-        ClazzLogAttendanceRecord.STATUS_ABSENT,
-        ClazzLogAttendanceRecord.STATUS_PARTIAL
-    )
-
     ListItem(
         text = {
             Text(text = clazzLog.person?.personFullName() ?: "",)
@@ -513,17 +507,43 @@ private fun ClazzLogItemView(
             )
         },
         trailing = {
+
+            var selectedButtonId: Int? = null
+
             AndroidView(factory = {  context ->
                 val view = LayoutInflater.from(context).inflate(
                     R.layout.item_clazz_log_attendance_status_toggle_buttons,
                     null, false
                 )
-//                val textView = view.findViewById<TextView>(R.id.text)
 
-                // do whatever you want...
-                view // return the view
+                val buttonsMap = mapOf(
+                    ClazzLogAttendanceRecord.STATUS_ATTENDED
+                            to view.findViewById<Button>(R.id.present_button),
+                    ClazzLogAttendanceRecord.STATUS_ABSENT
+                            to view.findViewById<Button>(R.id.absent_button),
+                    ClazzLogAttendanceRecord.STATUS_PARTIAL
+                            to view.findViewById<Button>(R.id.late_button)
+                )
+
+                buttonsMap.forEach { (status, button) ->
+                    button.isEnabled = fieldsEnabled
+
+                    if (clazzLog.attendanceStatus == status)
+                        selectedButtonId = button.id
+
+                    button.setOnClickListener {
+                        onClazzLogAttendanceChanged(clazzLog.shallowCopy{
+                            attendanceStatus = status
+                        })
+                    }
+                }
+
+                view
             },
-                update = {}
+                update = {
+                    val buttonGroup = it as MaterialButtonToggleGroup
+                    selectedButtonId?.let { buttonId -> buttonGroup.check(buttonId) }
+                }
             )
         }
     )
