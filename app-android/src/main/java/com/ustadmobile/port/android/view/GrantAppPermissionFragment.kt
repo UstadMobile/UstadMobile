@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.content.res.AppCompatResources
 import com.toughra.ustadmobile.databinding.FragmentGrantAppPermissionBinding
 import com.ustadmobile.port.android.presenter.GrantAppPermissionPresenter
 import com.ustadmobile.core.util.ext.toStringMap
@@ -41,6 +40,9 @@ class GrantAppPermissionFragment: UstadBaseFragment(), GrantAppPermissionView {
             rootView = it.root
             it.grantButton.setOnClickListener {
                 mPresenter?.onClickApprove()
+            }
+            it.cancelButton.setOnClickListener {
+                mPresenter?.onClickCancel()
             }
         }
 

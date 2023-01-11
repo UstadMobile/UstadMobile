@@ -4,7 +4,6 @@ import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.core.os.bundleOf
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -121,12 +120,17 @@ class GrantAppPermissionPresenter(
                     AccountManager.KEY_ACCOUNT_NAME to activeAccountName,
                 )
 
-                authenticatorActivity.setAccountAuthenticatorResult(
+                authenticatorActivity.finishWithAccountAuthenticatorResult(
                     Activity.RESULT_OK, resultBundle, resultDataIntent)
             }else {
                 view.showSnackBar("ERROR")
             }
         }
+    }
+
+    fun onClickCancel() {
+        authenticatorActivity.finishWithAccountAuthenticatorResult(Activity.RESULT_CANCELED,
+            bundleOf())
     }
 
 }

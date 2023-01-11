@@ -6,11 +6,9 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
-import androidx.navigation.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityWithNavhostBinding
 import com.ustadmobile.port.android.view.UstadBaseActivity
-import info.guardianproject.panic.PanicUtils
 
 /**
  * This activity handles intents that get created by the authenticator service. It must be a
@@ -43,7 +41,7 @@ class AuthenticatorActivity: UstadBaseActivity(
         }
     }
 
-    override fun setAccountAuthenticatorResult(
+    override fun finishWithAccountAuthenticatorResult(
         resultCode: Int,
         result: Bundle,
         resultData: Intent?,

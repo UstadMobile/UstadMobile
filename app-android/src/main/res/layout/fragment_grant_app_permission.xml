@@ -49,14 +49,13 @@
              />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/create_account"
+            android:id="@+id/cancel_button"
             style="@style/UmTheme.Widget.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/dimen_16dp"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
-            android:contentDescription="@string/download"
             android:text="@string/cancel" />
 
 

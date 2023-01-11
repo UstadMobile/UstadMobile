@@ -13,7 +13,7 @@ interface IAuthenticatorActivity {
      *  "The activity needs to return the final result when it is complete so the Intent should
      *  contain the AccountAuthenticatorResponse as"...
      */
-    fun setAccountAuthenticatorResult(
+    fun finishWithAccountAuthenticatorResult(
         resultCode: Int,
         result: Bundle,
         resultData: Intent? = null,
