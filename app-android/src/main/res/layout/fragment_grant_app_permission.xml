@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
+        <variable name="grantToAppName" type="String" />
     </data>
 
     <androidx.appcompat.widget.LinearLayoutCompat
@@ -10,6 +11,22 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         >
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/grant_to_app_icon"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{grantToAppName}"
+            android:layout_gravity="center_horizontal"
+            tools:text="App Name"
+            />
+
 
         <TextView
             android:layout_marginHorizontal="@dimen/dimen_16dp"

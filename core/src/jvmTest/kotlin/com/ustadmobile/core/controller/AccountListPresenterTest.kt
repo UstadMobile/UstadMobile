@@ -31,6 +31,8 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
 import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.door.lifecycle.*
 import com.ustadmobile.util.test.rules.CoroutineDispatcherRule
@@ -59,6 +61,8 @@ class AccountListPresenterTest {
     private lateinit var mockedAccountListObserver:Observer<List<UmAccount>>
 
     private lateinit var mockedAccountObserver:Observer<UmAccount>
+
+    private lateinit var mockNavController: UstadNavController
 
     private val accountList = listOf(UmAccount(1,"dummy",null,""))
 
@@ -130,6 +134,8 @@ class AccountListPresenterTest {
 
         mockedLifecycleOwner = mockLifecycleOwner(DoorState.STARTED)
 
+        mockNavController = mock { }
+
         di = DI {
             bind<UstadMobileSystemImpl>() with singleton { impl }
             bind<UstadAccountManager>() with singleton { accountManager }
@@ -141,6 +147,8 @@ class AccountListPresenterTest {
                     install(HttpTimeout)
                 }
             }
+            bind<UstadNavController>() with singleton { mockNavController }
+
             bindPresenterCoroutineRule(dispatcherRule)
         }
     }
@@ -342,12 +350,11 @@ class AccountListPresenterTest {
             it.userSession.usUid == secondAccountList[0].userSession.usUid
         }
 
-        verify(impl).goToViewLink(argWhere {
-            it.startsWith(ContentEntryList2View.VIEW_NAME)
-        }, any(), argWhere {
-            it.popUpToViewName == UstadView.ROOT_DEST && !it.popUpToInclusive
-        })
-
+        verify(mockNavController).navigate(eq(ContentEntryList2View.VIEW_NAME),
+            any(),
+            argWhere< UstadMobileSystemCommon.UstadGoOptions> {
+                it.popUpToViewName == UstadView.ROOT_DEST && !it.popUpToInclusive
+            })
     }
 
 

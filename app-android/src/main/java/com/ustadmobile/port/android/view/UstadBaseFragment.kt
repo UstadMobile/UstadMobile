@@ -33,8 +33,6 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     private var searchView: SearchView? = null
 
-    private val runOnAttach = Vector<Runnable>()
-
     protected var titleLifecycleObserver: TitleLifecycleObserver? = null
 
     protected var fabManager: FabManagerLifecycleObserver? = null
@@ -147,28 +145,9 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
 
-    override fun runOnUiThread(r: Runnable?) {
-        if (activity != null) {
-            activity?.runOnUiThread(r)
-        } else {
-            runOnAttach.add(r)
-        }
-    }
-
     fun <T : UstadBaseController<*>> T.withViewLifecycle(): T {
         viewLifecycleOwner.lifecycle.addObserver(PresenterViewLifecycleObserver(this))
         return this
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-        val runnables = runOnAttach.iterator()
-        while (runnables.hasNext()) {
-            val current = runnables.next()
-            current.run()
-            runnables.remove()
-        }
     }
 
     companion object {

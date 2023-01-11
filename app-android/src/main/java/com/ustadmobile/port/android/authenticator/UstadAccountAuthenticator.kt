@@ -18,7 +18,6 @@ import com.ustadmobile.core.account.UstadAccountManagerAndroid
 import com.ustadmobile.core.account.UstadAccountManagerAndroid.Companion.USERDATA_KEY_ENDPOINT
 import com.ustadmobile.core.account.UstadAccountManagerAndroid.Companion.USERDATA_KEY_PERSONUID
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.port.android.view.MainActivity
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
@@ -70,13 +69,15 @@ class UstadAccountAuthenticator(
         requiredFeatures: Array<out String>?,
         options: Bundle
     ): Bundle {
-        val callerUid = options.getInt(AccountManager.KEY_CALLER_UID)
+        //TODO: this should be updated to go to register account (via enter link if needed)
+
+        val callerPackage: String? = options.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME)
 
         return runBlocking {
             val eapUid = Random.nextInt(0, Int.MAX_VALUE)
 
             val externalAppPermission = ExternalAppPermission(
-                eapCallerUid = callerUid,
+                eapPackageId = callerPackage,
                 eapAuthToken = UUID.randomUUID().toString(),
             )
 
@@ -85,7 +86,7 @@ class UstadAccountAuthenticator(
                     externalAppPermission)
             }
 
-            val intent = Intent(context, MainActivity::class.java).apply {
+            val intent = Intent(context, AuthenticatorActivity::class.java).apply {
                 putExtra(UstadView.ARG_OPEN_LINK,
                     "${GrantAppPermissionView.VIEW_NAME}?$ARG_PERMISSION_UID=$eapUid" +
                         "&${GrantAppPermissionView.ARG_RETURN_NAME}=true")
@@ -116,11 +117,13 @@ class UstadAccountAuthenticator(
         //check the caller - if permissions have already been granted for this caller, then return
         // a token. Otherwise, return an intent tha tit will have to launch
         val callerUid = options.getInt(AccountManager.KEY_CALLER_UID)
+        val callerPackage = options.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME)
+
         val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = DoorTag.TAG_DB)
 
         coroutineScope.launch {
             val grantedToken = db.externalAppPermissionDao.getGrantedAuthToken(
-                callerUid, personUid, systemTimeInMillis())
+                callerPackage ?: "", personUid, systemTimeInMillis())
             if(grantedToken != null) {
                 response.onResult(
                     bundleOf(
@@ -130,12 +133,10 @@ class UstadAccountAuthenticator(
                     )
                 )
             }else {
-                //Get application name
-                // see https://stackoverflow.com/questions/11229219/android-how-to-get-application-name-not-package-name
                 val eapUid = Random.nextInt(0, Int.MAX_VALUE)
                 val externalAppPermission = ExternalAppPermission(
                     eapPersonUid = personUid,
-                    eapCallerUid = callerUid,
+                    eapPackageId = callerPackage,
                     eapAuthToken = UUID.randomUUID().toString(),
                     eapAndroidAccountName = account.name,
                     eapUid = eapUid
@@ -145,7 +146,7 @@ class UstadAccountAuthenticator(
                         externalAppPermission)
                 }
 
-                val authIntent = Intent(context, MainActivity::class.java).apply {
+                val authIntent = Intent(context, AuthenticatorActivity::class.java).apply {
                     putExtra(
                         UstadView.ARG_OPEN_LINK, UstadUrlComponents(endpointUrl,
                         GrantAppPermissionView.VIEW_NAME,
@@ -188,6 +189,11 @@ class UstadAccountAuthenticator(
     companion object {
 
         const val KEY_PREFIX_EAPUID = "eap_"
+
+        /**
+         * Intent action indicating that the caller wants to get an authentication token
+         */
+        const val ACTION_GET_AUTH_TOKEN = "com.ustadmobile.AUTH_GET_TOKEN"
 
     }
 }

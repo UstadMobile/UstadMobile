@@ -53,13 +53,6 @@ interface UstadView {
      */
     fun showSnackBar(message: String, action: () -> Unit = {}, actionMessageId: Int = 0)
 
-    /**
-     * Most UI platforms require that all UI changes are done in a particular thread. This method
-     * simply wraps those implementations.
-     *
-     * @param r Runnable to run on system's UI thread
-     */
-    fun runOnUiThread(r: Runnable?)
     companion object {
 
 

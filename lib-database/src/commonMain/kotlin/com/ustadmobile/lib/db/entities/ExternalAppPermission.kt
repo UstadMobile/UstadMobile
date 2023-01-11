@@ -24,7 +24,7 @@ data class ExternalAppPermission(
     /**
      * The UID of the caller app (android specific)
      */
-    var eapCallerUid: Int = 0,
+    var eapPackageId: String? = null,
 
     /**
      * The start time of the grant

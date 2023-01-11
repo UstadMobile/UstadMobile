@@ -1,8 +1,12 @@
 package com.ustadmobile.core.view
 
+import android.graphics.drawable.Drawable
+
 interface GrantAppPermissionView: UstadView {
 
+    var grantToAppName: String?
 
+    var grantToIcon: Drawable?
 
     companion object {
 

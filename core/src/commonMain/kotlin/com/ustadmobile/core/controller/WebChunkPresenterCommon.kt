@@ -74,17 +74,15 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
         clazzUid = arguments[UstadView.ARG_CLAZZUID]?.toLong() ?: 0L
 
-        GlobalScope.launch {
+        presenterScope.launch {
             try {
                 val result = repo.contentEntryDao.getContentByUuidAsync(entryUuid)
-                view.runOnUiThread(Runnable {
-                    view.entry = result
-                })
+                view.entry = result
             } catch (e: Exception) {
-                view.runOnUiThread(Runnable {
+                presenterScope.launch {
                     view.showSnackBar(
                         systemImpl.getString(MessageID.error_opening_file, context))
-                })
+                }
             }
 
             handleMountChunk()

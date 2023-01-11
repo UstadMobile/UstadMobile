@@ -90,7 +90,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private lateinit var ustadNavController: UstadNavController
 
-    private var mAccountAuthenticatorResponse: AccountAuthenticatorResponse? = null
 
     private val userProfileDrawable: Drawable? by lazy(LazyThreadSafetyMode.NONE) {
         ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_24dp)?.also {
@@ -123,29 +122,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
             }
         }
     }
-
-    /**
-     * Set the result and finish as per docs:
-     *
-     *  https://developer.android.com/reference/android/accounts/AbstractAccountAuthenticator
-     *  "The activity needs to return the final result when it is complete so the Intent should
-     *  contain the AccountAuthenticatorResponse as"...
-     */
-    fun setAccountAuthenticatorResult(
-        resultCode: Int,
-        result: Bundle,
-        resultData: Intent? = null,
-    ) {
-        mAccountAuthenticatorResponse?.onResult(result)
-        if(resultData == null) {
-            setResult(resultCode)
-        }else {
-            setResult(resultCode, resultData)
-        }
-
-        finish()
-    }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -183,14 +159,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
             AppBarConfiguration(mBinding.bottomNavView.menu))
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
-
-        val response: AccountAuthenticatorResponse? = intent.getParcelableExtra(
-            AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
-        if(response != null) {
-            response.onRequestContinued()
-            mAccountAuthenticatorResponse = response
-        }
-
     }
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,
@@ -316,8 +284,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         }
     }
-
-    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     override fun onBackPressed() {
         val fragment = supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.get(0)

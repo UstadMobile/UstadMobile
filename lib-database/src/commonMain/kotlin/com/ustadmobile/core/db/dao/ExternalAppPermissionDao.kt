@@ -14,13 +14,13 @@ expect abstract class ExternalAppPermissionDao {
     @Query("""
         SELECT ExternalAppPermission.eapAuthToken
           FROM ExternalAppPermission
-         WHERE ExternalAppPermission.eapCallerUid = :callerUid
+         WHERE ExternalAppPermission.eapPackageId = :packageId
            AND ExternalAppPermission.eapPersonUid = :personUid
            AND :currentTime BETWEEN ExternalAppPermission.eapStartTime AND ExternalAppPermission.eapExpireTime
          LIMIT 1  
     """)
     abstract suspend fun getGrantedAuthToken(
-        callerUid: Int,
+        packageId: String,
         personUid: Long,
         currentTime: Long,
     ): String?

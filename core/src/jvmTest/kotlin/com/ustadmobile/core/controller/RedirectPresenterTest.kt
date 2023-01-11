@@ -6,6 +6,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import org.mockito.kotlin.*
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
@@ -34,6 +35,8 @@ class RedirectPresenterTest {
 
     private lateinit var mockedAccountManager: UstadAccountManager
 
+    private lateinit var mockNavController: UstadNavController
+
     @JvmField
     @Rule
     val dispatcherRule = CoroutineDispatcherRule()
@@ -53,6 +56,7 @@ class RedirectPresenterTest {
     @Before
     fun setup() {
         mockedView = mock()
+        mockNavController = mock { }
         impl = mock()
 
         mockedAccountManager = mock { }
@@ -62,6 +66,7 @@ class RedirectPresenterTest {
             bind<UstadAccountManager>() with singleton { mockedAccountManager }
 
             bindPresenterCoroutineRule(dispatcherRule)
+            bind<UstadNavController>() with singleton { mockNavController }
         }
     }
 
@@ -88,7 +93,8 @@ class RedirectPresenterTest {
         mPresenter = RedirectPresenter(context, mapOf(),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(impl, timeout(5000)).goToViewLink(eq(ContentEntryList2View.VIEW_NAME_HOME), any(), any())
+        verify(mockNavController, timeout(5000)).navigate(
+            eq(ContentEntryList2View.VIEW_NAME_HOME), any(), any())
     }
 
     @Test
@@ -102,7 +108,10 @@ class RedirectPresenterTest {
         mPresenter = RedirectPresenter(context, mapOf(ARG_NEXT to viewLink),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(impl, timeout(5000)).goToViewLink(eq(viewLink), any(), any())
+        verify(mockNavController, timeout(5000)).navigate(
+            eq(ContentEntryDetailView.VIEW_NAME), argWhere {
+                it["entityUid"] == "42"
+            }, any())
     }
 
 }

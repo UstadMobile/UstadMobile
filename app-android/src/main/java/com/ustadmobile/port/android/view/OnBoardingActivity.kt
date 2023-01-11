@@ -24,8 +24,6 @@ import org.kodein.di.instance
 
 class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnItemClickListener {
 
-    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
-
     private var presenter: OnBoardingPresenter? = null
 
     private lateinit var languageOptions: AutoCompleteTextView

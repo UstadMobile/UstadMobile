@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 108,
-    "identityHash": "c1a65683139c27317f3f1c57aecf2da6",
+    "identityHash": "b0990e8b132a48653c0a1c4bbcb32abb",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -11040,7 +11040,7 @@
       },
       {
         "tableName": "ExternalAppPermission",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eapUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `eapPersonUid` INTEGER NOT NULL, `eapCallerUid` INTEGER NOT NULL, `eapStartTime` INTEGER NOT NULL, `eapExpireTime` INTEGER NOT NULL, `eapAuthToken` TEXT, `eapAndroidAccountName` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eapUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `eapPersonUid` INTEGER NOT NULL, `eapPackageId` TEXT, `eapStartTime` INTEGER NOT NULL, `eapExpireTime` INTEGER NOT NULL, `eapAuthToken` TEXT, `eapAndroidAccountName` TEXT)",
         "fields": [
           {
             "fieldPath": "eapUid",
@@ -11055,10 +11055,10 @@
             "notNull": true
           },
           {
-            "fieldPath": "eapCallerUid",
-            "columnName": "eapCallerUid",
-            "affinity": "INTEGER",
-            "notNull": true
+            "fieldPath": "eapPackageId",
+            "columnName": "eapPackageId",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "eapStartTime",
@@ -11098,7 +11098,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c1a65683139c27317f3f1c57aecf2da6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b0990e8b132a48653c0a1c4bbcb32abb')"
     ]
   }
 }

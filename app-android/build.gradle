@@ -257,7 +257,7 @@ dependencies {
     //Provides findViewTreeLifecycleOwner useful for two-way data binding that uses prepareCall (e.g. images/files)
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_androidx_lifecycle"
 
-    // Room (annotation processing takes place only on lib-database-android to improve build times)
+    // Room (annotation processing takes place only on lib-database to improve build times)
     implementation "androidx.room:room-runtime:$version_android_room"
 
     implementation "androidx.core:core-ktx:$version_androidx_core"

@@ -11,8 +11,10 @@ import com.toughra.ustadmobile.databinding.FragmentRedirectBinding
 import com.ustadmobile.core.controller.RedirectPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.GrantAppPermissionView
 import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.port.android.authenticator.UstadAccountAuthenticator.Companion.ACTION_GET_AUTH_TOKEN
 import org.kodein.di.instance
 
 /**
@@ -50,14 +52,24 @@ class RedirectFragment : UstadBaseFragment(), RedirectView {
                 intentMap[UstadView.ARG_OPEN_LINK] = it
             }
 
+            /*
+             * If being used by the AuthenticatorActivity to respond to an intent, map this to
+             * the viewname
+             */
+            if(intent.action == ACTION_GET_AUTH_TOKEN) {
+                intentMap[UstadView.ARG_OPEN_LINK] = "${GrantAppPermissionView.VIEW_NAME}?" +
+                    "${GrantAppPermissionView.ARG_PERMISSION_UID}=0" +
+                    "&${GrantAppPermissionView.ARG_RETURN_NAME}=true"
+            }
+
             intent.getStringExtra(UstadView.ARG_ACCOUNT_NAME)?.also {
                 intentMap[UstadView.ARG_ACCOUNT_NAME] = it
             }
 
-
+            val argMap =arguments.toStringMap() + requireActivity().intent.extras.toStringMap() +
+                intentMap
             mPresenter = RedirectPresenter(requireContext(),
-                arguments.toStringMap() + requireActivity().intent.extras.toStringMap() + intentMap,
-                this@RedirectFragment, di).withViewLifecycle()
+                argMap,this@RedirectFragment, di).withViewLifecycle()
             mPresenter?.onCreate(null)
         }
     }
