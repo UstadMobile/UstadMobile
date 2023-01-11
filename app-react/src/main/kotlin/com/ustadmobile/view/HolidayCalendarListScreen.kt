@@ -29,18 +29,24 @@ val HolidayCalendarListComponent2 = FC<HolidayCalendarListProps> { props ->
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-            props.uiState.holidayCalendarList.forEach {  holidayCalendar ->
-                ListItem {
-                    disablePadding = true
+            List{
+                props.uiState.holidayCalendarList.forEach {  holidayCalendar ->
+                    ListItem {
+                        disablePadding = true
 
-                    onClick = {
-                        props.onListItemClick(holidayCalendar)
-                    }
+                        ListItemButton{
 
-                    ListItemText{
-                        primary = ReactNode(holidayCalendar.umCalendarName ?: "")
-                        secondary = ReactNode(strings[MessageID.num_holidays].replace("%1\$s",
-                            holidayCalendar.numEntries.toString()))
+                            onClick = {
+                                props.onListItemClick(holidayCalendar)
+                            }
+
+                            ListItemText{
+                                primary = ReactNode(holidayCalendar.umCalendarName ?: "")
+                                secondary = ReactNode(strings[MessageID.num_holidays].replace("%1\$s",
+                                    holidayCalendar.numEntries.toString()))
+                            }
+                        }
+
                     }
                 }
             }
