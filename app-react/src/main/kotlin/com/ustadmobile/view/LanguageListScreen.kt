@@ -35,15 +35,18 @@ val LanguageListComponent2 = FC<LanguageListProps> { props ->
             List {
                 props.uiState.languageList.forEach { language ->
                     ListItem {
+                        ListItemButton {
 
-                        onClick = {
-                            props.onListItemClick(language)
+                            onClick = {
+                                props.onListItemClick(language)
+                            }
+
+                            ListItemText{
+                                primary = ReactNode(language.name ?: "")
+                                secondary = ReactNode("${language.iso_639_1_standard} / ${language.iso_639_2_standard}")
+                            }
                         }
 
-                        ListItemText{
-                            primary = ReactNode(language.name ?: "")
-                            secondary = ReactNode("${language.iso_639_1_standard} / ${language.iso_639_2_standard}")
-                        }
                     }
                 }
             }
