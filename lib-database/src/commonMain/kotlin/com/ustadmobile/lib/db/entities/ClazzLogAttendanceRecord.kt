@@ -134,6 +134,11 @@ open class ClazzLogAttendanceRecord {
         const val STATUS_ABSENT = 2
 
         const val STATUS_PARTIAL = 4
+
+        const val ATTENDANCE_THRESHOLD_GOOD = 0.8F
+
+        const val ATTENDANCE_THRESHOLD_WARNING = 0.6F
+
     }
 
 

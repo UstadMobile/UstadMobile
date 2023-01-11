@@ -3,18 +3,22 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.*
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Lens
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -281,6 +285,8 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
 private fun ClazzMemberListScreen(
     uiState: ClazzMemberListUiState = ClazzMemberListUiState(),
     onClickEntry: (PersonWithClazzEnrolmentDetails) -> Unit = {},
+    onClickPendingRequest: (enrolment: PersonWithClazzEnrolmentDetails,
+                            approved: Boolean) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -289,8 +295,10 @@ private fun ClazzMemberListScreen(
         item {
             UstadListFilterChipsHeader(
                 filterOptions = listOf(
-                    MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-                    MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
+                    MessageIdOption2(MessageID.currently_enrolled,
+                        ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
+                    MessageIdOption2(MessageID.past_enrollments,
+                        ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
                     MessageIdOption2(MessageID.all, 0),
                 ),
                 selectedChipId = ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
@@ -312,62 +320,169 @@ private fun ClazzMemberListScreen(
         }
 
         item {
-            Text(text = stringResource(id = R.string.teachers_literal))
-        }
-
-        items(
-            items = uiState.studentList,
-            key = { Pair(1, it.personUid) }
-        ){ entry ->
-            ListItem (
-                modifier = Modifier.clickable {
-                    onClickEntry(entry)
-                    },
-                text = {
-                    Text(text = "${entry.firstNames} ${entry.lastName}")
-                },
-                secondaryText = {
-                    Row {
-                        Icon(Icons.Filled.Lens, contentDescription = "")
-                        Text(stringResource(id = R.string.x_percent_attended, entry.attendance))
-                    }
-                },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Filled.AccountCircle,
-                        contentDescription = null
-                    )
-                }
+            ListItem(
+                text = { Text(text = stringResource(id = R.string.teachers_literal)) }
             )
         }
 
         item {
-            Text(stringResource(id = R.string.pending_requests))
+            if (uiState.addTeacherVisible){
+                AddListItem(
+                    text = stringResource(id = R.string.add_a_teacher),
+                    onClick = {},
+                )
+            }
+        }
+
+        item {
+            ListItem(
+                text = { Text(text = stringResource(id = R.string.students)) }
+            )
+        }
+
+        item {
+            if (uiState.addStudentVisible){
+                AddListItem(
+                    text = stringResource(id = R.string.add_a_student),
+                    onClick = {},
+                )
+            }
         }
 
         items(
             items = uiState.studentList,
             key = { Pair(1, it.personUid) }
-        ){ entry ->
-            ListItem (
-                text = {
-                    Text(text = "${entry.firstNames} ${entry.lastName}")
-                },
-                secondaryText = {
-                    Row {
-                        Icon(Icons.Filled.Lens, contentDescription = "")
-                        Text(stringResource(id = R.string.x_percent_attended, entry.attendance))
-                    }
-                },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Filled.AccountCircle,
-                        contentDescription = null
-                    )
-                }
+        ){ personItem ->
+            StudentListItem(
+                person = personItem,
+                onClick = onClickEntry
+            )
+        }
+
+        item {
+            ListItem(
+                text = { Text(text = stringResource(id = R.string.pending_requests)) }
+            )
+        }
+        
+        items(
+            items = uiState.pendingStudentList,
+            key = { Pair(2, it.personUid) }
+        ){ pendingStudent ->
+            PendingStudentListItem(
+                person = pendingStudent,
+                onClick = onClickPendingRequest
             )
         }
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun AddListItem(
+    text: String,
+    onClick: () -> Unit,
+){
+    ListItem(
+        modifier = Modifier.clickable {
+            onClick()
+        },
+        icon = {
+               Icon(
+                   Icons.Filled.PersonAdd,
+                   contentDescription = ""
+               )
+        },
+        text = { Text(text = text) }
+    )
+}
+
+ @OptIn(ExperimentalMaterialApi::class)
+ @Composable
+ fun StudentListItem(
+     person: PersonWithClazzEnrolmentDetails,
+     onClick: (PersonWithClazzEnrolmentDetails) -> Unit,
+ ){
+
+     val statusColor = if ((person.attendance/100) >= ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_GOOD)
+         R.color.successColor
+     else if ((person.attendance/100)
+         >= ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_WARNING)
+         R.color.attendanceWarningColor
+     else
+         R.color.errorColor
+
+     ListItem (
+         modifier = Modifier.clickable {
+             onClick(person)
+         },
+         text = {
+             Text(text = "${person.firstNames} ${person.lastName}")
+         },
+         secondaryText = {
+             Row(
+                 verticalAlignment = Alignment.CenterVertically,
+                 horizontalArrangement = Arrangement.spacedBy(5.dp)
+             ) {
+                 Icon(
+                     Icons.Filled.Lens,
+                     contentDescription = "",
+                     tint = colorResource(id = statusColor),
+                     modifier = Modifier.size(15.dp)
+                 )
+                 Text(stringResource(id = R.string.x_percent_attended, person.attendance))
+             }
+         },
+         icon = {
+             Icon(
+                 imageVector = Icons.Filled.AccountCircle,
+                 contentDescription = null
+             )
+         }
+     )
+ }
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun PendingStudentListItem(
+    person: PersonWithClazzEnrolmentDetails,
+    onClick: (enrolment: PersonWithClazzEnrolmentDetails, approved: Boolean) -> Unit
+){
+    ListItem (
+        text = {
+            Text(text = "${person.firstNames} ${person.lastName}")
+        },
+        icon = {
+            Icon(
+                imageVector = Icons.Filled.AccountCircle,
+                contentDescription = null
+            )
+        },
+        trailing = {
+            Row {
+                IconButton(
+                    onClick = {
+                        onClick(person, true)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.exo_ic_check),
+                        contentDescription = stringResource(R.string.accept)
+                    )
+                }
+                IconButton(
+                    onClick = {
+                        onClick(person, false)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_close_black_24dp),
+                        contentDescription = stringResource(R.string.reject)
+                    )
+                }
+            }
+        }
+    )
 }
 
 @Composable
@@ -391,12 +506,36 @@ fun ClazzMemberListScreenPreview() {
                 personUid = 3
                 firstNames = "Student 3"
                 lastName = "Name"
-                attendance = 40F
+                attendance = 65F
+            },
+            PersonWithClazzEnrolmentDetails().apply {
+                personUid = 4
+                firstNames = "Student 4"
+                lastName = "Name"
             }
-        )
+        ),
+        pendingStudentList = listOf(
+            PersonWithClazzEnrolmentDetails().apply {
+                personUid = 1
+                firstNames = "Student 1"
+                lastName = "Name"
+                attendance = 20F
+            },
+            PersonWithClazzEnrolmentDetails().apply {
+                personUid = 2
+                firstNames = "Student 2"
+                lastName = "Name"
+                attendance = 80F
+            }
+        ),
+        addStudentVisible = true,
+        addTeacherVisible = true
     )
 
     MdcTheme {
-        ClazzMemberListScreen(uiStateVal)
+        ClazzMemberListScreen(uiStateVal, {},
+            {enrolment: PersonWithClazzEnrolmentDetails,
+             approved: Boolean ->  {}}
+        )
     }
 }
