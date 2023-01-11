@@ -18,7 +18,6 @@ import com.ustadmobile.lib.db.entities.UserSession
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
-import io.ktor.client.plugins.json.*
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.runBlocking
@@ -31,7 +30,6 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
 import com.ustadmobile.core.db.waitUntil
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.mockLifecycleOwner
 import com.ustadmobile.door.lifecycle.*
@@ -118,6 +116,8 @@ class AccountListPresenterTest {
             }
         }
 
+        mockNavController = mock { }
+
         accountManager = mock{
             on { activeUserSessionsLive }.thenReturn(mockActiveSessionsLive)
             on { activeUserSessionLive }.thenReturn(mockActiveSessionLive)
@@ -134,8 +134,6 @@ class AccountListPresenterTest {
 
         mockedLifecycleOwner = mockLifecycleOwner(DoorState.STARTED)
 
-        mockNavController = mock { }
-
         di = DI {
             bind<UstadMobileSystemImpl>() with singleton { impl }
             bind<UstadAccountManager>() with singleton { accountManager }
@@ -147,7 +145,10 @@ class AccountListPresenterTest {
                     install(HttpTimeout)
                 }
             }
-            bind<UstadNavController>() with singleton { mockNavController }
+
+            bind<UstadNavController>() with singleton {
+                mockNavController
+            }
 
             bindPresenterCoroutineRule(dispatcherRule)
         }
@@ -350,9 +351,8 @@ class AccountListPresenterTest {
             it.userSession.usUid == secondAccountList[0].userSession.usUid
         }
 
-        verify(mockNavController).navigate(eq(ContentEntryList2View.VIEW_NAME),
-            any(),
-            argWhere< UstadMobileSystemCommon.UstadGoOptions> {
+        verify(mockNavController).navigate(eq(ContentEntryList2View.VIEW_NAME), any(),
+            argWhere {
                 it.popUpToViewName == UstadView.ROOT_DEST && !it.popUpToInclusive
             })
     }

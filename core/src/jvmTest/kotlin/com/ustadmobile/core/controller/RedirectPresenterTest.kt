@@ -7,7 +7,6 @@ import org.mockito.kotlin.*
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.lib.db.entities.Person
@@ -27,6 +26,8 @@ class RedirectPresenterTest {
 
     private lateinit var impl: UstadMobileSystemImpl
 
+    private lateinit var mockNavController: UstadNavController
+
     private lateinit var mPresenter: RedirectPresenter
 
     private val context = Any()
@@ -34,8 +35,6 @@ class RedirectPresenterTest {
     private lateinit var di: DI
 
     private lateinit var mockedAccountManager: UstadAccountManager
-
-    private lateinit var mockNavController: UstadNavController
 
     @JvmField
     @Rule
@@ -56,17 +55,18 @@ class RedirectPresenterTest {
     @Before
     fun setup() {
         mockedView = mock()
-        mockNavController = mock { }
         impl = mock()
 
         mockedAccountManager = mock { }
 
+        mockNavController = mock { }
+
         di = DI {
             bind<UstadMobileSystemImpl>() with singleton { impl }
             bind<UstadAccountManager>() with singleton { mockedAccountManager }
+            bind<UstadNavController>() with singleton { mockNavController }
 
             bindPresenterCoroutineRule(dispatcherRule)
-            bind<UstadNavController>() with singleton { mockNavController }
         }
     }
 
@@ -108,8 +108,8 @@ class RedirectPresenterTest {
         mPresenter = RedirectPresenter(context, mapOf(ARG_NEXT to viewLink),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(mockNavController, timeout(5000)).navigate(
-            eq(ContentEntryDetailView.VIEW_NAME), argWhere {
+        verify(mockNavController, timeout(5000)).navigate(eq(ContentEntryDetailView.VIEW_NAME),
+            argWhere {
                 it["entityUid"] == "42"
             }, any())
     }
