@@ -1,22 +1,14 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import kotlin.jvm.JvmInline
 
-data class ContentEntryListItemUiState(
+val ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.listItemUiState
+    get() = ContentEntryListItemUiState(this)
 
-    val title: String = "",
-
-    val editOptionVisible: Boolean = true,
-
-    val contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer =
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer(),
-
-    val isPickerMode: Boolean = false,
-
-    val selectFolderVisible: Boolean = false,
-
-    val cbIndentLevel: Int = 0
-
+@JvmInline
+value class ContentEntryListItemUiState(
+    val contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
 ) {
 
     val containerAlpha: Double

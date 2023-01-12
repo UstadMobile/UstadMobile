@@ -4,7 +4,7 @@ import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
 import com.ustadmobile.core.util.ext.progressBadge
-import com.ustadmobile.core.viewmodel.ContentEntryListItemUiState
+import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
@@ -25,29 +25,32 @@ import mui.material.Badge
 
 external interface UstadContentEntryListItemProps : Props {
 
-    var uiState: ContentEntryListItemUiState
+    var contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 
     var onClickContentEntry: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
 
     var onClickDownloadContentEntry: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
 
+    var padding: Padding
+
 }
 
 private val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
 
+    val uiState = props.contentEntry.listItemUiState
+
     ListItem{
         ListItemButton {
-            onClick = { props.onClickContentEntry(props.uiState.contentEntry) }
+            onClick = { props.onClickContentEntry(props.contentEntry) }
 
             sx {
-                padding = paddingCourseBlockIndent(props.uiState.cbIndentLevel)
-                opacity = number(props.uiState.containerAlpha)
+                padding = props.padding
+                opacity = number(uiState.containerAlpha)
             }
 
             ListItemIcon {
                 LeadingContent {
-                    uiState = props.uiState
-                    contentEntryItem = props.uiState.contentEntry
+                    contentEntryItem = uiState.contentEntry
                 }
             }
 
@@ -56,16 +59,15 @@ private val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { pro
             }
 
             ListItemText {
-                primary = ReactNode(props.uiState.contentEntry.title ?: "")
+                primary = ReactNode(props.contentEntry.title ?: "")
                 secondary = SecondaryContent.create {
-                    uiState = props.uiState
-                    contentEntryItem = props.uiState.contentEntry
+                    contentEntryItem = props.contentEntry
                 }
             }
         }
 
         secondaryAction = SecondaryAction.create {
-            contentEntryItem = props.uiState.contentEntry
+            contentEntryItem = props.contentEntry
             onClick = props.onClickDownloadContentEntry
         }
     }
@@ -76,13 +78,12 @@ private val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { pro
 
 external interface LeadingContentProps: Props {
 
-    var uiState: ContentEntryListItemUiState
-
     var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 }
 
 val LeadingContent = FC<LeadingContentProps> { props ->
 
+    val uiState = props.contentEntryItem.listItemUiState
     val thumbnail = if (props.contentEntryItem.leaf)
         BookOutlined
     else
@@ -119,7 +120,7 @@ val LeadingContent = FC<LeadingContentProps> { props ->
                 }
             }
 
-            if (props.uiState.progressVisible){
+            if (uiState.progressVisible){
                 LinearProgress {
                     value = props.contentEntryItem.scoreProgress?.progress
                     variant = LinearProgressVariant.determinate
@@ -136,21 +137,20 @@ val LeadingContent = FC<LeadingContentProps> { props ->
 
 external interface SecondaryContentProps: Props {
 
-    var uiState: ContentEntryListItemUiState
-
     var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 }
 
 val SecondaryContent = FC<SecondaryContentProps> { props ->
 
     val strings = useStringsXml()
+    val uiState = props.contentEntryItem.listItemUiState
 
     Stack {
         direction = responsive(StackDirection.column)
         justifyContent = JustifyContent.start
 
 
-        if (props.uiState.descriptionVisible){
+        if (uiState.descriptionVisible){
             Typography {
                 + (props.contentEntryItem.description ?: "")
             }
@@ -159,7 +159,7 @@ val SecondaryContent = FC<SecondaryContentProps> { props ->
         Stack {
             direction = responsive(StackDirection.row)
 
-            if (props.uiState.mimetypeVisible){
+            if (uiState.mimetypeVisible){
                 Icon {
                     + (CONTENT_ENTRY_TYPE_ICON_MAP[props.contentEntryItem
                         .contentTypeFlag]?.create() ?: TextSnippet.create())
@@ -185,7 +185,7 @@ val SecondaryContent = FC<SecondaryContentProps> { props ->
             }
 
             Typography {
-                + props.uiState.scoreResultText
+                + uiState.scoreResultText
             }
         }
     }
@@ -222,22 +222,19 @@ val SecondaryAction = FC<SecondaryActionProps> { props ->
 val UstadContentEntryListItemPreview = FC<Props> {
 
     UstadContentEntryListItem {
-        uiState = ContentEntryListItemUiState(
-            contentEntry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer()
-                .apply {
-                    contentEntryUid = 1
-                    leaf = true
-                    ceInactive = true
-                    scoreProgress = ContentEntryStatementScoreProgress().apply {
-                        progress = 10
-                        penalty = 20
-                        success = StatementEntity.RESULT_SUCCESS
-                    }
-                    contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
-                    title = "Content Title"
-                    description = "Content Description"
-                },
-            cbIndentLevel = 6
-        )
+        contentEntry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+            contentEntryUid = 1
+            leaf = true
+            ceInactive = true
+            scoreProgress = ContentEntryStatementScoreProgress().apply {
+                progress = 10
+                penalty = 20
+                success = StatementEntity.RESULT_SUCCESS
+            }
+            contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+            title = "Content Title"
+            description = "Content Description"
+        }
+        padding = paddingCourseBlockIndent(6)
     }
 }

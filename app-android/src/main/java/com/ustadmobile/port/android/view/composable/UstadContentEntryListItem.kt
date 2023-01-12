@@ -22,6 +22,7 @@ import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ContentEntryTypeLabelConstants
 import com.ustadmobile.core.util.ext.progressBadge
 import com.ustadmobile.core.viewmodel.ContentEntryListItemUiState
+import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.port.android.util.compose.messageIdResource
@@ -29,8 +30,9 @@ import com.ustadmobile.port.android.view.ContentEntryDetailOverviewFragment.Comp
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun UstadContentEntryListItem(
-    uiState: ContentEntryListItemUiState = ContentEntryListItemUiState(),
+fun UstadContentEntryListItem(
+    modifier: Modifier = Modifier,
+    contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
 
     onClickContentEntry: (
         ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
@@ -41,10 +43,10 @@ private fun UstadContentEntryListItem(
     ) -> Unit = {},
 ) {
 
+    val uiState = contentEntry.listItemUiState
     ListItem(
-        modifier = Modifier
+        modifier = modifier
             .alpha((uiState.containerAlpha).toFloat())
-            .paddingCourseBlockIndent(uiState.cbIndentLevel)
             .clickable {
                 onClickContentEntry(uiState.contentEntry)
             },
@@ -200,8 +202,7 @@ fun SecondaryAction(
 @Composable
 @Preview
 private fun ContentEntryListScreenPreview() {
-    val uiStateVal = ContentEntryListItemUiState(
-        contentEntry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer()
+    val contentEntry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer()
             .apply {
                 contentEntryUid = 1
                 leaf = true
@@ -214,10 +215,10 @@ private fun ContentEntryListScreenPreview() {
                 contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
                 title = "Content Title"
                 description = "Content Description"
-            },
-        cbIndentLevel = 1
-    )
+            }
     MdcTheme {
-        UstadContentEntryListItem(uiStateVal)
+        UstadContentEntryListItem(
+            contentEntry = contentEntry
+        )
     }
 }
