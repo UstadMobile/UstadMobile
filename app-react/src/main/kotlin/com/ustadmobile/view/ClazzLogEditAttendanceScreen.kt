@@ -95,6 +95,8 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
             PagerView{
                 timeZone = props.uiState.timeZone
                 clazzLog = props.uiState.clazzLogsList
+                onClickPreviousClazzLog = props.onClickPreviousClazzLog
+                onClickNextClazzLog = props.onClickNextClazzLog
             }
 
             List {
