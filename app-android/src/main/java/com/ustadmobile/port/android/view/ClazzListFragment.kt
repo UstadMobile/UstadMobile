@@ -189,7 +189,7 @@ private fun ClazzListScreen(
 
         item {
             UstadListFilterChipsHeader(
-                filterOptions = uiState.filterOptions,
+                filterOptions = uiState.DEFAULT_FILTER_OPTIONS,
                 selectedChipId = uiState.selectedChipId,
                 enabled = uiState.fieldsEnabled,
                 onClickFilterChip = onClickFilterChip,
@@ -234,6 +234,7 @@ fun ClazzListItem(
                     Icon(
                         imageVector = Icons.Filled.Lens,
                         contentDescription = "",
+                        modifier = Modifier.size(18.dp)
                     )
                     Text(
                         text = stringResource(
@@ -294,11 +295,6 @@ fun ClazzListScreenPreview() {
                 numStudents = 2
             }
         ),
-        filterOptions = listOf(
-            MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-            MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
-            MessageIdOption2(MessageID.all, 0),
-        )
     )
 
     MdcTheme {

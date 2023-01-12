@@ -20,7 +20,8 @@ data class ClazzListUiState(
 
     val fieldsEnabled: Boolean = true,
 
-    val filterOptions: List<MessageIdOption2> = emptyList(),
+    val selectedChipId: Int = ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED,
 
-    val selectedChipId: Int = ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
+    var DEFAULT_FILTER_OPTIONS: List<MessageIdOption2> = emptyList()
+
 )

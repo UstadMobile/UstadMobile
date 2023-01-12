@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.db.dao.ClazzDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
@@ -12,8 +11,7 @@ import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.util.ext.format
-import csstype.JustifyContent
-import csstype.px
+import csstype.*
 import mui.icons.material.LensRounded
 import mui.icons.material.People
 import mui.material.*
@@ -57,11 +55,6 @@ val ClazzListScreenPreview = FC<Props> {
                     numTeachers = 3
                     numStudents = 2
                 }
-            ),
-            filterOptions = listOf(
-                MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-                MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
-                MessageIdOption2(MessageID.all, 0),
             )
         )
     }
@@ -81,7 +74,7 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
             }
 
             UstadListFilterChipsHeader{
-                filterOptions = props.uiState.filterOptions
+                filterOptions = props.uiState.DEFAULT_FILTER_OPTIONS
                 selectedChipId = props.uiState.selectedChipId
                 enabled = props.uiState.fieldsEnabled
                 onClickFilterChip = props.onClickFilterChip
@@ -133,7 +126,18 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                     Stack {
                         direction = responsive(StackDirection.row)
 
-                        + LensRounded.create()
+                        LensRounded {
+                            sx {
+                                width = 15.px
+                                height = 15.px
+                                padding = Padding(
+                                    top = 5.px,
+                                    bottom = 0.px,
+                                    right = 0.px,
+                                    left = 0.px,
+                                )
+                            }
+                        }
 
                         Typography {
                             + (props.clazzItem.attendanceAverage * 100)
