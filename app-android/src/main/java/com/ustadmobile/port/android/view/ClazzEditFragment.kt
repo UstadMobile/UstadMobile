@@ -43,6 +43,8 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.ClazzEditFragment.Companion.BLOCK_AND_ENTRY_ICON_MAP
 import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.binding.MODE_END_OF_DAY
@@ -522,7 +524,8 @@ private fun ClazzEditScreen(
                 label = stringResource(id = R.string.attendance),
                 checked = uiState.clazzEditAttendanceChecked,
                 onChange = { onCheckedAttendance(it) },
-                enabled = uiState.fieldsEnabled
+                enabled = uiState.fieldsEnabled,
+                modifier = Modifier.defaultItemPadding(),
             )
         }
 
@@ -538,7 +541,8 @@ private fun ClazzEditScreen(
                     onClazzChanged(uiState.entity?.shallowCopy{
                         clazzEnrolmentPolicy = it.value
                     })
-                }
+                },
+                modifier = Modifier.defaultItemPadding(),
             )
         }
 
@@ -548,7 +552,8 @@ private fun ClazzEditScreen(
                 label = stringResource(id = R.string.terminology),
                 enabled = uiState.fieldsEnabled,
                 onValueChange = {},
-                onClick = onClickTerminology
+                onClick = onClickTerminology,
+                modifier = Modifier.defaultItemPadding(),
             )
         }
     }
@@ -561,10 +566,13 @@ private fun ClazzEditBasicDetails(
     onClickSchool: () -> Unit = {},
     onClickTimezone: () -> Unit = {},
 ) {
-    Column {
+    Column(
+        modifier = Modifier.defaultScreenPadding()
+    ) {
         UstadEditHeader(text = stringResource(id = R.string.basic_details))
 
         UstadTextEditField(
+            modifier = Modifier.defaultItemPadding(),
             value = uiState.entity?.clazzName ?: "",
             label = stringResource(id = R.string.name),
             enabled = uiState.fieldsEnabled,
@@ -579,6 +587,7 @@ private fun ClazzEditBasicDetails(
 
 
         UstadTextEditField(
+            modifier = Modifier.defaultItemPadding(),
             value = uiState.entity?.clazzDesc ?: "",
             label = stringResource(id = R.string.description).addOptionalSuffix(),
             enabled = uiState.fieldsEnabled,
@@ -592,6 +601,7 @@ private fun ClazzEditBasicDetails(
         )
 
         UstadTextEditField(
+            modifier = Modifier.defaultItemPadding(),
             value = uiState.entity?.school?.schoolName ?: "",
             label = stringResource(id = R.string.institution),
             enabled = uiState.fieldsEnabled,
@@ -605,8 +615,7 @@ private fun ClazzEditBasicDetails(
                 value = uiState.entity?.clazzStartTime ?: 0,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-                autoVerticalPadding = false,
+                    .defaultItemPadding(end = 8.dp),
                 label = stringResource(id = R.string.start_date),
                 error = uiState.clazzStartDateError,
                 enabled = uiState.fieldsEnabled,
@@ -624,8 +633,7 @@ private fun ClazzEditBasicDetails(
                 value = uiState.entity?.clazzEndTime ?: 0,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = 16.dp, start = 8.dp, top = 8.dp, bottom = 8.dp),
-                autoVerticalPadding = false,
+                    .defaultItemPadding(start = 8.dp),
                 label = stringResource(id = R.string.end_date).addOptionalSuffix(),
                 error = uiState.clazzEndDateError,
                 enabled = uiState.fieldsEnabled,
@@ -641,6 +649,7 @@ private fun ClazzEditBasicDetails(
         }
 
         UstadTextEditField(
+            modifier = Modifier.defaultItemPadding(),
             value = uiState.entity?.clazzTimeZone ?: "",
             label = stringResource(id = R.string.timezone),
             enabled = uiState.fieldsEnabled,

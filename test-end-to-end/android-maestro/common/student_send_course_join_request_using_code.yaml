@@ -1,0 +1,14 @@
+appId: com.toughra.ustadmobile
+---
+# student sends the request to join an existing course using code
+# Test parameters needs to provide for this test :
+ # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+ # 2) TEST : provide the test name, it should be a string
+
+- tapOn: "COURSE"
+- tapOn: "Join existing course"
+- tapOn: "Class code"
+- longPressOn: "Class code"
+- tapOn: "Paste"
+- tapOn: "Join Class"
+- takeScreenshot: "${TESTRESULTSDIR}/pending_student"

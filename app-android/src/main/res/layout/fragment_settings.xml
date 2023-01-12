@@ -97,6 +97,54 @@
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings_app_language_text1" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <!-- Panic button -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/activity_settings2_panicbutton_cl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="?android:selectableItemBackground"
+                android:onClick="@{() -> fragmentEventListener.onClickPanicButton()}">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/activity_settings2_panicbutton_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:tint="?colorOnIconTint"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    app:srcCompat="@drawable/baseline_crisis_alert_24" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/activity_settings_panicbutton_text1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:text="@string/panic_button_app"
+                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_panicbutton_iv"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    android:id="@+id/activity_settings_panicbutton_text2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:text="@string/actions_to_be_taken_in_case_of_emergency"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_panicbutton_iv"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_settings_panicbutton_text1" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <!-- Holiday Calendars-->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/activity_settings2_holiday_calendar_cl"
