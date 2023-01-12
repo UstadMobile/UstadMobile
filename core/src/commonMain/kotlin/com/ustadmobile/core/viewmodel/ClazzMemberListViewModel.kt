@@ -6,6 +6,8 @@ data class ClazzMemberListUiState(
 
     val studentList: List<PersonWithClazzEnrolmentDetails> = emptyList(),
 
+    val teacherList: List<PersonWithClazzEnrolmentDetails> = emptyList(),
+
     val pendingStudentList: List<PersonWithClazzEnrolmentDetails> = emptyList(),
 
     val addTeacherVisible: Boolean = false,

@@ -45,6 +45,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.viewmodel.ClazzMemberListUiState
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -290,6 +291,7 @@ private fun ClazzMemberListScreen(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
+            .defaultScreenPadding()
     ) {
 
         item {
@@ -306,17 +308,13 @@ private fun ClazzMemberListScreen(
         }
 
         item {
-            Row{
-                Text(text = stringResource(id = R.string.sort_by))
-
-                UstadListSortHeader(
-                    SortOrderOption(
-                        MessageID.name,
-                        ClazzDaoCommon.SORT_CLAZZNAME_ASC,
-                        true
-                    )
+            UstadListSortHeader(
+                SortOrderOption(
+                    MessageID.name,
+                    ClazzDaoCommon.SORT_CLAZZNAME_ASC,
+                    true
                 )
-            }
+            )
         }
 
         item {
@@ -332,6 +330,23 @@ private fun ClazzMemberListScreen(
                     onClick = {},
                 )
             }
+        }
+
+        items(
+            items = uiState.teacherList,
+            key = { Pair(1, it.personUid) }
+        ){ person ->
+            ListItem (
+                text = {
+                    Text(text = "${person.firstNames} ${person.lastName}")
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = null
+                    )
+                }
+            )
         }
 
         item {
@@ -351,7 +366,7 @@ private fun ClazzMemberListScreen(
 
         items(
             items = uiState.studentList,
-            key = { Pair(1, it.personUid) }
+            key = { Pair(2, it.personUid) }
         ){ personItem ->
             StudentListItem(
                 person = personItem,
@@ -367,7 +382,7 @@ private fun ClazzMemberListScreen(
         
         items(
             items = uiState.pendingStudentList,
-            key = { Pair(2, it.personUid) }
+            key = { Pair(3, it.personUid) }
         ){ pendingStudent ->
             PendingStudentListItem(
                 person = pendingStudent,
@@ -511,6 +526,18 @@ fun ClazzMemberListScreenPreview() {
             PersonWithClazzEnrolmentDetails().apply {
                 personUid = 4
                 firstNames = "Student 4"
+                lastName = "Name"
+            }
+        ),
+        teacherList = listOf(
+            PersonWithClazzEnrolmentDetails().apply {
+                personUid = 1
+                firstNames = "Teacher 1"
+                lastName = "Name"
+            },
+            PersonWithClazzEnrolmentDetails().apply {
+                personUid = 2
+                firstNames = "Teacher 2"
                 lastName = "Name"
             }
         ),
