@@ -35,7 +35,7 @@ external interface UstadContentEntryListItemProps : Props {
 
 }
 
-private val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
+val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { props ->
 
     val uiState = props.contentEntry.listItemUiState
 
@@ -74,14 +74,12 @@ private val UstadContentEntryListItem = FC<UstadContentEntryListItemProps> { pro
 
 }
 
-
-
-external interface LeadingContentProps: Props {
+private external interface LeadingContentProps: Props {
 
     var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 }
 
-val LeadingContent = FC<LeadingContentProps> { props ->
+private val LeadingContent = FC<LeadingContentProps> { props ->
 
     val uiState = props.contentEntryItem.listItemUiState
     val thumbnail = if (props.contentEntryItem.leaf)
@@ -135,12 +133,12 @@ val LeadingContent = FC<LeadingContentProps> { props ->
 
 
 
-external interface SecondaryContentProps: Props {
+private external interface SecondaryContentProps: Props {
 
     var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 }
 
-val SecondaryContent = FC<SecondaryContentProps> { props ->
+private val SecondaryContent = FC<SecondaryContentProps> { props ->
 
     val strings = useStringsXml()
     val uiState = props.contentEntryItem.listItemUiState
@@ -193,14 +191,14 @@ val SecondaryContent = FC<SecondaryContentProps> { props ->
 
 
 
-external interface SecondaryActionProps: Props {
+private external interface SecondaryActionProps: Props {
 
     var contentEntryItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 
     var onClick: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
 }
 
-val SecondaryAction = FC<SecondaryActionProps> { props ->
+private val SecondaryAction = FC<SecondaryActionProps> { props ->
 
     Button {
 

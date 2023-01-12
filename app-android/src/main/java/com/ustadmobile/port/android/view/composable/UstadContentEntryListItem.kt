@@ -75,7 +75,7 @@ fun UstadContentEntryListItem(
 }
 
 @Composable
-fun LeadingContent(
+private fun LeadingContent(
     uiState: ContentEntryListItemUiState,
     contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 ){
@@ -178,7 +178,7 @@ private fun SecondaryContent(
 }
 
 @Composable
-fun SecondaryAction(
+private fun SecondaryAction(
     onClick: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit,
     contentEntry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 ){
