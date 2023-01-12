@@ -334,6 +334,23 @@ private fun ClazzMemberListScreen(
             }
         }
 
+        items(
+            items = uiState.teacherList,
+            key = { Pair(1, it.personUid) }
+        ){ person ->
+            ListItem (
+                text = {
+                    Text(text = "${person.firstNames} ${person.lastName}")
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = null
+                    )
+                }
+            )
+        }
+
         item {
             ListItem(
                 text = { Text(text = stringResource(id = R.string.students)) }
@@ -351,7 +368,7 @@ private fun ClazzMemberListScreen(
 
         items(
             items = uiState.studentList,
-            key = { Pair(1, it.personUid) }
+            key = { Pair(2, it.personUid) }
         ){ personItem ->
             StudentListItem(
                 person = personItem,
@@ -367,7 +384,7 @@ private fun ClazzMemberListScreen(
         
         items(
             items = uiState.pendingStudentList,
-            key = { Pair(2, it.personUid) }
+            key = { Pair(3, it.personUid) }
         ){ pendingStudent ->
             PendingStudentListItem(
                 person = pendingStudent,
@@ -526,6 +543,18 @@ fun ClazzMemberListScreenPreview() {
                 firstNames = "Student 2"
                 lastName = "Name"
                 attendance = 80F
+            }
+        ),
+        teacherList = listOf(
+            PersonWithClazzEnrolmentDetails().apply {
+                personUid = 1
+                firstNames = "Teacher 1"
+                lastName = "Name"
+            },
+            PersonWithClazzEnrolmentDetails().apply {
+                personUid = 2
+                firstNames = "Teacher 2"
+                lastName = "Name"
             }
         ),
         addStudentVisible = true,

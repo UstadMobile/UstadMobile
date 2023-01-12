@@ -67,21 +67,30 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                 }
             }
 
-            Typography {
-                strings[MessageID.teachers_literal]
-            }
+            List {
 
-            if (props.uiState.addTeacherVisible){
-                ListItem {
-                    ListItemButton {
+                Typography {
+                    strings[MessageID.teachers_literal]
+                }
 
-                        ListItemIcon {
-                            + PersonAdd.create()
+                if (props.uiState.addTeacherVisible){
+                    ListItem {
+                        ListItemButton {
+
+                            ListItemIcon {
+                                + PersonAdd.create()
+                            }
+
+                            ListItemText {
+                                + strings[MessageID.add_a_teacher]
+                            }
                         }
+                    }
+                }
 
-                        ListItemText {
-                            + strings[MessageID.add_a_teacher]
-                        }
+                props.uiState.teacherList.forEach { person ->
+                    ListItemText {
+                        primary = ReactNode("${person.firstNames} ${person.lastName}")
                     }
                 }
             }
@@ -275,6 +284,18 @@ val ClazzMemberListScreenPreview = FC<Props> {
                     firstNames = "Student 2"
                     lastName = "Name"
                     attendance = 80F
+                }
+            ),
+            teacherList = listOf(
+                PersonWithClazzEnrolmentDetails().apply {
+                    personUid = 1
+                    firstNames = "Teacher 1"
+                    lastName = "Name"
+                },
+                PersonWithClazzEnrolmentDetails().apply {
+                    personUid = 2
+                    firstNames = "Teacher 2"
+                    lastName = "Name"
                 }
             ),
             addStudentVisible = true,
