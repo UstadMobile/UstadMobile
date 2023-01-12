@@ -27,16 +27,19 @@ class UstadSavedStateHandleJs(
         }
     }
 
-    override fun <T> set(key: String, value: T?) {
+    override fun set(key: String, value: String?) {
         mLiveData[key] = MutableLiveData(value)
         commitListener?.onCommit()
     }
 
+    override val keys: Set<String>
+        get() = mLiveData.keys.toSet()
 
-    override fun <T> get(key: String): T? {
-        return mLiveData[key]?.getValue().unsafeCast<T>()
+    override fun get(key: String): String? {
+        return mLiveData[key]?.getValue().unsafeCast<String?>()
     }
 
+    @Deprecated("This should NOT be used with MVVM. Data should be returned via bus")
     override fun <T> getLiveData(key: String): MutableLiveData<T> {
         return mLiveData.getOrPut(key) {
             MutableLiveData(null)

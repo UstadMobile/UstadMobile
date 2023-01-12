@@ -44,6 +44,15 @@ class SiteEnterLinkViewModel(
 
     var counter = 0
 
+    init {
+        _appUiState.update { prev ->
+            prev.copy(
+                title = impl.getString(MessageID.enter_link),
+                navigationVisible = false
+            )
+        }
+    }
+
     fun onClickNext() {
         _uiState.update {
             it.copy(fieldsEnabled = false)
@@ -72,7 +81,7 @@ class SiteEnterLinkViewModel(
                 }
 
                 navController.navigate(Login2View.VIEW_NAME, args)
-            }catch(e: Exception) {
+            }catch(e: Throwable) {
                 _uiState.update { previous ->
                     loadingState = LoadingUiState.NOT_LOADING
                     previous.copy(

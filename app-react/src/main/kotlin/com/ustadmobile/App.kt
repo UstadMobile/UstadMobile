@@ -16,6 +16,7 @@ import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import com.ustadmobile.core.components.DIModule
+import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.mui.components.Header
 import com.ustadmobile.mui.components.Sidebar
 import com.ustadmobile.mui.components.ThemeModule
@@ -40,6 +41,7 @@ import react.Props
 import react.create
 import react.dom.client.createRoot
 import react.router.dom.HashRouter
+import react.useState
 import ustadJsDi
 import kotlin.random.Random
 
@@ -99,6 +101,7 @@ external interface AppProps: Props {
 
 private val App = FC<AppProps> { props ->
     val mobileMode = false//useMediaQuery("(max-width:960px)")
+    var appUiState: AppUiState by useState { AppUiState() }
 
     HashRouter {
         DIModule {
@@ -115,19 +118,31 @@ private val App = FC<AppProps> { props ->
                             gridTemplateColumns = array(
                                 Sizes.Sidebar.Width, auto,
                             )
+
+                            //As per https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-areas
                             gridTemplateAreas = GridTemplateAreas(
                                 arrayOf(Area.Header, Area.Header),
-                                if (mobileMode)
+                                if (mobileMode || !appUiState.navigationVisible)
                                     arrayOf(Area.Content, Area.Content)
                                 else
                                     arrayOf(Area.Sidebar, Area.Content),
                             )
                         }
 
-                        Header()
+                        Header {
+                            this.appUiState = appUiState
+                        }
+
                         //if (mobileMode) Menu() else Sidebar()
-                        Sidebar()
-                        Content()
+                        if(appUiState.navigationVisible) {
+                            Sidebar()
+                        }
+
+                        Content {
+                            onAppUiStateChanged = {
+                                appUiState = it
+                            }
+                        }
                     }
                 }
             }

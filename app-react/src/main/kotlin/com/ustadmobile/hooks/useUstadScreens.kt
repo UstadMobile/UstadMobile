@@ -28,7 +28,7 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(Login2View.VIEW_NAME, "Login Preview",
                 LoginPreview),
             UstadScreen(SiteEnterLinkView.VIEW_NAME, "Site Enter Link Preview",
-                SiteEnterLinkScreenPreview),
+                SiteEnterLinkScreen),
             UstadScreen(ParentalConsentManagementView.VIEW_NAME, "Parental Consent Management Preview",
                 ParentalConsentManagementPreview),
             UstadScreen(SettingsView.VIEW_NAME, "Settings Preview",

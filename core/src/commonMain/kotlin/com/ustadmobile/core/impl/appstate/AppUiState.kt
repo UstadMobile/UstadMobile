@@ -9,6 +9,6 @@ data class AppUiState(
     val fabState: FabUiState = FabUiState(),
     val loadingState: LoadingUiState = LoadingUiState(),
     val title: String? = null,
-    val navigationVisible: Boolean = false,
+    val navigationVisible: Boolean = true,
 ) {
 }
