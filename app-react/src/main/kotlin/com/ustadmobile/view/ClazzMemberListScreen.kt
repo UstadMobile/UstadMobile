@@ -49,28 +49,22 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                 selectedChipId = ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
             }
 
-            Stack {
-                direction = responsive(StackDirection.row)
-
-                Typography{
-                    + strings[MessageID.sort_by]
-                }
-
-                UstadListSortHeader {
-                    activeSortOrderOption = SortOrderOption(
-                        MessageID.name,
-                        ClazzDaoCommon.SORT_CLAZZNAME_ASC,
-                        true
-                    )
-                    enabled = true
-                    onClickSort = { }
-                }
+            UstadListSortHeader {
+                activeSortOrderOption = SortOrderOption(
+                    MessageID.name,
+                    ClazzDaoCommon.SORT_CLAZZNAME_ASC,
+                    true
+                )
+                enabled = true
+                onClickSort = { }
             }
 
             List {
 
-                Typography {
-                    strings[MessageID.teachers_literal]
+                ListItem {
+                    ListItemText {
+                        + strings[MessageID.teachers_literal]
+                    }
                 }
 
                 if (props.uiState.addTeacherVisible){
@@ -89,18 +83,25 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                 }
 
                 props.uiState.teacherList.forEach { person ->
-                    ListItemText {
-                        primary = ReactNode("${person.firstNames} ${person.lastName}")
+                    ListItem{
+                        ListItemIcon {
+                            + AccountCircle.create()
+                        }
+
+                        ListItemText {
+                            primary = ReactNode("${person.firstNames} ${person.lastName}")
+                        }
                     }
                 }
             }
 
             List{
 
-                Typography {
-                    strings[MessageID.students]
+                ListItem {
+                    ListItemText {
+                        + strings[MessageID.students]
+                    }
                 }
-
 
                 if (props.uiState.addStudentVisible){
                     ListItem {
@@ -128,8 +129,10 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
             List{
 
-                Typography {
-                    strings[MessageID.pending_requests]
+                ListItem {
+                    ListItemText {
+                        + strings[MessageID.pending_requests]
+                    }
                 }
 
                 props.uiState.pendingStudentList.forEach { pendingStudent ->
