@@ -45,6 +45,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.viewmodel.ClazzMemberListUiState
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -290,6 +291,7 @@ private fun ClazzMemberListScreen(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
+            .defaultScreenPadding()
     ) {
 
         item {
@@ -306,17 +308,13 @@ private fun ClazzMemberListScreen(
         }
 
         item {
-            Row{
-                Text(text = stringResource(id = R.string.sort_by))
-
-                UstadListSortHeader(
-                    SortOrderOption(
-                        MessageID.name,
-                        ClazzDaoCommon.SORT_CLAZZNAME_ASC,
-                        true
-                    )
+            UstadListSortHeader(
+                SortOrderOption(
+                    MessageID.name,
+                    ClazzDaoCommon.SORT_CLAZZNAME_ASC,
+                    true
                 )
-            }
+            )
         }
 
         item {
@@ -528,6 +526,18 @@ fun ClazzMemberListScreenPreview() {
             PersonWithClazzEnrolmentDetails().apply {
                 personUid = 4
                 firstNames = "Student 4"
+                lastName = "Name"
+            }
+        ),
+        teacherList = listOf(
+            PersonWithClazzEnrolmentDetails().apply {
+                personUid = 1
+                firstNames = "Teacher 1"
+                lastName = "Name"
+            },
+            PersonWithClazzEnrolmentDetails().apply {
+                personUid = 2
+                firstNames = "Teacher 2"
                 lastName = "Name"
             }
         ),
