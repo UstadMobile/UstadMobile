@@ -74,7 +74,7 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
             }
 
             UstadListFilterChipsHeader{
-                filterOptions = props.uiState.DEFAULT_FILTER_OPTIONS
+                filterOptions = props.uiState.filterOptions
                 selectedChipId = props.uiState.selectedChipId
                 enabled = props.uiState.fieldsEnabled
                 onClickFilterChip = props.onClickFilterChip

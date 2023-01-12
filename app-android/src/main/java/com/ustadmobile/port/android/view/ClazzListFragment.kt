@@ -189,7 +189,7 @@ private fun ClazzListScreen(
 
         item {
             UstadListFilterChipsHeader(
-                filterOptions = uiState.DEFAULT_FILTER_OPTIONS,
+                filterOptions = uiState.filterOptions,
                 selectedChipId = uiState.selectedChipId,
                 enabled = uiState.fieldsEnabled,
                 onClickFilterChip = onClickFilterChip,

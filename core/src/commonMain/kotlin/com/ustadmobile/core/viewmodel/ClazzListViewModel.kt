@@ -12,16 +12,23 @@ data class ClazzListUiState(
 
     val clazzList: List<ClazzWithListDisplayDetails> = emptyList(),
 
-    val activeSortOrderOption: SortOrderOption = SortOrderOption(
-        MessageID.name,
-        ClazzDaoCommon.SORT_CLAZZNAME_ASC,
-        true
+    val sortOptions: List<SortOrderOption> = listOf(
+        SortOrderOption(MessageID.name, ClazzDaoCommon.SORT_CLAZZNAME_ASC, true),
+        SortOrderOption(MessageID.name, ClazzDaoCommon.SORT_CLAZZNAME_DESC, false),
+        SortOrderOption(MessageID.attendance, ClazzDaoCommon.SORT_ATTENDANCE_ASC, true),
+        SortOrderOption(MessageID.attendance, ClazzDaoCommon.SORT_ATTENDANCE_DESC, false)
     ),
+
+    val activeSortOrderOption: SortOrderOption = sortOptions.first(),
 
     val fieldsEnabled: Boolean = true,
 
     val selectedChipId: Int = ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED,
 
-    var DEFAULT_FILTER_OPTIONS: List<MessageIdOption2> = emptyList()
+    val filterOptions: List<MessageIdOption2> = listOf(
+        MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
+        MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
+        MessageIdOption2(MessageID.all, 0)
+    ),
 
 )
