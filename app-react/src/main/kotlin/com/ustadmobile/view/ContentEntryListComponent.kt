@@ -164,7 +164,8 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
             ContentEntry.TYPE_ARTICLE to "article",
             ContentEntry.TYPE_COLLECTION to "collections",
             ContentEntry.TYPE_INTERACTIVE_EXERCISE to "touch_app",
-            ContentEntry.TYPE_AUDIO to "audiotrack"
+            ContentEntry.TYPE_AUDIO to "audiotrack",
+            ContentEntry.TYPE_PDF to "artcle"
         )
 
         val CONTENT_ENTRY_TYPE_LABEL_MAP = mapOf(
@@ -174,7 +175,8 @@ class ContentEntryListComponent(props: UmProps): UstadListComponent<ContentEntry
             ContentEntry.TYPE_ARTICLE to MessageID.article,
             ContentEntry.TYPE_COLLECTION to MessageID.collection,
             ContentEntry.TYPE_INTERACTIVE_EXERCISE to MessageID.interactive,
-            ContentEntry.TYPE_AUDIO to MessageID.audio
+            ContentEntry.TYPE_AUDIO to MessageID.audio,
+            ContentEntry.TYPE_PDF to MessageID.document
         )
     }
 }

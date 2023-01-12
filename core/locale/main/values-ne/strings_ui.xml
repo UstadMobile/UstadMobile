@@ -88,26 +88,10 @@
     <string name="download_locally_availability">नजिकै उपलब्ध छ</string>
     <string name="multiple_choice">बहु विकल्प</string>
     <string name="preview">पूर्व अवलोकन</string>
-    <string name="content_format_paragraph">अनुच्छेद</string>
-    <string name="content_font_12">१२प्वाइन्ट</string>
-    <string name="content_font_18">१८प्वाइन्ट</string>
-    <string name="content_insert_options">इन्सर्ट गरौं</string>
-    <string name="content_source_device">डिभाइसबाट</string>
     <string name="video">भिडियो</string>
-    <string name="content_blank_doc_start_label">सम्पादन सुरू गर्न।</string>
-    <string name="content_untitled_page">शीर्षकविनाको पेज</string>
-    <string name="content_action_page_remove">पेज हटाऔं</string>
     <string name="download_continue_stacked_label">डाउनलोडलाई निरन्तरता दिऔं</string>
     <string name="download_continue_btn_label">निरन्तरता दिऔं</string>
-    <string name="content_editor_menu_undo">पूर्ववत् गरौं</string>
-    <string name="content_editor_menu_text_formatting">टेक्स्ट फर्मेटिङ</string>
-    <string name="content_editor_menu_indent">इनडेन्ट</string>
-    <string name="content_editor_menu_fontsize">फन्ट साइज</string>
-    <string name="content_editor_link_text">लिंक टेक्स्ट</string>
-    <string name="content_editor_menu_align_right">दायाँ</string>
-    <string name="content_editor_menu_subscript">सबस्क्रिप्ट</string>
     <string name="content_editor_link_insert">लिंक इन्सर्ट गरौं</string>
-    <string name="permission_camera_title">क्यामेरा र फाइल अनुमति जरुरी छ</string>
     <string name="content_editor_create_new_category">नयाँ फोल्डर</string>
     <string name="download_state_downloading">जम्मा %1$s आइटमहरू &lt;b&gt;डाउनलोड हुँदैछ&lt;/b&gt;, जसले तपाईंको डिभाइस स्टोरेजको जम्मा %2$s प्रयोग गर्दैछन्।</string>
     <string name="content_editor_save_error">सेभ गर्दा त्रुटि देखियो, फेरि कोशिस गरौं</string>
@@ -130,7 +114,6 @@
     <string name="xapi_result_header">नतिजा</string>
     <string name="no_account">तपाईंको कुनै अकाउन्ट छैन\?</string>
     <string name="enter_url">यूआरएल हालौं</string>
-    <string name="content_blank_page_title">खाली पेज</string>
     <string name="enter_register_code">दर्ता कोड हालौं</string>
     <string name="xapi_day" value="300">दिन</string>
     <string name="xapi_week" value="301">हप्ता</string>
@@ -255,7 +238,6 @@
     <string name="last_month_date_range" value="802">गत महिना</string>
     <string name="last_three_months_date_range" value="803">गत तीन महिना</string>
     <string name="pause_download">डाउनलोड रोकौं</string>
-    <string name="content_font_10">१०प्वाइन्ट</string>
     <string name="new_custom_date_range" value="804">नयाँ निर्धारित मिति श्रेणी अन्तर…</string>
     <string name="time_range">समय अन्तर</string>
     <string name="selected_custom_range">निर्धारित श्रेणी अन्तर: %1$s%</string>
@@ -273,7 +255,6 @@
     <string name="add_a_new_verb">नयाँ क्रिया थपौं</string>
     <string name="id_verbentity_urlid">आइडी: %s</string>
     <string name="deleting">डिलिट हुँदै</string>
-    <string name="content_update_page_title">पेज अपडेट गरौं</string>
     <string name="edit_filters">फिल्टरहरू सम्पादन गरौं</string>
     <string name="field_person_gender">व्यक्तिको लिङ्ग</string>
     <string name="field_person_age">व्यक्तिको उमेर</string>
@@ -299,7 +280,6 @@
     <string name="import_link_big_size">फाइल साइज धेरै ठूलो</string>
     <string name="supported_link">सपोर्ट गरिएको लिंक प्रकारहरू : गुगल ड्राइभ (फोल्डर वा फाइल) र सामान्य HTTP लिंकहरू</string>
     <string name="description">विवरण</string>
-    <string name="permission_camera_message">फोटो खिच्न र भिडियो रेकर्ड गर्न यो एपलाई क्यामेरा र फाइल अनुमति दुवै चाहिन्छ</string>
     <string name="licence_type_cc_by">सीसी बीवाई</string>
     <string name="today">आज</string>
     <string name="sort_by">अनुसार छनौट गरौं</string>
@@ -534,7 +514,6 @@
     <string name="download_storage_option_device">%1$s - %2$s निःशुल्क प्रयोग गरौं</string>
     <string name="groups">समूहहरू</string>
     <string name="add_a_new_role">एउटा नयाँ भूमिका थपौं</string>
-    <string name="roles_setting_desc">भूमिकाहरूलाई दिइएको अनुमतिहरू व्यवस्थापन गरौं</string>
     <string name="role_assignment_setting_desc">एउटा प्रयोगकर्ता वा समूहलाई भूमिकाहरू तोकौं</string>
     <string name="members">सदस्यहरू</string>
     <string name="role_assignment">भूमिका प्रदान</string>

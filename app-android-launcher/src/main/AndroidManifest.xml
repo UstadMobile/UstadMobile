@@ -34,6 +34,63 @@
             </intent-filter>
         </activity>
 
+        <!--
+        PanicKit responder that will respond to a panic trigger app e.g. Ripple
+        -->
+        <activity
+            android:exported="true"
+            android:name="com.ustadmobile.port.android.panic.PanicResponderActivity"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay"
+            >
+
+            <!-- this can never have launchMode singleTask or singleInstance! -->
+            <intent-filter>
+                <action android:name="info.guardianproject.panic.action.TRIGGER" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Exit Activity used by PanicResponder to force exit and clear activity stack -->
+        <activity
+            android:name="com.ustadmobile.port.android.panic.ExitActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.NoDisplay"
+            />
+
+        <!--
+        Shell activity that can be launched by PanicKit trigger apps (e.g. Ripple) to
+        bring the user to the panic response configuration screen.
+        -->
+        <activity
+            android:exported="true"
+            android:name="com.ustadmobile.port.android.panic.PanicConfigActivity">
+
+            <intent-filter>
+                <action android:name="info.guardianproject.panic.action.CONNECT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+        </activity>
+
+        <activity
+            android:exported="true"
+            android:name="com.ustadmobile.port.android.panic.NotepadActivity"
+            android:label="Notepad"
+            android:icon="@drawable/ic_baseline_edit_24"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:enabled="false">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
+
 
     </application>
 
