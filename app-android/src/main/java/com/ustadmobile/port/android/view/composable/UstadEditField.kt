@@ -26,7 +26,6 @@ import com.ustadmobile.core.util.StringAndSerialNum
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDate
-import com.ustadmobile.port.android.util.ext.applyEditAutoPadding
 import com.ustadmobile.port.android.util.ext.getActivityContext
 import java.util.*
 
@@ -34,11 +33,10 @@ import java.util.*
 fun UstadEditField(
     modifier: Modifier = Modifier,
     error: String? = null,
-    autoPadding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     Column(
-        modifier = modifier.applyEditAutoPadding(autoPadding)
+        modifier = modifier,
     ) {
         content()
 
@@ -74,7 +72,6 @@ fun UstadTextEditField(
     onValueChange: (String) -> Unit,
     password: Boolean = false,
     suffixText: String? = null,
-    autoPadding: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     var errorText by remember(errorString) {
@@ -98,7 +95,6 @@ fun UstadTextEditField(
     UstadEditField(
         modifier = modifier,
         error = errorText,
-        autoPadding = autoPadding,
     ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -208,7 +204,6 @@ fun UstadDateEditTextField(
     enabled: Boolean = true,
     @Suppress("UNUSED_PARAMETER") //Reserved for future use
     error: String? = null,
-    autoVerticalPadding: Boolean = true,
     onValueChange: (Long) -> Unit = {},
 ) {
     var errorText by remember(error) {
@@ -229,7 +224,6 @@ fun UstadDateEditTextField(
         modifier = modifier,
         onValueChange = {},
         readOnly = true,
-        autoPadding = autoVerticalPadding,
         onClick = {
             val supportFragmentManager =
                 (context.getActivityContext() as AppCompatActivity)

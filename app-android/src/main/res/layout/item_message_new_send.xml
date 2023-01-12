@@ -70,6 +70,7 @@
             android:layout_marginEnd="8dp"
             app:buttonListener2="@{listener}"
             app:editText2="@{comment}"
+            android:contentDescription="@string/send"
             android:src="@drawable/ic_send_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
