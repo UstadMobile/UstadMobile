@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.StringAndSerialNum
 import com.ustadmobile.core.util.ext.requireHttpPrefix
@@ -38,8 +38,6 @@ class SiteEnterLinkViewModel(
 
     private val httpClient: HttpClient by instance()
 
-    private val navController: UstadNavController by instance()
-
     private val json: Json by instance()
 
     private val impl: UstadMobileSystemImpl by instance()
@@ -50,6 +48,8 @@ class SiteEnterLinkViewModel(
         _uiState.update {
             it.copy(fieldsEnabled = false)
         }
+
+        loadingState = LoadingUiState.INDETERMINATE
 
         viewModelScope.launch {
             try {
@@ -66,6 +66,7 @@ class SiteEnterLinkViewModel(
                     }
                 }
 
+                loadingState = LoadingUiState.NOT_LOADING
                 _uiState.update { previous ->
                     previous.copy(validLink =  true, linkError = null, fieldsEnabled = true)
                 }
@@ -73,6 +74,7 @@ class SiteEnterLinkViewModel(
                 navController.navigate(Login2View.VIEW_NAME, args)
             }catch(e: Exception) {
                 _uiState.update { previous ->
+                    loadingState = LoadingUiState.NOT_LOADING
                     previous.copy(
                         validLink = false,
                         fieldsEnabled = true,

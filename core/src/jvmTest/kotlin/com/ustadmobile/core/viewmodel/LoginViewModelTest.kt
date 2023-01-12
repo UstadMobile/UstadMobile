@@ -154,7 +154,7 @@ class LoginViewModelTest {
             }
 
             verify(navController, timeout(5000)).navigate(eq(nextDestination), any(), argWhere {
-                it.clearStack
+                it.popUpToViewName == UstadView.ROOT_DEST
             })
         }
 

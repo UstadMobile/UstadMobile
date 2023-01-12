@@ -56,12 +56,7 @@ abstract class UstadMobileSystemCommon {
              */
             val serializer: KSerializer<*>? = null,
 
-            /**
-             * If true, clear the entire session history stack. On Javascript: use history.length,
-             * on Android set popUpTo = rootview.
-             */
-            val clearStack: Boolean = false,
-    ) {
+            ) {
 
         companion object {
             val Default = UstadGoOptions(null, false)

@@ -8,7 +8,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
@@ -65,8 +66,6 @@ class LoginViewModel(
 
     private val json: Json by instance()
 
-    private val navController: UstadNavController by instance()
-
     init {
         nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest()
 
@@ -91,8 +90,11 @@ class LoginViewModel(
                     fieldsEnabled = false,
                 )
             }
-//            view.loading = true
-//            view.inProgress = true
+            _appUiState.value = AppUiState(
+                loadingState = LoadingUiState(LoadingUiState.State.INDETERMINATE),
+                navigationVisible = false,
+                title = impl.getString(MessageID.login)
+            )
 
             viewModelScope.launch {
                 while(verifiedSite == null) {
@@ -116,6 +118,7 @@ class LoginViewModel(
 
     private fun onVerifySite(site: Site) {
         verifiedSite = site
+        loadingState = LoadingUiState.NOT_LOADING
         _uiState.update { prev ->
             prev.copy(
                 createAccountVisible = site.registrationAllowed,
@@ -124,12 +127,6 @@ class LoginViewModel(
                 errorMessage = null,
             )
         }
-
-//        view.loading = false
-//        view.inProgress = false
-//
-//        if(view.errorMessage == impl.getString(MessageID.login_network_error, context))
-//            view.errorMessage = ""
     }
 
     fun onUsernameChanged(username: String) {
@@ -189,6 +186,7 @@ class LoginViewModel(
                 }catch(e: Exception) {
                     errorMessage = impl.getString(MessageID.login_network_error)
                 }finally {
+                    loadingState = LoadingUiState.NOT_LOADING
                     _uiState.update { prev ->
                         prev.copy(
                             fieldsEnabled = true,
@@ -198,6 +196,7 @@ class LoginViewModel(
                 }
             }
         }else{
+            loadingState = LoadingUiState.NOT_LOADING
             _uiState.update { prev ->
                 prev.copy(
                     fieldsEnabled = true,
