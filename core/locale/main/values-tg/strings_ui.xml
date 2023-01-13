@@ -338,7 +338,6 @@
 \n2. Боварӣ ҳосил кунед, ки дастгоҳ намоён аст.</string>
     <string name="dialog_download_from_playstore_cancel">Дар сомона бимонед</string>
     <string name="onboarding_no_internet_subheadline">Ҳама чиз офлайн кор мекунад</string>
-    <string name="location_permission_message">Ин барнома иҷозати ҷойгиршавиро тақозо мекунад, то мубодилаи фаврӣ бо корбарони наздик фаъол карда шавад.</string>
     <string name="xapi_custom_date" value="303">Санаи фармоишӣ</string>
     <string name="xapi_options_visual_type">Намуди визуализатсия</string>
     <string name="xapi_options_filters">Филтрҳо</string>
@@ -940,7 +939,7 @@
     <string name="max_number_of_files">Шумораи максималии файлҳо: %1$s</string>
     <string name="penalty_label">Агар пас аз мӯҳлат анҷом дода шуда бошад, аммо то ба охир расидани давраи имтиёзнок</string>
     <string name="add_block">Илова кардани блок</string>
-    <string name="discussion_board">Шӯрои муҳокима</string>
+    <string name="discussion_board">Форум</string>
     <string name="add_discussion_board_desc">Муҳокима бо мавзӯъҳо ташкил карда шуд</string>
     <string name="institution">Муассиса</string>
     <string name="enrolment_requests_must_be_approved">Дархостҳои бақайдгирӣ бояд тасдиқ карда шаванд</string>
