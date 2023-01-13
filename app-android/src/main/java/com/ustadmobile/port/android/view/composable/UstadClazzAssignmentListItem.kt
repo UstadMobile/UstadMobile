@@ -17,23 +17,34 @@ import com.toughra.ustadmobile.R
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.controller.SubmissionConstants
-import com.ustadmobile.core.viewmodel.ClazzAssignmentUiState
+import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.view.ClazzAssignmentDetailOverviewFragment.Companion.ASSIGNMENT_STATUS_MAP
+import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UstadClazzAssignmentListItem(
-    uiState: ClazzAssignmentUiState,
+
+    modifier: Modifier = Modifier,
+
+    assignment: ClazzAssignmentWithMetrics,
+
+    courseBlock: CourseBlockWithCompleteEntity,
+
     onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit = {}
+
 ){
+
+    val blockUiState = courseBlock.listItemUiState
+    val assignmentUiState = assignment.listItemUiState
 
     ListItem(
         modifier = Modifier
             .clickable {
-                onClickAssignment(uiState.assignment)
+                onClickAssignment(assignment)
             },
 
         icon = {
@@ -43,46 +54,49 @@ fun UstadClazzAssignmentListItem(
                 modifier = Modifier.size(40.dp)
             )
         },
-        text = { Text(uiState.assignment.caTitle ?: "") },
+        text = { Text(assignment.caTitle ?: "") },
         secondaryText = {
             Column{
-                if (uiState.cbDescriptionVisible){
-                    Text(text = uiState.block.cbDescription ?: "")
+                if (blockUiState.cbDescriptionVisible){
+                    Text(text = courseBlock.cbDescription ?: "")
                 }
 
-                DateAndPointRow(uiState = uiState)
+                DateAndPointRow(
+                    courseBlock = courseBlock,
+                    assignment = assignment
+                )
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ){
-                    if (uiState.submissionStatusIconVisible){
+                    if (assignmentUiState.submissionStatusIconVisible){
                         Icon(
                             painter = painterResource(
-                                id = ASSIGNMENT_STATUS_MAP[uiState.assignment.fileSubmissionStatus]
+                                id = ASSIGNMENT_STATUS_MAP[assignment.fileSubmissionStatus]
                                     ?: R.drawable.ic_baseline_done_all_24),
                             contentDescription = "")
                     }
 
-                    if (uiState.submissionStatusVisible){
+                    if (assignmentUiState.submissionStatusVisible){
                         Text(text = messageIdMapResource(
                             map = SubmissionConstants.STATUS_MAP,
-                            key = uiState.assignment.fileSubmissionStatus)
+                            key = assignment.fileSubmissionStatus)
                         )
                     }
                 }
                 
-                if (uiState.progressTextVisible){
+                if (assignmentUiState.progressTextVisible){
                     Text(text = stringResource(
                         id = R.string.three_num_items_with_name_with_comma,
 
-                        uiState.assignment.progressSummary
+                        assignment.progressSummary
                             ?.calculateNotSubmittedStudents() ?: 0,
                         stringResource(R.string.not_submitted_cap),
 
-                        uiState.assignment.progressSummary?.submittedStudents ?: 0,
+                        assignment.progressSummary?.submittedStudents ?: 0,
                         stringResource(R.string.submitted_cap),
 
-                        uiState.assignment.progressSummary?.markedStudents ?: 0,
+                        assignment.progressSummary?.markedStudents ?: 0,
                         stringResource(R.string.marked)
                     ))
                 }
@@ -93,15 +107,20 @@ fun UstadClazzAssignmentListItem(
 
 @Composable
 private fun DateAndPointRow(
-    uiState: ClazzAssignmentUiState,
+    courseBlock: CourseBlockWithCompleteEntity,
+    assignment: ClazzAssignmentWithMetrics,
 ){
 
+    val blockUiState = courseBlock.listItemUiState
+    val assignmentUiState = assignment.listItemUiState
+
     val dateTime = rememberFormattedDateTime(
-        timeInMillis = uiState.block.cbDeadlineDate,
-        timeZoneId = uiState.timeZone)
+        timeInMillis = courseBlock.cbDeadlineDate,
+        timeZoneId = TimeZone.getDefault().id
+    )
 
     Row{
-        if (uiState.cbDeadlineDateVisible){
+        if (blockUiState.cbDeadlineDateVisible){
             Icon(
                 Icons.Default.CalendarToday,
                 contentDescription = "",
@@ -113,9 +132,9 @@ private fun DateAndPointRow(
 
         Spacer(modifier = Modifier.width(10.dp))
 
-        if (uiState.assignmentMarkVisible){
-            Text("${uiState.assignment.mark?.camMark ?: 0}/" +
-                    "${uiState.block.cbMaxPoints} " +
+        if (assignmentUiState.assignmentMarkVisible){
+            Text("${assignment.mark?.camMark ?: 0}/" +
+                    "${courseBlock.cbMaxPoints} " +
                     stringResource(id = R.string.points))
         }
     }
@@ -124,24 +143,28 @@ private fun DateAndPointRow(
 @Composable
 @Preview
 private fun UstadClazzAssignmentListItemPreview() {
-    val uiState = ClazzAssignmentUiState(
-        assignment = ClazzAssignmentWithMetrics().apply {
-            caTitle = "Module"
-            mark = CourseAssignmentMark().apply {
-                camPenalty = 20
-                camMark = 20F
-            }
-            progressSummary = AssignmentProgressSummary().apply {
-                hasMetricsPermission = false
-            }
-            fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
-        },
-        block = CourseBlockWithCompleteEntity().apply {
-            cbDescription = "Description"
-            cbDeadlineDate = 1672707505000
-            cbMaxPoints = 100
-            cbIndentLevel = 1
+
+    val assignment = ClazzAssignmentWithMetrics().apply {
+        caTitle = "Module"
+        mark = CourseAssignmentMark().apply {
+            camPenalty = 20
+            camMark = 20F
         }
+        progressSummary = AssignmentProgressSummary().apply {
+            hasMetricsPermission = false
+        }
+        fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
+    }
+
+    val block = CourseBlockWithCompleteEntity().apply {
+        cbDescription = "Description"
+        cbDeadlineDate = 1672707505000
+        cbMaxPoints = 100
+        cbIndentLevel = 1
+    }
+
+    UstadClazzAssignmentListItem(
+        assignment = assignment,
+        courseBlock = block
     )
-    UstadClazzAssignmentListItem(uiState)
 }

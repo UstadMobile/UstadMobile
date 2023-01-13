@@ -4,22 +4,15 @@ import com.ustadmobile.core.util.ext.isDateSet
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.lib.db.entities.CourseAssignmentSubmission
 import com.ustadmobile.lib.db.entities.CourseBlockWithCompleteEntity
+import kotlin.jvm.JvmInline
 
-data class ClazzAssignmentUiState(
+val ClazzAssignmentWithMetrics.listItemUiState
+    get() = ClazzAssignmentWithMetricsUiState(this)
 
-    val assignment: ClazzAssignmentWithMetrics = ClazzAssignmentWithMetrics(),
-
-    val block: CourseBlockWithCompleteEntity = CourseBlockWithCompleteEntity(),
-
-    val timeZone: String = "UTC"
-
+@JvmInline
+value class ClazzAssignmentWithMetricsUiState(
+    val assignment: ClazzAssignmentWithMetrics,
 ) {
-
-    val cbDescriptionVisible: Boolean
-        get() = !block.cbDescription.isNullOrBlank()
-
-    val cbDeadlineDateVisible: Boolean
-        get() = block.cbDeadlineDate.isDateSet()
 
     val assignmentMarkVisible: Boolean
         get() = assignment.mark != null
@@ -37,5 +30,22 @@ data class ClazzAssignmentUiState(
         get() = assignment.progressSummary?.hasMetricsPermission != null &&
                 assignment.progressSummary?.hasMetricsPermission == true
 
+}
+
+
+
+val CourseBlockWithCompleteEntity.listItemUiState
+    get() = CourseBlockWithCompleteEntityUiState(this)
+
+@JvmInline
+value class CourseBlockWithCompleteEntityUiState(
+    val block: CourseBlockWithCompleteEntity,
+) {
+
+    val cbDescriptionVisible: Boolean
+        get() = !block.cbDescription.isNullOrBlank()
+
+    val cbDeadlineDateVisible: Boolean
+        get() = block.cbDeadlineDate.isDateSet()
 
 }
