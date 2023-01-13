@@ -62,7 +62,7 @@ val UstadClazzAssignmentListItem = FC<UstadClazzAssignmentListItemProps> { props
     }
 }
 
-val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
+private val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
 
     val strings = useStringsXml()
     val dateTime = useFormattedDateAndTime(
@@ -103,7 +103,7 @@ val DateAndPointRow = FC<UstadClazzAssignmentListItemProps> { props ->
 }
 
 
-val SecondaryContent = FC<UstadClazzAssignmentListItemProps> { props ->
+private val SecondaryContent = FC<UstadClazzAssignmentListItemProps> { props ->
 
     val strings = useStringsXml()
 

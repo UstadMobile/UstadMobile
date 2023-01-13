@@ -32,7 +32,6 @@ fun UstadClazzAssignmentListItem(
 
     ListItem(
         modifier = Modifier
-            .paddingCourseBlockIndent(uiState.block.cbIndentLevel)
             .clickable {
                 onClickAssignment(uiState.assignment)
             },
@@ -93,7 +92,7 @@ fun UstadClazzAssignmentListItem(
 }
 
 @Composable
-fun DateAndPointRow(
+private fun DateAndPointRow(
     uiState: ClazzAssignmentUiState,
 ){
 
