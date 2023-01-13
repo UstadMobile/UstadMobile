@@ -39,10 +39,11 @@ fun UstadClazzAssignmentListItem(
 ){
 
     val blockUiState = courseBlock.listItemUiState
+
     val assignmentUiState = assignment.listItemUiState
 
     ListItem(
-        modifier = Modifier
+        modifier = modifier
             .clickable {
                 onClickAssignment(assignment)
             },
@@ -112,6 +113,7 @@ private fun DateAndPointRow(
 ){
 
     val blockUiState = courseBlock.listItemUiState
+
     val assignmentUiState = assignment.listItemUiState
 
     val dateTime = rememberFormattedDateTime(
