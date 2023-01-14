@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.door.lifecycle.MutableLiveData
+import com.ustadmobile.lib.db.entities.ClazzLog
 
 data class ClazzLogListAttendanceUiState(
 
@@ -14,6 +15,8 @@ data class ClazzLogListAttendanceUiState(
     var graphData: List<ClazzLogListAttendancePresenter.AttendanceGraphData> = emptyList(),
 
     var recordAttendanceOptions: List<ClazzLogListAttendancePresenter.RecordAttendanceOption> =
-        emptyList()
+        emptyList(),
+
+    var clazzLogsList: List<ClazzLog> = emptyList()
 
 )

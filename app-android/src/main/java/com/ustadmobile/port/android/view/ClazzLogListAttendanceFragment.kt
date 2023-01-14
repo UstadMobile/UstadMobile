@@ -7,8 +7,20 @@ import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ConcatAdapter
@@ -32,7 +44,8 @@ import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.viewmodel.ClazzLogListAttendanceUiState
 import com.ustadmobile.door.lifecycle.MutableLiveData
-import com.ustadmobile.lib.db.entities.ClazzLog
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
@@ -320,15 +333,102 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
 @Composable
 private fun ClazzLogListAttendanceScreen(
-    uiState: ClazzLogListAttendanceUiState = ClazzLogListAttendanceUiState()
+    uiState: ClazzLogListAttendanceUiState = ClazzLogListAttendanceUiState(),
+    onClickClazz: (ClazzLog) -> Unit = {},
 ) {
 
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+
+        items(
+            items = uiState.clazzLogsList,
+            key = { clazzLog -> clazzLog.clazzLogUid }
+        ){ clazzLog ->
+            ClazzLogListItem(
+                clazzLog = clazzLog,
+                onClick = onClickClazz
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ClazzLogListItem(
+    clazzLog: ClazzLog,
+    onClick: (ClazzLog) -> Unit,
+){
+
+    val dateTime = rememberFormattedDateTime(
+        timeInMillis = clazzLog.logDate,
+        timeZoneId = TimeZone.getDefault().id
+    )
+
+    val attendanceMap = mapOf(
+        clazzLog.clazzLogNumPresent to R.color.successColor,
+        clazzLog.clazzLogNumPartial to R.color.secondaryColor,
+        clazzLog.clazzLogNumAbsent  to R.color.errorColor
+    )
+
+    ListItem(
+        modifier = Modifier.clickable {
+            onClick(clazzLog)
+        },
+        icon = {
+            Icon(
+                Icons.Outlined.CalendarToday,
+                contentDescription = ""
+            )
+        },
+        text = { Text(dateTime) },
+        secondaryText = {
+            Column {
+                Row {
+                    attendanceMap.forEach { (attendaneStatus, color) ->
+
+                        Box(modifier = Modifier
+                            .width((attendaneStatus*10).dp)
+                            .height(4.dp)
+                            .background(color = colorResource(id = color))
+                        )
+
+                    }
+                }
+                Text(text = stringResource(
+                    id = R.string.three_num_items_with_name_with_comma,
+                    clazzLog.clazzLogNumPresent,
+                    stringResource(R.string.present),
+                    clazzLog.clazzLogNumPartial,
+                    stringResource(R.string.partial),
+                    clazzLog.clazzLogNumAbsent,
+                    stringResource(R.string.absent)
+                ))
+            }
+        }
+    )
 }
 
 @Composable
 @Preview
 fun ClazzLogListAttendanceScreenPreview() {
+    val uiStateVal = ClazzLogListAttendanceUiState(
+        clazzLogsList = listOf(
+            ClazzLog().apply {
+                clazzLogUid = 1
+                clazzLogNumPresent = 4
+                clazzLogNumPartial = 15
+                clazzLogNumAbsent = 10
+            },
+            ClazzLog().apply {
+                clazzLogUid = 2
+            },
+            ClazzLog().apply {
+                clazzLogUid = 3
+            }
+        )
+    )
     MdcTheme {
-        ClazzLogListAttendanceScreen()
+        ClazzLogListAttendanceScreen(uiStateVal)
     }
 }
