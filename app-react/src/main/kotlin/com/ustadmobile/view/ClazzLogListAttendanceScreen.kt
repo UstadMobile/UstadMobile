@@ -35,12 +35,21 @@ val ClazzLogListAttendanceScreenPreview = FC<Props> {
                     clazzLogNumPresent = 4
                     clazzLogNumPartial = 15
                     clazzLogNumAbsent = 10
+                    logDate = 1673683347000
                 },
                 ClazzLog().apply {
                     clazzLogUid = 2
+                    clazzLogNumPresent = 9
+                    clazzLogNumPartial = 8
+                    clazzLogNumAbsent = 45
+                    logDate = 1673683347000
                 },
                 ClazzLog().apply {
                     clazzLogUid = 3
+                    clazzLogNumPresent = 70
+                    clazzLogNumPartial = 30
+                    clazzLogNumAbsent = 10
+                    logDate = 1673683347000
                 }
             )
         )
@@ -90,12 +99,12 @@ private val ClazzLogListAttendanceScreenComponent2 =
                                     Stack {
                                         direction = responsive(StackDirection.row)
 
-                                        attendanceMap.forEach { (attendaneStatus, color) ->
+                                        attendanceMap.forEach { (attendanceStatus, color) ->
 
                                             Box {
                                                 sx{
-                                                  width = (attendaneStatus*100).px
-                                                  height = 4.px
+                                                  width = (attendanceStatus*100).px
+                                                  height = 6.px
                                                   backgroundColor = color
                                                 }
                                             }

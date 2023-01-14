@@ -21,11 +21,13 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -45,6 +47,7 @@ import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.viewmodel.ClazzLogListAttendanceUiState
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -341,6 +344,62 @@ private fun ClazzLogListAttendanceScreen(
         modifier = Modifier.fillMaxSize()
     ) {
 
+        item {
+            AndroidView(factory = {  context ->
+                val view = LayoutInflater.from(context).inflate(
+                    R.layout.item_clazz_log_list_attendance_chart,
+                    null, false
+                )
+
+                val chart = view.findViewById<LineChart>(R.id.chart)
+
+                chart.legend.isEnabled = false
+                chart.description.isEnabled = false
+                chart.axisRight.setDrawLabels(false)
+                chart.xAxis.valueFormatter = object: ValueFormatter(){
+                    override fun getFormattedValue(value: Float): String {
+                        return "${value}"
+//                        return rememberFormattedDate(
+//                            timeInMillis = value.toLong(),
+//                            timeZoneId = TimeZone.getDefault().id
+//                        )
+                    }
+                }
+//
+                chart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+                chart.xAxis.labelRotationAngle = 45f
+                chart.setTouchEnabled(false)
+                chart.xAxis.setDrawGridLines(false)
+                chart.axisRight.setDrawGridLines(false)
+                chart.axisRight.setDrawAxisLine(false)
+                chart.xAxis.isGranularityEnabled = true
+                chart.xAxis.granularity = (1000 * 60 * 60 * 24 * 2).toFloat()
+                chart.axisLeft.axisMinimum = 0f
+                chart.axisLeft.axisMaximum = 100f
+                chart.axisLeft.valueFormatter = object: ValueFormatter(){
+                    override fun getFormattedValue(value: Float): String {
+                        return "${value}%"
+                    }
+                }
+                var lastCheckedId = R.id.chip_last_week
+//                chipGroup.check(lastCheckedId)
+//                chipGroup.setOnCheckedChangeListener { group, checkedId ->
+//                    if(checkedId != View.NO_ID) {
+//                        lastCheckedId = checkedId
+//                        presenter?.handleClickGraphDuration(ClazzLogListAttendanceFragment.ClazzLogListGraphRecyclerAdapter.VIEW_ID_TO_NUMDAYS_MAP[checkedId] ?: 7)
+//                    }else {
+//                        chipGroup.check(lastCheckedId)
+//                    }
+//
+//                }
+
+                view
+            },
+                update = {
+                }
+            )
+        }
+
         items(
             items = uiState.clazzLogsList,
             key = { clazzLog -> clazzLog.clazzLogUid }
@@ -385,11 +444,11 @@ private fun ClazzLogListItem(
         secondaryText = {
             Column {
                 Row {
-                    attendanceMap.forEach { (attendaneStatus, color) ->
+                    attendanceMap.forEach { (attendanceStatus, color) ->
 
                         Box(modifier = Modifier
-                            .width((attendaneStatus*10).dp)
-                            .height(4.dp)
+                            .weight(attendanceStatus.toFloat())
+                            .height(6.dp)
                             .background(color = colorResource(id = color))
                         )
 
@@ -416,15 +475,23 @@ fun ClazzLogListAttendanceScreenPreview() {
         clazzLogsList = listOf(
             ClazzLog().apply {
                 clazzLogUid = 1
-                clazzLogNumPresent = 4
+                clazzLogNumPresent = 40
                 clazzLogNumPartial = 15
                 clazzLogNumAbsent = 10
             },
             ClazzLog().apply {
                 clazzLogUid = 2
+                clazzLogNumPresent = 40
+                clazzLogNumPartial = 40
+                clazzLogNumAbsent = 30
+                logDate = 1673683347000
             },
             ClazzLog().apply {
                 clazzLogUid = 3
+                clazzLogNumPresent = 70
+                clazzLogNumPartial = 20
+                clazzLogNumAbsent = 10
+                logDate = 1673683347000
             }
         )
     )
