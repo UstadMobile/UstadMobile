@@ -423,7 +423,7 @@ fun AddListItem(
          R.color.successColor
      else if ((person.attendance/100)
          >= ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_WARNING)
-         R.color.attendanceWarningColor
+         R.color.secondaryColor
      else
          R.color.errorColor
 
@@ -553,18 +553,6 @@ fun ClazzMemberListScreenPreview() {
                 firstNames = "Student 2"
                 lastName = "Name"
                 attendance = 80F
-            }
-        ),
-        teacherList = listOf(
-            PersonWithClazzEnrolmentDetails().apply {
-                personUid = 1
-                firstNames = "Teacher 1"
-                lastName = "Name"
-            },
-            PersonWithClazzEnrolmentDetails().apply {
-                personUid = 2
-                firstNames = "Teacher 2"
-                lastName = "Name"
             }
         ),
         addStudentVisible = true,

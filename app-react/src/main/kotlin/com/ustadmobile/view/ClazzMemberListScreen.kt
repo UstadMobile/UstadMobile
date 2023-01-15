@@ -11,11 +11,13 @@ import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.util.ext.format
+import csstype.Padding
 import csstype.px
 import mui.icons.material.*
 import mui.material.*
 import mui.material.List
 import mui.system.responsive
+import mui.system.sx
 import react.*
 
 external interface ClazzMemberListScreenProps : Props {
@@ -42,8 +44,10 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
             UstadListFilterChipsHeader{
                 filterOptions = listOf(
-                    MessageIdOption2(MessageID.currently_enrolled, ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-                    MessageIdOption2(MessageID.past_enrollments, ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
+                    MessageIdOption2(MessageID.currently_enrolled,
+                        ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
+                    MessageIdOption2(MessageID.past_enrollments,
+                        ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
                     MessageIdOption2(MessageID.all, 0),
                 )
                 selectedChipId = ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
@@ -84,12 +88,14 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
                 props.uiState.teacherList.forEach { person ->
                     ListItem{
-                        ListItemIcon {
-                            + AccountCircle.create()
-                        }
+                        ListItemButton {
+                            ListItemIcon {
+                                + AccountCircle.create()
+                            }
 
-                        ListItemText {
-                            primary = ReactNode("${person.firstNames} ${person.lastName}")
+                            ListItemText {
+                                primary = ReactNode("${person.firstNames} ${person.lastName}")
+                            }
                         }
                     }
                 }
@@ -160,12 +166,12 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
     val strings = useStringsXml()
 
     val statusColor = if ((props.person.attendance/100) >= ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_GOOD)
-        IconColor.success
+        SvgIconColor.success
     else if ((props.person.attendance/100)
         >= ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_WARNING)
-        IconColor.warning
+        SvgIconColor.warning
     else
-        IconColor.error
+        SvgIconColor.error
 
     ListItem{
         ListItemButton {
@@ -182,9 +188,16 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
                 secondary = Stack.create {
                     direction = responsive(StackDirection.row)
 
-                    Icon {
+                    LensRounded {
+                        sx {
+                            padding = Padding(
+                                top = 5.px,
+                                bottom = 5.px,
+                                right = 0.px,
+                                left = 5.px
+                            )
+                        }
                         color = statusColor
-                        + LensRounded.create()
                     }
 
                     Typography {
@@ -263,12 +276,6 @@ val ClazzMemberListScreenPreview = FC<Props> {
                     attendance = 20F
                 },
                 PersonWithClazzEnrolmentDetails().apply {
-                    personUid = 2
-                    firstNames = "Student 2"
-                    lastName = "Name"
-                    attendance = 80F
-                },
-                PersonWithClazzEnrolmentDetails().apply {
                     personUid = 3
                     firstNames = "Student 3"
                     lastName = "Name"
@@ -281,23 +288,12 @@ val ClazzMemberListScreenPreview = FC<Props> {
                     firstNames = "Student 1"
                     lastName = "Name"
                     attendance = 20F
-                },
-                PersonWithClazzEnrolmentDetails().apply {
-                    personUid = 2
-                    firstNames = "Student 2"
-                    lastName = "Name"
-                    attendance = 80F
                 }
             ),
             teacherList = listOf(
                 PersonWithClazzEnrolmentDetails().apply {
                     personUid = 1
                     firstNames = "Teacher 1"
-                    lastName = "Name"
-                },
-                PersonWithClazzEnrolmentDetails().apply {
-                    personUid = 2
-                    firstNames = "Teacher 2"
                     lastName = "Name"
                 }
             ),

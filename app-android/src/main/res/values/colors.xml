@@ -13,7 +13,6 @@
 
     <color name="errorLightColor">#cf6679</color> <!--@200 Intensity-->
     <color name="errorColor">#b00020</color> <!--@500 Intensity-->
-    <color name="attendanceWarningColor">#FFD56F</color>
     <color name="surfaceColor">#ffffff</color>
     <color name="backgroundColor">#ffffff</color>
 
