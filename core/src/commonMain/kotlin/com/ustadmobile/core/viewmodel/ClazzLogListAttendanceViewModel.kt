@@ -22,6 +22,7 @@ data class ClazzLogListAttendanceUiState(
 )
 
 data class AttendanceGraphData(
+
     val percentageAttendedSeries: List<Pair<Long, Float>>,
 
     val percentageLateSeries: List<Pair<Long, Float>>,

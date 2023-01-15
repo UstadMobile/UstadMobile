@@ -44,6 +44,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
+import com.ustadmobile.core.viewmodel.AttendanceGraphData
 import com.ustadmobile.core.viewmodel.ClazzLogListAttendanceUiState
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
@@ -345,27 +346,24 @@ private fun ClazzLogListAttendanceScreen(
     ) {
 
         item {
-            AndroidView(factory = {  context ->
+            AndroidView(
+                modifier = Modifier.fillMaxWidth()
+                    .height(150.dp),
+                factory = {  context ->
                 val view = LayoutInflater.from(context).inflate(
                     R.layout.item_clazz_log_list_attendance_chart,
                     null, false
                 )
 
                 val chart = view.findViewById<LineChart>(R.id.chart)
-
                 chart.legend.isEnabled = false
                 chart.description.isEnabled = false
                 chart.axisRight.setDrawLabels(false)
                 chart.xAxis.valueFormatter = object: ValueFormatter(){
                     override fun getFormattedValue(value: Float): String {
-                        return "${value}"
-//                        return rememberFormattedDate(
-//                            timeInMillis = value.toLong(),
-//                            timeZoneId = TimeZone.getDefault().id
-//                        )
+                        return value.toString()
                     }
                 }
-//
                 chart.xAxis.position = XAxis.XAxisPosition.BOTTOM
                 chart.xAxis.labelRotationAngle = 45f
                 chart.setTouchEnabled(false)
@@ -381,7 +379,44 @@ private fun ClazzLogListAttendanceScreen(
                         return "${value}%"
                     }
                 }
-                var lastCheckedId = R.id.chip_last_week
+                val graphData = uiState.graphData
+                val percentage = graphData?.percentageAttendedSeries?.size ?: 0
+                if(percentage > 2) {
+                    val lineData = LineData().apply {
+                        listOf(graphData?.percentageAttendedSeries, graphData?.percentageLateSeries).forEachIndexed { index, list ->
+                            val colorId = if(index == 0) R.color.successColor else R.color.secondaryColor
+                            val seriesColor = context.let { ContextCompat.getColor(it, colorId) } ?: Color.BLACK
+                            addDataSet(LineDataSet(list?.map { Entry(it.first.toFloat(), it.second * 100) },
+                                context.getString(R.string.attendance)).apply {
+                                color = seriesColor
+                                valueTextColor = Color.BLACK
+                                lineWidth = 1f
+                                setDrawValues(false)
+                                setDrawCircles(false)
+                                mode = LineDataSet.Mode.LINEAR
+                                fillColor = seriesColor
+                                fillAlpha = 192
+                                setDrawFilled(true)
+                                setFillFormatter { dataSet, dataProvider ->
+                                    0f
+                                }
+                            })
+                        }
+                    }
+
+                    val dateRangeVal = graphData?.graphDateRange?.first?.toFloat() to graphData?.graphDateRange?.second?.toFloat()
+                    if(chart != null && lineData != null) {
+                        chart.data = lineData
+                        chart.invalidate()
+                    }
+
+                    if(chart != null && dateRangeVal != null) {
+                        chart.xAxis.axisMinimum = dateRangeVal.first ?: 0F
+                        chart.xAxis.axisMaximum = dateRangeVal.second ?: 0F
+                    }
+                }
+
+//                var lastCheckedId = R.id.chip_last_week
 //                chipGroup.check(lastCheckedId)
 //                chipGroup.setOnCheckedChangeListener { group, checkedId ->
 //                    if(checkedId != View.NO_ID) {
@@ -392,7 +427,6 @@ private fun ClazzLogListAttendanceScreen(
 //                    }
 //
 //                }
-
                 view
             },
                 update = {
@@ -493,6 +527,19 @@ fun ClazzLogListAttendanceScreenPreview() {
                 clazzLogNumAbsent = 10
                 logDate = 1673683347000
             }
+        ),
+        graphData = AttendanceGraphData(
+             percentageAttendedSeries = listOf(
+                 Pair(23, 34F),
+                 Pair(12, 45F),
+                 Pair(80, 14F),
+             ),
+            percentageLateSeries = listOf(
+                Pair(23, 34F),
+                Pair(12, 45F),
+                Pair(80, 14F),
+            ),
+            graphDateRange = Pair(23.toLong(), 34.toLong()),
         )
     )
     MdcTheme {
