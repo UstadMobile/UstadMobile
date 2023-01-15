@@ -15,7 +15,7 @@ include ':app-android',
         ':sharedse',
         ':app-android-launcher',
         ':lib-util',
-        ':lib-http-testserver',
+        ':testserver-controller',
         ':lib-database',
         ':lib-content-scrapers'
 

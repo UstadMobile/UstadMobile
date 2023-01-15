@@ -33,17 +33,10 @@ import java.util.*
 fun UstadEditField(
     modifier: Modifier = Modifier,
     error: String? = null,
-    autoVerticalPadding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     Column(
-        modifier = modifier.let {
-            if(autoVerticalPadding) {
-                it.padding(vertical = 8.dp)
-            }else {
-                it
-            }
-        }
+        modifier = modifier,
     ) {
         content()
 
@@ -79,7 +72,6 @@ fun UstadTextEditField(
     onValueChange: (String) -> Unit,
     password: Boolean = false,
     suffixText: String? = null,
-    autoVerticalPadding: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     var errorText by remember(errorString) {
@@ -103,7 +95,6 @@ fun UstadTextEditField(
     UstadEditField(
         modifier = modifier,
         error = errorText,
-        autoVerticalPadding = autoVerticalPadding,
     ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -213,7 +204,6 @@ fun UstadDateEditTextField(
     enabled: Boolean = true,
     @Suppress("UNUSED_PARAMETER") //Reserved for future use
     error: String? = null,
-    autoVerticalPadding: Boolean = true,
     onValueChange: (Long) -> Unit = {},
 ) {
     var errorText by remember(error) {
@@ -234,7 +224,6 @@ fun UstadDateEditTextField(
         modifier = modifier,
         onValueChange = {},
         readOnly = true,
-        autoVerticalPadding = autoVerticalPadding,
         onClick = {
             val supportFragmentManager =
                 (context.getActivityContext() as AppCompatActivity)

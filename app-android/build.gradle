@@ -310,6 +310,8 @@ dependencies {
     implementation "com.google.android.material:compose-theme-adapter:$version_compose_theme_adapter"
     implementation "com.google.accompanist:accompanist-pager:$version_compose_accompanist"
     implementation "com.google.accompanist:accompanist-pager-indicators:$version_compose_accompanist"
+    implementation "org.burnoutcrew.composereorderable:reorderable:$version_composereorderable"
+    implementation "com.google.accompanist:accompanist-flowlayout:$version_compose_accompanist"
 
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"
@@ -375,6 +377,11 @@ dependencies {
 
     //Better Link Movement Method
     implementation "me.saket:better-link-movement-method:$version_better_link_movement"
+
+    implementation "com.dmitryborodin:pdfview-android:$version_pdfview_android"
+
+    //PanicKit (PanicButton) integration
+    implementation "info.guardianproject.panic:panic:$version_android_panickit"
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"

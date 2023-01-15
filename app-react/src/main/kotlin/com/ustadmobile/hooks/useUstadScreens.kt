@@ -3,10 +3,9 @@ package com.ustadmobile.hooks
 import com.ustadmobile.core.view.*
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
-import com.ustadmobile.mui.components.UstadCourseBlockEditPreview
-import com.ustadmobile.mui.components.UstadDetailFieldPreview
-import com.ustadmobile.mui.components.UstadEditFieldPreviews
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
+import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
 
 fun useUstadScreens(): UstadScreens {
@@ -50,7 +49,40 @@ fun useUstadScreens(): UstadScreens {
                 SchoolEditScreenPreview),
             UstadScreen(LanguageDetailView.VIEW_NAME, name = "LanguageDetail Preview",
                 LanguageDetailPreview),
-            UstadScreen(CourseGroupSetDetailView.VIEW_NAME, "CourseGroupSetDetail Preview", CourseGroupSetDetailScreenPreview)
+            UstadScreen(ClazzEdit2View.VIEW_NAME, "Clazz Edit Preview",
+                ClazzEditScreenPreview),
+            UstadScreen("EasySort", "Easy Sort", EasySortPreview),
+            UstadScreen(ErrorReportView.VIEW_NAME, name = "ErrorReport Preview", ErrorReportPreview),
+            UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
+            UstadScreen(ReportFilterEditView.VIEW_NAME,
+                "ReportFilterEdit Preview", ReportFilterEditScreenPreview),
+            UstadScreen(ScopedGrantDetailView.VIEW_NAME, "ScopedGrantDetail Preview",
+                ScopedGrantDetailScreenPreview),
+            UstadScreen(ContentEntryImportLinkView.VIEW_NAME, "ContentEntryImportLink Preview",
+                ContentEntryImportLinkScreenPreview),
+            UstadScreen(HolidayCalendarDetailView.VIEW_NAME, "HolidayCalendarDetail Preview",
+                HolidayCalendarDetailPreview),
+            UstadScreen(ContentEntryDetailOverviewView.VIEW_NAME,
+                "ContentEntryDetailOverview Preview",
+                ContentEntryDetailOverviewScreenPreview),
+            UstadScreen(HolidayCalendarEditView.VIEW_NAME, "HolidayCalendarEdit Preview",
+                HolidayCalendarEditPreview),
+            UstadScreen(ScopedGrantEditView.VIEW_NAME,
+                "ScopedGrantEdit Preview", ScopedGrantEditScreenPreview),
+            UstadScreen(CourseTerminologyEditView.VIEW_NAME,
+                "CourseTerminologyEdit Preview", CourseTerminologyEditScreenPreview),
+            UstadScreen("UstadListFilterChipsHeader",
+                "UstadListFilterChipsHeaderPreview Preview", UstadListFilterChipsHeaderPreview),
+            UstadScreen("UstadListSortHeader",
+                "UstadListSortHeader", UstadListSortHeaderPreview),
+            UstadScreen(ClazzLogEditView.VIEW_NAME, "ClazzLogEdit Preview",
+                ClazzLogEditScreenPreview),
+            UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview",
+                CourseGroupSetEditScreenPreview),
+            UstadScreen("UstadContentEntryListItem", "UstadContentEntryListItem Preview",
+                UstadContentEntryListItemPreview),
+            UstadScreen(CourseGroupSetDetailView.VIEW_NAME, "CourseGroupSetDetail Preview",
+                CourseGroupSetDetailScreenPreview),
         )
     }
 }

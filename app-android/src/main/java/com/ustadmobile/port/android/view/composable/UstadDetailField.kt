@@ -11,9 +11,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.toughra.ustadmobile.R
+
 
 /**
  * Main field layout for detail fields in DetailViews
@@ -26,17 +28,32 @@ fun UstadDetailField(
     imageId: Int = 0,
     onClick: (() -> Unit)? = null,
     secondaryActionContent: (@Composable () -> Unit)? = null,
-    autoPadding: Boolean = true,
+) {
+    UstadDetailField(
+        valueText = AnnotatedString(valueText),
+        labelText = AnnotatedString(labelText),
+        modifier = modifier,
+        imageId = imageId,
+        onClick = onClick,
+        secondaryActionContent = secondaryActionContent,
+    )
+}
+/**
+ * Main field layout for detail fields in DetailViews
+ */
+@Composable
+fun UstadDetailField(
+    valueText: AnnotatedString,
+    labelText: AnnotatedString,
+    modifier: Modifier = Modifier,
+    imageId: Int = 0,
+    onClick: (() -> Unit)? = null,
+    secondaryActionContent: (@Composable () -> Unit)? = null,
 ){
-    val modifierToUse = if(autoPadding) {
-        modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-    }else {
-        modifier
-    }
 
     if(onClick != null) {
         TextButton(
-            modifier = modifierToUse,
+            modifier = modifier,
             onClick = onClick
         ){
             DetailFieldContent(
@@ -48,7 +65,7 @@ fun UstadDetailField(
         }
     }else {
         DetailFieldContent(
-            modifier = modifierToUse,
+            modifier = modifier,
             valueText = valueText,
             labelText = labelText,
             imageId = imageId,
@@ -61,8 +78,8 @@ fun UstadDetailField(
 private fun DetailFieldContent(
     modifier: Modifier = Modifier,
     imageId: Int = 0,
-    valueText: String,
-    labelText: String,
+    valueText: AnnotatedString,
+    labelText: AnnotatedString,
     secondaryActionContent: (@Composable () -> Unit)? = null,
 ) {
     Row(modifier){
