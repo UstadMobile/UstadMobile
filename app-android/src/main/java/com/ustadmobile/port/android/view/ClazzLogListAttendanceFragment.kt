@@ -40,15 +40,19 @@ import com.toughra.ustadmobile.databinding.FragmentClazzLogListAttendanceCharthe
 import com.toughra.ustadmobile.databinding.ItemClazzLogAttendanceListBinding
 import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.db.dao.ClazzDaoCommon
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.viewmodel.AttendanceGraphData
 import com.ustadmobile.core.viewmodel.ClazzLogListAttendanceUiState
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
@@ -339,6 +343,7 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 private fun ClazzLogListAttendanceScreen(
     uiState: ClazzLogListAttendanceUiState = ClazzLogListAttendanceUiState(),
     onClickClazz: (ClazzLog) -> Unit = {},
+    onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
 
     LazyColumn(
@@ -363,6 +368,15 @@ private fun ClazzLogListAttendanceScreen(
                 view
             },
                 update = {}
+            )
+        }
+
+        item {
+            UstadListFilterChipsHeader(
+                filterOptions = uiState.viewIdToNumDays,
+                selectedChipId = uiState.selectedChipId,
+                enabled = uiState.fieldsEnabled,
+                onClickFilterChip = onClickFilterChip,
             )
         }
 
@@ -529,19 +543,5 @@ fun ClazzLogListAttendanceScreenPreview() {
     )
     MdcTheme {
         ClazzLogListAttendanceScreen(uiStateVal)
-    }
-}
-
-class MyAxisFormatter : IndexAxisValueFormatter() {
-
-    private var items = arrayListOf("Milk", "Butter", "Cheese", "Ice cream", "Milkshake")
-
-    override fun getAxisLabel(value: Float, axis: AxisBase?): String? {
-        val index = value.toInt()
-        return if (index < items.size) {
-            items[index]
-        } else {
-            null
-        }
     }
 }

@@ -2,9 +2,11 @@ package com.ustadmobile.view
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzLogListAttendanceUiState
 import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.ClazzLog
+import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import csstype.Color
 import csstype.px
 import kotlinx.datetime.TimeZone
@@ -22,6 +24,8 @@ external interface ClazzLogListAttendanceScreenProps : Props {
     var uiState: ClazzLogListAttendanceUiState
 
     var onClickClazz: (ClazzLog) -> Unit
+
+    var onClickFilterChip: (MessageIdOption2?) -> Unit
 
 }
 
@@ -66,6 +70,13 @@ private val ClazzLogListAttendanceScreenComponent2 =
 
         Stack {
             spacing = responsive(20.px)
+
+            UstadListFilterChipsHeader {
+                filterOptions = props.uiState.viewIdToNumDays
+                selectedChipId = props.uiState.selectedChipId
+                enabled = props.uiState.fieldsEnabled
+                onClickFilterChip = props.onClickFilterChip
+            }
 
             List{
                 props.uiState.clazzLogsList.forEach { clazzLog ->
