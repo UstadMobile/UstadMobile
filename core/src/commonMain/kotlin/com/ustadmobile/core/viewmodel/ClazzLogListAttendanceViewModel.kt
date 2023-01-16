@@ -1,7 +1,6 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
-import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzLog
 
 data class ClazzLogListAttendanceUiState(

@@ -17,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,10 +28,10 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.soywiz.klock.DateTime
@@ -49,7 +48,6 @@ import com.ustadmobile.core.viewmodel.AttendanceGraphData
 import com.ustadmobile.core.viewmodel.ClazzLogListAttendanceUiState
 import com.ustadmobile.door.lifecycle.MutableLiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -58,6 +56,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import java.text.DecimalFormat
 import java.util.*
+
 
 class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog>(),
         ClazzLogListAttendanceView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener,
@@ -345,131 +344,25 @@ private fun ClazzLogListAttendanceScreen(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        var chart: LineChart? = null;
 
         item {
 
             AndroidView(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp),
+                    .height(250.dp),
                 factory = {  context ->
                 val view = LayoutInflater.from(context).inflate(
                     R.layout.item_clazz_log_list_attendance_chart,
                     null, false
                 )
 
-                chart = view.findViewById<LineChart>(R.id.chart)
-                chart?.legend?.isEnabled = false
-                chart?.description?.isEnabled = false
-                chart?.axisRight?.setDrawLabels(false)
-                chart?.xAxis?.valueFormatter = object: ValueFormatter(){
-                    override fun getFormattedValue(value: Float): String {
-                        return value.toString()
-                    }
-                }
-                chart?.xAxis?.position = XAxis.XAxisPosition.BOTTOM
-                chart?.xAxis?.labelRotationAngle = 45f
-                chart?.setTouchEnabled(false)
-                chart?.xAxis?.setDrawGridLines(false)
-                chart?.axisRight?.setDrawGridLines(false)
-                chart?.axisRight?.setDrawAxisLine(false)
-                chart?.xAxis?.isGranularityEnabled = true
-                chart?.xAxis?.granularity = (1000 * 60 * 60 * 24 * 2).toFloat()
-                chart?.axisLeft?.axisMinimum = 0f
-                chart?.axisLeft?.axisMaximum = 100f
-                chart?.axisLeft?.valueFormatter = object: ValueFormatter(){
-                    override fun getFormattedValue(value: Float): String {
-                        return "${value}%"
-                    }
-                }
-                val graphData = uiState.graphData
-                val percentage = graphData?.percentageAttendedSeries?.size ?: 0
-                if(percentage > 2) {
-                    val lineData = LineData().apply {
-                        listOf(graphData?.percentageAttendedSeries, graphData?.percentageLateSeries).forEachIndexed { index, list ->
-                            val colorId = if(index == 0) R.color.successColor else R.color.secondaryColor
-                            val seriesColor = context.let { ContextCompat.getColor(it, colorId) } ?: Color.BLACK
-                            addDataSet(LineDataSet(list?.map { Entry(it.first.toFloat(), it.second * 100) },
-                                context.getString(R.string.attendance)).apply {
-                                color = seriesColor
-                                valueTextColor = Color.BLACK
-                                lineWidth = 1f
-                                setDrawValues(false)
-                                setDrawCircles(false)
-                                mode = LineDataSet.Mode.LINEAR
-//                                fillColor = seriesColor
-                                fillAlpha = 192
-                                setDrawFilled(true)
-                                setFillFormatter { dataSet, dataProvider ->
-                                    0f
-                                }
-                            })
-                        }
-                    }
+                val chart = view.findViewById<LineChart>(R.id.chart)
+                setUpLineChart(chart, uiState.graphData)
 
-                    val dateRangeVal = graphData?.graphDateRange?.first?.toFloat() to graphData?.graphDateRange?.second?.toFloat()
-                    if(chart != null && lineData != null) {
-                        chart?.data = lineData
-                        chart?.invalidate()
-                    }
-
-                    if(chart != null && dateRangeVal != null) {
-                        chart?.xAxis?.axisMinimum = dateRangeVal.first ?: 0F
-                        chart?.xAxis?.axisMaximum = dateRangeVal.second ?: 0F
-                    }
-                }
-
-//                var lastCheckedId = R.id.chip_last_week
-//                chipGroup.check(lastCheckedId)
-//                chipGroup.setOnCheckedChangeListener { group, checkedId ->
-//                    if(checkedId != View.NO_ID) {
-//                        lastCheckedId = checkedId
-//                        presenter?.handleClickGraphDuration(ClazzLogListAttendanceFragment.ClazzLogListGraphRecyclerAdapter.VIEW_ID_TO_NUMDAYS_MAP[checkedId] ?: 7)
-//                    }else {
-//                        chipGroup.check(lastCheckedId)
-//                    }
-//
-//                }
                 view
             },
-                update = {
-                    val graphData = uiState.graphData
-                    val percentage = graphData?.percentageAttendedSeries?.size ?: 0
-                    if(percentage > 2) {
-                        val lineData = LineData().apply {
-                            listOf(graphData?.percentageAttendedSeries, graphData?.percentageLateSeries).forEachIndexed { index, list ->
-                                val colorId = if(index == 0) Color.GREEN else Color.YELLOW
-                                val seriesColor = colorId
-                                addDataSet(LineDataSet(list?.map { Entry(it.first.toFloat(), it.second * 100) },
-                                    "attendant").apply {
-                                    color = seriesColor
-                                    valueTextColor = Color.BLACK
-                                    lineWidth = 1f
-                                    setDrawValues(false)
-                                    setDrawCircles(false)
-                                    mode = LineDataSet.Mode.LINEAR
-//                                    fillColor = seriesColor
-                                    fillAlpha = 192
-                                    setDrawFilled(true)
-                                    setFillFormatter { dataSet, dataProvider ->
-                                        0f
-                                    }
-                                })
-                            }
-                        }
-                        val dateRangeVal = graphData?.graphDateRange?.first?.toFloat() to graphData?.graphDateRange?.second?.toFloat()
-                        if(chart != null && lineData != null) {
-                            chart?.data = lineData
-                            chart?.invalidate()
-                        }
-
-                        if(chart != null && dateRangeVal != null) {
-                            chart?.xAxis?.axisMinimum = dateRangeVal.first ?: 0F
-                            chart?.xAxis?.axisMaximum = dateRangeVal.second ?: 0F
-                        }
-                    }
-                }
+                update = {}
             )
         }
 
@@ -483,6 +376,55 @@ private fun ClazzLogListAttendanceScreen(
             )
         }
     }
+}
+
+private fun setUpLineChart(chart: LineChart?, graphData: AttendanceGraphData?) {
+
+    chart?.legend?.isEnabled = false
+    chart?.description?.isEnabled = false
+    chart?.axisRight?.setDrawLabels(false)
+    chart?.xAxis?.position = XAxis.XAxisPosition.BOTTOM
+    chart?.xAxis?.labelRotationAngle = 45f
+    chart?.setTouchEnabled(false)
+    chart?.xAxis?.setDrawGridLines(false)
+    chart?.axisRight?.setDrawGridLines(false)
+    chart?.axisRight?.setDrawAxisLine(false)
+    chart?.xAxis?.isGranularityEnabled = true
+    chart?.xAxis?.granularity = (1000 * 60 * 60 * 24 * 2).toFloat()
+    chart?.axisLeft?.axisMinimum = 0f
+    chart?.axisLeft?.axisMaximum = 100f
+
+    val lineData = LineData().apply {
+        listOf(graphData?.percentageAttendedSeries, graphData?.percentageLateSeries).forEachIndexed { index, list ->
+            val colorId = if(index == 0) Color.GREEN else Color.RED
+            addDataSet(LineDataSet(list?.map { Entry(it.first.toFloat(), it.second ) },
+                "attendance").apply {
+                color = colorId
+                valueTextColor = Color.BLACK
+                lineWidth = 1f
+                setDrawValues(false)
+                setDrawCircles(false)
+                mode = LineDataSet.Mode.LINEAR
+                fillColor = colorId
+                fillAlpha = 192
+                setDrawFilled(true)
+                setFillFormatter { dataSet, dataProvider ->
+                    0f
+                }
+            })
+        }
+    }
+
+    val dateRangeVal = graphData?.graphDateRange?.first?.toFloat() to graphData?.graphDateRange?.second?.toFloat()
+
+//    if(chart != null && dateRangeVal != null) {
+//        chart?.xAxis?.axisMinimum = dateRangeVal.first ?: 0f
+//        chart?.xAxis?.axisMaximum = dateRangeVal.second ?: 0f
+//    }
+
+    chart?.data = lineData
+
+    chart?.invalidate()
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -569,36 +511,37 @@ fun ClazzLogListAttendanceScreenPreview() {
         ),
         graphData = AttendanceGraphData(
              percentageAttendedSeries = listOf(
-                 Pair(145, 34F),
-                 Pair(2, 45F),
-                 Pair(80, 130F),
-                 Pair(80, 130F),
-                 Pair(145, 34F),
-                 Pair(2, 45F),
-                 Pair(80, 130F),
-                 Pair(80, 130F),
-                 Pair(145, 34F),
-                 Pair(2, 45F),
-                 Pair(80, 130F),
-                 Pair(80, 130F),
+                 Pair(0, 11f),
+                 Pair(1, 35f),
+                 Pair(2, 18f),
+                 Pair(3, 16f),
+                 Pair(4, 22f),
              ),
             percentageLateSeries = listOf(
-                Pair(23, 34F),
-                Pair(290, 67F),
-                Pair(1, 14F),
-                Pair(145, 34F),
-                Pair(2, 45F),
-                Pair(80, 130F),
-                Pair(80, 130F),
-                Pair(145, 34F),
-                Pair(2, 45F),
-                Pair(80, 130F),
-                Pair(80, 130F),
+                Pair(0, 15f),
+                Pair(1, 16f),
+                Pair(2, 13f),
+                Pair(3, 22f),
+                Pair(4, 22f),
             ),
-            graphDateRange = Pair(23.toLong(), 34.toLong()),
+            graphDateRange = Pair(1343805819061, 1673792451000),
         )
     )
     MdcTheme {
         ClazzLogListAttendanceScreen(uiStateVal)
+    }
+}
+
+class MyAxisFormatter : IndexAxisValueFormatter() {
+
+    private var items = arrayListOf("Milk", "Butter", "Cheese", "Ice cream", "Milkshake")
+
+    override fun getAxisLabel(value: Float, axis: AxisBase?): String? {
+        val index = value.toInt()
+        return if (index < items.size) {
+            items[index]
+        } else {
+            null
+        }
     }
 }
