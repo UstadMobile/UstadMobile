@@ -29,6 +29,14 @@ external interface ClazzMemberListScreenProps : Props {
     var onClickPendingRequest: (enrolment: PersonWithClazzEnrolmentDetails,
                                 approved: Boolean) -> Unit
 
+    var onClickFilterChip: (MessageIdOption2?) -> Unit
+
+    var onClickAddNewTeacher: () -> Unit
+
+    var onClickAddNewStudent: () -> Unit
+
+    var onClickSort: () -> Unit
+
 }
 
 
@@ -42,25 +50,17 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
         Stack {
             spacing = responsive(20.px)
 
-            UstadListFilterChipsHeader{
-                filterOptions = listOf(
-                    MessageIdOption2(MessageID.currently_enrolled,
-                        ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-                    MessageIdOption2(MessageID.past_enrollments,
-                        ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
-                    MessageIdOption2(MessageID.all, 0),
-                )
-                selectedChipId = ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
+            UstadListFilterChipsHeader {
+                filterOptions = props.uiState.filterOptions
+                selectedChipId = props.uiState.selectedChipId
+                enabled = props.uiState.fieldsEnabled
+                onClickFilterChip = props.onClickFilterChip
             }
 
             UstadListSortHeader {
-                activeSortOrderOption = SortOrderOption(
-                    MessageID.name,
-                    ClazzDaoCommon.SORT_CLAZZNAME_ASC,
-                    true
-                )
-                enabled = true
-                onClickSort = { }
+                activeSortOrderOption = props.uiState.activeSortOrderOption
+                enabled = props.uiState.fieldsEnabled
+                onClickSort = props.onClickSort
             }
 
             List {
@@ -74,6 +74,7 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                 if (props.uiState.addTeacherVisible){
                     ListItem {
                         ListItemButton {
+                            onClick = { props.onClickAddNewTeacher }
 
                             ListItemIcon {
                                 + PersonAdd.create()
@@ -89,6 +90,9 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                 props.uiState.teacherList.forEach { person ->
                     ListItem{
                         ListItemButton {
+
+                            onClick = { props.onClickEntry(person) }
+
                             ListItemIcon {
                                 + AccountCircle.create()
                             }
@@ -112,6 +116,8 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                 if (props.uiState.addStudentVisible){
                     ListItem {
                         ListItemButton {
+
+                            onClick = { props.onClickAddNewStudent }
 
                             ListItemIcon {
                                 + PersonAdd.create()
@@ -165,7 +171,8 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
 
     val strings = useStringsXml()
 
-    val statusColor = if ((props.person.attendance/100) >= ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_GOOD)
+    val statusColor = if ((props.person.attendance/100) >=
+        ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_GOOD)
         SvgIconColor.success
     else if ((props.person.attendance/100)
         >= ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_WARNING)

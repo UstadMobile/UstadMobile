@@ -286,8 +286,12 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
 private fun ClazzMemberListScreen(
     uiState: ClazzMemberListUiState = ClazzMemberListUiState(),
     onClickEntry: (PersonWithClazzEnrolmentDetails) -> Unit = {},
+    onClickAddNewTeacher: () -> Unit = {},
+    onClickAddNewStudent: () -> Unit = {},
     onClickPendingRequest: (enrolment: PersonWithClazzEnrolmentDetails,
-                            approved: Boolean) -> Unit
+                            approved: Boolean) -> Unit,
+    onClickSort: () -> Unit = {},
+    onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -296,24 +300,18 @@ private fun ClazzMemberListScreen(
 
         item {
             UstadListFilterChipsHeader(
-                filterOptions = listOf(
-                    MessageIdOption2(MessageID.currently_enrolled,
-                        ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED),
-                    MessageIdOption2(MessageID.past_enrollments,
-                        ClazzDaoCommon.FILTER_PAST_ENROLLMENTS),
-                    MessageIdOption2(MessageID.all, 0),
-                ),
-                selectedChipId = ClazzDaoCommon.FILTER_CURRENTLY_ENROLLED
+                filterOptions = uiState.filterOptions,
+                selectedChipId = uiState.selectedChipId,
+                enabled = uiState.fieldsEnabled,
+                onClickFilterChip = onClickFilterChip,
             )
         }
 
         item {
             UstadListSortHeader(
-                SortOrderOption(
-                    MessageID.name,
-                    ClazzDaoCommon.SORT_CLAZZNAME_ASC,
-                    true
-                )
+                activeSortOrderOption = uiState.activeSortOrderOption,
+                enabled = uiState.fieldsEnabled,
+                onClickSort = onClickSort
             )
         }
 
@@ -327,7 +325,7 @@ private fun ClazzMemberListScreen(
             if (uiState.addTeacherVisible){
                 AddListItem(
                     text = stringResource(id = R.string.add_a_teacher),
-                    onClick = {},
+                    onClick = onClickAddNewTeacher,
                 )
             }
         }
@@ -337,6 +335,9 @@ private fun ClazzMemberListScreen(
             key = { Pair(1, it.personUid) }
         ){ person ->
             ListItem (
+                modifier = Modifier.clickable {
+                    onClickEntry(person)
+                },
                 text = {
                     Text(text = "${person.firstNames} ${person.lastName}")
                 },
@@ -359,7 +360,7 @@ private fun ClazzMemberListScreen(
             if (uiState.addStudentVisible){
                 AddListItem(
                     text = stringResource(id = R.string.add_a_student),
-                    onClick = {},
+                    onClick = onClickAddNewStudent,
                 )
             }
         }
@@ -419,7 +420,8 @@ fun AddListItem(
      onClick: (PersonWithClazzEnrolmentDetails) -> Unit,
  ){
 
-     val statusColor = if ((person.attendance/100) >= ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_GOOD)
+     val statusColor = if ((person.attendance/100) >=
+         ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_GOOD)
          R.color.successColor
      else if ((person.attendance/100)
          >= ClazzLogAttendanceRecord.ATTENDANCE_THRESHOLD_WARNING)
@@ -560,9 +562,12 @@ fun ClazzMemberListScreenPreview() {
     )
 
     MdcTheme {
-        ClazzMemberListScreen(uiStateVal, {},
-            {enrolment: PersonWithClazzEnrolmentDetails,
-             approved: Boolean ->  {}}
+        ClazzMemberListScreen(
+            uiState = uiStateVal,
+            onClickPendingRequest = {
+                    enrolment: PersonWithClazzEnrolmentDetails,
+                    approved: Boolean ->  {}
+            }
         )
     }
 }
