@@ -38,6 +38,6 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "Anu"
+      USERNAME: "edna"
       PASSWORD: "test"
 - tapOn: "courses"
