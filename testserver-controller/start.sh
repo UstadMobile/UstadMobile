@@ -2,6 +2,8 @@
 
 BASEDIR="$(realpath $(dirname $0))"
 
+TESTRESULTSDIR=$1
+
 if [ ! -e $BASEDIR/build/libs/testserver-controller-all.jar ]; then
   echo "Please build testserver-controller e.g. ./gradlew testserver-controller:build"
   exit 1
@@ -22,7 +24,7 @@ fi
 
 # Make the project root directory the working directory
 cd $BASEDIR/..
-java -jar $BASEDIR/build/libs/testserver-controller-all.jar &
+java -jar $BASEDIR/build/libs/testserver-controller-all.jar -P:resultDir=$TESTRESULTSDIR &
 TESTSERVERPID=$!
 echo $TESTSERVERPID > $BASEDIR/build/server.pid
 echo "Started testserver-controller and saved PID [ $TESTSERVERPID ]"
