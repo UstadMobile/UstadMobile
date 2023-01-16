@@ -390,21 +390,21 @@ private fun ClazzLogListAttendanceScreen(
     }
 }
 
-private fun setUpLineChart(chart: LineChart?, graphData: AttendanceGraphData?) {
+private fun setUpLineChart(chart: LineChart, graphData: AttendanceGraphData?) {
 
-    chart?.legend?.isEnabled = false
-    chart?.description?.isEnabled = false
-    chart?.axisRight?.setDrawLabels(false)
-    chart?.xAxis?.position = XAxis.XAxisPosition.BOTTOM
-    chart?.xAxis?.labelRotationAngle = 45f
-    chart?.setTouchEnabled(false)
-    chart?.xAxis?.setDrawGridLines(false)
-    chart?.axisRight?.setDrawGridLines(false)
-    chart?.axisRight?.setDrawAxisLine(false)
-    chart?.xAxis?.isGranularityEnabled = true
-    chart?.xAxis?.granularity = (1000 * 60 * 60 * 24 * 2).toFloat()
-    chart?.axisLeft?.axisMinimum = 0f
-    chart?.axisLeft?.axisMaximum = 100f
+    chart.legend?.isEnabled = false
+    chart.description?.isEnabled = false
+    chart.axisRight?.setDrawLabels(false)
+    chart.xAxis?.position = XAxis.XAxisPosition.BOTTOM
+    chart.xAxis?.labelRotationAngle = 45f
+    chart.setTouchEnabled(false)
+    chart.xAxis?.setDrawGridLines(false)
+    chart.axisRight?.setDrawGridLines(false)
+    chart.axisRight?.setDrawAxisLine(false)
+    chart.xAxis?.isGranularityEnabled = true
+    chart.xAxis?.granularity = (1000 * 60 * 60 * 24 * 2).toFloat()
+    chart.axisLeft?.axisMinimum = 0f
+    chart.axisLeft?.axisMaximum = 100f
 
     val lineData = LineData().apply {
         listOf(graphData?.percentageAttendedSeries,
@@ -431,12 +431,12 @@ private fun setUpLineChart(chart: LineChart?, graphData: AttendanceGraphData?) {
 
     val dateRangeVal = graphData?.graphDateRange?.first?.toFloat() to graphData?.graphDateRange?.second?.toFloat()
 
-    chart?.xAxis?.axisMinimum = dateRangeVal.first ?: 0f
-    chart?.xAxis?.axisMaximum = dateRangeVal.second ?: 0f
+    chart.xAxis?.axisMinimum = dateRangeVal.first ?: 0f
+    chart.xAxis?.axisMaximum = dateRangeVal.second ?: 0f
 
-    chart?.data = lineData
+    chart.data = lineData
 
-    chart?.invalidate()
+    chart.invalidate()
 }
 
 @OptIn(ExperimentalMaterialApi::class)
