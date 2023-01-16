@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,6 +53,7 @@ import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
+import okhttp3.internal.toHexString
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.text.DecimalFormat
@@ -405,17 +407,19 @@ private fun setUpLineChart(chart: LineChart?, graphData: AttendanceGraphData?) {
     chart?.axisLeft?.axisMaximum = 100f
 
     val lineData = LineData().apply {
-        listOf(graphData?.percentageAttendedSeries, graphData?.percentageLateSeries).forEachIndexed { index, list ->
-            val colorId = if(index == 0) Color.GREEN else Color.RED
+        listOf(graphData?.percentageAttendedSeries,
+            graphData?.percentageLateSeries).forEachIndexed { index, list ->
+            val colorId = if(index == 0) "#4CAF50" else "#ff9800"
+            val seriesColor = Color.parseColor(colorId)
             addDataSet(LineDataSet(list?.map { Entry(it.first.toFloat(), it.second ) },
                 "attendance").apply {
-                color = colorId
+                color = seriesColor
                 valueTextColor = Color.BLACK
-                lineWidth = 1f
+                lineWidth = 3f
                 setDrawValues(false)
                 setDrawCircles(false)
                 mode = LineDataSet.Mode.LINEAR
-                fillColor = colorId
+                fillColor = seriesColor
                 fillAlpha = 192
                 setDrawFilled(true)
                 setFillFormatter { dataSet, dataProvider ->
@@ -427,10 +431,8 @@ private fun setUpLineChart(chart: LineChart?, graphData: AttendanceGraphData?) {
 
     val dateRangeVal = graphData?.graphDateRange?.first?.toFloat() to graphData?.graphDateRange?.second?.toFloat()
 
-//    if(chart != null && dateRangeVal != null) {
-//        chart?.xAxis?.axisMinimum = dateRangeVal.first ?: 0f
-//        chart?.xAxis?.axisMaximum = dateRangeVal.second ?: 0f
-//    }
+    chart?.xAxis?.axisMinimum = dateRangeVal.first ?: 0f
+    chart?.xAxis?.axisMaximum = dateRangeVal.second ?: 0f
 
     chart?.data = lineData
 
@@ -455,6 +457,9 @@ private fun ClazzLogListItem(
         clazzLog.clazzLogNumAbsent  to R.color.errorColor
     )
 
+    val configuration = LocalConfiguration.current
+
+
     ListItem(
         modifier = Modifier.clickable {
             onClick(clazzLog)
@@ -469,14 +474,13 @@ private fun ClazzLogListItem(
         secondaryText = {
             Column {
                 Row {
-                    attendanceMap.forEach { (attendanceStatus, color) ->
-
+                    for (entry in attendanceMap.entries.iterator()) {
+                        print("${entry.key} : ${entry.value}")
                         Box(modifier = Modifier
-                            .weight(attendanceStatus.toFloat())
+                            .weight((entry.key).toFloat())
                             .height(6.dp)
-                            .background(color = colorResource(id = color))
+                            .background(color = colorResource(id = entry.value))
                         )
-
                     }
                 }
                 Text(text = stringResource(
@@ -507,7 +511,7 @@ fun ClazzLogListAttendanceScreenPreview() {
             ClazzLog().apply {
                 clazzLogUid = 2
                 clazzLogNumPresent = 40
-                clazzLogNumPartial = 40
+                clazzLogNumPartial = 30
                 clazzLogNumAbsent = 30
                 logDate = 1673683347000
             },
@@ -521,20 +525,20 @@ fun ClazzLogListAttendanceScreenPreview() {
         ),
         graphData = AttendanceGraphData(
              percentageAttendedSeries = listOf(
-                 Pair(0, 11f),
-                 Pair(1, 35f),
-                 Pair(2, 18f),
-                 Pair(3, 16f),
-                 Pair(4, 22f),
+                 Pair(1, 50f),
+                 Pair(2, 10f),
+                 Pair(3, 30f),
+                 Pair(4, 50f),
+                 Pair(5, 15f),
              ),
             percentageLateSeries = listOf(
-                Pair(0, 15f),
-                Pair(1, 16f),
-                Pair(2, 13f),
-                Pair(3, 22f),
-                Pair(4, 22f),
+                Pair(1, 15f),
+                Pair(2, 20f),
+                Pair(3, 50f),
+                Pair(4, 30f),
+                Pair(5, 60f),
             ),
-            graphDateRange = Pair(1343805819061, 1673792451000),
+            graphDateRange = Pair(1, 5),
         )
     )
     MdcTheme {
