@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_003_add_ content_block_and_link_existing_content"
-  TESTNAME: "003_003_add_ content_block_and_link_existing_content"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_003_add_existing_content_in_library_as_block"
+  TESTNAME: "003_003_add_existing_content_in_library_as_block"
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
@@ -70,7 +70,7 @@ env:
     index: 1
 - tapOn: "SAVE"
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/able_to_add_existing_content_block_inside_course"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/able_to_add_existing_content_block_inside_course"
 
 
 
