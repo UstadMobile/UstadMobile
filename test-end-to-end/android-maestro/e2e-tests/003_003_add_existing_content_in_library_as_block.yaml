@@ -7,7 +7,9 @@ env:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
-#---------add content to library ---------#
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+  #---------add content to library ---------#
 - runFlow:
     file: "../common/add_content.yaml"
     env:
