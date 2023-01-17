@@ -205,6 +205,9 @@ fun SessionListScreenPreview() {
                 sessionsList = listOf(
                     PersonWithSessionsDisplay().apply {
                         startDate = 13
+                        resultScoreScaled = 4F
+                        resultScore = 5
+                        resultMax = 10
                     },
                     PersonWithSessionsDisplay().apply {
                         startDate = 13

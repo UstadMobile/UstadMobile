@@ -97,13 +97,16 @@ private val PersonListItem = FC<PersonListItemProps> { props ->
                     if (uiState.scoreResultVisible){
                         Stack {
                             direction = responsive(StackDirection.row)
+                            spacing = responsive(10.px)
 
                             + Check.create()
 
                             Typography {
-                                + (strings[MessageID.percentage_score].replace("%1\$s",
-                                    (props.person.resultScoreScaled * 100).toString())
-                                        )
+                                + (strings[MessageID.percentage_score]
+                                    .replace("%1\$s",
+                                        (props.person.resultScoreScaled * 100F).toString())
+                                )
+
                             }
 
                             Typography {
@@ -124,7 +127,9 @@ val SessionListScreenPreview = FC<Props> {
             sessionsList = listOf(
                 PersonWithSessionsDisplay().apply {
                     startDate = 13
-                    resultScoreScaled = 100F
+                    resultScoreScaled = 3F
+                    resultScore = 5
+                    resultMax = 10
                 },
                 PersonWithSessionsDisplay().apply {
                     startDate = 13
