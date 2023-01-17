@@ -121,6 +121,7 @@ private val ClazzLogListAttendanceScreenComponent2 =
                                             }
                                         }
                                     }
+
                                     Typography {
                                         + (strings[MessageID.three_num_items_with_name_with_comma]
 

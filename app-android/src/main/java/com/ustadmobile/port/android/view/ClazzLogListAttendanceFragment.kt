@@ -474,14 +474,11 @@ private fun ClazzLogListItem(
         timeZoneId = TimeZone.getDefault().id
     )
 
-    val attendanceMap = mapOf(
-        clazzLog.clazzLogNumPresent to R.color.successColor,
-        clazzLog.clazzLogNumPartial to R.color.secondaryColor,
-        clazzLog.clazzLogNumAbsent  to R.color.errorColor
+    val attendancePairList: List<Pair<Int, Int>> = listOf(
+            Pair(clazzLog.clazzLogNumPresent, R.color.successColor) ,
+            Pair(clazzLog.clazzLogNumPartial, R.color.secondaryColor) ,
+            Pair(clazzLog.clazzLogNumAbsent, R.color.errorColor) ,
     )
-
-    val configuration = LocalConfiguration.current
-
 
     ListItem(
         modifier = Modifier.clickable {
@@ -497,12 +494,11 @@ private fun ClazzLogListItem(
         secondaryText = {
             Column {
                 Row {
-                    for (entry in attendanceMap.entries.iterator()) {
-                        print("${entry.key} : ${entry.value}")
+                    attendancePairList.forEach { pair ->
                         Box(modifier = Modifier
-                            .weight((entry.key).toFloat())
+                            .weight((pair.first).toFloat())
                             .height(6.dp)
-                            .background(color = colorResource(id = entry.value))
+                            .background(color = colorResource(id = pair.second))
                         )
                     }
                 }
@@ -542,7 +538,7 @@ fun ClazzLogListAttendanceScreenPreview() {
                 clazzLogUid = 3
                 clazzLogNumPresent = 70
                 clazzLogNumPartial = 20
-                clazzLogNumAbsent = 10
+                clazzLogNumAbsent = 2
                 logDate = 1673683347000
             }
         ),
