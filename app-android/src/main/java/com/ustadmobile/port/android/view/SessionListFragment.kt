@@ -2,18 +2,35 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.*
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemPersonSessionsListBinding
 import com.ustadmobile.core.controller.SessionListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SessionListView
+import com.ustadmobile.core.viewmodel.SessionListUiState
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
+import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import java.util.*
 
 
 class SessionListFragment(): UstadListViewFragment<PersonWithSessionsDisplay, PersonWithSessionsDisplay>(),
@@ -99,4 +116,90 @@ class SessionListFragment(): UstadListViewFragment<PersonWithSessionsDisplay, Pe
         }
     }
 
+}
+
+@Composable
+private fun SessionListScreen(
+    uiState: SessionListUiState = SessionListUiState(),
+    onClickPerson: (PersonWithSessionsDisplay) -> Unit = {}
+) {
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .defaultScreenPadding()
+    ) {
+
+        items(
+            items = uiState.sessionsList,
+        ){ personItem ->
+            PersonListItem(
+                person = personItem,
+                onClick = onClickPerson
+            )
+        }
+    }
+
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun PersonListItem(
+    person: PersonWithSessionsDisplay,
+    onClick: (PersonWithSessionsDisplay) -> Unit,
+){
+
+    val dateTimeFormatted = rememberFormattedDateTime (
+        timeInMillis = person.startDate,
+        timeZoneId = TimeZone.getDefault().id
+    )
+
+    ListItem (
+        modifier = Modifier.clickable {
+            onClick(person)
+        },
+        text = {
+            Text(text = "Passed - ")
+        },
+        secondaryText = {
+            Column{
+                Text(dateTimeFormatted)
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Text(stringResource(id = R.string.percentage_score,
+                        (person.resultScoreScaled * 100))
+                    )
+
+                    Text("${person.resultScore} / ${person.resultMax}")
+                }
+            }
+        },
+        icon = {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = null
+            )
+        }
+    )
+}
+
+@Composable
+@Preview
+fun SessionListScreenPreview() {
+    MdcTheme {
+        SessionListScreen(
+            uiState = SessionListUiState(
+                sessionsList = listOf(
+                    PersonWithSessionsDisplay().apply {
+                        startDate = 13
+                    },
+                    PersonWithSessionsDisplay().apply {
+                        startDate = 13
+                    }
+                ),
+            )
+        )
+    }
 }
