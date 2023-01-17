@@ -91,19 +91,11 @@ class TestSiteRoute {
     fun givenAvailableWorkSpace_whenRequested_thenShouldReturnWorkSpaceObject(
 
     ) = testSiteApplication{ client ->
-        val db: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_DB)
-        val site = Site().apply {
-            siteName = "UmTestWorkspace"
-            guestLogin = true
-            registrationAllowed = true
-        }
-        site.siteUid = db.siteDao.insert(site)
-
         val siteReceived: Site = runBlocking {
             client.get("/Site/verify").body()
         }
 
         Assert.assertEquals("Valid workspace was retrieved",
-            siteReceived.siteUid, site.siteUid)
+            1, siteReceived.siteUid)
     }
 }

@@ -29,6 +29,7 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:$version_logback"
     implementation "io.ktor:ktor-serialization-gson:$version_ktor"
     implementation "com.google.code.gson:gson:$version_gson"
+    implementation "org.jetbrains.kotlinx:kotlinx-html-jvm:$version_kotlinx_html"
 
     testImplementation "junit:junit:$version_junit"
 }

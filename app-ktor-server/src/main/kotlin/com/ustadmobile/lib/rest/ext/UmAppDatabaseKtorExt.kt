@@ -30,10 +30,9 @@ import java.io.File
 import io.github.aakira.napier.Napier
 
 internal fun UmAppDatabase.insertDefaultSite() {
-    val (db, repo) = requireDbAndRepo()
-    val site = db.siteDao.getSite()
+    val site = siteDao.getSite()
     if(site == null) {
-        repo.siteDao.insert(Site().apply {
+        siteDao.insert(Site().apply {
             siteUid = 1L
             siteName = "My Site"
             guestLogin = false
@@ -125,6 +124,5 @@ suspend fun UmAppDatabase.initAdminUser(
 }
 
 fun UmAppDatabase.ktorInitRepo(di: DI) {
-    insertDefaultSite()
     insertCourseTerminology(di)
 }

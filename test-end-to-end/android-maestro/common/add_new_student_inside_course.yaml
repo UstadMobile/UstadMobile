@@ -36,6 +36,6 @@ appId: com.toughra.ustadmobile
 - tapOn: "New password"
 - inputText: ${PASSWORD}
 - tapOn: "Confirm password"
-- inputText: "test"
+- inputText: ${PASSWORD}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_account_for_new_student-${STUDENTFIRSTNAME} ${STUDENTLASTNAME}"
