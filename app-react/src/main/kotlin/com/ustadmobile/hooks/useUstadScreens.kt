@@ -83,6 +83,8 @@ fun useUstadScreens(): UstadScreens {
                 UstadContentEntryListItemPreview),
             UstadScreen(CourseGroupSetDetailView.VIEW_NAME, "CourseGroupSetDetail Preview",
                 CourseGroupSetDetailScreenPreview),
+            UstadScreen(JoinWithCodeView.VIEW_NAME, "JoinWithCode Preview",
+                JoinWithCodeScreenPreview),
         )
     }
 }
