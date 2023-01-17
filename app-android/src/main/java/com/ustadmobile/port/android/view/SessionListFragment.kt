@@ -24,6 +24,7 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.viewmodel.SessionListUiState
+import com.ustadmobile.core.viewmodel.listItemUiState
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
@@ -149,6 +150,8 @@ fun PersonListItem(
     onClick: (PersonWithSessionsDisplay) -> Unit,
 ){
 
+    val uiState = person.listItemUiState
+
     val dateTimeFormatted = rememberFormattedDateTime (
         timeInMillis = person.startDate,
         timeZoneId = TimeZone.getDefault().id
@@ -165,14 +168,22 @@ fun PersonListItem(
             Column{
                 Text(dateTimeFormatted)
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    Text(stringResource(id = R.string.percentage_score,
-                        (person.resultScoreScaled * 100))
-                    )
+                if (uiState.scoreResultVisible){
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
 
-                    Text("${person.resultScore} / ${person.resultMax}")
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null
+                        )
+
+                        Text(stringResource(id = R.string.percentage_score,
+                            (person.resultScoreScaled * 100))
+                        )
+
+                        Text(uiState.scoreResultText)
+                    }
                 }
             }
         },
