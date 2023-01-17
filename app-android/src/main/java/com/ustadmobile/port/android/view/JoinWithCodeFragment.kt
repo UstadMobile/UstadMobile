@@ -24,6 +24,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.JoinWithCodeUiState
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
@@ -116,13 +117,16 @@ fun JoinWithCodeScreen(
     Column (
         modifier = Modifier
             .defaultScreenPadding()
-            .fillMaxSize()
-        ,
+            .fillMaxSize(),
     ){
 
-       Text(stringResource(id = R.string.join_code_instructions))
+       Text(
+           stringResource(id = R.string.join_code_instructions),
+           modifier = Modifier.defaultItemPadding()
+       )
 
         UstadTextEditField(
+            modifier = Modifier.defaultItemPadding(),
             value = uiState.code,
             label = stringResource(id = R.string.entity_code,uiState.entityType),
             error = uiState.codeError,
@@ -135,7 +139,8 @@ fun JoinWithCodeScreen(
         Button(
             onClick = onClickDone,
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .defaultItemPadding(),
             enabled = uiState.fieldsEnabled,
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = colorResource(id = R.color.secondaryColor)
