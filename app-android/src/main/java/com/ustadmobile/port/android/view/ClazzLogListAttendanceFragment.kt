@@ -348,7 +348,6 @@ private fun ClazzLogListAttendanceScreen(
         modifier = Modifier.fillMaxSize()
     ) {
 
-
         item {
 
             var chart = LineChart(LocalContext.current)
@@ -451,7 +450,8 @@ private fun updateChart(
     lineData: LineData?
 ) {
 
-    val dateRangeVal = graphData?.graphDateRange?.first?.toFloat() to graphData?.graphDateRange?.second?.toFloat()
+    val dateRangeVal = graphData?.graphDateRange?.first?.toFloat() to
+            graphData?.graphDateRange?.second?.toFloat()
 
     chart.xAxis?.axisMinimum = dateRangeVal.first ?: 0f
     chart.xAxis?.axisMaximum = dateRangeVal.second ?: 0f
