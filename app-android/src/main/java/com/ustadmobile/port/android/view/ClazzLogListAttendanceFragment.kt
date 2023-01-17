@@ -2,11 +2,13 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +20,7 @@ import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -348,7 +351,11 @@ private fun ClazzLogListAttendanceScreen(
         modifier = Modifier.fillMaxSize()
     ) {
 
+
         item {
+
+            var chart = LineChart(LocalContext.current)
+            var data: LineData? = null
 
             AndroidView(
                 modifier = Modifier
@@ -360,12 +367,17 @@ private fun ClazzLogListAttendanceScreen(
                     null, false
                 )
 
-                val chart = view.findViewById<LineChart>(R.id.chart)
-                setUpLineChart(chart, uiState.graphData)
+                chart = view.findViewById<LineChart>(R.id.chart)
+
+                data = setUpLineChart(chart, uiState.graphData, context)
+
+                updateChart(chart, uiState.graphData, data)
 
                 view
             },
-                update = {}
+                update = {
+                    updateChart(chart, uiState.graphData, data)
+                }
             )
         }
 
@@ -390,7 +402,11 @@ private fun ClazzLogListAttendanceScreen(
     }
 }
 
-private fun setUpLineChart(chart: LineChart, graphData: AttendanceGraphData?) {
+private fun setUpLineChart(
+    chart: LineChart,
+    graphData: AttendanceGraphData?,
+    context: Context
+): LineData {
 
     chart.legend?.isEnabled = false
     chart.description?.isEnabled = false
@@ -409,10 +425,10 @@ private fun setUpLineChart(chart: LineChart, graphData: AttendanceGraphData?) {
     val lineData = LineData().apply {
         listOf(graphData?.percentageAttendedSeries,
             graphData?.percentageLateSeries).forEachIndexed { index, list ->
-            val colorId = if(index == 0) "#4CAF50" else "#ff9800"
-            val seriesColor = Color.parseColor(colorId)
+            val colorId = if(index == 0) R.color.successColor else R.color.secondaryColor
+            val seriesColor = ContextCompat.getColor(context, colorId)
             addDataSet(LineDataSet(list?.map { Entry(it.first.toFloat(), it.second ) },
-                "attendance").apply {
+                context.getString(R.string.attendance)).apply {
                 color = seriesColor
                 valueTextColor = Color.BLACK
                 lineWidth = 3f
@@ -429,6 +445,15 @@ private fun setUpLineChart(chart: LineChart, graphData: AttendanceGraphData?) {
         }
     }
 
+    return lineData
+}
+
+private fun updateChart(
+    chart: LineChart,
+    graphData: AttendanceGraphData?,
+    lineData: LineData?
+) {
+
     val dateRangeVal = graphData?.graphDateRange?.first?.toFloat() to graphData?.graphDateRange?.second?.toFloat()
 
     chart.xAxis?.axisMinimum = dateRangeVal.first ?: 0f
@@ -437,6 +462,7 @@ private fun setUpLineChart(chart: LineChart, graphData: AttendanceGraphData?) {
     chart.data = lineData
 
     chart.invalidate()
+
 }
 
 @OptIn(ExperimentalMaterialApi::class)
