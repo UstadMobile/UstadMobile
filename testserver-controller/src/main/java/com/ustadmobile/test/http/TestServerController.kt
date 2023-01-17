@@ -30,7 +30,7 @@ fun Application.testServerController() {
 
     val adbPath = SysPathUtil.findCommandInPath(
         commandName = "adb",
-        extraSearchPaths = System.getenv("ANDROID_HOME"),
+        extraSearchPaths = System.getenv("ANDROID_HOME") ?: "",
     )
 
     var adbVideoName: String? = null
@@ -45,7 +45,7 @@ fun Application.testServerController() {
         throw IllegalStateException("ERROR: ADB path does not exist")
     }
 
-    fun pullFile(
+    fun adbPullFile(
         deviceSerial: String,
         fromPath: String,
         destFile: File,
@@ -82,7 +82,7 @@ fun Application.testServerController() {
             adbRecordProcess?.waitFor(20, TimeUnit.SECONDS)
             val destFile = File(File(resultDir, adbVideoName ?: "err"),
                 "screenrecord.mp4")
-            pullFile(currentSerial ?: "err", "/sdcard/$adbVideoName.mp4",
+            adbPullFile(currentSerial ?: "err", "/sdcard/$adbVideoName.mp4",
                 destFile, true)
             adbRecordProcess = null
         }
@@ -202,6 +202,15 @@ fun Application.testServerController() {
             response += "Started server process PID #${serverProcess?.pid()} ${serverArgs.joinToString( " ")} <br/>"
 
             if(adbRecordEnabled) {
+                ProcessBuilder(
+                    listOf(adbPath.absolutePath, "-s", requestDeviceSerial, "shell",
+                        "screencap", "/sdcard/$adbVideoName.png")
+                ).start().waitFor(5, TimeUnit.SECONDS)
+                val screenshotDestFile = File(File(resultDir, adbVideoName ?: "err"),
+                    "screenrecord-poster.png")
+                adbPullFile(requestDeviceSerial, "/sdcard/$adbVideoName.png",
+                    screenshotDestFile, deleteAfter = true)
+
                 val recordArgs = listOf(adbPath.absolutePath, "-s", requestDeviceSerial,
                     "shell", "screenrecord", "/sdcard/$adbVideoName.mp4")
                 adbRecordProcess = ProcessBuilder(recordArgs)

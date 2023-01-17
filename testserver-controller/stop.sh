@@ -13,3 +13,6 @@ kill $PID
 echo "Stopped server running as PID $PID"
 rm $BASEDIR/build/server.pid
 
+#Generate report
+java -classpath $BASEDIR/build/libs/testserver-controller-all.jar \
+  com.ustadmobile.test.http.AdbVideoReportMakerKt $BASEDIR/../
