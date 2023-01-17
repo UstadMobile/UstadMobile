@@ -95,11 +95,6 @@ if [ ! -e $TESTRESULTSDIR ]; then
   mkdir -p $TESTRESULTSDIR
 fi
 
-if [ -e $TESTRESULTSDIR/report.xml ]; then
-  echo "Delete previous report.xml"
-  rm $SCRIPTDIR/results/report.xml
-fi
-
 # Create a copy of common scripts that will work on the second app id (used to test interactions
 # between users)
 if [ ! -e $SCRIPTDIR/build/common-app2 ]; then

@@ -52,7 +52,7 @@ fun main(args: Array<String>) {
  * @param destDir report output directory normally test-end-to-end/android-maestro/build/results
  * @param devices list of emulator serials that ran the tests
  *  param testNames list of end-to-end tests run as per the YAML file names in
- *  test-end-to-end/android-maestro/e2e-tests (without the .yaml extension)
+ *  test-end-to-end/android-maestro/e2e-tests-descriptions-override (without the .yaml extension)
  *
  * A description for an end-to-end test can be saved to e2e-tests/testname-description.txt . If this
  * is not available, the reporter will try and generate this based on the test-end-to-end/README.md
@@ -142,7 +142,7 @@ fun generateReport(
 
                 testNames.forEach { testName ->
                     val descriptionFile = File(projectDir,
-                        "test-end-to-end/android-maestro/e2e-tests/$testName-description.txt")
+                        "test-end-to-end/android-maestro/e2e-tests-descriptions-override/$testName.txt")
                     val descriptionText = if(descriptionFile.exists()) {
                         descriptionFile.readText()
                     }else {
