@@ -364,7 +364,7 @@ private fun ClazzLogListAttendanceScreen(
                     null, false
                 )
 
-                chart = view.findViewById<LineChart>(R.id.chart)
+                chart = view.findViewById(R.id.chart)
 
                 data = setUpLineChart(chart, uiState.graphData, context)
 
