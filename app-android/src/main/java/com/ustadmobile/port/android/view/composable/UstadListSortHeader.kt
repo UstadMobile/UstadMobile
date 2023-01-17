@@ -25,12 +25,13 @@ import com.ustadmobile.port.android.util.compose.messageIdResource
 
 @Composable
 fun UstadListSortHeader(
+    modifier: Modifier = Modifier,
     activeSortOrderOption: SortOrderOption,
     enabled: Boolean = true,
     onClickSort: () -> Unit = {}
 ){
     Row(
-        modifier = Modifier
+        modifier = modifier
             .clickable(
                 enabled = enabled,
                 onClick = { onClickSort() }
@@ -61,7 +62,8 @@ fun UstadListSortHeader(
 @Composable
 @Preview
 private fun UstadListSortHeaderPreview() {
-    UstadListSortHeader(SortOrderOption(
+    UstadListSortHeader(
+        activeSortOrderOption = SortOrderOption(
         MessageID.name,
         ClazzDaoCommon.SORT_CLAZZNAME_ASC,
         true
