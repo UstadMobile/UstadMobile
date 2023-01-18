@@ -85,6 +85,8 @@ fun useUstadScreens(): UstadScreens {
                 CourseGroupSetDetailScreenPreview),
             UstadScreen("UstadClazzAssignmentListItem", "UstadClazzAssignmentListItem Preview",
                 UstadClazzAssignmentListItemPreview),
+            UstadScreen(HolidayCalendarListView.VIEW_NAME, "HolidayCalendarList Preview",
+                HolidayCalendarListScreenPreview),
         )
     }
 }
