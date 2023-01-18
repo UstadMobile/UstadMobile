@@ -45,9 +45,7 @@ env:
 - tapOn: "OVERVIEW"
 - runFlow:
     file: "../common/add_existing_content_block_to_course.yaml"
-- tapOn:
-    text: "SELECT "
-    index: 0
+- tapOn: "EpubContent"
 - tapOn: "SAVE"
 - tapOn: "SAVE"
 
@@ -65,18 +63,9 @@ env:
 #--- add h5p content already added by admin in library to course block --#
 - runFlow:
     file: "../common/add_existing_content_block_to_course.yaml"
-- assertVisible:
-    text: "SELECT "
-    index: 1
-- tapOn:
-    text: "SELECT "
-    index: 1
+- tapOn: "H5PContent"
 - tapOn: "SAVE"
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/able_to_add_existing_content_block_inside_course"
-
-
-
-
 
 
