@@ -48,6 +48,8 @@ import com.ustadmobile.core.viewmodel.ReportSeriesUiState
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.lib.db.entities.ext.shallowCopyReportWithSeriesWithFilters
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
@@ -383,11 +385,12 @@ private fun ReportEditScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .defaultScreenPadding()
     )  {
 
         item {
             UstadTextEditField(
+                modifier = Modifier.defaultItemPadding(),
                 value = uiState.report?.reportTitle ?: "",
                 label = stringResource(id = R.string.xapi_options_report_title),
                 enabled = uiState.fieldsEnabled,
@@ -402,6 +405,7 @@ private fun ReportEditScreen(
 
         item {
             UstadTextEditField(
+                modifier = Modifier.defaultItemPadding(),
                 value = uiState.report?.reportDescription ?: "",
                 label = stringResource(id = R.string.description),
                 enabled = uiState.fieldsEnabled,
@@ -415,6 +419,7 @@ private fun ReportEditScreen(
 
         item {
             UstadMessageIdOptionExposedDropDownMenuField(
+                modifier = Modifier.defaultItemPadding(),
                 value = uiState.report?.xAxis ?: 0,
                 label = stringResource(R.string.xapi_options_x_axes),
                 options = XAxisConstants.X_AXIS_MESSAGE_IDS,
@@ -429,6 +434,7 @@ private fun ReportEditScreen(
 
         item {
             UstadMessageIdOptionExposedDropDownMenuField(
+                modifier = Modifier.defaultItemPadding(),
                 value = uiState.report?.reportDateRangeSelection ?: 0,
                 label = stringResource(R.string.time_range),
                 options = DateRangeConstants.DATE_RANGE_MESSAGE_IDS,
@@ -486,7 +492,8 @@ fun ReportSeriesListItem(
         modifier = Modifier.padding(end = 10.dp)
     ){
         UstadTextEditField(
-            modifier = Modifier.weight(0.9F),
+            modifier = Modifier.weight(0.9F)
+                .defaultItemPadding(end = 8.dp),
             value = reportSeries.reportSeriesName ?: "",
             label = stringResource(id = R.string.title),
             enabled = uiState.fieldsEnabled,
@@ -499,7 +506,7 @@ fun ReportSeriesListItem(
 
         IconButton(
             modifier = Modifier.weight(0.1F)
-                .padding(end = 5.dp),
+                .padding(start = 8.dp, end = 8.dp),
             onClick = { onClickRemoveSeries(reportSeries) },
         ) {
             Icon(
@@ -510,6 +517,7 @@ fun ReportSeriesListItem(
     }
 
     UstadMessageIdOptionExposedDropDownMenuField(
+        modifier = Modifier.defaultItemPadding(),
         value = reportSeries.reportSeriesYAxis,
         label = stringResource(R.string.xapi_options_y_axes),
         options = YAxisConstants.Y_AXIS_MESSAGE_IDS,
@@ -522,6 +530,7 @@ fun ReportSeriesListItem(
     )
 
     UstadMessageIdOptionExposedDropDownMenuField(
+        modifier = Modifier.defaultItemPadding(),
         value = reportSeries.reportSeriesVisualType,
         label = stringResource(R.string.xapi_options_visual_type),
         options = VisualTypeConstants.VISUAL_TYPE_MESSAGE_IDS,
@@ -534,6 +543,7 @@ fun ReportSeriesListItem(
     )
 
     UstadMessageIdOptionExposedDropDownMenuField(
+        modifier = Modifier.defaultItemPadding(),
         value = reportSeries.reportSeriesSubGroup,
         label = stringResource(R.string.xapi_options_subgroup),
         options = SubgroupConstants.SUB_GROUP_MESSAGE_IDS,
