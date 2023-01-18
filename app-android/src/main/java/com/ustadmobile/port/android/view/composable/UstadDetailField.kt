@@ -28,7 +28,6 @@ fun UstadDetailField(
     imageId: Int = 0,
     onClick: (() -> Unit)? = null,
     secondaryActionContent: (@Composable () -> Unit)? = null,
-    autoPadding: Boolean = true,
 ) {
     UstadDetailField(
         valueText = AnnotatedString(valueText),
@@ -37,7 +36,6 @@ fun UstadDetailField(
         imageId = imageId,
         onClick = onClick,
         secondaryActionContent = secondaryActionContent,
-        autoPadding = autoPadding,
     )
 }
 /**
@@ -51,17 +49,11 @@ fun UstadDetailField(
     imageId: Int = 0,
     onClick: (() -> Unit)? = null,
     secondaryActionContent: (@Composable () -> Unit)? = null,
-    autoPadding: Boolean = true,
 ){
-    val modifierToUse = if(autoPadding) {
-        modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-    }else {
-        modifier
-    }
 
     if(onClick != null) {
         TextButton(
-            modifier = modifierToUse,
+            modifier = modifier,
             onClick = onClick
         ){
             DetailFieldContent(
@@ -73,7 +65,7 @@ fun UstadDetailField(
         }
     }else {
         DetailFieldContent(
-            modifier = modifierToUse,
+            modifier = modifier,
             valueText = valueText,
             labelText = labelText,
             imageId = imageId,

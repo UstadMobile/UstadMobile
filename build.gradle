@@ -188,6 +188,8 @@ ext {
     version_android_litr = "1.5.3"  //see https://github.com/linkedin/LiTr
     version_android_sharp = "1.1.3@aar"
 
+    version_android_panickit = "1.0"
+
     version_js_node = "10.15.1"
     version_js_yarn="1.13.0"
 
@@ -236,7 +238,9 @@ ext {
     version_react_linkify = "^1.0.0-alpha"
     version_linkify_js = "^3.0.5"
     version_linkify_react = "^3.0.4"
-
+    version_pdfview_android = "1.1.0"
+    version_pdfbox_apache = "3.0.0-RC1"
+    version_pdfview_android = "1.1.0"
 }
 
 /*

@@ -19,12 +19,30 @@ fun rememberFormattedDate(
     timeZoneId: String,
 ): String {
     val context = LocalContext.current
-    return remember(timeInMillis) {
+    return remember(timeInMillis, timeZoneId) {
         DateFormat
             .getDateFormat(context)
             .apply {
                 timeZone = TimeZone.getTimeZone(timeZoneId)
             }
             .format(Date(timeInMillis))
+    }
+}
+
+/**
+ * Format a start date - to date string e.g. "01/Jan/20 - 15/Jan/20". Usefor for enrolments, class
+ * end dates, etc.
+ */
+@Composable
+fun rememberFormattedDateRange(
+    startTimeInMillis: Long,
+    endTimeInMillis: Long,
+    timeZoneId: String,
+    joiner: (String, String) -> String = {start, end -> "$start - $end"}
+): String {
+    val startDate = rememberFormattedDate(startTimeInMillis, timeZoneId)
+    val endDate = rememberFormattedDate(endTimeInMillis, timeZoneId = timeZoneId)
+    return remember(startTimeInMillis, endTimeInMillis, timeZoneId) {
+        joiner(startDate, endDate)
     }
 }

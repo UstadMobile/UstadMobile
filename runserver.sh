@@ -90,7 +90,7 @@ if [ "$NOBUILD" != "true" ] && [ "$STOP" != "true" ]; then
     SERVER_BUILD_ARGS=" -Pktorbundleproductionjs=true "
   fi
 
-  ./gradlew app-ktor-server:shadowJar
+  ./gradlew $SERVER_BUILD_ARGS app-ktor-server:shadowJar
   if [ "$?" != "0" ]; then
     echo "Error compiling server"
     exit 2
@@ -114,11 +114,23 @@ if [ "$STOP" == "true" ];then
     rm build/server.pid
     kill $PID
     echo "Stopped server process $PID"
+    exit 0
   else
     echo "Cannot stop server: pid file build/server.pid does not exist!"
     exit 1
   fi
-elif [ "$BACKGROUND" == "true" ]; then
+fi
+
+
+#check the server is not already running
+nc -z 127.0.0.1 8087
+NCRESULT=$?
+if [ "$NCRESULT" == "0" ]; then
+  echo "Something is already running on port 8087! Please stop it before trying this again!"
+  exit 1
+fi
+
+if [ "$BACKGROUND" == "true" ]; then
   if [ -e build/server.pid ]; then
     echo "Server already running as process id #$(cat build/server.pid). If this is incorrect, delete app-ktor-server/build/server.pid"
     exit 1

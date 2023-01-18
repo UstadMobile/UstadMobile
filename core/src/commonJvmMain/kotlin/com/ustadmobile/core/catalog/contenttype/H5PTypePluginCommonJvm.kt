@@ -9,21 +9,11 @@ import org.kodein.di.direct
 import org.kodein.di.on
 import java.io.File
 import java.util.zip.ZipInputStream
-import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.door.DoorUri
-import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.door.ext.openInputStream
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.core.container.PrefixContainerFileNamer
 import com.ustadmobile.core.contentjob.*
-import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.core.io.ContainerBuilder
 import com.ustadmobile.core.io.ext.*
-import com.ustadmobile.core.network.NetworkProgressListenerAdapter
-import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.updateTotalFromContainerSize
-import com.ustadmobile.core.util.ext.updateTotalFromLocalUriIfNeeded
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
@@ -31,9 +21,6 @@ import io.ktor.util.*
 import kotlinx.serialization.json.*
 import java.util.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.CancellationException
-import com.ustadmobile.door.ext.withDoorTransactionAsync
-import com.ustadmobile.door.util.systemTimeInMillis
 
 val licenseMap = mapOf(
         "CC-BY" to ContentEntry.LICENSE_TYPE_CC_BY,
@@ -69,13 +56,9 @@ class H5PTypePluginCommonJvm(
 
     private val MAX_SIZE_LIMIT: Long = 100 * 1024 * 1024
 
-    private val httpClient: HttpClient = di.direct.instance()
-
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_REPO)
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
-
-    private val defaultContainerDir: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     override val pluginId: Int
         get() = PLUGIN_ID

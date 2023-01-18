@@ -195,6 +195,8 @@ open class ContentEntry() {
 
         const val TYPE_ARTICLE = 7
 
+        const val TYPE_PDF = 8
+
         const val FLAG_IMPORTED = 1
 
         const val FLAG_CONTENT_EDITOR = 2

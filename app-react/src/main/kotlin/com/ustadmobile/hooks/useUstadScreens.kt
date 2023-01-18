@@ -3,9 +3,7 @@ package com.ustadmobile.hooks
 import com.ustadmobile.core.view.*
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
-import com.ustadmobile.mui.components.UstadCourseBlockEditPreview
-import com.ustadmobile.mui.components.UstadDetailFieldPreview
-import com.ustadmobile.mui.components.UstadEditFieldPreviews
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
@@ -73,6 +71,18 @@ fun useUstadScreens(): UstadScreens {
                 "ScopedGrantEdit Preview", ScopedGrantEditScreenPreview),
             UstadScreen(CourseTerminologyEditView.VIEW_NAME,
                 "CourseTerminologyEdit Preview", CourseTerminologyEditScreenPreview),
+            UstadScreen("UstadListFilterChipsHeader",
+                "UstadListFilterChipsHeaderPreview Preview", UstadListFilterChipsHeaderPreview),
+            UstadScreen("UstadListSortHeader",
+                "UstadListSortHeader", UstadListSortHeaderPreview),
+            UstadScreen(ClazzLogEditView.VIEW_NAME, "ClazzLogEdit Preview",
+                ClazzLogEditScreenPreview),
+            UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview",
+                CourseGroupSetEditScreenPreview),
+            UstadScreen("UstadContentEntryListItem", "UstadContentEntryListItem Preview",
+                UstadContentEntryListItemPreview),
+            UstadScreen(CourseGroupSetDetailView.VIEW_NAME, "CourseGroupSetDetail Preview",
+                CourseGroupSetDetailScreenPreview),
             UstadScreen(ReportEditView.VIEW_NAME,
                 "Report Edit Preview",
                 ReportEditScreenPreview),
