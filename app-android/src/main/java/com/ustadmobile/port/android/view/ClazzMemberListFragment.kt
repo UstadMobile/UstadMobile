@@ -291,7 +291,8 @@ private fun ClazzMemberListScreen(
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .defaultScreenPadding()
     ) {
 

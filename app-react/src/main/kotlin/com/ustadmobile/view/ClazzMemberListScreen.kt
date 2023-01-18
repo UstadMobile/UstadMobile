@@ -189,7 +189,10 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
             }
 
             ListItemText {
-                primary = ReactNode("${props.person.firstNames} ${props.person.lastName}")
+                primary = ReactNode(
+                    "${props.person.firstNames}" +
+                            " ${props.person.lastName}"
+                )
                 secondary = Stack.create {
                     direction = responsive(StackDirection.row)
 
