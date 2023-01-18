@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
@@ -16,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -28,7 +26,7 @@ import com.ustadmobile.core.view.HolidayCalendarListView
 import com.ustadmobile.core.viewmodel.HolidayCalendarListUiState
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
-import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -113,11 +111,6 @@ class HolidayCalendarListFragment()
             }
         }
 
-        fun newInstance(bundle: Bundle?): HolidayCalendarListFragment {
-            return HolidayCalendarListFragment().apply {
-                arguments = bundle
-            }
-        }
     }
 }
 
@@ -130,7 +123,7 @@ fun HolidayCalendarListScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .defaultScreenPadding()
     ){
         items(
             uiState.holidayCalendarList,
@@ -159,17 +152,17 @@ fun HolidayCalendarListScreenPreview(){
         uiState = HolidayCalendarListUiState(
             holidayCalendarList = listOf(
                 HolidayCalendarWithNumEntries().apply {
-                    umCalendarName = "hol name 1"
+                    umCalendarName = "Calendar name 1"
                     umCalendarUid = 898787
                     numEntries = 4
                 },
                 HolidayCalendarWithNumEntries().apply {
-                    umCalendarName = "hol name 2"
+                    umCalendarName = "Calendar name 2"
                     umCalendarUid = 8
                     numEntries = 3
                 },
                 HolidayCalendarWithNumEntries().apply {
-                    umCalendarName = "hol name 3"
+                    umCalendarName = "Calendar name 3"
                     umCalendarUid = 80
                     numEntries = 2
                 }

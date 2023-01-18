@@ -3,9 +3,7 @@ package com.ustadmobile.view
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.HolidayCalendarListUiState
-import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
-import com.ustadmobile.mui.components.UstadDetailField
 import csstype.px
 import mui.material.*
 import mui.system.responsive
@@ -61,17 +59,17 @@ val HolidayCalendarListScreenPreview = FC<Props> {
         uiState = HolidayCalendarListUiState(
             holidayCalendarList = listOf(
                 HolidayCalendarWithNumEntries().apply {
-                    umCalendarName = "hol name 1"
+                    umCalendarName = "Calendar name 1"
                     umCalendarUid = 898787
                     numEntries = 4
                 },
                 HolidayCalendarWithNumEntries().apply {
-                    umCalendarName = "hol name 2"
+                    umCalendarName = "Calendar name 2"
                     umCalendarUid = 8
                     numEntries = 3
                 },
                 HolidayCalendarWithNumEntries().apply {
-                    umCalendarName = "hol name 3"
+                    umCalendarName = "Calendar name 3"
                     umCalendarUid = 80
                     numEntries = 2
                 }
