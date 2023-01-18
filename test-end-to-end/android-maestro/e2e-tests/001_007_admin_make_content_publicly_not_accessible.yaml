@@ -36,4 +36,4 @@ env:
 - runFlow: "../common/guest_login.yaml"
 - tapOn: "Library"
 #---------guest should not able to see the content on library---------#
-- takeScreenshot: "${TESTRESULTSDIR}/${TEST}/guest_view"
+- takeScreenshot: "${TESTRESULTSDIR}/guest_view"
