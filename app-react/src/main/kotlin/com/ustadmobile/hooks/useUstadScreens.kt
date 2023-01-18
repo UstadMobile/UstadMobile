@@ -89,6 +89,7 @@ fun useUstadScreens(): UstadScreens {
                 HolidayCalendarListScreenPreview),
             UstadScreen(LanguageListView.VIEW_NAME, "LanguageList Preview",
                 LanguageListScreenPreview),
+            UstadScreen(PersonListView.VIEW_NAME, "PersonList Preview", PersonListScreenPreview),
         )
     }
 }
