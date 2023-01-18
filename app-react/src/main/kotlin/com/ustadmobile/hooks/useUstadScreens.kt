@@ -3,11 +3,7 @@ package com.ustadmobile.hooks
 import com.ustadmobile.core.view.*
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
-import com.ustadmobile.mui.components.UstadCourseBlockEditPreview
-import com.ustadmobile.mui.components.UstadDetailFieldPreview
-import com.ustadmobile.mui.components.UstadEditFieldPreviews
-import com.ustadmobile.mui.components.UstadListFilterChipsHeaderPreview
-import com.ustadmobile.mui.components.UstadListSortHeaderPreview
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
@@ -83,7 +79,14 @@ fun useUstadScreens(): UstadScreens {
                 ClazzLogEditScreenPreview),
             UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview",
                 CourseGroupSetEditScreenPreview),
-            UstadScreen(HolidayCalendarListView.VIEW_NAME, "HolidayCalendarList Preview", HolidayCalendarListScreenPreview)
+            UstadScreen("UstadContentEntryListItem", "UstadContentEntryListItem Preview",
+                UstadContentEntryListItemPreview),
+            UstadScreen(CourseGroupSetDetailView.VIEW_NAME, "CourseGroupSetDetail Preview",
+                CourseGroupSetDetailScreenPreview),
+            UstadScreen("UstadClazzAssignmentListItem", "UstadClazzAssignmentListItem Preview",
+                UstadClazzAssignmentListItemPreview),
+            UstadScreen(HolidayCalendarListView.VIEW_NAME, "HolidayCalendarList Preview",
+                HolidayCalendarListScreenPreview),
         )
     }
 }
