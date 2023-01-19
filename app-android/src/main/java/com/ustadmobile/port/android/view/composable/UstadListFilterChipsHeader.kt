@@ -16,6 +16,7 @@ import com.ustadmobile.port.android.util.compose.messageIdResource
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UstadListFilterChipsHeader(
+    modifier: Modifier = Modifier,
     filterOptions: List<MessageIdOption2>,
     selectedChipId: Int,
     enabled: Boolean = true,
@@ -23,7 +24,7 @@ fun UstadListFilterChipsHeader(
 ){
 
     Row (
-        modifier = Modifier.horizontalScroll(
+        modifier = modifier.horizontalScroll(
             rememberScrollState()
         )
     ){
