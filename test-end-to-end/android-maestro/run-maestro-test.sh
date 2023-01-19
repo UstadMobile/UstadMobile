@@ -136,6 +136,8 @@ maestro --device=$TESTSERIAL test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS \
          $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR
 
+TESTSTATUS=$?
+
 $SCRIPTDIR/../../testserver-controller/stop.sh
 
-
+exit $TESTSTATUS
