@@ -28,5 +28,9 @@ env:
       TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
       TESTRESULTSDIR: ${TESTRESULTSDIR}
 - runFlow: "../common/guest_login.yaml"
+- runFlow:
+    when:
+      notVisible: "Library"
+    file: "../common/guest_login.yaml"
 - tapOn: "Library"
 - takeScreenshot: "${TESTRESULTSDIR}/guest_view"
