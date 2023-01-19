@@ -370,6 +370,7 @@ private fun ClazzLogEditAttendanceScreen(
     uiState: ClazzLogEditAttendanceUiState = ClazzLogEditAttendanceUiState(),
     onClickMarkAllPresent: (Int) -> Unit = {},
     onClickMarkAllAbsent: (Int) -> Unit = {},
+    onChangeClazzLog: (ClazzLog) -> Unit = {},
     onClazzLogAttendanceChanged: (ClazzLogAttendanceRecordWithPerson) -> Unit = {}
 ) {
     LazyColumn(
@@ -380,7 +381,8 @@ private fun ClazzLogEditAttendanceScreen(
         item {
             PagerView (
                 list = uiState.clazzLogsList,
-                timeZone = uiState.timeZone
+                timeZone = uiState.timeZone,
+                onChangeClazzLog = onChangeClazzLog
             )
         }
 
@@ -432,7 +434,8 @@ private fun ClazzLogEditAttendanceScreen(
 @Composable
 private fun PagerView(
     list: List<ClazzLog>,
-    timeZone: String
+    timeZone: String,
+    onChangeClazzLog: (ClazzLog) -> Unit
 ) {
 
     var currentClazzLog: Int by remember { mutableStateOf(0) }
@@ -448,6 +451,8 @@ private fun PagerView(
                 if (currentClazzLog != 0){
                     currentClazzLog -= 1
                     state = PagerState(currentClazzLog)
+
+                    onChangeClazzLog(list[currentClazzLog])
                 }
             },
             modifier = Modifier.weight(1F)
@@ -476,6 +481,8 @@ private fun PagerView(
                 if (currentClazzLog < list.size){
                     currentClazzLog += 1
                     state = PagerState(currentClazzLog)
+
+                    onChangeClazzLog(list[currentClazzLog])
                 }
             },
             modifier = Modifier.weight(1F)
