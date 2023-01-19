@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.StringAndSerialNum
@@ -48,7 +49,8 @@ class SiteEnterLinkViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 title = impl.getString(MessageID.enter_link),
-                navigationVisible = false
+                navigationVisible = false,
+                fabState = FabUiState(visible = true, text = "Link", icon = FabUiState.FabIcon.ADD)
             )
         }
     }

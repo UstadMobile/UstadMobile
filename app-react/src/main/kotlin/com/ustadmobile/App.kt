@@ -134,8 +134,11 @@ private val App = FC<AppProps> { props ->
                         }
 
                         //if (mobileMode) Menu() else Sidebar()
-                        if(appUiState.navigationVisible) {
-                            Sidebar()
+                        //Note: If we remove the component, instead of hiding using Display property,
+                        // then this seems to make react destroy the content component and create a
+                        // completely new one, which we definitely do not want
+                        Sidebar {
+                            visible = appUiState.navigationVisible
                         }
 
                         Content {
