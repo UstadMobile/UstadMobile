@@ -41,6 +41,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.port.android.util.compose.messageIdResource
+import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
@@ -209,7 +210,6 @@ private fun ClazzListScreen(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClazzListItem(
     clazz: ClazzWithListDisplayDetails,
@@ -220,57 +220,68 @@ fun ClazzListItem(
         it.value == clazz.clazzActiveEnrolment?.clazzEnrolmentRole
     }?.messageId ?: MessageID.student)
 
-    ListItem(
-        modifier = Modifier.clickable {
-            onClickClazz(clazz)
-        },
-        text = { Text(clazz.clazzName ?: "") },
-        secondaryText = {
-            Column {
-                Text(clazz.clazzDesc ?: "")
+    Card(
+        modifier = Modifier
+            .defaultItemPadding()
+            .clickable {
+                onClickClazz(clazz)
+            },
+        elevation = 10.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(5.dp)
+        ){
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(clazz.clazzName ?: "")
+                    Text(clazz.clazzDesc ?: "")
+                }
+
                 Row(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Lens,
-                        contentDescription = "",
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.x_percent_attended,
-                            clazz.attendanceAverage * 100
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Icon(
-                        imageVector = Icons.Filled.People,
+                        imageVector = Icons.Filled.Badge,
                         contentDescription = "",
                     )
-                    Text(
-                        text = stringResource(
-                            R.string.x_teachers_y_students,
-                            clazz.numTeachers, clazz.numStudents,
-                        )
-                    )
+                    Text(messageIdResource(id = role))
                 }
             }
-        },
-        trailing = {
+
             Row(
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Badge,
+                    imageVector = Icons.Filled.Lens,
+                    contentDescription = "",
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = stringResource(
+                        R.string.x_percent_attended,
+                        clazz.attendanceAverage * 100
+                    )
+                )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Icon(
+                    imageVector = Icons.Filled.People,
                     contentDescription = "",
                 )
-                Text(messageIdResource(id = role))
+                Text(
+                    text = stringResource(
+                        R.string.x_teachers_y_students,
+                        clazz.numTeachers, clazz.numStudents,
+                    )
+                )
             }
-        },
-    )
+        }
+    }
 }
 
 @Composable
