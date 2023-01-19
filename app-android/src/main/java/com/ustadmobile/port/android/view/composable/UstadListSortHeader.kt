@@ -25,46 +25,45 @@ import com.ustadmobile.port.android.util.compose.messageIdResource
 
 @Composable
 fun UstadListSortHeader(
+    modifier: Modifier = Modifier,
     activeSortOrderOption: SortOrderOption,
     enabled: Boolean = true,
     onClickSort: () -> Unit = {}
 ){
-    Surface(
-        modifier = Modifier
+    Row(
+        modifier = modifier
             .clickable(
                 enabled = enabled,
                 onClick = { onClickSort() }
-            )
+            ),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
 
-            Text(messageIdResource(id = activeSortOrderOption.fieldMessageId))
+        Text(messageIdResource(id = activeSortOrderOption.fieldMessageId))
 
-            Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(8.dp))
 
-            Icon(
-                imageVector = if(activeSortOrderOption.order)
-                    Icons.Default.ArrowDownward
-                else
-                    Icons.Default.ArrowUpward,
-                contentDescription = stringResource(if(activeSortOrderOption.order) {
-                    R.string.ascending
-                }else {
-                    R.string.descending
-                }),
-                modifier = Modifier.size(16.dp)
-            )
+        Icon(
+            imageVector = if(activeSortOrderOption.order)
+                Icons.Default.ArrowDownward
+            else
+                Icons.Default.ArrowUpward,
+            contentDescription = stringResource(if(activeSortOrderOption.order) {
+                R.string.ascending
+            }else {
+                R.string.descending
+            }),
+            modifier = Modifier.size(16.dp)
+        )
 
-        }
     }
 }
 
 @Composable
 @Preview
 private fun UstadListSortHeaderPreview() {
-    UstadListSortHeader(SortOrderOption(
+    UstadListSortHeader(
+        activeSortOrderOption = SortOrderOption(
         MessageID.name,
         ClazzDaoCommon.SORT_CLAZZNAME_ASC,
         true
