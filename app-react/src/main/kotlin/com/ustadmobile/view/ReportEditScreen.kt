@@ -15,6 +15,7 @@ import com.ustadmobile.mui.components.UstadMessageIdDropDownField
 import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.view.components.UstadBlankIcon
 import csstype.Margin
+import csstype.Padding
 import csstype.px
 import mui.icons.material.Add
 import mui.icons.material.Close
@@ -147,26 +148,27 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 }
             }
 
-            List{
-                props.uiState.reportSeriesUiState.reportSeriesList.forEach { reportSeriesItem ->
-                    ReportSeriesListItem {
-                        reportSeries = reportSeriesItem
-                        uiState = props.uiState
-                        onClickRemoveSeries = props.onClickRemoveSeries
-                        onClickNewFilter = props.onClickNewFilter
-                        onClickDeleteReportFilter = props.onClickDeleteReportFilter
-                        onChangedReportSeries = props.onChangedReportSeries
-                    }
+            props.uiState.reportSeriesUiState.reportSeriesList.forEach { reportSeriesItem ->
+                ReportSeriesListItem {
+                    reportSeries = reportSeriesItem
+                    uiState = props.uiState
+                    onClickRemoveSeries = props.onClickRemoveSeries
+                    onClickNewFilter = props.onClickNewFilter
+                    onClickDeleteReportFilter = props.onClickDeleteReportFilter
+                    onChangedReportSeries = props.onChangedReportSeries
                 }
             }
 
             ListItem {
-                onClick = { props.onClickNewSeries() }
-                ListItemIcon {
-                    + Add.create()
-                }
-                ListItemText{
-                    primary = ReactNode(strings[MessageID.xapi_options_series])
+                ListItemButton {
+                    onClick = { props.onClickNewSeries() }
+
+                    ListItemIcon {
+                        + Add.create()
+                    }
+                    ListItemText{
+                        primary = ReactNode(strings[MessageID.xapi_options_series])
+                    }
                 }
             }
         }
@@ -177,29 +179,42 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
 
     val strings = useStringsXml()
 
-    ListItem {
-        children = UstadTextEditField.create {
-            value = props.reportSeries.reportSeriesName ?: ""
-            label = strings[MessageID.title]
-            enabled = props.uiState.fieldsEnabled
-            fullWidth = true
-            onChange = {
-                props.onChangedReportSeries(
-                    props.reportSeries.shallowCopy {
-                        reportSeriesName = it
-                    })
+    Stack {
+        direction = responsive(StackDirection.column)
+        spacing = responsive(15.px)
+        sx {
+            padding = Padding(
+                left = 0.px,
+                right = 0.px,
+                top = 30.px,
+                bottom = 0.px,
+            )
+        }
+
+        Stack {
+            direction = responsive(StackDirection.row)
+
+            UstadTextEditField {
+                value = props.reportSeries.reportSeriesName ?: ""
+                label = strings[MessageID.title]
+                enabled = props.uiState.fieldsEnabled
+                fullWidth = true
+                onChange = {
+                    props.onChangedReportSeries(
+                        props.reportSeries.shallowCopy {
+                            reportSeriesName = it
+                        })
+                }
+            }
+
+            IconButton {
+                onClick = {
+                    props.onClickRemoveSeries(props.reportSeries)
+                }
+                Close { }
             }
         }
 
-        secondaryAction = IconButton.create(){
-            onClick = {
-                props.onClickRemoveSeries(props.reportSeries)
-            }
-            Close { }
-        }
-    }
-
-    ListItem {
         UstadMessageIdDropDownField {
             value = props.reportSeries.reportSeriesYAxis
             label = strings[MessageID.xapi_options_y_axes]
@@ -213,9 +228,7 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
                 )
             }
         }
-    }
 
-    ListItem {
         UstadMessageIdDropDownField {
             value = props.reportSeries.reportSeriesVisualType
             label = strings[MessageID.xapi_options_visual_type]
@@ -229,9 +242,7 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
                 )
             }
         }
-    }
 
-    ListItem {
         UstadMessageIdDropDownField {
             value = props.reportSeries.reportSeriesSubGroup
             label = strings[MessageID.xapi_options_subgroup]
@@ -245,56 +256,68 @@ private val ReportSeriesListItem = FC<ReportEditScreenProps> { props ->
                 )
             }
         }
-    }
 
-    List {
 
-        ListItem {
-            ListItemText {
-                primary = ReactNode(strings[MessageID.filter])
-            }
-        }
+        List {
 
-        ListItem {
-            onClick = {
-                props.onClickNewFilter(props.reportSeries)
-            }
-            ListItemIcon {
-                +Add.create()
-            }
-            ListItemText {
-                primary = ReactNode(strings[MessageID.filter])
-            }
-        }
-
-        props.uiState.reportSeriesUiState.filterList.forEach { filter ->
             ListItem {
-
-                ListItemIcon{
-                    UstadBlankIcon()
-                }
-
                 ListItemText {
-                    primary = ReactNode(filter.person?.fullName() ?: "")
-                    secondary = Divider.create {
-                        orientation = Orientation.horizontal
-                        sx {
-                            height = 1.px
-                        }
+                    primary = ReactNode(strings[MessageID.filter])
+                }
+            }
+
+            ListItem {
+                ListItemButton {
+                    onClick = {
+                        props.onClickNewFilter(props.reportSeries)
+                    }
+
+                    ListItemIcon {
+                        +Add.create()
+                    }
+                    ListItemText {
+                        primary = ReactNode(strings[MessageID.filter])
                     }
                 }
+            }
 
-                secondaryAction = IconButton.create {
-                    onClick = { props.onClickDeleteReportFilter(filter) }
-                    Delete {}
+            props.uiState.reportSeriesUiState.filterList.forEach { filter ->
+                ListItem {
+
+                    ListItemIcon{
+                        UstadBlankIcon()
+                    }
+
+                    ListItemText {
+                        sx {
+                            padding = Padding(
+                                left = 15.px,
+                                top = 0.px,
+                                right = 0.px,
+                                bottom = 0.px
+                            )
+                        }
+                        primary = ReactNode(filter.person?.fullName() ?: "")
+                        secondary = Divider.create {
+                            orientation = Orientation.horizontal
+                            sx {
+                                height = 1.px
+                            }
+                        }
+                    }
+
+                    secondaryAction = IconButton.create {
+                        onClick = { props.onClickDeleteReportFilter(filter) }
+                        Delete {}
+                    }
                 }
             }
         }
-    }
 
-    Divider {
-        sx {
-            margin = Margin(top=0.px, bottom = 40.px, horizontal = 15.px)
+        Divider {
+            sx {
+                margin = Margin(top=0.px, bottom = 40.px, horizontal = 15.px)
+            }
         }
     }
 }
