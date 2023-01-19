@@ -28,7 +28,6 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.core.viewmodel.LanguageListUiState
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
