@@ -29,7 +29,7 @@ appId: com.toughra.ustadmobile
 - runFlow:
     file: "./add_new_teacher_inside_course.yaml"
     env:
-      TESTCOURSENAME: "New Course"
+      TESTCOURSENAME: ${TESTCOURSENAME}
       TEACHERFIRSTNAME: "Anu"
       TEACHERLASTNAME: "Madhav"
       GENDER: "Female"
@@ -45,6 +45,7 @@ appId: com.toughra.ustadmobile
 - runFlow:
     file: "./add_member_inside_course.yaml"
     env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
       FIRSTNAME: "Lal"
       LASTNAME: "Alex"
       MEMBER: "teacher"
@@ -53,7 +54,7 @@ appId: com.toughra.ustadmobile
 - runFlow:
     file: "./add_new_student_inside_course.yaml"
     env:
-      TESTCOURSENAME: "Permission Test"
+      TESTCOURSENAME: ${TESTCOURSENAME}
       STUDENTFIRSTNAME: "Justin"
       STUDENTLASTNAME: "Joe"
       GENDER: "Male"
@@ -62,7 +63,7 @@ appId: com.toughra.ustadmobile
 - runFlow:
     file: "./add_new_student_inside_course.yaml"
     env:
-      TESTCOURSENAME: "Permission Test"
+      TESTCOURSENAME: ${TESTCOURSENAME}
       STUDENTFIRSTNAME: "Caroline"
       STUDENTLASTNAME: "Jacob"
       GENDER: "Female"
@@ -78,6 +79,7 @@ appId: com.toughra.ustadmobile
 - runFlow:
     file: "./add_member_inside_course.yaml"
     env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
       FIRSTNAME: "Mathew"
       LASTNAME: "Kuriean"
       MEMBER: "student"
@@ -92,6 +94,7 @@ appId: com.toughra.ustadmobile
 - runFlow:
     file: "./add_member_inside_course.yaml"
     env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
       FIRSTNAME: "Santhosh"
       LASTNAME: "George"
       MEMBER: "student"
@@ -106,6 +109,7 @@ appId: com.toughra.ustadmobile
 - runFlow:
     file: "./add_member_inside_course.yaml"
     env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
       FIRSTNAME: "Maria"
       LASTNAME: "Jacob"
       MEMBER: "student"
@@ -120,7 +124,8 @@ appId: com.toughra.ustadmobile
 - runFlow:
     file: "./add_member_inside_course.yaml"
     env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
       FIRSTNAME: "Sruthy"
       LASTNAME: "K"
       MEMBER: "student"
-- takeScreenshot: "${TESTRESULTSDIR}/member_list_of_new_test_course"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/member_list_of_new_test_course"

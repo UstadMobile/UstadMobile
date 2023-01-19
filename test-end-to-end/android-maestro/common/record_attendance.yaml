@@ -4,9 +4,10 @@ appId: com.toughra.ustadmobile
   # this record 2 nd student in list as late and others as present
 # test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+# 2) TESTCOURSENAME: provide course name of string type
+
 - tapOn: "Courses"
-- tapOn:
-      id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: ${TESTCOURSENAME}
 - tapOn: "ATTENDANCE"
 - tapOn: "Record attendance"
 - tapOn: "Add a new occurrence"
@@ -15,5 +16,5 @@ appId: com.toughra.ustadmobile
 - tapOn:
     text: "Partial"
     index: 1
-- takeScreenshot: "${TESTRESULTSDIR}/recorded_attendance"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/recorded_attendance"
 - tapOn: "Save"

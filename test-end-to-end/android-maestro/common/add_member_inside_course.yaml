@@ -7,13 +7,13 @@ appId: com.toughra.ustadmobile
  # 2) FIRSTNAME : FIRSTNAME of member
  # 3) LASTNAME : LASTNAME of member
  # 4) TESTRESULTSDIR : provides the path to store test results
+ # 5) TESTCOURSENAME: provide course name of string type
 
 - tapOn: "Courses"
-- tapOn:
-      id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: ${TESTCOURSENAME}
 - tapOn: "MEMBERS"
 - tapOn: "Add a ${MEMBER}"
 - scroll
 - tapOn: "${FIRSTNAME} ${LASTNAME}"
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/added-${MEMBER}-${FIRSTNAME} ${LASTNAME}"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added-${MEMBER}-${FIRSTNAME} ${LASTNAME}"
