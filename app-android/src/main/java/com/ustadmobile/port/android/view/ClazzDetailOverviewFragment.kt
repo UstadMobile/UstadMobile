@@ -59,6 +59,7 @@ import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
 import com.ustadmobile.port.android.util.ext.MS_PER_MIN
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
+import com.ustadmobile.port.android.view.composable.UstadClazzAssignmentListItem
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -683,7 +684,12 @@ fun CourseBlockListItem(
             )
         }
         CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
-
+            courseBlock.assignment?.let {
+                UstadClazzAssignmentListItem(
+                    assignment = it,
+                    courseBlock = courseBlock
+                )
+            }
         }
         CourseBlock.BLOCK_CONTENT_TYPE -> {
             if(courseBlock.entry != null) {
@@ -742,6 +748,13 @@ fun ClazzDetailOverviewScreenPreview() {
             },
             CourseBlockWithCompleteEntity().apply {
                 cbUid = 3
+                cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                assignment = ClazzAssignmentWithMetrics().apply {
+                    cbTitle = "Assignment"
+                }
+            },
+            CourseBlockWithCompleteEntity().apply {
+                cbUid = 4
                 cbTitle = "Text Block Module"
                 cbDescription = "<pre>\n" +
                         "            GeeksforGeeks\n" +
