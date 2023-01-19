@@ -46,7 +46,6 @@ import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.LibraryAddCheck
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -59,6 +58,7 @@ import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateTime
+import kotlinx.coroutines.launch
 
 interface ClazzLogEditAttendanceFragmentEventHandler {
 
@@ -432,11 +432,17 @@ private fun ClazzLogEditAttendanceScreen(
 @Composable
 private fun PagerView(
     list: List<ClazzLog>,
-    timeZone: String
+    timeZone: String,
+    onChangeClazzLog: (ClazzLog) -> Unit = {},
 ) {
+    val pagerState = rememberPagerState(0)
+    val coroutineScope = rememberCoroutineScope()
 
-    var currentClazzLog: Int by remember { mutableStateOf(0) }
-    var state = rememberPagerState(currentClazzLog)
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect {
+            onChangeClazzLog(list[it])
+        }
+    }
 
     Row (
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -445,9 +451,10 @@ private fun PagerView(
 
         IconButton(
             onClick = {
-                if (currentClazzLog != 0){
-                    currentClazzLog -= 1
-                    state = PagerState(currentClazzLog)
+                if (pagerState.currentPage > 0){
+                    coroutineScope.launch {
+                        pagerState.scrollToPage(pagerState.currentPage - 1)
+                    }
                 }
             },
             modifier = Modifier.weight(1F)
@@ -455,11 +462,12 @@ private fun PagerView(
             Icon(
                 Icons.Default.ArrowBack,
                 contentDescription = "")
+            )
         }
 
         HorizontalPager(
             modifier = Modifier.weight(8F),
-            state = state,
+            state = pagerState,
             count = list.size
         ) { index ->
 
@@ -473,16 +481,18 @@ private fun PagerView(
 
         IconButton(
             onClick = {
-                if (currentClazzLog < list.size){
-                    currentClazzLog += 1
-                    state = PagerState(currentClazzLog)
+                if(pagerState.currentPage < list.size -1) {
+                    coroutineScope.launch {
+                        pagerState.scrollToPage(pagerState.currentPage + 1)
+                    }
                 }
             },
             modifier = Modifier.weight(1F)
         ) {
             Icon(
                 Icons.Default.ArrowForward,
-                contentDescription = "")
+                contentDescription = ""
+            )
         }
     }
 }
@@ -509,36 +519,37 @@ private fun ClazzLogItemView(
 
             var selectedButtonId: Int? = null
 
-            AndroidView(factory = {  context ->
-                val view = LayoutInflater.from(context).inflate(
-                    R.layout.item_clazz_log_attendance_status_toggle_buttons,
-                    null, false
-                )
+            AndroidView(
+                factory = {  context ->
+                    val view = LayoutInflater.from(context).inflate(
+                        R.layout.item_clazz_log_attendance_status_toggle_buttons,
+                        null, false
+                    )
 
-                val buttonsMap = mapOf(
-                    ClazzLogAttendanceRecord.STATUS_ATTENDED
-                            to view.findViewById<Button>(R.id.present_button),
-                    ClazzLogAttendanceRecord.STATUS_ABSENT
-                            to view.findViewById<Button>(R.id.absent_button),
-                    ClazzLogAttendanceRecord.STATUS_PARTIAL
-                            to view.findViewById<Button>(R.id.late_button)
-                )
+                    val buttonsMap = mapOf(
+                        ClazzLogAttendanceRecord.STATUS_ATTENDED
+                                to view.findViewById<Button>(R.id.present_button),
+                        ClazzLogAttendanceRecord.STATUS_ABSENT
+                                to view.findViewById<Button>(R.id.absent_button),
+                        ClazzLogAttendanceRecord.STATUS_PARTIAL
+                                to view.findViewById<Button>(R.id.late_button)
+                    )
 
-                buttonsMap.forEach { (status, button) ->
-                    button.isEnabled = fieldsEnabled
+                    buttonsMap.forEach { (status, button) ->
+                        button.isEnabled = fieldsEnabled
 
-                    if (clazzLog.attendanceStatus == status)
-                        selectedButtonId = button.id
+                        if (clazzLog.attendanceStatus == status)
+                            selectedButtonId = button.id
 
-                    button.setOnClickListener {
-                        onClazzLogAttendanceChanged(clazzLog.shallowCopy{
-                            attendanceStatus = status
-                        })
+                        button.setOnClickListener {
+                            onClazzLogAttendanceChanged(clazzLog.shallowCopy{
+                                attendanceStatus = status
+                            })
+                        }
                     }
-                }
 
-                view
-            },
+                    view
+                },
                 update = {
                     val buttonGroup = it as MaterialButtonToggleGroup
                     selectedButtonId?.let { buttonId -> buttonGroup.check(buttonId) }
