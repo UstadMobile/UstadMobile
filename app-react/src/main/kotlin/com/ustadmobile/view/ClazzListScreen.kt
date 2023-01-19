@@ -55,6 +55,14 @@ val ClazzListScreenPreview = FC<Props> {
                     attendanceAverage = 0.3F
                     numTeachers = 3
                     numStudents = 2
+                },
+                ClazzWithListDisplayDetails().apply {
+                    clazzUid = 3
+                    clazzName = "Class Name"
+                    clazzDesc = "Class Description"
+                    attendanceAverage = 0.3F
+                    numTeachers = 3
+                    numStudents = 2
                 }
             )
         )
@@ -81,11 +89,20 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
                 onClickFilterChip = props.onClickFilterChip
             }
 
-            List{
+            Grid {
+                container = true
+
                 props.uiState.clazzList.forEach { clazz ->
-                    ClazzListItem {
-                        clazzItem = clazz
-                        onClickClazz = props.onClickClazz
+                    Grid {
+                        item = true
+                        xs = 12
+                        md = 6
+                        lg = 4
+
+                        ClazzListItem {
+                            clazzItem = clazz
+                            onClickClazz = props.onClickClazz
+                        }
                     }
                 }
             }
