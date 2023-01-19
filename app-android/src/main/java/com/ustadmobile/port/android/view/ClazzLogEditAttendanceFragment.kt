@@ -499,6 +499,12 @@ private fun PagerView(
     }
 }
 
+private val buttonsIdMap = mapOf(
+    ClazzLogAttendanceRecord.STATUS_ATTENDED to R.id.present_button,
+    ClazzLogAttendanceRecord.STATUS_ABSENT to R.id.absent_button,
+    ClazzLogAttendanceRecord.STATUS_PARTIAL to R.id.late_button
+)
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ClazzLogItemView(
@@ -506,12 +512,6 @@ private fun ClazzLogItemView(
     clazzLog: ClazzLogAttendanceRecordWithPerson,
     onClazzLogAttendanceChanged: (ClazzLogAttendanceRecordWithPerson) -> Unit
 ) {
-
-    val buttonsIdMap = mapOf(
-        ClazzLogAttendanceRecord.STATUS_ATTENDED to R.id.present_button,
-        ClazzLogAttendanceRecord.STATUS_ABSENT to R.id.absent_button,
-        ClazzLogAttendanceRecord.STATUS_PARTIAL to R.id.late_button
-    )
 
     ListItem(
         text = {

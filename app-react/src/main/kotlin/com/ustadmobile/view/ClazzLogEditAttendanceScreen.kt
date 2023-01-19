@@ -225,18 +225,13 @@ external interface ClazzLogItemViewProps : Props {
     var fieldsEnabled: Boolean
 }
 
-private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
+private val statusMap = mapOf(
+    ClazzLogAttendanceRecord.STATUS_ATTENDED to Done.create(),
+    ClazzLogAttendanceRecord.STATUS_ABSENT to Close.create(),
+    ClazzLogAttendanceRecord.STATUS_PARTIAL to AccessTime.create()
+)
 
-    val iconList = listOf(
-        Done.create(),
-        Close.create(),
-        AccessTime.create()
-    )
-    val statusList = listOf(
-        ClazzLogAttendanceRecord.STATUS_ATTENDED,
-        ClazzLogAttendanceRecord.STATUS_ABSENT,
-        ClazzLogAttendanceRecord.STATUS_PARTIAL
-    )
+private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
 
     ListItem{
 
@@ -258,15 +253,15 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
 
         secondaryAction = ButtonGroup.create {
 
-            iconList.forEachIndexed() { index ,icon ->
+            statusMap.forEach() { (status ,icon) ->
                 ToggleButton {
                     disabled = !props.fieldsEnabled
-                    selected = (props.clazzLog.attendanceStatus == statusList[index])
+                    selected = (props.clazzLog.attendanceStatus == status)
 
                     onChange = { _,_ ->
                         props.onClazzLogAttendanceChanged(
                             props.clazzLog.shallowCopy {
-                                attendanceStatus = statusList[index]
+                                attendanceStatus = status
                             }
                         )
                     }
