@@ -19,10 +19,7 @@ import mui.material.List
 import mui.material.StackDirection
 import mui.system.responsive
 import mui.system.sx
-import react.FC
-import react.Props
-import react.ReactNode
-import react.create
+import react.*
 
 external interface ClazzLogEditAttendanceScreenProps : Props {
 
@@ -32,9 +29,7 @@ external interface ClazzLogEditAttendanceScreenProps : Props {
 
     var onClickMarkAllAbsent: (Int) -> Unit
 
-    var onClickPreviousClazzLog: () -> Unit
-
-    var onClickNextClazzLog: () -> Unit
+    var onChangeClazzLog: (ClazzLog) -> Unit
 
     var onClazzLogAttendanceChanged: (ClazzLogAttendanceRecordWithPerson) -> Unit
 
@@ -71,7 +66,7 @@ val ClazzLogEditAttendanceScreenPreview = FC<Props> {
                     logDate = 1671629979000
                 },
                 ClazzLog().apply {
-                    logDate = 1671975579000
+                    logDate = 1655608510000
                 },
                 ClazzLog().apply {
                     logDate = 1671975579000
@@ -94,9 +89,8 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
 
             PagerView{
                 timeZone = props.uiState.timeZone
-                clazzLog = props.uiState.clazzLogsList
-                onClickPreviousClazzLog = props.onClickPreviousClazzLog
-                onClickNextClazzLog = props.onClickNextClazzLog
+                list = props.uiState.clazzLogsList
+                onChangeClazzLog = props.onChangeClazzLog
             }
 
             List {
@@ -153,18 +147,17 @@ external interface PagerViewProps : Props {
 
     var timeZone: String
 
-    var onClickPreviousClazzLog: () -> Unit
+    var onChangeClazzLog: (ClazzLog) -> Unit
 
-    var onClickNextClazzLog: () -> Unit
-
-    var clazzLog: List<ClazzLog>
+    var list: List<ClazzLog>
 
 }
 
 private val PagerView = FC<PagerViewProps> { props ->
 
+    var currentClazzLog by useState { 0 }
     val dateTime = useFormattedDateAndTime(
-        props.clazzLog[0].logDate,
+        props.list[currentClazzLog].logDate,
         props.timeZone
     )
 
@@ -178,7 +171,11 @@ private val PagerView = FC<PagerViewProps> { props ->
             Button {
                 variant = ButtonVariant.text
                 onClick = {
-                    props.onClickPreviousClazzLog()
+                    if (currentClazzLog != 0){
+                        currentClazzLog -= 1
+
+                        props.onChangeClazzLog(props.list[currentClazzLog])
+                    }
                 }
 
                 + ArrowBack.create()
@@ -204,7 +201,11 @@ private val PagerView = FC<PagerViewProps> { props ->
             Button {
                 variant = ButtonVariant.text
                 onClick = {
-                    props.onClickNextClazzLog()
+                    if (currentClazzLog < props.list.size-1){
+                        currentClazzLog += 1
+
+                        props.onChangeClazzLog(props.list[currentClazzLog])
+                    }
                 }
 
                 + ArrowForward.create()
