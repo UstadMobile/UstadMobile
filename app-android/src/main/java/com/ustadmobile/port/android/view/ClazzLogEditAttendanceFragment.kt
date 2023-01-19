@@ -463,7 +463,7 @@ private fun PagerView(
         ) {
             Icon(
                 Icons.Default.ArrowBack,
-                contentDescription = "")
+                contentDescription = ""
             )
         }
 
@@ -587,7 +587,7 @@ fun ClazzLogEditAttendanceScreenPreview() {
                 logDate = 1671629979000
             },
             ClazzLog().apply {
-                logDate = 1671975579000
+                logDate = 1655608510000
             },
             ClazzLog().apply {
                 logDate = 1671975579000
