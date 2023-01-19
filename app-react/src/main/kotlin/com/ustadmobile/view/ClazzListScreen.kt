@@ -7,7 +7,6 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzListUiState
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
-import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.common.lg
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
@@ -22,7 +21,6 @@ import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
-import react.ReactNode
 import react.create
 
 external interface ClazzListScreenProps : Props {

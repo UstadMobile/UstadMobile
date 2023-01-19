@@ -25,7 +25,6 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.locale.entityconstants.RoleConstants
@@ -182,6 +181,7 @@ private fun ClazzListScreen(
 
         item {
             UstadListSortHeader(
+                modifier = Modifier.defaultItemPadding(),
                 activeSortOrderOption = uiState.activeSortOrderOption,
                 enabled = uiState.fieldsEnabled,
                 onClickSort = onClickSort
@@ -190,6 +190,7 @@ private fun ClazzListScreen(
 
         item {
             UstadListFilterChipsHeader(
+                modifier = Modifier.defaultItemPadding(),
                 filterOptions = uiState.filterOptions,
                 selectedChipId = uiState.selectedChipId,
                 enabled = uiState.fieldsEnabled,
