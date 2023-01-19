@@ -495,6 +495,12 @@ private fun ClazzLogItemView(
     onClazzLogAttendanceChanged: (ClazzLogAttendanceRecordWithPerson) -> Unit
 ) {
 
+    val buttonsIdMap = mapOf(
+        ClazzLogAttendanceRecord.STATUS_ATTENDED to R.id.present_button,
+        ClazzLogAttendanceRecord.STATUS_ABSENT to R.id.absent_button,
+        ClazzLogAttendanceRecord.STATUS_PARTIAL to R.id.late_button
+    )
+
     ListItem(
         text = {
             Text(text = clazzLog.person?.personFullName() ?: "",)
@@ -507,28 +513,15 @@ private fun ClazzLogItemView(
         },
         trailing = {
 
-            var selectedButtonId: Int? = null
-
             AndroidView(factory = {  context ->
                 val view = LayoutInflater.from(context).inflate(
                     R.layout.item_clazz_log_attendance_status_toggle_buttons,
                     null, false
                 )
 
-                val buttonsMap = mapOf(
-                    ClazzLogAttendanceRecord.STATUS_ATTENDED
-                            to view.findViewById<Button>(R.id.present_button),
-                    ClazzLogAttendanceRecord.STATUS_ABSENT
-                            to view.findViewById<Button>(R.id.absent_button),
-                    ClazzLogAttendanceRecord.STATUS_PARTIAL
-                            to view.findViewById<Button>(R.id.late_button)
-                )
-
-                buttonsMap.forEach { (status, button) ->
+                buttonsIdMap.forEach { (status, buttonId) ->
+                    val button = view.findViewById<Button>(buttonId)
                     button.isEnabled = fieldsEnabled
-
-                    if (clazzLog.attendanceStatus == status)
-                        selectedButtonId = button.id
 
                     button.setOnClickListener {
                         onClazzLogAttendanceChanged(clazzLog.shallowCopy{
@@ -541,7 +534,9 @@ private fun ClazzLogItemView(
             },
                 update = {
                     val buttonGroup = it as MaterialButtonToggleGroup
-                    selectedButtonId?.let { buttonId -> buttonGroup.check(buttonId) }
+                    buttonsIdMap[clazzLog.attendanceStatus]?.let {
+                            it1 -> buttonGroup.check(it1)
+                    }
                 }
             )
         }
