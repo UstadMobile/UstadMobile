@@ -4,6 +4,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.*
@@ -12,13 +32,19 @@ import com.toughra.ustadmobile.databinding.FragmentAccountListBinding
 import com.toughra.ustadmobile.databinding.ItemAccountAboutBinding
 import com.toughra.ustadmobile.databinding.ItemAccountListBinding
 import com.toughra.ustadmobile.databinding.ItemAccountlistIntentmessageBinding
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
 import com.ustadmobile.core.controller.AccountListPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.AccountListView
+import com.ustadmobile.core.viewmodel.AccountListUiState
 import com.ustadmobile.door.lifecycle.LiveData
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UserSession
+import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
+import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 import org.kodein.di.instance
@@ -245,4 +271,232 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
     }
 
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun AccountListItem(
+        account: UserSessionWithPersonAndEndpoint?,
+        trailing: @Composable (() -> Unit)? = null,
+        onClickAccount: ((UserSessionWithPersonAndEndpoint) -> Unit)? = null
+    ){
+    ListItem(
+        modifier = Modifier.clickable {
+            if (account != null) {
+                onClickAccount?.invoke(account)
+            }
+        },
+        icon = {
+            Icon(
+                imageVector = Icons.Filled.AccountCircle,
+                contentDescription = null,
+                Modifier.size(40.dp)
+            )
+        },
+        text = {
+            Text(
+                text = "${account?.person?.firstNames} ${account?.person?.lastName}"
+            )
+        },
+        secondaryText = {
+            Row {
+                Image(
+                    painter = painterResource(id = R.drawable.person_with_key),
+                    contentDescription = null,
+                    Modifier.size(20.dp)
+                )
+                Text(
+                    text = account?.person?.username ?: "",
+                    modifier = Modifier
+                        .padding(start = 10.dp, end = 16.dp)
+                )
+                Image(
+                    painter = painterResource(id = R.drawable.link),
+                    contentDescription = null,
+                    Modifier.size(20.dp)
+                )
+                Text(
+                    text = account?.endpoint?.url ?: "",
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                )
+            }
+        },
+        trailing = trailing
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun AccountListScreen(
+    uiState: AccountListUiState,
+    onAccountListItemClick: (UserSessionWithPersonAndEndpoint?) -> Unit = {},
+    onDeleteListItemClick: (UserSessionWithPersonAndEndpoint?) -> Unit = {},
+    onAboutClick: () -> Unit = {},
+    onAddItem: () -> Unit = {},
+    onMyProfileClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
+){
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ){
+
+        item {
+            AccountListItem(
+                account = uiState.activeAccount
+            )
+        }
+
+        item {
+            Row (
+                modifier = Modifier
+                    .padding(start = 72.dp, bottom = 16.dp)
+            ){
+
+                OutlinedButton(
+                    onClick = onMyProfileClick,
+                ) {
+                    Text(stringResource(R.string.my_profile).uppercase())
+                }
+
+                OutlinedButton(
+                    modifier = Modifier
+                        .padding(start = 10.dp),
+                    onClick = onLogoutClick,
+                ) {
+                    Text(stringResource(R.string.logout).uppercase())
+                }
+
+            }
+        }
+        
+        item {
+            Divider(thickness = 1.dp)
+        }
+
+        items(
+            uiState.accountsList,
+            key = {
+                it.person.personUid
+            }
+        ){  account ->
+            AccountListItem(
+                account = account,
+                onClickAccount = {  selectedAccount ->
+                    onAccountListItemClick(selectedAccount)
+                },
+                trailing = {
+                    IconButton(
+                        onClick = {
+                            onDeleteListItemClick(account)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = stringResource(id = R.string.delete),
+                        )
+                    }
+                },
+            )
+        }
+
+        item {
+            ListItem(
+                modifier = Modifier
+                    .clickable {
+                        onAddItem()
+                    },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(id = R.string.add)
+                    )
+                },
+                text = {
+                    Text(text = stringResource(id = R.string.add_another_account))
+                }
+            )
+        }
+
+        item {
+            Divider(thickness = 1.dp)
+        }
+
+        item {
+            ListItem(
+                modifier = Modifier
+                    .clickable {
+                        onAboutClick()
+                    },
+                text = { Text(text = "About")},
+                secondaryText = { Text(text = uiState.version)}
+            )
+        }
+
+    }
+}
+
+@Composable
+@Preview
+fun AccountListScreenPreview(){
+    AccountListScreen(
+        uiState = AccountListUiState(
+            activeAccount = UserSessionWithPersonAndEndpoint(
+                userSession = UserSession().apply {
+                },
+                person = Person().apply {
+                    firstNames = "Sara"
+                    lastName = "Sarvari"
+                    personUid = 9
+                    username = "sara99"
+                },
+                endpoint = Endpoint(
+                    url = "https://example.com"
+                )
+            ),
+            accountsList = listOf(
+                UserSessionWithPersonAndEndpoint(
+                    userSession = UserSession().apply {
+                    },
+                    person = Person().apply {
+                        firstNames = "Ahmad"
+                        lastName = "Ahmadi"
+                        personUid = 4
+                        username = "ahmadi"
+                    },
+                    endpoint = Endpoint(
+                        url = "https://example.com"
+                    )
+                ),
+                UserSessionWithPersonAndEndpoint(
+                    userSession = UserSession().apply {
+                    },
+                    person = Person().apply {
+                        firstNames = "Negin"
+                        lastName = "Naseri"
+                        personUid = 5
+                        username = "negin10"
+                    },
+                    endpoint = Endpoint(
+                        url = "https://someweb.com"
+                    )
+                ),
+                UserSessionWithPersonAndEndpoint(
+                    userSession = UserSession().apply {
+                    },
+                    person = Person().apply {
+                        firstNames = "Ali"
+                        lastName = "Asadi"
+                        personUid = 6
+                        username = "ali01"
+                    },
+                    endpoint = Endpoint(
+                        url = "https://thisisalink.org"
+                    )
+                )
+            )
+        )
+    )
 }
