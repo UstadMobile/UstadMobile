@@ -5,8 +5,7 @@ appId: com.toughra.ustadmobile
 # test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
 - tapOn: "Courses"
-- tapOn:
-      id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: ${TESTCOURSENAME}
 - tapOn: "ATTENDANCE"
 - tapOn: "Record attendance"
 - tapOn: "Add a new occurrence"
