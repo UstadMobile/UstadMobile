@@ -8,6 +8,9 @@ import com.ustadmobile.core.viewmodel.ClazzListUiState
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.mui.common.justifyContent
+import com.ustadmobile.mui.common.lg
+import com.ustadmobile.mui.common.md
+import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.util.ext.format
@@ -109,65 +112,91 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
         it.value == props.clazzItem.clazzActiveEnrolment?.clazzEnrolmentRole
     }?.messageId ?: MessageID.student)
 
-    ListItem{
-        ListItemButton {
-            onClick = {
-                props.onClickClazz(props.clazzItem)
-            }
+    Card {
+        onClick = { props.onClickClazz(props.clazzItem) }
+        sx {
+            margin = Margin(
+                top = 15.px,
+                bottom = 15.px,
+                right = 0.px,
+                left = 0.px,
+            )
+            padding = 5.px
+        }
 
-            ListItemText {
-                primary = ReactNode(props.clazzItem.clazzName ?: "")
-                secondary = Stack.create {
+        Grid {
+            direction = responsive(GridDirection.column)
+            container = true
+
+            Grid {
+                direction = responsive(GridDirection.row)
+                container = true
+
+                Grid {
+                    direction = responsive(GridDirection.column)
+                    item = true
+                    lg = 11
+                    md = 10
+                    xs = 9
+
+                    Typography {
+                        + (props.clazzItem.clazzName ?: "")
+                    }
 
                     Typography {
                         + (props.clazzItem.clazzDesc ?: "")
                     }
-
-                    Stack {
-                        direction = responsive(StackDirection.row)
-
-                        LensRounded {
-                            sx {
-                                width = 15.px
-                                height = 15.px
-                                padding = Padding(
-                                    top = 5.px,
-                                    bottom = 0.px,
-                                    right = 0.px,
-                                    left = 0.px,
-                                )
-                            }
-                        }
-
-                        Typography {
-                            + (props.clazzItem.attendanceAverage * 100)
-                                .toString()
-                                .format(strings[MessageID.x_percent_attended])
-                        }
-
-                        Box{
-                            sx { width = 10.px }
-                        }
-
-                        + People.create()
-
-                        Typography {
-                            + strings[MessageID.x_teachers_y_students]
-                                .replace("%1\$d", props.clazzItem.numTeachers.toString())
-                                .replace("%2\$d", props.clazzItem.numStudents.toString())
-                        }
-                    }
                 }
+
+                Grid {
+                    direction = responsive(GridDirection.row)
+                    item = true
+                    lg = 1
+                    md = 2
+                    xs = 3
+
+                    + mui.icons.material.Badge.create()
+
+                    + strings[role]
+                }
+
             }
 
-            Stack {
-                direction = responsive(StackDirection.row)
-                spacing = responsive(5.px)
-                justifyContent = JustifyContent.center
+            Grid {
+                direction = responsive(GridDirection.row)
+                container = true
 
-                + mui.icons.material.Badge.create()
+                LensRounded {
+                    sx {
+                        width = 15.px
+                        height = 15.px
+                        padding = Padding(
+                            top = 5.px,
+                            bottom = 0.px,
+                            right = 0.px,
+                            left = 0.px,
+                        )
+                    }
+                }
 
-                + strings[role]
+                Typography {
+                    + (props.clazzItem.attendanceAverage * 100)
+                        .toString()
+                        .format(strings[MessageID.x_percent_attended])
+                }
+
+                Box{
+                    sx { width = 10.px }
+                }
+
+                + People.create()
+
+                Typography {
+                    + strings[MessageID.x_teachers_y_students]
+                        .replace("%1\$d", props.clazzItem.numTeachers.toString())
+                        .replace("%2\$d", props.clazzItem.numStudents.toString())
+                }
+
             }
         }
     }
