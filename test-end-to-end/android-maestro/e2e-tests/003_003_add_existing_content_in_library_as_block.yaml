@@ -35,6 +35,7 @@ env:
 - runFlow:
     file: "../common/add_new_teacher_inside_course.yaml"
     env:
+      TESTCOURSENAME: "Existing Content Block Test"
       TEACHERFIRSTNAME: "Anupama"
       TEACHERLASTNAME: "Sebastian"
       GENDER: "Female"
@@ -48,8 +49,6 @@ env:
 - tapOn: "EpubContent"
 - tapOn: "SAVE"
 - tapOn: "SAVE"
-
-#---------Launch App & Teacher Login------------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -58,9 +57,7 @@ env:
       USERNAME: "Anupama"
       PASSWORD: "test"
 - tapOn: "courses"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
-#--- add h5p content already added by admin in library to course block --#
+- tapOn: "Existing Content Block Test"
 - runFlow:
     file: "../common/add_existing_content_block_to_course.yaml"
 - tapOn: "H5PContent"

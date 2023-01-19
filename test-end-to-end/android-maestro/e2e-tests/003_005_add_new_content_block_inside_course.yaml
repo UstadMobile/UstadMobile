@@ -10,30 +10,25 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-#-------Launch App---------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
-#-------Admin Login---------------#
 - runFlow:
     file: "../common/user_login.yaml"
-#---------add course ---------#
 - runFlow:
     file: "../common/add_course.yaml"
     env:
       TESTCOURSENAME: "New Content Block Test"
-#----add teacher to the course----#
 - runFlow:
     file: "../common/add_new_teacher_inside_course.yaml"
     env:
+      TESTCOURSENAME: "New Content Block Test"
       TEACHERFIRSTNAME: "Julie"
       TEACHERLASTNAME: "Susan"
       GENDER: "Female"
       PASSWORD: "test"
-#--- add epub content already added by admin in library to course block----#
 - back
 - back
 - tapOn: "OVERVIEW"
-#---------add content to course ---------#
 - runFlow:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
@@ -41,7 +36,6 @@ env:
       TESTCONTENTNAME: H5PContent
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
-#---------Launch App & Teacher Login------------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -50,9 +44,7 @@ env:
       USERNAME: "Julie"
       PASSWORD: "test"
 - tapOn: "courses"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
-#---------add content to course ---------#
+- tapOn: "New Content Block Test"
 - runFlow:
     file: "../common/add_new_content_block_to_course.yaml"
     env:

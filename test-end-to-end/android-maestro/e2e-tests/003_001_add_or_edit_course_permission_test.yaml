@@ -4,32 +4,25 @@ env:
   TESTNAME: "003_001_add_or_edit_course_permission_test"
 ---
 - clearState: com.toughra.ustadmobile
-
 - runFlow:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-# admin able to add a course and edit that course
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
-#admin login
 - runFlow:
     file: "../common/user_login.yaml"
 - runFlow:
     file: "../common/create_course_with_members.yaml"
-#admin able to edit Course
-- tapOn: "Courses"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
-- assertVisible: "EDIT"
-- tapOn: "Edit"
-- tapOn: "Description (Optional)"
-- inputText: "Test edit"
-- tapOn: "SAVE"
+    env:
+      TESTCOURSENAME: "Permission Test"
+- runFlow:
+    file: "../common/edit_course.yaml"
+    env:
+      TESTCOURSENAME: "Permission Test"
 # teacher should be able to edit a course
-#---------Launch App & Teacher Login------------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -37,15 +30,12 @@ env:
     env:
       USERNAME: "Anu"
       PASSWORD: "test"
-#---------Teacher able to edit Course-----------------#
-- tapOn: "Courses"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
-- assertVisible: "EDIT"
-- tapOn: "Edit"
+- runFlow:
+    file: "../common/edit_course.yaml"
+    env:
+      TESTCOURSENAME: "Permission Test"
 - tapOn: "SAVE"
 #student should not be able to edit a course
-#---------Launch App & Student Login------------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -53,7 +43,6 @@ env:
     env:
       USERNAME: "Sruthy"
       PASSWORD: "test"
-#---------Verify that student not able to edit Course-----------------#
 - tapOn: "Courses"
 - tapOn:
     id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
