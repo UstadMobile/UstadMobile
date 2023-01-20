@@ -47,6 +47,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
     override var genderOptions: List<MessageIdOption>? = null
         set(value) {
             field = value
+            mBinding?.genderOptions = genderOptions
         }
 
     override var approvalPersonParentJoin: PersonParentJoin?

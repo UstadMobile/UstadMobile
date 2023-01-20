@@ -50,21 +50,30 @@ adding from device, test downloading from another device.
 
 ### 4: Assignments
 
-4.1 Teacher can create assignment, student can submit assignment (text and attachment), teacher can view submission and grade it. Student will see their mark when it is graded.
+4.1 Teacher can create assignment (set to allow one submission per student as per default), student 
+    can submit assignment (text and attachment), teacher can view submission and grade it. After 
+    submitting their work, the submit button is no longer visible. Student will see their mark when 
+    it is graded.
 
 4.2 Teachers and students can add course comments which are visible for all who can view the assignment.
 
 4.3 Teachers and students can submit and view private comments. Student can submit a private comment, teacher can see the private comment, and reply to it. 
 
-4.4 If assignment is set that only one submission is allowed, when the students make a submission, they will not be able to make any further submission.
+4.4 If assignment is set to allow multiple submissions, student can make another submission after the first submission. Teacher can see the revised submission and give a new grade. The student can see the updated grade.
 
-4.5 If assignment is set to allow multiple submissions, student can make another submission after the first submission. Teacher can see the revised submission and give a new grade. The student can see the updated grade.
+4.5 If assignment is submitted after the deadline but before the grace period, the submission should
+    be accepted. The specified late penalty should be applied to the mark given by the teacher.
 
-4.6 Teacher can create assignment as per 4.1 by groups. When another group member logs in, the group member will see the same submission and comments.
+4.6 If assignment submission page is open after the deadline the submit button should not be visible.
 
-4.7 Teacher and students can sumit and view private comments. Students who are in the same group see the same set of comments. Comments are private within the group.
+4.7 If assignment submission page is open before the deadline, and the deadline passes whilst the 
+    screen is open, the student should not be able to submit.
 
-4.8 If group assignment is set that only one submission is allowed, when the students make a submission, they will not be able to make any further submission (including as another member of the group)
+4.8 Teacher can create assignment as per 4.1 by groups. When another group member logs in, the group member will see the same submission and comments.
 
-4.9 If assignment is set to allow multiple submissions, student can make another submission after the first submission. Teacher can see the revised submission and give a new grade. The student can see the updated grade (including as another member of the group).
+4.9 Teacher and students can submit and view private comments. Students who are in the same group see the same set of comments. Comments are private within the group.
+
+4.10 If group assignment is set that only one submission is allowed, when the students make a submission, they will not be able to make any further submission (including as another member of the group)
+
+4.11 If assignment is set to allow multiple submissions, student can make another submission after the first submission. Teacher can see the revised submission and give a new grade. The student can see the updated grade (including as another member of the group).
 
