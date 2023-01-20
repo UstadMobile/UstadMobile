@@ -14,9 +14,27 @@ external enum class IntlDateTimeNumericProp {
     ;
 }
 
+@Suppress("NAME_CONTAINS_ILLEGAL_CHARS")
+// language=JavaScript
+@JsName("""(/*union*/{full: 'full', long: 'long', medium: 'medium', short: 'short'}/*union*/)""")
+external enum class IntlDateTimeStyleProp  {
+    @Suppress("unused")
+    full,
+    @Suppress("unused")
+    long,
+    @Suppress("unused")
+    medium,
+    @Suppress("unused")
+    short,
+    ;
+}
+
 external interface DateTimeFormatOptions {
     var hour: IntlDateTimeNumericProp
     var minute: IntlDateTimeNumericProp
+
+    var dateStyle: IntlDateTimeStyleProp
+    var timeStyle: IntlDateTimeStyleProp
 }
 
 
