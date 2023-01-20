@@ -1,0 +1,15 @@
+appId: com.toughra.ustadmobile
+---
+
+- tapOn: "Courses"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_course_block_icon"
+- tapOn: "ADD TEXT"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/text_editor"
+- inputText: ${TEXT}
+- tapOn: "DONE"
+- tapOn: "SUBMIT"
+

@@ -1,0 +1,17 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: "Courses"
+- tapOn:
+      id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_course_block_icon"
+- tapOn: "SUBMISSIONS"
+- tapOn: ${STUDENTNAME}
+- tapOn: "Points"
+- inputText: ${POINT}
+- hideKeyboard
+- tapOn:
+    id: "com.google.android.inputmethod.latin:id/icon"
+    index: 2
+- tapOn: "SUBMIT GRADE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment_grade_teacherView"

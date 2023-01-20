@@ -1,0 +1,21 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: "Courses"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_course_block_icon"
+- runFlow:
+    when:
+      visible: "SUBMISSIONS"
+    file: teacher_add_private_comment.yaml
+    env:
+      STUDENTNAME: ${STUDENTNAME}
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn: "Add a private comment"
+- inputText: ${PRIVATECOMMENT}
+- tapOn:
+      id: "com.toughra.ustadmobile:id/item_comment_new_send_ib"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_private_comment-${PRIVATECOMMENT}"

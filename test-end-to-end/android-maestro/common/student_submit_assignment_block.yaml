@@ -1,0 +1,24 @@
+appId: com.toughra.ustadmobile
+---
+# clear the downloads
+- evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
+# push the test file to the downloads
+- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+
+- tapOn: "Courses"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_course_block_icon"
+- tapOn: "ADD TEXT"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/text_editor"
+- inputText: "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
+- tapOn: "DONE"
+- tapOn: "ADD FILE"
+- runFlow:
+    when:
+      notVisible: "Downloads"
+    file: "./redirect_to_downloads.yaml"
+- tapOn: ${TESTFILENAME}
+- tapOn: "SUBMIT"

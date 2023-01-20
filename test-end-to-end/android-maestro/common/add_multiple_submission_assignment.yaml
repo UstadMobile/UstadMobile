@@ -1,0 +1,26 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: "Courses"
+- tapOn:
+      id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: "Edit"
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn: "Add block"
+- tapOn: "Assignments"
+- tapOn: "Title"
+- inputText: "Test Assignment"
+- hideKeyboard
+- tapOn: "Completion criteria"
+- tapOn: "Submitted"
+- swipe:
+    start: 100,400
+    end: 100,100
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn: "Must submit all at once"
+- tapOn: "Can make multiple submissions"
+- tapOn: "DONE"
+- tapOn: "SAVE"

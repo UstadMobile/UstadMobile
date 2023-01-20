@@ -1,0 +1,88 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_003_add_private_comment_on_assignments"
+---
+#--------------------------------------------------APP 2--------------------------------------#
+- clearState: com.toughra.ustadmobile2
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+# admin able to add a course and edit that course
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+#-------------------------------------------------------------------------------------admin login
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+- runFlow:
+    file: "../build/common-app2/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Private comment test"
+#------------------------------------------------------------------------------admin add new teacher
+- runFlow:
+    file: "../build/common-app2/add_new_teacher_inside_course.yaml"
+    env:
+      TEACHERFIRSTNAME: Mary
+      TEACHERLASTNAME: Jacob
+      GENDER: Female
+      PASSWORD: test
+#----------------------------------------------------------------admin add new students to new course
+- runFlow:
+    file: "../build/common-app2/add_new_student_inside_course.yaml"
+    env:
+      STUDENTFIRSTNAME: Ajay
+      STUDENTLASTNAME: Dev
+      GENDER: Male
+      PASSWORD: test
+- runFlow:
+    file: "../build/common-app2/add_new_student_inside_course.yaml"
+    env:
+      STUDENTFIRSTNAME: Sam
+      STUDENTLASTNAME: Antony
+      GENDER: Male
+      PASSWORD: test
+
+#---------------------------------------------------APP 1 -  teacher add private comment---------------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#teacher login
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: Mary
+      PASSWORD: test
+- runFlow: "../common/add_assignment_Block.yaml"
+- runFlow:
+    file: "../common/add_private_comments.yaml"
+    env:
+      STUDENTNAME: "Ajay Dev"
+      PRIVATECOMMENT: "Please comment here once you submit the assignment"
+#-------------------------------APP 2------student reply to private comment--------#
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: Ajay
+      PASSWORD: test
+- runFlow:
+    file: "../build/common-app2/add_private_comments.yaml"
+    env:
+      PRIVATECOMMENT: "Ok Mam, will complete before 4pm"
+#---------------------------------------------------APP 1 ------student login - not able to view private comments test---------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: Sam
+      PASSWORD: test
+- tapOn: "Courses"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/item_course_block_icon"
+- swipe:
+    start: 100,400
+    end: 100,100
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_private_comments_2studentView"
