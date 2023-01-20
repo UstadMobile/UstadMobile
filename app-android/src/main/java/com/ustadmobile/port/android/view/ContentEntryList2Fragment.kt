@@ -182,12 +182,13 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 @Composable
 private fun ContentEntryListScreen(
     uiState: ContentEntryListUiState = ContentEntryListUiState(),
-    onClickContentEntry: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit = {},
-    onClickDownloadContentEntry: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit = {},
+    onClickContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit = {},
+    onClickDownloadContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit = {},
 ) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     )  {
 
         items(

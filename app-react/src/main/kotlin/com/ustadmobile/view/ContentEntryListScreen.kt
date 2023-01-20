@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.ContentEntryListUiState
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatementScoreProgress
@@ -17,14 +16,16 @@ external interface ContentEntryListScreenProps : Props {
 
     var uiState: ContentEntryListUiState
 
-    var onClickContentEntry: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
+    var onClickContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
 
-    var onClickDownloadContentEntry: (ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
+    var onClickDownloadContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
 
 }
 
 val ContentEntryListScreenPreview = FC<Props> {
-    val strings = useStringsXml()
+
     ContentEntryListScreenComponent2 {
         uiState = ContentEntryListUiState(
             contentEntryList = listOf(
