@@ -7,6 +7,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -16,6 +27,7 @@ import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.*
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentReportDetailBinding
 import com.toughra.ustadmobile.databinding.ItemReportChartHeaderBinding
@@ -28,11 +40,15 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportDetailView
+import com.ustadmobile.core.viewmodel.LoginUiState
+import com.ustadmobile.core.viewmodel.ReportDetailUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.composable.UstadTextEditField
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -345,4 +361,26 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
 
     }
 
+}
+
+@Composable
+private fun ReportDetailScreen(
+    uiState: ReportDetailUiState = ReportDetailUiState(),
+    onClickLogin: () -> Unit = {},
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .defaultScreenPadding()
+    )  {
+
+    }
+}
+
+@Composable
+@Preview
+fun ReportDetailScreenPreview() {
+    MdcTheme {
+        ReportDetailScreen()
+    }
 }
