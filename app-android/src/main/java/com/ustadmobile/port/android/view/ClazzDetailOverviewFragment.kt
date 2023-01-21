@@ -45,6 +45,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.toNullableStringMap
@@ -772,10 +773,11 @@ fun ClazzDetailOverviewScreenPreview() {
                 cbDescription = "Description"
                 cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                 assignment = ClazzAssignmentWithMetrics().apply {
-                    cbTitle = "Assignment"
+                    caTitle = "Assignment"
                     fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
                     progressSummary = AssignmentProgressSummary().apply {
-
+                        submittedStudents = 5
+                        markedStudents = 10
                     }
                 }
             },
@@ -783,7 +785,11 @@ fun ClazzDetailOverviewScreenPreview() {
                 cbUid = 4
                 cbType = CourseBlock.BLOCK_CONTENT_TYPE
                 entry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
-                    cbTitle = "Content Entry"
+                    title = "Content Entry"
+                    scoreProgress = ContentEntryStatementScoreProgress().apply {
+                        success = StatementEntity.RESULT_SUCCESS
+                        progress = 70
+                    }
                 }
             },
             CourseBlockWithCompleteEntity().apply {

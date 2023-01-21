@@ -8,7 +8,10 @@ import com.ustadmobile.core.util.MS_PER_MIN
 import com.ustadmobile.core.viewmodel.ClazzDetailOverviewUiState
 import com.ustadmobile.hooks.useFormattedTime
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.mui.components.UstadClazzAssignmentListItem
+import com.ustadmobile.mui.components.UstadContentEntryListItem
 import com.ustadmobile.mui.components.UstadDetailField
+import com.ustadmobile.mui.ext.paddingCourseBlockIndent
 import com.ustadmobile.view.components.UstadBlankIcon
 import csstype.Padding
 import csstype.px
@@ -32,6 +35,14 @@ external interface ClazzDetailOverviewProps : Props {
     var onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit
 
     var onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit
+
+    var onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit
+
+    var onClickContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit
+
+    var onClickDownloadContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit
 }
 
 val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
@@ -202,6 +213,14 @@ external interface CourseBlockListItemProps : Props {
 
     var onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit
 
+    var onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit
+
+    var onClickContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
+
+    var onClickDownloadContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
+
 }
 
 private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
@@ -272,12 +291,19 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
             }
         }
         CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
-
+            UstadClazzAssignmentListItem {
+                assignment = props.courseBlock.assignment
+                    ?: ClazzAssignmentWithMetrics()
+                courseBlock = props.courseBlock
+                onClickAssignment = props.onClickAssignment
+            }
         }
         CourseBlock.BLOCK_CONTENT_TYPE -> {
-            if(props.courseBlock.entry != null) {
-
-            }else{
+            UstadContentEntryListItem {
+                contentEntry = props.courseBlock.entry
+                    ?: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer()
+                onClickContentEntry = props.onClickContentEntry
+                onClickDownloadContentEntry = props.onClickDownloadContentEntry
 
             }
         }
@@ -312,15 +338,48 @@ val ClazzDetailOverviewScreenPreview = FC<Props> {
             ),
             courseBlockList = listOf(
                 CourseBlockWithCompleteEntity().apply {
-                    cbUid = 3
-                    cbTitle = "Module 1"
-                    cbDescription = "Description 1"
+                    cbUid = 1
+                    cbTitle = "Module"
+                    cbDescription = "Description"
                     cbType = CourseBlock.BLOCK_MODULE_TYPE
                 },
                 CourseBlockWithCompleteEntity().apply {
+                    cbUid = 2
+                    cbTitle = "Main discussion board"
+                    cbType = CourseBlock.BLOCK_DISCUSSION_TYPE
+                },
+                CourseBlockWithCompleteEntity().apply {
+                    cbUid = 3
+                    cbDescription = "Description"
+                    cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                    assignment = ClazzAssignmentWithMetrics().apply {
+                        caTitle = "Assignment"
+                        fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
+                        progressSummary = AssignmentProgressSummary().apply {
+                            submittedStudents = 5
+                            markedStudents = 10
+                        }
+                    }
+                },
+                CourseBlockWithCompleteEntity().apply {
                     cbUid = 4
-                    cbTitle = "Module 2"
-                    cbType = CourseBlock.BLOCK_MODULE_TYPE
+                    cbType = CourseBlock.BLOCK_CONTENT_TYPE
+                    entry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+                        title = "Content Entry"
+                        scoreProgress = ContentEntryStatementScoreProgress().apply {
+                            success = StatementEntity.RESULT_SUCCESS
+                            progress = 70
+                        }
+                    }
+                },
+                CourseBlockWithCompleteEntity().apply {
+                    cbUid = 5
+                    cbTitle = "Text Block Module"
+                    cbDescription = "<pre>\n" +
+                            "            GeeksforGeeks\n" +
+                            "                         A Computer   Science Portal   For Geeks\n" +
+                            "        </pre>"
+                    cbType = CourseBlock.BLOCK_TEXT_TYPE
                 }
             ),
             clazzCodeVisible = true
