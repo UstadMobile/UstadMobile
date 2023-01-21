@@ -60,6 +60,7 @@ import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
 import com.ustadmobile.port.android.util.ext.MS_PER_MIN
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.composable.UstadClazzAssignmentListItem
+import com.ustadmobile.port.android.view.composable.UstadContentEntryListItem
 import com.ustadmobile.port.android.view.composable.UstadDetailField
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -476,6 +477,13 @@ private fun ClazzDetailOverviewScreen(
     onClickCourseDiscussion: (CourseDiscussion?) -> Unit = {},
     onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit = {},
     onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit = {},
+    onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit = {},
+    onClickContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    ) -> Unit = {},
+    onClickDownloadContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    ) -> Unit = {},
 ) {
     val numMembers = stringResource(R.string.x_teachers_y_students,
         uiState.clazz?.numTeachers ?: 0,
@@ -591,7 +599,10 @@ private fun ClazzDetailOverviewScreen(
                 courseBlock = courseBlock,
                 onClickCourseDiscussion = onClickCourseDiscussion,
                 onClickCourseExpandCollapse = onClickCourseExpandCollapse,
-                onClickTextBlock = onClickTextBlock
+                onClickTextBlock = onClickTextBlock,
+                onClickAssignment = onClickAssignment,
+                onClickContentEntry = onClickContentEntry,
+                onClickDownloadContentEntry = onClickDownloadContentEntry
             )
         }
     }
@@ -620,9 +631,16 @@ fun TextImageRow(
 @Composable
 fun CourseBlockListItem(
     courseBlock: CourseBlockWithCompleteEntity,
-    onClickCourseDiscussion: (CourseDiscussion?) -> Unit = {},
-    onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit = {},
-    onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit = {},
+    onClickCourseDiscussion: (CourseDiscussion?) -> Unit,
+    onClickCourseExpandCollapse: (CourseBlockWithCompleteEntity) -> Unit,
+    onClickTextBlock: (CourseBlockWithCompleteEntity) -> Unit,
+    onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit,
+    onClickContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    ) -> Unit,
+    onClickDownloadContentEntry: (
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+    ) -> Unit,
 ){
 
     when(courseBlock.cbType){
@@ -687,15 +705,18 @@ fun CourseBlockListItem(
             courseBlock.assignment?.let {
                 UstadClazzAssignmentListItem(
                     assignment = it,
-                    courseBlock = courseBlock
+                    courseBlock = courseBlock,
+                    onClickAssignment = onClickAssignment
                 )
             }
         }
         CourseBlock.BLOCK_CONTENT_TYPE -> {
-            if(courseBlock.entry != null) {
-
-            }else{
-
+            courseBlock.entry?.let {
+                UstadContentEntryListItem(
+                    contentEntry = it,
+                    onClickContentEntry = onClickContentEntry,
+                    onClickDownloadContentEntry = onClickDownloadContentEntry
+                )
             }
         }
     }
@@ -748,13 +769,25 @@ fun ClazzDetailOverviewScreenPreview() {
             },
             CourseBlockWithCompleteEntity().apply {
                 cbUid = 3
+                cbDescription = "Description"
                 cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
                 assignment = ClazzAssignmentWithMetrics().apply {
                     cbTitle = "Assignment"
+                    fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
+                    progressSummary = AssignmentProgressSummary().apply {
+
+                    }
                 }
             },
             CourseBlockWithCompleteEntity().apply {
                 cbUid = 4
+                cbType = CourseBlock.BLOCK_CONTENT_TYPE
+                entry = ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+                    cbTitle = "Content Entry"
+                }
+            },
+            CourseBlockWithCompleteEntity().apply {
+                cbUid = 5
                 cbTitle = "Text Block Module"
                 cbDescription = "<pre>\n" +
                         "            GeeksforGeeks\n" +
