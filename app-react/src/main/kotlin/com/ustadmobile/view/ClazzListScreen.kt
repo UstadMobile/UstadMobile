@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzListUiState
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
+import com.ustadmobile.mui.common.justifyContent
 import com.ustadmobile.mui.common.lg
 import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
@@ -130,29 +131,19 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
     Card {
         onClick = { props.onClickClazz(props.clazzItem) }
         sx {
-            margin = Margin(
-                top = 15.px,
-                bottom = 15.px,
-                right = 0.px,
-                left = 0.px,
-            )
-            padding = 5.px
+            margin = 10.px
+            padding = 15.px
         }
 
-        Grid {
-            direction = responsive(GridDirection.column)
-            container = true
+        Stack {
+            direction = responsive(StackDirection.column)
 
-            Grid {
-                direction = responsive(GridDirection.row)
-                container = true
+            Stack {
+                direction = responsive(StackDirection.row)
+                justifyContent = JustifyContent.spaceBetween
 
-                Grid {
-                    direction = responsive(GridDirection.column)
-                    item = true
-                    lg = 11
-                    md = 10
-                    xs = 9
+                Stack {
+                    direction = responsive(StackDirection.column)
 
                     Typography {
                         + (props.clazzItem.clazzName ?: "")
@@ -163,12 +154,8 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                     }
                 }
 
-                Grid {
-                    direction = responsive(GridDirection.row)
-                    item = true
-                    lg = 1
-                    md = 2
-                    xs = 3
+                Stack {
+                    direction = responsive(StackDirection.row)
 
                     + mui.icons.material.Badge.create()
 
@@ -177,9 +164,8 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
 
             }
 
-            Grid {
-                direction = responsive(GridDirection.row)
-                container = true
+            Stack {
+                direction = responsive(StackDirection.row)
 
                 LensRounded {
                     sx {
