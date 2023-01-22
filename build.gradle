@@ -80,10 +80,12 @@ ext {
     version_jacoco_tool = "0.8.5"
     version_kotlin_jvmTarget = "1.8"
     version_kotlinx_serialization = "1.4.1"
+    version_xmlutil = "0.84.3"
     version_klock = "2.4.13"
     version_ktor = "2.1.2"
     version_coroutines = "1.6.3"
     version_atomicfu = "0.18.4"
+    version_kotlinx_html = "0.8.0"
     version_kotlinx_datetime = "0.4.0"
 
 
