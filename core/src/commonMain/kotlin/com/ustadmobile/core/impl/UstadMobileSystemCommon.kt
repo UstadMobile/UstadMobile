@@ -51,6 +51,8 @@ abstract class UstadMobileSystemCommon {
              */
             val popUpToInclusive: Boolean = false,
 
+            val clearStack: Boolean = false,
+
             /**
              * Serialization strategy, i.e On JS there is no way to serialize without a strategy
              */

@@ -147,8 +147,7 @@ class LoginViewModel(
      * or at least removing the login screen itself from the stack).
      */
     private fun goToNextDestAfterLoginOrGuestSelected() {
-        val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-            popUpToViewName = UstadView.ROOT_DEST, popUpToInclusive = false)
+        val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
         Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
 
         val viewName = nextDestination.substringBefore('?')

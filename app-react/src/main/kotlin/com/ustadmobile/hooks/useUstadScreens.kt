@@ -1,5 +1,7 @@
 package com.ustadmobile.hooks
 
+import com.ustadmobile.core.components.NAVHOST_CLEARSTACK_VIEWNAME
+import com.ustadmobile.core.components.NavHostClearStackPlaceholder
 import com.ustadmobile.core.view.*
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
@@ -26,7 +28,7 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",
                 PersonAccountEditPreview),
             UstadScreen(Login2View.VIEW_NAME, "Login Preview",
-                LoginPreview),
+                LoginScreen),
             UstadScreen(SiteEnterLinkView.VIEW_NAME, "Site Enter Link Preview",
                 SiteEnterLinkScreen),
             UstadScreen(ParentalConsentManagementView.VIEW_NAME, "Parental Consent Management Preview",
@@ -83,6 +85,7 @@ fun useUstadScreens(): UstadScreens {
                 ClazzLogEditScreenPreview),
             UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview",
                 CourseGroupSetEditScreenPreview),
+            UstadScreen(NAVHOST_CLEARSTACK_VIEWNAME, "Clear Stack", NavHostClearStackPlaceholder),
         )
     }
 }

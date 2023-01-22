@@ -4,6 +4,7 @@ import com.ustadmobile.core.components.DIContext
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.navigation.SavedStateHandle2
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.ViewModel
 import kotlinx.browser.window
 import org.kodein.di.DI
@@ -44,6 +45,7 @@ fun <T:ViewModel> useViewModel(
     }
 
     useViewModelAppUiStateEffect(viewModel, onAppUiStateChange)
+    useNavControllerEffect((viewModel as? UstadViewModel)?.navCommandFlow)
 
     return viewModel
 }

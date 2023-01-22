@@ -46,7 +46,6 @@ import ustadJsDi
 import kotlin.random.Random
 
 fun main() {
-
     Napier.d("Index: Window.onLoad")
     val url = window.location.href
     val apiUrl = URLSearchParams().get(AppConfig.KEY_API_URL)

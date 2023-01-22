@@ -1,5 +1,6 @@
 package com.ustadmobile.view
 
+import com.ustadmobile.core.components.NavHost
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.mui.common.Area
 import csstype.px
@@ -36,7 +37,9 @@ val Content = FC<UstadScreenProps> { props ->
                     padding = DEFAULT_PADDING
                 }
 
-                Outlet()
+                NavHost {
+                    Outlet()
+                }
             }
 
             showcases.forEachIndexed { i, (key, _, Component) ->
