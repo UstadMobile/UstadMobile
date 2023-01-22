@@ -1,6 +1,9 @@
 package com.ustadmobile.core.components
 
 import com.ustadmobile.core.hooks.ustadViewName
+import com.ustadmobile.core.impl.nav.NavCommand
+import com.ustadmobile.core.impl.nav.NavigateNavCommand
+import com.ustadmobile.door.ext.toUrlQueryString
 import history.Location
 import kotlinx.browser.sessionStorage
 import kotlinx.coroutines.*
@@ -9,6 +12,7 @@ import org.w3c.dom.Storage
 import org.w3c.dom.get
 import org.w3c.dom.set
 import react.*
+import react.router.NavigateFunction
 import react.router.useLocation
 import react.router.useNavigate
 
@@ -19,6 +23,9 @@ const val KEY_NAV_CONTROLLER_NAVTO_AFTER_POP = "navControllerGoToAfterPop"
 const val KEY_HAVHOST_ROOT_KEY = "navHostRoot"
 const val KEY_NAV_CONTROLLER_STACK_CLEARED = "navControllerStackCleared"
 const val KEY_NAVCONTROLLER_HIT_POPUP_TO_TARGET = "navHostHitPopupto"
+
+const val NAVHOST_CLEARSTACK_VIEWNAME = "ClearStack"
+
 
 /**
  * The NavHost makes it possible to an use the Android Jetpack style popUpTo screen option so that we
@@ -56,112 +63,176 @@ const val KEY_NAVCONTROLLER_HIT_POPUP_TO_TARGET = "navHostHitPopupto"
  *
  */
 
-//Still needed: work on handling edge case when
-const val NAVHOST_CLEARSTACK_VIEWNAME = "ClearStack"
+
+/**
+ * NavHostFunction will execute a NavCommand. These are collected from the ViewModel's
+ * CommandFlowUstadNavController .
+ *
+ * If no pop or stack clearing is required, the navigation will be executed immediately using the
+ * normal NavigateFunction. If popping the stack is required, then the children will be hidden, and
+ * we use the NavigateFunction to start going back.
+ */
+class NavHostFunction(
+    private val navigateFn: NavigateFunction,
+    private val onHideChildren: () -> Unit,
+)  {
+
+    operator fun invoke(cmd: NavCommand) {
+        when(cmd) {
+            is NavigateNavCommand -> {
+                val popUpToView = cmd.goOptions.popUpToViewName
+
+                if(popUpToView == null && !cmd.goOptions.clearStack) {
+                    console.log("useNavControllerEffect: go to /${cmd.viewName}?${cmd.args.toUrlQueryString()}")
+                    navigateFn("/${cmd.viewName}?${cmd.args.toUrlQueryString()}")
+                }else {
+                    console.log("useNavControllerEffect: pop, then go /${cmd.viewName}?${cmd.args.toUrlQueryString()}")
+                    if(popUpToView != null) {
+                        sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE] = popUpToView
+                    }
+                    sessionStorage[KEY_NAV_CONTROLLER_CLEAR_STACK] = cmd.goOptions.clearStack.toString()
+                    sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE] = cmd.goOptions.popUpToInclusive.toString()
+                    sessionStorage[KEY_NAV_CONTROLLER_NAVTO_AFTER_POP] = "/${cmd.viewName}?${cmd.args.toUrlQueryString()}"
+                    onHideChildren()
+                    navigateFn(-1)
+                }
+            }
+            else -> {
+                //do nothing
+            }
+        }
+    }
+
+}
+
+val NavHostContext = createContext<NavHostFunction>()
 
 val NavHost = FC<PropsWithChildren> { props ->
-
-    fun Storage.clearNavHostCommands() {
-        removeItem(KEY_NAV_CONTROLLER_POPUPTO_PAGE)
-        removeItem(KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE)
-        removeItem(KEY_NAV_CONTROLLER_CLEAR_STACK)
-        removeItem(KEY_NAV_CONTROLLER_NAVTO_AFTER_POP)
-        removeItem(KEY_HAVHOST_ROOT_KEY)
-    }
-
-    val navigateFn = useNavigate()
-    val location: Location = useLocation()
-    val firstEntryKey = useMemo(dependencies = emptyArray()) {
-        sessionStorage[KEY_HAVHOST_ROOT_KEY]
-            ?: location.key.also { sessionStorage[KEY_HAVHOST_ROOT_KEY] = it }
-    }
 
     var showChildren by useState(
         sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE] == null
             && sessionStorage[KEY_NAV_CONTROLLER_CLEAR_STACK] != false.toString()
     )
 
-    val coroutineScope = useMemo(dependencies = emptyArray()) {
-        CoroutineScope(Dispatchers.Main + Job())
+    val navigateFn = useNavigate()
+
+    val navHostFunction = useMemo(dependencies = arrayOf(navigateFn)) {
+        NavHostFunction(navigateFn) { showChildren = false }
     }
 
-    var navTimeoutJob: Job? by useState { null }
+    NavHostContext(navHostFunction) {
+        fun Storage.clearNavHostCommands() {
+            removeItem(KEY_NAV_CONTROLLER_POPUPTO_PAGE)
+            removeItem(KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE)
+            removeItem(KEY_NAV_CONTROLLER_CLEAR_STACK)
+            removeItem(KEY_NAV_CONTROLLER_NAVTO_AFTER_POP)
+            removeItem(KEY_HAVHOST_ROOT_KEY)
+        }
 
-    useEffect(dependencies = arrayOf(location.key)) {
-        navTimeoutJob?.cancel()
-        console.log("NavHost: useEffect check: key = ${location.key}")
-        val popupToTarget = sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE]
-        val navToAfterPop = sessionStorage[KEY_NAV_CONTROLLER_NAVTO_AFTER_POP]
-        val popUpToInclusive = sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE]?.toBoolean() ?: false
-        val clearStack = sessionStorage[KEY_NAV_CONTROLLER_CLEAR_STACK]?.toBoolean() ?: false
-        val clearStackHitPlaceholder  = sessionStorage[KEY_NAV_CONTROLLER_STACK_CLEARED]?.toBoolean() ?: false
-        val popUpToHitDestination = sessionStorage[KEY_NAVCONTROLLER_HIT_POPUP_TO_TARGET]?.toBoolean() ?: false
+        /*
+         * If we are already at the end of the history, calling navigateFunction(-1) will have no
+         * effect
+         *
+         * This is used as a timeout. It will then initiate navigation to the Clear Stack placeholder.
+         */
+        fun CoroutineScope.launchClearStackFallback() = launch {
+            delay(250)
+            sessionStorage[KEY_NAV_CONTROLLER_CLEAR_STACK] = true.toString()
+            navigateFn("/$NAVHOST_CLEARSTACK_VIEWNAME")
+        }
 
-        when {
-            //We don't have any other pop or stack operation pending, show NavHost children
-            popupToTarget == null && !clearStack && location.pathname != "/$NAVHOST_CLEARSTACK_VIEWNAME" -> {
-                showChildren = true
-            }
 
-            //We have reached the popupTo destination, but popUpToInclusive is set, so we need to pop
-            //once more, then execute any pending navigation
-            popupToTarget == location.ustadViewName && popUpToInclusive-> {
-                sessionStorage[KEY_NAVCONTROLLER_HIT_POPUP_TO_TARGET] = true.toString()
-                navigateFn(-1)
+        val location: Location = useLocation()
+        val firstEntryKey = useMemo(dependencies = emptyArray()) {
+            sessionStorage[KEY_HAVHOST_ROOT_KEY]
+                ?: location.key.also { sessionStorage[KEY_HAVHOST_ROOT_KEY] = it }
+        }
 
-                //if stack is empty, then just do the navigation anyway.
-            }
 
-            //We have reached the popUpTo destination (and popUpToInclusive = false), popUpTo
-            // was provided, and the destination was hit. Now it is time to execute forward nav
-            popupToTarget == location.ustadViewName || popUpToHitDestination -> {
-                sessionStorage.clearNavHostCommands()
-                if(navToAfterPop != null){
-                    navigateFn(navToAfterPop)
+        //This should be cancelled - needs to use state and effect
+        val coroutineScope = useMemo(dependencies = emptyArray()) {
+            CoroutineScope(Dispatchers.Main + Job())
+        }
+
+        var navTimeoutJob: Job? by useState { null }
+
+        useEffect(dependencies = arrayOf(location.key)) {
+            navTimeoutJob?.cancel()
+            console.log("NavHost: useEffect check: key = ${location.key}")
+            val popupToTarget = sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE]
+            val navToAfterPop = sessionStorage[KEY_NAV_CONTROLLER_NAVTO_AFTER_POP]
+            val popUpToInclusive = sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE]?.toBoolean() ?: false
+            val clearStack = sessionStorage[KEY_NAV_CONTROLLER_CLEAR_STACK]?.toBoolean() ?: false
+            val clearStackHitPlaceholder  = sessionStorage[KEY_NAV_CONTROLLER_STACK_CLEARED]?.toBoolean() ?: false
+            val popUpToHitDestination = sessionStorage[KEY_NAVCONTROLLER_HIT_POPUP_TO_TARGET]?.toBoolean() ?: false
+
+            when {
+                //We don't have any other pop or stack operation pending, show NavHost children
+                popupToTarget == null && !clearStack && location.pathname != "/$NAVHOST_CLEARSTACK_VIEWNAME" -> {
+                    showChildren = true
                 }
-            }
 
-            //ClearStack was set, we have now reached the first entry in the history, but we did not
-            // yet navigate to the dummy placeholder (NAVHOST_CLEARSTACK_VIEWNAME) to clear the
-            // top off the stack and prevent forward navigation
-            clearStack && location.key == firstEntryKey && !clearStackHitPlaceholder -> {
-                navigateFn("/$NAVHOST_CLEARSTACK_VIEWNAME")
-            }
+                //We have reached the popupTo destination, but popUpToInclusive is set, so we need to pop
+                //once more, then execute any pending navigation
+                popupToTarget == location.ustadViewName && popUpToInclusive-> {
+                    showChildren = false
+                    sessionStorage[KEY_NAVCONTROLLER_HIT_POPUP_TO_TARGET] = true.toString()
+                    navigateFn(-1)
 
-            //This is the dummy placeholder (NAVHOST_CLEARSTACK_VIEWNAME), mark that it has been hit
-            //then navigate back
-            location.pathname == "/$NAVHOST_CLEARSTACK_VIEWNAME" -> {
-                sessionStorage[KEY_NAV_CONTROLLER_STACK_CLEARED] = true.toString()
-                navigateFn(-1)
-            }
-
-            //The stack was set to be cleared, and the placeholder has been hit. Navigate to the
-            // destination
-            clearStack && clearStackHitPlaceholder -> {
-                sessionStorage.clearNavHostCommands()
-                if(navToAfterPop != null) {
-                    navigateFn(navToAfterPop, jso {
-                        replace = true
-                    })
+                    if(navToAfterPop != null) {
+                        navTimeoutJob = coroutineScope.launchClearStackFallback()
+                    }
                 }
-            }
 
-            //We need to continue popping off history - there is a popUpToTarget, but we have not
-            // reached it yet, or clearStack has been set and we have not yet cleared the stack
-            else -> {
-                navigateFn(-1)
+                //We have reached the popUpTo destination (and popUpToInclusive = false), popUpTo
+                // was provided, and the destination was hit. Now it is time to execute forward nav
+                popupToTarget == location.ustadViewName || popUpToHitDestination -> {
+                    sessionStorage.clearNavHostCommands()
+                    if(navToAfterPop != null){
+                        navigateFn(navToAfterPop)
+                    }
+                }
 
-                //if stack is empty, set clearStack = true,
-                navTimeoutJob = coroutineScope.launch {
-                    delay(250)
-                    sessionStorage[KEY_NAV_CONTROLLER_CLEAR_STACK] = true.toString()
+                //ClearStack was set, we have now reached the first entry in the history, but we did not
+                // yet navigate to the dummy placeholder (NAVHOST_CLEARSTACK_VIEWNAME) to clear the
+                // top off the stack and prevent forward navigation
+                clearStack && location.key == firstEntryKey && !clearStackHitPlaceholder -> {
                     navigateFn("/$NAVHOST_CLEARSTACK_VIEWNAME")
+                }
+
+                //This is the dummy placeholder (NAVHOST_CLEARSTACK_VIEWNAME), mark that it has been hit
+                //then navigate back
+                location.pathname == "/$NAVHOST_CLEARSTACK_VIEWNAME" -> {
+                    sessionStorage[KEY_NAV_CONTROLLER_STACK_CLEARED] = true.toString()
+                    navigateFn(-1)
+                }
+
+                //The stack was set to be cleared, and the placeholder has been hit. Navigate to the
+                // destination
+                clearStack && clearStackHitPlaceholder -> {
+                    sessionStorage.clearNavHostCommands()
+                    if(navToAfterPop != null) {
+                        navigateFn(navToAfterPop, jso {
+                            replace = true
+                        })
+                    }
+                }
+
+                //We need to continue popping off history - there is a popUpToTarget, but we have not
+                // reached it yet, or clearStack has been set and we have not yet cleared the stack
+                else -> {
+                    showChildren = false
+                    navigateFn(-1)
+
+                    //Set a timeout in case we have hit the go back limit, in which case navigateFn(-1)
+                    // will have no effect.
+                    navTimeoutJob = coroutineScope.launchClearStackFallback()
                 }
             }
         }
-    }
 
-    if(showChildren) {
-        + props.children
+        if(showChildren) {
+            + props.children
+        }
     }
 }
