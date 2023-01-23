@@ -276,10 +276,10 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AccountListItem(
-        account: UserSessionWithPersonAndEndpoint?,
-        trailing: @Composable (() -> Unit)? = null,
-        onClickAccount: ((UserSessionWithPersonAndEndpoint) -> Unit)? = null
-    ){
+    account: UserSessionWithPersonAndEndpoint?,
+    trailing: @Composable (() -> Unit)? = null,
+    onClickAccount: ((UserSessionWithPersonAndEndpoint) -> Unit)? = null
+){
     ListItem(
         modifier = Modifier.clickable {
             if (account != null) {

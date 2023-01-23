@@ -26,6 +26,109 @@ external interface AccountListProps: Props {
     var onLogoutClick: () -> Unit
 }
 
+interface AccountListItemProps: Props {
+    var onListItemClick: ((UserSessionWithPersonAndEndpoint) -> Unit)?
+}
+
+val AccountListItem = FC<AccountListItemProps> {    props ->
+    fun content(){
+
+        ListItemSecondaryAction{
+            IconButton{
+                onClick = {
+                    props.onDeleteListItemClick(account)
+                }
+                Delete()
+            }
+        }
+
+        ListItemIcon{
+            Icon{
+                sx{
+                    width = 40.px
+                    height = 40.px
+                }
+                AccountCircle{
+                    sx{
+                        width = 40.px
+                        height = 40.px
+                    }
+                }
+            }
+        }
+
+        Stack{
+            direction = responsive(StackDirection.column)
+
+            ListItemText{
+                primary = ReactNode("Ahmad Ahmadi")
+            }
+
+            Stack{
+                direction = responsive(StackDirection.row)
+
+                Icon{
+                    sx{
+                        width = 20.px
+                        height = 20.px
+                    }
+                    Person2{
+                        sx{
+                            width = 20.px
+                            height = 20.px
+                        }
+                    }
+                }
+
+                ListItemText{
+                    sx{
+                        paddingRight = 20.px
+                        paddingLeft = 5.px
+                    }
+                    secondary = ReactNode("ah-mad")
+                }
+
+                Icon{
+                    sx{
+                        width = 20.px
+                        height = 20.px
+                    }
+
+                    LinkOutlined{
+                        sx{
+                            width = 20.px
+                            height = 20.px
+                        }
+                    }
+                }
+
+                ListItemText{
+                    sx{
+                        paddingLeft = 5.px
+                    }
+                    secondary = ReactNode("https://example.com")
+                }
+            }
+        }
+    }
+
+    if(props.onListItemClick != null){
+        ListItem{
+            disablePadding = true
+
+            ListItemButton{
+                content()
+            }
+        }
+    }else{
+        ListItem{
+            disablePadding = true
+
+            content()
+        }
+    }
+}
+
 val AccountListComponent2 = FC<AccountListProps> {  props ->
 
     var strings = useStringsXml()
@@ -36,6 +139,12 @@ val AccountListComponent2 = FC<AccountListProps> {  props ->
         Stack{
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
+
+            AccountListItem{
+                onListItemClick = {
+                    props.onAccountListItemClick(props.uiState.activeAccount)
+                }
+            }
 
             ListItem{
 
@@ -121,7 +230,7 @@ val AccountListComponent2 = FC<AccountListProps> {  props ->
                 Button {
                     onClick = { props.onMyProfileClick() }
                     variant = ButtonVariant.outlined
-                    + strings[MessageID.my_profile].uppercase()
+//                    + strings[MessageID.my_profile].uppercase()
                 }
 
                 Button {
@@ -242,7 +351,7 @@ val AccountListComponent2 = FC<AccountListProps> {  props ->
                     }
 
                     ListItemText{
-                        primary = ReactNode(strings[MessageID.add_another_account])
+//                        primary = ReactNode(strings[MessageID.add_another_account])
                     }
                 }
             }
