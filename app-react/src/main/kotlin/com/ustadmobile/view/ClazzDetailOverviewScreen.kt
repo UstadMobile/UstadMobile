@@ -39,10 +39,10 @@ external interface ClazzDetailOverviewProps : Props {
     var onClickAssignment: (ClazzAssignmentWithMetrics?) -> Unit
 
     var onClickContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
 
     var onClickDownloadContentEntry: (
-        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) -> Unit
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?) -> Unit
 }
 
 val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
@@ -112,14 +112,6 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
 
             List {
                 Typography {
-                    sx {
-                        padding = Padding(
-                            top = 0.px,
-                            bottom = 0.px,
-                            left = 44.px,
-                            right = 0.px
-                        )
-                    }
                     + strings[MessageID.schedule]
                 }
 
@@ -141,7 +133,7 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                             padding = Padding(
                                 top = 0.px,
                                 bottom = 0.px,
-                                left = 52.px,
+                                left = 22.px,
                                 right = 0.px
                             )
                         }
@@ -163,6 +155,9 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                         onClickCourseDiscussion = props.onClickCourseDiscussion
                         onClickCourseExpandCollapse = props.onClickCourseExpandCollapse
                         onClickTextBlock = props.onClickTextBlock
+                        onClickAssignment = props.onClickAssignment
+                        onClickContentEntry = props.onClickContentEntry
+                        onClickDownloadContentEntry = props.onClickDownloadContentEntry
                     }
 
                 }
@@ -183,7 +178,7 @@ private val TextImageRow = FC<TextImageRowProps> { props ->
 
     Stack {
         direction = responsive(StackDirection.row)
-        spacing = responsive(10.px)
+        spacing = responsive(34.px)
         sx {
             padding = Padding(
                 top = 10.px,

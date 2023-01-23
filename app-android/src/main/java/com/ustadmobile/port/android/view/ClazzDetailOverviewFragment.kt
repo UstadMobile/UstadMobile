@@ -4,14 +4,10 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.text.Html
-import android.text.SpannedString
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,7 +23,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.text.HtmlCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -45,7 +40,6 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.entityconstants.ProgressConstants
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.RateLimitedLiveData
 import com.ustadmobile.core.util.ext.toNullableStringMap
@@ -520,8 +514,6 @@ private fun ClazzDetailOverviewScreen(
         item {
             if (uiState.clazzCodeVisible) {
                 UstadDetailField(
-
-                    modifier = Modifier.fillMaxWidth().padding(0.dp),
                     imageId = R.drawable.ic_login_24px,
                     valueText = numMembers,
                     labelText = stringResource(R.string.class_code),
@@ -565,7 +557,6 @@ private fun ClazzDetailOverviewScreen(
 
         item {
             Text(
-                modifier = Modifier.padding(start = 40.dp),
                 text = stringResource(id = R.string.schedule)
             )
         }
@@ -582,7 +573,6 @@ private fun ClazzDetailOverviewScreen(
                     " $fromTimeFormatted - $toTimeFormatted "
 
             ListItem(
-                icon = { Spacer(modifier = Modifier.width(24.dp)) },
                 text = { Text(text) },
             )
         }
@@ -618,7 +608,6 @@ fun TextImageRow(
         modifier = Modifier.padding(vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Spacer(modifier = Modifier.width(24.dp))
 
         Image(
             painter = painterResource(id = imageId),
@@ -652,8 +641,7 @@ fun CourseBlockListItem(
             else
                 Icons.Default.KeyboardArrowDown
             ListItem(
-                modifier = Modifier.padding(start = 40.dp)
-                    .clickable {
+                modifier = Modifier.clickable {
                         onClickCourseExpandCollapse(courseBlock)
                     },
                 text = { Text(courseBlock.cbTitle ?: "") },
@@ -670,8 +658,7 @@ fun CourseBlockListItem(
         }
         CourseBlock.BLOCK_DISCUSSION_TYPE -> {
             ListItem(
-                modifier = Modifier.padding(start = 40.dp)
-                    .clickable {
+                modifier = Modifier.clickable {
                         onClickCourseDiscussion(courseBlock.courseDiscussion)
                     },
                 text = { Text(courseBlock.cbTitle ?: "") },
