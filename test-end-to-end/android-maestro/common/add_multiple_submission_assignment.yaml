@@ -1,8 +1,7 @@
 appId: com.toughra.ustadmobile
 ---
 - tapOn: "Courses"
-- tapOn:
-      id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: ${TESTCOURSENAME}
 - tapOn: "Edit"
 - swipe:
     start: 100,400
@@ -10,7 +9,9 @@ appId: com.toughra.ustadmobile
 - tapOn: "Add block"
 - tapOn: "Assignments"
 - tapOn: "Title"
-- inputText: "Test Assignment"
+- inputText: ${ASSIGNMENTNAME}
+- tapOn: "Description (Optional)"
+- inputText: "Test "
 - hideKeyboard
 - tapOn: "Completion criteria"
 - tapOn: "Submitted"

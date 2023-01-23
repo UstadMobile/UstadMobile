@@ -6,10 +6,8 @@ appId: com.toughra.ustadmobile
 - evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 
 - tapOn: "Courses"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_course_block_icon"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: ${ASSIGNMENTNAME}
 - tapOn: "ADD TEXT"
 - tapOn:
     id: "com.toughra.ustadmobile:id/text_editor"
@@ -21,4 +19,7 @@ appId: com.toughra.ustadmobile
       notVisible: "Downloads"
     file: "./redirect_to_downloads.yaml"
 - tapOn: ${TESTFILENAME}
+- swipe:
+    start: 100,400
+    end: 100,100
 - tapOn: "SUBMIT"

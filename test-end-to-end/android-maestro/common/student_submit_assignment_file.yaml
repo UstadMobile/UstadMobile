@@ -6,8 +6,7 @@ appId: com.toughra.ustadmobile
 - evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 
 - tapOn: "Courses"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: ${TESTCOURSENAME}
 - tapOn:
     id: "com.toughra.ustadmobile:id/item_course_block_icon"
 - tapOn: "ADD FILE"

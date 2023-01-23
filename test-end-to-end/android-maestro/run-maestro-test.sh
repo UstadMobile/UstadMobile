@@ -2,7 +2,7 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 's:u:p:e:t:a:cr' --long 'serial1:,username:,password:,endpoint:,test:,apk:,console-output,result:' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 's:u:p:e:t:a1:a2:c:r' --long 'serial1:,username:,password:,endpoint:,test:,apk1:,apk2:,console-output:,result:' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -13,7 +13,8 @@ TESTPASS="testpass"
 WORKDIR=$(pwd)
 TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
-TESTAPK=$SCRIPTDIR/../../app-android-launcher/build/outputs/apk/release/app-android-launcher-release.apk
+TESTAPK1=$SCRIPTDIR/build/apks/app-android-launcher-release.apk
+TESTAPK2=$SCRIPTDIR/build/apks/app-android-launcher-release-2.apk
 TESTRESULTSDIR=""
 CONTROLSERVER=""
 USECONSOLEOUTPUT=0
@@ -46,9 +47,15 @@ while true; do
                      shift 2
                      continue
                ;;
-               '-a'|'--apk')
-                     echo "Set APK to $2"
-                     TESTAPK=$2
+               '-a1'|'--apk1')
+                     echo "Set APK1 to $2"
+                     TESTAPK1=$2
+                     shift 2
+                     continue
+               ;;
+               '-a2'|'--apk2')
+                     echo "Set APK2 to $2"
+                     TESTAPK2=$2
                      shift 2
                      continue
                ;;
@@ -117,7 +124,11 @@ adb reverse tcp:8075 tcp:8075
 if [ "$(adb shell pm list packages com.toughra.ustadmobile)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile
 fi
-adb install $TESTAPK
+if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
+  adb shell pm uninstall com.toughra.ustadmobile2
+fi
+adb install $TESTAPK1
+adb install $TESTAPK2
 
 TESTARG=$TEST
 if [ "$TEST" != "" ]; then
@@ -133,7 +144,7 @@ fi
 
 maestro --device=$TESTSERIAL test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-         -e TESTSERIAL=$TESTSERIAL $OUTPUTARGS \
+         -e TESTSERIAL=$TESTSERIAL \
          $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR
 
 TESTSTATUS=$?

@@ -13,6 +13,7 @@ appId: com.toughra.ustadmobile
 - inputText: ${TEXTTITLE}
 - tapOn: "Don't show before (Optional)"
 - tapOn: "OK"
+# editor space on text module does not have text field, so we used its id
 - tapOn:
     id: "com.toughra.ustadmobile:id/editor"
 - inputText: ${TEXT}

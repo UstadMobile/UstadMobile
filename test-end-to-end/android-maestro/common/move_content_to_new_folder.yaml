@@ -13,8 +13,7 @@ appId: com.toughra.ustadmobile
     text: "Move"
 - tapOn: "Add new content"
 - tapOn: "New folder"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/entry_title_text"
+- tapOn: "Title"
 - inputText: "New Test Folder"
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/after_moving_content_to_new_folder"

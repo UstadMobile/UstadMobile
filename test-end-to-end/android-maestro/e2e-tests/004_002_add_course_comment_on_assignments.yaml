@@ -1,13 +1,16 @@
 appId: com.toughra.ustadmobile
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/004_002_add_course_comment_on_assignments"
+  TESTNAME: 004_002_add_course_comment_on_assignments
 ---
 #--------------------------------------------------APP 2--------------------------------------#
 - clearState: com.toughra.ustadmobile2
 - runFlow:
-    file: "../common/startserver.yaml"
-    env:
+     file: "../common/startserver.yaml"
+     env:
       CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
 # admin able to add a course and edit that course
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
@@ -17,11 +20,12 @@ env:
 - runFlow:
     file: "../build/common-app2/add_course.yaml"
     env:
-      TESTCOURSENAME: "Course comment test"
+      TESTCOURSENAME: Course comment test
 #------------------------------------------------------------------------------admin add new teacher
 - runFlow:
     file: "../build/common-app2/add_new_teacher_inside_course.yaml"
     env:
+      TESTCOURSENAME: Course comment test
       TEACHERFIRSTNAME: Mary
       TEACHERLASTNAME: Jacob
       GENDER: Female
@@ -30,6 +34,7 @@ env:
 - runFlow:
     file: "../build/common-app2/add_new_student_inside_course.yaml"
     env:
+      TESTCOURSENAME: Course comment test
       STUDENTFIRSTNAME: Ajay
       STUDENTLASTNAME: Dev
       GENDER: Male
@@ -37,6 +42,7 @@ env:
 - runFlow:
     file: "../build/common-app2/add_new_student_inside_course.yaml"
     env:
+      TESTCOURSENAME: Course comment test
       STUDENTFIRSTNAME: Sam
       STUDENTLASTNAME: Antony
       GENDER: Male
@@ -51,11 +57,17 @@ env:
     env:
       USERNAME: Mary
       PASSWORD: test
-- runFlow: "../common/add_assignment_Block.yaml"
+- runFlow:
+    file:  "../common/add_assignment_Block.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Course comment test
 - runFlow:
     file: "../common/add_class_comments.yaml"
     env:
-      CLASSCOMMENT: "Please comment here once you submit the assignment"
+      TESTCOURSENAME: Course comment test
+      ASSIGNMENTNAME: Test Assignment
+      CLASSCOMMENT: Please comment here once you submit the assignment
 #-------------------------------APP 2------student submit assignment and add class comment--------#
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
@@ -67,13 +79,20 @@ env:
 - runFlow:
      file: "../build/common-app2/student_submit_assignment_block.yaml"
      env:
-       TESTFILENAME: "H5p_Content.h5p"
+       TESTCOURSENAME: Course comment test
+       ASSIGNMENTNAME: Test Assignment
+       TESTFILENAME: H5p_Content.h5p
        CONTROLSERVER: ${CONTROLSERVER}
        TESTSERIAL: ${TESTSERIAL}
+- swipe:
+    start: 100,100
+    end: 100,400
 - runFlow:
     file: "../build/common-app2/add_class_comments.yaml"
     env:
-      CLASSCOMMENT: "Completed Mam"
+      TESTCOURSENAME: Course comment test
+      ASSIGNMENTNAME: Test Assignment
+      CLASSCOMMENT: Completed Mam
 #---------------------------------------------------APP 1 ------student login to view class comments---------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -83,10 +102,8 @@ env:
       USERNAME: Sam
       PASSWORD: test
 - tapOn: "Courses"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_course_block_icon"
+- tapOn: "Course comment test"
+- tapOn: "Test Assignment"
 - swipe:
     start: 100,400
     end: 100,100

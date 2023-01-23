@@ -1,8 +1,13 @@
 appId: com.toughra.ustadmobile
 ---
+# Test parameters needs to provide for this test :
+# 1) TESTCOURSENAME: provide course name of string type
+# 2) STUDENTNAME: provide student full name of string type
+# 3) POINT: provide mark in string type
+# 4) TESTRESULTSDIR : provide location to store results
+
 - tapOn: "Courses"
-- tapOn:
-      id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: ${TESTCOURSENAME}
 - tapOn:
     id: "com.toughra.ustadmobile:id/item_course_block_icon"
 - tapOn: "SUBMISSIONS"

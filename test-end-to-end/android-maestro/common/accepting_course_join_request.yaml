@@ -3,9 +3,9 @@ appId: com.toughra.ustadmobile
 # admin accepts the student's request to join an existing course using code
 # Test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+# 2) TESTCOURSENAME: provide course name of string type
 -  tapOn: "Courses"
-- tapOn:
-      id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
+- tapOn: ${TESTCOURSENAME}
 - tapOn: "MEMBERS"
 - tapOn:
     id: "com.toughra.ustadmobile:id/accept_icon"

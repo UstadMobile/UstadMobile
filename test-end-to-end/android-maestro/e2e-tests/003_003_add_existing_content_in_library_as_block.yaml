@@ -1,13 +1,16 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_003_add_ content_block_and_link_existing_content"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_003_add_existing_content_in_library_as_block"
+  TESTNAME: "003_003_add_existing_content_in_library_as_block"
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
-#---------add content to library ---------#
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+  #---------add content to library ---------#
 - runFlow:
     file: "../common/add_content.yaml"
     env:
@@ -32,6 +35,7 @@ env:
 - runFlow:
     file: "../common/add_new_teacher_inside_course.yaml"
     env:
+      TESTCOURSENAME: "Existing Content Block Test"
       TEACHERFIRSTNAME: "Anupama"
       TEACHERLASTNAME: "Sebastian"
       GENDER: "Female"
@@ -42,13 +46,9 @@ env:
 - tapOn: "OVERVIEW"
 - runFlow:
     file: "../common/add_existing_content_block_to_course.yaml"
-- tapOn:
-    text: "SELECT "
-    index: 0
+- tapOn: "EpubContent"
 - tapOn: "SAVE"
 - tapOn: "SAVE"
-
-#---------Launch App & Teacher Login------------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -57,19 +57,12 @@ env:
       USERNAME: "Anupama"
       PASSWORD: "test"
 - tapOn: "courses"
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_clazzlist_clazz_cl"
-#--- add h5p content already added by admin in library to course block --#
+- tapOn: "Existing Content Block Test"
 - runFlow:
     file: "../common/add_existing_content_block_to_course.yaml"
-- tapOn:
-    text: "SELECT "
-    index: 1
+- tapOn: "H5PContent"
 - tapOn: "SAVE"
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/able_to_add_existing_content_block_inside_course"
-
-
-
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/able_to_add_existing_content_block_inside_course"
 
 

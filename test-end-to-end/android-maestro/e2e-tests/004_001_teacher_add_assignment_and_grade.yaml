@@ -1,12 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/004_001_teacher_add_assignment_and_grade"
+  TESTNAME: 004_001_teacher_add_assignment_and_grade
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
 # admin able to add a course and edit that course
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
@@ -16,11 +19,12 @@ env:
 - runFlow:
     file: "../build/common-app2/add_course.yaml"
     env:
-      TESTCOURSENAME: "Assignment block test"
+      TESTCOURSENAME: Assignment block test
 #------------------------------------------------------------------------------admin add new teacher
 - runFlow:
     file: "../build/common-app2/add_new_teacher_inside_course.yaml"
     env:
+      TESTCOURSENAME: Assignment block test
       TEACHERFIRSTNAME: Mary
       TEACHERLASTNAME: Jacob
       GENDER: Female
@@ -29,6 +33,7 @@ env:
 - runFlow:
     file: "../build/common-app2/add_new_student_inside_course.yaml"
     env:
+      TESTCOURSENAME: Assignment block test
       STUDENTFIRSTNAME: Ajay
       STUDENTLASTNAME: Dev
       GENDER: Male
@@ -36,6 +41,7 @@ env:
 - runFlow:
     file: "../build/common-app2/add_new_student_inside_course.yaml"
     env:
+      TESTCOURSENAME: Assignment block test
       STUDENTFIRSTNAME: Sam
       STUDENTLASTNAME: Antony
       GENDER: Male
@@ -49,7 +55,11 @@ env:
     env:
       USERNAME: Mary
       PASSWORD: test
-- runFlow: "../common/add_assignment_Block.yaml"
+- runFlow:
+     file:  "../common/add_assignment_Block.yaml"
+     env:
+       TESTCOURSENAME: Assignment block test
+       ASSIGNMENTNAME: Test Assignment
 #-------------------------------------------------------------------------student submit assignment
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
@@ -61,11 +71,11 @@ env:
 - runFlow:
      file: "../build/common-app2/student_submit_assignment_block.yaml"
      env:
-       TESTFILENAME: "H5p_Content.h5p"
+       TESTCOURSENAME: Assignment block test
+       ASSIGNMENTNAME: Test Assignment
+       TESTFILENAME: H5p_Content.h5p
        CONTROLSERVER: ${CONTROLSERVER}
        TESTSERIAL: ${TESTSERIAL}
-
-
 #-------------one submission per student as per default- After submitting their work, the submit button is no longer visible----#
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
@@ -77,7 +87,8 @@ env:
 - runFlow:
      file: "../build/common-app2/student_submit_assignment_text.yaml"
      env:
-       TEXT: "Numbers - 1,2,3,4,5,6,7,8,9,10"
+       TESTCOURSENAME: Assignment block test
+       TEXT: Numbers - 1,2,3,4,5,6,7,8,9,10
 - extendedWaitUntil:
     notVisible: "SUBMIT"
     timeout: 10000
@@ -93,11 +104,13 @@ env:
 - runFlow:
     file: "../common/add_assignment_grade.yaml"
     env:
+      TESTCOURSENAME: Assignment block test
       STUDENTNAME: Ajay Dev
       POINT: 8
 - runFlow:
     file: "../common/add_assignment_grade.yaml"
     env:
+      TESTCOURSENAME: Assignment block test
       STUDENTNAME: Sam Antony
       POINT: 7
 #----------------------------------------------student view assignment grade ------------#
@@ -110,11 +123,9 @@ env:
       PASSWORD: test
 
 - tapOn: "Courses"
-- tapOn:
-    id: "com.toughra.ustadmobile2:id/item_clazzlist_clazz_cl"
+- tapOn: "Assignment block test"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_overviewPage_studentView1"
-- tapOn:
-    id: "com.toughra.ustadmobile2:id/item_course_block_icon"
+- tapOn: "Test Assignment"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_assignmentPage_studentView1"
 #----------------------------------------------------------------------
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
@@ -125,15 +136,8 @@ env:
       USERNAME: Sam
       PASSWORD: test
 - tapOn: "Courses"
-- tapOn:
-    id: "com.toughra.ustadmobile2:id/item_clazzlist_clazz_cl"
+- tapOn: "Assignment block test"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_overviewPage_studentView2"
-- tapOn:
-    id: "com.toughra.ustadmobile2:id/item_course_block_icon"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_assignmentPage_studentView2"
-- runFlow:
-    file: "../build/common-app2/student_submit_assignment_block.yaml"
-    env:
-      TESTFILENAME: "Pdf_Content.pdf"
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
+- tapOn: "Test Assignment"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/single_submission_assignment_grade_studentView2"
+

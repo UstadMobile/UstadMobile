@@ -1,12 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/004_004_multiple_submission_assignment"
+  TESTNAME: "004_004_multiple_submission_assignment"
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
 # admin able to add a course and edit that course
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
@@ -16,11 +19,12 @@ env:
 - runFlow:
     file: "../build/common-app2/add_course.yaml"
     env:
-      TESTCOURSENAME: "Assignment block test"
+      TESTCOURSENAME: Assignment block test
 #------------------------------------------------------------------------------admin add new teacher
 - runFlow:
     file: "../build/common-app2/add_new_teacher_inside_course.yaml"
     env:
+      TESTCOURSENAME: Assignment block test
       TEACHERFIRSTNAME: Mary
       TEACHERLASTNAME: Jacob
       GENDER: Female
@@ -29,6 +33,7 @@ env:
 - runFlow:
     file: "../build/common-app2/add_new_student_inside_course.yaml"
     env:
+      TESTCOURSENAME: Assignment block test
       STUDENTFIRSTNAME: Ajay
       STUDENTLASTNAME: Dev
       GENDER: Male
@@ -36,6 +41,7 @@ env:
 - runFlow:
     file: "../build/common-app2/add_new_student_inside_course.yaml"
     env:
+      TESTCOURSENAME: Assignment block test
       STUDENTFIRSTNAME: Sam
       STUDENTLASTNAME: Antony
       GENDER: Male
@@ -49,7 +55,11 @@ env:
     env:
       USERNAME: Mary
       PASSWORD: test
-- runFlow: "../common/add_multiple_submission_assignment.yaml"
+- runFlow:
+    file: "../common/add_multiple_submission_assignment.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Assignment block test
 #-------------------------------------------------------------------------student submit assignment
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
@@ -61,6 +71,7 @@ env:
 - runFlow:
     file: "../build/common-app2/student_submit_assignment_text.yaml"
     env:
+      TESTCOURSENAME: Assignment block test
       TEXT: "Numbers - 1,2,3,4,5,6,7,8,9,10"
 #--------------------------------------------------------------------------teacher grade the assignment
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -73,6 +84,7 @@ env:
 - runFlow:
     file: "../common/add_assignment_grade.yaml"
     env:
+      TESTCOURSENAME: Assignment block test
       STUDENTNAME: Ajay Dev
       POINT: 8
 #----------------------------------------------student view assignment grade ------------#
@@ -84,8 +96,7 @@ env:
       USERNAME: Ajay
       PASSWORD: test
 - tapOn: "Courses"
-- tapOn:
-    id: "com.toughra.ustadmobile2:id/item_clazzlist_clazz_cl"
+- tapOn: "Assignment block test"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_overviewPage_studentView1"
 - tapOn:
     id: "com.toughra.ustadmobile2:id/item_course_block_icon"
@@ -93,6 +104,7 @@ env:
 - runFlow:
     file: "../build/common-app2/student_submit_assignment_file.yaml"
     env:
+      TESTCOURSENAME: Assignment block test
       TESTFILENAME: "Pdf_Content.pdf"
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
@@ -107,6 +119,7 @@ env:
 - runFlow:
     file: "../common/update_assignment_grade.yaml"
     env:
+      TESTCOURSENAME: Assignment block test
       STUDENTNAME: Ajay Dev
       POINT: 9
 #----------------------------------------------student view updated assignment grade ------------#
@@ -118,9 +131,5 @@ env:
       USERNAME: Ajay
       PASSWORD: test
 - tapOn: "Courses"
-- tapOn:
-    id: "com.toughra.ustadmobile2:id/item_clazzlist_clazz_cl"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_updated_grade_on_overviewPage_studentView1"
-- tapOn:
-    id: "com.toughra.ustadmobile2:id/item_course_block_icon"
+- tapOn: "Assignment block test"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_updated_grade_on_assignmentPage_studentView1"
