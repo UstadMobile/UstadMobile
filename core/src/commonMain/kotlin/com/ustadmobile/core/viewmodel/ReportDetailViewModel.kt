@@ -7,6 +7,13 @@ data class ReportDetailUiState(
 
     val statementListDetails: List<StatementEntityWithDisplayDetails> = emptyList(),
 
-    val chartData: ChartData? = null
+    val chart: ChartData? = null,
 
-)
+    val saveAsTemplateVisible: Boolean = false,
+
+) {
+
+    val addToDashboardVisible: Boolean
+        get() = chart?.reportWithFilters?.reportUid == 0L
+
+}

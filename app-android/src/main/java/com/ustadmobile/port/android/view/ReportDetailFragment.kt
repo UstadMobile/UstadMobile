@@ -8,8 +8,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LifecycleOwner
@@ -35,10 +37,10 @@ import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.viewmodel.ReportDetailUiState
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
-import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -355,6 +357,9 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
 @Composable
 private fun ReportDetailScreen(
     uiState: ReportDetailUiState = ReportDetailUiState(),
+    onClickExport: () -> Unit = {},
+    onClickAddToDashboard: (ReportWithSeriesWithFilters?) -> Unit = {},
+    onClickAddAsTemplate: (ReportWithSeriesWithFilters?) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -362,13 +367,69 @@ private fun ReportDetailScreen(
             .defaultScreenPadding()
     )  {
 
+        QuickActionBars(
+            uiState = uiState,
+            onClickExport = onClickExport,
+            onClickAddToDashboard = onClickAddToDashboard,
+            onClickAddAsTemplate = onClickAddAsTemplate
+        )
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+           Text(text = stringResource(id = R.string.person))
+
+           Text(text = stringResource(id = R.string.xapi_verb_header))
+
+           Text(text = stringResource(id = R.string.xapi_result_header))
+
+           Text(text = stringResource(id = R.string.xapi_options_when))
+        }
+    }
+}
+
+@Composable
+private fun QuickActionBars(
+    uiState: ReportDetailUiState,
+    onClickExport: () -> Unit,
+    onClickAddToDashboard: (ReportWithSeriesWithFilters?) -> Unit,
+    onClickAddAsTemplate: (ReportWithSeriesWithFilters?) -> Unit,
+){
+    Row {
+        UstadQuickActionButton(
+            labelText = stringResource(id = R.string.export).uppercase(),
+            imageId = R.drawable.ic_export,
+            onClick = onClickExport
+        )
+
+        if (uiState.addToDashboardVisible){
+            UstadQuickActionButton(
+                labelText = stringResource(id = R.string.add_to, R.string.dashboard).uppercase(),
+                imageId = R.drawable.ic_baseline_addchart_24,
+                onClick = { onClickAddToDashboard(uiState.chart?.reportWithFilters) }
+            )
+        }
+
+        if (uiState.saveAsTemplateVisible){
+            UstadQuickActionButton(
+                labelText = stringResource(id = R.string.save_as_template).uppercase(),
+                imageId = R.drawable.ic_baseline_post_add_24,
+                onClick = { onClickAddAsTemplate(uiState.chart?.reportWithFilters) }
+            )
+        }
     }
 }
 
 @Composable
 @Preview
 fun ReportDetailScreenPreview() {
+
     MdcTheme {
-        ReportDetailScreen()
+        ReportDetailScreen(
+            uiState = ReportDetailUiState(
+                saveAsTemplateVisible = true
+            )
+        )
     }
 }
