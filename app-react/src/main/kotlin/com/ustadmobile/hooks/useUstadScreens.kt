@@ -90,6 +90,8 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(LanguageListView.VIEW_NAME, "LanguageList Preview",
                 LanguageListScreenPreview),
             UstadScreen(PersonListView.VIEW_NAME, "PersonList Preview", PersonListScreenPreview),
+            UstadScreen(TextCourseBlockEditView.VIEW_NAME, "TextCourseBlockEdit Preview",
+                TextCourseBlockEditScreenPreview),
         )
     }
 }
