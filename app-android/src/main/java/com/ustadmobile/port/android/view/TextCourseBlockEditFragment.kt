@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,8 +23,6 @@ import com.ustadmobile.core.view.TextCourseBlockEditView
 import com.ustadmobile.core.viewmodel.TextCourseBlockEditUiState
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
-import com.ustadmobile.port.android.util.ext.MS_PER_MIN
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadDateEditTextField
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
