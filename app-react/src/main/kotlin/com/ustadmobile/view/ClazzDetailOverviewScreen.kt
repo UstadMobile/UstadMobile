@@ -230,6 +230,11 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
 
             ListItem {
                 ListItemButton {
+
+                    sx {
+                        padding = paddingCourseBlockIndent(props.courseBlock.cbIndentLevel)
+                    }
+
                    onClick = {
                        props.onClickCourseExpandCollapse(props.courseBlock)
                    }
@@ -248,6 +253,11 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
         CourseBlock.BLOCK_DISCUSSION_TYPE -> {
             ListItem {
                 ListItemButton {
+
+                    sx {
+                        padding = paddingCourseBlockIndent(props.courseBlock.cbIndentLevel)
+                    }
+
                     onClick = {
                         props.onClickCourseDiscussion(props.courseBlock.courseDiscussion)
                     }
@@ -266,6 +276,11 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
         CourseBlock.BLOCK_TEXT_TYPE -> {
             ListItem {
                 ListItemButton {
+
+                    sx {
+                        padding = paddingCourseBlockIndent(props.courseBlock.cbIndentLevel)
+                    }
+
                     onClick = {
                         props.onClickTextBlock(props.courseBlock)
                     }
