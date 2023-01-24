@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.ustadmobile.core.controller.ScopedGrantListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
@@ -101,6 +102,9 @@ private fun ScopedGrantListScreen(
             ListItem(
                 modifier = Modifier.clickable {
                     onClickScopedGrant(scopedGrant)
+                },
+                icon = {
+                    Spacer(modifier = Modifier.width(24.dp))
                 },
                 text = { Text(scopedGrant.name ?: "") },
             )

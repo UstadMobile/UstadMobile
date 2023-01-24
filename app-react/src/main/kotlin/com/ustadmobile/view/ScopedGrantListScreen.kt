@@ -4,6 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.ScopedGrantListUiState
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
+import com.ustadmobile.view.components.UstadBlankIcon
 import mui.icons.material.Add
 import mui.material.*
 import react.FC
@@ -51,6 +52,10 @@ val ScopedGrantListScreenComponent2 = FC<ScopedGrantListScreenProps> { props ->
                         ListItemButton {
                             onClick = {
                                 props.onClickScopedGrant(scopedGrant)
+                            }
+
+                            ListItemIcon{
+                                UstadBlankIcon()
                             }
 
                             ListItemText {
