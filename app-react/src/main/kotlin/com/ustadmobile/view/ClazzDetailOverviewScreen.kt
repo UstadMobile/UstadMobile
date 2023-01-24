@@ -239,6 +239,10 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                        props.onClickCourseExpandCollapse(props.courseBlock)
                    }
 
+                    ListItemIcon {
+                        + Folder.create()
+                    }
+
                     ListItemText {
                         primary = ReactNode(props.courseBlock.cbTitle ?: "")
                         secondary = ReactNode(props.courseBlock.cbDescription ?: "")
@@ -263,7 +267,7 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                     }
 
                     ListItemIcon {
-
+                        + Forum.create()
                     }
 
                     ListItemText {
@@ -286,7 +290,7 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                     }
 
                     ListItemIcon {
-
+                        + Title.create()
                     }
 
                     ListItemText {
