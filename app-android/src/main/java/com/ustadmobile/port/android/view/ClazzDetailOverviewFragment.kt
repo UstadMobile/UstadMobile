@@ -57,6 +57,7 @@ import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.composable.UstadClazzAssignmentListItem
 import com.ustadmobile.port.android.view.composable.UstadContentEntryListItem
 import com.ustadmobile.port.android.view.composable.UstadDetailField
+import com.ustadmobile.port.android.view.composable.paddingCourseBlockIndent
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -641,7 +642,8 @@ fun CourseBlockListItem(
             else
                 Icons.Default.KeyboardArrowDown
             ListItem(
-                modifier = Modifier.clickable {
+                modifier = Modifier.paddingCourseBlockIndent(courseBlock.cbIndentLevel)
+                    .clickable {
                         onClickCourseExpandCollapse(courseBlock)
                     },
                 text = { Text(courseBlock.cbTitle ?: "") },
@@ -658,7 +660,8 @@ fun CourseBlockListItem(
         }
         CourseBlock.BLOCK_DISCUSSION_TYPE -> {
             ListItem(
-                modifier = Modifier.clickable {
+                modifier = Modifier.paddingCourseBlockIndent(courseBlock.cbIndentLevel)
+                    .clickable {
                         onClickCourseDiscussion(courseBlock.courseDiscussion)
                     },
                 text = { Text(courseBlock.cbTitle ?: "") },
@@ -677,7 +680,8 @@ fun CourseBlockListItem(
 //                SpannedString.valueOf("")
 
             ListItem(
-                modifier = Modifier.clickable {
+                modifier = Modifier.paddingCourseBlockIndent(courseBlock.cbIndentLevel)
+                    .clickable {
                     onClickTextBlock(courseBlock)
                 },
                 text = { Text(courseBlock.cbTitle ?: "") },

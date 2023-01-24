@@ -234,10 +234,6 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                        props.onClickCourseExpandCollapse(props.courseBlock)
                    }
 
-                    ListItemIcon {
-
-                    }
-
                     ListItemText {
                         primary = ReactNode(props.courseBlock.cbTitle ?: "")
                         secondary = ReactNode(props.courseBlock.cbDescription ?: "")
