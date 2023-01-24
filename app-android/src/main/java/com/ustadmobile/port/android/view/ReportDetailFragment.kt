@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -32,7 +34,9 @@ import com.ustadmobile.core.controller.ReportDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.ChartData
+import com.ustadmobile.core.util.ext.SeriesData
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.util.graph.LabelValueFormatter
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.viewmodel.ReportDetailUiState
 import com.ustadmobile.door.ext.DoorTag
@@ -367,6 +371,28 @@ private fun ReportDetailScreen(
             .defaultScreenPadding()
     )  {
 
+
+        var chart: XapiChartView;
+
+        AndroidView(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp),
+            factory = {  context ->
+                val view = LayoutInflater.from(context).inflate(
+                    R.layout.item_report_detail_chart,
+                    null, false
+                )
+
+                chart = view.findViewById(R.id.chart_view)
+
+                chart.setChartData(uiState.chart)
+                view
+            },
+            update = {
+            }
+        )
+
         QuickActionBars(
             uiState = uiState,
             onClickExport = onClickExport,
@@ -428,7 +454,27 @@ fun ReportDetailScreenPreview() {
     MdcTheme {
         ReportDetailScreen(
             uiState = ReportDetailUiState(
-                saveAsTemplateVisible = true
+                saveAsTemplateVisible = true,
+                chart = ChartData(
+                    seriesData = listOf(
+                        SeriesData(
+                            dataList = listOf(
+                                StatementReportData().apply {
+                                    yAxis = 5f
+                                    xAxis = ""
+                                    subgroup = ""
+                                }
+                            ),
+                            series = ReportSeries().apply {
+
+                            },
+                            subGroupFormatter = null
+                        )
+                    ),
+                    reportWithFilters = ReportWithSeriesWithFilters(),
+                    xAxisValueFormatter = null,
+                    yAxisValueFormatter = null
+                )
             )
         )
     }
