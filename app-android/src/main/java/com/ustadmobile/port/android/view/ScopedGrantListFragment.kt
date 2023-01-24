@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.ustadmobile.core.controller.ScopedGrantListPresenter
@@ -68,12 +71,28 @@ class ScopedGrantListFragment(
 private fun ScopedGrantListScreen(
     uiState: ScopedGrantListUiState = ScopedGrantListUiState(),
     onClickScopedGrant: (ScopedGrantWithName) -> Unit = {},
+    onClickAddScopedGrant: () -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .defaultScreenPadding()
     )  {
+
+        item {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickAddScopedGrant()
+                },
+                icon = {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = null
+                    )
+                },
+                text = { Text(stringResource(id = R.string.add)) }
+            )
+        }
 
         items(
             items = uiState.scopedGrantList,
@@ -93,6 +112,23 @@ private fun ScopedGrantListScreen(
 @Preview
 fun ScopedGrantListScreenPreview() {
     MdcTheme {
-        ScopedGrantListScreen()
+        ScopedGrantListScreen(
+            uiState = ScopedGrantListUiState(
+                scopedGrantList = listOf(
+                    ScopedGrantWithName().apply {
+                        sgUid = 1
+                        name = "First Item"
+                    },
+                    ScopedGrantWithName().apply {
+                        sgUid = 2
+                        name = "Second Item"
+                    },
+                    ScopedGrantWithName().apply {
+                        sgUid = 3
+                        name = "Third Item"
+                    }
+                )
+            )
+        )
     }
 }
