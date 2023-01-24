@@ -3,6 +3,7 @@ package com.ustadmobile.core.components
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.nav.NavCommand
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
+import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.door.ext.toUrlQueryString
 import history.Location
 import kotlinx.browser.sessionStorage
@@ -66,7 +67,7 @@ const val NAVHOST_CLEARSTACK_VIEWNAME = "ClearStack"
 
 /**
  * NavHostFunction will execute a NavCommand. These are collected from the ViewModel's
- * CommandFlowUstadNavController .
+ * CommandFlowUstadNavController flow.
  *
  * If no pop or stack clearing is required, the navigation will be executed immediately using the
  * normal NavigateFunction. If popping the stack is required, then the children will be hidden, and
@@ -96,6 +97,12 @@ class NavHostFunction(
                     onHideChildren()
                     navigateFn(-1)
                 }
+            }
+            is PopNavCommand -> {
+                sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_PAGE] = cmd.viewName
+                sessionStorage[KEY_NAV_CONTROLLER_POPUPTO_INCLUSIVE] = cmd.inclusive.toString()
+                onHideChildren()
+                navigateFn(-1)
             }
             else -> {
                 //do nothing
@@ -135,7 +142,7 @@ val NavHost = FC<PropsWithChildren> { props ->
          *
          * This is used as a timeout. It will then initiate navigation to the Clear Stack placeholder.
          */
-        fun CoroutineScope.launchClearStackFallback() = launch {
+        fun CoroutineScope.launchClearStackTimeout() = launch {
             delay(250)
             sessionStorage[KEY_NAV_CONTROLLER_CLEAR_STACK] = true.toString()
             navigateFn("/$NAVHOST_CLEARSTACK_VIEWNAME")
@@ -180,7 +187,7 @@ val NavHost = FC<PropsWithChildren> { props ->
                     navigateFn(-1)
 
                     if(navToAfterPop != null) {
-                        navTimeoutJob = coroutineScope.launchClearStackFallback()
+                        navTimeoutJob = coroutineScope.launchClearStackTimeout()
                     }
                 }
 
@@ -226,7 +233,7 @@ val NavHost = FC<PropsWithChildren> { props ->
 
                     //Set a timeout in case we have hit the go back limit, in which case navigateFn(-1)
                     // will have no effect.
-                    navTimeoutJob = coroutineScope.launchClearStackFallback()
+                    navTimeoutJob = coroutineScope.launchClearStackTimeout()
                 }
             }
         }

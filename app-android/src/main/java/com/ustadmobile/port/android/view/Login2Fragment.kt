@@ -23,6 +23,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.LoginUiState
@@ -30,7 +31,7 @@ import com.ustadmobile.core.viewmodel.LoginViewModel
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
 
-class Login2Fragment : UstadBaseFragment() {
+class Login2Fragment : UstadBaseMvvmFragment() {
 
     private val viewModel: LoginViewModel by viewModels {
         UstadViewModelProviderFactory(di, this, requireArguments())
@@ -41,6 +42,9 @@ class Login2Fragment : UstadBaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
