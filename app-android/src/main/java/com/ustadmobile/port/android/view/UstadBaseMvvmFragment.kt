@@ -6,6 +6,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import com.ustadmobile.core.impl.nav.NavControllerAdapter
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -24,6 +25,8 @@ abstract class UstadBaseMvvmFragment: UstadBaseFragment() {
         extend(closestDi)
     }
 
+    val navCommandExecTracker: NavCommandExecutionTracker by instance()
+
     /**
      *
      */
@@ -31,18 +34,20 @@ abstract class UstadBaseMvvmFragment: UstadBaseFragment() {
         launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.navCommandFlow.collect {
-                    when(it) {
-                        is NavigateNavCommand -> {
-                            //if this is run directly (without launch) then we will get a memory leak
-                            launch {
-                                delay(20)
-                                val navAdapter = NavControllerAdapter(findNavController(),
-                                    direct.instance())
-                                navAdapter.navigate(it.viewName, it.args, it.goOptions)
+                    navCommandExecTracker.runIfNotExecutedOrTimedOut(it) { cmd ->
+                        when(cmd) {
+                            is NavigateNavCommand -> {
+                                //if this is run directly (without launch) then we will get a memory leak
+                                launch {
+                                    delay(20)
+                                    val navAdapter = NavControllerAdapter(findNavController(),
+                                        direct.instance())
+                                    navAdapter.navigate(cmd.viewName, cmd.args, cmd.goOptions)
+                                }
                             }
-                        }
-                        else -> {
-                            //do nothing
+                            else -> {
+                                //do nothing
+                            }
                         }
                     }
                 }
