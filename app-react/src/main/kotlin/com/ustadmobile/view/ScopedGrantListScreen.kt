@@ -25,12 +25,13 @@ val ScopedGrantListScreenComponent2 = FC<ScopedGrantListScreenProps> { props ->
 
     Container {
 
-        UstadAddListItem {
-            text = strings[MessageID.add]
-            onClickAdd = { props.onClickAddScopedGrant() }
-        }
-
         List{
+
+            UstadAddListItem {
+                text = strings[MessageID.add]
+                onClickAdd = { props.onClickAddScopedGrant() }
+            }
+
             props.uiState.scopedGrantList
                 .forEach { scopedGrant ->
                     ListItem{
