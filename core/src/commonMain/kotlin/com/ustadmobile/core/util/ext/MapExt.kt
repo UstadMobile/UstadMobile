@@ -2,12 +2,11 @@ package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadBackStackEntry
+import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
-import io.ktor.client.plugins.json.defaultSerializer
-import io.ktor.http.content.*
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 
@@ -46,6 +45,20 @@ fun <K, V> MutableMap<K, V>.putFromOtherMapIfPresent(otherMap: Map<K, V>, keyVal
     val otherMapVal = otherMap[keyVal]
     if(otherMapVal != null) {
         put(keyVal, otherMapVal)
+    }
+}
+
+/**
+ * Puts a value in the receiver Map if it is present in the saved state handle. This can be useful to
+ * selectively copy keys from one map to another, whilst avoiding putting the string "null" in
+ * by accident
+ */
+fun MutableMap<String, String>.putFromSavedStateIfPresent(
+    savedState: UstadSavedStateHandle,
+    key: String
+) {
+    savedState[key]?.also {
+        put(key, it)
     }
 }
 

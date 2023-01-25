@@ -65,7 +65,7 @@ class PersonDetailViewModel(
 
         val currentUserUid = accountManager.activeSession?.userSession?.usPersonUid ?: 0
 
-        val entityUid: Long = savedStateHandle.get<String>(UstadView.ARG_ENTITY_UID)!!.toLong()
+        val entityUid: Long = savedStateHandle.get(UstadView.ARG_ENTITY_UID)!!.toLong()
 
         val dbPersonFlow = db.personDao
             .findByUidWithDisplayDetailsFlow(entityUid, currentUserUid)
