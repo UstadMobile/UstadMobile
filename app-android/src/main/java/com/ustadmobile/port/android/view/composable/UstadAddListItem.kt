@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.material.composethemeadapter.MdcTheme
-import com.ustadmobile.port.android.util.ext.defaultItemPadding
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -25,7 +24,6 @@ fun UstadAddListItem(
 ){
     ListItem(
         modifier = modifier
-            .defaultItemPadding()
             .clickable(
                 enabled = enabled,
                 onClick = { onClickAdd() }

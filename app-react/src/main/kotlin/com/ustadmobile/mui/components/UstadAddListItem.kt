@@ -13,7 +13,7 @@ external interface UstadAddListItemProps: Props {
 
     var enabled: Boolean?
 
-    var icon: ReactNode
+    var icon: ReactNode?
 
     var onClickAdd: () -> Unit
 
@@ -27,7 +27,7 @@ val UstadAddListItem = FC<UstadAddListItemProps> { props ->
             disabled = !(props.enabled ?: true)
 
             ListItemIcon {
-                + props.icon
+                + (props.icon ?: Add.create())
             }
 
             ListItemText{
