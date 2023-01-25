@@ -4,13 +4,11 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.viewmodel.ScopedGrantListUiState
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
+import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.view.components.UstadBlankIcon
 import mui.icons.material.Add
 import mui.material.*
-import react.FC
-import react.Props
-import react.ReactNode
-import react.useState
+import react.*
 
 external interface ScopedGrantListScreenProps : Props {
 
@@ -28,21 +26,9 @@ val ScopedGrantListScreenComponent2 = FC<ScopedGrantListScreenProps> { props ->
 
     Container {
 
-        ListItem {
-            ListItemButton{
-
-                onClick = {
-                    props.onClickAddScopedGrant()
-                }
-
-                ListItemIcon {
-                    Add{}
-                }
-
-                ListItemText{
-                    primary = ReactNode((strings[MessageID.add]))
-                }
-            }
+        UstadAddListItem {
+            text = strings[MessageID.add]
+            onClickAdd = { props.onClickAddScopedGrant() }
         }
 
         List{

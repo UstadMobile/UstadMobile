@@ -26,6 +26,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.ScopedGrantListUiState
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 
@@ -81,17 +82,9 @@ private fun ScopedGrantListScreen(
     )  {
 
         item {
-            ListItem(
-                modifier = Modifier.clickable {
-                    onClickAddScopedGrant()
-                },
-                icon = {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = null
-                    )
-                },
-                text = { Text(stringResource(id = R.string.add)) }
+            UstadAddListItem(
+                text = stringResource(id = R.string.add),
+                onClickAdd = { onClickAddScopedGrant() }
             )
         }
 
