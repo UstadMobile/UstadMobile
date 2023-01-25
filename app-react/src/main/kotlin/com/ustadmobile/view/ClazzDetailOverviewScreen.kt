@@ -218,9 +218,9 @@ external interface CourseBlockListItemProps : Props {
 
 }
 
-private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
+val iconSize = 40.0.px
 
-    val iconSize = 40.0.px
+private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
 
     when(props.courseBlock.cbType){
         CourseBlock.BLOCK_MODULE_TYPE  -> {
@@ -331,7 +331,6 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                     ?: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer()
                 onClickContentEntry = props.onClickContentEntry
                 onClickDownloadContentEntry = props.onClickDownloadContentEntry
-
             }
         }
     }

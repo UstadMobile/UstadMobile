@@ -618,6 +618,8 @@ fun TextImageRow(
     }
 }
 
+val iconSize = 40.dp
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CourseBlockListItem(
@@ -633,8 +635,6 @@ fun CourseBlockListItem(
         ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
     ) -> Unit,
 ){
-
-    val iconSize = 40.dp
 
     when(courseBlock.cbType){
         CourseBlock.BLOCK_MODULE_TYPE  -> {
