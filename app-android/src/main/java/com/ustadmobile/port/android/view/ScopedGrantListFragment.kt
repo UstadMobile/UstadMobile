@@ -21,8 +21,14 @@ import com.ustadmobile.core.view.ScopedGrantListView
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.locale.entityconstants.PermissionConstants
+import com.ustadmobile.core.model.BitmaskMessageId
 import com.ustadmobile.core.viewmodel.ScopedGrantListUiState
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
+import com.ustadmobile.port.android.util.compose.messageIdMapResource
+import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
