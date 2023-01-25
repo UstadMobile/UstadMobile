@@ -18,7 +18,6 @@ import com.ustadmobile.lib.db.entities.UserSession
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
-import io.ktor.client.plugins.json.*
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.runBlocking
@@ -103,7 +102,7 @@ class AccountListPresenterTest {
 
         mockView = mock { }
         impl = mock{
-            on { getAppConfigDefaultFirstDest(any()) }.thenReturn(ContentEntryList2View.VIEW_NAME)
+            on { getAppConfigDefaultFirstDest() }.thenReturn(ContentEntryList2View.VIEW_NAME)
             on { getString(any<Int>(), any()) }.thenAnswer {
                 val messageId = it.getArgument<Int>(0)
                 if(messageId == MessageID.logged_in_as) {

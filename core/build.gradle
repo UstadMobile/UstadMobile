@@ -182,6 +182,7 @@ kotlin {
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
                 implementation "net.bytebuddy:byte-buddy:1.12.18"
+                implementation "app.cash.turbine:turbine:$version_turbine"
             }
         }
 
