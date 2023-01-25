@@ -2,7 +2,6 @@ package com.ustadmobile.core.impl.locale.entityconstants
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskMessageId
-import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.lib.db.entities.Role
 
 object PermissionConstants {
