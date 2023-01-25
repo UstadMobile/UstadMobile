@@ -93,6 +93,8 @@ fun useUstadScreens(): UstadScreens {
                 LanguageListScreenPreview),
             UstadScreen(PersonListView.VIEW_NAME, "PersonList Preview", PersonListScreenPreview),
             UstadScreen(NAVHOST_CLEARSTACK_VIEWNAME, "Clear Stack", NavHostClearStackPlaceholder),
+            UstadScreen("UstadAddListItem", "UstadAddListItem Preview",
+                UstadAddListItemPreview),
         )
     }
 }
