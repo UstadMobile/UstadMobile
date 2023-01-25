@@ -278,13 +278,11 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 fun AccountListItem(
     account: UserSessionWithPersonAndEndpoint?,
     trailing: @Composable (() -> Unit)? = null,
-    onClickAccount: ((UserSessionWithPersonAndEndpoint) -> Unit)? = null
+    onClickAccount: ((UserSessionWithPersonAndEndpoint?) -> Unit)? = null
 ){
     ListItem(
         modifier = Modifier.clickable {
-            if (account != null) {
-                onClickAccount?.invoke(account)
-            }
+            onClickAccount?.invoke(account)
         },
         icon = {
             Icon(

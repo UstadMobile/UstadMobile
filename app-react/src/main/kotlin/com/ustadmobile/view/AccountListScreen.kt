@@ -26,105 +26,118 @@ external interface AccountListProps: Props {
     var onLogoutClick: () -> Unit
 }
 
-interface AccountListItemProps: Props {
-    var onListItemClick: ((UserSessionWithPersonAndEndpoint) -> Unit)?
+interface ItemContentProps: Props{
+    var account: UserSessionWithPersonAndEndpoint?
+    var onDeleteListItemClick: ((UserSessionWithPersonAndEndpoint?) -> Unit)?
 }
 
-val AccountListItem = FC<AccountListItemProps> {    props ->
-    fun content(){
+interface AccountListItemProps: Props {
+    var onListItemClick: ((UserSessionWithPersonAndEndpoint) -> Unit)?
+    var account: UserSessionWithPersonAndEndpoint?
+    var onDeleteListItemClick: ((UserSessionWithPersonAndEndpoint?) -> Unit)?
+}
 
+val ItemContent = FC<ItemContentProps> {    props ->
+
+    if (props.onDeleteListItemClick != null){
         ListItemSecondaryAction{
             IconButton{
                 onClick = {
-                    props.onDeleteListItemClick(account)
+                    props?.onDeleteListItemClick?.invoke(props.account)
                 }
                 Delete()
             }
         }
+    }
 
-        ListItemIcon{
-            Icon{
+    ListItemIcon{
+        Icon{
+            sx{
+                width = 40.px
+                height = 40.px
+            }
+            AccountCircle{
                 sx{
                     width = 40.px
                     height = 40.px
-                }
-                AccountCircle{
-                    sx{
-                        width = 40.px
-                        height = 40.px
-                    }
-                }
-            }
-        }
-
-        Stack{
-            direction = responsive(StackDirection.column)
-
-            ListItemText{
-                primary = ReactNode("Ahmad Ahmadi")
-            }
-
-            Stack{
-                direction = responsive(StackDirection.row)
-
-                Icon{
-                    sx{
-                        width = 20.px
-                        height = 20.px
-                    }
-                    Person2{
-                        sx{
-                            width = 20.px
-                            height = 20.px
-                        }
-                    }
-                }
-
-                ListItemText{
-                    sx{
-                        paddingRight = 20.px
-                        paddingLeft = 5.px
-                    }
-                    secondary = ReactNode("ah-mad")
-                }
-
-                Icon{
-                    sx{
-                        width = 20.px
-                        height = 20.px
-                    }
-
-                    LinkOutlined{
-                        sx{
-                            width = 20.px
-                            height = 20.px
-                        }
-                    }
-                }
-
-                ListItemText{
-                    sx{
-                        paddingLeft = 5.px
-                    }
-                    secondary = ReactNode("https://example.com")
                 }
             }
         }
     }
 
+    Stack{
+        direction = responsive(StackDirection.column)
+
+        ListItemText{
+            primary = ReactNode("${props.account?.person?.firstNames} ${props.account?.person?.lastName}")
+        }
+
+        Stack{
+            direction = responsive(StackDirection.row)
+
+            Icon{
+                sx{
+                    width = 20.px
+                    height = 20.px
+                }
+                Person2{
+                    sx{
+                        width = 20.px
+                        height = 20.px
+                    }
+                }
+            }
+
+            ListItemText{
+                sx{
+                    paddingRight = 20.px
+                    paddingLeft = 5.px
+                }
+                secondary = ReactNode(props.account?.person?.username ?: "")
+            }
+
+            Icon{
+                sx{
+                    width = 20.px
+                    height = 20.px
+                }
+
+                LinkOutlined{
+                    sx{
+                        width = 20.px
+                        height = 20.px
+                    }
+                }
+            }
+
+            ListItemText{
+                sx{
+                    paddingLeft = 5.px
+                }
+                secondary = ReactNode(props.account?.endpoint?.url ?: "")
+            }
+        }
+    }
+}
+
+val AccountListItem = FC<AccountListItemProps> {    props ->
     if(props.onListItemClick != null){
         ListItem{
             disablePadding = true
 
             ListItemButton{
-                content()
+                ItemContent{
+                    account = props.account
+                    onDeleteListItemClick = props.onDeleteListItemClick
+                }
             }
         }
     }else{
         ListItem{
-            disablePadding = true
 
-            content()
+            ItemContent{
+                account = props.account
+            }
         }
     }
 }
@@ -141,82 +154,7 @@ val AccountListComponent2 = FC<AccountListProps> {  props ->
             spacing = responsive(10.px)
 
             AccountListItem{
-                onListItemClick = {
-                    props.onAccountListItemClick(props.uiState.activeAccount)
-                }
-            }
-
-            ListItem{
-
-                ListItemIcon{
-                    Icon{
-                        sx{
-                            width = 40.px
-                            height = 40.px
-                        }
-                        AccountCircle{
-                            sx{
-                                width = 40.px
-                                height = 40.px
-                            }
-                        }
-                    }
-                }
-
-                Stack{
-                    direction = responsive(StackDirection.column)
-
-                    ListItemText{
-                        primary = ReactNode("${props.uiState.activeAccount?.person?.firstNames} ${props.uiState.activeAccount?.person?.lastName}")
-                    }
-
-                    Stack{
-                        direction = responsive(StackDirection.row)
-
-                        Icon{
-                            sx{
-                                width = 20.px
-                                height = 20.px
-                            }
-                            Person2{
-                                sx{
-                                    width = 20.px
-                                    height = 20.px
-                                }
-                            }
-                        }
-
-                        ListItemText{
-                            sx{
-                                paddingRight = 20.px
-                                paddingLeft = 5.px
-                            }
-                            secondary = ReactNode(props.uiState.activeAccount?.person?.username ?: "")
-                        }
-
-                        Icon{
-                            sx{
-                                width = 20.px
-                                height = 20.px
-                            }
-
-                            LinkOutlined{
-                                sx{
-                                    width = 20.px
-                                    height = 20.px
-                                }
-                            }
-                        }
-
-                        ListItemText{
-                            sx{
-                                paddingLeft = 5.px
-                            }
-                            secondary = ReactNode(props.uiState.activeAccount?.endpoint?.url ?: "")
-                        }
-                    }
-                }
-
+                account = props.uiState.activeAccount
             }
 
             Stack{
@@ -230,7 +168,7 @@ val AccountListComponent2 = FC<AccountListProps> {  props ->
                 Button {
                     onClick = { props.onMyProfileClick() }
                     variant = ButtonVariant.outlined
-//                    + strings[MessageID.my_profile].uppercase()
+                    + strings[MessageID.my_profile].uppercase()
                 }
 
                 Button {
@@ -246,100 +184,21 @@ val AccountListComponent2 = FC<AccountListProps> {  props ->
                 }
             }
 
-            props.uiState.accountsList.forEach { account ->
-                ListItem{
-
-                    disablePadding = true
-
-                    ListItemButton{
-
-                        onClick = {
-                            props.onAccountListItemClick(account)
-                        }
-
-                        ListItemSecondaryAction{
-                            IconButton{
-                                onClick = {
-                                    props.onDeleteListItemClick(account)
-                                }
-                                Delete()
-                            }
-                        }
-
-                        ListItemIcon{
-                            Icon{
-                                sx{
-                                    width = 40.px
-                                    height = 40.px
-                                }
-                                AccountCircle{
-                                    sx{
-                                        width = 40.px
-                                        height = 40.px
-                                    }
-                                }
-                            }
-                        }
-
-                        Stack{
-                            direction = responsive(StackDirection.column)
-
-                            ListItemText{
-                                primary = ReactNode("${account.person.firstNames} ${account.person.lastName}")
-                            }
-
-                            Stack{
-                                direction = responsive(StackDirection.row)
-
-                                Icon{
-                                    sx{
-                                        width = 20.px
-                                        height = 20.px
-                                    }
-                                    Person2{
-                                        sx{
-                                            width = 20.px
-                                            height = 20.px
-                                        }
-                                    }
-                                }
-
-                                ListItemText{
-                                    sx{
-                                        paddingRight = 20.px
-                                        paddingLeft = 5.px
-                                    }
-                                    secondary = ReactNode(account.person.username ?: "")
-                                }
-
-                                Icon{
-                                    sx{
-                                        width = 20.px
-                                        height = 20.px
-                                    }
-
-                                    LinkOutlined{
-                                        sx{
-                                            width = 20.px
-                                            height = 20.px
-                                        }
-                                    }
-                                }
-
-                                ListItemText{
-                                    sx{
-                                        paddingLeft = 5.px
-                                    }
-                                    secondary = ReactNode(account.endpoint.url)
-                                }
-                            }
-                        }
+            props.uiState.accountsList.forEach { thisAccount ->
+                AccountListItem{
+                    onListItemClick = {
+                        props.onAccountListItemClick(props.uiState.activeAccount)
                     }
-
+                    account = thisAccount
+                    onDeleteListItemClick = {
+                        props.onDeleteListItemClick(thisAccount)
+                    }
                 }
             }
 
             ListItem{
+                disablePadding = true
+
                 ListItemButton{
 
                     onClick = {
@@ -351,7 +210,7 @@ val AccountListComponent2 = FC<AccountListProps> {  props ->
                     }
 
                     ListItemText{
-//                        primary = ReactNode(strings[MessageID.add_another_account])
+                        primary = ReactNode(strings[MessageID.add_another_account])
                     }
                 }
             }
