@@ -634,6 +634,8 @@ fun CourseBlockListItem(
     ) -> Unit,
 ){
 
+    val iconSize = 40.dp
+
     when(courseBlock.cbType){
         CourseBlock.BLOCK_MODULE_TYPE  -> {
 
@@ -651,6 +653,7 @@ fun CourseBlockListItem(
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_folder_open_24),
+                        modifier = Modifier.size(iconSize),
                         contentDescription = "")
                 },
                 trailing = {
@@ -669,6 +672,7 @@ fun CourseBlockListItem(
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_forum_24),
+                        modifier = Modifier.size(iconSize),
                         contentDescription = "")
                 }
             )
@@ -689,6 +693,7 @@ fun CourseBlockListItem(
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_title_24),
+                        modifier = Modifier.size(iconSize),
                         contentDescription = "")
                 }
             )

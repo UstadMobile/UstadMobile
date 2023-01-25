@@ -220,6 +220,8 @@ external interface CourseBlockListItemProps : Props {
 
 private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
 
+    val iconSize = 40.0.px
+
     when(props.courseBlock.cbType){
         CourseBlock.BLOCK_MODULE_TYPE  -> {
 
@@ -240,7 +242,12 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                    }
 
                     ListItemIcon {
-                        + Folder.create()
+                        Folder {
+                            sx {
+                                width = iconSize
+                                height = iconSize
+                            }
+                        }
                     }
 
                     ListItemText {
@@ -267,7 +274,12 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                     }
 
                     ListItemIcon {
-                        + Forum.create()
+                        Forum {
+                            sx {
+                                width = iconSize
+                                height = iconSize
+                            }
+                        }
                     }
 
                     ListItemText {
@@ -290,7 +302,12 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                     }
 
                     ListItemIcon {
-                        + Title.create()
+                        Title {
+                            sx {
+                                width = iconSize
+                                height = iconSize
+                            }
+                        }
                     }
 
                     ListItemText {
@@ -362,6 +379,7 @@ val ClazzDetailOverviewScreenPreview = FC<Props> {
                     cbUid = 3
                     cbDescription = "Description"
                     cbType = CourseBlock.BLOCK_ASSIGNMENT_TYPE
+                    cbIndentLevel = 0
                     assignment = ClazzAssignmentWithMetrics().apply {
                         caTitle = "Assignment"
                         fileSubmissionStatus = CourseAssignmentSubmission.NOT_SUBMITTED
