@@ -5,8 +5,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.navigation.NavControllerJs
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
 import com.ustadmobile.core.util.ContentEntryOpener
@@ -72,7 +70,6 @@ internal fun ustadJsDi(
 
     bind<UstadMobileSystemImpl>() with singleton {
         UstadMobileSystemImpl(
-            instance(),
             instance(tag = JsStringXml.DEFAULT), instanceOrNull(tag = JsStringXml.DISPLAY)
         ).also { impl ->
             appConfigs.forEach {
@@ -153,10 +150,6 @@ internal fun ustadJsDi(
             }
             install(HttpTimeout)
         }
-    }
-
-    bind<UstadNavController>() with singleton {
-        NavControllerJs(json = instance())
     }
 
     bind<ContainerStorageManager> () with scoped(EndpointScope.Default).singleton{

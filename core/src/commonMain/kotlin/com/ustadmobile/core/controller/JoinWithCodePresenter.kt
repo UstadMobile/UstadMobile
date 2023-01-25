@@ -11,11 +11,9 @@ import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.enrolPersonIntoSchoolAtLocalTimezone
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -53,7 +51,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
         //If the code is in the args, we should make only one attempt to use it
         //Because it can lead to navigation, this must be done in onStart
         val codeFromArgsUsed = requireNavController().currentBackStackEntry?.savedStateHandle
-            ?.get<String>(CODE_FROM_ARGS_USED)?.toBoolean() ?: false
+            ?.get(CODE_FROM_ARGS_USED)?.toBoolean() ?: false
 
         if(!codeFromArgsUsed) {
             val codeArg = arguments[UstadView.ARG_CODE] ?:""

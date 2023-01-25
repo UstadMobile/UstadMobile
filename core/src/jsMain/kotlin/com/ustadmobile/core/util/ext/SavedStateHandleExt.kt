@@ -31,7 +31,7 @@ fun <T> UstadSavedStateHandle.observeResult(lifecycleOwner: LifecycleOwner,
 fun UstadSavedStateHandleJs.toStringMap() : Map<String, String> {
     return mutableMapOf<String, String>().also {
         this.mLiveData.keys.forEach {key ->
-            val strVal = get<String>(key)
+            val strVal = get(key)
             if(strVal != null)
                 it[key] = strVal
         }
