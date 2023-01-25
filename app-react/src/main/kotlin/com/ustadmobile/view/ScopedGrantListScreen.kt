@@ -6,7 +6,6 @@ import com.ustadmobile.core.viewmodel.ScopedGrantListUiState
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
 import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.view.components.UstadBlankIcon
-import mui.icons.material.Add
 import mui.material.*
 import react.*
 
