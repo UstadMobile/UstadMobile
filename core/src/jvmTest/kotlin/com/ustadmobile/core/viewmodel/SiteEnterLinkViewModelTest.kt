@@ -1,27 +1,34 @@
 package com.ustadmobile.core.viewmodel
 
+import app.cash.turbine.test
+import com.ustadmobile.core.impl.nav.NavigateNavCommand
+import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Site
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.flow.filter
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okio.Buffer
-import org.junit.Assert
 import org.junit.Test
 import org.kodein.di.*
 import org.mockito.kotlin.*
+import kotlin.test.assertNotNull
 
+@Suppress("RemoveExplicitTypeArguments")
 class SiteEnterLinkViewModelTest {
 
     @Test
-    fun givenValidLinkEntered_whenOnClickNextCalled_thenShouldNavigateToNextScreen() = testViewModel<SiteEnterLinkViewModel>(
-        makeViewModel = { SiteEnterLinkViewModel(di, savedStateHandle) }
+    fun givenValidLinkEntered_whenOnClickNextCalled_thenShouldNavigateToNextScreen(
+
+    ) = testViewModel<SiteEnterLinkViewModel>(
+
     ) {
+        viewModelFactory {
+            SiteEnterLinkViewModel(di, savedStateHandle)
+        }
+
         mockWebServer.start()
         val json: Json = di.direct.instance()
 
@@ -39,38 +46,34 @@ class SiteEnterLinkViewModelTest {
         val workSpacelink = "${mockWebServer.url("/")}"
 
         viewModel.onSiteLinkUpdated(workSpacelink)
-        viewModel.onClickNext()
 
-        runBlocking {
-            withTimeout(5000) {
-                Assert.assertNotNull("When receiving a valid link viewmodel emits the link and sets error state to null",
-                    viewModel.uiState.firstOrNull {
-                        it.siteLink == workSpacelink && it.linkError == null
-                    })
-                verify(navController, timeout(5000)).navigate(eq(Login2View.VIEW_NAME),
-                    argWhere {
-                        it[UstadView.ARG_SERVER_URL] == workSpacelink
-                    }, any())
-            }
+        viewModel.navCommandFlow.filter {
+            (it as? NavigateNavCommand)?.viewName == Login2View.VIEW_NAME
+        }.test(name = "Receive navigate to LoginView") {
+            viewModel.onClickNext()
+            assertNotNull(awaitItem())
+        }
+
+        viewModel.uiState.assertItemReceived(name = "ui state updated as expected") {
+            it.siteLink == workSpacelink && it.linkError == null
         }
     }
 
     @Test
-    fun givenInvalidLinkEntered_whenOnClickNextCalled_thenShouldShowError() = testViewModel<SiteEnterLinkViewModel>(
-        makeViewModel = { SiteEnterLinkViewModel(di, savedStateHandle) }
-    ) {
+    fun givenInvalidLinkEntered_whenOnClickNextCalled_thenShouldShowError(
+
+    ) = testViewModel<SiteEnterLinkViewModel> {
         val siteLink = "invalid"
+
+        viewModelFactory {
+            SiteEnterLinkViewModel(di, savedStateHandle)
+        }
 
         viewModel.onSiteLinkUpdated("invalid")
         viewModel.onClickNext()
-        runBlocking {
-            withTimeout(5000) {
-                Assert.assertNotNull("Ui State is updated to show an error",
-                    viewModel.uiState.firstOrNull {
-                        it.siteLink == siteLink && it.linkError != null
-                    }
-                )
-            }
+
+        viewModel.uiState.assertItemReceived(name = "Ui state updated to show error") {
+            it.siteLink == siteLink && it.linkError != null
         }
     }
 

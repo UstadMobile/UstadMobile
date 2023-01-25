@@ -2,15 +2,16 @@ package com.ustadmobile.core.test.viewmodeltest
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
+import com.ustadmobile.core.impl.nav.NavCommand
 import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.ext.isLazyInitialized
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.ViewModel
 import com.ustadmobile.util.test.nav.TestUstadNavController
 import com.ustadmobile.util.test.nav.TestUstadSavedStateHandle
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockWebServer
 import org.kodein.di.*
@@ -19,12 +20,13 @@ import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.nio.file.Files
 
-class ViewModelTestBuilder<T: ViewModel>(
-    makeViewModel: ViewModelFactoryParams<T>.() -> T,
-    diExtra: (DI.MainBuilder.() -> Unit)?,
-) {
+typealias TestViewModelFactory<T> = ViewModelTestBuilder<T>.() -> T
+
+class ViewModelTestBuilder<T: ViewModel> {
 
     val savedStateHandle = TestUstadSavedStateHandle()
+
+    private lateinit var viewModelFactory: TestViewModelFactory<T>
 
     private val xppFactory: XmlPullParserFactory by lazy {
         XmlPullParserFactory.newInstance().also {
@@ -59,22 +61,13 @@ class ViewModelTestBuilder<T: ViewModel>(
         bind<UstadMobileSystemImpl>() with singleton {
             spy(UstadMobileSystemImpl(xppFactory, tempDir))
         }
-
-        bind<UstadNavController>() with singleton {
-            spy(TestUstadNavController())
-        }
     }
-
-    val navController: UstadNavController by di.instance()
 
     init {
-        if(diExtra != null) {
-            extendDi {
-                diExtra()
-            }
-        }
+
     }
 
+    @ViewModelDslMarker
     fun extendDi(
         block: DI.MainBuilder.() -> Unit,
     ) {
@@ -89,8 +82,14 @@ class ViewModelTestBuilder<T: ViewModel>(
         get() = diVar
 
     val viewModel: T by lazy {
-        makeViewModel(ViewModelFactoryParams(di, savedStateHandle, di.direct.instance(),
-            this))
+        viewModelFactory()
+    }
+
+    @ViewModelDslMarker
+    fun viewModelFactory(
+        block: TestViewModelFactory<T>
+    ) {
+        viewModelFactory = block
     }
 
     suspend fun <T> stateInViewModelScope(flow: Flow<T>): StateFlow<T> {

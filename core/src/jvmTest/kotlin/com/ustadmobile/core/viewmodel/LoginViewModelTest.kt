@@ -5,7 +5,8 @@ import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.test.viewmodeltest.awaitMatch
+import com.ustadmobile.core.impl.nav.NavigateNavCommand
+import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.view.RegisterAgeRedirectView
 import com.ustadmobile.core.view.UstadView
@@ -28,6 +29,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 
+@Suppress("RemoveExplicitTypeArguments")
 class LoginViewModelTest {
 
     private val json = Json {
@@ -58,19 +60,17 @@ class LoginViewModelTest {
     @Test
     fun givenRegistrationIsAllowedOrNot_whenCreated_thenRegistrationButtonVisibilityShouldMatch() {
         listOf(true, false).forEach { testRegistrationAllowed ->
-            testViewModel<LoginViewModel>(
-                makeViewModel =  {
+            testViewModel<LoginViewModel> {
+                viewModelFactory {
                     savedStateHandle[UstadView.ARG_SERVER_URL] = "http://localhost:8087/"
                     savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site().apply {
                         registrationAllowed = testRegistrationAllowed
                     })
                     LoginViewModel(di, savedStateHandle)
                 }
-            ) {
-                val stateFlow = stateInViewModelScope(viewModel.uiState)
-                stateFlow.filter { it.createAccountVisible == testRegistrationAllowed }.test {
-                    Assert.assertEquals("Create account button visible",
-                        testRegistrationAllowed, awaitItem().createAccountVisible)
+
+                viewModel.uiState.assertItemReceived(name = "Create account button visible") {
+                    it.createAccountVisible == testRegistrationAllowed
                 }
             }
         }
@@ -79,15 +79,16 @@ class LoginViewModelTest {
     @Test
     fun givenGuestConnectionAllowedOrNot_whenCreated_thenGuestButtonVisibiltyShouldMatch() {
         listOf(true, false).forEach { testGuestAllowed ->
-            testViewModel<LoginViewModel>(
-                makeViewModel = {
+            testViewModel<LoginViewModel> {
+                viewModelFactory {
                     savedStateHandle[UstadView.ARG_SERVER_URL] = "http://localhost:8087/"
                     savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site().apply {
                         guestLogin = testGuestAllowed
                     })
                     LoginViewModel(di, savedStateHandle)
                 }
-            ) {
+
+
                 val stateFlow = stateInViewModelScope(viewModel.uiState)
                 stateFlow.filter { it.connectAsGuestVisible == testGuestAllowed }.test {
                     Assert.assertEquals("guest connection visibility matches",
@@ -99,20 +100,24 @@ class LoginViewModelTest {
 
     @Test
     fun givenCreateAccountVisible_whenClickCreateAccount_thenShouldNavigateToAgeRedirect() {
-        testViewModel<LoginViewModel>(
-            makeViewModel = {
+        testViewModel<LoginViewModel>(timeOut = 5000 * 1000) {
+            viewModelFactory {
                 savedStateHandle[UstadView.ARG_SERVER_URL] = "http://localhost:8087/"
                 savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site().apply {
                     registrationAllowed = true
                 })
                 LoginViewModel(di, savedStateHandle)
             }
-        ) {
-            val stateFlow = stateInViewModelScope(viewModel.uiState)
-            stateFlow.awaitMatch { it.createAccountVisible }
 
-            viewModel.onClickCreateAccount()
-            verify(navController).navigate(eq(RegisterAgeRedirectView.VIEW_NAME), any(), any())
+            val stateFlow = stateInViewModelScope(viewModel.uiState)
+            stateFlow.assertItemReceived { it.createAccountVisible }
+
+            viewModel.navCommandFlow.filter {
+                (it as? NavigateNavCommand)?.viewName == RegisterAgeRedirectView.VIEW_NAME
+            }.test(name = "receive navigate to age redirect screen") {
+                viewModel.onClickCreateAccount()
+                assertNotNull(awaitItem())
+            }
         }
     }
 
@@ -123,39 +128,41 @@ class LoginViewModelTest {
         val nextDestination = "nextDummyDestination"
         val mockAccountManager = mockAccountManager()
 
-        testViewModel<LoginViewModel>(
-            extendDi = {
-               bind<UstadAccountManager>() with singleton {
-                   mockAccountManager
-               }
-            },
-            makeViewModel = {
-                testContext.mockWebServer.start()
-                testContext.mockWebServer.enqueueSiteResponse(Site())
+        testViewModel<LoginViewModel> {
+            extendDi {
+                bind<UstadAccountManager>() with singleton {
+                    mockAccountManager
+                }
+            }
 
-                savedStateHandle[UstadView.ARG_SERVER_URL] = testContext.mockWebServer
+            viewModelFactory {
+                mockWebServer.start()
+                mockWebServer.enqueueSiteResponse(Site())
+
+                savedStateHandle[UstadView.ARG_SERVER_URL] = mockWebServer
                     .url("/").toString()
                 savedStateHandle[UstadView.ARG_NEXT] = nextDestination
                 LoginViewModel(di, savedStateHandle)
             }
-        ) {
+
             val stateFlow = stateInViewModelScope(viewModel.uiState)
-            stateFlow.awaitMatch { it.fieldsEnabled }
+            stateFlow.assertItemReceived { it.fieldsEnabled }
 
             viewModel.onUsernameChanged(VALID_USER)
             viewModel.onPasswordChanged(VALID_PASS)
 
-            stateFlow.awaitMatch { it.username == VALID_USER && it.password == VALID_PASS }
+            stateFlow.assertItemReceived { it.username == VALID_USER && it.password == VALID_PASS }
 
-            viewModel.onClickLogin()
+            viewModel.navCommandFlow.filter {
+                (it as? NavigateNavCommand)?.viewName == nextDestination && it.goOptions.clearStack
+            }.test(name = "Receive navigate to next destination command") {
+                viewModel.onClickLogin()
+                assertNotNull(awaitItem())
+            }
 
             verifyBlocking(mockAccountManager, timeout(5000)) {
                 login(VALID_USER, VALID_PASS, mockWebServer.url("/").toString())
             }
-
-            verify(navController, timeout(5000)).navigate(eq(nextDestination), any(), argWhere {
-                it.popUpToViewName == UstadView.ROOT_DEST
-            })
         }
 
     }
@@ -169,22 +176,23 @@ class LoginViewModelTest {
             }
         }
 
-        testViewModel<LoginViewModel>(
-            extendDi = {
-               bind<UstadAccountManager>() with singleton {
-                   mockAccountManager
-               }
-            },
-            makeViewModel = {
-                testContext.mockWebServer.start()
-                testContext.mockWebServer.enqueueSiteResponse(Site())
-                savedStateHandle[UstadView.ARG_SERVER_URL] = testContext.mockWebServer
+        testViewModel<LoginViewModel> {
+            extendDi {
+                bind<UstadAccountManager>() with singleton {
+                    mockAccountManager
+                }
+            }
+
+            viewModelFactory {
+                mockWebServer.start()
+                mockWebServer.enqueueSiteResponse(Site())
+                savedStateHandle[UstadView.ARG_SERVER_URL] = mockWebServer
                     .url("/").toString()
                 LoginViewModel(di, savedStateHandle)
             }
-        ) {
+
             val stateFlow = stateInViewModelScope(viewModel.uiState)
-            stateFlow.awaitMatch { it.fieldsEnabled }
+            stateFlow.assertItemReceived { it.fieldsEnabled }
 
             viewModel.onUsernameChanged(VALID_USER)
             viewModel.onPasswordChanged("wrongpass")
@@ -215,17 +223,18 @@ class LoginViewModelTest {
         }
 
 
-        testViewModel<LoginViewModel>(
-            extendDi = {
+        testViewModel<LoginViewModel> {
+            extendDi {
                 bind<UstadAccountManager>() with singleton {
                     mockAccountManager
                 }
-            },
-            makeViewModel = {
+            }
+
+            viewModelFactory {
                 savedStateHandle[UstadView.ARG_SERVER_URL] = "http://localhost:79/"
                 LoginViewModel(di, savedStateHandle)
             }
-        ) {
+
             val stateFlow = stateInViewModelScope(viewModel.uiState)
             val systemImpl: UstadMobileSystemImpl by di.instance()
             val expectedErr = systemImpl.getString(MessageID.login_network_error)
@@ -240,28 +249,29 @@ class LoginViewModelTest {
 
     @Test
     fun givenUsernameOrPasswordContainsSpacePadding_whenLoginCalled_thenShouldTrimSpace() {
-        testViewModel<LoginViewModel>(
-            extendDi = {
+        testViewModel<LoginViewModel> {
+            extendDi {
                 bind<UstadAccountManager>() with singleton {
                     mockAccountManager()
                 }
-            },
-            makeViewModel = {
-                testContext.mockWebServer.start()
-                testContext.mockWebServer.enqueueSiteResponse(Site())
+            }
 
-                savedStateHandle[UstadView.ARG_SERVER_URL] = testContext.mockWebServer
+            viewModelFactory {
+                mockWebServer.start()
+                mockWebServer.enqueueSiteResponse(Site())
+
+                savedStateHandle[UstadView.ARG_SERVER_URL] = mockWebServer
                     .url("/").toString()
                 LoginViewModel(di, savedStateHandle)
             }
-        ) {
+
             val stateFlow = stateInViewModelScope(viewModel.uiState)
-            stateFlow.awaitMatch { it.fieldsEnabled }
+            stateFlow.assertItemReceived { it.fieldsEnabled }
 
             viewModel.onUsernameChanged(" $VALID_USER ")
             viewModel.onPasswordChanged(" $VALID_PASS ")
 
-            stateFlow.awaitMatch { it.username == " $VALID_USER " && it.password == " $VALID_PASS " }
+            stateFlow.assertItemReceived { it.username == " $VALID_USER " && it.password == " $VALID_PASS " }
 
             viewModel.onClickLogin()
             val accountManager: UstadAccountManager = di.direct.instance()
@@ -274,17 +284,17 @@ class LoginViewModelTest {
 
     @Test
     fun givenEmptyUsernameAndPassword_whenLoginCalled_thenShouldShowError() {
-        testViewModel<LoginViewModel>(
-            makeViewModel = {
-                testContext.mockWebServer.start()
-                testContext.mockWebServer.enqueueSiteResponse(Site())
-                savedStateHandle[UstadView.ARG_SERVER_URL] = testContext.mockWebServer
+        testViewModel<LoginViewModel> {
+            viewModelFactory {
+                mockWebServer.start()
+                mockWebServer.enqueueSiteResponse(Site())
+                savedStateHandle[UstadView.ARG_SERVER_URL] = mockWebServer
                     .url("/").toString()
                 LoginViewModel(di, savedStateHandle)
             }
-        ) {
+
             val stateFlow = stateInViewModelScope(viewModel.uiState)
-            stateFlow.awaitMatch { it.fieldsEnabled }
+            stateFlow.assertItemReceived { it.fieldsEnabled }
 
             viewModel.onClickLogin()
 

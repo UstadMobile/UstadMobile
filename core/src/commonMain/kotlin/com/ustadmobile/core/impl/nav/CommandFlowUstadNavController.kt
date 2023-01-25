@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.*
 class CommandFlowUstadNavController: UstadNavController {
 
     private val _commandFlow = MutableSharedFlow<NavCommand>(
-        replay = 0,
-        extraBufferCapacity = 1,
+        replay = 1,
+        extraBufferCapacity = 0,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
