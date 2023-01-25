@@ -21,13 +21,11 @@ import com.ustadmobile.core.view.ScopedGrantListView
 import com.ustadmobile.lib.db.entities.ScopedGrant
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.locale.entityconstants.PermissionConstants
-import com.ustadmobile.core.model.BitmaskMessageId
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.viewmodel.ScopedGrantListUiState
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
-import com.ustadmobile.port.android.util.compose.messageIdMapResource
 import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.composable.UstadAddListItem
@@ -96,6 +94,13 @@ private fun ScopedGrantListScreen(
             items = uiState.scopedGrantList,
             key = { scopedGrant -> scopedGrant.sgUid }
         ){ scopedGrant ->
+
+            val permissions = PermissionConstants.PERMISSION_MESSAGE_IDS
+                .filter{
+                    scopedGrant.sgPermissions.hasFlag(it.flagVal)}
+                .map {
+                    messageIdResource(it.messageId) }.joinToString()
+
             ListItem(
                 modifier = Modifier.clickable {
                     onClickScopedGrant(scopedGrant)
@@ -104,6 +109,7 @@ private fun ScopedGrantListScreen(
                     Spacer(modifier = Modifier.width(24.dp))
                 },
                 text = { Text(scopedGrant.name ?: "") },
+                secondaryText = { Text(text = permissions) }
             )
         }
     }
@@ -119,10 +125,13 @@ fun ScopedGrantListScreenPreview() {
                     ScopedGrantWithName().apply {
                         sgUid = 1
                         name = "First Item"
+                        sgPermissions = Role.PERMISSION_PERSON_DELEGATE+Role.PERMISSION_SCHOOL_UPDATE
                     },
                     ScopedGrantWithName().apply {
                         sgUid = 2
                         name = "Second Item"
+                        sgPermissions = Role.PERMISSION_PERSON_DELEGATE+
+                                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE
                     },
                     ScopedGrantWithName().apply {
                         sgUid = 3
