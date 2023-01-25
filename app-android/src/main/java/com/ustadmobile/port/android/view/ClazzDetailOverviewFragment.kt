@@ -53,6 +53,7 @@ import com.ustadmobile.port.android.util.compose.messageIdResource
 import com.ustadmobile.port.android.util.compose.rememberFormattedTime
 import com.ustadmobile.port.android.util.ext.MS_PER_HOUR
 import com.ustadmobile.port.android.util.ext.MS_PER_MIN
+import com.ustadmobile.port.android.util.ext.defaultScreenPadding
 import com.ustadmobile.port.android.view.binding.MODE_START_OF_DAY
 import com.ustadmobile.port.android.view.composable.UstadClazzAssignmentListItem
 import com.ustadmobile.port.android.view.composable.UstadContentEntryListItem
@@ -496,7 +497,7 @@ private fun ClazzDetailOverviewScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp)
+            .defaultScreenPadding()
     ){
 
         item {
@@ -567,8 +568,12 @@ private fun ClazzDetailOverviewScreen(
             key = { Pair(1, it.scheduleUid) }
         ){ schedule ->
 
-            val fromTimeFormatted = rememberFormattedTime(timeInMs = schedule.sceduleStartTime.toInt())
-            val toTimeFormatted = rememberFormattedTime(timeInMs = schedule.scheduleEndTime.toInt())
+            val fromTimeFormatted = rememberFormattedTime(
+                timeInMs = schedule.sceduleStartTime.toInt()
+            )
+            val toTimeFormatted = rememberFormattedTime(
+                timeInMs = schedule.scheduleEndTime.toInt()
+            )
             val text = "${messageIdResource(id = schedule.scheduleFrequency)} " +
                     " ${messageIdResource(schedule.scheduleDay)} " +
                     " $fromTimeFormatted - $toTimeFormatted "
@@ -618,7 +623,7 @@ fun TextImageRow(
     }
 }
 
-val iconSize = 40.dp
+val ICON_SIZE = 40.dp
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -653,7 +658,7 @@ fun CourseBlockListItem(
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_folder_open_24),
-                        modifier = Modifier.size(iconSize),
+                        modifier = Modifier.size(ICON_SIZE),
                         contentDescription = "")
                 },
                 trailing = {
@@ -672,7 +677,7 @@ fun CourseBlockListItem(
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_forum_24),
-                        modifier = Modifier.size(iconSize),
+                        modifier = Modifier.size(ICON_SIZE),
                         contentDescription = "")
                 }
             )
@@ -693,7 +698,7 @@ fun CourseBlockListItem(
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_title_24),
-                        modifier = Modifier.size(iconSize),
+                        modifier = Modifier.size(ICON_SIZE),
                         contentDescription = "")
                 }
             )

@@ -124,8 +124,10 @@ val ClazzDetailOverviewComponent2 = FC<ClazzDetailOverviewProps> { props ->
                         timeInMillisSinceMidnight = schedule.scheduleEndTime.toInt(),
                     )
 
-                    val text = "${strings[ScheduleConstants.SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[schedule.scheduleFrequency] ?: 0]} " +
-                            " ${strings[ScheduleConstants.DAY_MESSAGE_ID_MAP[schedule.scheduleDay] ?: 0]  } " +
+                    val text = "${strings[ScheduleConstants
+                        .SCHEDULE_FREQUENCY_MESSAGE_ID_MAP[schedule.scheduleFrequency] ?: 0]} " +
+                            " ${strings[ScheduleConstants
+                                .DAY_MESSAGE_ID_MAP[schedule.scheduleDay] ?: 0]  } " +
                             " $fromTimeFormatted - $toTimeFormatted "
 
                     ListItem{
@@ -218,7 +220,7 @@ external interface CourseBlockListItemProps : Props {
 
 }
 
-val iconSize = 40.0.px
+val ICON_SIZE = 40.0.px
 
 private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
 
@@ -244,9 +246,15 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                     ListItemIcon {
                         Folder {
                             sx {
-                                width = iconSize
-                                height = iconSize
+                                width = ICON_SIZE
+                                height = ICON_SIZE
                             }
+                        }
+                    }
+
+                    Box{
+                        sx {
+                            width = 10.px
                         }
                     }
 
@@ -276,9 +284,15 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                     ListItemIcon {
                         Forum {
                             sx {
-                                width = iconSize
-                                height = iconSize
+                                width = ICON_SIZE
+                                height = ICON_SIZE
                             }
+                        }
+                    }
+
+                    Box{
+                        sx {
+                            width = 10.px
                         }
                     }
 
@@ -304,9 +318,15 @@ private val CourseBlockListItem = FC<CourseBlockListItemProps> { props ->
                     ListItemIcon {
                         Title {
                             sx {
-                                width = iconSize
-                                height = iconSize
+                                width = ICON_SIZE
+                                height = ICON_SIZE
                             }
+                        }
+                    }
+
+                    Box{
+                        sx {
+                            width = 10.px
                         }
                     }
 
