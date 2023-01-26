@@ -32,6 +32,7 @@ import com.ustadmobile.core.controller.ClazzEnrolmentListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.locale.entityconstants.ClazzEnrolmentListConstants
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
@@ -263,20 +264,6 @@ fun ClazzEnrolmentListScreen(
     onViewProfileClick: () -> Unit = {}
 ){
 
-    val ROLE_TO_MESSAGE_ID_MAP: Map<Int, Int> = mapOf(
-        ClazzEnrolment.ROLE_STUDENT to MessageID.student,
-        ClazzEnrolment.ROLE_TEACHER to MessageID.teacher,
-        ClazzEnrolment.ROLE_TEACHER to MessageID.parent,
-        ClazzEnrolment.ROLE_STUDENT_PENDING to MessageID.student
-    )
-
-    val OUTCOME_TO_MESSAGE_ID_MAP: Map<Int, Int> = mapOf(
-        ClazzEnrolment.OUTCOME_FAILED to MessageID.outcome,
-        ClazzEnrolment.OUTCOME_GRADUATED to MessageID.graduated,
-        ClazzEnrolment.OUTCOME_DROPPED_OUT to MessageID.dropped_out,
-        ClazzEnrolment.OUTCOME_IN_PROGRESS to MessageID.in_progress
-    )
-
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -320,7 +307,7 @@ fun ClazzEnrolmentListScreen(
                 endTimeInMillis = enrolment.clazzEnrolmentDateLeft,
                 timeZoneId = "UTC"
             )
-            var itemPrimaryText = "${messageIdResource(id = ROLE_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentRole] ?: 0)} - ${messageIdResource( id = OUTCOME_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentOutcome] ?: 0 )}"
+            var itemPrimaryText = "${messageIdResource(id = ClazzEnrolmentListConstants.ROLE_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentRole] ?: 0)} - ${messageIdResource( id = ClazzEnrolmentListConstants.OUTCOME_TO_MESSAGE_ID_MAP[enrolment.clazzEnrolmentOutcome] ?: 0 )}"
 
             if (enrolment.leavingReason != null){
                 itemPrimaryText = "$itemPrimaryText (${enrolment.leavingReason?.leavingReasonTitle})"
