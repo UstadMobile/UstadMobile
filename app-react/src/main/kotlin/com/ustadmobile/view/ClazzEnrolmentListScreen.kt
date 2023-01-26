@@ -5,7 +5,6 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.impl.locale.entityconstants.ClazzEnrolmentListConstants
 import com.ustadmobile.core.viewmodel.ClazzEnrolmentListUiState
 import com.ustadmobile.hooks.useFormattedDateRange
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.mui.components.UstadQuickActionButton

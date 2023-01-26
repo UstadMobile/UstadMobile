@@ -2,18 +2,14 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,7 +26,6 @@ import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentListBinding
 import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentPersonHeaderListBinding
 import com.ustadmobile.core.controller.ClazzEnrolmentListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.locale.entityconstants.ClazzEnrolmentListConstants
 import com.ustadmobile.core.util.ext.personFullName
@@ -41,9 +36,7 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.ui.theme.ui.theme.Typography
 import com.ustadmobile.port.android.util.compose.messageIdResource
-import com.ustadmobile.port.android.util.compose.rememberFormattedDate
 import com.ustadmobile.port.android.util.compose.rememberFormattedDateRange
-import com.ustadmobile.port.android.view.composable.UstadDetailField
 import com.ustadmobile.port.android.view.composable.UstadQuickActionButton
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
@@ -315,7 +308,7 @@ fun ClazzEnrolmentListScreen(
 
             ListItem(
                 text = { Text(text = itemPrimaryText) },
-                secondaryText = { Text(text = "$joinedLeftDate")},
+                secondaryText = { Text(text = joinedLeftDate)},
                 trailing = {
                     IconButton(
                         onClick = {
