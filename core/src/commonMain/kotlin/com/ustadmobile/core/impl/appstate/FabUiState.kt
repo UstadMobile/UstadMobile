@@ -11,7 +11,7 @@ data class FabUiState(
 ) {
 
     enum class FabIcon {
-        NONE, ADD
+        NONE, ADD, EDIT
     }
 
 }

@@ -58,8 +58,6 @@ class LoginViewModel(
 
     private val impl: UstadMobileSystemImpl by instance()
 
-    private val accountManager: UstadAccountManager by instance()
-
     private val httpClient: HttpClient by instance()
 
     private var verifiedSite: Site? = null

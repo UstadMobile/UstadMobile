@@ -203,7 +203,7 @@ class LoginViewModelTest {
 
             val expectedErrMsg = systemImpl.getString(MessageID.wrong_user_pass_combo)
 
-            stateFlow.filter { it.errorMessage  == expectedErrMsg}.test(
+            stateFlow.filter { it.errorMessage  == expectedErrMsg }.test(
                 name = "wait for expected error message"
             ) {
                 val state = awaitItem()
