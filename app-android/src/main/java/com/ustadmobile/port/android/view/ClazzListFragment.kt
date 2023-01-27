@@ -5,12 +5,9 @@ import android.view.*
 import android.widget.AdapterView
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
@@ -52,7 +49,6 @@ import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import org.w3c.dom.Text
 
 class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDetails>(),
         ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener,
