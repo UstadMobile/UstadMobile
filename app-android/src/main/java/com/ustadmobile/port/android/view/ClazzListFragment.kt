@@ -6,6 +6,10 @@ import android.widget.AdapterView
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -48,6 +52,7 @@ import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import org.w3c.dom.Text
 
 class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDetails>(),
         ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener,
@@ -173,13 +178,12 @@ private fun ClazzListScreen(
     onClickSort: () -> Unit = {},
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(5.dp)
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
     ) {
 
-        item {
+        item(span = { GridItemSpan(maxLineSpan) }) {
             UstadListSortHeader(
                 modifier = Modifier.defaultItemPadding(),
                 activeSortOrderOption = uiState.activeSortOrderOption,
@@ -188,7 +192,7 @@ private fun ClazzListScreen(
             )
         }
 
-        item {
+        item(span = { GridItemSpan(maxLineSpan) }) {
             UstadListFilterChipsHeader(
                 modifier = Modifier.defaultItemPadding(),
                 filterOptions = uiState.filterOptions,
@@ -199,12 +203,11 @@ private fun ClazzListScreen(
         }
 
         items(
-            items = uiState.clazzList,
-            key = { clazz -> clazz.clazzUid }
-        ){ clazz ->
-
+            uiState.clazzList.size,
+            span = { GridItemSpan(maxLineSpan) }
+        ) { index ->
             ClazzListItem(
-                clazz = clazz,
+                clazz = uiState.clazzList[index],
                 onClickClazz = onClickClazz
             )
         }
