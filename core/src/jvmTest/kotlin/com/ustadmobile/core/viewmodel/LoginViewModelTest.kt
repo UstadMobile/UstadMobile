@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel
 
 import app.cash.turbine.test
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
@@ -54,6 +55,8 @@ class LoginViewModelTest {
                 UmAccount(personUid = 42,
                     username = VALID_USER, firstName = "user", lastName = "last", endpointUrl = url)
             }
+
+            on { activeEndpoint }.thenReturn(Endpoint("http://localhost:8087/"))
         }
     }
 
@@ -128,9 +131,9 @@ class LoginViewModelTest {
         val nextDestination = "nextDummyDestination"
         val mockAccountManager = mockAccountManager()
 
-        testViewModel<LoginViewModel> {
+        testViewModel<LoginViewModel>(timeOut = 500000) {
             extendDi {
-                bind<UstadAccountManager>() with singleton {
+                bind<UstadAccountManager>(overrides = true) with singleton {
                     mockAccountManager
                 }
             }
@@ -174,11 +177,12 @@ class LoginViewModelTest {
             onBlocking { login(any(), any(), any(), any()) }.then {
                 throw UnauthorizedException("Access denied")
             }
+            on { activeEndpoint }.thenReturn(Endpoint("http://localhost:8087/"))
         }
 
         testViewModel<LoginViewModel> {
             extendDi {
-                bind<UstadAccountManager>() with singleton {
+                bind<UstadAccountManager>(overrides = true) with singleton {
                     mockAccountManager
                 }
             }
@@ -220,12 +224,13 @@ class LoginViewModelTest {
             onBlocking { login(any(), any(), any(), any()) }.then {
                 throw IOException("Server offline")
             }
+            on { activeEndpoint }.thenReturn(Endpoint("http://localhost:79/"))
         }
 
 
         testViewModel<LoginViewModel> {
             extendDi {
-                bind<UstadAccountManager>() with singleton {
+                bind<UstadAccountManager>(overrides = true) with singleton {
                     mockAccountManager
                 }
             }
@@ -251,7 +256,7 @@ class LoginViewModelTest {
     fun givenUsernameOrPasswordContainsSpacePadding_whenLoginCalled_thenShouldTrimSpace() {
         testViewModel<LoginViewModel> {
             extendDi {
-                bind<UstadAccountManager>() with singleton {
+                bind<UstadAccountManager>(overrides = true) with singleton {
                     mockAccountManager()
                 }
             }

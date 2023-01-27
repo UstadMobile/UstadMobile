@@ -16,7 +16,6 @@ import io.ktor.client.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -38,8 +37,6 @@ class SiteEnterLinkViewModel(
     val uiState: Flow<SiteEnterLinkUiState> = _uiState.asStateFlow()
 
     private val httpClient: HttpClient by instance()
-
-    private val json: Json by instance()
 
     private val impl: UstadMobileSystemImpl by instance()
 

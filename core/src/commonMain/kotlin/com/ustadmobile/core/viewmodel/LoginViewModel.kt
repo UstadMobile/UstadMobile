@@ -3,7 +3,6 @@ package com.ustadmobile.core.viewmodel
 import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -61,8 +59,6 @@ class LoginViewModel(
     private val httpClient: HttpClient by instance()
 
     private var verifiedSite: Site? = null
-
-    private val json: Json by instance()
 
     init {
         nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: impl.getAppConfigDefaultFirstDest()

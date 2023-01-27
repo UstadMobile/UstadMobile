@@ -1,19 +1,26 @@
 package com.ustadmobile.core.viewmodel
 
-import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.controller.PersonConstants
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.account.AccountRegisterOptions
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.util.ext.hasFlag
+import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
+import com.ustadmobile.core.util.ext.validEmail
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_MODE_MINOR
 import kotlinx.coroutines.flow.*
 import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
-import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
 import kotlinx.coroutines.launch
-import org.kodein.di.on
+import org.kodein.di.instance
 
 data class PersonEditUiState(
 
@@ -62,26 +69,47 @@ class PersonEditViewModel(
     savedStateHandle: UstadSavedStateHandle
 ): DetailViewModel<Person>(di, savedStateHandle) {
 
-    private val _uiState: MutableStateFlow<PersonEditUiState> = MutableStateFlow(PersonEditUiState())
+    private val systemImpl: UstadMobileSystemImpl by instance()
+
+    private val _uiState: MutableStateFlow<PersonEditUiState> = MutableStateFlow(
+        PersonEditUiState(
+            fieldsEnabled = false,
+        )
+    )
 
     val uiState: Flow<PersonEditUiState> = _uiState.asStateFlow()
 
+    private val registrationModeFlags = savedStateHandle[PersonEditView.ARG_REGISTRATION_MODE]?.toInt()
+        ?: PersonEditView.REGISTER_MODE_NONE
+
+    private val entityUid: Long
+        get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
+
+    private val serverUrl = savedStateHandle[UstadView.ARG_SERVER_URL]
+        ?: systemImpl.getAppConfigString(AppConfig.KEY_API_URL, "http://localhost") ?: ""
+
+    private val nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: systemImpl.getAppConfigString(
+        AppConfig.KEY_FIRST_DEST, ContentEntryList2View.VIEW_NAME
+    ) ?: ContentEntryList2View.VIEW_NAME
+
     init {
-
-
-        val accountManager: UstadAccountManager by instance()
-
-        val db: UmAppDatabase by on(accountManager.activeEndpoint).instance(tag = DoorTag.TAG_DB)
-
-        val currentUserUid = accountManager.activeSession?.userSession?.usPersonUid ?: 0
-
-        val entityUid: Long = savedStateHandle.get(UstadView.ARG_ENTITY_UID)!!.toLong()
+        loadingState = LoadingUiState.INDETERMINATE
 
         viewModelScope.launch {
-            val person = db.personDao.findPersonAccountByUid(entityUid)
-            _uiState.update { prev ->
-                prev.copy(person = person)
+            val person: PersonWithAccount = savedStateHandle.getOrPutJson(KEY_ENTITY_STATE) {
+                activeRepo.onDbThenRepoWithTimeout(5000) { db, _ ->
+                    db.personDao.findPersonAccountByUid(entityUid)
+                } ?: PersonWithAccount().also {
+                    it.dateOfBirth = savedStateHandle[PersonEditView.ARG_DATE_OF_BIRTH]?.toLong() ?: 0L
+                }
             }
+            _uiState.update { prev ->
+                prev.copy(
+                    person = person,
+                    fieldsEnabled = true,
+                )
+            }
+            loadingState = LoadingUiState.NOT_LOADING
         }
     }
 
@@ -92,9 +120,134 @@ class PersonEditViewModel(
         }
     }
 
-    fun getGender(gender: Int = 0): String {
-        val genderId: Int? = PersonConstants.GENDER_MESSAGE_ID_MAP[gender]
-        val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-        return systemImpl.getString(genderId ?: 0)
+    private fun PersonEditUiState.hasErrors(): Boolean {
+        return usernameError != null ||
+            passwordError != null ||
+            confirmError != null ||
+            dateOfBirthError != null ||
+            firstNameError != null ||
+            lastNameError != null ||
+            genderError != null ||
+            emailError != null ||
+            parentContactError != null
     }
+
+    fun onClickSave() {
+
+        loadingState = LoadingUiState.INDETERMINATE
+        _uiState.update { prev -> prev.copy(fieldsEnabled = false) }
+        val savePerson = _uiState.value.person ?: return
+        val requiredFieldMessage = systemImpl.getString(MessageID.field_required_prompt)
+
+        _uiState.update { prev ->
+            prev.copy(
+                usernameError = null,
+                passwordError = null,
+                emailError = if(savePerson.emailAddr.let { !it.isNullOrBlank() && !it.validEmail() })
+                    systemImpl.getString(MessageID.invalid_email)
+                else
+                    null,
+                confirmError = null,
+                dateOfBirthError = null,
+                parentContactError = null,
+                firstNameError = if(savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
+                lastNameError = if(savePerson.lastName.isNullOrEmpty()) requiredFieldMessage else null,
+                genderError = if(savePerson.gender == GENDER_UNSET) requiredFieldMessage else null,
+            )
+        }
+
+        if(_uiState.value.hasErrors()) {
+            loadingState = LoadingUiState.NOT_LOADING
+            _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
+            return
+        }
+
+        viewModelScope.launch {
+            if(registrationModeFlags.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
+                val parentJoin = _uiState.value.approvalPersonParentJoin
+                _uiState.update { prev ->
+                    prev.copy(
+                        usernameError = if(savePerson.username.isNullOrEmpty()) {
+                            requiredFieldMessage
+                        }else {
+                            null
+                        },
+                        passwordError = if(savePerson.newPassword.isNullOrEmpty()) {
+                            requiredFieldMessage
+                        }else {
+                            null
+                        },
+                        parentContactError = when {
+                            !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR) -> null
+                            parentJoin?.ppjEmail.isNullOrEmpty() -> requiredFieldMessage
+                            parentJoin?.ppjEmail?.let { it.validEmail() } != true -> {
+                                systemImpl.getString(MessageID.invalid_email)
+                            }
+                            else -> null
+                        },
+                        dateOfBirthError = if(savePerson.dateOfBirth == 0L) {
+                            requiredFieldMessage
+                        } else {
+                            null
+                        }
+                    )
+                }
+
+                if(_uiState.value.hasErrors()) {
+                    loadingState = LoadingUiState.NOT_LOADING
+                    _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
+                    return@launch
+                }
+
+                try {
+                    accountManager.register(savePerson, serverUrl, AccountRegisterOptions(
+                        makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR),
+                        parentJoin = parentJoin))
+
+                    val popUpToViewName = savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST
+
+                    if(registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)) {
+                        val goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                            RegisterAgeRedirectView.VIEW_NAME, true)
+                        val args = mutableMapOf<String, String>().also {
+                            it[RegisterMinorWaitForParentView.ARG_USERNAME] = savePerson.username ?: ""
+                            it[RegisterMinorWaitForParentView.ARG_PARENT_CONTACT] =
+                                parentJoin?.ppjEmail ?: ""
+                            it[RegisterMinorWaitForParentView.ARG_PASSWORD] = savePerson.newPassword ?: ""
+                            it.putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_POPUPTO_ON_FINISH)
+                        }
+
+                        navController.navigate(RegisterMinorWaitForParentView.VIEW_NAME, args,
+                            goOptions)
+                    }else {
+                        val goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                            popUpToViewName, true)
+                        navController.navigateToViewUri(nextDestination, goOptions)
+                    }
+                } catch (e: Exception) {
+                    if (e is IllegalStateException) {
+                        _uiState.update { prev ->
+                            prev.copy(usernameError = systemImpl.getString(MessageID.person_exists))
+                        }
+                    } else {
+                        snackDispatcher.showSnackBar(
+                            Snack(systemImpl.getString(MessageID.login_network_error))
+                        )
+                    }
+
+                    return@launch
+                }finally {
+                    loadingState = LoadingUiState.NOT_LOADING
+                    _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
+                }
+            }else {
+
+            }
+        }
+
+
+
+
+    }
+
 }
