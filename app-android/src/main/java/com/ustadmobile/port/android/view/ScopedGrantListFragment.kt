@@ -23,6 +23,7 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.locale.entityconstants.PermissionConstants
 import com.ustadmobile.core.util.ext.hasFlag
+import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.viewmodel.ScopedGrantListUiState
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.ScopedGrantWithName
@@ -83,11 +84,13 @@ private fun ScopedGrantListScreen(
             .defaultScreenPadding()
     )  {
 
-        item {
-            UstadAddListItem(
-                text = stringResource(id = R.string.add),
-                onClickAdd = { onClickAddScopedGrant() }
-            )
+        if(uiState.addMode == ListViewAddMode.FIRST_ITEM) {
+            item {
+                UstadAddListItem(
+                    text = stringResource(id = R.string.add),
+                    onClickAdd = { onClickAddScopedGrant() }
+                )
+            }
         }
 
         items(
