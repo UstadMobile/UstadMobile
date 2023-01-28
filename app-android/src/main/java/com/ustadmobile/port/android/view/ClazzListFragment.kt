@@ -177,6 +177,10 @@ private fun ClazzListScreen(
 
     LazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
+
+        // 600 width of the smallest iPad,
+        // subtracted 20 = horizontal padding & space between cards,
+        // half of 580 is 290
         columns = GridCells.Adaptive(290.dp)
     ) {
 
