@@ -176,7 +176,8 @@ private fun ClazzListScreen(
 ) {
 
     LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
+        modifier = Modifier.fillMaxSize(),
+        columns = GridCells.Adaptive(290.dp)
     ) {
 
         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -199,8 +200,7 @@ private fun ClazzListScreen(
         }
 
         items(
-            uiState.clazzList.size,
-            span = { GridItemSpan(maxLineSpan) }
+            uiState.clazzList.size
         ) { index ->
             ClazzListItem(
                 clazz = uiState.clazzList[index],

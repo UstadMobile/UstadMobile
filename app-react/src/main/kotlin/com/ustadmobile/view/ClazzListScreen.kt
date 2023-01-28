@@ -76,6 +76,7 @@ private val ClazzListScreenComponent2 = FC<ClazzListScreenProps> { props ->
         maxWidth = "lg"
 
         Stack {
+            spacing = responsive(10.px)
 
             UstadListSortHeader {
                 activeSortOrderOption = props.uiState.activeSortOrderOption
