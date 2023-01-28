@@ -172,6 +172,8 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                     sx {
                         width = 15.px
                         height = 15.px
+
+                        // To align with List Item Button
                         padding = Padding(
                             top = 5.px,
                             bottom = 0.px,
