@@ -1,13 +1,11 @@
 package com.ustadmobile.hooks
 
+import com.ustadmobile.core.components.NAVHOST_CLEARSTACK_VIEWNAME
+import com.ustadmobile.core.components.NavHostClearStackPlaceholder
 import com.ustadmobile.core.view.*
 import com.ustadmobile.entities.UstadScreen
 import com.ustadmobile.entities.UstadScreens
-import com.ustadmobile.mui.components.UstadCourseBlockEditPreview
-import com.ustadmobile.mui.components.UstadDetailFieldPreview
-import com.ustadmobile.mui.components.UstadEditFieldPreviews
-import com.ustadmobile.mui.components.UstadListFilterChipsHeaderPreview
-import com.ustadmobile.mui.components.UstadListSortHeaderPreview
+import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
 import com.ustadmobile.wrappers.reacteasysort.EasySortPreview
 import react.useMemo
@@ -26,9 +24,9 @@ fun useUstadScreens(): UstadScreens {
             UstadScreen(PersonAccountEditView.VIEW_NAME, "Person Account Edit Preview",
                 PersonAccountEditPreview),
             UstadScreen(Login2View.VIEW_NAME, "Login Preview",
-                LoginPreview),
+                LoginScreen),
             UstadScreen(SiteEnterLinkView.VIEW_NAME, "Site Enter Link Preview",
-                SiteEnterLinkScreenPreview),
+                SiteEnterLinkScreen),
             UstadScreen(ParentalConsentManagementView.VIEW_NAME, "Parental Consent Management Preview",
                 ParentalConsentManagementPreview),
             UstadScreen(SettingsView.VIEW_NAME, "Settings Preview",
@@ -83,6 +81,20 @@ fun useUstadScreens(): UstadScreens {
                 ClazzLogEditScreenPreview),
             UstadScreen(CourseGroupSetEditView.VIEW_NAME, "CourseGroupSetEdit Preview",
                 CourseGroupSetEditScreenPreview),
+            UstadScreen("UstadContentEntryListItem", "UstadContentEntryListItem Preview",
+                UstadContentEntryListItemPreview),
+            UstadScreen(CourseGroupSetDetailView.VIEW_NAME, "CourseGroupSetDetail Preview",
+                CourseGroupSetDetailScreenPreview),
+            UstadScreen("UstadClazzAssignmentListItem", "UstadClazzAssignmentListItem Preview",
+                UstadClazzAssignmentListItemPreview),
+            UstadScreen(HolidayCalendarListView.VIEW_NAME, "HolidayCalendarList Preview",
+                HolidayCalendarListScreenPreview),
+            UstadScreen(LanguageListView.VIEW_NAME, "LanguageList Preview",
+                LanguageListScreenPreview),
+            UstadScreen(PersonListView.VIEW_NAME, "PersonList Preview", PersonListScreenPreview),
+            UstadScreen(NAVHOST_CLEARSTACK_VIEWNAME, "Clear Stack", NavHostClearStackPlaceholder),
+            UstadScreen("UstadAddListItem", "UstadAddListItem Preview",
+                UstadAddListItemPreview),
             UstadScreen(ClazzLogEditAttendanceView.VIEW_NAME, name = "ClazzLogEditAttendance Preview",
                 ClazzLogEditAttendanceScreenPreview),
         )

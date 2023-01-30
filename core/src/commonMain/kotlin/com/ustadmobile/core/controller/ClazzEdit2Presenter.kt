@@ -487,6 +487,7 @@ class ClazzEdit2Presenter(
 
             view.loading = true
 
+            entity.clazzName = entity.clazzName?.trim()
             entity.clazzStartTime = DateTime(entity.clazzStartTime)
                     .toOffsetByTimezone(entity.effectiveTimeZone).localMidnight.utc.unixMillisLong
             if(entity.clazzEndTime != Long.MAX_VALUE){

@@ -9,16 +9,20 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class TestUstadSavedStateHandle: UstadSavedStateHandle {
 
-    private val mLiveDatas: MutableMap<String, MutableLiveData<*>> = ConcurrentHashMap()
+    private val mLiveDatas: MutableMap<String, MutableLiveData<String?>> = ConcurrentHashMap()
 
-    override fun <T> set(key: String, value: T?) {
-        mLiveDatas[key] = MutableLiveData(value as Any)
+    override fun set(key: String, value: String?) {
+        mLiveDatas[key] = MutableLiveData(value)
     }
 
-    override fun <T> get(key: String): T? {
-        return mLiveDatas[key]?.getValue() as T?
+    override fun get(key: String): String? {
+        return mLiveDatas[key]?.getValue()
     }
 
+    override val keys: Set<String>
+        get() = mLiveDatas.keys.toSet()
+
+    @Deprecated("This should NOT be used in MVVM")
     override fun <T> getLiveData(key: String): MutableLiveData<T> {
         return mLiveDatas.getOrPut(key) {
             MutableLiveData(null)

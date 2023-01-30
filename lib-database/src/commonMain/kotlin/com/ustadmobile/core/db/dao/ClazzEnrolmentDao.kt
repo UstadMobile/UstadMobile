@@ -20,6 +20,7 @@ import com.ustadmobile.door.lifecycle.LiveData
 import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
+import kotlinx.coroutines.flow.Flow
 
 @Repository
 @DoorDao
@@ -165,7 +166,9 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND ClazzEnrolment.clazzEnrolmentActive
         ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
     """)
-    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DataSourceFactory<Int, ClazzEnrolmentWithClazzAndAttendance>
+    abstract fun findAllClazzesByPersonWithClazz(
+        personUid: Long
+    ): Flow<List<ClazzEnrolmentWithClazzAndAttendance>>
 
     @Query("""SELECT COALESCE(MAX(clazzEnrolmentDateLeft),0) FROM ClazzEnrolment WHERE 
         ClazzEnrolment.clazzEnrolmentPersonUid = :selectedPerson 

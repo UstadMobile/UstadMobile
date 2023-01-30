@@ -1,6 +1,7 @@
 package com.ustadmobile.core.impl.nav
 
 import androidx.navigation.NavController
+import androidx.navigation.navOptions
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
@@ -14,30 +15,29 @@ class NavControllerAdapter(
     override val currentBackStackEntry: UstadBackStackEntry?
         get() = droidNavController.currentBackStackEntry?.let {
             val viewName = destinationProvider.lookupViewNameById(it.destination.id)
-                ?: throw IllegalArgumentException("Current backstack viewname not found for " +
+                ?: throw IllegalArgumentException("Current backstack view name not found for " +
                         "${it.destination}!")
             BackStackEntryAdapter(it, viewName)
         }
 
-    private fun lookupDestinationName(viewName: String): Int? {
+    private fun resolveViewId(
+        viewName: String,
+    ) : Int {
         return when(viewName) {
             UstadView.CURRENT_DEST -> droidNavController.currentDestination?.id
             UstadView.ROOT_DEST -> droidNavController.graph.startDestinationId
             else -> destinationProvider.lookupDestinationName(viewName)?.destinationId
-        }
+        } ?: throw IllegalArgumentException("Could not find destination id for $viewName")
     }
 
-    override fun getBackStackEntry(viewName: String): UstadBackStackEntry? {
-        val destinationId = lookupDestinationName(viewName) ?: return null
 
+    override fun getBackStackEntry(viewName: String): UstadBackStackEntry {
         return BackStackEntryAdapter(
-            droidNavController.getBackStackEntry(destinationId), viewName)
+            droidNavController.getBackStackEntry(resolveViewId(viewName)), viewName)
     }
 
     override fun popBackStack(viewName: String, inclusive: Boolean) {
-        val popViewId = lookupDestinationName(viewName) ?: return
-
-        droidNavController.popBackStack(popViewId, inclusive)
+        droidNavController.popBackStack(resolveViewId(viewName), inclusive)
     }
 
     override fun navigate(
@@ -45,10 +45,19 @@ class NavControllerAdapter(
         args: Map<String, String>,
         goOptions: UstadMobileSystemCommon.UstadGoOptions
     ) {
-        val destinationId = destinationProvider.lookupDestinationName(viewName)?.destinationId
-            ?: return
-
-        droidNavController.navigate(destinationId, args.toBundleWithNullableValues(),
-            goOptions.toNavOptions(droidNavController, destinationProvider))
+        droidNavController.navigate(resolveViewId(viewName),
+            args.toBundleWithNullableValues(),
+            navOptions {
+                if(goOptions.clearStack) {
+                    popUpTo(droidNavController.graph.startDestinationId) {
+                        inclusive = false
+                    }
+                }else if(goOptions.popUpToViewName != null) {
+                    popUpTo(resolveViewId(viewName)) {
+                        inclusive = goOptions.popUpToInclusive
+                    }
+                }
+            }
+        )
     }
 }
