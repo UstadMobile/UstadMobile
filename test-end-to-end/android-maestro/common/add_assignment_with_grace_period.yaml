@@ -4,7 +4,6 @@ appId: com.toughra.ustadmobile
 # Test parameters needs to provide for this test :
 # 1) TESTCOURSENAME: provide course name of string type
 # 2) ASSIGNMENTNAME: provide assignment name of string type
-
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: "Edit"
@@ -20,5 +19,31 @@ appId: com.toughra.ustadmobile
 - hideKeyboard
 - tapOn: "Completion criteria"
 - tapOn: "Submitted"
+- tapOn: "Deadline (Optional)"
+- tapOn: "OK"
+- tapOn:
+      text: "Time"
+      index: 1
+- tapOn: "OK"
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn: "End of grace period"
+- tapOn: "OK"
+- tapOn: "Time"
+- tapOn: "Switch to text input mode for the time input."
+- tapOn:
+    id: "android:id/input_hour"
+- inputText: "11"
+- tapOn:
+    id: "android:id/input_minute"
+- inputText: "30"
+- tapOn:
+    id: "android:id/am_pm_spinner"
+- tapOn: "PM"
+- tapOn: "OK"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/ca_edit_penalty"
+- inputText: "10"
 - tapOn: "DONE"
 - tapOn: "SAVE"

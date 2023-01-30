@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - checklist2
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/002_003_teacher_record_attendance"
   TESTNAME: "002_003_teacher_record_attendance"

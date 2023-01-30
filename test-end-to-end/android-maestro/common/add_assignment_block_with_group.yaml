@@ -1,0 +1,76 @@
+appId: com.toughra.ustadmobile
+---
+# this test add an assignment block on a course
+# Test parameters needs to provide for this test :
+# 1) TESTCOURSENAME: provide course name of string type
+# 2) ASSIGNMENTNAME: provide assignment name of string type
+- tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: "Edit"
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn: "Add block"
+- tapOn: "Assignments"
+- tapOn: "Title"
+- inputText: ${ASSIGNMENTNAME}
+- tapOn: "Description (Optional)"
+- inputText: "Test "
+- hideKeyboard
+- tapOn: "Completion criteria"
+- tapOn: "Submitted"
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn: "Individual Submission"
+- tapOn: "New group set"
+- tapOn: "Title"
+- inputText: ${GROUPTITLE}
+- tapOn:
+      id: "com.toughra.ustadmobile:id/fragment_course_group_set_number_groups_text"
+- eraseText
+- inputText: "2"
+- hideKeyboard
+- swipe:
+    start: 100,400
+    end: 100,100
+- tapOn:
+      text: "Group"
+      index: 0
+- tapOn:
+      id: "com.toughra.ustadmobile:id/line_item"
+      index: 0
+
+- tapOn:
+    text: "Show dropdown menu"
+    index: 1
+- tapOn:
+      id: "com.toughra.ustadmobile:id/line_item"
+      index: 0
+- tapOn:
+    text: "Show dropdown menu"
+    index: 2
+- tapOn:
+      id: "com.toughra.ustadmobile:id/line_item"
+      index: 0
+- tapOn:
+    text: "Show dropdown menu"
+    index: 3
+- tapOn:
+      id: "com.toughra.ustadmobile:id/line_item"
+      index: 1
+- tapOn:
+    text: "Show dropdown menu"
+    index: 4
+- tapOn:
+      id: "com.toughra.ustadmobile:id/line_item"
+      index: 1
+- tapOn:
+    text: "Show dropdown menu"
+    index: 5
+- tapOn:
+      id: "com.toughra.ustadmobile:id/line_item"
+      index: 1
+- tapOn: "SAVE"
+- tapOn: "DONE"
+- tapOn: "SAVE"

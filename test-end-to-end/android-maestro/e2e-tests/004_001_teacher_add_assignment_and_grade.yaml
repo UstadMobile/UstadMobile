@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - checklist4
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/004_001_teacher_add_assignment_and_grade"
   TESTNAME: 004_001_teacher_add_assignment_and_grade
@@ -13,14 +15,13 @@ env:
 # admin able to add a course and edit that course
 - runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
 - runFlow: "../build/common-app2/select_site.yaml"
-#-------------------------------------------------------------------------------------admin login
 - runFlow:
     file: "../build/common-app2/user_login.yaml"
 - runFlow:
     file: "../build/common-app2/add_course.yaml"
     env:
       TESTCOURSENAME: Assignment block test
-#------------------------------------------------------------------------------admin add new teacher
+#admin add new teacher
 - runFlow:
     file: "../build/common-app2/add_new_teacher_inside_course.yaml"
     env:
@@ -29,7 +30,7 @@ env:
       TEACHERLASTNAME: Jacob
       GENDER: Female
       PASSWORD: test
-#----------------------------------------------------------------admin add new student to new course
+#admin add new student to new course
 - runFlow:
     file: "../build/common-app2/add_new_student_inside_course.yaml"
     env:
@@ -46,10 +47,9 @@ env:
       STUDENTLASTNAME: Antony
       GENDER: Male
       PASSWORD: test
-
+#teacherLogin
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
-#teacher login
 - runFlow:
     file: "../common/user_login.yaml"
     env:
@@ -88,7 +88,9 @@ env:
      file: "../build/common-app2/student_submit_assignment_text.yaml"
      env:
        TESTCOURSENAME: Assignment block test
+       ASSIGNMENTNAME: Test Assignment
        TEXT: Numbers - 1,2,3,4,5,6,7,8,9,10
+
 - extendedWaitUntil:
     notVisible: "SUBMIT"
     timeout: 10000
@@ -105,12 +107,14 @@ env:
     file: "../common/add_assignment_grade.yaml"
     env:
       TESTCOURSENAME: Assignment block test
+      ASSIGNMENTNAME: Test Assignment
       STUDENTNAME: Ajay Dev
       POINT: 8
 - runFlow:
     file: "../common/add_assignment_grade.yaml"
     env:
       TESTCOURSENAME: Assignment block test
+      ASSIGNMENTNAME: Test Assignment
       STUDENTNAME: Sam Antony
       POINT: 7
 #----------------------------------------------student view assignment grade ------------#

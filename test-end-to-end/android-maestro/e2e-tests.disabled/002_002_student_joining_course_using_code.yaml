@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - checklist2
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/002_002_student_joining_course_using_code"
 ---

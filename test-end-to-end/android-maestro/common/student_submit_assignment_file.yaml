@@ -7,8 +7,7 @@ appId: com.toughra.ustadmobile
 
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
-- tapOn:
-    id: "com.toughra.ustadmobile:id/item_course_block_icon"
+- tapOn: ${ASSIGNMENTNAME}
 - tapOn: "ADD FILE"
 - runFlow:
     when:

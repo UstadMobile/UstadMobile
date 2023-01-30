@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - checklist1
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/001_003_admin_can_move_content"
   TESTNAME: "001_003_admin_can_move_content"

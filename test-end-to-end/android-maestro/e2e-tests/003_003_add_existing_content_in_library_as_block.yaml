@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - checklist3
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/003_003_add_existing_content_in_library_as_block"
   TESTNAME: "003_003_add_existing_content_in_library_as_block"

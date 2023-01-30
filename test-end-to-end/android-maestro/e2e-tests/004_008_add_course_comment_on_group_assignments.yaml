@@ -1,0 +1,104 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist4
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_008_add_course_comment_on_group_assignments"
+  TESTNAME: 004_008_add_course_comment_on_group_assignments
+---
+#--------------------------------------------------APP 2--------------------------------------#
+- clearState: com.toughra.ustadmobile2
+- runFlow:
+     file: "../common/startserver.yaml"
+     env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+- runFlow:
+    file: "../common/create_course_with_members.yaml"
+    env:
+      TESTCOURSENAME: Course comment test
+#---------------------------------------------------APP 1 -teacher add class comment--------------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#teacher login
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: Anu
+      PASSWORD: test
+- runFlow:
+    file:  "../common/add_assignment_block_with_group.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Course comment test
+      GROUPTITLE: Course comment Group
+- swipe:
+    direction: LEFT
+- swipe:
+    direction: LEFT
+- tapOn: "Groups"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/line1_text"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/group_list"
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: Sruthy
+      PASSWORD: test
+- runFlow:
+    file: "../build/common-app2/student_submit_assignment_text.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME:  Course comment test
+      TEXT: Numbers - 1,2,3,4,5,6,7,8,9,10 Alphabets - A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+- runFlow:
+    file: "../build/common-app2/add_class_comments.yaml"
+    env:
+      TESTCOURSENAME: Course comment test
+      ASSIGNMENTNAME: Test Assignment
+      CLASSCOMMENT: Group 2 -assignment completed
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: Mathew
+      PASSWORD: test
+- runFlow:
+    file: "../build/common-app2/add_class_comments.yaml"
+    env:
+      TESTCOURSENAME: Course comment test
+      ASSIGNMENTNAME: Test Assignment
+      CLASSCOMMENT: Ok Thank you
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/group2_member_view"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: Justin
+      PASSWORD: test
+- runFlow:
+    file: "../common/student_submit_assignment_block.yaml"
+    env:
+      TESTCOURSENAME: Course comment test
+      ASSIGNMENTNAME: Test Assignment
+      TESTFILENAME: H5p_Content.h5p
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- swipe:
+    start: 100,100
+    end: 100,400
+- runFlow:
+    file: "../common/add_class_comments.yaml"
+    env:
+      TESTCOURSENAME: Course comment test
+      ASSIGNMENTNAME: Test Assignment
+      CLASSCOMMENT: Group 1 completed assignment
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/group1_member_view"

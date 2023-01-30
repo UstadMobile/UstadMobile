@@ -9,5 +9,6 @@ appId: com.toughra.ustadmobile
     id: "com.toughra.ustadmobile:id/text_editor"
 - inputText: ${TEXT}
 - tapOn: "DONE"
-- tapOn: "SUBMIT"
+- assertNotVisible:
+      text: "SUBMIT"
 

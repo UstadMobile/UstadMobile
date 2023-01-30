@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - checklist1
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/001_002_admin_can_hide_content"
   TESTNAME: "001_002_admin_can_hide_content"

@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - checklist3
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/003_001_add_or_edit_course_permission_test"
   TESTNAME: "003_001_add_or_edit_course_permission_test"

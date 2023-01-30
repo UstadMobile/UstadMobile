@@ -3,12 +3,6 @@ appId: com.toughra.ustadmobile
 - tapOn: "Courses"
 - tapOn: ${TESTCOURSENAME}
 - tapOn: ${ASSIGNMENTNAME}
-- runFlow:
-    when:
-      visible: "SUBMISSIONS"
-    file: teacher_add_private_comment.yaml
-    env:
-      STUDENTNAME: ${STUDENTNAME}
 - swipe:
     start: 100,400
     end: 100,100

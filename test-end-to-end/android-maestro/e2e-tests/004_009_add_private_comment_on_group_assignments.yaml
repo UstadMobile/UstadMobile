@@ -1,0 +1,101 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist4
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_009_add_private_comment_on_group_assignments"
+  TESTNAME: 004_009_add_private_comment_on_group_assignments
+---
+#--------------------------------------------------APP 2--------------------------------------#
+- clearState: com.toughra.ustadmobile2
+- runFlow:
+     file: "../common/startserver.yaml"
+     env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+- runFlow:
+    file: "../common/create_course_with_members.yaml"
+    env:
+      TESTCOURSENAME: Group Private comment test
+#---------------------------------------------------APP 1 -teacher add class comment--------------------#
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#teacher login
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: Anu
+      PASSWORD: test
+- runFlow:
+    file:  "../common/add_assignment_block_with_group.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Group Private comment test
+      GROUPTITLE: Private comment Group
+- swipe:
+    direction: LEFT
+- swipe:
+    direction: LEFT
+- tapOn: "Groups"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/line1_text"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/group_list"
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: Sruthy
+      PASSWORD: test
+- runFlow:
+    file: "../build/common-app2/add_private_comments.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Group Private comment test
+      PRIVATECOMMENT: Hi Mam
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: Anu
+      PASSWORD: test
+- runFlow:
+    file: "../common/teacher_add_private_comment.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Group Private comment test
+      STUDENTNAME: Group  2
+      PRIVATECOMMENT: Please comment here once you submit the assignment
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: Santhosh
+      PASSWORD: test
+- runFlow:
+    file: "../build/common-app2/add_private_comments.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Group Private comment test
+      PRIVATECOMMENT: Ok Mam
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/ameGroup_privatecomment visible"
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: Justin
+      PASSWORD: test
+- runFlow:
+    file: "../build/common-app2/add_private_comments.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Group Private comment test
+      PRIVATECOMMENT: Hello Mam
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/otherGroup_private comment_not_visible"

@@ -18,6 +18,7 @@ appId: com.toughra.ustadmobile
 
 # test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
+# 2) TESTCOURSENAME: provide course name of String type
 
 
 # add new course

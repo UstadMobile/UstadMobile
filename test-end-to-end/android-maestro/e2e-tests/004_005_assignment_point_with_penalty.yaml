@@ -2,8 +2,8 @@ appId: com.toughra.ustadmobile
 tags:
   - checklist4
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_004_multiple_submission_assignment"
-  TESTNAME: "004_004_multiple_submission_assignment"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_005_assignment_point_with_penalty"
+  TESTNAME: "004_005_assignment_point_with_penalty"
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
@@ -31,21 +31,12 @@ env:
       TEACHERLASTNAME: Jacob
       GENDER: Female
       PASSWORD: test
-#----------------------------------------------------------------admin add new student to new course
 - runFlow:
     file: "../build/common-app2/add_new_student_inside_course.yaml"
     env:
       TESTCOURSENAME: Assignment block test
       STUDENTFIRSTNAME: Ajay
       STUDENTLASTNAME: Dev
-      GENDER: Male
-      PASSWORD: test
-- runFlow:
-    file: "../build/common-app2/add_new_student_inside_course.yaml"
-    env:
-      TESTCOURSENAME: Assignment block test
-      STUDENTFIRSTNAME: Sam
-      STUDENTLASTNAME: Antony
       GENDER: Male
       PASSWORD: test
 
@@ -58,7 +49,7 @@ env:
       USERNAME: Mary
       PASSWORD: test
 - runFlow:
-    file: "../common/add_multiple_submission_assignment.yaml"
+    file: "../common/add_assignment_with_grace_period.yaml"
     env:
       ASSIGNMENTNAME: Test Assignment
       TESTCOURSENAME: Assignment block test
@@ -102,40 +93,5 @@ env:
 - tapOn: "Courses"
 - tapOn: "Assignment block test"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_overviewPage_studentView1"
-- tapOn:
-    id: "com.toughra.ustadmobile2:id/item_course_block_icon"
+- tapOn: "Test Assignment"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_grade_on_assignmentPage_studentView1"
-- runFlow:
-    file: "../build/common-app2/student_submit_assignment_file.yaml"
-    env:
-      TESTCOURSENAME: Assignment block test
-      ASSIGNMENTNAME: Test Assignment
-      TESTFILENAME: "Pdf_Content.pdf"
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-#--------------------------------------------------------------------------teacher re-grade the assignment
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
-- runFlow:
-    file: "../common/user_login.yaml"
-    env:
-      USERNAME: Mary
-      PASSWORD: test
-- runFlow:
-    file: "../common/update_assignment_grade.yaml"
-    env:
-      TESTCOURSENAME: Assignment block test
-      ASSIGNMENTNAME: Test Assignment
-      STUDENTNAME: Ajay Dev
-      POINT: 9
-#----------------------------------------------student view updated assignment grade ------------#
-- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
-- runFlow: "../build/common-app2/select_site.yaml"
-- runFlow:
-    file: "../build/common-app2/user_login.yaml"
-    env:
-      USERNAME: Ajay
-      PASSWORD: test
-- tapOn: "Courses"
-- tapOn: "Assignment block test"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/assignment_updated_grade_on_assignmentPage_studentView1"

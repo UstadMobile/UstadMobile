@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - checklist4
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/004_003_add_private_comment_on_assignments"
   TESTNAME: "004_003_add_private_comment_on_assignments"
@@ -63,7 +65,7 @@ env:
       ASSIGNMENTNAME: Test Assignment
       TESTCOURSENAME: Private comment test
 - runFlow:
-    file: "../common/add_private_comments.yaml"
+    file: "../common/teacher_add_private_comment.yaml"
     env:
       ASSIGNMENTNAME: Test Assignment
       TESTCOURSENAME: Private comment test

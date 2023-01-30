@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - checklist3
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/003_006_course_view_and_modules_can_expand_collapse"
   TESTNAME: "003_006_course_view_and_modules_can_expand_collapse"

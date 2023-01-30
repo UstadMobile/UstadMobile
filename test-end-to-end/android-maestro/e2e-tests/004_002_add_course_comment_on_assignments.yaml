@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - checklist4
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/004_002_add_course_comment_on_assignments"
   TESTNAME: 004_002_add_course_comment_on_assignments

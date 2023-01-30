@@ -1,0 +1,76 @@
+appId: com.toughra.ustadmobile
+tags:
+  - checklist4
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_007_assignment_submission_after_graceperiod"
+  TESTNAME: "004_007_assignment_submission_after_graceperiod"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+# admin able to add a course and edit that course
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+#-------------------------------------------------------------------------------------admin login
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+- runFlow:
+    file: "../build/common-app2/add_course.yaml"
+    env:
+      TESTCOURSENAME: Assignment block test
+#------------------------------------------------------------------------------admin add new teacher
+- runFlow:
+    file: "../build/common-app2/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: Assignment block test
+      TEACHERFIRSTNAME: Mary
+      TEACHERLASTNAME: Jacob
+      GENDER: Female
+      PASSWORD: test
+- runFlow:
+    file: "../build/common-app2/add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: Assignment block test
+      STUDENTFIRSTNAME: Ajay
+      STUDENTLASTNAME: Dev
+      GENDER: Male
+      PASSWORD: test
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#teacher login
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: Mary
+      PASSWORD: test
+- runFlow:
+    file: "../common/add_assignment_2min_after_grace_period.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Assignment block test
+#-------------------------------------------------------------------------student submit assignment
+- runFlow: "../build/common-app2/clear_state_and_get_started.yaml"
+- runFlow: "../build/common-app2/select_site.yaml"
+- runFlow:
+    file: "../build/common-app2/user_login.yaml"
+    env:
+      USERNAME: Ajay
+      PASSWORD: test
+- runFlow:
+    file: "../build/common-app2/student_try_submit_assignment_just_before_deadline.yaml"
+    env:
+      ASSIGNMENTNAME: Test Assignment
+      TESTCOURSENAME: Assignment block test
+      TEXT: Numbers - 1,2,3,4,5,6,7,8,9,10 Alphabets - A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#teacher login
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: Mary
+      PASSWORD: test
