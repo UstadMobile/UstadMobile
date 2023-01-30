@@ -2,9 +2,6 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.generated.locale.MessageIdMap
 import com.ustadmobile.core.impl.locale.StringsXml
-import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
-import com.ustadmobile.xmlpullparserkmp.setInputString
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlin.js.Date
@@ -26,7 +23,6 @@ import org.w3c.dom.HTMLAnchorElement
  *        if the display locale is not English.
  */
 actual open class UstadMobileSystemImpl(
-    private val navController: UstadNavController,
     private val defaultStringsXml: StringsXml,
     private val displayLocaleStringsXml: StringsXml?
 ): UstadMobileSystemCommon() {
@@ -153,11 +149,11 @@ actual open class UstadMobileSystemImpl(
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int,
                            ustadGoOptions: UstadGoOptions) {
-        navController.navigate(viewName,args as Map<String, String>,ustadGoOptions)
+        throw IllegalStateException("Not supported on JS anymore!")
     }
 
     actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
-        navController.popBackStack(popUpToViewName,popUpInclusive)
+        throw IllegalStateException("Not supported on JS anymore!")
     }
 
     /**
