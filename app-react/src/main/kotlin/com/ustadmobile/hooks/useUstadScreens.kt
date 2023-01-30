@@ -97,6 +97,8 @@ fun useUstadScreens(): UstadScreens {
                 UstadAddListItemPreview),
             UstadScreen(ClazzLogEditAttendanceView.VIEW_NAME, name = "ClazzLogEditAttendance Preview",
                 ClazzLogEditAttendanceScreenPreview),
+            UstadScreen(JoinWithCodeView.VIEW_NAME, "JoinWithCode Preview",
+                JoinWithCodeScreenPreview),
         )
     }
 }
