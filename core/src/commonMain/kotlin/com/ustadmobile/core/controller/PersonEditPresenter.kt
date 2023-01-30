@@ -60,7 +60,7 @@ class PersonEditPresenter(
      */
     private var registrationModeFlags: Int = PersonEditView.REGISTER_MODE_NONE
 
-    private var loggedInPerson: Person? = null
+    //private var loggedInPerson: Person? = null
 
     private var regViaLink: Boolean = false
 
@@ -82,8 +82,7 @@ class PersonEditPresenter(
 
         nextDestination = arguments[UstadView.ARG_NEXT] ?: impl.getAppConfigString(
             AppConfig.KEY_FIRST_DEST, ContentEntryList2View.VIEW_NAME
-        )
-                ?: ContentEntryList2View.VIEW_NAME
+        ) ?: ContentEntryList2View.VIEW_NAME
 
         view.registrationMode = registrationModeFlags
 
@@ -112,10 +111,10 @@ class PersonEditPresenter(
             view.approvalPersonParentJoin = mPersonParentJoin
         }
 
-        val loggedInPersonUid = accountManager.activeAccount.personUid
-        loggedInPerson = withTimeoutOrNull(2000){
-            db.personDao.findByUidAsync(loggedInPersonUid)
-        }
+//        val loggedInPersonUid = accountManager.activeAccount.personUid
+//        loggedInPerson = withTimeoutOrNull(2000){
+//            db.personDao.findByUidAsync(loggedInPersonUid)
+//        }
 
 
         return person
