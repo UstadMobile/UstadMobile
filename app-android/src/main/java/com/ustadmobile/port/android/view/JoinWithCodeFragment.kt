@@ -128,7 +128,7 @@ fun JoinWithCodeScreen(
         UstadTextEditField(
             modifier = Modifier.defaultItemPadding(),
             value = uiState.code,
-            label = stringResource(id = R.string.entity_code,uiState.entityType),
+            label = stringResource(id = R.string.entity_code, uiState.entityType),
             error = uiState.codeError,
             enabled = uiState.fieldsEnabled,
             onValueChange = {
@@ -160,7 +160,8 @@ fun JoinWithCodeScreen(
 fun JoinWithCodeScreenPreview(){
     JoinWithCodeScreen(
         uiState = JoinWithCodeUiState(
-            buttonLabel = "join_class"
+            entityType = "Course",
+            buttonLabel = "Join course"
         )
     )
 }

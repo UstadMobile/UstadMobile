@@ -25,7 +25,8 @@ external interface JoinWithCodeScreenProps : Props {
 val JoinWithCodeScreenPreview = FC<Props> {
     JoinWithCodeScreenComponent2 {
         uiState = JoinWithCodeUiState(
-            buttonLabel = "join_class"
+            entityType = "Course",
+            buttonLabel = "Join course"
         )
     }
 }
