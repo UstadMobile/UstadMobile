@@ -442,6 +442,7 @@ private fun ClazzLogListAttendanceScreen(
         ){ clazzLog ->
             ClazzLogListItem(
                 clazzLog = clazzLog,
+                timeZoneId = uiState.timeZoneId,
                 onClick = onClickClazz
             )
         }
@@ -452,12 +453,13 @@ private fun ClazzLogListAttendanceScreen(
 @Composable
 private fun ClazzLogListItem(
     clazzLog: ClazzLog,
+    timeZoneId: String,
     onClick: (ClazzLog) -> Unit,
 ){
 
     val dateTime = rememberFormattedDateTime(
         timeInMillis = clazzLog.logDate,
-        timeZoneId = TimeZone.getDefault().id
+        timeZoneId = timeZoneId,
     )
 
     val attendancePairList: List<Pair<Int, Int>> = listOf(
@@ -512,20 +514,21 @@ fun ClazzLogListAttendanceScreenPreview() {
                 clazzLogNumPresent = 40
                 clazzLogNumPartial = 15
                 clazzLogNumAbsent = 10
+                logDate = 1675089491000
             },
             ClazzLog().apply {
                 clazzLogUid = 2
                 clazzLogNumPresent = 40
                 clazzLogNumPartial = 30
                 clazzLogNumAbsent = 30
-                logDate = 1673683347000
+                logDate = 1675003091000
             },
             ClazzLog().apply {
                 clazzLogUid = 3
                 clazzLogNumPresent = 70
                 clazzLogNumPartial = 20
                 clazzLogNumAbsent = 2
-                logDate = 1673683347000
+                logDate = 1674916691000
             }
         ),
         graphData = AttendanceGraphData(

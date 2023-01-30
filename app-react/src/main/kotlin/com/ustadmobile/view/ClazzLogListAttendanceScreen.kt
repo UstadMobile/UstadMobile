@@ -8,8 +8,8 @@ import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import csstype.Color
+import csstype.pct
 import csstype.px
-import kotlinx.datetime.TimeZone
 import mui.icons.material.CalendarToday
 import mui.material.*
 import mui.system.responsive
@@ -83,7 +83,7 @@ private val ClazzLogListAttendanceScreenComponent2 =
 
                     val dateTime = useFormattedDateAndTime(
                         timeInMillis = clazzLog.logDate,
-                        timezoneId = TimeZone.currentSystemDefault().id
+                        timezoneId = props.uiState.timeZoneId
                     )
 
                     val attendanceMap = mapOf(
@@ -114,7 +114,7 @@ private val ClazzLogListAttendanceScreenComponent2 =
 
                                             Box {
                                                 sx{
-                                                  width = (attendanceStatus*100).px
+                                                  width = (attendanceStatus*100).pct
                                                   height = 6.px
                                                   backgroundColor = color
                                                 }

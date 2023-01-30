@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.lib.db.entities.ClazzLog
+import kotlinx.datetime.TimeZone
 
 data class ClazzLogListAttendanceUiState(
 
@@ -12,6 +13,11 @@ data class ClazzLogListAttendanceUiState(
      * x/y coordinates. The x is the timestamp, the y is the attendance (between 0 and 100)
      */
     val graphData: AttendanceGraphData? = null,
+
+    /**
+     * The course time zone (used to format all timestamps)
+     */
+    val timeZoneId: String = TimeZone.currentSystemDefault().id,
 
     val recordAttendanceOptions: List<ClazzLogListAttendancePresenter.RecordAttendanceOption> =
         emptyList(),
