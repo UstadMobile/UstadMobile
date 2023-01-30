@@ -368,8 +368,7 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
 @Composable
 private fun ClazzLogEditAttendanceScreen(
     uiState: ClazzLogEditAttendanceUiState = ClazzLogEditAttendanceUiState(),
-    onClickMarkAllPresent: (Int) -> Unit = {},
-    onClickMarkAllAbsent: (Int) -> Unit = {},
+    onClickMarkAll: (status: Int) -> Unit = {},
     onChangeClazzLog: (ClazzLog) -> Unit = {},
     onClazzLogAttendanceChanged: (ClazzLogAttendanceRecordWithPerson) -> Unit = {}
 ) {
@@ -389,7 +388,7 @@ private fun ClazzLogEditAttendanceScreen(
         item {
             ListItem(
                 modifier = Modifier.clickable {
-                    onClickMarkAllPresent(ClazzLogAttendanceRecord.STATUS_ATTENDED)
+                    onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
                 },
                 text = { Text(stringResource(id = R.string.mark_all_present)) },
                 icon = {
@@ -404,7 +403,7 @@ private fun ClazzLogEditAttendanceScreen(
         item {
             ListItem(
                 modifier = Modifier.clickable {
-                    onClickMarkAllAbsent(ClazzLogAttendanceRecord.STATUS_ABSENT)
+                    onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT)
                 },
                 text = { Text(stringResource(id = R.string.mark_all_absent)) },
                 icon = {

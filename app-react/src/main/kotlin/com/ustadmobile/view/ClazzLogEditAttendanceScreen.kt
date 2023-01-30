@@ -25,9 +25,7 @@ external interface ClazzLogEditAttendanceScreenProps : Props {
 
     var uiState: ClazzLogEditAttendanceUiState
 
-    var onClickMarkAllPresent: (Int) -> Unit
-
-    var onClickMarkAllAbsent: (Int) -> Unit
+    var onClickMarkAll: (status: Int) -> Unit
 
     var onChangeClazzLog: (ClazzLog) -> Unit
 
@@ -97,8 +95,8 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
 
                 ListItem {
                     ListItemButton {
-                        onClick = {props
-                            .onClickMarkAllPresent(ClazzLogAttendanceRecord.STATUS_ATTENDED)
+                        onClick = {
+                            props.onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
                         }
 
                         ListItemIcon {
@@ -113,8 +111,8 @@ private val ClazzLogEditAttendanceScreenComponent2 = FC<ClazzLogEditAttendanceSc
 
                 ListItem {
                     ListItemButton {
-                        onClick = {props
-                            .onClickMarkAllAbsent(ClazzLogAttendanceRecord.STATUS_ABSENT)
+                        onClick = {
+                            props.onClickMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT)
                         }
 
                         ListItemIcon {
@@ -225,10 +223,10 @@ external interface ClazzLogItemViewProps : Props {
     var fieldsEnabled: Boolean
 }
 
-private val statusMap = mapOf(
-    ClazzLogAttendanceRecord.STATUS_ATTENDED to Done.create(),
-    ClazzLogAttendanceRecord.STATUS_ABSENT to Close.create(),
-    ClazzLogAttendanceRecord.STATUS_PARTIAL to AccessTime.create()
+private val STATUS_TO_ICON_MAP = mapOf(
+    ClazzLogAttendanceRecord.STATUS_ATTENDED to Done,
+    ClazzLogAttendanceRecord.STATUS_ABSENT to Close,
+    ClazzLogAttendanceRecord.STATUS_PARTIAL to AccessTime
 )
 
 private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
@@ -253,7 +251,7 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
 
         secondaryAction = ButtonGroup.create {
 
-            statusMap.forEach() { (status ,icon) ->
+            STATUS_TO_ICON_MAP.forEach { (status ,icon) ->
                 ToggleButton {
                     disabled = !props.fieldsEnabled
                     selected = (props.clazzLog.attendanceStatus == status)
@@ -266,7 +264,7 @@ private val ClazzLogItemView = FC<ClazzLogItemViewProps> { props ->
                         )
                     }
 
-                    + icon
+                    + icon.create()
                 }
             }
 
