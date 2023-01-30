@@ -28,6 +28,16 @@ import react.Props
 import react.create
 import react.useState
 
+val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
+    ContentEntry.TYPE_EBOOK to Book,
+    ContentEntry.TYPE_VIDEO to SmartDisplay,
+    ContentEntry.TYPE_DOCUMENT to TextSnippet,
+    ContentEntry.TYPE_ARTICLE to Article,
+    ContentEntry.TYPE_COLLECTION to Collections,
+    ContentEntry.TYPE_INTERACTIVE_EXERCISE to TouchApp,
+    ContentEntry.TYPE_AUDIO to Audiotrack,
+)
+
 external interface ContentEntryDetailOverviewScreenProps : Props {
 
     var uiState: ContentEntryDetailOverviewUiState
