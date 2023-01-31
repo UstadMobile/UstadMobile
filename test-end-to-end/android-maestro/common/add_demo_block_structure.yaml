@@ -22,8 +22,8 @@ appId: com.toughra.ustadmobile
       TEXT: ${TEXT}
 # indent the text block ----- 1
 - tapOn:
-      text: "Edit"
-      index: 1
+    text: "Edit"
+    index: 1
 - tapOn: "Indent"
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/block_structure"

@@ -49,6 +49,8 @@ env:
 - tapOn: "EpubContent"
 - tapOn: "SAVE"
 - tapOn: "SAVE"
+
+# teacher add existing content in library to course as a content block
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
