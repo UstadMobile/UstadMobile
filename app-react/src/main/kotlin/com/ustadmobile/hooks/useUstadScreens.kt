@@ -103,6 +103,7 @@ fun useUstadScreens(): UstadScreens {
                 ClazzLogListAttendanceScreenPreview),
             UstadScreen(ContentEntryList2View.VIEW_NAME, "ContentEntryList Preview",
                 ContentEntryListScreenPreview),
+            UstadScreen(AccountListView.VIEW_NAME, "AccountList Preview", AccountListScreenPreview),
         )
     }
 }
