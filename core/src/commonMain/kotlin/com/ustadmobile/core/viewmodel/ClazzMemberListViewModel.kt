@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
@@ -41,4 +42,6 @@ data class ClazzMemberListUiState(
         MessageIdOption2(MessageID.active, ClazzEnrolmentDaoCommon.FILTER_ACTIVE_ONLY),
         MessageIdOption2(MessageID.all, 0)
     ),
+
+    val terminologyStrings: CourseTerminologyStrings? = null
 )

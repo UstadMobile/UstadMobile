@@ -5,6 +5,7 @@ import com.ustadmobile.core.hooks.useStringsXml
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ClazzMemberListUiState
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
+import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.util.ColorForAttendanceStatus
@@ -65,11 +66,15 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
 
                 ListItem {
                     ListItemText {
-                        + strings[MessageID.teachers_literal]
+                        + (props.uiState.terminologyStrings?.get(MessageID.teachers_literal)
+                            ?: strings[MessageID.teachers_literal])
                     }
                 }
 
                 if (props.uiState.addTeacherVisible){
+                    UstadAddListItem(
+
+                    )
                     ListItem {
                         ListItemButton {
                             onClick = { props.onClickAddNewTeacher }

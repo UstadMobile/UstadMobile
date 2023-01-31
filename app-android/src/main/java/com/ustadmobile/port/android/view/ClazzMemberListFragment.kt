@@ -44,6 +44,7 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.defaultItemPadding
 import com.ustadmobile.port.android.util.ext.defaultScreenPadding
+import com.ustadmobile.port.android.view.composable.UstadAddListItem
 import com.ustadmobile.port.android.view.composable.UstadListFilterChipsHeader
 import com.ustadmobile.port.android.view.composable.UstadListSortHeader
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -318,15 +319,21 @@ private fun ClazzMemberListScreen(
 
         item {
             ListItem(
-                text = { Text(text = stringResource(id = R.string.teachers_literal)) }
+                text = {
+                    Text(text = uiState.terminologyStrings?.get(R.string.teachers_literal)
+                        ?: stringResource(R.string.teachers_literal))
+                }
             )
         }
 
         item {
             if (uiState.addTeacherVisible){
-                AddListItem(
-                    text = stringResource(id = R.string.add_a_teacher),
-                    onClick = onClickAddNewTeacher,
+                UstadAddListItem(
+                    text = uiState.terminologyStrings?.get(R.string.add_a_teacher)
+                        ?: stringResource(R.string.add_a_teacher),
+                    enabled = uiState.fieldsEnabled,
+                    icon = Icons.Filled.PersonAdd,
+                    onClickAdd = onClickAddNewTeacher
                 )
             }
         }
@@ -353,15 +360,21 @@ private fun ClazzMemberListScreen(
 
         item {
             ListItem(
-                text = { Text(text = stringResource(id = R.string.students)) }
+                text = {
+                    Text(text = uiState.terminologyStrings?.get(R.string.students)
+                        ?: stringResource(R.string.students))
+                }
             )
         }
 
         item {
             if (uiState.addStudentVisible){
-                AddListItem(
-                    text = stringResource(id = R.string.add_a_student),
-                    onClick = onClickAddNewStudent,
+                UstadAddListItem(
+                    text = uiState.terminologyStrings?.get(R.string.add_a_student)
+                        ?: stringResource(R.string.add_a_student),
+                    enabled = uiState.fieldsEnabled,
+                    icon = Icons.Filled.PersonAdd,
+                    onClickAdd = onClickAddNewStudent
                 )
             }
         }
@@ -392,26 +405,6 @@ private fun ClazzMemberListScreen(
             )
         }
     }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun AddListItem(
-    text: String,
-    onClick: () -> Unit,
-){
-    ListItem(
-        modifier = Modifier.clickable {
-            onClick()
-        },
-        icon = {
-               Icon(
-                   Icons.Filled.PersonAdd,
-                   contentDescription = ""
-               )
-        },
-        text = { Text(text = text) }
-    )
 }
 
  @OptIn(ExperimentalMaterialApi::class)
