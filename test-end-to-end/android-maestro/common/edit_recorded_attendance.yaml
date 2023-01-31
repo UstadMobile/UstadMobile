@@ -16,12 +16,9 @@ appId: com.toughra.ustadmobile
 - tapOn: "Mark all present"
 - tapOn:
         text: "Absent"
-        index: 1
-- tapOn:
-    text: "Partial"
-    index: 2
+        index: 0
 - tapOn:
     text: "Absent"
-    index: 4
+    index: 1
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/edited_attendance"
 - tapOn: "Save"
