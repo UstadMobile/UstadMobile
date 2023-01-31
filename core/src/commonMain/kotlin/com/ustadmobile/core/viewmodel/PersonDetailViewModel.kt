@@ -2,27 +2,38 @@ package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.appstate.FabUiState
+import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.INDETERMINATE
+import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.NOT_LOADING
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isDateSet
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+import com.ustadmobile.core.util.ext.whenSubscribed
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
+import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 
 data class PersonDetailUiState(
 
     val person: PersonWithPersonParentJoin? = null,
 
-    val changePasswordVisible: Boolean = false,
-
-    val showCreateAccountVisible: Boolean = false,
-
     val chatVisible: Boolean = false,
 
-    val clazzes: List<Clazz> = emptyList(),
+    val clazzes: List<ClazzEnrolmentWithClazzAndAttendance> = emptyList(),
 
-    ) {
+    internal val hasChangePasswordPermission: Boolean = false,
+
+) {
 
     val dateOfBirthVisible: Boolean
         get() = person?.dateOfBirth.isDateSet()
@@ -30,6 +41,12 @@ data class PersonDetailUiState(
     val personGenderVisible: Boolean
         get() = person?.gender  != null
                 && person.gender != 0
+
+    val changePasswordVisible: Boolean
+        get() = person?.username != null && hasChangePasswordPermission
+
+    val showCreateAccountVisible: Boolean
+        get() = person != null && person.username == null && hasChangePasswordPermission
 
     val personAddressVisible: Boolean
         get() = !person?.personAddress.isNullOrBlank()
@@ -56,32 +73,111 @@ class PersonDetailViewModel(
     savedStateHandle: UstadSavedStateHandle
 ): DetailViewModel<Person>(di, savedStateHandle) {
 
-    val uiState: Flow<PersonDetailUiState>
+    private val _uiState = MutableStateFlow(PersonDetailUiState())
+
+    val uiState: Flow<PersonDetailUiState> = _uiState.asStateFlow()
+
+    private val systemImpl: UstadMobileSystemImpl by instance()
+
+    private val personUid = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
 
     init {
-        val db: UmAppDatabase by instance()
-
         val accountManager: UstadAccountManager by instance()
 
         val currentUserUid = accountManager.activeSession?.userSession?.usPersonUid ?: 0
 
-        val entityUid: Long = savedStateHandle.get<String>(UstadView.ARG_ENTITY_UID)!!.toLong()
+        val entityUid: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
-        val dbPersonFlow = db.personDao
-            .findByUidWithDisplayDetailsFlow(entityUid, currentUserUid)
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
-
-        val dbHasPermissionFlow = db.personDao.personHasPermissionFlow(currentUserUid,
-            entityUid, Role.PERMISSION_RESET_PASSWORD)
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
-
-        uiState = dbPersonFlow.combine(dbHasPermissionFlow) { person, personHasPermission ->
-            PersonDetailUiState(
-                person = person,
-                changePasswordVisible = personHasPermission && person?.username != null,
-                showCreateAccountVisible = personHasPermission && person != null && person.username == null,
-                chatVisible = person != null && person.personUid != currentUserUid
+        _appUiState.update { prev ->
+            prev.copy(
+                loadingState = INDETERMINATE,
+                fabState = FabUiState(
+                    visible = false,
+                    text = systemImpl.getString(MessageID.edit),
+                    icon = FabUiState.FabIcon.EDIT,
+                    onClick = this::onClickEdit,
+                )
             )
+        }
+
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                launch {
+                    activeDb.personDao.findByUidWithDisplayDetailsFlow(entityUid,
+                        currentUserUid
+                    ).collect { person ->
+                        _uiState.update { prev -> prev.copy(person = person) }
+                        _appUiState.update { prev ->
+                            prev.copy(
+                                title = person?.personFullName() ?: "",
+                                loadingState = if(person != null) { NOT_LOADING } else { INDETERMINATE }
+                            )
+                        }
+                    }
+                }
+
+                launch {
+                    activeDb.personDao.personHasPermissionFlow(currentUserUid,
+                        entityUid, Role.PERMISSION_RESET_PASSWORD
+                    ).collect {
+                        _uiState.update { prev -> prev.copy(hasChangePasswordPermission = it) }
+                    }
+                }
+
+                launch {
+                    activeDb.clazzEnrolmentDao.findAllClazzesByPersonWithClazz(personUid).collect {
+                        _uiState.update { prev -> prev.copy(clazzes = it) }
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            _appUiState.whenSubscribed {
+                activeDb.personDao.personHasPermissionFlow(currentUserUid,
+                    entityUid, Role.PERMISSION_PERSON_UPDATE
+                ).distinctUntilChanged().collect { hasUpdatePermission ->
+                    _appUiState.update { prev ->
+                        prev.copy(
+                            fabState = prev.fabState.copy(visible = hasUpdatePermission),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun onClickEdit() {
+        navController.navigate(PersonEditView.VIEW_NAME,
+            mapOf(ARG_ENTITY_UID to personUid.toString()))
+    }
+
+    fun onClickClazz(clazz: ClazzEnrolmentWithClazz) {
+        navController.navigate(ClazzDetailView.VIEW_NAME,
+            mapOf(ARG_ENTITY_UID to clazz.clazzEnrolmentClazzUid.toString()))
+    }
+
+
+    private fun navigateToEditAccount() {
+        navController.navigate(PersonAccountEditView.VIEW_NAME,
+            mapOf(ARG_ENTITY_UID to personUid.toString()))
+    }
+
+    fun onClickCreateAccount() = navigateToEditAccount()
+
+    fun onClickChangePassword() = navigateToEditAccount()
+
+    fun onClickChat() {
+        navController.navigate(ChatDetailView.VIEW_NAME,
+            mapOf(ARG_PERSON_UID to personUid.toString()))
+    }
+
+    fun onClickManageParentalConsent() {
+        val ppjUid = _uiState.value.person?.parentJoin?.ppjUid ?: 0L
+        if(ppjUid != 0L) {
+            navController.navigate(ParentalConsentManagementView.VIEW_NAME,
+                mapOf(ARG_ENTITY_UID to ppjUid.toString(),
+                    ARG_NEXT to CURRENT_DEST))
         }
     }
 }

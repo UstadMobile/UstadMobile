@@ -25,9 +25,7 @@ import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
-import org.kodein.di.instance
 
 
 class ClazzAssignmentEditPresenter(context: Any,
@@ -148,7 +146,7 @@ class ClazzAssignmentEditPresenter(context: Any,
 
             val terminologyUid = arguments[ClazzAssignmentEditView.TERMINOLOGY_ID]?.toLongOrNull() ?: clazzWithSchool.clazzTerminologyUid
             val terminology = db.courseTerminologyDao.findByUidAsync(terminologyUid)
-            val termMap = terminology.toTermMap(json, systemImpl, context)
+            val termMap = terminology.toTermMap(json, systemImpl)
 
             view.markingTypeOptions = listOf(
                 IdOption(termMap.getValue(TerminologyKeys.TEACHER_KEY), ClazzAssignment.MARKED_BY_COURSE_LEADER),
