@@ -13,6 +13,7 @@ import com.ustadmobile.mui.common.md
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
+import com.ustadmobile.util.colorForAttendanceStatus
 import com.ustadmobile.util.ext.format
 import csstype.*
 import mui.icons.material.LensRounded
@@ -169,6 +170,7 @@ private val ClazzListItem = FC<ClazzListItemProps> { props ->
                 direction = responsive(StackDirection.row)
 
                 LensRounded {
+                    color = colorForAttendanceStatus(props.clazzItem.attendanceAverage)
                     sx {
                         width = 15.px
                         height = 15.px
