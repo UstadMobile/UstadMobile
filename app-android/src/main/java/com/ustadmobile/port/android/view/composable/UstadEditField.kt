@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -72,6 +73,8 @@ fun UstadTextEditField(
     onValueChange: (String) -> Unit,
     password: Boolean = false,
     suffixText: String? = null,
+    singleLine: Boolean = true,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     var errorText by remember(errorString) {
@@ -108,11 +111,13 @@ fun UstadTextEditField(
             enabled = enabled,
             interactionSource = interactionSource,
             readOnly = readOnly,
+            keyboardActions = keyboardActions,
             visualTransformation = if (password && !passwordVisible) {
                 PasswordVisualTransformation()
             } else {
                 VisualTransformation.None
             },
+            singleLine = singleLine,
             trailingIcon = if(password) {
                 {
                     IconButton(

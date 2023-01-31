@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -16,34 +18,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.viewmodel.SiteEnterLinkUiState
 import com.ustadmobile.core.viewmodel.SiteEnterLinkViewModel
 import com.ustadmobile.port.android.view.composable.UstadTextEditField
 
-
-class SiteEnterLinkFragment : UstadBaseFragment() {
+class SiteEnterLinkFragment : UstadBaseMvvmFragment() {
 
     private val viewModel: SiteEnterLinkViewModel by viewModels {
         UstadViewModelProviderFactory(di, this, requireArguments())
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        viewLifecycleOwner.lifecycleScope.launchNavigatorCollector(viewModel)
+        viewLifecycleOwner.lifecycleScope.launchAppUiStateCollector(viewModel)
 
         return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(
-                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
-            )
-
             setContent {
                 MdcTheme {
                     SiteEnterLinkScreenForViewModel(viewModel)
@@ -83,6 +86,12 @@ private fun SiteEnterLinkScreen(
             onValueChange = onEditTextValueChange,
             errorString = uiState.linkError,
             enabled = uiState.fieldsEnabled,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+            keyboardActions = KeyboardActions(
+                onGo = {
+                    onClickNext()
+                }
+            )
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -112,6 +121,7 @@ private fun SiteEnterLinkScreen(
             modifier = Modifier
                 .fillMaxWidth(),
             elevation = null,
+            enabled = uiState.fieldsEnabled,
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
                 contentColor = colorResource(id = R.color.primaryColor),

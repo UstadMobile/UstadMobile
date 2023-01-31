@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -25,8 +24,8 @@ import com.ustadmobile.port.android.util.compose.messageIdResource
 
 @Composable
 fun UstadListSortHeader(
-    modifier: Modifier = Modifier,
     activeSortOrderOption: SortOrderOption,
+    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     onClickSort: () -> Unit = {}
 ){

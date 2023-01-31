@@ -1,6 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/002_003_teacher_record_attendance"
+  TESTNAME: "002_003_teacher_record_attendance"
 ---
 - clearState: com.toughra.ustadmobile
 
@@ -8,6 +9,9 @@ env:
     file: "../common/startserver.yaml"
     env:
       CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+
 #-------Launch App---------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -17,6 +21,8 @@ env:
 #---------Add Course with members------------------#
 - runFlow:
     file: "../common/create_course_with_members.yaml"
+    env:
+      TESTCOURSENAME: "Attendance Test"
 #---------Launch App & Teacher Login------------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -28,5 +34,9 @@ env:
 #---------Teacher record attendance------------------#
 - runFlow:
     file: "../common/record_attendance.yaml"
+    env:
+      TESTCOURSENAME: "Attendance Test"
 - runFlow:
     file: "../common/edit_recorded_attendance.yaml"
+    env:
+      TESTCOURSENAME: "Attendance Test"
